@@ -1,1 +1,31 @@
-{"dependencies": {"clsx": "^2.1.0", "lucide-react": "^1.16.0", "next": "16.3.8", "react": "^19.0.0", "react-dom": "^19.0.0", "react-hook-form": "^7.52.0", "tailwind-merge": "^2.4.0", "zod": "^3.23.0"}, "devDependencies": {"@tailwindcss/postcss": "^4.1.0", "@types/node": "^22.0.0", "@types/react": "^19.0.0", "@types/react-dom": "^19.0.0", "tailwindcss": "^4.1.0", "typescript": "^5.7.0"}, "name": "tuw-admin", "private": true, "scripts": {"build": "next build", "dev": "next dev", "lint": "tsc --noEmit", "start": "next start", "typecheck": "tsc --noEmit"}, "version": "0.1.0"}
+{
+  "name": "tuw-admin",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.34.6",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "tsc --noEmit",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "clsx": "^2.1.0",
+    "lucide-react": "^1.16.0",
+    "next": "16.3.8",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.52.0",
+    "tailwind-merge": "^2.4.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "tailwindcss": "^4.1.0",
+    "typescript": "^5.7.0"
+  }
+}

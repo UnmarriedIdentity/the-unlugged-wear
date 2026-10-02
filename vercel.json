@@ -1,4 +1,0 @@
-{
-  "buildCommand": "npm --prefix tuw-admin run build",
-  "outputDirectory": "tuw-admin/.next"
-}
