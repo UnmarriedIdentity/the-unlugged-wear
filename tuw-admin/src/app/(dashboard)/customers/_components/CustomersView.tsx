@@ -84,7 +84,7 @@ export default function CustomersView() {
       <div className={styles.statGrid}>
         <StatCard label="Total Clients" value={String(customers.length)} trend="Active buyer profiles" trendType="up" />
         <StatCard label="VIP Clientele" value={String(vipCount)} subtitle="Tier 1 high-value" trendType="up" />
-        <StatCard label="Total Customer LTV" value={`$${totalSpentAll.toFixed(2)}`} trend="Combined lifetime spend" trendType="up" />
+        <StatCard label="Total Customer LTV" value={`₹${totalSpentAll.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} trend="Combined lifetime spend" trendType="up" />
         <StatCard label="Average Order Count" value={(orders.length / Math.max(1, customers.length)).toFixed(1)} subtitle="Orders per account" trendType="neutral" />
       </div>
 
@@ -141,8 +141,8 @@ export default function CustomersView() {
                   <td style={{ padding: '14px 16px', fontSize: 14, textAlign: 'center', color: 'var(--tuw-text-primary, #262626)' }}>
                     {customer.totalOrders}
                   </td>
-                  <td style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', textAlign: 'right' }}>
-                    ${customer.totalSpent.toFixed(2)}
+                  <td className="tuw-tabular-nums" style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', textAlign: 'right' }}>
+                    ₹{customer.totalSpent.toFixed(2)}
                   </td>
                   <td style={{ padding: '14px 16px', textAlign: 'right' }}>
                     <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedCustomer(customer); }}>
@@ -169,8 +169,8 @@ export default function CustomersView() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div style={{ padding: 14, backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)', borderRadius: 10 }}>
                 <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>Total Spent</span>
-                <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--tuw-text-primary, #262626)', marginTop: 2 }}>
-                  ${selectedCustomer.totalSpent.toFixed(2)}
+                <div className="tuw-tabular-nums" style={{ fontSize: 20, fontWeight: 700, color: 'var(--tuw-text-primary, #262626)', marginTop: 2 }}>
+                  ₹{selectedCustomer.totalSpent.toFixed(2)}
                 </div>
               </div>
               <div style={{ padding: 14, backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)', borderRadius: 10 }}>

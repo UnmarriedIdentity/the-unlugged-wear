@@ -448,12 +448,12 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
 
     const availableToRefund = targetOrder.paidAmount - targetOrder.refundedAmount;
     if (params.amount <= 0) {
-      return { success: false, error: 'Refund amount must be greater than $0.00' };
+      return { success: false, error: 'Refund amount must be greater than ₹0.00' };
     }
     if (params.amount > availableToRefund) {
       return {
         success: false,
-        error: `Cannot refund $${params.amount.toFixed(2)}. Maximum refundable balance is $${availableToRefund.toFixed(2)}.`,
+        error: `Cannot refund ₹${params.amount.toFixed(2)}. Maximum refundable balance is ₹${availableToRefund.toFixed(2)}.`,
       };
     }
 

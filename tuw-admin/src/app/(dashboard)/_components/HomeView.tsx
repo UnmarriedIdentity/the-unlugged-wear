@@ -12,13 +12,13 @@ const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'home-' +
 
 // Chart Data matching Figma Frame 1:20300
 const salesData = [
-  { day: 'Mon', lastWeek: 38, thisWeek: 44, lastVal: '$2,800', thisVal: '$3,200' },
-  { day: 'Tue', lastWeek: 49, thisWeek: 62, lastVal: '$4,000', thisVal: '$5,600' },
-  { day: 'Wed', lastWeek: 82, thisWeek: 72, lastVal: '$6,800', thisVal: '$6,000' },
-  { day: 'Thu', lastWeek: 48, thisWeek: 61, lastVal: '$4,000', thisVal: '$5,200' },
-  { day: 'Fri', lastWeek: 87, thisWeek: 99, lastVal: '$7,200', thisVal: '$8,500' },
-  { day: 'Sat', lastWeek: 67, thisWeek: 80, lastVal: '$5,400', thisVal: '$6,400' },
-  { day: 'Sun', lastWeek: 62, thisWeek: 68, lastVal: '$5,000', thisVal: '$6,000' },
+  { day: 'Mon', lastWeek: 38, thisWeek: 44, lastVal: '₹2,800', thisVal: '₹3,200' },
+  { day: 'Tue', lastWeek: 49, thisWeek: 62, lastVal: '₹4,000', thisVal: '₹5,600' },
+  { day: 'Wed', lastWeek: 82, thisWeek: 72, lastVal: '₹6,800', thisVal: '₹6,000' },
+  { day: 'Thu', lastWeek: 48, thisWeek: 61, lastVal: '₹4,000', thisVal: '₹5,200' },
+  { day: 'Fri', lastWeek: 87, thisWeek: 99, lastVal: '₹7,200', thisVal: '₹8,500' },
+  { day: 'Sat', lastWeek: 67, thisWeek: 80, lastVal: '₹5,400', thisVal: '₹6,400' },
+  { day: 'Sun', lastWeek: 62, thisWeek: 68, lastVal: '₹5,000', thisVal: '₹6,000' },
 ];
 
 // Inventory Alerts Data
@@ -60,13 +60,13 @@ const inventoryAlerts = [
 
 // Recent Orders Data matching Figma Frame 1:20300
 const recentOrders = [
-  { id: '#1247', time: '2 min ago', total: '$24.50', status: 'Shipped', statusClass: styles.badgeShipped },
-  { id: '#1246', time: '5 mins ago', total: '$18.00', status: 'Process', statusClass: styles.badgeProcess },
-  { id: '#1245', time: '8 min ago', total: '$31.25', status: 'Deliver', statusClass: styles.badgeDeliver },
-  { id: '#1244', time: '12 min ago', total: '$15.50', status: 'Shipped', statusClass: styles.badgeShipped },
-  { id: '#1243', time: '15 min ago', total: '$28.00', status: 'Pending', statusClass: styles.badgePending },
-  { id: '#1242', time: '19 min ago', total: '$13.00', status: 'Shipped', statusClass: styles.badgeShipped },
-  { id: '#1241', time: '23 min ago', total: '$13.00', status: 'Process', statusClass: styles.badgeProcess },
+  { id: '#1247', time: '2 min ago', total: '₹24.50', status: 'Shipped', statusClass: styles.badgeShipped },
+  { id: '#1246', time: '5 mins ago', total: '₹18.00', status: 'Process', statusClass: styles.badgeProcess },
+  { id: '#1245', time: '8 min ago', total: '₹31.25', status: 'Deliver', statusClass: styles.badgeDeliver },
+  { id: '#1244', time: '12 min ago', total: '₹15.50', status: 'Shipped', statusClass: styles.badgeShipped },
+  { id: '#1243', time: '15 min ago', total: '₹28.00', status: 'Pending', statusClass: styles.badgePending },
+  { id: '#1242', time: '19 min ago', total: '₹13.00', status: 'Shipped', statusClass: styles.badgeShipped },
+  { id: '#1241', time: '23 min ago', total: '₹13.00', status: 'Process', statusClass: styles.badgeProcess },
 ];
 
 export default function HomeView() {
@@ -155,8 +155,8 @@ export default function HomeView() {
         <div className={styles.kpiCard}>
           <span className={styles.kpiLabel}>Revenue today</span>
           <div className={styles.kpiMiddleRow}>
-            <span className={styles.kpiValue}>
-              ${liveTotalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            <span className={`${styles.kpiValue} tuw-tabular-nums`}>
+              ₹{liveTotalRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
             <svg className={styles.kpiSparkline} viewBox="0 0 90 40" fill="none">
               <defs>
@@ -219,8 +219,8 @@ export default function HomeView() {
         <div className={styles.kpiCard}>
           <span className={styles.kpiLabel}>Average order</span>
           <div className={styles.kpiMiddleRow}>
-            <span className={styles.kpiValue}>
-              ${liveAOV.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            <span className={`${styles.kpiValue} tuw-tabular-nums`}>
+              ₹{liveAOV.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
             <svg className={styles.kpiSparkline} viewBox="0 0 90 40" fill="none">
               <path
@@ -249,7 +249,7 @@ export default function HomeView() {
         <div className={styles.kpiCard}>
           <span className={styles.kpiLabel}>Conversion rate</span>
           <div className={styles.kpiMiddleRow}>
-            <span className={styles.kpiValue}>$3,2%</span>
+            <span className={`${styles.kpiValue} tuw-tabular-nums`}>3.2%</span>
             <svg className={styles.kpiSparkline} viewBox="0 0 90 40" fill="none">
               <defs>
                 <linearGradient id="sparkRedGrad" x1="0" y1="0" x2="0" y2="1">
@@ -309,7 +309,7 @@ export default function HomeView() {
             </div>
 
             <div className={styles.salesStatRow}>
-              <span className={styles.salesLargeNumber}>$39,190</span>
+              <span className={`${styles.salesLargeNumber} tuw-tabular-nums`}>₹39,190</span>
               <span className={styles.trendBadgeGreen}>
                 <ArrowUp size={14} />
                 8.4%
@@ -320,13 +320,13 @@ export default function HomeView() {
           {/* Chart Plot Area */}
           <div className={styles.chartContainer}>
             {/* Y-Axis Labels */}
-            <div className={styles.yAxisLabels}>
-              <span>$10K</span>
-              <span>$8K</span>
-              <span>$6K</span>
-              <span>$4K</span>
-              <span>$2K</span>
-              <span>$0</span>
+            <div className={`${styles.yAxisLabels} tuw-tabular-nums`}>
+              <span>₹10K</span>
+              <span>₹8K</span>
+              <span>₹6K</span>
+              <span>₹4K</span>
+              <span>₹2K</span>
+              <span>₹0</span>
             </div>
 
             {/* Plot Area with Grid Lines and Bars */}
@@ -404,7 +404,7 @@ export default function HomeView() {
               <div className={styles.productInfo}>
                 <span className={styles.productName}>Summer dress</span>
                 <div className={styles.productStatsRow}>
-                  <span className={styles.productPrice}>$2,340</span>
+                  <span className={`${styles.productPrice} tuw-tabular-nums`}>₹2,340</span>
                   <span className={styles.statBullet}>•</span>
                   <span className={styles.productSoldGreen}>492</span>
                   <span className={styles.productSoldGray}>/500 Sold</span>
@@ -451,7 +451,7 @@ export default function HomeView() {
               <div className={styles.productInfo}>
                 <span className={styles.productName}>Floral dress</span>
                 <div className={styles.productStatsRow}>
-                  <span className={styles.productPrice}>$1,680</span>
+                  <span className={`${styles.productPrice} tuw-tabular-nums`}>₹1,680</span>
                   <span className={styles.statBullet}>•</span>
                   <span className={styles.productSoldGreen}>369</span>
                   <span className={styles.productSoldGray}>/450 Sold</span>
@@ -496,7 +496,7 @@ export default function HomeView() {
               <div className={styles.productInfo}>
                 <span className={styles.productName}>White Tshirt</span>
                 <div className={styles.productStatsRow}>
-                  <span className={styles.productPrice}>$1,890</span>
+                  <span className={`${styles.productPrice} tuw-tabular-nums`}>₹1,890</span>
                   <span className={styles.statBullet}>•</span>
                   <span className={styles.productSoldGreen}>592</span>
                   <span className={styles.productSoldGray}>/800 Sold</span>
@@ -590,7 +590,7 @@ export default function HomeView() {
                       </Link>
                     </td>
                     <td className={styles.orderTimeCell}>{order.customerName}</td>
-                    <td className={styles.orderTotalCell}>${order.total.toFixed(2)}</td>
+                    <td className={`${styles.orderTotalCell} tuw-tabular-nums`}>₹{order.total.toFixed(2)}</td>
                     <td className={styles.orderStatusCell}>
                       <span className={styles.badgeShipped}>{order.fulfillmentStatus}</span>
                     </td>

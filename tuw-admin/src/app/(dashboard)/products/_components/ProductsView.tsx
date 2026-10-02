@@ -302,12 +302,12 @@ export default function ProductsView() {
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 14, paddingTop: 10, borderTop: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
                   <div>
-                    <span style={{ fontSize: '18px', fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-                      ${p.price.toFixed(2)}
+                    <span className="tuw-tabular-nums" style={{ fontSize: '18px', fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                      ₹{p.price.toFixed(2)}
                     </span>
                     {p.compareAtPrice && (
-                      <span style={{ fontSize: '13px', color: 'var(--tuw-text-secondary, #5D6772)', textDecoration: 'line-through', marginLeft: 6 }}>
-                        ${p.compareAtPrice.toFixed(2)}
+                      <span className="tuw-tabular-nums" style={{ fontSize: '13px', color: 'var(--tuw-text-secondary, #5D6772)', textDecoration: 'line-through', marginLeft: 6 }}>
+                        ₹{p.compareAtPrice.toFixed(2)}
                       </span>
                     )}
                   </div>

@@ -676,7 +676,7 @@ export const initialOrders: OrderItem[] = [
     trackingNumber: 'DHL-489102711',
     date: '15 Apr 2026, 14:10',
     timeline: [
-      { title: 'Partial Refund Applied', time: '16 Apr, 10:00', note: 'Goodwill discount $50 applied for late arrival' },
+      { title: 'Partial Refund Applied', time: '16 Apr, 10:00', note: 'Goodwill discount ₹50 applied for late arrival' },
     ],
   },
   {
@@ -823,7 +823,7 @@ export const initialOrders: OrderItem[] = [
     trackingNumber: 'UPS-102938111',
     date: '12 Apr 2026, 15:10',
     timeline: [
-      { title: 'Return Restocked', time: '15 Apr, 14:00', note: 'Inspected and added back to inventory. Refund $147 processed.' },
+      { title: 'Return Restocked', time: '15 Apr, 14:00', note: 'Inspected and added back to inventory. Refund ₹147 processed.' },
     ],
   },
 ];
@@ -1316,7 +1316,7 @@ export const initialAuditLogs: AuditEntry[] = [
   {
     id: 'AUD-9009',
     actor: 'tariq@theunpluggedwear.com (Operations)',
-    action: 'Processed refund REF-2041 ($147.00) for #ORD-8815',
+    action: 'Processed refund REF-2041 (₹147.00) for #ORD-8815',
     resource: 'Refunds / Payment',
     ipAddress: '192.168.1.112',
     timestamp: '16 Apr 2026, 12:45',

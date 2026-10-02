@@ -184,7 +184,7 @@ export default function OrdersView() {
       <div className={styles.statGrid}>
         <StatCard
           label="Total Revenue"
-          value={`$${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+          value={`₹${totalRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
           trend={`${orders.length} orders recorded`}
           trendType="up"
         />
@@ -355,8 +355,8 @@ export default function OrdersView() {
                         </Badge>
                       )}
                     </td>
-                    <td style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', textAlign: 'right' }}>
-                      ${order.total.toFixed(2)}
+                    <td className="tuw-tabular-nums" style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', textAlign: 'right' }}>
+                      ₹{order.total.toFixed(2)}
                     </td>
                     <td style={{ padding: '14px 16px', textAlign: 'right' }}>
                       <Button
@@ -484,8 +484,8 @@ export default function OrdersView() {
                         {item.variant} · Qty: {item.quantity}
                       </div>
                     </div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-                      ${(item.price * item.quantity).toFixed(2)}
+                    <div className="tuw-tabular-nums" style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                      ₹{(item.price * item.quantity).toFixed(2)}
                     </div>
                   </div>
                 ))}
@@ -500,20 +500,20 @@ export default function OrdersView() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 13 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>Subtotal</span>
-                  <span>${selectedOrder.subtotal.toFixed(2)}</span>
+                  <span className="tuw-tabular-nums">₹{selectedOrder.subtotal.toFixed(2)}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>Shipping Fee</span>
-                  <span>${selectedOrder.shippingFee.toFixed(2)}</span>
+                  <span className="tuw-tabular-nums">₹{selectedOrder.shippingFee.toFixed(2)}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600, fontSize: 14, borderTop: '1px solid var(--tuw-border-subtle, #E2E4E6)', paddingTop: 6, marginTop: 4 }}>
                   <span>Grand Total</span>
-                  <span>${selectedOrder.total.toFixed(2)}</span>
+                  <span className="tuw-tabular-nums">₹{selectedOrder.total.toFixed(2)}</span>
                 </div>
                 {selectedOrder.refundedAmount > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--tuw-text-error, #C91818)', fontWeight: 500 }}>
                     <span>Total Refunded</span>
-                    <span>-${selectedOrder.refundedAmount.toFixed(2)}</span>
+                    <span className="tuw-tabular-nums">-₹{selectedOrder.refundedAmount.toFixed(2)}</span>
                   </div>
                 )}
               </div>
