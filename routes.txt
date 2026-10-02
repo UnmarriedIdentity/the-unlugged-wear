@@ -1,0 +1,108 @@
+================================================================================
+STOREFLOW APPLICATION - ROUTES & WEB HIT POINTS
+================================================================================
+Production: https://the-unplugged-wear.vercel.app/
+Repository: https://github.com/UnmarriedIdentity/the-unplugged-wear.git
+Branch: meet (https://github.com/UnmarriedIdentity/the-unplugged-wear/tree/meet)
+Project: Storeflow (E-Commerce Admin & Authentication Suite)
+Stack: Next.js 16.3.8 (Turbopack) | React 19 | TypeScript | Vanilla CSS Modules
+Design Source: Figma File Key WmpPcdGcXerVgqNpgr6Q6S
+
+--------------------------------------------------------------------------------
+1. PRIMARY PAGE ROUTES (DEDICATED ROUTERS)
+--------------------------------------------------------------------------------
+- /                 : Primary Login & Authentication Landing Page (Figma Frame 1:20816)
+- /login            : Dedicated Login Page (Figma Frames 1:20816, 1:20776, 1:20725)
+- /dashboard        : Official Homescreen Dashboard (Figma Frame 1:20300) - 100% Pure Code
+- /home             : Auto-redirects to /dashboard (Canonical Redirect)
+- /homepage         : Auto-redirects to /dashboard (Canonical Redirect)
+- /orders           : Orders Management & Logistics Router
+- /products         : Product Catalog & Stock Inventory Router
+- /customers        : Customer Relationship & CRM Directory Router
+- /analytics        : Revenue Analytics & Performance Funnel Router
+- /settings         : Store General Configuration & Manager Profile Router
+- /help             : Help Center & 24/7 AI Store Assistant Router
+- /signup           : Create New Account Page (Figma Frames 1:20984, 1:20920)
+- /verify           : Email 4-Digit Verification Page (Figma Frames 1:20890, 1:20856)
+- /reset-password   : Password Reset & Recovery Page (Figma Frames 1:20710, 1:20690)
+- /design-system    : Live Figma Design System Specimen (Figma Node 1:26969)
+
+--------------------------------------------------------------------------------
+2. LIVE VERCEL HIT POINTS
+--------------------------------------------------------------------------------
+- https://the-unplugged-wear.vercel.app/
+- https://the-unplugged-wear.vercel.app/login
+- https://the-unplugged-wear.vercel.app/dashboard
+- https://the-unplugged-wear.vercel.app/home
+- https://the-unplugged-wear.vercel.app/homepage
+- https://the-unplugged-wear.vercel.app/orders
+- https://the-unplugged-wear.vercel.app/products
+- https://the-unplugged-wear.vercel.app/customers
+- https://the-unplugged-wear.vercel.app/analytics
+- https://the-unplugged-wear.vercel.app/settings
+- https://the-unplugged-wear.vercel.app/help
+- https://the-unplugged-wear.vercel.app/signup
+- https://the-unplugged-wear.vercel.app/verify
+- https://the-unplugged-wear.vercel.app/reset-password
+- https://the-unplugged-wear.vercel.app/design-system
+
+--------------------------------------------------------------------------------
+3. FIGMA SPECIFIC HIT POINTS & STATE SIMULATION (URL QUERY PARAMS)
+--------------------------------------------------------------------------------
+
+A. LOGIN PAGE STATES (/ or /login)
+- /?state=default
+  Figma Frame: 1:20816 ("0 1 0 Log In")
+  Description: Clean initial login view with empty fields.
+
+- /?state=filled
+  Figma Frame: 1:20776 ("0 1 1 Log In - Filled")
+  Description: Pre-filled credentials (contactstylehub@gmail.com / stylehubforlyfe).
+
+- /?state=error
+  Figma Frame: 1:20725 ("0 1 2 Log In - Error Password")
+  Description: Red error container with warning message "Password comparisson failed".
+
+- /?state=reset
+  Figma Frame: 1:20710 ("0 1 3 Reset Password")
+  Description: Clean password reset input view.
+
+- /?state=recovery
+  Figma Frame: 1:20690 ("0 1 4 Recovery email sent")
+  Description: Success card confirmation with green badge.
+
+B. CREATE ACCOUNT (SIGN UP) STATES (/signup)
+- /signup?state=default
+  Figma Frame: 1:20984 ("0 1 0 Sign Up")
+  Description: Clean initial sign up form with Username, Email, Create password,
+               Confirm password, and Terms & Privacy agreement checkbox.
+
+- /signup?state=filled
+  Figma Frame: 1:20920 ("0 1 1 Sign Up - Filled")
+  Description: Pre-filled state (Username: "Jessicha Smith",
+               Email: "jessichasmith94@gmail.com", Masked passwords, Checked box).
+
+- /signup?state=verify-empty
+  Figma Frame: 1:20890 ("0 1 2 Sign Up - Email Verification")
+  Description: 4-digit OTP empty input boxes (56x56px), resend code prompt,
+               and "Back to login" navigation.
+
+- /signup?state=verify-filled
+  Figma Frame: 1:20856 ("0 1 3 Sign Up - Enter code")
+  Description: Active verification state with filled code digits "3 3 4 2".
+
+C. DEDICATED VERIFICATION HIT POINTS (/verify)
+- /verify
+  Figma Frame: 1:20890 (Default empty 4-digit OTP boxes)
+
+- /verify?state=verify-filled
+  Figma Frame: 1:20856 (Pre-filled code "3 3 4 2")
+
+D. DEDICATED PASSWORD RESET HIT POINTS (/reset-password)
+- /reset-password
+  Figma Frame: 1:20710 (Password reset form)
+
+- /reset-password?state=recovery
+  Figma Frame: 1:20690 (Recovery email sent success confirmation)
+
+================================================================================

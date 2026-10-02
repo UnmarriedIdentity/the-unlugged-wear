@@ -1,0 +1,6 @@
+{
+  "name": "tuw-website",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Folder scaffold only; application dependencies and scripts are not configured."
+}
