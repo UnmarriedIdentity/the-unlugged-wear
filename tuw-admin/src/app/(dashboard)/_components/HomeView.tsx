@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { ArrowUp, Calendar, ChevronDown } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
+import { useAdminState } from '@/mocks/state';
 // Class map - selectors live in src/app/globals.css (single app.css, home- prefix).
 // Verbatim port of HomePage.module.css; JSX untouched for zero pixel drift.
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'home-' + String(p) });
@@ -68,11 +70,63 @@ const recentOrders = [
 ];
 
 export default function HomeView() {
+  const { orders, products } = useAdminState();
   const [timeRange, setTimeRange] = useState('This week');
   const [productSort, setProductSort] = useState('By revenue');
 
+  // Derive live KPIs and recent orders from live state
+  const liveRecentOrders = orders.slice(0, 6);
+  const failedFulfillmentCount = orders.filter((o) => o.fulfillmentStatus === 'submission_failed').length;
+  const livePaidOrders = orders.filter((o) => o.paymentStatus === 'paid');
+  const liveTotalRevenue = livePaidOrders.reduce((sum, o) => sum + (o.paidAmount || o.total), 0);
+  const liveOrdersCount = orders.length;
+  const liveAOV = livePaidOrders.length > 0 ? liveTotalRevenue / livePaidOrders.length : 0;
+
   return (
     <DashboardShell pageTitle="Home" activeNav="home">
+      {/* Operational Issue Banner if any */}
+      {failedFulfillmentCount > 0 && (
+        <div
+          style={{
+            padding: '12px 18px',
+            backgroundColor: 'var(--tuw-bg-error, #FEF4F4)',
+            border: '1px solid rgba(201, 24, 24, 0.25)',
+            borderRadius: 'var(--tuw-radius-card, 12px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+            marginBottom: 4,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span
+              style={{
+                width: 10,
+                height: 10,
+                borderRadius: '50%',
+                backgroundColor: 'var(--tuw-text-error, #C91818)',
+                boxShadow: '0 0 6px var(--tuw-text-error, #C91818)',
+              }}
+            />
+            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-error, #C91818)' }}>
+              Operational Issue: {failedFulfillmentCount} order(s) failed partner API dispatch
+            </span>
+          </div>
+          <Link
+            href="/fulfillment"
+            style={{
+              fontSize: 13,
+              fontWeight: 600,
+              color: 'var(--tuw-text-error, #C91818)',
+              textDecoration: 'underline',
+            }}
+          >
+            Review & Retry in Fulfillment →
+          </Link>
+        </div>
+      )}
+
       {/* Welcome Header */}
       <div className={styles.welcomeRow}>
         <div className={styles.welcomeTextGroup}>
@@ -101,7 +155,9 @@ export default function HomeView() {
         <div className={styles.kpiCard}>
           <span className={styles.kpiLabel}>Revenue today</span>
           <div className={styles.kpiMiddleRow}>
-            <span className={styles.kpiValue}>$5,234</span>
+            <span className={styles.kpiValue}>
+              ${liveTotalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
             <svg className={styles.kpiSparkline} viewBox="0 0 90 40" fill="none">
               <defs>
                 <linearGradient id="sparkGreenGrad" x1="0" y1="0" x2="0" y2="1">
@@ -135,7 +191,7 @@ export default function HomeView() {
         <div className={styles.kpiCard}>
           <span className={styles.kpiLabel}>Orders today</span>
           <div className={styles.kpiMiddleRow}>
-            <span className={styles.kpiValue}>42</span>
+            <span className={styles.kpiValue}>{liveOrdersCount}</span>
             <svg className={styles.kpiSparkline} viewBox="0 0 90 40" fill="none">
               <path
                 d="M 0 26 C 12 26, 18 10, 28 16 C 38 22, 44 26, 52 14 C 60 4, 68 8, 76 2 C 82 -2, 86 4, 90 2 L 90 40 L 0 40 Z"
@@ -163,7 +219,9 @@ export default function HomeView() {
         <div className={styles.kpiCard}>
           <span className={styles.kpiLabel}>Average order</span>
           <div className={styles.kpiMiddleRow}>
-            <span className={styles.kpiValue}>$124,62</span>
+            <span className={styles.kpiValue}>
+              ${liveAOV.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
             <svg className={styles.kpiSparkline} viewBox="0 0 90 40" fill="none">
               <path
                 d="M 0 26 C 12 26, 18 10, 28 16 C 38 22, 44 26, 52 14 C 60 4, 68 8, 76 2 C 82 -2, 86 4, 90 2 L 90 40 L 0 40 Z"
@@ -467,9 +525,9 @@ export default function HomeView() {
               <h3 className={styles.cardTitle}>Inventory alerts</h3>
               <p className={styles.subHeading}>3 items need attention</p>
             </div>
-            <button type="button" className={styles.seeAllBtn}>
+            <Link href="/products" className={styles.seeAllBtn} style={{ textDecoration: 'none' }}>
               See all
-            </button>
+            </Link>
           </div>
 
           <div className={styles.alertsList}>
@@ -508,9 +566,9 @@ export default function HomeView() {
         <div className={styles.recentOrdersCard}>
           <div className={styles.cardHeaderRow}>
             <h3 className={styles.cardTitle}>Recent orders</h3>
-            <button type="button" className={styles.seeAllBtn}>
+            <Link href="/orders" className={styles.seeAllBtn} style={{ textDecoration: 'none' }}>
               See all
-            </button>
+            </Link>
           </div>
 
           <div className={styles.ordersTableWrapper}>
@@ -518,19 +576,23 @@ export default function HomeView() {
               <thead>
                 <tr className={styles.ordersTableHeaderRow}>
                   <th>Order</th>
-                  <th>Time</th>
+                  <th>Customer</th>
                   <th>Total</th>
                   <th>Status</th>
                 </tr>
               </thead>
               <tbody>
-                {recentOrders.map((order) => (
+                {liveRecentOrders.map((order) => (
                   <tr key={order.id} className={styles.orderDataRow}>
-                    <td className={styles.orderIdCell}>{order.id}</td>
-                    <td className={styles.orderTimeCell}>{order.time}</td>
-                    <td className={styles.orderTotalCell}>{order.total}</td>
+                    <td className={styles.orderIdCell}>
+                      <Link href="/orders" style={{ color: 'inherit', textDecoration: 'none' }}>
+                        {order.id}
+                      </Link>
+                    </td>
+                    <td className={styles.orderTimeCell}>{order.customerName}</td>
+                    <td className={styles.orderTotalCell}>${order.total.toFixed(2)}</td>
                     <td className={styles.orderStatusCell}>
-                      <span className={order.statusClass}>{order.status}</span>
+                      <span className={styles.badgeShipped}>{order.fulfillmentStatus}</span>
                     </td>
                   </tr>
                 ))}

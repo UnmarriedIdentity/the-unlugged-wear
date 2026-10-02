@@ -1,5 +1,8 @@
-// Client providers — query-client, theme, auth.
-// TODO: implement when dependencies are installed.
+'use client';
+
+import React from 'react';
+import { AdminStateProvider } from '@/mocks/state';
+
 export function Providers({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return <AdminStateProvider>{children}</AdminStateProvider>;
 }

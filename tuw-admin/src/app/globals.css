@@ -9,23 +9,42 @@
    ========================================================================== */
 
 @theme {
-  --font-sans: "Urbanist", "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Urbanist", ui-sans-serif, system-ui, sans-serif;
+  --font-urbanist: "Urbanist", ui-sans-serif, system-ui, sans-serif;
 
-  --color-canvas: #f7f8f9;
-  --color-surface: #ffffff;
+  /* 18 Semantic Color Roles per DESIGN_SYSTEM.md */
+  --color-canvas: #F7F8F9;
+  --color-surface: #FFFFFF;
   --color-text-primary: #262626;
-  --color-text-secondary: #5d6772;
-  --color-border-subtle: #e2e4e6;
-  --color-action-primary: #7539ff;
-  --color-action-hover: #6025db;
-  --color-selected: #f8f5ff;
+  --color-text-secondary: #5D6772;
+  --color-border-subtle: #E2E4E6;
+  --color-border-control: #90979F;
+  --color-action-primary: #7539FF;
+  --color-action-hover: #6025DB;
+  --color-selected: #F8F5FF;
+  --color-text-on-primary: #FFFFFF;
+
+  --color-info-text: #175CD3;
+  --color-info-bg: #F4F9FE;
+  --color-success-text: #187343;
+  --color-success-bg: #F4FBF7;
+  --color-warning-text: #856300;
+  --color-warning-bg: #FEFBF5;
+  --color-error-text: #C91818;
+  --color-error-bg: #FEF4F4;
+
+  /* Admin Radii */
+  --radius-sm: 4px;
+  --radius-control: 8px;
+  --radius-card: 12px;
+  --radius-modal: 16px;
+  --radius-pill: 9999px;
 }
 
 :root {
-  /* Typography */
+  /* Typography - Urbanist is the primary font family per DESIGN_SYSTEM.md */
   --font-urbanist: 'Urbanist', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-plus-jakarta: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-main: var(--font-urbanist), var(--font-plus-jakarta), sans-serif;
+  --font-main: var(--font-urbanist), sans-serif;
   --font-brand: var(--font-urbanist), sans-serif;
 
   /* TUW Semantic Colour Roles (18 roles) - Standard & Figma Web Code Syntax */
@@ -82,6 +101,65 @@
 
   --tuw-text-on-primary: #FFFFFF;
   --tuw-color-text-on-primary: #FFFFFF;
+
+  /* Admin Radii per DESIGN_SYSTEM.md */
+  --tuw-radius-sm: 4px;
+  --tuw-radius-control: 8px;
+  --tuw-radius-card: 12px;
+  --tuw-radius-modal: 16px;
+  --tuw-radius-pill: 9999px;
+
+  /* Spacing Scale per DESIGN_SYSTEM.md: 4, 8, 12, 16, 24, 32, 48, 64px */
+  --tuw-space-4: 4px;
+  --tuw-space-8: 8px;
+  --tuw-space-12: 12px;
+  --tuw-space-16: 16px;
+  --tuw-space-24: 24px;
+  --tuw-space-32: 32px;
+  --tuw-space-48: 48px;
+  --tuw-space-64: 64px;
+
+  /* Control Heights */
+  --tuw-control-height: 44px;
+  --tuw-control-height-sm: 36px;
+  --tuw-control-height-lg: 48px;
+
+  /* Urbanist V2 Type Scale Tokens */
+  --tuw-type-display-size: 44px;
+  --tuw-type-display-line-height: 52px;
+  --tuw-type-display-weight: 600;
+
+  --tuw-type-heading-page-size: 32px;
+  --tuw-type-heading-page-line-height: 40px;
+  --tuw-type-heading-page-weight: 600;
+
+  --tuw-type-heading-section-size: 24px;
+  --tuw-type-heading-section-line-height: 32px;
+  --tuw-type-heading-section-weight: 600;
+
+  --tuw-type-heading-subsection-size: 20px;
+  --tuw-type-heading-subsection-line-height: 28px;
+  --tuw-type-heading-subsection-weight: 600;
+
+  --tuw-type-heading-card-size: 18px;
+  --tuw-type-heading-card-line-height: 26px;
+  --tuw-type-heading-card-weight: 600;
+
+  --tuw-type-body-large-size: 16px;
+  --tuw-type-body-large-line-height: 24px;
+  --tuw-type-body-large-weight: 400;
+
+  --tuw-type-body-default-size: 14px;
+  --tuw-type-body-default-line-height: 22px;
+  --tuw-type-body-default-weight: 400;
+
+  --tuw-type-label-control-size: 14px;
+  --tuw-type-label-control-line-height: 20px;
+  --tuw-type-label-control-weight: 500;
+
+  --tuw-type-caption-default-size: 12px;
+  --tuw-type-caption-default-line-height: 18px;
+  --tuw-type-caption-default-weight: 400;
 
   /* Backward Compatible Tokens */
   --color-primary: #262626;
@@ -164,6 +242,86 @@
   --shadow-dropdown: 0 6px 18px rgba(0, 0, 0, 0.08);
   --shadow-focus: 0 0 0 3px rgba(117, 57, 255, 0.15);
   --shadow-error: 0 0 0 3px rgba(201, 24, 24, 0.15);
+}
+
+/* ============================================================
+   Urbanist V2 Typography Scale Classes (DESIGN_SYSTEM.md)
+   ============================================================ */
+.tuw-type-display {
+  font-family: var(--font-urbanist), sans-serif;
+  font-size: var(--tuw-type-display-size, 44px);
+  line-height: var(--tuw-type-display-line-height, 52px);
+  font-weight: var(--tuw-type-display-weight, 600);
+  letter-spacing: 0;
+}
+
+.tuw-type-heading-page {
+  font-family: var(--font-urbanist), sans-serif;
+  font-size: var(--tuw-type-heading-page-size, 32px);
+  line-height: var(--tuw-type-heading-page-line-height, 40px);
+  font-weight: var(--tuw-type-heading-page-weight, 600);
+  letter-spacing: 0;
+}
+
+.tuw-type-heading-section {
+  font-family: var(--font-urbanist), sans-serif;
+  font-size: var(--tuw-type-heading-section-size, 24px);
+  line-height: var(--tuw-type-heading-section-line-height, 32px);
+  font-weight: var(--tuw-type-heading-section-weight, 600);
+  letter-spacing: 0;
+}
+
+.tuw-type-heading-subsection {
+  font-family: var(--font-urbanist), sans-serif;
+  font-size: var(--tuw-type-heading-subsection-size, 20px);
+  line-height: var(--tuw-type-heading-subsection-line-height, 28px);
+  font-weight: var(--tuw-type-heading-subsection-weight, 600);
+  letter-spacing: 0;
+}
+
+.tuw-type-heading-card {
+  font-family: var(--font-urbanist), sans-serif;
+  font-size: var(--tuw-type-heading-card-size, 18px);
+  line-height: var(--tuw-type-heading-card-line-height, 26px);
+  font-weight: var(--tuw-type-heading-card-weight, 600);
+  letter-spacing: 0;
+}
+
+.tuw-type-body-large {
+  font-family: var(--font-urbanist), sans-serif;
+  font-size: var(--tuw-type-body-large-size, 16px);
+  line-height: var(--tuw-type-body-large-line-height, 24px);
+  font-weight: var(--tuw-type-body-large-weight, 400);
+  letter-spacing: 0;
+}
+
+.tuw-type-body-default {
+  font-family: var(--font-urbanist), sans-serif;
+  font-size: var(--tuw-type-body-default-size, 14px);
+  line-height: var(--tuw-type-body-default-line-height, 22px);
+  font-weight: var(--tuw-type-body-default-weight, 400);
+  letter-spacing: 0;
+}
+
+.tuw-type-label-control {
+  font-family: var(--font-urbanist), sans-serif;
+  font-size: var(--tuw-type-label-control-size, 14px);
+  line-height: var(--tuw-type-label-control-line-height, 20px);
+  font-weight: var(--tuw-type-label-control-weight, 500);
+  letter-spacing: 0;
+}
+
+.tuw-type-caption-default {
+  font-family: var(--font-urbanist), sans-serif;
+  font-size: var(--tuw-type-caption-default-size, 12px);
+  line-height: var(--tuw-type-caption-default-line-height, 18px);
+  font-weight: var(--tuw-type-caption-default-weight, 400);
+  letter-spacing: 0;
+}
+
+/* Tabular Numerals for Numerical Data and Currency */
+.tuw-tabular-nums {
+  font-variant-numeric: tabular-nums;
 }
 
 /* Base — verbatim from old globals.css */
@@ -1556,7 +1714,7 @@ a {
   width: 100%;
   max-width: 100%;
   background-color: #FFFFFF;
-  font-family: var(--font-plus-jakarta), 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-urbanist), 'Urbanist', sans-serif;
   color: #242424;
   overflow-x: hidden;
   position: relative;
@@ -1620,7 +1778,7 @@ a {
 }
 
 .signup-heroHeadline {
-  font-family: var(--font-plus-jakarta), 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-urbanist), 'Urbanist', sans-serif;
   font-weight: 700;
   font-size: clamp(28px, 3.6vw, 64px);
   line-height: 1.15;
@@ -1632,7 +1790,7 @@ a {
 }
 
 .signup-heroSubtitle {
-  font-family: var(--font-plus-jakarta), 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-urbanist), 'Urbanist', sans-serif;
   font-weight: 500;
   font-size: clamp(13px, 1.25vw, 20px);
   line-height: 1.35;
@@ -4022,4 +4180,43 @@ a {
     width: 100%;
     justify-content: space-between;
   }
+}
+
+/* --------------------------------------------------------------------------
+   Accessibility: Reduced Motion Preference (WCAG 2.2 AA)
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Accessibility: Skip to Main Content Link (WCAG 2.2 AA)
+   -------------------------------------------------------------------------- */
+.tuw-skip-link {
+  position: absolute;
+  top: -100px;
+  left: 16px;
+  z-index: 9999;
+  padding: 10px 18px;
+  background-color: var(--tuw-action-primary, #7539FF);
+  color: #FFFFFF;
+  font-weight: 600;
+  font-size: 13px;
+  border-radius: 6px;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: top 0.15s ease;
+}
+
+.tuw-skip-link:focus {
+  top: 16px;
+  outline: 2px solid #FFFFFF;
+  outline-offset: 2px;
 }

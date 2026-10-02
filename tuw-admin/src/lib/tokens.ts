@@ -81,7 +81,7 @@ export const SPACING = {
 } as const;
 
 export const TYPOGRAPHY = {
-  fontFamily: "'Urbanist', 'Plus Jakarta Sans', sans-serif",
+  fontFamily: "'Urbanist', sans-serif",
   display: { fontSize: '40px', lineHeight: '44px', fontWeight: 700, letterSpacing: '-0.02em' },
   headingPage: { fontSize: '32px', lineHeight: '40px', fontWeight: 600, letterSpacing: '-0.01em' },
   headingSection: { fontSize: '24px', lineHeight: '32px', fontWeight: 600 },

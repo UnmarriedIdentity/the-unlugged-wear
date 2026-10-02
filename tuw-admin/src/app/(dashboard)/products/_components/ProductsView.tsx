@@ -1,169 +1,155 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Plus, Filter, ArrowUpRight, Search } from 'lucide-react';
+import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-// Class map - selectors live in src/app/globals.css (single app.css, sub- prefix).
-// Verbatim port of SubPages.module.css; JSX untouched for zero pixel drift.
-const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
-import { StatCard, ContentCard, Button, Badge } from '@/components/ui';
+import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer } from '@/components/ui';
+import { useAdminState } from '@/mocks/state';
+import { ProductItem } from '@/mocks/fixtures';
 
-const catalogProducts = [
-  {
-    id: 1,
-    name: 'Summer dress',
-    category: 'Dresses',
-    price: '$2,340',
-    stock: 8,
-    status: 'Critical Low',
-    statusClass: styles.badgeRed,
-    sold: 492,
-    bg: 'linear-gradient(135deg, #EBF4F8 0%, #D8EBF5 100%)',
-    svg: (
-      <svg width="60" height="60" viewBox="0 0 48 48" fill="none">
-        <path d="M21 7C22 5.8 24 5.8 25 7" stroke="#7A93A2" strokeWidth="1.5" strokeLinecap="round" />
-        <path d="M19 8L16 17H32L29 8L24 13L19 8Z" fill="#3D7EAA" />
-        <path d="M19 8L24 13L29 8" stroke="#2B648C" strokeWidth="1.2" />
-        <rect x="15.5" y="17" width="17" height="3" rx="1.5" fill="#2B5B7D" />
-        <path d="M16 20L10 38C12 40 18 41 24 41C30 41 36 40 38 38L32 20H16Z" fill="#4E8CBA" />
-        <path d="M19 20L17 39.5" stroke="#3D75A0" strokeWidth="1.2" />
-        <path d="M24 20V41" stroke="#31678E" strokeWidth="1.2" />
-        <path d="M29 20L31 39.5" stroke="#3D75A0" strokeWidth="1.2" />
-      </svg>
-    ),
-  },
-  {
-    id: 2,
-    name: 'Floral dress',
-    category: 'Dresses',
-    price: '$1,680',
-    stock: 34,
-    status: 'Low Stock',
-    statusClass: styles.badgeOrange,
-    sold: 369,
-    bg: 'linear-gradient(135deg, #FAF0EB 0%, #F5E2DA 100%)',
-    svg: (
-      <svg width="60" height="60" viewBox="0 0 48 48" fill="none">
-        <line x1="18" y1="8" x2="18" y2="15" stroke="#252525" strokeWidth="1.5" strokeLinecap="round" />
-        <line x1="30" y1="8" x2="30" y2="15" stroke="#252525" strokeWidth="1.5" strokeLinecap="round" />
-        <path d="M16 15C16 13 32 13 32 15L31 22H17L16 15Z" fill="#1E2022" />
-        <rect x="16.5" y="22" width="15" height="2.5" fill="#141517" />
-        <path d="M17 24.5L12 39C16 41 32 41 36 39L31 24.5H17Z" fill="#1E2022" />
-        <circle cx="20" cy="18" r="2.5" fill="#E8826F" />
-        <circle cx="27" cy="19" r="2.2" fill="#EAA3B3" />
-        <circle cx="24" cy="28" r="2.8" fill="#F8B195" />
-      </svg>
-    ),
-  },
-  {
-    id: 3,
-    name: 'White Tshirt',
-    category: 'Tops',
-    price: '$1,890',
-    stock: 26,
-    status: 'In Stock',
-    statusClass: styles.badgeGreen,
-    sold: 592,
-    bg: 'linear-gradient(135deg, #F0F3F6 0%, #E3E7ED 100%)',
-    svg: (
-      <svg width="60" height="60" viewBox="0 0 48 48" fill="none">
-        <path
-          d="M16 11L9 16L12 21L15 19V38H33V19L36 21L39 16L32 11C30 14 27 15 24 15C21 15 18 14 16 11Z"
-          fill="#FFFFFF"
-          stroke="#B8C4CE"
-          strokeWidth="1.5"
-          strokeLinejoin="round"
-        />
-        <path d="M18 11.5C19.5 13.5 21.6 14.5 24 14.5C26.4 14.5 28.5 13.5 30 11.5" stroke="#A2B0BD" strokeWidth="1.2" strokeLinecap="round" />
-        <rect x="21" y="20" width="6" height="3" rx="1" fill="#115D5D" opacity="0.85" />
-      </svg>
-    ),
-  },
-  {
-    id: 4,
-    name: 'Ankle boots',
-    category: 'Footwear',
-    price: '$2,150',
-    stock: 8,
-    status: 'Low Stock',
-    statusClass: styles.badgeOrange,
-    sold: 215,
-    bg: 'linear-gradient(135deg, #F7EFE8 0%, #EDE1D5 100%)',
-    svg: (
-      <svg width="60" height="60" viewBox="0 0 48 48" fill="none">
-        <path d="M14 14H24V28L36 31V37H14V14Z" fill="#5A3A28" />
-        <path d="M14 37H36V40H14V37Z" fill="#2E1C12" />
-        <line x1="20" y1="18" x2="20" y2="26" stroke="#C49B7A" strokeWidth="1.5" strokeLinecap="round" />
-      </svg>
-    ),
-  },
-  {
-    id: 5,
-    name: 'Denim Jacket',
-    category: 'Outerwear',
-    price: '$3,420',
-    stock: 54,
-    status: 'In Stock',
-    statusClass: styles.badgeGreen,
-    sold: 180,
-    bg: 'linear-gradient(135deg, #E6EEF5 0%, #D2DEEB 100%)',
-    svg: (
-      <svg width="60" height="60" viewBox="0 0 48 48" fill="none">
-        <path d="M14 10L8 16L12 26L16 23V39H32V23L36 26L40 16L34 10H14Z" fill="#2E5A88" stroke="#1D3E62" strokeWidth="1.5" />
-        <line x1="24" y1="10" x2="24" y2="39" stroke="#1D3E62" strokeWidth="1.5" />
-        <rect x="17" y="16" width="4" height="4" fill="#24486E" />
-        <rect x="27" y="16" width="4" height="4" fill="#24486E" />
-      </svg>
-    ),
-  },
-  {
-    id: 6,
-    name: 'Silk Scarf',
-    category: 'Accessories',
-    price: '$890',
-    stock: 42,
-    status: 'In Stock',
-    statusClass: styles.badgeGreen,
-    sold: 310,
-    bg: 'linear-gradient(135deg, #FAF3F7 0%, #EFE1EB 100%)',
-    svg: (
-      <svg width="60" height="60" viewBox="0 0 48 48" fill="none">
-        <path d="M12 12C20 8 28 20 36 14C38 22 28 32 34 38C26 36 18 26 12 30V12Z" fill="#9C4D78" />
-        <circle cx="24" cy="22" r="3" fill="#E8B4CE" />
-      </svg>
-    ),
-  },
-];
+const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
 
 export default function ProductsView() {
-  const [selectedCat, setSelectedCat] = useState('All');
+  const { products, createProduct, updateProduct, deleteProduct, canPerformAction } = useAdminState();
 
-  const filteredProducts = selectedCat === 'All'
-    ? catalogProducts
-    : catalogProducts.filter(p => p.category === selectedCat);
+  const [selectedCat, setSelectedCat] = useState<string>('All');
+  const [publicationFilter, setPublicationFilter] = useState<'all' | 'published' | 'draft' | 'archived'>('all');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Modals & Drawers
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<ProductItem | null>(null);
+
+  // Form State for Create/Edit
+  const [formName, setFormName] = useState('');
+  const [formSlug, setFormSlug] = useState('');
+  const [formCategory, setFormCategory] = useState<ProductItem['category']>('T-Shirts');
+  const [formPrice, setFormPrice] = useState('48.00');
+  const [formComparePrice, setFormComparePrice] = useState('58.00');
+  const [formStock, setFormStock] = useState('30');
+  const [formColors, setFormColors] = useState('Black, Chalk White, Olive');
+  const [formSizes, setFormSizes] = useState('S, M, L, XL');
+  const [formPartner, setFormPartner] = useState<ProductItem['partner']>('Qikink Direct API');
+  const [formPlacement, setFormPlacement] = useState<ProductItem['placement']>('Chest (45mm)');
+  const [formStatus, setFormStatus] = useState<ProductItem['publicationStatus']>('published');
+  const [formDescription, setFormDescription] = useState('Pre-shrunk premium heavyweight combed cotton with reinforced seams.');
+
+  const openCreateModal = () => {
+    if (!canPerformAction('products')) return;
+    setFormName('');
+    setFormSlug('');
+    setFormCategory('T-Shirts');
+    setFormPrice('48.00');
+    setFormComparePrice('58.00');
+    setFormStock('25');
+    setFormColors('Black, Chalk White, Olive');
+    setFormSizes('S, M, L, XL');
+    setFormPartner('Qikink Direct API');
+    setFormPlacement('Chest (45mm)');
+    setFormStatus('published');
+    setFormDescription('Pre-shrunk premium heavyweight combed cotton with reinforced seams.');
+    setIsCreateOpen(true);
+  };
+
+  const openEditDrawer = (product: ProductItem) => {
+    if (!canPerformAction('products')) return;
+    setEditingProduct(product);
+    setFormName(product.name);
+    setFormSlug(product.slug);
+    setFormCategory(product.category);
+    setFormPrice(product.price.toFixed(2));
+    setFormComparePrice(product.compareAtPrice ? product.compareAtPrice.toFixed(2) : '');
+    setFormStock(String(product.stock));
+    setFormColors(product.colors.join(', '));
+    setFormSizes(product.sizes.join(', '));
+    setFormPartner(product.partner);
+    setFormPlacement(product.placement);
+    setFormStatus(product.publicationStatus);
+    setFormDescription(product.description);
+  };
+
+  const handleCreateSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const priceNum = parseFloat(formPrice) || 0;
+    const stockNum = parseInt(formStock, 10) || 0;
+    const compareNum = parseFloat(formComparePrice) || undefined;
+
+    createProduct({
+      name: formName || 'Untitled Garment',
+      slug: formSlug || formName.toLowerCase().replace(/\s+/g, '-'),
+      category: formCategory,
+      price: priceNum,
+      compareAtPrice: compareNum,
+      stock: stockNum,
+      colors: formColors.split(',').map((c) => c.trim()).filter(Boolean),
+      sizes: formSizes.split(',').map((s) => s.trim()).filter(Boolean),
+      partner: formPartner,
+      placement: formPlacement,
+      publicationStatus: formStatus,
+      description: formDescription,
+      imageBg: 'linear-gradient(135deg, #FAF3F7 0%, #EFE1EB 100%)',
+    });
+
+    setIsCreateOpen(false);
+  };
+
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingProduct) return;
+
+    const priceNum = parseFloat(formPrice) || editingProduct.price;
+    const stockNum = parseInt(formStock, 10) || editingProduct.stock;
+    const compareNum = parseFloat(formComparePrice) || undefined;
+
+    updateProduct(editingProduct.id, {
+      name: formName,
+      slug: formSlug,
+      category: formCategory,
+      price: priceNum,
+      compareAtPrice: compareNum,
+      stock: stockNum,
+      colors: formColors.split(',').map((c) => c.trim()).filter(Boolean),
+      sizes: formSizes.split(',').map((s) => s.trim()).filter(Boolean),
+      partner: formPartner,
+      placement: formPlacement,
+      publicationStatus: formStatus,
+      description: formDescription,
+    });
+
+    setEditingProduct(null);
+  };
+
+  // Filtered Products
+  const filteredProducts = products.filter((p) => {
+    const matchesSearch =
+      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.slug.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCat = selectedCat === 'All' || p.category === selectedCat;
+    const matchesPub = publicationFilter === 'all' || p.publicationStatus === publicationFilter;
+    return matchesSearch && matchesCat && matchesPub;
+  });
+
+  const lowStockCount = products.filter((p) => p.stock > 0 && p.stock <= 10).length;
+  const outOfStockCount = products.filter((p) => p.stock === 0).length;
+  const draftCount = products.filter((p) => p.publicationStatus === 'draft').length;
 
   return (
     <DashboardShell pageTitle="Products" activeNav="products">
       <div className={styles.pageHeader}>
         <div className={styles.headingGroup}>
           <h2 className={styles.pageTitle}>Product Catalog</h2>
-          <p className={styles.pageSubtitle}>Organize stock, inventory alerts, and product merchandising.</p>
+          <p className={styles.pageSubtitle}>
+            Organize garments, live inventory levels, print partner mapping, and publication states.
+          </p>
         </div>
 
         <div className={styles.headerActions}>
           <Button
-            variant="secondary"
-            size="md"
-            icon={<Filter size={16} />}
-            onClick={() => alert('Filter Catalog')}
-          >
-            <span>Filter</span>
-          </Button>
-          <Button
             variant="primary"
             size="md"
             icon={<Plus size={16} />}
-            onClick={() => alert('Add New Product Modal (Figma Frame 3:0:1)')}
+            onClick={openCreateModal}
           >
             <span>Add New Product</span>
           </Button>
@@ -174,80 +160,428 @@ export default function ProductsView() {
       <div className={styles.statGrid}>
         <StatCard
           label="Total Products"
-          value="86"
-          trend="↑ 4 added this week"
+          value={String(products.length)}
+          trend="Managed in local memory"
           trendType="up"
         />
         <StatCard
           label="Low Stock Alerts"
-          value="3"
-          trend="Needs re-stock"
-          trendType="down"
+          value={String(lowStockCount)}
+          subtitle="Stock ≤ 10 units"
+          trendType={lowStockCount > 0 ? 'down' : 'up'}
+        />
+        <StatCard
+          label="Drafts in Review"
+          value={String(draftCount)}
+          subtitle="Unpublished items"
+          trendType="neutral"
         />
         <StatCard
           label="Out of Stock"
-          value="0"
-          trend="100% available"
-          trendType="up"
-        />
-        <StatCard
-          label="Categories"
-          value="12"
-          trend="Active departments"
-          trendType="neutral"
+          value={String(outOfStockCount)}
+          subtitle={outOfStockCount > 0 ? 'Backorder only' : 'Fully stocked'}
+          trendType={outOfStockCount > 0 ? 'down' : 'up'}
         />
       </div>
 
-      {/* Catalog Grid */}
+      {/* Catalog Filter Bar & Grid */}
       <ContentCard>
-        <div className={styles.filterBar}>
-          <ul className={styles.tabList}>
-            {['All', 'Dresses', 'Tops', 'Outerwear', 'Footwear', 'Accessories'].map((cat) => (
-              <li
-                key={cat}
-                className={`${styles.tabItem} ${selectedCat === cat ? styles.tabItemActive : ''}`}
-                onClick={() => setSelectedCat(cat)}
-              >
-                {cat}
-              </li>
-            ))}
-          </ul>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 20 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+            <div style={{ maxWidth: 360, width: '100%' }}>
+              <Input
+                placeholder="Search products by title, category, or slug..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                prefixIcon={<Search size={16} />}
+              />
+            </div>
+
+            {/* Publication Filter Tabs */}
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>
+                Status:
+              </span>
+              {(['all', 'published', 'draft', 'archived'] as const).map((st) => (
+                <button
+                  key={st}
+                  type="button"
+                  onClick={() => setPublicationFilter(st)}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    fontWeight: publicationFilter === st ? 600 : 500,
+                    cursor: 'pointer',
+                    border: '1px solid',
+                    borderColor: publicationFilter === st ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-border-subtle, #E2E4E6)',
+                    backgroundColor: publicationFilter === st ? 'var(--tuw-bg-selected, #F8F5FF)' : 'transparent',
+                    color: publicationFilter === st ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-text-secondary, #5D6772)',
+                  }}
+                >
+                  {st.charAt(0).toUpperCase() + st.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Department Categories */}
+          <div className={styles.filterBar}>
+            <ul className={styles.tabList}>
+              {['All', 'T-Shirts', 'Hoodies', 'Jackets', 'Pants', 'Accessories'].map((cat) => (
+                <li
+                  key={cat}
+                  className={`${styles.tabItem} ${selectedCat === cat ? styles.tabItemActive : ''}`}
+                  onClick={() => setSelectedCat(cat)}
+                >
+                  {cat}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
+        {/* Card Grid */}
         <div className={styles.cardGrid}>
-          {filteredProducts.map((p) => (
-            <div key={p.id} className={styles.productCatalogCard}>
-              <div className={styles.productThumbFrame} style={{ background: p.bg }}>
-                {p.svg}
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '16px', fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>{p.name}</span>
-                <Badge
-                  variant={
-                    p.status === 'In Stock'
-                      ? 'success'
-                      : p.status === 'Low Stock'
-                      ? 'warning'
-                      : 'danger'
-                  }
+          {filteredProducts.length === 0 ? (
+            <div style={{ padding: '60px 16px', textAlign: 'center', color: 'var(--tuw-text-secondary, #5D6772)', gridColumn: '1 / -1' }}>
+              No products found matching the selected filters.
+            </div>
+          ) : (
+            filteredProducts.map((p) => (
+              <div key={p.id} className={styles.productCatalogCard}>
+                <div
+                  className={styles.productThumbFrame}
+                  style={{
+                    background: p.imageBg,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative',
+                  }}
                 >
-                  {p.status}
-                </Badge>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: '#4A5568' }}>
+                    {p.name.slice(0, 2).toUpperCase()}
+                  </span>
+                  <div style={{ position: 'absolute', top: 10, right: 10 }}>
+                    <Badge
+                      variant={
+                        p.publicationStatus === 'published'
+                          ? 'success'
+                          : p.publicationStatus === 'draft'
+                          ? 'warning'
+                          : 'neutral'
+                      }
+                    >
+                      {p.publicationStatus}
+                    </Badge>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 12 }}>
+                  <div>
+                    <span style={{ fontSize: '15px', fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', display: 'block' }}>
+                      {p.name}
+                    </span>
+                    <span style={{ fontSize: '12px', color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                      {p.category} · {p.partner}
+                    </span>
+                  </div>
+                  <Badge variant={p.stock > 10 ? 'success' : p.stock > 0 ? 'warning' : 'danger'}>
+                    {p.stock > 10 ? `${p.stock} in stock` : p.stock > 0 ? `Low: ${p.stock}` : 'Out of stock'}
+                  </Badge>
+                </div>
+
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }}>
+                  {p.sizes.map((s) => (
+                    <span key={s} style={{ fontSize: 11, padding: '2px 6px', background: 'var(--tuw-bg-canvas, #F7F8F9)', borderRadius: 4, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                      {s}
+                    </span>
+                  ))}
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 14, paddingTop: 10, borderTop: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
+                  <div>
+                    <span style={{ fontSize: '18px', fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                      ${p.price.toFixed(2)}
+                    </span>
+                    {p.compareAtPrice && (
+                      <span style={{ fontSize: '13px', color: 'var(--tuw-text-secondary, #5D6772)', textDecoration: 'line-through', marginLeft: 6 }}>
+                        ${p.compareAtPrice.toFixed(2)}
+                      </span>
+                    )}
+                  </div>
+
+                  <Button variant="secondary" size="sm" icon={<Edit3 size={14} />} onClick={() => openEditDrawer(p)}>
+                    Manage
+                  </Button>
+                </div>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--tuw-text-secondary, #5D6772)', fontSize: '13px' }}>
-                <span>Stock: {p.stock} units</span>
-                <span>Sold: {p.sold}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
-                <span style={{ fontSize: '18px', fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>{p.price}</span>
-                <Button variant="secondary" size="sm" onClick={() => alert(`Manage: ${p.name}`)}>
-                  Manage
+            ))
+          )}
+        </div>
+      </ContentCard>
+
+      {/* Add New Product Modal */}
+      <Modal
+        isOpen={isCreateOpen}
+        onClose={() => setIsCreateOpen(false)}
+        title="Add New Catalog Garment"
+        subtitle="Create an apparel item with partner mapping and size variants"
+        maxWidth="620px"
+        footer={
+          <div style={{ display: 'flex', gap: 10 }}>
+            <Button variant="secondary" size="md" onClick={() => setIsCreateOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" size="md" onClick={handleCreateSubmit}>
+              Save to Catalog
+            </Button>
+          </div>
+        }
+      >
+        <form onSubmit={handleCreateSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <Input
+              label="Product Title"
+              placeholder="e.g. Heavyweight Fleece Zip Hoodie"
+              value={formName}
+              onChange={(e) => {
+                setFormName(e.target.value);
+                if (!formSlug) setFormSlug(e.target.value.toLowerCase().replace(/\s+/g, '-'));
+              }}
+              required
+            />
+            <Input
+              label="URL Slug"
+              placeholder="e.g. heavyweight-fleece-zip-hoodie"
+              value={formSlug}
+              onChange={(e) => setFormSlug(e.target.value)}
+              required
+            />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+            <div>
+              <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
+                Category
+              </label>
+              <select
+                value={formCategory}
+                onChange={(e) => setFormCategory(e.target.value as ProductItem['category'])}
+                style={{ width: '100%', height: 40, borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '0 10px', fontSize: 13 }}
+              >
+                <option value="T-Shirts">T-Shirts</option>
+                <option value="Hoodies">Hoodies</option>
+                <option value="Jackets">Jackets</option>
+                <option value="Pants">Pants</option>
+                <option value="Accessories">Accessories</option>
+              </select>
+            </div>
+
+            <Input
+              label="Price ($ USD)"
+              type="number"
+              step="0.01"
+              value={formPrice}
+              onChange={(e) => setFormPrice(e.target.value)}
+              required
+            />
+
+            <Input
+              label="Initial Stock Units"
+              type="number"
+              value={formStock}
+              onChange={(e) => setFormStock(e.target.value)}
+              required
+            />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div>
+              <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
+                Fulfillment Partner
+              </label>
+              <select
+                value={formPartner}
+                onChange={(e) => setFormPartner(e.target.value as ProductItem['partner'])}
+                style={{ width: '100%', height: 40, borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '0 10px', fontSize: 13 }}
+              >
+                <option value="Qikink Direct API">Qikink Direct API</option>
+                <option value="Printrove Hub">Printrove Hub</option>
+                <option value="Custom Atelier">Custom Atelier</option>
+              </select>
+            </div>
+
+            <div>
+              <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
+                Artwork Placement Spec
+              </label>
+              <select
+                value={formPlacement}
+                onChange={(e) => setFormPlacement(e.target.value as ProductItem['placement'])}
+                style={{ width: '100%', height: 40, borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '0 10px', fontSize: 13 }}
+              >
+                <option value="Chest (45mm)">Chest (45mm)</option>
+                <option value="Back Oversized">Back Oversized</option>
+                <option value="Sleeve Length">Sleeve Length</option>
+                <option value="Interior Hem">Interior Hem</option>
+              </select>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <Input
+              label="Colors (comma separated)"
+              value={formColors}
+              onChange={(e) => setFormColors(e.target.value)}
+            />
+            <Input
+              label="Sizes (comma separated)"
+              value={formSizes}
+              onChange={(e) => setFormSizes(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
+              Garment Description & Care
+            </label>
+            <textarea
+              rows={3}
+              value={formDescription}
+              onChange={(e) => setFormDescription(e.target.value)}
+              style={{
+                width: '100%',
+                borderRadius: 8,
+                border: '1px solid var(--tuw-border-control, #90979F)',
+                padding: '8px 12px',
+                fontSize: 13,
+                fontFamily: 'inherit',
+              }}
+            />
+          </div>
+
+          <div>
+            <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
+              Publication State
+            </label>
+            <select
+              value={formStatus}
+              onChange={(e) => setFormStatus(e.target.value as ProductItem['publicationStatus'])}
+              style={{ width: '100%', height: 40, borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '0 10px', fontSize: 13 }}
+            >
+              <option value="published">Published (Visible in Storefront)</option>
+              <option value="draft">Draft (Editorial review only)</option>
+              <option value="archived">Archived (Hidden from catalog)</option>
+            </select>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Edit Product Drawer */}
+      <Drawer
+        isOpen={Boolean(editingProduct)}
+        onClose={() => setEditingProduct(null)}
+        title={editingProduct ? `Manage ${editingProduct.name}` : 'Edit Product'}
+        subtitle={`ID: ${editingProduct?.id} · ${editingProduct?.partner}`}
+        footer={
+          editingProduct && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+              <Button
+                variant="danger"
+                size="sm"
+                icon={<Trash2 size={14} />}
+                onClick={() => {
+                  if (window.confirm(`Permanently delete "${editingProduct.name}" from catalog?`)) {
+                    deleteProduct(editingProduct.id);
+                    setEditingProduct(null);
+                  }
+                }}
+              >
+                Delete
+              </Button>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <Button variant="secondary" size="sm" onClick={() => setEditingProduct(null)}>
+                  Cancel
+                </Button>
+                <Button variant="primary" size="sm" onClick={handleEditSubmit}>
+                  Save Changes
                 </Button>
               </div>
             </div>
-          ))}
-        </div>
-      </ContentCard>
+          )
+        }
+      >
+        {editingProduct && (
+          <form onSubmit={handleEditSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <Input
+              label="Product Title"
+              value={formName}
+              onChange={(e) => setFormName(e.target.value)}
+              required
+            />
+            <Input
+              label="URL Slug"
+              value={formSlug}
+              onChange={(e) => setFormSlug(e.target.value)}
+              required
+            />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <Input
+                label="Price ($ USD)"
+                type="number"
+                step="0.01"
+                value={formPrice}
+                onChange={(e) => setFormPrice(e.target.value)}
+                required
+              />
+              <Input
+                label="Stock Quantity"
+                type="number"
+                value={formStock}
+                onChange={(e) => setFormStock(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
+                Publication Status
+              </label>
+              <select
+                value={formStatus}
+                onChange={(e) => setFormStatus(e.target.value as ProductItem['publicationStatus'])}
+                style={{ width: '100%', height: 40, borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '0 10px', fontSize: 13 }}
+              >
+                <option value="published">Published (Live on website)</option>
+                <option value="draft">Draft (Hidden)</option>
+                <option value="archived">Archived</option>
+              </select>
+            </div>
+            <Input
+              label="Color Variations"
+              value={formColors}
+              onChange={(e) => setFormColors(e.target.value)}
+            />
+            <Input
+              label="Size Variations"
+              value={formSizes}
+              onChange={(e) => setFormSizes(e.target.value)}
+            />
+            <div>
+              <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
+                Description
+              </label>
+              <textarea
+                rows={4}
+                value={formDescription}
+                onChange={(e) => setFormDescription(e.target.value)}
+                style={{ width: '100%', borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '8px 12px', fontSize: 13, fontFamily: 'inherit' }}
+              />
+            </div>
+          </form>
+        )}
+      </Drawer>
     </DashboardShell>
   );
 }
