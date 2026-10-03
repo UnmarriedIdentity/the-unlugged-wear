@@ -4,8 +4,8 @@ export const STORE_PRODUCTS: Product[] = [
   {
     id: 'prod-1',
     slug: 'monolith-heavyweight-hoodie-vintage-black',
-    title: 'Monolith Heavyweight Hoodie',
-    subtitle: '500 GSM French Terry Cotton',
+    title: 'Tailored Double-Breasted Blazer Suit',
+    subtitle: 'Architectural Wool-Blend Gabardine',
     category: 'hoodies',
     priceINR: 3899,
     priceMinorINR: 389900,
@@ -16,8 +16,8 @@ export const STORE_PRODUCTS: Product[] = [
     partnerAvailability: 'ready_to_print',
     images: [
       {
-        url: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=1200&auto=format&fit=crop&q=80',
-        alt: 'Monolith Heavyweight Hoodie in Vintage Black front view',
+        url: '/products/2.jpeg',
+        alt: 'Tailored Double-Breasted Blazer Suit front view',
         color: 'vintage-black',
       },
       {
@@ -63,12 +63,13 @@ export const STORE_PRODUCTS: Product[] = [
     sustainabilityBadge: 'Zero Deadstock POD',
     isNew: true,
     isBestseller: true,
+    videoUrl: '/products/2.mp4',
   },
   {
     id: 'prod-2',
     slug: 'atelier-raw-edge-relaxed-tee',
-    title: 'Atelier Raw-Edge Boxy Tee',
-    subtitle: '280 GSM Combed Organic Jersey',
+    title: 'Oversized Boyfriend Poplin Shirt',
+    subtitle: '100% Crisp Long-Staple Combed Cotton',
     category: 'tees',
     priceINR: 2199,
     priceMinorINR: 219900,
@@ -77,8 +78,8 @@ export const STORE_PRODUCTS: Product[] = [
     partnerAvailability: 'ready_to_print',
     images: [
       {
-        url: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=1200&auto=format&fit=crop&q=80',
-        alt: 'Atelier Raw-Edge Boxy Tee in Bone White front view',
+        url: '/products/1.jpeg',
+        alt: 'Oversized Boyfriend Poplin Shirt editorial look',
         color: 'bone-white',
       },
       {
@@ -125,7 +126,7 @@ export const STORE_PRODUCTS: Product[] = [
   {
     id: 'prod-3',
     slug: 'solitude-wide-leg-canvas-trousers',
-    title: 'Solitude Wide-Leg Pleated Pant',
+    title: 'Belted Utilitarian Safari Ensemble',
     subtitle: '340 GSM Cotton Duck Twill',
     category: 'pants',
     priceINR: 4299,
@@ -137,8 +138,8 @@ export const STORE_PRODUCTS: Product[] = [
     partnerAvailability: 'ready_to_print',
     images: [
       {
-        url: 'https://images.unsplash.com/photo-1506630448388-4e683c67ddb0?w=1200&auto=format&fit=crop&q=80',
-        alt: 'Solitude Wide-Leg Pleated Pant in Slate Olive',
+        url: '/products/3.jpeg',
+        alt: 'Belted Utilitarian Safari Ensemble on model',
         color: 'slate-olive',
       },
       {
@@ -558,7 +559,7 @@ export const STORE_COLLECTIONS: Collection[] = [
     tagline: '500 GSM Heavyweight Architectural Cotton',
     description:
       'Form without distraction. Designed to insulate and shield against the frantic noise of modern pace.',
-    coverImage: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=1200&auto=format&fit=crop&q=80',
+    coverImage: '/products/2.jpeg',
     productCount: 4,
   },
   {
@@ -568,7 +569,7 @@ export const STORE_COLLECTIONS: Collection[] = [
     tagline: 'GOTS Organic Ring-Spun Basics',
     description:
       'Foundational t-shirts and daily staples built with uncompromising textile integrity.',
-    coverImage: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=1200&auto=format&fit=crop&q=80',
+    coverImage: '/products/1.jpeg',
     productCount: 6,
   },
   {
@@ -578,7 +579,7 @@ export const STORE_COLLECTIONS: Collection[] = [
     tagline: 'Heavy Canvas Totes & Studio Goods',
     description:
       'Tools for transit and contemplation. Crafted from unbleached duck canvas and solid brass.',
-    coverImage: 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=1200&auto=format&fit=crop&q=80',
+    coverImage: '/products/3.jpeg',
     productCount: 3,
   },
 ];

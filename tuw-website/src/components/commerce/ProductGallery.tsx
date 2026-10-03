@@ -12,26 +12,29 @@ export interface ProductGalleryProps {
     color?: string;
   }[];
   title: string;
+  videoUrl?: string;
 }
 
-export default function ProductGallery({ images, title }: ProductGalleryProps) {
+export default function ProductGallery({ images, title, videoUrl }: ProductGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isZoomOpen, setIsZoomOpen] = useState(false);
 
+  const totalSlides = images.length + (videoUrl ? 1 : 0);
+  const isVideoActive = Boolean(videoUrl && activeIndex === images.length);
   const activeImage = images[activeIndex] || images[0];
 
   const handleNext = () => {
-    setActiveIndex((prev) => (prev + 1) % images.length);
+    setActiveIndex((prev) => (prev + 1) % totalSlides);
   };
 
   const handlePrev = () => {
-    setActiveIndex((prev) => (prev - 1 + images.length) % images.length);
+    setActiveIndex((prev) => (prev - 1 + totalSlides) % totalSlides);
   };
 
   return (
     <div className="flex flex-col-reverse lg:flex-row gap-4">
       {/* Thumbnail Selector Column */}
-      {images.length > 1 && (
+      {totalSlides > 1 && (
         <div className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-y-auto no-scrollbar shrink-0">
           {images.map((img, idx) => (
             <button
@@ -52,16 +55,44 @@ export default function ProductGallery({ images, title }: ProductGalleryProps) {
               />
             </button>
           ))}
+          {videoUrl && (
+            <button
+              type="button"
+              onClick={() => setActiveIndex(images.length)}
+              aria-label={`Watch video reel for ${title}`}
+              className={`relative w-16 h-20 sm:w-20 sm:h-24 rounded-xl overflow-hidden bg-[#1A1A1A] text-white border transition-all shrink-0 cursor-pointer flex flex-col items-center justify-center gap-1 ${
+                isVideoActive
+                  ? 'border-[#C8A96A] ring-2 ring-[#C8A96A]/30'
+                  : 'border-[#E2DDCF] opacity-80 hover:opacity-100'
+              }`}
+            >
+              <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs text-white">
+                ▶
+              </div>
+              <span className="text-[10px] uppercase tracking-wider font-semibold text-white/90">Reel</span>
+            </button>
+          )}
         </div>
       )}
 
       {/* Main Image Viewport */}
       <div className="relative aspect-[3/4] w-full rounded-2xl overflow-hidden bg-[#F4F1EA] border border-[#E2DDCF]">
-        <ImageWithFallback
-          src={activeImage.url}
-          alt={activeImage.alt}
-          className="w-full h-full object-cover"
-        />
+        {isVideoActive ? (
+          <video
+            src={videoUrl}
+            controls
+            autoPlay
+            loop
+            playsInline
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <ImageWithFallback
+            src={activeImage.url}
+            alt={activeImage.alt}
+            className="w-full h-full object-cover"
+          />
+        )}
 
         {/* Zoom trigger */}
         <button

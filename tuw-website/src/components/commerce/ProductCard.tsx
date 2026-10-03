@@ -61,6 +61,11 @@ export default function ProductCard({ product, className = '' }: ProductCardProp
         {/* Badges Overlay */}
         <div className="absolute top-3 left-3 flex flex-col gap-1.5 pointer-events-none z-10">
           {product.isNew && <Badge variant="dark">New</Badge>}
+          {product.videoUrl && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wider uppercase bg-[#1A1A1A]/85 text-white backdrop-blur-xs">
+              ▶ Reel
+            </span>
+          )}
           {product.isBestseller && <Badge variant="neutral">Bestseller</Badge>}
           {product.sustainabilityBadge && (
             <Badge variant="outline" className="bg-white/80 backdrop-blur-xs">

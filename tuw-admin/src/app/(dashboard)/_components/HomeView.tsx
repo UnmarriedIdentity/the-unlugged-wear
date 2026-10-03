@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowUp, Calendar, ChevronDown } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
 import { useAdminState } from '@/mocks/state';
@@ -31,7 +32,7 @@ const inventoryAlerts = [
     segmentClass: styles.segmentFilledRed,
     filledSegments: 2,
     unitsLeft: '5 units left',
-    itemName: 'Summer dress',
+    itemName: 'Boyfriend Poplin Shirt',
     velocity: 'Sells: 3 pcs/day',
   },
   {
@@ -42,7 +43,7 @@ const inventoryAlerts = [
     segmentClass: styles.segmentFilledOrange,
     filledSegments: 2,
     unitsLeft: '8 units left',
-    itemName: 'Ankle boots',
+    itemName: 'Tailored Blazer Suit',
     velocity: 'Sells: 2 pcs/day',
   },
   {
@@ -340,28 +341,21 @@ export default function HomeView() {
           </div>
 
           <div className={styles.productList}>
-            {/* Product 1: Summer Dress (Pure SVG Illustration) */}
+            {/* Product 1: Classic Boyfriend Poplin Shirt */}
             <div className={styles.productCardItem}>
-              <div
-                className={styles.productIllustrationWrapper}
-                style={{ background: 'linear-gradient(135deg, #EBF4F8 0%, #D8EBF5 100%)' }}
-              >
-                <svg width="46" height="46" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M21 7C22 5.8 24 5.8 25 7" stroke="#7A93A2" strokeWidth="1.5" strokeLinecap="round" />
-                  <path d="M19 8L16 17H32L29 8L24 13L19 8Z" fill="#3D7EAA" />
-                  <path d="M19 8L24 13L29 8" stroke="#2B648C" strokeWidth="1.2" />
-                  <rect x="15.5" y="17" width="17" height="3" rx="1.5" fill="#2B5B7D" />
-                  <path d="M16 20L10 38C12 40 18 41 24 41C30 41 36 40 38 38L32 20H16Z" fill="#4E8CBA" />
-                  <path d="M19 20L17 39.5" stroke="#3D75A0" strokeWidth="1.2" />
-                  <path d="M24 20V41" stroke="#31678E" strokeWidth="1.2" />
-                  <path d="M29 20L31 39.5" stroke="#3D75A0" strokeWidth="1.2" />
-                  <path d="M14 29C18 31 30 31 34 29" stroke="#FFFFFF" strokeWidth="1" strokeOpacity="0.35" />
-                </svg>
+              <div className={styles.productIllustrationWrapper} style={{ position: 'relative' }}>
+                <Image
+                  src="/products/1.jpeg"
+                  alt="Boyfriend Poplin Shirt"
+                  fill
+                  sizes="72px"
+                  style={{ objectFit: 'cover' }}
+                />
               </div>
               <div className={styles.productInfo}>
-                <span className={styles.productName}>Summer dress</span>
+                <span className={styles.productName}>Boyfriend Poplin Shirt</span>
                 <div className={styles.productStatsRow}>
-                  <span className={`${styles.productPrice} tuw-tabular-nums`}>₹2,340</span>
+                  <span className={`${styles.productPrice} tuw-tabular-nums`}>₹3,490</span>
                   <span className={styles.statBullet}>•</span>
                   <span className={styles.productSoldGreen}>492</span>
                   <span className={styles.productSoldGray}>/500 Sold</span>
@@ -376,39 +370,21 @@ export default function HomeView() {
               </div>
             </div>
 
-            {/* Product 2: Floral Dress (Pure SVG Illustration) */}
+            {/* Product 2: Tailored Blazer Suit */}
             <div className={styles.productCardItem}>
-              <div
-                className={styles.productIllustrationWrapper}
-                style={{ background: 'linear-gradient(135deg, #FAF0EB 0%, #F5E2DA 100%)' }}
-              >
-                <svg width="46" height="46" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <line x1="18" y1="8" x2="18" y2="15" stroke="#252525" strokeWidth="1.5" strokeLinecap="round" />
-                  <line x1="30" y1="8" x2="30" y2="15" stroke="#252525" strokeWidth="1.5" strokeLinecap="round" />
-                  <path d="M16 15C16 13 32 13 32 15L31 22H17L16 15Z" fill="#1E2022" />
-                  <rect x="16.5" y="22" width="15" height="2.5" fill="#141517" />
-                  <path d="M17 24.5L12 39C16 41 32 41 36 39L31 24.5H17Z" fill="#1E2022" />
-                  <circle cx="20" cy="18" r="2.5" fill="#E8826F" />
-                  <circle cx="20" cy="18" r="1" fill="#FFE8B2" />
-                  <circle cx="27" cy="19" r="2.2" fill="#EAA3B3" />
-                  <circle cx="27" cy="19" r="0.8" fill="#FFFFFF" />
-                  <circle cx="24" cy="28" r="2.8" fill="#F8B195" />
-                  <circle cx="24" cy="28" r="1.1" fill="#FFF1C5" />
-                  <circle cx="17" cy="33" r="2.4" fill="#E8826F" />
-                  <circle cx="17" cy="33" r="0.9" fill="#FFF1C5" />
-                  <circle cx="31" cy="32" r="2.5" fill="#EAA3B3" />
-                  <circle cx="31" cy="32" r="1" fill="#FFFFFF" />
-                  <circle cx="24" cy="36" r="2.2" fill="#E8826F" />
-                  <circle cx="24" cy="36" r="0.8" fill="#FFF1C5" />
-                  <ellipse cx="22" cy="16.5" rx="1.2" ry="0.6" fill="#84A98C" transform="rotate(25 22 16.5)" />
-                  <ellipse cx="26" cy="30" rx="1.2" ry="0.6" fill="#84A98C" transform="rotate(-30 26 30)" />
-                  <ellipse cx="19" cy="35" rx="1.2" ry="0.6" fill="#84A98C" transform="rotate(45 19 35)" />
-                </svg>
+              <div className={styles.productIllustrationWrapper} style={{ position: 'relative' }}>
+                <Image
+                  src="/products/2.jpeg"
+                  alt="Tailored Blazer Suit"
+                  fill
+                  sizes="72px"
+                  style={{ objectFit: 'cover' }}
+                />
               </div>
               <div className={styles.productInfo}>
-                <span className={styles.productName}>Floral dress</span>
+                <span className={styles.productName}>Tailored Blazer Suit</span>
                 <div className={styles.productStatsRow}>
-                  <span className={`${styles.productPrice} tuw-tabular-nums`}>₹1,680</span>
+                  <span className={`${styles.productPrice} tuw-tabular-nums`}>₹6,890</span>
                   <span className={styles.statBullet}>•</span>
                   <span className={styles.productSoldGreen}>369</span>
                   <span className={styles.productSoldGray}>/450 Sold</span>
@@ -423,37 +399,21 @@ export default function HomeView() {
               </div>
             </div>
 
-            {/* Product 3: White T-Shirt (Pure SVG Illustration) */}
+            {/* Product 3: Belted Safari Ensemble */}
             <div className={styles.productCardItem}>
-              <div
-                className={styles.productIllustrationWrapper}
-                style={{ background: 'linear-gradient(135deg, #F0F3F6 0%, #E3E7ED 100%)' }}
-              >
-                <svg width="46" height="46" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    d="M16 11L9 16L12 21L15 19V38H33V19L36 21L39 16L32 11C30 14 27 15 24 15C21 15 18 14 16 11Z"
-                    fill="#FFFFFF"
-                    stroke="#B8C4CE"
-                    strokeWidth="1.5"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M18 11.5C19.5 13.5 21.6 14.5 24 14.5C26.4 14.5 28.5 13.5 30 11.5"
-                    stroke="#A2B0BD"
-                    strokeWidth="1.2"
-                    strokeLinecap="round"
-                  />
-                  <path d="M12 21L15 19" stroke="#CCD5DE" strokeWidth="1" />
-                  <path d="M36 21L33 19" stroke="#CCD5DE" strokeWidth="1" />
-                  <rect x="21" y="20" width="6" height="3" rx="1" fill="#115D5D" opacity="0.85" />
-                  <line x1="22" y1="25" x2="26" y2="25" stroke="#8E9DAE" strokeWidth="1" strokeLinecap="round" />
-                  <line x1="16" y1="36" x2="32" y2="36" stroke="#CCD5DE" strokeWidth="1.2" strokeLinecap="round" />
-                </svg>
+              <div className={styles.productIllustrationWrapper} style={{ position: 'relative' }}>
+                <Image
+                  src="/products/3.jpeg"
+                  alt="Belted Safari Ensemble"
+                  fill
+                  sizes="72px"
+                  style={{ objectFit: 'cover' }}
+                />
               </div>
               <div className={styles.productInfo}>
-                <span className={styles.productName}>White Tshirt</span>
+                <span className={styles.productName}>Belted Safari Ensemble</span>
                 <div className={styles.productStatsRow}>
-                  <span className={`${styles.productPrice} tuw-tabular-nums`}>₹1,890</span>
+                  <span className={`${styles.productPrice} tuw-tabular-nums`}>₹5,490</span>
                   <span className={styles.statBullet}>•</span>
                   <span className={styles.productSoldGreen}>592</span>
                   <span className={styles.productSoldGray}>/800 Sold</span>

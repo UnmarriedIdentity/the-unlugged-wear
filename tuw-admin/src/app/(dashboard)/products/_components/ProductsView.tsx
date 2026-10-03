@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
 import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer, Pagination } from '@/components/ui';
@@ -266,12 +267,45 @@ export default function ProductsView() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     position: 'relative',
+                    overflow: 'hidden',
                   }}
                 >
-                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                    {p.name.slice(0, 2).toUpperCase()}
-                  </span>
-                  <div style={{ position: 'absolute', top: 10, right: 10 }}>
+                  {p.image ? (
+                    <Image
+                      src={p.image}
+                      alt={p.name}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 320px"
+                      style={{ objectFit: 'cover' }}
+                    />
+                  ) : (
+                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                      {p.name.slice(0, 2).toUpperCase()}
+                    </span>
+                  )}
+                  {p.video && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        bottom: 8,
+                        left: 8,
+                        background: 'rgba(0, 0, 0, 0.65)',
+                        backdropFilter: 'blur(4px)',
+                        color: '#FFFFFF',
+                        borderRadius: 4,
+                        padding: '2px 7px',
+                        fontSize: 10,
+                        fontWeight: 600,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 4,
+                        zIndex: 2,
+                      }}
+                    >
+                      ▶ Video Reel
+                    </div>
+                  )}
+                  <div style={{ position: 'absolute', top: 10, right: 10, zIndex: 2 }}>
                     <Badge
                       variant={
                         p.publicationStatus === 'published'
@@ -538,6 +572,35 @@ export default function ProductsView() {
       >
         {editingProduct && (
           <form onSubmit={handleEditSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {editingProduct.image && (
+              <div
+                style={{
+                  position: 'relative',
+                  width: '100%',
+                  height: 220,
+                  borderRadius: 10,
+                  overflow: 'hidden',
+                  border: '1px solid var(--tuw-border-subtle, #E9E9E9)',
+                  background: 'var(--tuw-bg-canvas, #F7F8F9)',
+                }}
+              >
+                {editingProduct.video ? (
+                  <video
+                    src={editingProduct.video}
+                    controls
+                    poster={editingProduct.image}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                ) : (
+                  <Image
+                    src={editingProduct.image}
+                    alt={editingProduct.name}
+                    fill
+                    style={{ objectFit: 'cover' }}
+                  />
+                )}
+              </div>
+            )}
             <Input
               label="Product Title"
               value={formName}
