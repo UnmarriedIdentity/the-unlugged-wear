@@ -56,6 +56,7 @@ export default function Pagination({
             <select
               value={pageSize}
               onChange={(e) => onPageSizeChange(Number(e.target.value))}
+              aria-label="Rows per page"
               style={{
                 height: '28px',
                 padding: '0 8px',
@@ -70,7 +71,7 @@ export default function Pagination({
             >
               {pageSizeOptions.map((opt) => (
                 <option key={opt} value={opt}>
-                  {opt} / page
+                  {opt}
                 </option>
               ))}
             </select>
