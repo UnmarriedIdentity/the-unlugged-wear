@@ -580,6 +580,8 @@ a {
   width: 100%;
   box-sizing: border-box;
   z-index: 10;
+  border-bottom: 1px solid var(--tuw-border-subtle, #E9E9E9);
+  margin-bottom: 10px;
 }
 
 .sidebarCollapsed .sidebarHeader {
@@ -650,8 +652,7 @@ a {
   flex-direction: column;
   gap: 16px;
   margin-top: 6px;
-  flex: 1;
-  min-height: 0;
+  flex: none;
   overflow: visible;
   scrollbar-width: none;
   -ms-overflow-style: none;

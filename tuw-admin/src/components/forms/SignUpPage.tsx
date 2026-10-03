@@ -175,8 +175,8 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
               <header className={styles.headerBlock}>
                 <div className={styles.logoBadge}>
                   <Image
-                    src="/images/storeflow-monogram.png"
-                    alt="Storeflow Logo"
+                    src="/logos/tuw-stag-white.png"
+                    alt="The Unplugged Wear"
                     width={27}
                     height={27}
                     className={styles.logoMonogram}
@@ -397,8 +397,8 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
               <header className={styles.verifyHeaderBlock}>
                 <div className={styles.logoBadge}>
                   <Image
-                    src="/images/storeflow-monogram.png"
-                    alt="Storeflow Logo"
+                    src="/logos/tuw-stag-white.png"
+                    alt="The Unplugged Wear"
                     width={27}
                     height={27}
                     className={styles.logoMonogram}

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   Home as HomeIcon,
@@ -54,15 +55,14 @@ export default function Sidebar({
       <div className="sidebarHeader">
           <Link href="/" className="brandLink">
             <div className="logoIconWrapper">
-              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path
-                  d="M6.5 17C6.5 14.79 8.29 13 10.5 13H13.5C15.71 13 17.5 11.21 17.5 9C17.5 6.79 15.71 5 13.5 5H9M17.5 7C17.5 9.21 15.71 11 13.5 11H10.5C8.29 11 6.5 12.79 6.5 15C6.5 17.21 8.29 19 10.5 19H15"
-                  stroke="#FFFFFF"
-                  strokeWidth="2.4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <Image
+                src="/logos/tuw-stag-white.png"
+                alt="The Unplugged Wear"
+                width={22}
+                height={22}
+                style={{ objectFit: 'contain', width: 'auto', height: '22px' }}
+                priority
+              />
             </div>
             {!isCollapsed && <span className="brandName">TUW Admin</span>}
           </Link>
