@@ -465,12 +465,12 @@ a {
 .dashboardLayoutRoot {
   display: flex;
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
   background-color: var(--tuw-bg-canvas, #F7F8F9);
   color: var(--tuw-text-primary, #262626);
   font-family: var(--font-main);
   position: relative;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 .dashboardMobileBackdrop {
@@ -484,12 +484,12 @@ a {
 .dashboardMainWrapper {
   flex: 1;
   min-width: 0;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   background-color: var(--tuw-bg-canvas, #F7F8F9);
-  min-height: 100vh;
-  width: 100%;
-  overflow-x: hidden;
 }
 
 .dashboardMainWrapperCollapsed {
@@ -514,7 +514,7 @@ a {
   }
 }
 
-/* Sidebar - Sticky, All-Time Visible while scrolling, perfectly in-flow */
+/* Sidebar - Full-Height Viewport Docked, Never Empty While Scrolling */
 .sidebar {
   width: 250px;
   min-width: 250px;
@@ -522,18 +522,13 @@ a {
   border-right: 1px solid var(--tuw-border-subtle, #E9E9E9);
   display: flex;
   flex-direction: column;
-  padding: 0 14px 20px 14px;
-  position: sticky;
-  top: 0;
+  padding: 0 14px 16px 14px;
   height: 100vh;
   flex-shrink: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  overflow: hidden;
+  box-sizing: border-box;
   z-index: 50;
   transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  box-sizing: border-box;
 }
 
 .sidebar::-webkit-scrollbar {
@@ -652,8 +647,10 @@ a {
   flex-direction: column;
   gap: 16px;
   margin-top: 6px;
-  flex: none;
-  overflow: visible;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -666,7 +663,7 @@ a {
 
 .sidebarFooter {
   flex-shrink: 0;
-  margin-top: 20px;
+  margin-top: auto;
   padding-top: 12px;
   border-top: 1px solid var(--tuw-border-subtle, #E9E9E9);
   display: flex;
