@@ -76,7 +76,6 @@ export default function HomeView() {
 
   // Derive live KPIs and recent orders from live state
   const liveRecentOrders = orders.slice(0, 6);
-  const failedFulfillmentCount = orders.filter((o) => o.fulfillmentStatus === 'submission_failed').length;
   const livePaidOrders = orders.filter((o) => o.paymentStatus === 'paid');
   const liveTotalRevenue = livePaidOrders.reduce((sum, o) => sum + (o.paidAmount || o.total), 0);
   const liveOrdersCount = orders.length;
@@ -84,48 +83,6 @@ export default function HomeView() {
 
   return (
     <DashboardShell pageTitle="Dashboard" activeNav="home">
-      {/* Operational Issue Banner if any */}
-      {failedFulfillmentCount > 0 && (
-        <div
-          style={{
-            padding: '12px 18px',
-            backgroundColor: 'var(--tuw-bg-error, #FEF4F4)',
-            border: '1px solid rgba(201, 24, 24, 0.25)',
-            borderRadius: 'var(--tuw-radius-card, 12px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 12,
-            marginBottom: 4,
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span
-              style={{
-                width: 10,
-                height: 10,
-                borderRadius: '50%',
-                backgroundColor: 'var(--tuw-text-error, #C91818)',
-                boxShadow: '0 0 6px var(--tuw-text-error, #C91818)',
-              }}
-            />
-            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-error, #C91818)' }}>
-              Operational Issue: {failedFulfillmentCount} order(s) failed partner API dispatch
-            </span>
-          </div>
-          <Link
-            href="/fulfillment"
-            style={{
-              fontSize: 13,
-              fontWeight: 600,
-              color: 'var(--tuw-text-error, #C91818)',
-              textDecoration: 'underline',
-            }}
-          >
-            Review & Retry in Fulfillment →
-          </Link>
-        </div>
-      )}
 
       {/* Welcome Header */}
       <div className={styles.welcomeRow}>
