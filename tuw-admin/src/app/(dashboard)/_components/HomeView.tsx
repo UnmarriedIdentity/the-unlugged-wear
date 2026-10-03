@@ -269,9 +269,10 @@ export default function HomeView() {
             <div className={styles.salesStatRow}>
               <span className={`${styles.salesLargeNumber} tuw-tabular-nums`}>₹39,190</span>
               <span className={styles.trendBadgeGreen}>
-                <ArrowUp size={14} />
+                <ArrowUp size={13} strokeWidth={2.5} />
                 8.4%
               </span>
+              <span className={styles.trendSubtext}>vs last week</span>
             </div>
           </div>
 
@@ -310,9 +311,19 @@ export default function HomeView() {
                       className={`${styles.barColumn} ${styles.barColumnThisWeek}`}
                       style={{ height: `${item.thisWeek}%` }}
                     />
-                    {/* Hover Tooltip */}
+                    {/* Rich Floating Tooltip */}
                     <div className={styles.barTooltip}>
-                      <strong>{item.day}</strong>: Last week {item.lastVal} | This week {item.thisVal}
+                      <span className={styles.tooltipDay}>{item.day}</span>
+                      <div className={styles.tooltipRow}>
+                        <span className={styles.tooltipDotThisWeek} />
+                        <span className={styles.tooltipLabel}>This week:</span>
+                        <strong className="tuw-tabular-nums">{item.thisVal}</strong>
+                      </div>
+                      <div className={styles.tooltipRow}>
+                        <span className={styles.tooltipDotLastWeek} />
+                        <span className={styles.tooltipLabel}>Last week:</span>
+                        <strong className="tuw-tabular-nums">{item.lastVal}</strong>
+                      </div>
                     </div>
                   </div>
                 ))}

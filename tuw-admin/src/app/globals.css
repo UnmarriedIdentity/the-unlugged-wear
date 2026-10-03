@@ -3650,62 +3650,67 @@ a {
 .home-salesHeaderRight {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 20px;
 }
 
 .home-chartLegend {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
 }
 
 .home-legendItem {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #6C6C6C;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tuw-text-secondary, #5D6772);
 }
 
 .home-legendDotLastWeek {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
-  background-color: #C6EAA0;
+  background-color: #E6DFF6;
+  border: 1px solid rgba(117, 57, 255, 0.25);
+  box-sizing: border-box;
 }
 
 .home-legendDotThisWeek {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
-  background-color: #115D5D;
+  background: linear-gradient(135deg, #7539FF 0%, #5E26E6 100%);
+  box-shadow: 0 0 0 2.5px rgba(117, 57, 255, 0.18);
+  box-sizing: border-box;
 }
 
 .home-filterSelectBtn {
-  background-color: #FFFFFF;
-  border: 1px solid #E9E9E9;
-  border-radius: 10px;
+  background-color: var(--tuw-bg-surface, #FFFFFF);
+  border: 1px solid var(--tuw-border-subtle, #E9E9E9);
+  border-radius: 8px;
   padding: 6px 12px;
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
-  color: #505050;
+  color: var(--tuw-text-primary, #262626);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.18s ease;
 }
 
 .home-filterSelectBtn:hover {
-  border-color: #CCCCCC;
-  background-color: #F8F9FA;
+  border-color: var(--tuw-action-primary, #7539FF);
+  color: var(--tuw-action-primary, #7539FF);
+  background-color: var(--tuw-bg-selected, #F8F5FF);
 }
 
 .home-salesStatRow {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   margin-top: 6px;
   margin-bottom: 20px;
 }
@@ -3713,8 +3718,27 @@ a {
 .home-salesLargeNumber {
   font-size: 32px;
   font-weight: 700;
-  color: #242424;
-  letter-spacing: -0.02em;
+  color: var(--tuw-text-primary, #262626);
+  letter-spacing: -0.03em;
+}
+
+.home-trendBadgeGreen {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background-color: #ECFDF5;
+  color: #059669;
+  border: 1px solid #A7F3D0;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.home-trendSubtext {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--tuw-text-secondary, #7E8793);
 }
 
 /* Sales Trend Bar Chart */
@@ -3722,7 +3746,7 @@ a {
   display: flex;
   width: 100%;
   height: 230px;
-  gap: 16px;
+  gap: 14px;
   position: relative;
 }
 
@@ -3730,12 +3754,13 @@ a {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding-bottom: 24px;
-  font-size: 12px;
-  font-weight: 400;
-  color: #6C6C6C;
-  min-width: 36px;
+  padding-bottom: 26px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--tuw-text-tertiary, #9CA3AF);
+  min-width: 38px;
   text-align: right;
+  user-select: none;
 }
 
 .home-chartPlotArea {
@@ -3751,7 +3776,7 @@ a {
   top: 0;
   left: 0;
   right: 0;
-  bottom: 24px;
+  bottom: 26px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -3761,84 +3786,157 @@ a {
 .home-gridLine {
   width: 100%;
   height: 1px;
-  border-bottom: 1px dashed #E5E9E9;
+  border-bottom: 1px dashed var(--tuw-border-subtle, #EEF0F2);
+}
+
+.home-gridLine:last-child {
+  border-bottom: 1px solid var(--tuw-border-subtle, #E5E7EB);
 }
 
 .home-barsArea {
   flex: 1;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-around;
-  padding: 0 10px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  width: 100%;
+  height: 100%;
+  padding: 0 4px;
   z-index: 2;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .home-barGroup {
   display: flex;
   align-items: flex-end;
-  gap: 8px;
+  justify-content: center;
+  gap: 4px;
   height: 100%;
   position: relative;
   cursor: pointer;
+  padding: 0 2px 2px 2px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.home-barGroup:hover {
+  background-color: rgba(117, 57, 255, 0.04);
 }
 
 .home-barColumn {
-  width: 28px;
-  border-radius: 6px 6px 0 0;
-  transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+  width: clamp(8px, 1.4vw, 12px);
+  border-radius: 6px 6px 2px 2px;
+  transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s ease, box-shadow 0.2s ease;
   position: relative;
 }
 
 .home-barColumnLastWeek {
-  background-color: #C6EAA0;
+  background-color: #E6DFF6;
+  border: 1px solid rgba(117, 57, 255, 0.12);
 }
 
 .home-barColumnThisWeek {
-  background-color: #115D5D;
+  background: linear-gradient(180deg, #7539FF 0%, #5E26E6 100%);
+  box-shadow: 0 2px 6px rgba(117, 57, 255, 0.18);
 }
 
-.home-barGroup:hover .home-barColumn {
-  opacity: 0.85;
+.home-barGroup:hover .home-barColumnThisWeek {
+  background: linear-gradient(180deg, #874FFF 0%, #7539FF 100%);
+  box-shadow: 0 4px 12px rgba(117, 57, 255, 0.35);
+  transform: translateY(-2px);
+}
+
+.home-barGroup:hover .home-barColumnLastWeek {
+  background-color: #D6C8F2;
+  transform: translateY(-2px);
 }
 
 .home-barTooltip {
   position: absolute;
-  bottom: 102%;
+  bottom: calc(100% + 6px);
   left: 50%;
-  transform: translateX(-50%);
-  background-color: #242424;
+  transform: translateX(-50%) translateY(4px);
+  background-color: #1A1A1A;
   color: #FFFFFF;
-  padding: 6px 10px;
+  padding: 8px 12px;
   border-radius: 8px;
   font-size: 11px;
   white-space: nowrap;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.2s ease, transform 0.2s ease;
-  z-index: 10;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 20;
+  box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 130px;
 }
 
 .home-barGroup:hover .home-barTooltip {
   opacity: 1;
-  transform: translateX(-50%) translateY(-4px);
+  transform: translateX(-50%) translateY(0);
+}
+
+.home-tooltipDay {
+  font-weight: 700;
+  font-size: 12px;
+  color: #FFFFFF;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  padding-bottom: 3px;
+  margin-bottom: 2px;
+}
+
+.home-tooltipRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.home-tooltipDotThisWeek {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #7539FF;
+  flex-shrink: 0;
+}
+
+.home-tooltipDotLastWeek {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #D6C8F2;
+  flex-shrink: 0;
+}
+
+.home-tooltipLabel {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.home-tooltipRow strong {
+  margin-left: auto;
+  color: #FFFFFF;
+  font-weight: 600;
 }
 
 .home-xAxisLabels {
   height: 24px;
-  display: flex;
-  justify-content: space-around;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
   align-items: center;
-  padding: 0 10px;
+  width: 100%;
+  padding: 0 4px;
   font-size: 12px;
-  font-weight: 400;
-  color: #6C6C6C;
+  font-weight: 500;
+  color: var(--tuw-text-secondary, #7E8793);
 }
 
 .home-xAxisDay {
   text-align: center;
-  width: 64px;
+  transition: all 0.18s ease;
+  user-select: none;
 }
 
 /* --------------------------------------------------------------------------
