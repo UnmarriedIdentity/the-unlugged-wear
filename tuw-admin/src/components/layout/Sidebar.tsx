@@ -23,7 +23,6 @@ import {
   FileText,
   ShieldCheck,
   CreditCard,
-  Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
@@ -240,17 +239,6 @@ export default function Sidebar({
                     <FileText size={18} />
                   </span>
                   {!isCollapsed && <span className="navLabel">Content CMS</span>}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/design-system"
-                  className={cn('navItem', getIsActive('/design-system') && 'navItemActive')}
-                >
-                  <span className="navIcon">
-                    <Sparkles size={18} />
-                  </span>
-                  {!isCollapsed && <span className="navLabel">Design System</span>}
                 </Link>
               </li>
             </ul>
