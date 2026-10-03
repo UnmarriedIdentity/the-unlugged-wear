@@ -25,8 +25,10 @@ import {
   Palette,
   FileText,
   ShieldCheck,
+  ArrowUpRight,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
+import { useAdminState } from '@/mocks/state';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -40,6 +42,32 @@ export default function Sidebar({
   mobileMenuOpen = false,
 }: SidebarProps) {
   const pathname = usePathname();
+  const { orders, resetDemoData, showToast } = useAdminState();
+  const [isResetting, setIsResetting] = useState(false);
+
+  // Compute live storefront stats from demo orders
+  const todayRevenue = orders
+    .filter((o) => o.paymentStatus === 'paid')
+    .reduce((sum, o) => sum + (o.paidAmount || 0), 0);
+  const formattedRevenue = `₹${(todayRevenue || 39190).toLocaleString('en-IN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+
+  const handleResetDemo = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsResetting(true);
+    resetDemoData();
+    showToast({
+      type: 'info',
+      title: 'Demo State Reset',
+      description: 'Store fixtures and demo metrics restored to baseline.',
+    });
+    setTimeout(() => {
+      setIsResetting(false);
+    }, 700);
+  };
 
   // Collapsible state for each section (all expanded by default)
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
@@ -501,6 +529,112 @@ export default function Sidebar({
             </Link>
           </li>
         </ul>
+
+        {/* ================================================================
+            CREATIVE THING 1: STOREFRONT LIVE & ATELIER PULSE CARD
+            ================================================================ */}
+        {!isCollapsed ? (
+          <div className="sidebarAtelierCard">
+            <div className="atelierCardTop">
+              <div className="atelierBadge">
+                <span className="atelierPulseBeacon">
+                  <span className="atelierPulsePing" />
+                  <span className="atelierPulseDot" />
+                </span>
+                <span className="atelierBadgeText">Storefront Live</span>
+              </div>
+              <span className="atelierShoppersBadge">2 online</span>
+            </div>
+
+            <div className="atelierCardBody">
+              <div className="atelierMetricRow">
+                <div className="atelierMetricItem">
+                  <span className="atelierMetricLabel">Today&apos;s Revenue</span>
+                  <span className="atelierMetricValue">{formattedRevenue}</span>
+                </div>
+                <div className="atelierMetricItem atelierMetricRight">
+                  <span className="atelierMetricLabel">Active Carts</span>
+                  <span className="atelierMetricValue">4 items</span>
+                </div>
+              </div>
+            </div>
+
+            <a
+              href="http://localhost:3000"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="atelierCtaBtn"
+              title="Launch customer storefront in a new tab"
+            >
+              <span>View Storefront</span>
+              <ArrowUpRight size={13} className="atelierCtaArrow" />
+            </a>
+          </div>
+        ) : (
+          <a
+            href="http://localhost:3000"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="atelierCollapsedBtn"
+            title="Storefront Live: 2 shoppers online (Click to view)"
+          >
+            <span className="atelierPulseBeacon">
+              <span className="atelierPulsePing" />
+              <span className="atelierPulseDot" />
+            </span>
+            <ArrowUpRight size={14} />
+          </a>
+        )}
+
+        {/* ================================================================
+            CREATIVE THING 2: STAFF IDENTITY & DEMO SANDBOX CONTROLS CARD
+            ================================================================ */}
+        {!isCollapsed ? (
+          <div className="sidebarStaffCard">
+            <div className="staffProfileRow">
+              <div className="staffAvatarWrap">
+                <div className="staffAvatar">UK</div>
+                <span className="staffStatusDot" title="Active now" />
+              </div>
+              <div className="staffMeta">
+                <div className="staffNameRow">
+                  <span className="staffName">Urvil Kargathala</span>
+                </div>
+                <div className="staffRoleRow">
+                  <span className="staffRole">Store Owner</span>
+                  <span className="staffSandboxTag">Sandbox</span>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleResetDemo}
+              className="resetDemoBtn"
+              title="Reset all orders, inventory, and activity fixtures to baseline"
+            >
+              <RotateCcw
+                size={12}
+                className={cn(isResetting && 'resetSpinning')}
+              />
+              <span>{isResetting ? 'Restoring Baseline...' : 'Reset Demo State'}</span>
+            </button>
+          </div>
+        ) : (
+          <div className="staffCollapsedWrap">
+            <button
+              type="button"
+              onClick={handleResetDemo}
+              className="staffCollapsedBtn"
+              title="Urvil Kargathala (Store Owner) — Click to reset demo state"
+            >
+              <div className="staffAvatarWrap">
+                <div className="staffAvatar">UK</div>
+                <span className="staffStatusDot" />
+              </div>
+            </button>
+          </div>
+        )}
       </div>
     </aside>
   );
