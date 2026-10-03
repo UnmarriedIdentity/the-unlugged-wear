@@ -3,7 +3,7 @@
 export const site = {
   name: "TUW Admin",
   nav: [
-    { href: "/", label: "Overview" },
+    { href: "/", label: "Dashboard" },
     { href: "/products", label: "Products" },
     { href: "/orders", label: "Orders" },
     { href: "/customers", label: "Customers" },

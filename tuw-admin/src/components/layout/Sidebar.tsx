@@ -51,9 +51,8 @@ export default function Sidebar({
     <aside
       className={cn('sidebar', isCollapsed && 'sidebarCollapsed', mobileMenuOpen && 'sidebarMobileOpen')}
     >
-      <div>
-        {/* Brand Header */}
-        <div className="sidebarHeader">
+      {/* Brand Header */}
+      <div className="sidebarHeader">
           <Link href="/" className="brandLink">
             <div className="logoIconWrapper">
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -94,7 +93,7 @@ export default function Sidebar({
                   <span className="navIcon">
                     <HomeIcon size={18} />
                   </span>
-                  {!isCollapsed && <span className="navLabel">Overview</span>}
+                  {!isCollapsed && <span className="navLabel">Dashboard</span>}
                 </Link>
               </li>
               <li>
@@ -265,6 +264,7 @@ export default function Sidebar({
                 <Link
                   href="/team"
                   className={cn('navItem', getIsActive('/team') && 'navItemActive')}
+                  title={isCollapsed ? 'Team' : undefined}
                 >
                   <span className="navIcon">
                     <Users size={18} />
@@ -276,6 +276,7 @@ export default function Sidebar({
                 <Link
                   href="/audit-log"
                   className={cn('navItem', getIsActive('/audit-log') && 'navItemActive')}
+                  title={isCollapsed ? 'Audit Log' : undefined}
                 >
                   <span className="navIcon">
                     <ShieldCheck size={18} />
@@ -283,79 +284,51 @@ export default function Sidebar({
                   {!isCollapsed && <span className="navLabel">Audit Log</span>}
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/settings"
-                  className={cn('navItem', getIsActive('/settings') && 'navItemActive')}
-                >
-                  <span className="navIcon">
-                    <Settings size={18} />
-                  </span>
-                  {!isCollapsed && <span className="navLabel">Settings</span>}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/support"
-                  className={cn('navItem', (getIsActive('/support') || getIsActive('/help')) && 'navItemActive')}
-                >
-                  <span className="navIcon">
-                    <Headphones size={18} />
-                  </span>
-                  {!isCollapsed && <span className="navLabel">Help & Support</span>}
-                </Link>
-              </li>
-              <li>
-                <Link href="/login" className="navItem logOutItem">
-                  <span className="navIcon">
-                    <LogOut size={18} />
-                  </span>
-                  {!isCollapsed && <span className="navLabel">Log out</span>}
-                </Link>
-              </li>
             </ul>
           </div>
         </div>
-      </div>
 
-      {/* Become Pro Promo Card */}
-      {!isCollapsed && (
-        <div className="becomeProCard" style={{ marginTop: 24 }}>
-          <div className="becomeProWaveBg">
-            <svg className="waveSvg" viewBox="0 0 200 220" fill="none" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="layoutWaveGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#1E1338" stopOpacity="0.9" />
-                  <stop offset="50%" stopColor="#371B70" stopOpacity="0.6" />
-                  <stop offset="100%" stopColor="#7539FF" stopOpacity="0.2" />
-                </linearGradient>
-                <linearGradient id="layoutWaveGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#120A24" stopOpacity="0.95" />
-                  <stop offset="60%" stopColor="#6025DB" stopOpacity="0.4" />
-                  <stop offset="100%" stopColor="#CFCBFF" stopOpacity="0.1" />
-                </linearGradient>
-              </defs>
-              <path
-                d="M-20 180 C30 135, 70 205, 130 155 C170 120, 185 180, 220 145 L220 230 L-20 230 Z"
-                fill="url(#layoutWaveGrad1)"
-              />
-              <path
-                d="M-20 150 C40 95, 95 185, 140 115 C180 70, 205 140, 230 100 L230 230 L-20 230 Z"
-                fill="url(#layoutWaveGrad2)"
-              />
-            </svg>
-          </div>
-          <div className="becomeProContent">
-            <h3 className="becomeProTitle">TUW Enterprise</h3>
-            <p className="becomeProDesc">
-              Full inventory automation, multi-warehouse sync, and SLA monitoring
-            </p>
-          </div>
-          <button type="button" className="becomeProBtn">
-            View specifications
-          </button>
+        {/* Pinned Bottom Footer - Stays visible on all viewports */}
+        <div className="sidebarFooter">
+          <ul className="navList">
+            <li>
+              <Link
+                href="/settings"
+                className={cn('navItem', getIsActive('/settings') && 'navItemActive')}
+                title={isCollapsed ? 'Settings' : undefined}
+              >
+                <span className="navIcon">
+                  <Settings size={18} />
+                </span>
+                {!isCollapsed && <span className="navLabel">Settings</span>}
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/support"
+                className={cn('navItem', (getIsActive('/support') || getIsActive('/help')) && 'navItemActive')}
+                title={isCollapsed ? 'Help & Support' : undefined}
+              >
+                <span className="navIcon">
+                  <Headphones size={18} />
+                </span>
+                {!isCollapsed && <span className="navLabel">Help & Support</span>}
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/login"
+                className="navItem logOutItem"
+                title={isCollapsed ? 'Log out' : undefined}
+              >
+                <span className="navIcon">
+                  <LogOut size={18} />
+                </span>
+                {!isCollapsed && <span className="navLabel">Log out</span>}
+              </Link>
+            </li>
+          </ul>
         </div>
-      )}
     </aside>
   );
 }

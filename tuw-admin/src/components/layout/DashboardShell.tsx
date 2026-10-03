@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
+import { cn } from '@/lib/cn';
 
 interface DashboardShellProps {
   children: React.ReactNode;
@@ -12,56 +13,30 @@ interface DashboardShellProps {
 
 export default function DashboardShell({
   children,
-  pageTitle = 'Home',
+  pageTitle = 'Dashboard',
 }: DashboardShellProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        width: '100%',
-        minHeight: '100vh',
-        backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)',
-        color: 'var(--tuw-text-primary, #262626)',
-        fontFamily: 'var(--font-main)',
-        overflowX: 'hidden',
-        position: 'relative',
-      }}
-    >
+    <div className="dashboardLayoutRoot">
       {/* Mobile Backdrop */}
       {mobileMenuOpen && (
         <div
           onClick={() => setMobileMenuOpen(false)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.4)',
-            zIndex: 95,
-            backdropFilter: 'blur(2px)',
-          }}
+          className="dashboardMobileBackdrop"
         />
       )}
 
-      {/* Sidebar Navigation */}
+      {/* Sidebar Navigation - Fixed, All-Time Visible */}
       <Sidebar
         isCollapsed={isCollapsed}
         onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
         mobileMenuOpen={mobileMenuOpen}
       />
 
-      {/* Main Container */}
-      <div
-        style={{
-          flex: 1,
-          minWidth: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)',
-          overflowX: 'hidden',
-        }}
-      >
+      {/* Main Container - Offsets cleanly for fixed sidebar */}
+      <div className={cn('dashboardMainWrapper', isCollapsed && 'dashboardMainWrapperCollapsed')}>
         <Header
           pageTitle={pageTitle}
           mobileMenuOpen={mobileMenuOpen}
@@ -72,16 +47,7 @@ export default function DashboardShell({
         <main
           id="main-content"
           tabIndex={-1}
-          style={{
-            padding: '30px',
-            maxWidth: '1360px',
-            width: '100%',
-            margin: '0 auto',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '20px',
-            boxSizing: 'border-box',
-          }}
+          className="dashboardMainContent"
         >
           {children}
         </main>

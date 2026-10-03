@@ -14,6 +14,7 @@ import {
   Drawer,
   Textarea,
   EmptyState,
+  Pagination,
 } from '@/components/ui';
 import {
   FileText,
@@ -107,6 +108,8 @@ export default function PagesManagementPage() {
   const [pages, setPages] = useState<StaticPage[]>(initialPages);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'published' | 'draft'>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
 
   // Modals & Drawers
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -121,6 +124,10 @@ export default function PagesManagementPage() {
   const [newStatus, setNewStatus] = useState<'published' | 'draft'>('published');
   const [newContent, setNewContent] = useState('');
 
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter]);
+
   const filteredPages = pages.filter((p) => {
     const matchesSearch =
       p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -128,6 +135,9 @@ export default function PagesManagementPage() {
     const matchesStatus = statusFilter === 'all' || p.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filteredPages.length / pageSize));
+  const paginatedPages = filteredPages.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleCreatePage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -357,7 +367,7 @@ export default function PagesManagementPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredPages.map((page) => (
+                {paginatedPages.map((page) => (
                   <tr
                     key={page.id}
                     style={{
@@ -420,6 +430,21 @@ export default function PagesManagementPage() {
               </tbody>
             </table>
           </div>
+        )}
+
+        {filteredPages.length > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            totalItems={filteredPages.length}
+            pageSize={pageSize}
+            pageSizeOptions={[5, 10, 20]}
+            onPageSizeChange={(newSize) => {
+              setPageSize(newSize);
+              setCurrentPage(1);
+            }}
+          />
         )}
       </ContentCard>
 

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Drawer } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination } from '@/components/ui';
 import { Undo2, Search, Filter, CheckCircle2, XCircle, ArrowRight, RotateCcw } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { ReturnItem } from '@/mocks/fixtures';
@@ -14,6 +14,10 @@ export default function ReturnsPage() {
   const [stageFilter, setStageFilter] = useState<'all' | ReturnItem['stage']>('all');
   const [selectedReturn, setSelectedReturn] = useState<ReturnItem | null>(null);
 
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
+
   const filteredReturns = returns.filter((item) => {
     const matchesSearch =
       item.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -23,6 +27,13 @@ export default function ReturnsPage() {
     const matchesStage = stageFilter === 'all' || item.stage === stageFilter;
     return matchesSearch && matchesStage;
   });
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, stageFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredReturns.length / pageSize));
+  const paginatedReturns = filteredReturns.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleApprove = (id: string) => {
     if (!canPerformAction('orders')) return;
@@ -109,7 +120,7 @@ export default function ReturnsPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredReturns.map((item) => (
+              {paginatedReturns.map((item) => (
                 <tr
                   key={item.id}
                   onClick={() => setSelectedReturn(item)}
@@ -146,6 +157,19 @@ export default function ReturnsPage() {
             </tbody>
           </table>
         </div>
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalItems={filteredReturns.length}
+          pageSize={pageSize}
+          pageSizeOptions={[5, 10, 20]}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize);
+            setCurrentPage(1);
+          }}
+        />
       </ContentCard>
 
       {/* Return Review Drawer */}

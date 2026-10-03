@@ -18,7 +18,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, Button, Badge } from '@/components/ui';
+import { StatCard, ContentCard, Button, Badge, Pagination } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
@@ -26,6 +26,8 @@ const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + 
 export default function AnalyticsView() {
   const { orders, products, customers, refunds } = useAdminState();
   const [timeRange, setTimeRange] = useState<'30d' | '7d'>('30d');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
 
   // Compute live metrics from state
   const paidOrders = orders.filter((o) => o.paymentStatus === 'paid');
@@ -33,6 +35,9 @@ export default function AnalyticsView() {
   const totalOrdersCount = orders.length;
   const aov = paidOrders.length > 0 ? totalRevenue / paidOrders.length : 0;
   const totalRefundsSum = refunds.reduce((sum, r) => sum + r.amount, 0);
+
+  const totalPages = Math.max(1, Math.ceil(products.length / pageSize));
+  const paginatedProducts = products.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleExportCSV = () => {
     const headers = ['Report Metric', 'Value', 'Time Scope'];
@@ -213,7 +218,7 @@ export default function AnalyticsView() {
               </tr>
             </thead>
             <tbody>
-              {products.slice(0, 6).map((p) => (
+              {paginatedProducts.map((p) => (
                 <tr key={p.id} style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
                   <td style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
                     {p.name}
@@ -235,6 +240,19 @@ export default function AnalyticsView() {
             </tbody>
           </table>
         </div>
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalItems={products.length}
+          pageSize={pageSize}
+          pageSizeOptions={[5, 10, 20]}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize);
+            setCurrentPage(1);
+          }}
+        />
       </ContentCard>
     </DashboardShell>
   );

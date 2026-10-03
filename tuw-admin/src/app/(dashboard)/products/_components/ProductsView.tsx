@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer } from '@/components/ui';
+import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer, Pagination } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 
@@ -15,6 +15,8 @@ export default function ProductsView() {
   const [selectedCat, setSelectedCat] = useState<string>('All');
   const [publicationFilter, setPublicationFilter] = useState<'all' | 'published' | 'draft' | 'archived'>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
 
   // Modals & Drawers
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -119,7 +121,10 @@ export default function ProductsView() {
     setEditingProduct(null);
   };
 
-  // Filtered Products
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedCat, publicationFilter]);
+
   const filteredProducts = products.filter((p) => {
     const matchesSearch =
       p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -129,6 +134,9 @@ export default function ProductsView() {
     const matchesPub = publicationFilter === 'all' || p.publicationStatus === publicationFilter;
     return matchesSearch && matchesCat && matchesPub;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize));
+  const paginatedProducts = filteredProducts.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const lowStockCount = products.filter((p) => p.stock > 0 && p.stock <= 10).length;
   const outOfStockCount = products.filter((p) => p.stock === 0).length;
@@ -248,7 +256,7 @@ export default function ProductsView() {
               No products found matching the selected filters.
             </div>
           ) : (
-            filteredProducts.map((p) => (
+            paginatedProducts.map((p) => (
               <div key={p.id} className={styles.productCatalogCard}>
                 <div
                   className={styles.productThumbFrame}
@@ -320,6 +328,21 @@ export default function ProductsView() {
             ))
           )}
         </div>
+
+        {filteredProducts.length > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            totalItems={filteredProducts.length}
+            pageSize={pageSize}
+            pageSizeOptions={[6, 12, 24]}
+            onPageSizeChange={(newSize) => {
+              setPageSize(newSize);
+              setCurrentPage(1);
+            }}
+          />
+        )}
       </ContentCard>
 
       {/* Add New Product Modal */}

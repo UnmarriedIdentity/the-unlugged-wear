@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination } from '@/components/ui';
 import { RotateCcw, Search, Filter, Download, ArrowUpRight, CheckCircle2, Clock, AlertTriangle, Eye } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { RefundItem } from '@/mocks/fixtures';
@@ -11,6 +11,8 @@ export default function RefundsPage() {
   const { refunds, orders, issueRefund, canPerformAction } = useAdminState();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | RefundItem['status']>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
 
   // Modals & Drawers
   const [isIssueOpen, setIsIssueOpen] = useState(false);
@@ -26,6 +28,10 @@ export default function RefundsPage() {
   const selectedOrder = orders.find((o) => o.id === selectedOrderId);
   const availableBalance = selectedOrder ? Math.max(0, selectedOrder.paidAmount - selectedOrder.refundedAmount) : 0;
 
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter]);
+
   const filteredRefunds = refunds.filter((item) => {
     const matchesSearch =
       item.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -34,6 +40,9 @@ export default function RefundsPage() {
     const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filteredRefunds.length / pageSize));
+  const paginatedRefunds = filteredRefunds.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const totalRefundedSum = refunds
     .filter((r) => r.status === 'completed')
@@ -192,7 +201,7 @@ export default function RefundsPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredRefunds.map((refund) => (
+              {paginatedRefunds.map((refund) => (
                 <tr
                   key={refund.id}
                   onClick={() => setSelectedRefund(refund)}
@@ -231,6 +240,19 @@ export default function RefundsPage() {
             </tbody>
           </table>
         </div>
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalItems={filteredRefunds.length}
+          pageSize={pageSize}
+          pageSizeOptions={[5, 10, 20]}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize);
+            setCurrentPage(1);
+          }}
+        />
       </ContentCard>
 
       {/* Validated Refund Dialog */}

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { HelpCircle, MessageSquare, Send, CheckCircle2, Clock, AlertCircle, Sparkles, ChevronRight, User } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Drawer } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { SupportTicket } from '@/mocks/fixtures';
 
@@ -29,8 +29,16 @@ export default function HelpView() {
   const [statusFilter, setStatusFilter] = useState<'all' | SupportTicket['status']>('all');
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
   const [draftReply, setDraftReply] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter]);
 
   const filteredTickets = supportTickets.filter((t) => statusFilter === 'all' || t.status === statusFilter);
+  const totalPages = Math.max(1, Math.ceil(filteredTickets.length / pageSize));
+  const paginatedTickets = filteredTickets.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const openTicketsCount = supportTickets.filter((t) => t.status === 'open').length;
   const resolvedCount = supportTickets.filter((t) => t.status === 'resolved').length;
@@ -119,7 +127,7 @@ export default function HelpView() {
               </tr>
             </thead>
             <tbody>
-              {filteredTickets.map((ticket) => (
+              {paginatedTickets.map((ticket) => (
                 <tr
                   key={ticket.id}
                   onClick={() => setSelectedTicket(ticket)}
@@ -155,6 +163,19 @@ export default function HelpView() {
             </tbody>
           </table>
         </div>
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalItems={filteredTickets.length}
+          pageSize={pageSize}
+          pageSizeOptions={[5, 10, 20]}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize);
+            setCurrentPage(1);
+          }}
+        />
       </ContentCard>
 
       {/* Ticket Detail & Response Drawer */}

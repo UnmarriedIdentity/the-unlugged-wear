@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination } from '@/components/ui';
 import { BookOpen, Plus, ArrowLeft, Search, Eye, Edit3 } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 
@@ -75,6 +75,8 @@ export default function JournalPage() {
   const { canPerformAction, showToast } = useAdminState();
   const [stories, setStories] = useState<StoryItem[]>(initialStories);
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
 
   // Modals & Drawers
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -88,12 +90,19 @@ export default function JournalPage() {
   const [formExcerpt, setFormExcerpt] = useState('');
   const [formStatus, setFormStatus] = useState<StoryItem['status']>('published');
 
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
   const filteredStories = stories.filter(
     (s) =>
       s.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       s.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
       s.author.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const totalPages = Math.max(1, Math.ceil(filteredStories.length / pageSize));
+  const paginatedStories = filteredStories.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleCreateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -184,7 +193,7 @@ export default function JournalPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredStories.map((story) => (
+              {paginatedStories.map((story) => (
                 <tr
                   key={story.id}
                   onClick={() => setSelectedStory(story)}
@@ -222,6 +231,19 @@ export default function JournalPage() {
             </tbody>
           </table>
         </div>
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalItems={filteredStories.length}
+          pageSize={pageSize}
+          pageSizeOptions={[5, 10, 20]}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize);
+            setCurrentPage(1);
+          }}
+        />
       </ContentCard>
 
       {/* Story Detail Drawer */}

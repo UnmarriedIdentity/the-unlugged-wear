@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Modal } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Modal, Pagination } from '@/components/ui';
 import { PackageCheck, Truck, RotateCcw, AlertTriangle, Printer, CheckCircle2, Clock } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { OrderItem } from '@/mocks/fixtures';
@@ -17,6 +17,17 @@ export default function FulfillmentPage() {
   const printingOrders = orders.filter((o) => o.fulfillmentStatus === 'printing');
   const queuedOrders = orders.filter((o) => o.fulfillmentStatus === 'queued');
   const shippedOrders = orders.filter((o) => o.fulfillmentStatus === 'shipped' || o.fulfillmentStatus === 'delivered');
+
+  // Pagination for printing and queued tables
+  const [printingPage, setPrintingPage] = useState(1);
+  const [printingPageSize, setPrintingPageSize] = useState(5);
+  const totalPrintingPages = Math.max(1, Math.ceil(printingOrders.length / printingPageSize));
+  const paginatedPrintingOrders = printingOrders.slice((printingPage - 1) * printingPageSize, printingPage * printingPageSize);
+
+  const [queuedPage, setQueuedPage] = useState(1);
+  const [queuedPageSize, setQueuedPageSize] = useState(5);
+  const totalQueuedPages = Math.max(1, Math.ceil(queuedOrders.length / queuedPageSize));
+  const paginatedQueuedOrders = queuedOrders.slice((queuedPage - 1) * queuedPageSize, queuedPage * queuedPageSize);
 
   const handleRetry = async (orderId: string) => {
     setRetryingId(orderId);
@@ -165,7 +176,7 @@ export default function FulfillmentPage() {
                 </tr>
               </thead>
               <tbody>
-                {printingOrders.map((order) => (
+                {paginatedPrintingOrders.map((order) => (
                   <tr key={order.id} style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
                     <td style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)' }}>
                       {order.id}
@@ -196,6 +207,21 @@ export default function FulfillmentPage() {
             </table>
           </div>
         )}
+
+        {printingOrders.length > 0 && (
+          <Pagination
+            currentPage={printingPage}
+            totalPages={totalPrintingPages}
+            onPageChange={setPrintingPage}
+            totalItems={printingOrders.length}
+            pageSize={printingPageSize}
+            pageSizeOptions={[5, 10, 20]}
+            onPageSizeChange={(newSize) => {
+              setPrintingPageSize(newSize);
+              setPrintingPage(1);
+            }}
+          />
+        )}
       </ContentCard>
 
       {/* SECTION 3: Queued Orders */}
@@ -223,7 +249,7 @@ export default function FulfillmentPage() {
               </tr>
             </thead>
             <tbody>
-              {queuedOrders.map((order) => (
+              {paginatedQueuedOrders.map((order) => (
                 <tr key={order.id} style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
                   <td style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)' }}>
                     {order.id}
@@ -255,6 +281,21 @@ export default function FulfillmentPage() {
             </tbody>
           </table>
         </div>
+
+        {queuedOrders.length > 0 && (
+          <Pagination
+            currentPage={queuedPage}
+            totalPages={totalQueuedPages}
+            onPageChange={setQueuedPage}
+            totalItems={queuedOrders.length}
+            pageSize={queuedPageSize}
+            pageSizeOptions={[5, 10, 20]}
+            onPageSizeChange={(newSize) => {
+              setQueuedPageSize(newSize);
+              setQueuedPage(1);
+            }}
+          />
+        )}
       </ContentCard>
     </DashboardShell>
   );
