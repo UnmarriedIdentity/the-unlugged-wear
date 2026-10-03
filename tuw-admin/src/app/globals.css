@@ -518,7 +518,7 @@ a {
 .sidebar {
   width: 250px;
   min-width: 250px;
-  background-color: var(--tuw-bg-surface, #FFFFFF);
+  background-color: var(--tuw-bg-canvas, #F7F8F9);
   border-right: 1px solid var(--tuw-border-subtle, #E9E9E9);
   display: flex;
   flex-direction: column;
@@ -575,7 +575,7 @@ a {
   justify-content: space-between;
   position: sticky;
   top: 0;
-  background-color: var(--tuw-bg-surface, #FFFFFF);
+  background-color: var(--tuw-bg-canvas, #F7F8F9);
   padding: 0 4px;
   width: 100%;
   box-sizing: border-box;
@@ -672,6 +672,7 @@ a {
   display: flex;
   flex-direction: column;
   gap: 3px;
+  background-color: var(--tuw-bg-canvas, #F7F8F9);
 }
 
 .navGroup {
@@ -713,26 +714,70 @@ a {
   background: transparent;
   width: 100%;
   box-sizing: border-box;
+  border: none;
+  text-align: left;
 }
 
 .navItem:hover {
-  background-color: var(--tuw-bg-selected, #F8F5FF);
+  background-color: rgba(117, 57, 255, 0.06);
   color: var(--tuw-action-primary, #7539FF);
 }
 
 .navItemActive {
-  background: #F8F5FF;
-  color: #7539FF;
+  background: #FFFFFF;
+  color: #111827;
   font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .navItemActive:hover {
-  background: #F8F5FF;
-  color: #7539FF;
+  background: #FFFFFF;
+  color: #111827;
 }
 
 .navItemActive .navIcon {
   color: #7539FF;
+}
+
+/* Expandable Parent Items */
+.navParentBtn,
+.navParentItem {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: #262626;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.navParentBtn:hover,
+.navParentItem:hover {
+  background-color: rgba(117, 57, 255, 0.06);
+  color: var(--tuw-action-primary, #7539FF);
+}
+
+.navParentBtnActive,
+.navParentItemActive {
+  color: #111827;
+}
+
+.navParentLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
 }
 
 .navIcon {
@@ -756,8 +801,142 @@ a {
 .navChevron {
   width: 16px;
   height: 16px;
-  color: var(--tuw-text-secondary, #5D6772);
+  color: #8A94A6;
   margin-left: auto;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.navChevronOpen {
+  transform: rotate(180deg);
+}
+
+/* Branched Navigation Tree Hierarchy */
+.navBranchTree {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 3px;
+  margin-bottom: 6px;
+}
+
+/* Continuous vertical guide line */
+.navBranchTree::before {
+  content: '';
+  position: absolute;
+  left: 21px;
+  top: -6px;
+  bottom: 19px; /* stops exactly at vertical center of last child item */
+  width: 1.5px;
+  background-color: #CBD5E1;
+  border-radius: 1px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Branch child item */
+.navBranchItem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding-left: 36px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Smooth curved branch line connecting vertical stem to this item */
+.navBranchItem::before {
+  content: '';
+  position: absolute;
+  left: 21px;
+  top: -6px;
+  width: 14px;
+  height: calc(50% + 6px);
+  border-left: 1.5px solid #CBD5E1;
+  border-bottom: 1.5px solid #CBD5E1;
+  border-bottom-left-radius: 10px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Branch child link button */
+.navBranchLink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748B;
+  transition: all 0.15s ease;
+  position: relative;
+  box-sizing: border-box;
+  background: transparent;
+}
+
+.navBranchLink:hover {
+  color: #111827;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+/* Active state - crisp floating card pill like 'Overview' in user screenshot */
+.navBranchLinkActive {
+  background-color: #FFFFFF !important;
+  color: #111827 !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+  border: 1px solid rgba(0, 0, 0, 0.04) !important;
+}
+
+.navBranchLinkActive:hover {
+  background-color: #FFFFFF !important;
+  color: #111827 !important;
+}
+
+.navBranchLabel {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Badges */
+.navBadge {
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 2.5px 7.5px;
+  border-radius: 9999px;
+  min-width: 18px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.navBadgeOrange {
+  background-color: #FED7AA;
+  color: #C2410C;
+}
+
+.navBadgeGreen {
+  background-color: #BBF7D0;
+  color: #15803D;
+}
+
+.navBadgePurple {
+  background-color: #F3E8FF;
+  color: #7539FF;
+}
+
+.navBadgeAmber {
+  background-color: #FEF3C7;
+  color: #D97706;
 }
 
 .logOutItem {
@@ -777,11 +956,13 @@ a {
 .sidebarCollapsed .brandName,
 .sidebarCollapsed .groupLabel,
 .sidebarCollapsed .navLabel,
-.sidebarCollapsed .navChevron {
-  display: none;
+.sidebarCollapsed .navChevron,
+.sidebarCollapsed .navBranchTree {
+  display: none !important;
 }
 
-.sidebarCollapsed .navItem {
+.sidebarCollapsed .navItem,
+.sidebarCollapsed .navParentItem {
   justify-content: center;
   padding: 8px;
 }

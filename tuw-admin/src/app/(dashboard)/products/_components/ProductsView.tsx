@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
@@ -18,6 +18,22 @@ export default function ProductsView() {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(6);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const statusParam = params.get('status');
+      if (statusParam === 'draft') {
+        setPublicationFilter('draft');
+      } else if (statusParam === 'published') {
+        setPublicationFilter('published');
+      } else if (statusParam === 'scheduled') {
+        setPublicationFilter('draft');
+      } else if (!statusParam) {
+        setPublicationFilter('all');
+      }
+    }
+  }, []);
 
   // Modals & Drawers
   const [isCreateOpen, setIsCreateOpen] = useState(false);
