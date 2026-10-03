@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination } from '@/components/ui';
 import { Truck, Search, Filter, Download, ExternalLink, Calendar, MapPin, Clock, Plus } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { ShipmentItem } from '@/mocks/fixtures';
@@ -11,6 +11,10 @@ export default function ShipmentsPage() {
   const { shipments, createShipment, orders, canPerformAction } = useAdminState();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | ShipmentItem['status']>('all');
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
 
   // Modals & Drawers
   const [selectedShipment, setSelectedShipment] = useState<ShipmentItem | null>(null);
@@ -33,6 +37,13 @@ export default function ShipmentsPage() {
     const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredShipments.length / pageSize));
+  const paginatedShipments = filteredShipments.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleCreateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -152,7 +163,7 @@ export default function ShipmentsPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredShipments.map((shipment) => (
+              {paginatedShipments.map((shipment) => (
                 <tr
                   key={shipment.trackingId}
                   onClick={() => setSelectedShipment(shipment)}
@@ -202,6 +213,19 @@ export default function ShipmentsPage() {
             </tbody>
           </table>
         </div>
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalItems={filteredShipments.length}
+          pageSize={pageSize}
+          pageSizeOptions={[5, 10, 20]}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize);
+            setCurrentPage(1);
+          }}
+        />
       </ContentCard>
 
       {/* Tracking Preview Drawer */}

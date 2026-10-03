@@ -11,6 +11,7 @@ import {
   Input,
   Drawer,
   Modal,
+  Pagination,
 } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { OrderItem, PaymentStatus, FulfillmentStatus } from '@/mocks/fixtures';
@@ -24,6 +25,10 @@ export default function OrdersView() {
   const [searchTerm, setSearchTerm] = useState('');
   const [paymentFilter, setPaymentFilter] = useState<'all' | PaymentStatus>('all');
   const [fulfillmentFilter, setFulfillmentFilter] = useState<'all' | FulfillmentStatus>('all');
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
 
   // Drawer & Modal State
   const [selectedOrder, setSelectedOrder] = useState<OrderItem | null>(null);
@@ -50,6 +55,14 @@ export default function OrdersView() {
     const matchesFulfillment = fulfillmentFilter === 'all' || o.fulfillmentStatus === fulfillmentFilter;
     return matchesSearch && matchesPayment && matchesFulfillment;
   });
+
+  // Reset page when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, paymentFilter, fulfillmentFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredOrders.length / pageSize));
+  const paginatedOrders = filteredOrders.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   // Calculate Metrics from Live Dataset
   const totalRevenue = orders
@@ -312,7 +325,7 @@ export default function OrdersView() {
                   </td>
                 </tr>
               ) : (
-                filteredOrders.map((order) => (
+                paginatedOrders.map((order) => (
                   <tr
                     key={order.id}
                     onClick={() => setSelectedOrder(order)}
@@ -377,6 +390,19 @@ export default function OrdersView() {
             </tbody>
           </table>
         </div>
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalItems={filteredOrders.length}
+          pageSize={pageSize}
+          pageSizeOptions={[5, 10, 20]}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize);
+            setCurrentPage(1);
+          }}
+        />
       </ContentCard>
 
       {/* Order Detail Drawer */}

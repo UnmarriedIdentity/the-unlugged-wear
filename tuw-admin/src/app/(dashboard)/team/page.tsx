@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Modal } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Modal, Pagination } from '@/components/ui';
 import { UserPlus, Search, Filter, ShieldCheck, Mail, Trash2, AlertTriangle } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { TeamMember, StaffRole } from '@/mocks/fixtures';
@@ -10,6 +10,8 @@ import { TeamMember, StaffRole } from '@/mocks/fixtures';
 export default function TeamPage() {
   const { team, inviteTeamMember, removeTeamMember, canPerformAction } = useAdminState();
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
 
   // Modals
   const [isInviteOpen, setIsInviteOpen] = useState(false);
@@ -20,12 +22,19 @@ export default function TeamPage() {
   const [formEmail, setFormEmail] = useState('');
   const [formRole, setFormRole] = useState<StaffRole>('Operations');
 
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
   const filteredMembers = team.filter(
     (member) =>
       member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       member.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       member.role.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const totalPages = Math.max(1, Math.ceil(filteredMembers.length / pageSize));
+  const paginatedMembers = filteredMembers.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleInviteSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,7 +111,7 @@ export default function TeamPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredMembers.map((member) => (
+              {paginatedMembers.map((member) => (
                 <tr key={member.id} style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
                   <td style={{ padding: '14px 16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -158,6 +167,19 @@ export default function TeamPage() {
             </tbody>
           </table>
         </div>
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalItems={filteredMembers.length}
+          pageSize={pageSize}
+          pageSizeOptions={[5, 10, 20]}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize);
+            setCurrentPage(1);
+          }}
+        />
       </ContentCard>
 
       {/* Invite Member Modal */}

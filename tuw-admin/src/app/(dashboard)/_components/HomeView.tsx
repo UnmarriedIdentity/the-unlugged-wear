@@ -83,7 +83,7 @@ export default function HomeView() {
   const liveAOV = livePaidOrders.length > 0 ? liveTotalRevenue / livePaidOrders.length : 0;
 
   return (
-    <DashboardShell pageTitle="Home" activeNav="home">
+    <DashboardShell pageTitle="Dashboard" activeNav="home">
       {/* Operational Issue Banner if any */}
       {failedFulfillmentCount > 0 && (
         <div

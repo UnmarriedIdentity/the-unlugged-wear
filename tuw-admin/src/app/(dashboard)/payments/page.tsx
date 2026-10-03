@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Drawer } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination } from '@/components/ui';
 import { CreditCard, Download, Search, Filter, ShieldCheck, CheckCircle2, ArrowUpRight } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { OrderItem } from '@/mocks/fixtures';
@@ -11,6 +11,8 @@ export default function PaymentsPage() {
   const { orders } = useAdminState();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTx, setSelectedTx] = useState<OrderItem | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
 
   // Derived metrics
   const paidOrders = orders.filter((o) => o.paidAmount > 0);
@@ -19,11 +21,18 @@ export default function PaymentsPage() {
   const totalPending = pendingOrders.reduce((sum, o) => sum + o.total, 0);
   const totalRefunded = orders.reduce((sum, o) => sum + o.refundedAmount, 0);
 
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
   const filteredOrders = orders.filter((o) =>
     o.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
     o.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     o.paymentMethod.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const totalPages = Math.max(1, Math.ceil(filteredOrders.length / pageSize));
+  const paginatedOrders = filteredOrders.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleExportCSV = () => {
     const headers = ['Order Ref', 'Customer', 'Method', 'Paid Amount', 'Refunded Amount', 'Payment Status', 'Date'];
@@ -119,7 +128,7 @@ export default function PaymentsPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredOrders.map((order) => (
+              {paginatedOrders.map((order) => (
                 <tr
                   key={order.id}
                   onClick={() => setSelectedTx(order)}
@@ -153,6 +162,19 @@ export default function PaymentsPage() {
             </tbody>
           </table>
         </div>
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalItems={filteredOrders.length}
+          pageSize={pageSize}
+          pageSizeOptions={[5, 10, 20]}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize);
+            setCurrentPage(1);
+          }}
+        />
       </ContentCard>
 
       {/* Transaction Details Drawer */}

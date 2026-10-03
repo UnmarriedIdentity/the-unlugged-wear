@@ -11,7 +11,7 @@ const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + 
 type SettingsTab = 'general' | 'brand' | 'payments' | 'fulfillment' | 'shipping' | 'taxes' | 'notifications';
 
 export default function SettingsView() {
-  const { settings, updateSettings, canPerformAction } = useAdminState();
+  const { settings, updateSettings, canPerformAction, resetDemoData } = useAdminState();
   const [activeTab, setActiveTab] = useState<SettingsTab>('general');
 
   // Form states initialized from mock state
@@ -186,6 +186,29 @@ export default function SettingsView() {
                   <option value="INR (₹)">INR (₹) — Indian Rupee</option>
                 </select>
               </div>
+            </div>
+
+            <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid var(--tuw-border-subtle, #E2E4E6)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+              <div>
+                <h4 style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', margin: 0 }}>
+                  Demo Sandbox Environment
+                </h4>
+                <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: '4px 0 0' }}>
+                  Reset all operational mutations, mock orders, and staff changes back to default baseline fixtures.
+                </p>
+              </div>
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={<RefreshCw size={14} />}
+                onClick={() => {
+                  if (window.confirm('Reset all demo data back to baseline fixtures?')) {
+                    resetDemoData();
+                  }
+                }}
+              >
+                Reset Demo State
+              </Button>
             </div>
           </ContentCard>
         )}

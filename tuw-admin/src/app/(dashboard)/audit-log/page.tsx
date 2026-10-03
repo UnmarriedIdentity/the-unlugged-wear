@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Pagination } from '@/components/ui';
 import { ShieldCheck, Search, Filter, Download, Terminal, Clock, AlertCircle } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { AuditEntry } from '@/mocks/fixtures';
@@ -11,6 +11,12 @@ export default function AuditLogPage() {
   const { auditLogs } = useAdminState();
   const [searchTerm, setSearchTerm] = useState('');
   const [severityFilter, setSeverityFilter] = useState<'all' | AuditEntry['severity']>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, severityFilter]);
 
   const filteredLogs = auditLogs.filter((log) => {
     const matchesSearch =
@@ -21,6 +27,9 @@ export default function AuditLogPage() {
     const matchesSeverity = severityFilter === 'all' || log.severity === severityFilter;
     return matchesSearch && matchesSeverity;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filteredLogs.length / pageSize));
+  const paginatedLogs = filteredLogs.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleExportCSV = () => {
     const headers = ['Entry ID', 'Actor', 'Action', 'Resource', 'IP Address', 'Timestamp', 'Severity'];
@@ -115,7 +124,7 @@ export default function AuditLogPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredLogs.map((log) => (
+              {paginatedLogs.map((log) => (
                 <tr key={log.id} style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
                   <td style={{ padding: '14px 16px', fontSize: 13, fontFamily: 'monospace', fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)' }}>
                     {log.id}
@@ -142,6 +151,19 @@ export default function AuditLogPage() {
             </tbody>
           </table>
         </div>
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalItems={filteredLogs.length}
+          pageSize={pageSize}
+          pageSizeOptions={[5, 10, 20]}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize);
+            setCurrentPage(1);
+          }}
+        />
       </ContentCard>
     </DashboardShell>
   );

@@ -4,6 +4,7 @@ import type { NextConfig } from 'next';
 // Note: '/' -> '/login' is also handled by src/app/page.tsx (verbatim old port).
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  devIndicators: false,
   async redirects() {
     return [
       {

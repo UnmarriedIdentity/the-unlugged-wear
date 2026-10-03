@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination } from '@/components/ui';
 import { Palette, Plus, Search, Filter, Image as ImageIcon, UploadCloud, AlertCircle } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { DesignAsset } from '@/mocks/fixtures';
@@ -10,6 +10,8 @@ import { DesignAsset } from '@/mocks/fixtures';
 export default function DesignsPage() {
   const { designs, uploadDesignAsset, canPerformAction } = useAdminState();
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
 
   // Modals & Drawers
   const [isUploadOpen, setIsUploadOpen] = useState(false);
@@ -25,12 +27,19 @@ export default function DesignsPage() {
   const [fileName, setFileName] = useState('');
   const [fileError, setFileError] = useState<string | null>(null);
 
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
   const filtered = designs.filter(
     (d) =>
       d.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       d.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
       d.designer.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const paginated = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleFileSimulate = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -131,7 +140,7 @@ export default function DesignsPage() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((design) => (
+              {paginated.map((design) => (
                 <tr
                   key={design.id}
                   onClick={() => setSelectedAsset(design)}
@@ -167,6 +176,19 @@ export default function DesignsPage() {
             </tbody>
           </table>
         </div>
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalItems={filtered.length}
+          pageSize={pageSize}
+          pageSizeOptions={[5, 10, 20]}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize);
+            setCurrentPage(1);
+          }}
+        />
       </ContentCard>
 
       {/* Asset Spec Drawer */}

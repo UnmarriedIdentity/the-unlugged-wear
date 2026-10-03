@@ -81,6 +81,16 @@ interface AdminStateContextType {
   updateReturnStatus: (returnId: string, stage: ReturnItem['stage']) => boolean;
 
   addCustomerNote: (customerId: string, note: string) => boolean;
+  createCustomer: (customer: {
+    name: string;
+    email: string;
+    phone: string;
+    city: string;
+    country: string;
+    address: string;
+    tier?: 'VIP Customer' | 'Active' | 'New';
+    notes?: string[];
+  }) => boolean;
   sendSupportReply: (ticketId: string, replyText: string) => boolean;
 
   createCollection: (col: Omit<CollectionItem, 'id' | 'updatedAt'>) => boolean;
@@ -533,6 +543,43 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     return true;
   };
 
+  const createCustomer = (c: {
+    name: string;
+    email: string;
+    phone: string;
+    city: string;
+    country: string;
+    address: string;
+    tier?: 'VIP Customer' | 'Active' | 'New';
+    notes?: string[];
+  }) => {
+    if (!canPerformAction('orders')) return false;
+    const newCustomer: CustomerItem = {
+      id: `CUST-${Math.floor(1000 + Math.random() * 9000)}`,
+      name: c.name,
+      email: c.email,
+      phone: c.phone,
+      totalOrders: 0,
+      totalSpent: 0,
+      tier: c.tier || 'New',
+      address: c.address || 'Indiranagar, 100ft Road',
+      city: c.city,
+      country: c.country,
+      joinedDate: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+      notes: c.notes || [],
+    };
+    const next = [newCustomer, ...customers];
+    setCustomers(next);
+    logAuditAction(`Added new customer profile "${c.name}" (${c.email})`, 'Customers / Directory');
+    persistState({ customers: next });
+    showToast({
+      type: 'success',
+      title: 'Customer Added',
+      description: `${c.name} has been added to customer directory.`,
+    });
+    return true;
+  };
+
   const sendSupportReply = (ticketId: string, replyText: string) => {
     if (!canPerformAction('orders')) return false;
     const next = supportTickets.map((t) => {
@@ -786,6 +833,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         issueRefund,
         updateReturnStatus,
         addCustomerNote,
+        createCustomer,
         sendSupportReply,
         createCollection,
         uploadDesignAsset,

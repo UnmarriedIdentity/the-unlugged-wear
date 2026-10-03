@@ -1,9 +1,23 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Search, CirclePlus, Bell, Menu, X, RotateCcw, ShieldCheck, ChevronDown, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import {
+  Search,
+  Bell,
+  Menu,
+  X,
+  Package,
+  ClipboardList,
+  Users,
+  Settings,
+  Compass,
+  ArrowRight,
+  Truck,
+  RotateCcw,
+  Sparkles,
+} from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
-import { StaffRole } from '@/mocks/fixtures';
 
 interface HeaderProps {
   pageTitle?: string;
@@ -11,30 +25,113 @@ interface HeaderProps {
   onToggleMobileMenu: () => void;
 }
 
+const quickLinks = [
+  { title: 'Dashboard', subtitle: 'Store performance and operational KPIs', href: '/dashboard', icon: <Compass size={16} /> },
+  { title: 'Orders', subtitle: 'Fulfillment queue and sales logs', href: '/orders', icon: <ClipboardList size={16} /> },
+  { title: 'Products', subtitle: 'Catalog, variants, pricing, and stock', href: '/products', icon: <Package size={16} /> },
+  { title: 'Customers', subtitle: 'Accounts, lifetime value, and order history', href: '/customers', icon: <Users size={16} /> },
+  { title: 'Fulfillment', subtitle: 'Production print jobs and partner sync', href: '/fulfillment', icon: <Sparkles size={16} /> },
+  { title: 'Shipments', subtitle: 'Dispatch manifests and courier tracking', href: '/shipments', icon: <Truck size={16} /> },
+  { title: 'Returns & RMA', subtitle: 'Customer return requests and disputes', href: '/returns', icon: <RotateCcw size={16} /> },
+  { title: 'Store Settings', subtitle: 'Store details, currency, and notifications', href: '/settings', icon: <Settings size={16} /> },
+];
+
 export default function Header({
-  pageTitle = 'Home',
+  pageTitle = 'Dashboard',
   mobileMenuOpen,
   onToggleMobileMenu,
 }: HeaderProps) {
+  const router = useRouter();
   const {
     activeRole,
-    setActiveRole,
-    scenario,
-    setScenario,
     simulatedError,
     retryConnection,
-    resetDemoData,
-    showToast,
     supportTickets,
     orders,
+    products,
+    customers,
   } = useAdminState();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showRoleMenu, setShowRoleMenu] = useState(false);
-  const [showScenarioMenu, setShowScenarioMenu] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
 
-  const pendingIssuesCount = orders.filter((o) => o.fulfillmentStatus === 'submission_failed').length +
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showNotifications, setShowNotifications] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Keyboard shortcut Ctrl+K / Cmd+K and Escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsSearchOpen((prev) => !prev);
+      }
+      if (e.key === 'Escape') {
+        setIsSearchOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Auto focus input when opened
+  useEffect(() => {
+    if (isSearchOpen) {
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 50);
+    } else {
+      setSearchQuery('');
+    }
+  }, [isSearchOpen]);
+
+  const handleNavigate = (href: string) => {
+    setIsSearchOpen(false);
+    router.push(href);
+  };
+
+  const pendingIssuesCount =
+    orders.filter((o) => o.fulfillmentStatus === 'submission_failed').length +
     supportTickets.filter((t) => t.status === 'open').length;
+
+  const filteredOrders = searchQuery.trim()
+    ? orders
+        .filter(
+          (o) =>
+            o.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            o.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            o.paymentStatus.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            o.fulfillmentStatus.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        .slice(0, 4)
+    : [];
+
+  const filteredProducts = searchQuery.trim()
+    ? products
+        .filter(
+          (p) =>
+            p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            p.category.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        .slice(0, 4)
+    : [];
+
+  const filteredCustomers = searchQuery.trim()
+    ? customers
+        .filter(
+          (c) =>
+            c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            c.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            c.city.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        .slice(0, 4)
+    : [];
+
+  const filteredNav = searchQuery.trim()
+    ? quickLinks.filter(
+        (n) =>
+          n.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          n.subtitle.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : [];
 
   return (
     <>
@@ -77,218 +174,6 @@ export default function Header({
         </div>
       )}
 
-      {/* Top Demo Session Ribbon */}
-      <div
-        style={{
-          backgroundColor: '#1E1B2E',
-          color: '#E9E4F5',
-          fontSize: '12px',
-          fontWeight: 500,
-          padding: '6px 24px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          borderBottom: '1px solid rgba(117, 57, 255, 0.25)',
-          zIndex: 40,
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span
-              style={{
-                width: '7px',
-                height: '7px',
-                borderRadius: '50%',
-                backgroundColor: '#7539FF',
-                display: 'inline-block',
-                boxShadow: '0 0 6px #7539FF',
-              }}
-            />
-            <strong>DEMO SESSION:</strong>
-          </span>
-
-          {/* Role Selector Dropdown */}
-          {/* Role Selector Dropdown */}
-          <div style={{ position: 'relative' }}>
-            <button
-              type="button"
-              onClick={() => setShowRoleMenu(!showRoleMenu)}
-              style={{
-                background: 'rgba(255, 255, 255, 0.1)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                color: '#FFFFFF',
-                borderRadius: '6px',
-                padding: '2px 8px',
-                fontSize: '12px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-              }}
-            >
-              <span>Role: {activeRole}</span>
-              <ChevronDown size={12} />
-            </button>
-
-            {showRoleMenu && (
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '100%',
-                  left: 0,
-                  marginTop: '4px',
-                  backgroundColor: '#FFFFFF',
-                  color: '#262626',
-                  borderRadius: '8px',
-                  boxShadow: '0 10px 15px -3px rgba(0,0,0,0.15)',
-                  border: '1px solid #E2E4E6',
-                  zIndex: 100,
-                  width: '180px',
-                  overflow: 'hidden',
-                }}
-              >
-                {(['Owner', 'Operations', 'Content', 'Read-only'] as StaffRole[]).map((r) => (
-                  <button
-                    key={r}
-                    type="button"
-                    onClick={() => {
-                      setActiveRole(r);
-                      setShowRoleMenu(false);
-                    }}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      textAlign: 'left',
-                      background: activeRole === r ? 'var(--tuw-bg-selected, #F8F5FF)' : 'transparent',
-                      color: activeRole === r ? 'var(--tuw-action-primary, #7539FF)' : '#262626',
-                      border: 'none',
-                      fontSize: '13px',
-                      fontWeight: activeRole === r ? 600 : 400,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <span>{r}</span>
-                    {activeRole === r && <CheckCircle2 size={14} color="#7539FF" />}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Scenario Selector Dropdown */}
-          <div style={{ position: 'relative' }}>
-            <button
-              type="button"
-              onClick={() => setShowScenarioMenu(!showScenarioMenu)}
-              style={{
-                background: 'rgba(255, 255, 255, 0.1)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                color: '#FFFFFF',
-                borderRadius: '6px',
-                padding: '2px 8px',
-                fontSize: '12px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-              }}
-            >
-              <span>Scenario: {scenario}</span>
-              <ChevronDown size={12} />
-            </button>
-
-            {showScenarioMenu && (
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '100%',
-                  left: 0,
-                  marginTop: '4px',
-                  backgroundColor: '#FFFFFF',
-                  color: '#262626',
-                  borderRadius: '8px',
-                  boxShadow: '0 10px 15px -3px rgba(0,0,0,0.15)',
-                  border: '1px solid #E2E4E6',
-                  zIndex: 100,
-                  width: '200px',
-                  overflow: 'hidden',
-                }}
-              >
-                {[
-                  { id: 'normal', label: 'Normal Baseline' },
-                  { id: 'empty', label: 'Empty States (Zero data)' },
-                  { id: 'error', label: 'Simulated API Error' },
-                  { id: 'long_content', label: 'Long Multiline Text' },
-                ].map((sc) => (
-                  <button
-                    key={sc.id}
-                    type="button"
-                    onClick={() => {
-                      setScenario(sc.id as any);
-                      setShowScenarioMenu(false);
-                    }}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      textAlign: 'left',
-                      background: scenario === sc.id ? 'var(--tuw-bg-selected, #F8F5FF)' : 'transparent',
-                      color: scenario === sc.id ? 'var(--tuw-action-primary, #7539FF)' : '#262626',
-                      border: 'none',
-                      fontSize: '13px',
-                      fontWeight: scenario === sc.id ? 600 : 400,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <span>{sc.label}</span>
-                    {scenario === sc.id && <CheckCircle2 size={14} color="#7539FF" />}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <span style={{ color: 'rgba(233, 228, 245, 0.65)' }}>
-            Simulated Local State · No live credentials or card charges
-          </span>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <button
-            type="button"
-            onClick={() => {
-              if (window.confirm('Reset all demo data back to deterministic fixtures?')) {
-                resetDemoData();
-              }
-            }}
-            title="Reset local changes back to baseline fixtures"
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#CFCBFF',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              fontSize: '11px',
-              padding: '2px 6px',
-              borderRadius: '4px',
-              textDecoration: 'underline',
-            }}
-          >
-            <RotateCcw size={12} />
-            <span>Reset Demo</span>
-          </button>
-        </div>
-      </div>
-
       {/* Main Top Header */}
       <header className="topBar">
         <div className="topBarLeft">
@@ -303,22 +188,20 @@ export default function Header({
           <h1 className="pageTitle">{pageTitle}</h1>
         </div>
 
-        {/* Search Bar */}
-        <div className="searchContainer">
-          <Search className="searchIcon" />
-          <input
-            type="text"
-            placeholder="Search orders, products, or customers..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="searchInput"
-          />
-          <CirclePlus className="searchPlusIcon" />
-        </div>
-
         {/* Actions & Profile */}
         <div className="topBarRight">
           <div className="actionIcons">
+            {/* Search Trigger Button beside Notification */}
+            <button
+              type="button"
+              className="searchTriggerBtn"
+              aria-label="Search"
+              title="Search orders, products, customers (Ctrl+K)"
+              onClick={() => setIsSearchOpen(true)}
+            >
+              <Search size={18} />
+            </button>
+
             {/* Notification Bell */}
             <div style={{ position: 'relative' }}>
               <button
@@ -414,6 +297,221 @@ export default function Header({
           </div>
         </div>
       </header>
+
+      {/* Global Command Palette / Search Modal */}
+      {isSearchOpen && (
+        <div
+          className="commandPaletteOverlay"
+          onClick={() => setIsSearchOpen(false)}
+        >
+          <div
+            className="commandPaletteDialog"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Global search command palette"
+          >
+            <div className="commandPaletteHeader">
+              <Search className="commandPaletteSearchIcon" size={18} />
+              <input
+                ref={searchInputRef}
+                type="text"
+                placeholder="Search orders, products, customers, or quick jump..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="commandPaletteInput"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--tuw-text-secondary, #5D6772)',
+                    cursor: 'pointer',
+                    padding: 4,
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                  title="Clear input"
+                >
+                  <X size={16} />
+                </button>
+              )}
+              <button
+                type="button"
+                className="commandPaletteEscBadge"
+                onClick={() => setIsSearchOpen(false)}
+                title="Close (ESC)"
+              >
+                ESC
+              </button>
+            </div>
+
+            <div className="commandPaletteBody">
+              {searchQuery.trim() ? (
+                <>
+                  {filteredOrders.length === 0 &&
+                  filteredProducts.length === 0 &&
+                  filteredCustomers.length === 0 &&
+                  filteredNav.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '36px 16px', color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                      <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', margin: '0 0 6px' }}>
+                        No matches found
+                      </p>
+                      <p style={{ fontSize: 13, margin: 0 }}>
+                        No orders, products, or customers match &ldquo;{searchQuery}&rdquo;
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Matching Orders */}
+                      {filteredOrders.length > 0 && (
+                        <div>
+                          <div className="commandPaletteSectionTitle">Orders ({filteredOrders.length})</div>
+                          {filteredOrders.map((ord) => (
+                            <button
+                              key={ord.id}
+                              type="button"
+                              className="commandPaletteItem"
+                              onClick={() => handleNavigate('/orders')}
+                            >
+                              <div className="commandPaletteItemLeft">
+                                <div className="commandPaletteItemIcon">
+                                  <ClipboardList size={16} />
+                                </div>
+                                <div className="commandPaletteItemText">
+                                  <span className="commandPaletteItemTitle">{ord.id} · {ord.customerName}</span>
+                                  <span className="commandPaletteItemSubtitle">
+                                    ₹{ord.total} · Payment: {ord.paymentStatus} · {ord.fulfillmentStatus}
+                                  </span>
+                                </div>
+                              </div>
+                              <ArrowRight size={14} color="#90979F" />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Matching Products */}
+                      {filteredProducts.length > 0 && (
+                        <div>
+                          <div className="commandPaletteSectionTitle">Products ({filteredProducts.length})</div>
+                          {filteredProducts.map((p) => (
+                            <button
+                              key={p.id}
+                              type="button"
+                              className="commandPaletteItem"
+                              onClick={() => handleNavigate('/products')}
+                            >
+                              <div className="commandPaletteItemLeft">
+                                <div className="commandPaletteItemIcon">
+                                  <Package size={16} />
+                                </div>
+                                <div className="commandPaletteItemText">
+                                  <span className="commandPaletteItemTitle">{p.name}</span>
+                                  <span className="commandPaletteItemSubtitle">
+                                    {p.category} · ₹{p.price} · {p.stock} units in stock
+                                  </span>
+                                </div>
+                              </div>
+                              <ArrowRight size={14} color="#90979F" />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Matching Customers */}
+                      {filteredCustomers.length > 0 && (
+                        <div>
+                          <div className="commandPaletteSectionTitle">Customers ({filteredCustomers.length})</div>
+                          {filteredCustomers.map((c) => (
+                            <button
+                              key={c.id}
+                              type="button"
+                              className="commandPaletteItem"
+                              onClick={() => handleNavigate('/customers')}
+                            >
+                              <div className="commandPaletteItemLeft">
+                                <div className="commandPaletteItemIcon">
+                                  <Users size={16} />
+                                </div>
+                                <div className="commandPaletteItemText">
+                                  <span className="commandPaletteItemTitle">{c.name}</span>
+                                  <span className="commandPaletteItemSubtitle">
+                                    {c.email} · {c.city} · {c.totalOrders} total orders
+                                  </span>
+                                </div>
+                              </div>
+                              <ArrowRight size={14} color="#90979F" />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Matching Navigation Pages */}
+                      {filteredNav.length > 0 && (
+                        <div>
+                          <div className="commandPaletteSectionTitle">Navigation Pages</div>
+                          {filteredNav.map((n) => (
+                            <button
+                              key={n.href}
+                              type="button"
+                              className="commandPaletteItem"
+                              onClick={() => handleNavigate(n.href)}
+                            >
+                              <div className="commandPaletteItemLeft">
+                                <div className="commandPaletteItemIcon">
+                                  {n.icon}
+                                </div>
+                                <div className="commandPaletteItemText">
+                                  <span className="commandPaletteItemTitle">{n.title}</span>
+                                  <span className="commandPaletteItemSubtitle">{n.subtitle}</span>
+                                </div>
+                              </div>
+                              <ArrowRight size={14} color="#90979F" />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </>
+              ) : (
+                /* Empty state - Quick Jump Shortcuts */
+                <div>
+                  <div className="commandPaletteSectionTitle">Quick Navigation</div>
+                  {quickLinks.map((item) => (
+                    <button
+                      key={item.href}
+                      type="button"
+                      className="commandPaletteItem"
+                      onClick={() => handleNavigate(item.href)}
+                    >
+                      <div className="commandPaletteItemLeft">
+                        <div className="commandPaletteItemIcon">
+                          {item.icon}
+                        </div>
+                        <div className="commandPaletteItemText">
+                          <span className="commandPaletteItemTitle">{item.title}</span>
+                          <span className="commandPaletteItemSubtitle">{item.subtitle}</span>
+                        </div>
+                      </div>
+                      <ArrowRight size={14} color="#90979F" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="commandPaletteFooter">
+              <span>Press <kbd style={{ padding: '2px 5px', borderRadius: 4, background: '#E2E4E6', fontSize: 11 }}>ESC</kbd> to close</span>
+              <span>Quick shortcut: <kbd style={{ padding: '2px 5px', borderRadius: 4, background: '#E2E4E6', fontSize: 11 }}>Ctrl+K</kbd></span>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination } from '@/components/ui';
 import { Layers, Plus, Search, Filter, Sparkles, FolderTree, Edit3 } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { CollectionItem } from '@/mocks/fixtures';
@@ -10,6 +10,8 @@ import { CollectionItem } from '@/mocks/fixtures';
 export default function CollectionsPage() {
   const { collections, createCollection, products, canPerformAction } = useAdminState();
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
 
   // Modals & Drawers
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -23,12 +25,19 @@ export default function CollectionsPage() {
   const [formDescription, setFormDescription] = useState('Curated apparel grouping.');
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
 
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
   const filtered = collections.filter(
     (c) =>
       c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       c.slug.toLowerCase().includes(searchTerm.toLowerCase()) ||
       c.season.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const paginated = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleCreateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,7 +119,7 @@ export default function CollectionsPage() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((item) => (
+              {paginated.map((item) => (
                 <tr
                   key={item.id}
                   onClick={() => setSelectedCol(item)}
@@ -143,6 +152,19 @@ export default function CollectionsPage() {
             </tbody>
           </table>
         </div>
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalItems={filtered.length}
+          pageSize={pageSize}
+          pageSizeOptions={[5, 10, 20]}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize);
+            setCurrentPage(1);
+          }}
+        />
       </ContentCard>
 
       {/* Collection Detail Drawer */}
