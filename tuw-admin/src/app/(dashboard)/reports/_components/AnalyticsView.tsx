@@ -154,15 +154,15 @@ export default function AnalyticsView() {
             </defs>
 
             {/* Grid Horizontal Lines */}
-            <line x1="0" y1="40" x2="900" y2="40" stroke="#F0F0F0" strokeDasharray="4 4" />
-            <line x1="0" y1="90" x2="900" y2="90" stroke="#F0F0F0" strokeDasharray="4 4" />
-            <line x1="0" y1="140" x2="900" y2="140" stroke="#F0F0F0" strokeDasharray="4 4" />
+            <line x1="0" y1="40" x2="900" y2="40" stroke="var(--tuw-border-subtle, #E2E4E6)" strokeDasharray="4 4" />
+            <line x1="0" y1="90" x2="900" y2="90" stroke="var(--tuw-border-subtle, #E2E4E6)" strokeDasharray="4 4" />
+            <line x1="0" y1="140" x2="900" y2="140" stroke="var(--tuw-border-subtle, #E2E4E6)" strokeDasharray="4 4" />
 
             {/* Prior Period Trend (Muted Gray) */}
             <path
               d="M0,150 Q150,130 300,120 T600,80 T900,110"
               fill="none"
-              stroke="#D2D6DC"
+              stroke="var(--tuw-border-control, #90979F)"
               strokeWidth="2"
               strokeDasharray="5 5"
             />

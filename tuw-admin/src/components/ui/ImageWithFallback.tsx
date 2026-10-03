@@ -50,7 +50,7 @@ export default function ImageWithFallback({
           backgroundColor: 'var(--tuw-bg-surface-subtle, #F1F3F5)',
           color: 'var(--tuw-text-tertiary, #9CA3AF)',
           borderRadius: 'var(--tuw-radius-control, 8px)',
-          border: '1px dashed var(--tuw-border-subtle, #E8ECEF)',
+          border: '1px dashed var(--tuw-border-subtle, #E2E4E6)',
           padding: '16px',
           width: '100%',
           height: '100%',

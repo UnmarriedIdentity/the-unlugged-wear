@@ -370,7 +370,7 @@ export default function MediaLibraryPage() {
                   setIsDetailDrawerOpen(true);
                 }}
                 style={{
-                  border: '1px solid var(--tuw-border-subtle, #E8ECEF)',
+                  border: '1px solid var(--tuw-border-subtle, #E2E4E6)',
                   borderRadius: 'var(--tuw-radius-card, 12px)',
                   overflow: 'hidden',
                   cursor: 'pointer',
@@ -378,7 +378,7 @@ export default function MediaLibraryPage() {
                   transition: 'all 0.15s ease',
                 }}
               >
-                <div style={{ height: '140px', width: '100%', overflow: 'hidden', backgroundColor: '#F1F3F5' }}>
+                <div style={{ height: '140px', width: '100%', overflow: 'hidden', backgroundColor: 'var(--tuw-bg-surface-subtle, #F1F3F5)' }}>
                   <ImageWithFallback
                     src={asset.url}
                     alt={asset.filename}
@@ -405,7 +405,7 @@ export default function MediaLibraryPage() {
                       justifyContent: 'space-between',
                       marginTop: 6,
                       fontSize: 12,
-                      color: 'var(--tuw-text-secondary, #6B7280)',
+                      color: 'var(--tuw-text-secondary, #5D6772)',
                     }}
                   >
                     <Badge variant="neutral">{asset.category}</Badge>
@@ -499,32 +499,32 @@ export default function MediaLibraryPage() {
               style={{
                 borderRadius: '8px',
                 overflow: 'hidden',
-                border: '1px solid var(--tuw-border-subtle, #E8ECEF)',
+                border: '1px solid var(--tuw-border-subtle, #E2E4E6)',
                 maxHeight: '260px',
               }}
             >
               <ImageWithFallback
                 src={selectedAsset.url}
                 alt={selectedAsset.filename}
-                style={{ width: '100%', maxHeight: '260px', objectFit: 'contain', backgroundColor: '#F8F9FA' }}
+                style={{ width: '100%', maxHeight: '260px', objectFit: 'contain', backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)' }}
               />
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, borderBottom: '1px solid var(--tuw-border-subtle, #E8ECEF)', paddingBottom: 8 }}>
-                <span style={{ color: 'var(--tuw-text-secondary, #6B7280)' }}>MIME Type:</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', paddingBottom: 8 }}>
+                <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>MIME Type:</span>
                 <span style={{ fontWeight: 500 }}>{selectedAsset.mimeType}</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, borderBottom: '1px solid var(--tuw-border-subtle, #E8ECEF)', paddingBottom: 8 }}>
-                <span style={{ color: 'var(--tuw-text-secondary, #6B7280)' }}>Dimensions:</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', paddingBottom: 8 }}>
+                <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>Dimensions:</span>
                 <span style={{ fontWeight: 500 }}>{selectedAsset.dimensions}</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, borderBottom: '1px solid var(--tuw-border-subtle, #E8ECEF)', paddingBottom: 8 }}>
-                <span style={{ color: 'var(--tuw-text-secondary, #6B7280)' }}>File Size:</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', paddingBottom: 8 }}>
+                <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>File Size:</span>
                 <span style={{ fontWeight: 500 }}>{selectedAsset.size}</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, borderBottom: '1px solid var(--tuw-border-subtle, #E8ECEF)', paddingBottom: 8 }}>
-                <span style={{ color: 'var(--tuw-text-secondary, #6B7280)' }}>Uploaded Date:</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', paddingBottom: 8 }}>
+                <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>Uploaded Date:</span>
                 <span style={{ fontWeight: 500 }}>{selectedAsset.uploadedAt}</span>
               </div>
             </div>
@@ -545,7 +545,7 @@ export default function MediaLibraryPage() {
               </div>
             </div>
 
-            <div style={{ marginTop: 24, borderTop: '1px solid var(--tuw-border-subtle, #E8ECEF)', paddingTop: 16 }}>
+            <div style={{ marginTop: 24, borderTop: '1px solid var(--tuw-border-subtle, #E2E4E6)', paddingTop: 16 }}>
               <Button
                 variant="danger"
                 fullWidth

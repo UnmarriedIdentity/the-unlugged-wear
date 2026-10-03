@@ -89,7 +89,7 @@ export default function SettingsView() {
           style={{
             padding: '12px 16px',
             backgroundColor: 'var(--tuw-bg-warning, #FEFBF5)',
-            border: '1px solid #E5C384',
+            border: '1px solid rgba(133, 99, 0, 0.25)',
             borderRadius: 'var(--tuw-radius-control, 8px)',
             display: 'flex',
             alignItems: 'center',

@@ -47,7 +47,7 @@ export default function Disclosure({
     <div
       className={className}
       style={{
-        border: '1px solid var(--tuw-border-subtle, #E8ECEF)',
+        border: '1px solid var(--tuw-border-subtle, #E2E4E6)',
         borderRadius: 'var(--tuw-radius-card, 12px)',
         backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
         overflow: 'hidden',
@@ -95,7 +95,7 @@ export default function Disclosure({
               <p
                 style={{
                   fontSize: '13px',
-                  color: 'var(--tuw-text-secondary, #6B7280)',
+                  color: 'var(--tuw-text-secondary, #5D6772)',
                   margin: '2px 0 0 0',
                 }}
               >
@@ -108,7 +108,7 @@ export default function Disclosure({
         <ChevronDown
           size={18}
           style={{
-            color: 'var(--tuw-text-secondary, #6B7280)',
+            color: 'var(--tuw-text-secondary, #5D6772)',
             transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
             transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
             flexShrink: 0,
@@ -121,10 +121,10 @@ export default function Disclosure({
           role="region"
           style={{
             padding: '0 20px 20px 20px',
-            borderTop: '1px solid var(--tuw-border-subtle, #E8ECEF)',
+            borderTop: '1px solid var(--tuw-border-subtle, #E2E4E6)',
             marginTop: 0,
             paddingTop: '16px',
-            color: 'var(--tuw-text-secondary, #6B7280)',
+            color: 'var(--tuw-text-secondary, #5D6772)',
             fontSize: '14px',
             lineHeight: '22px',
           }}

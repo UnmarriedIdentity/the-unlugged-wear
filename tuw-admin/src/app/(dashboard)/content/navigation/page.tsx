@@ -254,7 +254,7 @@ export default function NavigationPage() {
           style={{
             display: 'flex',
             gap: 8,
-            borderBottom: '1px solid var(--tuw-border-subtle, #E8ECEF)',
+            borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)',
             paddingBottom: 16,
             marginBottom: 20,
           }}
@@ -309,7 +309,7 @@ export default function NavigationPage() {
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   padding: '12px 16px',
-                  border: '1px solid var(--tuw-border-subtle, #E8ECEF)',
+                  border: '1px solid var(--tuw-border-subtle, #E2E4E6)',
                   borderRadius: '8px',
                   backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
                 }}

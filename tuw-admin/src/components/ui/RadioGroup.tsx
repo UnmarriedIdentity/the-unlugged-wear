@@ -65,9 +65,9 @@ export default function RadioGroup({
               borderRadius: 'var(--tuw-radius-control, 8px)',
               border: isSelected
                 ? '1px solid var(--tuw-action-primary, #7539FF)'
-                : '1px solid var(--tuw-border-subtle, #E8ECEF)',
+                : '1px solid var(--tuw-border-subtle, #E2E4E6)',
               backgroundColor: isSelected
-                ? 'rgba(117, 57, 255, 0.04)'
+                ? 'var(--tuw-bg-selected, #F8F5FF)'
                 : 'var(--tuw-bg-surface, #FFFFFF)',
               transition: 'all 0.15s ease',
             }}
@@ -102,7 +102,7 @@ export default function RadioGroup({
                 <span
                   style={{
                     fontSize: '12px',
-                    color: 'var(--tuw-text-secondary, #6B7280)',
+                    color: 'var(--tuw-text-secondary, #5D6772)',
                     lineHeight: '16px',
                     marginTop: '2px',
                   }}

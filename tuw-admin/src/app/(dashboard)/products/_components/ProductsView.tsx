@@ -260,7 +260,7 @@ export default function ProductsView() {
                     position: 'relative',
                   }}
                 >
-                  <span style={{ fontSize: 13, fontWeight: 600, color: '#4A5568' }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)' }}>
                     {p.name.slice(0, 2).toUpperCase()}
                   </span>
                   <div style={{ position: 'absolute', top: 10, right: 10 }}>

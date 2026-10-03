@@ -88,8 +88,8 @@ export default function Sidebar({
             <ul className="navList">
               <li>
                 <Link
-                  href="/"
-                  className={cn('navItem', getIsActive('/') && 'navItemActive')}
+                  href="/dashboard"
+                  className={cn('navItem', getIsActive('/dashboard') && 'navItemActive')}
                 >
                   <span className="navIcon">
                     <HomeIcon size={18} />

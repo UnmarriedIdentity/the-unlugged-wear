@@ -81,27 +81,38 @@ All 19 components are implemented with zero cross-app dependencies:
 
 ---
 
-## 🗺️ Route Directory (35 Pre-Rendered Routes)
+## 🗺️ Route Directory (38 Pre-Rendered Routes)
 
-* `/`: Dashboard Overview (dynamic KPIs, sparklines, partner status)
-* `/orders`: Order processing, filters, detail drawers, status transitions
-* `/products`: Catalog management, partner assignment, creation modal
-* `/fulfillment`: Partner POD sync queue, retry simulation for failed items
-* `/shipments`: Carrier tracking and timeline events
-* `/returns`: RMA inspection and restocking stages
-* `/refunds`: Refund authorization and disbursement log
-* `/customers`: Client profiles, lifetime value, staff notes
-* `/collections`: Seasonal capsule curation
-* `/designs`: Production artwork approval workflow
-* `/content`: CMS hub
-* `/content/pages`: Static page publishing
-* `/content/journal`: Editorial stories and sustainability articles
-* `/content/navigation`: Header and footer menu tree builder
-* `/content/media`: Asset storage library with browser-local object URL previews (`<25MB` limit)
-* `/reports`: Financial and SLA metrics with dynamic CSV export
-* `/team`: Staff roster and role assignments
-* `/audit-log`: Immutable security and mutation event log
-* `/support`: Ticket resolution inbox
-* `/settings/*`: General, Brand, Shipping, Payments, Fulfillment, Notifications, Taxes
-* `/design-system`: Interactive live token specimen
-* `/login`, `/forgot-password`, `/reset-password`, `/accept-invite`: Demo auth simulations
+> Full deployed URL mapping available in [**`ROUTES.md`**](file:///d:/unplugg/ROUTES.md)
+
+* **`/dashboard`**: Official Homescreen Dashboard (dynamic KPIs, sparklines, partner status — Figma Frame `1:20300`)
+* **`/`**: Root entry point (redirects to `/login`)
+* **`/home`**, **`/homepage`**: Canonical redirects to `/dashboard`
+* **`/login`**: Dedicated login page (Figma Frames `1:20816`, `1:20776`, `1:20725`)
+* **`/signup`**: Create account page (Figma Frames `1:20984`, `1:20920`)
+* **`/verify`**: 4-Digit OTP verification page (Figma Frames `1:20890`, `1:20856`)
+* **`/forgot-password`**, **`/reset-password`**: Password recovery (Figma Frames `1:20710`, `1:20690`)
+* **`/accept-invite`**: Staff invitation acceptance
+* **`/orders`**: Order processing, filters, detail drawers, status transitions
+* **`/products`**: Catalog management, partner assignment, creation modal
+* **`/fulfillment`**: Partner POD sync queue, retry simulation for failed items
+* **`/shipments`**: Carrier tracking and timeline events
+* **`/returns`**: RMA inspection and restocking stages
+* **`/refunds`**: Refund authorization and disbursement log
+* **`/payments`**: Payment transaction logs & gateway captures
+* **`/customers`**: Client profiles, lifetime value, staff notes
+* **`/collections`**: Seasonal capsule curation
+* **`/designs`**: Production artwork approval workflow
+* **`/content`**: CMS hub
+* **`/content/pages`**: Static page publishing
+* **`/content/journal`**: Editorial stories and sustainability articles
+* **`/content/navigation`**: Header and footer menu tree builder
+* **`/content/media`**: Asset storage library with browser-local object previews (`<25MB` limit)
+* **`/reports`**: Financial and SLA metrics with dynamic CSV export
+* **`/analytics`**: Canonical redirect to `/reports`
+* **`/team`**: Staff roster and role assignments
+* **`/audit-log`**: Immutable security and mutation event log
+* **`/support`**: Ticket resolution inbox
+* **`/help`**: Canonical redirect to `/support`
+* **`/settings`**, **`/settings/*`**: General, Brand, Shipping, Payments, Fulfillment, Notifications, Taxes
+* **`/design-system`**: Interactive live token specimen (Figma Node `1:26969`)

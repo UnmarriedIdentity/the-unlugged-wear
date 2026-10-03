@@ -40,22 +40,22 @@ export default function IconButton({
     secondary: {
       backgroundColor: 'var(--tuw-bg-surface-subtle, #F1F3F5)',
       color: 'var(--tuw-text-primary, #262626)',
-      border: '1px solid var(--tuw-border-subtle, #E8ECEF)',
+      border: '1px solid var(--tuw-border-subtle, #E2E4E6)',
     },
     ghost: {
       backgroundColor: 'transparent',
-      color: 'var(--tuw-text-secondary, #6B7280)',
+      color: 'var(--tuw-text-secondary, #5D6772)',
       border: 'none',
     },
     danger: {
       backgroundColor: 'var(--tuw-bg-error, #FEF4F4)',
-      color: 'var(--tuw-status-danger, #EF4444)',
+      color: 'var(--tuw-text-error, #C91818)',
       border: '1px solid var(--tuw-border-error, #FED7D7)',
     },
     outline: {
       backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
       color: 'var(--tuw-text-primary, #262626)',
-      border: '1px solid var(--tuw-border-subtle, #E8ECEF)',
+      border: '1px solid var(--tuw-border-subtle, #E2E4E6)',
     },
   };
 

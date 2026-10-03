@@ -78,7 +78,7 @@ export default function FieldWrapper({
         <span
           style={{
             fontSize: '12px',
-            color: 'var(--tuw-text-secondary, #6B7280)',
+            color: 'var(--tuw-text-secondary, #5D6772)',
             marginTop: '2px',
           }}
         >

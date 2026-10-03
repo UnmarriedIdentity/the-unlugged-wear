@@ -81,7 +81,7 @@ export default function OrderTimeline({
                   backgroundColor:
                     event.status === 'completed'
                       ? 'var(--tuw-status-success, #10B981)'
-                      : 'var(--tuw-border-subtle, #E8ECEF)',
+                      : 'var(--tuw-border-subtle, #E2E4E6)',
                 }}
               />
             )}
@@ -130,7 +130,7 @@ export default function OrderTimeline({
                 <p
                   style={{
                     fontSize: '13px',
-                    color: 'var(--tuw-text-secondary, #6B7280)',
+                    color: 'var(--tuw-text-secondary, #5D6772)',
                     margin: '4px 0 0 0',
                     lineHeight: '18px',
                   }}

@@ -348,7 +348,7 @@ export default function PagesManagementPage() {
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 14 }}>
               <thead>
-                <tr style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E8ECEF)', color: 'var(--tuw-text-secondary, #6B7280)' }}>
+                <tr style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', color: 'var(--tuw-text-secondary, #5D6772)' }}>
                   <th style={{ padding: '12px 16px', fontWeight: 600 }}>Page Title & Path</th>
                   <th style={{ padding: '12px 16px', fontWeight: 600 }}>Status</th>
                   <th style={{ padding: '12px 16px', fontWeight: 600 }}>Last Modified</th>
@@ -361,7 +361,7 @@ export default function PagesManagementPage() {
                   <tr
                     key={page.id}
                     style={{
-                      borderBottom: '1px solid var(--tuw-border-subtle, #E8ECEF)',
+                      borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)',
                       transition: 'background-color 0.15s ease',
                     }}
                   >
