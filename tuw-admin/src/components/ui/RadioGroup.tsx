@@ -65,7 +65,7 @@ export default function RadioGroup({
               borderRadius: 'var(--tuw-radius-control, 8px)',
               border: isSelected
                 ? '1px solid var(--tuw-action-primary, #7539FF)'
-                : '1px solid var(--tuw-border-subtle, #E2E4E6)',
+                : '1px solid var(--tuw-border-subtle, #E5E7EB)',
               backgroundColor: isSelected
                 ? 'var(--tuw-bg-selected, #F8F5FF)'
                 : 'var(--tuw-bg-surface, #FFFFFF)',

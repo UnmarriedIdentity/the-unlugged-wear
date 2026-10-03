@@ -23,7 +23,7 @@ export default function Skeleton({
         width,
         height,
         borderRadius,
-        backgroundColor: 'var(--tuw-border-subtle, #E2E4E6)',
+        backgroundColor: 'var(--tuw-border-subtle, #E5E7EB)',
         animation: 'pulse 1.5s ease-in-out infinite',
         ...style,
       }}

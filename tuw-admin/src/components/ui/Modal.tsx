@@ -69,7 +69,7 @@ export default function Modal({
           maxWidth,
           backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
           borderRadius: 'var(--tuw-radius-modal, 16px)',
-          border: '1px solid var(--tuw-border-subtle, #E2E4E6)',
+          border: '1px solid var(--tuw-border-subtle, #E5E7EB)',
           boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
           display: 'flex',
           flexDirection: 'column',
@@ -82,7 +82,7 @@ export default function Modal({
         <div
           style={{
             padding: '20px 24px',
-            borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)',
+            borderBottom: '1px solid var(--tuw-border-subtle, #E5E7EB)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -160,7 +160,7 @@ export default function Modal({
           <div
             style={{
               padding: '16px 24px',
-              borderTop: '1px solid var(--tuw-border-subtle, #E2E4E6)',
+              borderTop: '1px solid var(--tuw-border-subtle, #E5E7EB)',
               backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)',
               display: 'flex',
               alignItems: 'center',

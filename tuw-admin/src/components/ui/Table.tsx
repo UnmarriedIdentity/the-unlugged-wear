@@ -32,7 +32,7 @@ export function TableHeader({ children, style = {}, ...props }: React.HTMLAttrib
   return (
     <thead
       style={{
-        borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)',
+        borderBottom: '1px solid var(--tuw-border-subtle, #E5E7EB)',
         ...style,
       }}
       {...props}
@@ -59,7 +59,7 @@ export function TableRow({
   return (
     <tr
       style={{
-        borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)',
+        borderBottom: '1px solid var(--tuw-border-subtle, #E5E7EB)',
         transition: 'background-color 0.1s ease',
         ...style,
       }}

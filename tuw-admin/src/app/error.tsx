@@ -34,7 +34,7 @@ export default function AdminErrorPage({
           width: '100%',
           backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
           borderRadius: 'var(--tuw-radius-modal, 16px)',
-          border: '1px solid var(--tuw-border-subtle, #E2E4E6)',
+          border: '1px solid var(--tuw-border-subtle, #E5E7EB)',
           padding: '48px 32px',
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
           display: 'flex',
@@ -113,7 +113,7 @@ export default function AdminErrorPage({
           style={{
             marginTop: '16px',
             paddingTop: '16px',
-            borderTop: '1px solid var(--tuw-border-subtle, #E2E4E6)',
+            borderTop: '1px solid var(--tuw-border-subtle, #E5E7EB)',
             fontSize: '12px',
             color: 'var(--tuw-text-secondary, #5D6772)',
           }}

@@ -224,7 +224,7 @@ export default function Header({
                     marginTop: '8px',
                     width: '320px',
                     backgroundColor: '#FFFFFF',
-                    border: '1px solid var(--tuw-border-subtle, #E2E4E6)',
+                    border: '1px solid var(--tuw-border-subtle, #E5E7EB)',
                     borderRadius: 'var(--tuw-radius-card, 12px)',
                     boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
                     zIndex: 100,
@@ -506,8 +506,8 @@ export default function Header({
             </div>
 
             <div className="commandPaletteFooter">
-              <span>Press <kbd style={{ padding: '2px 5px', borderRadius: 4, background: '#E2E4E6', fontSize: 11 }}>ESC</kbd> to close</span>
-              <span>Quick shortcut: <kbd style={{ padding: '2px 5px', borderRadius: 4, background: '#E2E4E6', fontSize: 11 }}>Ctrl+K</kbd></span>
+              <span>Press <kbd style={{ padding: '2px 5px', borderRadius: 4, background: '#E5E7EB', fontSize: 11 }}>ESC</kbd> to close</span>
+              <span>Quick shortcut: <kbd style={{ padding: '2px 5px', borderRadius: 4, background: '#E5E7EB', fontSize: 11 }}>Ctrl+K</kbd></span>
             </div>
           </div>
         </div>

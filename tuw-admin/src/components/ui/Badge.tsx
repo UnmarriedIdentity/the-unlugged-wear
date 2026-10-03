@@ -71,7 +71,7 @@ export default function Badge({
     neutral: {
       backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)',
       color: 'var(--tuw-text-secondary, #5D6772)',
-      border: '1px solid var(--tuw-border-subtle, #E2E4E6)',
+      border: '1px solid var(--tuw-border-subtle, #E5E7EB)',
     },
   };
 

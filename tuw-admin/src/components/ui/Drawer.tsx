@@ -69,7 +69,7 @@ export default function Drawer({
           boxShadow: '-10px 0 25px -5px rgba(0, 0, 0, 0.1)',
           display: 'flex',
           flexDirection: 'column',
-          borderLeft: '1px solid var(--tuw-border-subtle, #E2E4E6)',
+          borderLeft: '1px solid var(--tuw-border-subtle, #E5E7EB)',
           animation: 'slideInRight 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       >
@@ -77,7 +77,7 @@ export default function Drawer({
         <div
           style={{
             padding: '20px 24px',
-            borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)',
+            borderBottom: '1px solid var(--tuw-border-subtle, #E5E7EB)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -147,7 +147,7 @@ export default function Drawer({
           <div
             style={{
               padding: '16px 24px',
-              borderTop: '1px solid var(--tuw-border-subtle, #E2E4E6)',
+              borderTop: '1px solid var(--tuw-border-subtle, #E5E7EB)',
               backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)',
               display: 'flex',
               alignItems: 'center',

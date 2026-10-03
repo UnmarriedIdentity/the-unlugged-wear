@@ -162,7 +162,7 @@ export default function CustomersView() {
         <div style={{ overflowX: 'auto', width: '100%' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
-              <tr style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
+              <tr style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E5E7EB)' }}>
                 <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Customer</th>
                 <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Tier</th>
                 <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Location</th>
@@ -193,7 +193,7 @@ export default function CustomersView() {
                   <tr
                     key={customer.id}
                     onClick={() => setSelectedCustomer(customer)}
-                    style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', cursor: 'pointer' }}
+                    style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E5E7EB)', cursor: 'pointer' }}
                   >
                     <td style={{ padding: '14px 16px' }}>
                       <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
@@ -447,7 +447,7 @@ export default function CustomersView() {
                   width: '100%',
                   height: 40,
                   borderRadius: 'var(--tuw-radius-control, 8px)',
-                  border: '1px solid var(--tuw-border-control, #C6C8CA)',
+                  border: '1px solid var(--tuw-border-control, #D1D5DB)',
                   padding: '0 12px',
                   fontSize: 14,
                   backgroundColor: '#FFFFFF',

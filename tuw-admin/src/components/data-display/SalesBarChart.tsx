@@ -62,7 +62,7 @@ export function SalesBarChart({ data }: SalesBarChartProps) {
               style={{
                 width: '100%',
                 height: 1,
-                borderBottom: '1px dashed var(--tuw-border-subtle, #E2E4E6)',
+                borderBottom: '1px dashed var(--tuw-border-subtle, #E5E7EB)',
               }}
             />
           ))}

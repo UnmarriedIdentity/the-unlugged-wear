@@ -81,7 +81,7 @@ export default function OrderTimeline({
                   backgroundColor:
                     event.status === 'completed'
                       ? 'var(--tuw-status-success, #10B981)'
-                      : 'var(--tuw-border-subtle, #E2E4E6)',
+                      : 'var(--tuw-border-subtle, #E5E7EB)',
                 }}
               />
             )}

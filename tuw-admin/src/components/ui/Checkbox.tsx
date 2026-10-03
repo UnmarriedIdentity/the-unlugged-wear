@@ -53,7 +53,7 @@ export default function Checkbox({
             border: `1.5px solid ${
               checked
                 ? 'var(--tuw-action-primary, #7539FF)'
-                : 'var(--tuw-border-control, #90979F)'
+                : 'var(--tuw-border-control, #D1D5DB)'
             }`,
             backgroundColor: checked
               ? 'var(--tuw-action-primary, #7539FF)'

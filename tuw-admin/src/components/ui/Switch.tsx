@@ -36,7 +36,7 @@ export default function Switch({
           borderRadius: '12px',
           backgroundColor: checked
             ? 'var(--tuw-action-primary, #7539FF)'
-            : 'var(--tuw-border-control, #90979F)',
+            : 'var(--tuw-border-control, #D1D5DB)',
           position: 'relative',
           transition: 'background-color 0.2s',
           cursor: disabled ? 'not-allowed' : 'pointer',
