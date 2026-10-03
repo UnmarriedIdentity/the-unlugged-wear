@@ -32,12 +32,12 @@ export function SalesBarChart({ data }: SalesBarChartProps) {
           fontFamily: 'var(--font-main)',
         }}
       >
-        <span>$10k</span>
-        <span>$8k</span>
-        <span>$6k</span>
-        <span>$4k</span>
-        <span>$2k</span>
-        <span>$0</span>
+        <span>₹10k</span>
+        <span>₹8k</span>
+        <span>₹6k</span>
+        <span>₹4k</span>
+        <span>₹2k</span>
+        <span>₹0</span>
       </div>
 
       {/* Chart Plot Area */}

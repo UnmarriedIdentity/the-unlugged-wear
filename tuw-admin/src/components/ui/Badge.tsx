@@ -5,12 +5,14 @@ import React from 'react';
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   variant?: 'success' | 'warning' | 'info' | 'danger' | 'error' | 'neutral';
   size?: 'sm' | 'md';
+  icon?: React.ReactNode;
 }
 
 export default function Badge({
   children,
   variant = 'success',
   size = 'md',
+  icon,
   style = {},
   className = '',
   ...props
@@ -84,6 +86,7 @@ export default function Badge({
       className={className}
       {...props}
     >
+      {icon && <span style={{ display: 'inline-flex', alignItems: 'center' }}>{icon}</span>}
       {children}
     </span>
   );

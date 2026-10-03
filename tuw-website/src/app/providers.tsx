@@ -1,5 +1,8 @@
-// Client providers — Cart, Auth, Wishlist.
-// TODO: implement with context + persisted state.
+'use client';
+
+import React from 'react';
+import { StoreProvider } from '@/mocks/store';
+
 export function Providers({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return <StoreProvider>{children}</StoreProvider>;
 }

@@ -21,6 +21,16 @@ const nextConfig: NextConfig = {
         destination: '/dashboard',
         permanent: false,
       },
+      {
+        source: '/analytics',
+        destination: '/reports',
+        permanent: false,
+      },
+      {
+        source: '/help',
+        destination: '/support',
+        permanent: false,
+      },
     ];
   },
 };

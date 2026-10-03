@@ -2,76 +2,49 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input } from '@/components/ui';
-import { UserPlus, Search, Filter, ShieldCheck, Mail, MoreHorizontal } from 'lucide-react';
-
-interface TeamMember {
-  id: string;
-  name: string;
-  email: string;
-  role: 'Store Owner' | 'Inventory Lead' | 'Fulfillment Specialist' | 'Support Agent' | 'Designer';
-  status: 'active' | 'invited' | 'inactive';
-  lastActive: string;
-  avatarBg: string;
-}
-
-const mockTeam: TeamMember[] = [
-  {
-    id: 'MEM-01',
-    name: 'Ronan Vance',
-    email: 'ronan@theunpluggedwear.com',
-    role: 'Store Owner',
-    status: 'active',
-    lastActive: 'Just now',
-    avatarBg: '#7539FF',
-  },
-  {
-    id: 'MEM-02',
-    name: 'Elena Rostova',
-    email: 'elena.r@theunpluggedwear.com',
-    role: 'Inventory Lead',
-    status: 'active',
-    lastActive: '12m ago',
-    avatarBg: '#187343',
-  },
-  {
-    id: 'MEM-03',
-    name: 'Tariq Mansoor',
-    email: 'tariq@theunpluggedwear.com',
-    role: 'Fulfillment Specialist',
-    status: 'active',
-    lastActive: '1h ago',
-    avatarBg: '#175CD3',
-  },
-  {
-    id: 'MEM-04',
-    name: 'Sora Tanaka',
-    email: 'sora.t@theunpluggedwear.com',
-    role: 'Designer',
-    status: 'active',
-    lastActive: '3h ago',
-    avatarBg: '#856300',
-  },
-  {
-    id: 'MEM-05',
-    name: 'Jessica Miller',
-    email: 'jessica.m@theunpluggedwear.com',
-    role: 'Support Agent',
-    status: 'invited',
-    lastActive: 'Pending invite',
-    avatarBg: '#90979F',
-  },
-];
+import { ContentCard, StatCard, Badge, Button, Input, Modal } from '@/components/ui';
+import { UserPlus, Search, Filter, ShieldCheck, Mail, Trash2, AlertTriangle } from 'lucide-react';
+import { useAdminState } from '@/mocks/state';
+import { TeamMember, StaffRole } from '@/mocks/fixtures';
 
 export default function TeamPage() {
+  const { team, inviteTeamMember, removeTeamMember, canPerformAction } = useAdminState();
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredMembers = mockTeam.filter(
+  // Modals
+  const [isInviteOpen, setIsInviteOpen] = useState(false);
+  const [memberToRemove, setMemberToRemove] = useState<TeamMember | null>(null);
+
+  // Form State
+  const [formName, setFormName] = useState('');
+  const [formEmail, setFormEmail] = useState('');
+  const [formRole, setFormRole] = useState<StaffRole>('Operations');
+
+  const filteredMembers = team.filter(
     (member) =>
       member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       member.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       member.role.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleInviteSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    inviteTeamMember({
+      name: formName || 'New Team Member',
+      email: formEmail || 'staff@theunpluggedwear.com',
+      role: formRole,
+      status: 'invited',
+    });
+    setIsInviteOpen(false);
+    setFormName('');
+    setFormEmail('');
+  };
+
+  const handleConfirmRemoval = () => {
+    if (!memberToRemove) return;
+    removeTeamMember(memberToRemove.id);
+    setMemberToRemove(null);
+  };
 
   return (
     <DashboardShell pageTitle="Team & Permissions">
@@ -85,17 +58,24 @@ export default function TeamPage() {
           </p>
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
-          <Button variant="primary" size="md" icon={<UserPlus size={16} />}>
+          <Button
+            variant="primary"
+            size="md"
+            icon={<UserPlus size={16} />}
+            onClick={() => {
+              if (canPerformAction('team')) setIsInviteOpen(true);
+            }}
+          >
             Invite Member
           </Button>
         </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
-        <StatCard label="Total Staff" value="5 Members" subtitle="Across 4 departments" trendType="neutral" />
-        <StatCard label="Active Sessions" value="4 Online" trend="Normal workload" trendType="up" />
-        <StatCard label="Pending Invites" value="1 Seat" subtitle="Awaiting acceptance" trendType="neutral" />
-        <StatCard label="Security Compliance" value="100%" trend="2FA enforced on all" trendType="up" />
+        <StatCard label="Total Staff" value={`${team.length} Members`} subtitle="Across 4 operational roles" trendType="neutral" />
+        <StatCard label="Active Sessions" value={String(team.filter((m) => m.status === 'active').length)} trend="Online locally" trendType="up" />
+        <StatCard label="Pending Invites" value={String(team.filter((m) => m.status === 'invited').length)} subtitle="Awaiting acceptance" trendType="neutral" />
+        <StatCard label="RBAC Policy" value="Enforced" trend="Demo role isolation" trendType="up" />
       </div>
 
       <ContentCard>
@@ -108,9 +88,6 @@ export default function TeamPage() {
               prefixIcon={<Search size={16} />}
             />
           </div>
-          <Button variant="secondary" size="sm" icon={<Filter size={14} />}>
-            Filter Roles
-          </Button>
         </div>
 
         <div style={{ overflowX: 'auto', width: '100%' }}>
@@ -118,7 +95,7 @@ export default function TeamPage() {
             <thead>
               <tr style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
                 <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Member</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Role</th>
+                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Role Scope</th>
                 <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Status</th>
                 <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Last Active</th>
                 <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase', textAlign: 'right' }}>Actions</th>
@@ -152,7 +129,9 @@ export default function TeamPage() {
                     </div>
                   </td>
                   <td style={{ padding: '14px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)', fontWeight: 500 }}>
-                    {member.role}
+                    <Badge variant={member.role === 'Owner' ? 'success' : member.role === 'Operations' ? 'info' : 'neutral'}>
+                      {member.role}
+                    </Badge>
                   </td>
                   <td style={{ padding: '14px 16px' }}>
                     {member.status === 'active' && <Badge variant="success">Active</Badge>}
@@ -163,8 +142,15 @@ export default function TeamPage() {
                     {member.lastActive}
                   </td>
                   <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                    <Button variant="ghost" size="sm">
-                      Edit
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      icon={<Trash2 size={14} color="var(--tuw-text-error, #C91818)" />}
+                      onClick={() => {
+                        if (canPerformAction('team')) setMemberToRemove(member);
+                      }}
+                    >
+                      Remove
                     </Button>
                   </td>
                 </tr>
@@ -173,6 +159,90 @@ export default function TeamPage() {
           </table>
         </div>
       </ContentCard>
+
+      {/* Invite Member Modal */}
+      <Modal
+        isOpen={isInviteOpen}
+        onClose={() => setIsInviteOpen(false)}
+        title="Invite New Staff Member"
+        subtitle="Sends a simulated invitation link with designated role scope"
+        footer={
+          <div style={{ display: 'flex', gap: 10 }}>
+            <Button variant="secondary" size="md" onClick={() => setIsInviteOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" size="md" onClick={handleInviteSubmit}>
+              Dispatch Invitation
+            </Button>
+          </div>
+        }
+      >
+        <form onSubmit={handleInviteSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <Input
+            label="Full Name"
+            placeholder="e.g. Tariq Mansoor"
+            value={formName}
+            onChange={(e) => setFormName(e.target.value)}
+            required
+          />
+          <Input
+            label="Staff Work Email"
+            type="email"
+            placeholder="e.g. tariq@theunpluggedwear.com"
+            value={formEmail}
+            onChange={(e) => setFormEmail(e.target.value)}
+            required
+          />
+          <div>
+            <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
+              Role Scope
+            </label>
+            <select
+              value={formRole}
+              onChange={(e) => setFormRole(e.target.value as StaffRole)}
+              style={{ width: '100%', height: 40, borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '0 10px', fontSize: 13 }}
+            >
+              <option value="Owner">Owner — Full administrative authority</option>
+              <option value="Operations">Operations — Fulfillment, Orders, Shipments & Refunds</option>
+              <option value="Content">Content — Products, Collections, Media & CMS</option>
+              <option value="Read-only">Read-only — View all data without mutation capabilities</option>
+            </select>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Removal Confirmation Dialog */}
+      <Modal
+        isOpen={Boolean(memberToRemove)}
+        onClose={() => setMemberToRemove(null)}
+        title="Confirm Staff Member Removal"
+        subtitle="This action will revoke all permissions immediately"
+        footer={
+          <div style={{ display: 'flex', gap: 10 }}>
+            <Button variant="secondary" size="md" onClick={() => setMemberToRemove(null)}>
+              Cancel
+            </Button>
+            <Button variant="danger" size="md" onClick={handleConfirmRemoval}>
+              Revoke & Remove Staff
+            </Button>
+          </div>
+        }
+      >
+        {memberToRemove && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ padding: 14, backgroundColor: 'var(--tuw-bg-error, #FEF4F4)', borderRadius: 8, display: 'flex', gap: 12 }}>
+              <AlertTriangle size={20} color="var(--tuw-text-error, #C91818)" style={{ flexShrink: 0, marginTop: 2 }} />
+              <div style={{ fontSize: 13, color: 'var(--tuw-text-primary, #262626)', lineHeight: 1.5 }}>
+                Are you sure you want to remove <strong>{memberToRemove.name}</strong> ({memberToRemove.email})?
+                They currently have active access under the <strong>{memberToRemove.role}</strong> role.
+              </div>
+            </div>
+            <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
+              All simulated active sessions and API permissions will be terminated immediately and recorded in the audit log.
+            </p>
+          </div>
+        )}
+      </Modal>
     </DashboardShell>
   );
 }

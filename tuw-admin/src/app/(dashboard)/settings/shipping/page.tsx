@@ -7,8 +7,8 @@ import { ContentCard, Button, Input } from '@/components/ui';
 import { Truck, Save, Check, ArrowLeft } from 'lucide-react';
 
 export default function ShippingSettingsPage() {
-  const [flatRateDomestic, setFlatRateDomestic] = useState('$5.00');
-  const [freeShippingThreshold, setFreeShippingThreshold] = useState('$100.00');
+  const [flatRateDomestic, setFlatRateDomestic] = useState('₹250.00');
+  const [freeShippingThreshold, setFreeShippingThreshold] = useState('₹3,000.00');
   const [saved, setSaved] = useState(false);
 
   const handleSave = () => {

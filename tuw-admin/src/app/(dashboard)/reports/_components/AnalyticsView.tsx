@@ -18,23 +18,50 @@ import {
   ChevronDown
 } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-// Class map - selectors live in src/app/globals.css (single app.css, sub- prefix).
-// Verbatim port of SubPages.module.css; JSX untouched for zero pixel drift.
-const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
 import { StatCard, ContentCard, Button, Badge } from '@/components/ui';
+import { useAdminState } from '@/mocks/state';
+
+const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
 
 export default function AnalyticsView() {
-  const [timeRange, setTimeRange] = useState('30d');
-  const [activeTab, setActiveTab] = useState('overview');
+  const { orders, products, customers, refunds } = useAdminState();
+  const [timeRange, setTimeRange] = useState<'30d' | '7d'>('30d');
+
+  // Compute live metrics from state
+  const paidOrders = orders.filter((o) => o.paymentStatus === 'paid');
+  const totalRevenue = paidOrders.reduce((sum, o) => sum + o.paidAmount, 0);
+  const totalOrdersCount = orders.length;
+  const aov = paidOrders.length > 0 ? totalRevenue / paidOrders.length : 0;
+  const totalRefundsSum = refunds.reduce((sum, r) => sum + r.amount, 0);
+
+  const handleExportCSV = () => {
+    const headers = ['Report Metric', 'Value', 'Time Scope'];
+    const rows = [
+      ['Total Gross Revenue', `₹${totalRevenue.toLocaleString()}`, timeRange],
+      ['Total Processed Orders', String(totalOrdersCount), timeRange],
+      ['Average Order Value (AOV)', `₹${Math.round(aov).toLocaleString()}`, timeRange],
+      ['Total Refund Disbursements', `₹${totalRefundsSum.toLocaleString()}`, timeRange],
+      ['Active Catalog Garments', String(products.length), 'Current'],
+      ['Registered Client Base', String(customers.length), 'Current'],
+    ];
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.map((x) => `"${x}"`).join(','))].join('\n');
+    const link = document.createElement('a');
+    link.setAttribute('href', encodeURI(csvContent));
+    link.setAttribute('download', `tuw_analytics_report_${timeRange}_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <DashboardShell pageTitle="Analytics" activeNav="analytics">
       {/* Page Header */}
       <div className={styles.pageHeader}>
         <div className={styles.headingGroup}>
-          <h2 className={styles.pageTitle}>Analytics & Insights</h2>
+          <h2 className={styles.pageTitle}>Analytics & Operational Reports</h2>
           <p className={styles.pageSubtitle}>
-            Comprehensive overview of store sales, conversion funnels, and customer acquisition.
+            Comprehensive overview of store sales, conversion metrics, customer acquisition, and fulfillment SLA.
           </p>
         </div>
 
@@ -53,38 +80,38 @@ export default function AnalyticsView() {
             variant="primary"
             size="md"
             icon={<Download size={16} />}
-            onClick={() => alert('Exporting Analytics Report as PDF/CSV...')}
+            onClick={handleExportCSV}
           >
-            <span>Download Report</span>
+            <span>Export CSV Report</span>
           </Button>
         </div>
       </div>
 
-      {/* Top 4 KPI Metrics (Design System StatCards) */}
+      {/* Top 4 KPI Metrics */}
       <div className={styles.statGrid}>
         <StatCard
           label="Total Revenue"
-          value="$184,920.00"
-          trend="↑ +14.2% vs previous period"
+          value={`₹${totalRevenue.toLocaleString()}`}
+          trend="Derived from paid order records"
           trendType="up"
         />
         <StatCard
           label="Total Orders"
-          value="1,482"
-          trend="↑ +8.6% vs previous period"
-          trendType="up"
-        />
-        <StatCard
-          label="Conversion Rate"
-          value="3.24%"
-          trend="↑ +0.32% vs benchmark"
+          value={String(totalOrdersCount)}
+          trend="Active store order volume"
           trendType="up"
         />
         <StatCard
           label="Average Order Value"
-          value="$124.62"
-          trend="↑ +$7.10 from last month"
+          value={`₹${Math.round(aov).toLocaleString()}`}
+          trend="Per settled transaction"
           trendType="up"
+        />
+        <StatCard
+          label="Refund Volume"
+          value={`₹${totalRefundsSum.toLocaleString()}`}
+          subtitle={`${refunds.length} processed adjustments`}
+          trendType="neutral"
         />
       </div>
 
@@ -92,22 +119,22 @@ export default function AnalyticsView() {
       <div className={styles.contentCard}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
           <div>
-            <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#242424', margin: 0 }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--tuw-text-primary, #262626)', margin: 0 }}>
               Sales & Revenue Performance
             </h3>
-            <span style={{ fontSize: '13px', color: '#6C6C6C' }}>
-              Daily gross sales and total orders processed
+            <span style={{ fontSize: '13px', color: 'var(--tuw-text-secondary, #5D6772)' }}>
+              Gross sales trends across {timeRange === '30d' ? 'the past 30 days' : 'the past 7 days'}
             </span>
           </div>
 
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '12px', fontWeight: 600, color: '#115D5D' }}>
-              <span style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#115D5D' }} />
-              Current Period
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '12px', fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)' }}>
+              <span style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: 'var(--tuw-action-primary, #7539FF)' }} />
+              Active Period
             </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '12px', fontWeight: 600, color: '#9A9A9A', marginLeft: 12 }}>
-              <span style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#E0E7E6' }} />
-              Previous Period
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '12px', fontWeight: 600, color: 'var(--tuw-border-control, #90979F)', marginLeft: 12 }}>
+              <span style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: 'var(--tuw-border-subtle, #E2E4E6)' }} />
+              Prior Period
             </span>
           </div>
         </div>
@@ -120,201 +147,95 @@ export default function AnalyticsView() {
             style={{ width: '100%', height: '100%', overflow: 'visible' }}
           >
             <defs>
-              <linearGradient id="analyticsGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#115D5D" stopOpacity="0.28" />
-                <stop offset="85%" stopColor="#115D5D" stopOpacity="0.02" />
-                <stop offset="100%" stopColor="#115D5D" stopOpacity="0.00" />
+              <linearGradient id="analyticsGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#7539FF" stopOpacity="0.28" />
+                <stop offset="100%" stopColor="#7539FF" stopOpacity="0.0" />
               </linearGradient>
             </defs>
 
-            {/* Grid lines */}
-            <line x1="0" y1="40" x2="900" y2="40" stroke="#F0F4F4" strokeDasharray="4 4" />
-            <line x1="0" y1="90" x2="900" y2="90" stroke="#F0F4F4" strokeDasharray="4 4" />
-            <line x1="0" y1="140" x2="900" y2="140" stroke="#F0F4F4" strokeDasharray="4 4" />
-            <line x1="0" y1="190" x2="900" y2="190" stroke="#F0F4F4" />
+            {/* Grid Horizontal Lines */}
+            <line x1="0" y1="40" x2="900" y2="40" stroke="var(--tuw-border-subtle, #E2E4E6)" strokeDasharray="4 4" />
+            <line x1="0" y1="90" x2="900" y2="90" stroke="var(--tuw-border-subtle, #E2E4E6)" strokeDasharray="4 4" />
+            <line x1="0" y1="140" x2="900" y2="140" stroke="var(--tuw-border-subtle, #E2E4E6)" strokeDasharray="4 4" />
 
-            {/* Previous Period Ghost Curve */}
+            {/* Prior Period Trend (Muted Gray) */}
             <path
-              d="M 0 160 Q 150 140 300 130 T 600 110 T 900 95"
+              d="M0,150 Q150,130 300,120 T600,80 T900,110"
               fill="none"
-              stroke="#D2DCDA"
+              stroke="var(--tuw-border-control, #90979F)"
               strokeWidth="2"
               strokeDasharray="5 5"
             />
 
-            {/* Current Period Area */}
+            {/* Area Fill */}
             <path
-              d="M 0 150 Q 100 120 200 135 T 400 80 T 600 90 T 800 45 L 900 35 L 900 190 L 0 190 Z"
+              d="M0,140 Q150,110 300,90 T600,45 T900,60 L900,200 L0,200 Z"
               fill="url(#analyticsGrad)"
             />
 
-            {/* Current Period Stroke */}
+            {/* Main Trend Line */}
             <path
-              d="M 0 150 Q 100 120 200 135 T 400 80 T 600 90 T 800 45 L 900 35"
+              d="M0,140 Q150,110 300,90 T600,45 T900,60"
               fill="none"
-              stroke="#115D5D"
+              stroke="#7539FF"
               strokeWidth="3.2"
               strokeLinecap="round"
             />
 
-            {/* Active Data Key Points */}
-            <circle cx="200" cy="135" r="4.5" fill="#FFFFFF" stroke="#115D5D" strokeWidth="2.5" />
-            <circle cx="400" cy="80" r="4.5" fill="#FFFFFF" stroke="#115D5D" strokeWidth="2.5" />
-            <circle cx="600" cy="90" r="4.5" fill="#FFFFFF" stroke="#115D5D" strokeWidth="2.5" />
-            <circle cx="800" cy="45" r="5.5" fill="#115D5D" stroke="#FFFFFF" strokeWidth="2.5" />
-            <circle cx="900" cy="35" r="4.5" fill="#FFFFFF" stroke="#115D5D" strokeWidth="2.5" />
+            {/* Data Point Marker */}
+            <circle cx="600" cy="45" r="5" fill="#7539FF" stroke="#FFFFFF" strokeWidth="2.5" />
           </svg>
+        </div>
 
-          {/* X Axis labels */}
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              fontSize: '12px',
-              color: '#9A9A9A',
-              fontWeight: 500,
-              marginTop: 8,
-              padding: '0 4px'
-            }}
-          >
-            <span>Week 1</span>
-            <span>Week 2</span>
-            <span>Week 3</span>
-            <span>Week 4</span>
-            <span>Today</span>
-          </div>
+        {/* X-Axis Labels */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#888', fontSize: '12px', marginTop: '8px' }}>
+          <span>Wk 1</span>
+          <span>Wk 2</span>
+          <span>Wk 3</span>
+          <span>Wk 4</span>
         </div>
       </div>
 
-      {/* Grid: Revenue by Channel & Conversion Funnel */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px', width: '100%' }}>
-        {/* Sales by Channel Card */}
-        <div className={styles.contentCard}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ fontSize: '17px', fontWeight: 700, color: '#242424', margin: 0 }}>
-              Acquisition Channels
-            </h3>
-            <span style={{ fontSize: '13px', color: '#115D5D', fontWeight: 600 }}>By Revenue</span>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '4px' }}>
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '6px' }}>
-                <span style={{ fontWeight: 600, color: '#242424' }}>Direct Storefront</span>
-                <span style={{ fontWeight: 600, color: '#242424' }}>$112,400 (60.8%)</span>
-              </div>
-              <div style={{ height: '8px', background: '#E7EFEF', borderRadius: '4px', overflow: 'hidden' }}>
-                <div style={{ width: '60.8%', height: '100%', background: '#115D5D', borderRadius: '4px' }} />
-              </div>
-            </div>
-
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '6px' }}>
-                <span style={{ fontWeight: 600, color: '#242424' }}>Social Marketing (IG & TikTok)</span>
-                <span style={{ fontWeight: 600, color: '#242424' }}>$44,200 (23.9%)</span>
-              </div>
-              <div style={{ height: '8px', background: '#E7EFEF', borderRadius: '4px', overflow: 'hidden' }}>
-                <div style={{ width: '23.9%', height: '100%', background: '#00CB75', borderRadius: '4px' }} />
-              </div>
-            </div>
-
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '6px' }}>
-                <span style={{ fontWeight: 600, color: '#242424' }}>Organic Search & SEO</span>
-                <span style={{ fontWeight: 600, color: '#242424' }}>$28,320 (15.3%)</span>
-              </div>
-              <div style={{ height: '8px', background: '#E7EFEF', borderRadius: '4px', overflow: 'hidden' }}>
-                <div style={{ width: '15.3%', height: '100%', background: '#C6EAA0', borderRadius: '4px' }} />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Conversion Funnel Card */}
-        <div className={styles.contentCard}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ fontSize: '17px', fontWeight: 700, color: '#242424', margin: 0 }}>
-              Conversion Funnel
-            </h3>
-            <span style={{ fontSize: '13px', color: '#009E5C', fontWeight: 600 }}>Healthy Flow</span>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '4px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', background: '#F8FAF9', borderRadius: '10px', fontSize: '13px' }}>
-              <span style={{ color: '#6C6C6C' }}>1. Storefront Visitors</span>
-              <span style={{ fontWeight: 700, color: '#242424' }}>45,200</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', background: '#F8FAF9', borderRadius: '10px', fontSize: '13px' }}>
-              <span style={{ color: '#6C6C6C' }}>2. Product Views</span>
-              <span style={{ fontWeight: 700, color: '#242424' }}>24,800 (54.8%)</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', background: '#F8FAF9', borderRadius: '10px', fontSize: '13px' }}>
-              <span style={{ color: '#6C6C6C' }}>3. Add to Cart</span>
-              <span style={{ fontWeight: 700, color: '#242424' }}>6,400 (14.1%)</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', background: '#EDF8E2', borderRadius: '10px', color: '#115D5D', fontSize: '13px' }}>
-              <span style={{ fontWeight: 600 }}>4. Completed Checkout</span>
-              <span style={{ fontWeight: 700 }}>1,482 (3.24%)</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Top Products Table */}
-      <div className={styles.contentCard}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-          <h3 style={{ fontSize: '17px', fontWeight: 700, color: '#242424', margin: 0 }}>
-            Top Grossing Products
-          </h3>
-          <span style={{ fontSize: '13px', color: '#6C6C6C' }}>
-            Ranked by units sold & total revenue
-          </span>
-        </div>
-
-        <div className={styles.tableWrapper}>
-          <table className={styles.customTable}>
+      {/* Product Merchandising Breakdown */}
+      <ContentCard>
+        <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginBottom: 12 }}>
+          Product Merchandising Sales Summary
+        </h3>
+        <div style={{ overflowX: 'auto', width: '100%' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
-              <tr className={styles.tableHeaderRow}>
-                <th>Product Name</th>
-                <th>Category</th>
-                <th>Units Sold</th>
-                <th>Unit Price</th>
-                <th className={styles.alignRight}>Gross Revenue</th>
+              <tr style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
+                <th style={{ padding: '10px 14px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Product</th>
+                <th style={{ padding: '10px 14px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Category</th>
+                <th style={{ padding: '10px 14px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Unit Price</th>
+                <th style={{ padding: '10px 14px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Units Sold</th>
+                <th style={{ padding: '10px 14px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase', textAlign: 'right' }}>Gross Revenue</th>
               </tr>
             </thead>
             <tbody>
-              <tr className={styles.tableDataRow}>
-                <td style={{ fontWeight: 600 }}>White Classic T-Shirt</td>
-                <td>Apparel</td>
-                <td>480</td>
-                <td>$29.00</td>
-                <td className={`${styles.alignRight}`} style={{ fontWeight: 700, color: '#115D5D' }}>$13,920.00</td>
-              </tr>
-              <tr className={styles.tableDataRow}>
-                <td style={{ fontWeight: 600 }}>Floral Breeze Dress</td>
-                <td>Dresses</td>
-                <td>324</td>
-                <td>$54.00</td>
-                <td className={`${styles.alignRight}`} style={{ fontWeight: 700, color: '#115D5D' }}>$17,496.00</td>
-              </tr>
-              <tr className={styles.tableDataRow}>
-                <td style={{ fontWeight: 600 }}>Casual Summer Sundress</td>
-                <td>Summer Wear</td>
-                <td>290</td>
-                <td>$62.00</td>
-                <td className={`${styles.alignRight}`} style={{ fontWeight: 700, color: '#115D5D' }}>$17,980.00</td>
-              </tr>
-              <tr className={styles.tableDataRow}>
-                <td style={{ fontWeight: 600 }}>Unisex Minimal Hoodie</td>
-                <td>Outerwear</td>
-                <td>185</td>
-                <td>$78.00</td>
-                <td className={`${styles.alignRight}`} style={{ fontWeight: 700, color: '#115D5D' }}>$14,430.00</td>
-              </tr>
+              {products.slice(0, 6).map((p) => (
+                <tr key={p.id} style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
+                  <td style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                    {p.name}
+                  </td>
+                  <td style={{ padding: '12px 14px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                    {p.category}
+                  </td>
+                  <td className="tuw-tabular-nums" style={{ padding: '12px 14px', fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
+                    ₹{p.price.toLocaleString()}
+                  </td>
+                  <td className="tuw-tabular-nums" style={{ padding: '12px 14px', fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
+                    {p.soldCount}
+                  </td>
+                  <td className="tuw-tabular-nums" style={{ padding: '12px 14px', fontSize: 13, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', textAlign: 'right' }}>
+                    ₹{(p.price * p.soldCount).toLocaleString()}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
-      </div>
+      </ContentCard>
     </DashboardShell>
   );
 }

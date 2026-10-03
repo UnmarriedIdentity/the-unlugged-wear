@@ -70,6 +70,8 @@ export default function DashboardShell({
 
         {/* Page Content Body */}
         <main
+          id="main-content"
+          tabIndex={-1}
           style={{
             padding: '30px',
             maxWidth: '1360px',
