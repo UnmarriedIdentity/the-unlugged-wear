@@ -516,13 +516,13 @@ a {
 
 /* Sidebar - Sticky, All-Time Visible while scrolling, perfectly in-flow */
 .sidebar {
-  width: 240px;
-  min-width: 240px;
+  width: 250px;
+  min-width: 250px;
   background-color: var(--tuw-bg-surface, #FFFFFF);
   border-right: 1px solid var(--tuw-border-subtle, #E9E9E9);
   display: flex;
   flex-direction: column;
-  padding: 0 10px 12px 10px;
+  padding: 0 14px 20px 14px;
   position: sticky;
   top: 0;
   height: 100vh;
@@ -568,8 +568,8 @@ a {
 }
 
 .sidebarHeader {
-  height: 56px;
-  min-height: 56px;
+  height: 64px;
+  min-height: 64px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -648,8 +648,8 @@ a {
 .navSections {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-top: 2px;
+  gap: 16px;
+  margin-top: 6px;
   flex: 1;
   min-height: 0;
   overflow: visible;
@@ -665,12 +665,12 @@ a {
 
 .sidebarFooter {
   flex-shrink: 0;
-  margin-top: auto;
-  padding-top: 8px;
+  margin-top: 20px;
+  padding-top: 12px;
   border-top: 1px solid var(--tuw-border-subtle, #E9E9E9);
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 3px;
 }
 
 .navGroup {
@@ -679,30 +679,30 @@ a {
 }
 
 .groupLabel {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.07em;
-  color: var(--tuw-text-secondary, #5D6772);
+  letter-spacing: 0.08em;
+  color: #7E8793;
   text-transform: uppercase;
-  padding: 0 8px 2px 8px;
-  opacity: 0.8;
+  padding: 0 10px 6px 10px;
+  font-family: var(--font-main);
 }
 
 .navList {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 3px;
 }
 
 .navItem {
   display: flex;
   align-items: center;
-  gap: 9px;
-  padding: 5px 9px;
-  border-radius: var(--tuw-radius-control, 8px);
-  color: var(--tuw-text-secondary, #5D6772);
-  font-size: 13px;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  color: #262626;
+  font-size: 14px;
   font-weight: 500;
   text-decoration: none;
   cursor: pointer;
@@ -711,6 +711,7 @@ a {
   position: relative;
   background: transparent;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .navItem:hover {
@@ -719,14 +720,18 @@ a {
 }
 
 .navItemActive {
-  background: var(--tuw-bg-selected, #F8F5FF);
-  color: var(--tuw-action-primary, #7539FF);
+  background: #F8F5FF;
+  color: #7539FF;
   font-weight: 600;
 }
 
 .navItemActive:hover {
-  background: var(--tuw-bg-selected, #F8F5FF);
-  color: var(--tuw-action-hover, #6025DB);
+  background: #F8F5FF;
+  color: #7539FF;
+}
+
+.navItemActive .navIcon {
+  color: #7539FF;
 }
 
 .navIcon {
@@ -736,6 +741,7 @@ a {
   display: flex;
   align-items: center;
   justify-content: center;
+  color: #5D6772;
 }
 
 .navLabel {
@@ -743,7 +749,7 @@ a {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 13.5px;
+  font-size: 14px;
 }
 
 .navChevron {
