@@ -234,16 +234,14 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
               </div>
 
               {/* Login Form */}
-              <form className={styles.form} onSubmit={handleLoginSubmit} noValidate>
+              <form className="flex w-full max-w-auth-form flex-col" onSubmit={handleLoginSubmit} noValidate>
                 {/* Frame 129: Email Field */}
-                <div className={styles.fieldGroup}>
-                  <label htmlFor="email-input" className={styles.fieldLabel}>
+                <div className="flex w-full flex-col mb-auth-field-gap">
+                  <label htmlFor="email-input" className="text-auth-social font-medium tracking-auth-social text-auth-ink mb-2 text-left">
                     Email
                   </label>
                   <div
-                    className={`${styles.inputWrapper} ${
-                      isEmailActive ? styles.inputWrapperActive : ''
-                    }`}
+                    className={`flex h-12 w-full items-center gap-2.5 rounded-xl border bg-white px-4 transition-colors duration-200 ${isEmailActive ? 'border-auth-teal' : 'border-auth-line'}`}
                   >
                     <input
                       id="email-input"
@@ -254,26 +252,22 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
                         if (hasError) setHasError(false);
                       }}
                       placeholder="Enter your email here"
-                      className={`${styles.inputField} ${
-                        email ? styles.inputFieldFilled : ''
-                      }`}
+                      className={`h-full w-full flex-1 border-none bg-transparent tracking-auth-input text-auth-ink placeholder:text-auth-faint placeholder:text-sm ${email ? 'text-auth-input-filled tracking-auth-input-filled' : 'text-auth-input'}`}
                       autoComplete="email"
                     />
-                    <div className={styles.inputIcon}>
+                    <div className="flex items-center justify-center shrink-0 text-auth-faint">
                       <Mail size={20} strokeWidth={1.5} />
                     </div>
                   </div>
                 </div>
 
                 {/* Frame 130: Password Field & Remember Me */}
-                <div className={styles.fieldGroup}>
-                  <label htmlFor="password-input" className={styles.fieldLabel}>
+                <div className="flex w-full flex-col mb-auth-field-gap">
+                  <label htmlFor="password-input" className="text-auth-social font-medium tracking-auth-social text-auth-ink mb-2 text-left">
                     Password
                   </label>
                   <div
-                    className={`${styles.inputWrapper} ${
-                      hasError ? styles.inputWrapperError : ''
-                    }`}
+                    className={`flex h-12 w-full items-center gap-2.5 rounded-xl border bg-white px-4 transition-colors duration-200 ${hasError ? 'border-auth-error bg-auth-error-bg' : 'border-auth-line'}`}
                   >
                     <input
                       id="password-input"
@@ -284,15 +278,13 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
                         if (hasError) setHasError(false);
                       }}
                       placeholder="Input your password"
-                      className={`${styles.inputField} ${
-                        password ? styles.inputFieldFilled : ''
-                      }`}
+                      className={`h-full w-full flex-1 border-none bg-transparent tracking-auth-input text-auth-ink placeholder:text-auth-faint placeholder:text-sm ${password ? 'text-auth-input-filled tracking-auth-input-filled' : 'text-auth-input'}`}
                       autoComplete="current-password"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className={styles.togglePasswordBtn}
+                      className="flex items-center justify-center p-0.5 text-auth-faint transition-colors duration-150 hover:text-auth-ink"
                       aria-label={showPassword ? 'Hide password' : 'Show password'}
                       id="toggle-password-btn"
                     >
@@ -306,8 +298,8 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
 
                   {/* Frame 281 in 1:20725: Password comparison error */}
                   {hasError && (
-                    <div className={styles.errorMessage} id="password-error">
-                      <CircleX size={16} strokeWidth={1.0} className={styles.errorIcon} />
+                    <div className="flex items-center gap-1.5 mt-1.5 text-auth-input tracking-auth-input text-auth-error" id="password-error">
+                      <CircleX size={16} strokeWidth={1.0} className="shrink-0 text-auth-error" />
                       <span>Password comparisson failed</span>
                     </div>
                   )}

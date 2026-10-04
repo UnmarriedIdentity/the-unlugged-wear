@@ -75,6 +75,17 @@
   --container-auth-form: 568px;
   --container-auth-reset: 488px;
   --container-auth-recovery: 392px;
+
+  /* Auth input type */
+  --text-auth-input: 14px;
+  --text-auth-input--line-height: 22.4px;
+  --text-auth-input-filled: 16px;
+  --text-auth-input-filled--line-height: 25.6px;
+  --tracking-auth-input: 0.28px;
+  --tracking-auth-input-filled: 0.32px;
+
+  /* Auth field rhythm */
+  --spacing-auth-field-gap: clamp(16px, 2.2vh, 24px);
 }
 
 :root {
@@ -1908,121 +1919,11 @@
 }
 
 /* Form block */
-.login-form {
-  width: 100%;
-  max-width: 568px;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Frame 129: Field group */
-.login-fieldGroup {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: clamp(16px, 2.2vh, 24px);
-  width: 100%;
-}
-
-.login-fieldLabel {
-  font-family: var(--font-main), sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  color: #242424;
-  line-height: 22.4px;
-  letter-spacing: 0.14px;
-  margin-bottom: 8px;
-  text-align: left;
-}
-
-/* Frame 125: Input box (height 48px, radius 12px, border #E9E9E9) */
-.login-inputWrapper {
-  height: 48px;
-  width: 100%;
-  border-radius: 12px;
-  border: 1px solid #E9E9E9;
-  background: #FFFFFF;
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  gap: 10px;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
-}
-
-/* Active email border (Frame 1:20776 & 1:20725) */
-.login-inputWrapperActive {
-  border-color: #115D5D !important;
-}
-
-/* Wrong password error state (Frame 1:20725) */
-.login-inputWrapperError {
-  border-color: #E94845 !important;
-  background-color: #FDEDEC !important;
-}
-
-.login-inputField {
-  flex: 1;
-  border: none;
-  background: transparent;
-  font-family: var(--font-main), sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  color: #242424;
-  line-height: 22.4px;
-  letter-spacing: 0.28px;
-  height: 100%;
-  width: 100%;
-}
-
-.login-inputFieldFilled {
-  font-size: 16px;
-  line-height: 25.6px;
-  letter-spacing: 0.32px;
-}
-
-.login-inputField::placeholder {
-  color: #9A9A9A;
-  font-size: 14px;
-}
-
-.login-inputIcon {
-  color: #9A9A9A;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.login-togglePasswordBtn {
-  color: #9A9A9A;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2px;
-  transition: color 0.15s ease;
-}
-
-.login-togglePasswordBtn:hover {
-  color: #242424;
-}
-
-/* Frame 281 in 1:20725: Error notification */
-.login-errorMessage {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-main), sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 22.4px;
-  letter-spacing: 0.28px;
-  color: #E94845;
-  margin-top: 6px;
-}
-
-.login-errorIcon {
-  color: #E94845;
-  flex-shrink: 0;
-}
+/* Login form + inputs migrated to Tailwind auth-* utilities in LoginPage.tsx (pixel-identical).
+   Removed: .login-form, .login-fieldGroup, .login-fieldLabel, .login-inputWrapper,
+   .login-inputWrapperActive, .login-inputWrapperError, .login-inputField,
+   .login-inputFieldFilled, .login-inputField::placeholder, .login-inputIcon,
+   .login-togglePasswordBtn, .login-errorMessage, .login-errorIcon. */
 
 /* Frame 132: Remember me row */
 .login-rememberRow {
