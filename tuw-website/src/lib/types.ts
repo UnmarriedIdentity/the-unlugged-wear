@@ -39,6 +39,7 @@ export type Product = {
   sustainabilityBadge?: string;
   isNew?: boolean;
   isBestseller?: boolean;
+  videoUrl?: string;
 };
 
 export type Collection = {

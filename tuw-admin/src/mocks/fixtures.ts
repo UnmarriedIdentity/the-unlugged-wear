@@ -14,6 +14,8 @@ export interface ProductItem {
   placement: 'Chest (45mm)' | 'Back Oversized' | 'Sleeve Length' | 'Interior Hem';
   soldCount: number;
   imageBg: string;
+  image?: string;
+  video?: string;
   rating: number;
 }
 
@@ -179,6 +181,7 @@ export const initialProducts: ProductItem[] = [
     placement: 'Back Oversized',
     soldCount: 492,
     imageBg: 'linear-gradient(135deg, #EBF4F8 0%, #D8EBF5 100%)',
+    image: '/products/1.jpeg',
     rating: 4.9,
   },
   {
@@ -197,6 +200,8 @@ export const initialProducts: ProductItem[] = [
     placement: 'Chest (45mm)',
     soldCount: 369,
     imageBg: 'linear-gradient(135deg, #FAF0EB 0%, #F5E2DA 100%)',
+    image: '/products/2.jpeg',
+    video: '/products/2.mp4',
     rating: 4.8,
   },
   {
@@ -214,6 +219,7 @@ export const initialProducts: ProductItem[] = [
     placement: 'Interior Hem',
     soldCount: 215,
     imageBg: 'linear-gradient(135deg, #F0F3F6 0%, #E3E7ED 100%)',
+    image: '/products/3.jpeg',
     rating: 4.7,
   },
   {
@@ -232,6 +238,7 @@ export const initialProducts: ProductItem[] = [
     placement: 'Sleeve Length',
     soldCount: 140,
     imageBg: 'linear-gradient(135deg, #F7EFE8 0%, #EDE1D5 100%)',
+    image: '/products/1.jpeg',
     rating: 5.0,
   },
   {
@@ -249,6 +256,8 @@ export const initialProducts: ProductItem[] = [
     placement: 'Interior Hem',
     soldCount: 0,
     imageBg: 'linear-gradient(135deg, #E6EEF5 0%, #D2DEEB 100%)',
+    image: '/products/2.jpeg',
+    video: '/products/2.mp4',
     rating: 0,
   },
   {
@@ -266,6 +275,7 @@ export const initialProducts: ProductItem[] = [
     placement: 'Back Oversized',
     soldCount: 520,
     imageBg: 'linear-gradient(135deg, #FAF3F7 0%, #EFE1EB 100%)',
+    image: '/products/3.jpeg',
     rating: 4.9,
   },
   {
@@ -283,6 +293,7 @@ export const initialProducts: ProductItem[] = [
     placement: 'Interior Hem',
     soldCount: 198,
     imageBg: 'linear-gradient(135deg, #EBF4F8 0%, #D8EBF5 100%)',
+    image: '/products/1.jpeg',
     rating: 4.8,
   },
   {
@@ -300,6 +311,8 @@ export const initialProducts: ProductItem[] = [
     placement: 'Chest (45mm)',
     soldCount: 260,
     imageBg: 'linear-gradient(135deg, #F0F3F6 0%, #E3E7ED 100%)',
+    image: '/products/2.jpeg',
+    video: '/products/2.mp4',
     rating: 4.9,
   },
   {
@@ -317,6 +330,7 @@ export const initialProducts: ProductItem[] = [
     placement: 'Chest (45mm)',
     soldCount: 310,
     imageBg: 'linear-gradient(135deg, #FAF0EB 0%, #F5E2DA 100%)',
+    image: '/products/3.jpeg',
     rating: 4.6,
   },
   {
@@ -334,6 +348,7 @@ export const initialProducts: ProductItem[] = [
     placement: 'Interior Hem',
     soldCount: 88,
     imageBg: 'linear-gradient(135deg, #F7EFE8 0%, #EDE1D5 100%)',
+    image: '/products/1.jpeg',
     rating: 4.9,
   },
 ];

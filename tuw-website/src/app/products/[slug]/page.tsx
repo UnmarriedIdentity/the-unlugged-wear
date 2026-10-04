@@ -73,7 +73,11 @@ export default function ProductDetailPage({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14">
           {/* Left Column: Interactive Product Gallery (7 cols) */}
           <div className="lg:col-span-7">
-            <ProductGallery images={product.images} title={product.title} />
+            <ProductGallery
+              images={product.images}
+              title={product.title}
+              videoUrl={product.videoUrl}
+            />
           </div>
 
           {/* Right Column: Pricing, Variant Selector, Details (5 cols) */}

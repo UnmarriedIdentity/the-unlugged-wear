@@ -242,7 +242,7 @@ export default function OrdersView() {
           </div>
 
           {/* Independent Filter Tabs */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20, paddingTop: 8, borderTop: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20, paddingTop: 8, borderTop: '1px solid var(--tuw-border-subtle, #E5E7EB)' }}>
             {/* Payment Filter */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>
@@ -261,7 +261,7 @@ export default function OrdersView() {
                       fontWeight: paymentFilter === status ? 600 : 500,
                       cursor: 'pointer',
                       border: '1px solid',
-                      borderColor: paymentFilter === status ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-border-subtle, #E2E4E6)',
+                      borderColor: paymentFilter === status ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-border-subtle, #E5E7EB)',
                       backgroundColor: paymentFilter === status ? 'var(--tuw-bg-selected, #F8F5FF)' : 'transparent',
                       color: paymentFilter === status ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-text-secondary, #5D6772)',
                     }}
@@ -290,7 +290,7 @@ export default function OrdersView() {
                       fontWeight: fulfillmentFilter === status ? 600 : 500,
                       cursor: 'pointer',
                       border: '1px solid',
-                      borderColor: fulfillmentFilter === status ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-border-subtle, #E2E4E6)',
+                      borderColor: fulfillmentFilter === status ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-border-subtle, #E5E7EB)',
                       backgroundColor: fulfillmentFilter === status ? 'var(--tuw-bg-selected, #F8F5FF)' : 'transparent',
                       color: fulfillmentFilter === status ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-text-secondary, #5D6772)',
                     }}
@@ -307,7 +307,7 @@ export default function OrdersView() {
         <div style={{ overflowX: 'auto', width: '100%' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
-              <tr style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
+              <tr style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E5E7EB)' }}>
                 <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Order</th>
                 <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Customer</th>
                 <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Date</th>
@@ -330,7 +330,7 @@ export default function OrdersView() {
                     key={order.id}
                     onClick={() => setSelectedOrder(order)}
                     style={{
-                      borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)',
+                      borderBottom: '1px solid var(--tuw-border-subtle, #E5E7EB)',
                       cursor: 'pointer',
                       transition: 'background-color 0.15s',
                     }}
@@ -519,7 +519,7 @@ export default function OrdersView() {
             </div>
 
             {/* Purchase Summary */}
-            <div style={{ padding: 16, border: '1px solid var(--tuw-border-subtle, #E2E4E6)', borderRadius: 10 }}>
+            <div style={{ padding: 16, border: '1px solid var(--tuw-border-subtle, #E5E7EB)', borderRadius: 10 }}>
               <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 10, color: 'var(--tuw-text-primary, #262626)' }}>
                 Immutable Financial Summary
               </h4>
@@ -532,7 +532,7 @@ export default function OrdersView() {
                   <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>Shipping Fee</span>
                   <span className="tuw-tabular-nums">₹{selectedOrder.shippingFee.toFixed(2)}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600, fontSize: 14, borderTop: '1px solid var(--tuw-border-subtle, #E2E4E6)', paddingTop: 6, marginTop: 4 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600, fontSize: 14, borderTop: '1px solid var(--tuw-border-subtle, #E5E7EB)', paddingTop: 6, marginTop: 4 }}>
                   <span>Grand Total</span>
                   <span className="tuw-tabular-nums">₹{selectedOrder.total.toFixed(2)}</span>
                 </div>
@@ -634,7 +634,7 @@ export default function OrdersView() {
                 width: '100%',
                 height: 40,
                 borderRadius: 8,
-                border: '1px solid var(--tuw-border-control, #90979F)',
+                border: '1px solid var(--tuw-border-control, #D1D5DB)',
                 padding: '0 12px',
                 fontSize: 14,
               }}
@@ -657,7 +657,7 @@ export default function OrdersView() {
                 width: '100%',
                 height: 40,
                 borderRadius: 8,
-                border: '1px solid var(--tuw-border-control, #90979F)',
+                border: '1px solid var(--tuw-border-control, #D1D5DB)',
                 padding: '0 12px',
                 fontSize: 14,
               }}
@@ -726,7 +726,7 @@ export default function OrdersView() {
                 width: '100%',
                 height: 40,
                 borderRadius: 8,
-                border: '1px solid var(--tuw-border-control, #90979F)',
+                border: '1px solid var(--tuw-border-control, #D1D5DB)',
                 padding: '0 12px',
                 fontSize: 14,
               }}

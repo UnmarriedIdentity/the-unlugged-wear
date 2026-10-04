@@ -68,7 +68,7 @@ export default function Button({
     secondary: {
       backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
       color: 'var(--tuw-text-primary, #262626)',
-      border: '1px solid var(--tuw-border-control, #90979F)',
+      border: '1px solid var(--tuw-border-control, #D1D5DB)',
     },
     dark: {
       backgroundColor: 'var(--tuw-text-primary, #262626)',
@@ -87,7 +87,7 @@ export default function Button({
     outline: {
       backgroundColor: 'transparent',
       color: 'var(--tuw-text-primary, #262626)',
-      border: '1px solid var(--tuw-border-subtle, #E2E4E6)',
+      border: '1px solid var(--tuw-border-subtle, #E5E7EB)',
     },
   };
 

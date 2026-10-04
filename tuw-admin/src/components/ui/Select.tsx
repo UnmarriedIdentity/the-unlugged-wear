@@ -61,7 +61,7 @@ export default function Select({
             border: `1px solid ${
               error
                 ? 'var(--tuw-text-error, #C91818)'
-                : 'var(--tuw-border-control, #90979F)'
+                : 'var(--tuw-border-control, #D1D5DB)'
             }`,
             backgroundColor: disabled ? 'var(--tuw-bg-canvas, #F7F8F9)' : 'var(--tuw-bg-surface, #FFFFFF)',
             color: 'var(--tuw-text-primary, #262626)',

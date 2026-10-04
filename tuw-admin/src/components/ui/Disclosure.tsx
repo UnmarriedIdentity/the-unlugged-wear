@@ -47,7 +47,7 @@ export default function Disclosure({
     <div
       className={className}
       style={{
-        border: '1px solid var(--tuw-border-subtle, #E2E4E6)',
+        border: '1px solid var(--tuw-border-subtle, #E5E7EB)',
         borderRadius: 'var(--tuw-radius-card, 12px)',
         backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
         overflow: 'hidden',
@@ -121,7 +121,7 @@ export default function Disclosure({
           role="region"
           style={{
             padding: '0 20px 20px 20px',
-            borderTop: '1px solid var(--tuw-border-subtle, #E2E4E6)',
+            borderTop: '1px solid var(--tuw-border-subtle, #E5E7EB)',
             marginTop: 0,
             paddingTop: '16px',
             color: 'var(--tuw-text-secondary, #5D6772)',

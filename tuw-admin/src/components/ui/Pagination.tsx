@@ -35,7 +35,7 @@ export default function Pagination({
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '14px 18px',
-        borderTop: '1px solid var(--tuw-border-subtle, #E2E4E6)',
+        borderTop: '1px solid var(--tuw-border-subtle, #E5E7EB)',
         flexWrap: 'wrap',
         gap: '12px',
         backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
@@ -56,13 +56,14 @@ export default function Pagination({
             <select
               value={pageSize}
               onChange={(e) => onPageSizeChange(Number(e.target.value))}
+              aria-label="Rows per page"
               style={{
                 height: '28px',
                 padding: '0 8px',
                 fontSize: '12px',
                 fontWeight: 600,
                 borderRadius: '6px',
-                border: '1px solid var(--tuw-border-control, #90979F)',
+                border: '1px solid var(--tuw-border-control, #D1D5DB)',
                 backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
                 color: 'var(--tuw-text-primary, #262626)',
                 cursor: 'pointer',
@@ -70,7 +71,7 @@ export default function Pagination({
             >
               {pageSizeOptions.map((opt) => (
                 <option key={opt} value={opt}>
-                  {opt} / page
+                  {opt}
                 </option>
               ))}
             </select>
@@ -150,7 +151,7 @@ export default function Pagination({
                   padding: '0 8px',
                   borderRadius: '6px',
                   border: '1px solid',
-                  borderColor: isActive ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-border-subtle, #E2E4E6)',
+                  borderColor: isActive ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-border-subtle, #E5E7EB)',
                   backgroundColor: isActive ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-bg-surface, #FFFFFF)',
                   color: isActive ? '#FFFFFF' : 'var(--tuw-text-primary, #262626)',
                   fontSize: '13px',

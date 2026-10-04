@@ -43,7 +43,7 @@ export default function Breadcrumb({ items }: BreadcrumbProps) {
                 {item.label}
               </span>
             )}
-            {!isLast && <ChevronRight size={14} color="var(--tuw-border-control, #90979F)" />}
+            {!isLast && <ChevronRight size={14} color="var(--tuw-border-control, #D1D5DB)" />}
           </React.Fragment>
         );
       })}

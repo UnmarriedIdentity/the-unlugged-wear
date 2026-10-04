@@ -309,7 +309,7 @@ export default function RefundsPage() {
                 <span>Already Refunded:</span>
                 <span>${selectedOrder.refundedAmount.toFixed(2)}</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--tuw-text-success, #187343)', fontWeight: 600, marginTop: 4, borderTop: '1px solid #E2E4E6', paddingTop: 4 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--tuw-text-success, #187343)', fontWeight: 600, marginTop: 4, borderTop: '1px solid var(--tuw-border-subtle, #E5E7EB)', paddingTop: 4 }}>
                 <span>Available to Refund:</span>
                 <span>${availableBalance.toFixed(2)}</span>
               </div>

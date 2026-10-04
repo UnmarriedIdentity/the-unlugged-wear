@@ -78,7 +78,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               ? '1px solid var(--tuw-text-error, #C91818)'
               : isFocused
               ? '1px solid var(--tuw-action-primary, #7539FF)'
-              : '1px solid var(--tuw-border-control, #90979F)',
+              : '1px solid var(--tuw-border-control, #D1D5DB)',
             borderRadius: 'var(--tuw-radius-control, 8px)',
             padding: '0 14px',
             gap: '10px',

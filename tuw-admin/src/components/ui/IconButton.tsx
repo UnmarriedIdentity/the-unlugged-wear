@@ -40,7 +40,7 @@ export default function IconButton({
     secondary: {
       backgroundColor: 'var(--tuw-bg-surface-subtle, #F1F3F5)',
       color: 'var(--tuw-text-primary, #262626)',
-      border: '1px solid var(--tuw-border-subtle, #E2E4E6)',
+      border: '1px solid var(--tuw-border-subtle, #E5E7EB)',
     },
     ghost: {
       backgroundColor: 'transparent',
@@ -55,7 +55,7 @@ export default function IconButton({
     outline: {
       backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
       color: 'var(--tuw-text-primary, #262626)',
-      border: '1px solid var(--tuw-border-subtle, #E2E4E6)',
+      border: '1px solid var(--tuw-border-subtle, #E5E7EB)',
     },
   };
 

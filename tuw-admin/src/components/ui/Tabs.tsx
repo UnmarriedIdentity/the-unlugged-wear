@@ -28,7 +28,7 @@ export default function Tabs({
       style={{
         display: 'flex',
         gap: variant === 'pill' ? '6px' : '16px',
-        borderBottom: variant === 'underline' ? '1px solid var(--tuw-border-subtle, #E2E4E6)' : 'none',
+        borderBottom: variant === 'underline' ? '1px solid var(--tuw-border-subtle, #E5E7EB)' : 'none',
         overflowX: 'auto',
       }}
     >
