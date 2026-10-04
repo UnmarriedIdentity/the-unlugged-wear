@@ -11,12 +11,43 @@ interface DashboardShellProps {
   activeNav?: string;
 }
 
+let globalIsCollapsed: boolean = false;
+
 export default function DashboardShell({
   children,
   pageTitle = 'Dashboard',
 }: DashboardShellProps) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('tuw_admin_sidebar_collapsed');
+        if (stored !== null) {
+          const val = stored === 'true';
+          globalIsCollapsed = val;
+          return val;
+        }
+      } catch {
+        // fallback
+      }
+    }
+    return globalIsCollapsed;
+  });
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const handleToggleCollapse = () => {
+    setIsCollapsed((prev) => {
+      const next = !prev;
+      globalIsCollapsed = next;
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('tuw_admin_sidebar_collapsed', String(next));
+        } catch {
+          // ignore
+        }
+      }
+      return next;
+    });
+  };
 
   return (
     <div className="dashboardLayoutRoot">
@@ -31,8 +62,9 @@ export default function DashboardShell({
       {/* Sidebar Navigation - Fixed, All-Time Visible */}
       <Sidebar
         isCollapsed={isCollapsed}
-        onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
+        onToggleCollapse={handleToggleCollapse}
         mobileMenuOpen={mobileMenuOpen}
+        onCloseMobileMenu={() => setMobileMenuOpen(false)}
       />
 
       {/* Main Container - Offsets cleanly for fixed sidebar */}

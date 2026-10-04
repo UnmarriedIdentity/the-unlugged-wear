@@ -28,6 +28,7 @@ import {
   MoonStar,
   Contrast,
   PanelLeft,
+  X,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
@@ -35,14 +36,77 @@ interface SidebarProps {
   isCollapsed: boolean;
   onToggleCollapse: () => void;
   mobileMenuOpen?: boolean;
+  onCloseMobileMenu?: () => void;
+}
+
+// Module-level cache to persist open group state across Next.js client-side page transitions
+let globalOpenGroups: Set<string> | null = null;
+const STORAGE_KEY = 'tuw_admin_open_groups';
+
+function getActiveGroupForPath(pathname: string): string | null {
+  if (
+    pathname === '/' ||
+    pathname === '/dashboard' ||
+    pathname.startsWith('/orders') ||
+    pathname.startsWith('/products') ||
+    pathname.startsWith('/customers') ||
+    pathname.startsWith('/reports') ||
+    pathname.startsWith('/analytics')
+  ) {
+    return 'core';
+  }
+  if (
+    pathname.startsWith('/fulfillment') ||
+    pathname.startsWith('/shipments') ||
+    pathname.startsWith('/returns') ||
+    pathname.startsWith('/refunds') ||
+    pathname.startsWith('/payments')
+  ) {
+    return 'operations';
+  }
+  if (
+    pathname.startsWith('/collections') ||
+    pathname.startsWith('/designs') ||
+    pathname.startsWith('/content')
+  ) {
+    return 'merchandise';
+  }
+  if (
+    pathname.startsWith('/team') ||
+    pathname.startsWith('/audit-log')
+  ) {
+    return 'system';
+  }
+  return null;
 }
 
 export default function Sidebar({
   isCollapsed,
   onToggleCollapse,
   mobileMenuOpen = false,
+  onCloseMobileMenu,
 }: SidebarProps) {
   const pathname = usePathname();
+
+  // Close mobile drawer when pressing Escape
+  React.useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onCloseMobileMenu?.();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [mobileMenuOpen, onCloseMobileMenu]);
+
+  // When clicking any link inside mobile sidebar, close drawer smoothly
+  const handleSidebarClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('a') && mobileMenuOpen && onCloseMobileMenu) {
+      onCloseMobileMenu();
+    }
+  };
 
   // Bottom dock toolbar theme state
   const [activeThemeMode, setActiveThemeMode] = useState<'dark' | 'contrast' | 'default'>('dark');
@@ -51,20 +115,49 @@ export default function Sidebar({
     setActiveThemeMode((prev) => (prev === mode ? 'default' : mode));
   };
 
-  // Collapsible state for each section (all expanded by default)
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
-    core: true,
-    operations: true,
-    merchandise: true,
-    system: true,
+  // User-controlled accordion state: persists across route transitions & page loads
+  const [openGroups, setOpenGroups] = useState<Set<string>>(() => {
+    if (globalOpenGroups !== null) {
+      return new Set(globalOpenGroups);
+    }
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            const set = new Set<string>(parsed);
+            globalOpenGroups = set;
+            return set;
+          }
+        }
+      } catch {
+        // fallback
+      }
+    }
+    const activeGroup = getActiveGroupForPath(pathname) || 'core';
+    const initial = new Set<string>([activeGroup]);
+    globalOpenGroups = initial;
+    return initial;
   });
 
   const toggleGroup = (key: string) => {
-    setOpenGroups((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
+    setOpenGroups((prev) => {
+      // Single-accordion: opening one section closes others; clicking open section collapses it
+      const next = prev.has(key) ? new Set<string>() : new Set<string>([key]);
+      globalOpenGroups = next;
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(next)));
+        } catch {
+          // ignore
+        }
+      }
+      return next;
+    });
   };
+
+  const isGroupOpen = (key: string) => openGroups.has(key);
 
   const getIsActive = (path: string) => {
     if (path === '/' || path === '/dashboard') {
@@ -76,6 +169,7 @@ export default function Sidebar({
   return (
     <aside
       className={cn('sidebar', isCollapsed && 'sidebarCollapsed', mobileMenuOpen && 'sidebarMobileOpen')}
+      onClick={handleSidebarClick}
     >
       {/* Brand Header */}
       <div className="sidebarHeader">
@@ -93,14 +187,15 @@ export default function Sidebar({
           {!isCollapsed && <span className="brandName">TUW Admin</span>}
         </Link>
 
+        {/* Mobile Close Button */}
         <button
           type="button"
-          className="sidebarToggleBtn"
-          onClick={onToggleCollapse}
-          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          className="sidebarMobileCloseBtn"
+          onClick={onCloseMobileMenu}
+          aria-label="Close menu"
+          title="Close menu"
         >
-          {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+          <X size={18} />
         </button>
       </div>
 
@@ -117,12 +212,12 @@ export default function Sidebar({
               <span className="groupLabel">CORE</span>
               <ChevronDown
                 size={13}
-                className={cn('groupChevron', openGroups.core && 'groupChevronOpen')}
+                className={cn('groupChevron', isGroupOpen('core') && 'groupChevronOpen')}
               />
             </button>
           )}
 
-          {(!isCollapsed ? openGroups.core : true) && (
+          {(!isCollapsed ? isGroupOpen('core') : true) && (
             <div className={cn(!isCollapsed && 'navBranchTree')}>
               {/* Dashboard */}
               <div className={cn(!isCollapsed && 'navBranchItem')}>
@@ -228,12 +323,12 @@ export default function Sidebar({
               <span className="groupLabel">OPERATIONS</span>
               <ChevronDown
                 size={13}
-                className={cn('groupChevron', openGroups.operations && 'groupChevronOpen')}
+                className={cn('groupChevron', isGroupOpen('operations') && 'groupChevronOpen')}
               />
             </button>
           )}
 
-          {(!isCollapsed ? openGroups.operations : true) && (
+          {(!isCollapsed ? isGroupOpen('operations') : true) && (
             <div className={cn(!isCollapsed && 'navBranchTree')}>
               {/* Fulfillment */}
               <div className={cn(!isCollapsed && 'navBranchItem')}>
@@ -349,12 +444,12 @@ export default function Sidebar({
               <span className="groupLabel">MERCHANDISE</span>
               <ChevronDown
                 size={13}
-                className={cn('groupChevron', openGroups.merchandise && 'groupChevronOpen')}
+                className={cn('groupChevron', isGroupOpen('merchandise') && 'groupChevronOpen')}
               />
             </button>
           )}
 
-          {(!isCollapsed ? openGroups.merchandise : true) && (
+          {(!isCollapsed ? isGroupOpen('merchandise') : true) && (
             <div className={cn(!isCollapsed && 'navBranchTree')}>
               {/* Collections */}
               <div className={cn(!isCollapsed && 'navBranchItem')}>
@@ -424,12 +519,12 @@ export default function Sidebar({
               <span className="groupLabel">SYSTEM</span>
               <ChevronDown
                 size={13}
-                className={cn('groupChevron', openGroups.system && 'groupChevronOpen')}
+                className={cn('groupChevron', isGroupOpen('system') && 'groupChevronOpen')}
               />
             </button>
           )}
 
-          {(!isCollapsed ? openGroups.system : true) && (
+          {(!isCollapsed ? isGroupOpen('system') : true) && (
             <div className={cn(!isCollapsed && 'navBranchTree')}>
               {/* Team */}
               <div className={cn(!isCollapsed && 'navBranchItem')}>
@@ -513,44 +608,32 @@ export default function Sidebar({
         </ul>
 
         {/* ================================================================
-            CREATIVE THING 1: BRAND LOGO ANIMAL ARTWORK & COPYRIGHT (LIKE BIGDIRTY.AGENCY)
+            BRAND LOGO ANIMAL ARTWORK & COPYRIGHT (SEAMLESS - BIGDIRTY.AGENCY STYLE)
             ================================================================ */}
         {!isCollapsed ? (
-          <div className="sidebarStagArtCard">
-            <div className="stagIllustrationContainer">
-              <div className="stagImageWrapper">
-                <Image
-                  src="/logos/tuw-stag-white.png"
-                  alt="The Unplugged Wear Stag"
-                  width={110}
-                  height={110}
-                  className="stagArtImage"
-                  priority
-                />
-                {/* Heart Eye (from user reference artwork) */}
-                <div className="stagHeartEye" title="The Unplugged Wear">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="#FF5126">
-                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                  </svg>
-                </div>
-              </div>
+          <div className="sidebarStagDirect">
+            <div className="stagImageWrapper">
+              <Image
+                src="/logos/tuw-stag-dark.png"
+                alt="The Unplugged Wear Stag"
+                width={105}
+                height={80}
+                className="stagArtImage"
+                priority
+              />
             </div>
-
-            <div className="stagCopyrightRow">
-              <span className="stagCopyrightText">© 2026 theunpluggedwear.com</span>
-            </div>
+            <span className="stagCopyrightText">© 2026 theunpluggedwear.com</span>
           </div>
         ) : (
-          <div className="stagCollapsedCard" title="© 2026 theunpluggedwear.com">
+          <div className="stagCollapsedDirect" title="© 2026 theunpluggedwear.com">
             <div className="stagCollapsedImgWrap">
               <Image
-                src="/logos/tuw-stag-white.png"
+                src="/logos/tuw-stag-dark.png"
                 alt="TUW Stag"
                 width={26}
                 height={26}
                 className="stagCollapsedImg"
               />
-              <span className="stagHeartDot">♥</span>
             </div>
           </div>
         )}
@@ -588,10 +671,10 @@ export default function Sidebar({
               type="button"
               className="dockToolbarBtn"
               onClick={onToggleCollapse}
-              aria-label="Toggle Sidebar Layout"
-              title="Toggle Sidebar Layout"
+              aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
-              <PanelLeft size={15} />
+              {isCollapsed ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
             </button>
           </div>
         ) : (
@@ -601,8 +684,9 @@ export default function Sidebar({
               className="dockToolbarBtnCollapsed"
               onClick={onToggleCollapse}
               title="Expand Sidebar"
+              aria-label="Expand Sidebar"
             >
-              <PanelLeft size={16} />
+              <ChevronRight size={16} />
             </button>
           </div>
         )}

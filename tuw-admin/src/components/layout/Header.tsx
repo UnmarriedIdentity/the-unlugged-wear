@@ -262,61 +262,26 @@ export default function Header({
           {/* User Portrait with Role Label */}
           <div className="userProfile" title={`Logged in as ${activeRole}`}>
             <div className="avatarCodeWrapper">
-              <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg
+                width="40"
+                height="40"
+                viewBox="0 0 162 163"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="koboyoProfileSvg"
+                aria-label="Urvil Kargathala Profile"
+              >
                 <defs>
-                  <linearGradient id="boyAvatarBg" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="#F5DFB8" />
-                    <stop offset="100%" stopColor="#DDB57F" />
-                  </linearGradient>
-                  <linearGradient id="boyHairGrad" x1="12" y1="6" x2="28" y2="22" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="#3E2415" />
-                    <stop offset="100%" stopColor="#1E1008" />
-                  </linearGradient>
-                  <linearGradient id="boyJacketGrad" x1="10" y1="28" x2="30" y2="40" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="#1E293B" />
-                    <stop offset="100%" stopColor="#0F172A" />
+                  <linearGradient id="koboyoAvatarGrad" x1="0" y1="0" x2="162" y2="163" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#7539FF" />
+                    <stop offset="100%" stopColor="#501EB8" />
                   </linearGradient>
                 </defs>
-
-                {/* Background circle */}
-                <circle cx="20" cy="20" r="20" fill="url(#boyAvatarBg)" />
-
-                {/* Body / Shoulders & Atelier Shirt */}
-                <path d="M7 40C7 33.5 12 30 16 29L20 33L24 29C28 30 33 33.5 33 40H7Z" fill="url(#boyJacketGrad)" />
-                
-                {/* Inner collar / shirt accent */}
-                <path d="M17 29L20 34L23 29" stroke="#C8A96A" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-
-                {/* Neck */}
-                <path d="M17 23V29.5C17 31 23 31 23 29.5V23H17Z" fill="#E8B58D" />
-                <path d="M17 23C18.5 24.5 21.5 24.5 23 23V25C21.5 26.5 18.5 26.5 17 25V23Z" fill="#D39F75" />
-
-                {/* Face */}
-                <path d="M13.5 17C13.5 12.5 16.5 10 20 10C23.5 10 26.5 12.5 26.5 17C26.5 21.8 23.5 24.5 20 24.5C16.5 24.5 13.5 21.8 13.5 17Z" fill="#F2C5A0" />
-
-                {/* Ears */}
-                <circle cx="13.5" cy="18" r="2.2" fill="#E8B58D" />
-                <circle cx="26.5" cy="18" r="2.2" fill="#E8B58D" />
-
-                {/* Modern Short Hair - Clean textured top and short sides */}
-                <path d="M13 15.5C12.8 13 14 9.5 17.5 7.8C20 6.5 24 7 26 9C27.5 10.5 27.5 13.5 27.2 15.5C26 15 25.5 14 24.5 14C23 14 22 15 19 14.2C16.5 13.5 14.8 14.8 13 15.5Z" fill="url(#boyHairGrad)" />
-                <path d="M15 10C17 8 21 8.5 23 9.5C25 10.5 26 12 26 13C25 12 23 11 20 11.5C17.5 12 16 11 15 10Z" fill="#4E301D" />
-
-                {/* Eyebrows */}
-                <path d="M15.5 15.2C16.5 14.8 17.8 15 18.5 15.5" stroke="#2D1C13" strokeWidth="1" strokeLinecap="round" />
-                <path d="M21.5 15.5C22.2 15 23.5 14.8 24.5 15.2" stroke="#2D1C13" strokeWidth="1" strokeLinecap="round" />
-
-                {/* Eyes */}
-                <ellipse cx="17.2" cy="17.2" rx="1.1" ry="1.3" fill="#201209" />
-                <ellipse cx="22.8" cy="17.2" rx="1.1" ry="1.3" fill="#201209" />
-                <circle cx="16.9" cy="16.8" r="0.4" fill="#FFFFFF" />
-                <circle cx="22.5" cy="16.8" r="0.4" fill="#FFFFFF" />
-
-                {/* Nose */}
-                <path d="M19.5 18.5L20 19.5L20.5 18.5" stroke="#D39F75" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round" />
-
-                {/* Friendly smile */}
-                <path d="M18.2 21.2C19.2 22.3 20.8 22.3 21.8 21.2" stroke="#A85842" strokeWidth="1.2" strokeLinecap="round" />
+                <circle cx="81" cy="81.5" r="80" fill="#F8F5FF" />
+                <path
+                  d="M65.6 8.6a74 74 0 0 0-55.7 53 82 82 0 0 0 0 38.7 72 72 0 0 0 39.6 48.2 72 72 0 0 0 79.3-10.5 77 77 0 0 0 17.7-92 74 74 0 0 0-45-36.5c-8.7-2.4-27.3-2.8-35.9-.9m34.2 6.5a62 62 0 0 1 29.7 17.4A58 58 0 0 1 146.1 60a85 85 0 0 1 .1 41 71 71 0 0 1-12.8 24.4l-4.7 5.9-3.4-7.2a46 46 0 0 0-30.3-25l-7-1.7 3.9-1.7A29 29 0 0 0 107 71a28 28 0 0 0-15.4-24.6 26.6 26.6 0 0 0-36.2 15.9 31 31 0 0 0 1.4 21.3c2.4 4.6 9 11 13.4 12.8l3 1.3-4.6.6c-13.4 1.9-31.1 16.9-34.1 29-.4 1.5-1.1 2.7-1.6 2.7-1.4 0-8.9-10-11.9-15.9a77 77 0 0 1-6.5-48.2c3-12.9 8.8-23.3 17.9-32.5a67 67 0 0 1 67.4-18.3m-13.3 35a25 25 0 0 1 14.4 15.6 21.6 21.6 0 0 1-11.5 24.9 20 20 0 0 1-26-6.8 22 22 0 0 1 2.4-28.1c6.1-6 12.7-7.8 20.7-5.6m9.6 54.9a41 41 0 0 1 25.6 24.9l1.7 5.3-2.9 2.5A75 75 0 0 1 85 150.5a77 77 0 0 1-32.3-6.3c-7.4-3.5-14.7-8.7-14.7-10.5 0-2.5 5.9-13.3 9.5-17.5a42 42 0 0 1 18-11.4 62 62 0 0 1 30.6.2"
+                  fill="url(#koboyoAvatarGrad)"
+                />
               </svg>
             </div>
             <div className="userInfo">
