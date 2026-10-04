@@ -1,0 +1,265 @@
+{
+  "project": "TUW Admin Tailwind v4 Token Rebuild",
+  "tracker_version": 1,
+  "source_of_truth": {
+    "code": "tuw-admin/src (branch v2)",
+    "tokens": "tuw-admin/src/app/globals.css @theme",
+    "skill": "tuw-admin/docs/AUTH_TOKEN_SKILL.md",
+    "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
+  },
+  "summary": {
+    "total": 18,
+    "done": 3,
+    "in_progress": 1,
+    "backlog": 14
+  },
+  "tasks": [
+    {
+      "id": "001",
+      "title": "Login buttons tokenize",
+      "status": "done",
+      "owner": "agent",
+      "started": null,
+      "finished": "2026-10-04",
+      "log": "v2:ef392b0",
+      "design_match": "yes",
+      "key_decisions": [
+        "auth-* namespace; admin tokens untouched",
+        "@layer base reset fix (unlayered button reset was beating utilities)"
+      ],
+      "verified": true,
+      "follow_ups": []
+    },
+    {
+      "id": "002",
+      "title": "Login inputs tokenize",
+      "status": "done",
+      "owner": "agent",
+      "started": null,
+      "finished": "2026-10-04",
+      "log": "v2:b4e3fe6",
+      "design_match": "yes",
+      "key_decisions": [
+        "Ternary border swaps instead of additive overrides",
+        "Error state retains input values"
+      ],
+      "verified": true,
+      "follow_ups": []
+    },
+    {
+      "id": "003",
+      "title": "Login shell tokenize",
+      "status": "done",
+      "owner": "agent",
+      "started": null,
+      "finished": "2026-10-04",
+      "log": "v2:f61fac1",
+      "design_match": "yes",
+      "key_decisions": [
+        "49.444%/50.556% fractions kept arbitrary (exact Figma math)",
+        "heroOverlay gradient + radial washes are documented art exceptions"
+      ],
+      "verified": true,
+      "follow_ups": ["Owner screenshot verify: split + stacking"]
+    },
+    {
+      "id": "004",
+      "title": "Global skill + JSON tracker",
+      "status": "in_progress",
+      "owner": "agent",
+      "started": "2026-10-04",
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "follow_ups": []
+    },
+    {
+      "id": "005",
+      "title": "Button-family rename (ink -> button)",
+      "status": "backlog",
+      "owner": null,
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "follow_ups": []
+    },
+    {
+      "id": "006",
+      "title": "Legacy alias reconciliation",
+      "status": "backlog",
+      "owner": null,
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "follow_ups": []
+    },
+    {
+      "id": "007",
+      "title": "Ghost-var tokenization (22 TSX hits)",
+      "status": "backlog",
+      "owner": null,
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "follow_ups": []
+    },
+    {
+      "id": "008",
+      "title": "Login: controls row + divider",
+      "status": "backlog",
+      "owner": null,
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "follow_ups": []
+    },
+    {
+      "id": "009",
+      "title": "Login: hero type + header",
+      "status": "backlog",
+      "owner": null,
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "follow_ups": []
+    },
+    {
+      "id": "010",
+      "title": "Login: secondary views (reset/recovery)",
+      "status": "backlog",
+      "owner": null,
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "follow_ups": []
+    },
+    {
+      "id": "011",
+      "title": "Signup: shell",
+      "status": "backlog",
+      "owner": null,
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "follow_ups": []
+    },
+    {
+      "id": "012",
+      "title": "Signup: social + inputs",
+      "status": "backlog",
+      "owner": null,
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "follow_ups": []
+    },
+    {
+      "id": "013",
+      "title": "Signup: terms + submit",
+      "status": "backlog",
+      "owner": null,
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "follow_ups": []
+    },
+    {
+      "id": "014",
+      "title": "Signup: verify + OTP",
+      "status": "backlog",
+      "owner": null,
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "follow_ups": []
+    },
+    {
+      "id": "015",
+      "title": "UI primitives (Button/Card/Badge/Input)",
+      "status": "backlog",
+      "owner": null,
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "follow_ups": []
+    },
+    {
+      "id": "016",
+      "title": "sub-* shared pages",
+      "status": "backlog",
+      "owner": null,
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "follow_ups": []
+    },
+    {
+      "id": "017",
+      "title": "Sidebar/Header/DashboardShell chrome",
+      "status": "backlog",
+      "owner": null,
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "follow_ups": []
+    },
+    {
+      "id": "018",
+      "title": "home-* vs shell dedupe",
+      "status": "backlog",
+      "owner": null,
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "follow_ups": ["Bucket-B decision (Reel removal restore?)", ".gitattributes for CRLF noise"]
+    }
+  ],
+  "workflow": {
+    "how_to_close_a_task": "Convert -> gates (zero-hex/bracket grep, typecheck, test 4/4, build 38/38, built-CSS token proof, screenshots 360/1024/1440 + ?state=) -> commit exact paths -> update entry (status, log, design_match, key_decisions, verified, finished) + summary counts. See AUTH_TOKEN_SKILL.md sections 5-6.",
+    "validation": "ids unique; status done requires log commit + verified true; status must match folders if task logs used; no Bucket-B/C paths in any log commit."
+  }
+}
