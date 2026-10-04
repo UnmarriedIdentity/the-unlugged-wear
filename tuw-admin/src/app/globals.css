@@ -43,7 +43,9 @@
   /* Auth (login/signup) palette — Figma Storeflow frames, tokenized, no hardcodes in JSX.
      Admin --color-* above untouched; auth uses its own namespace. */
   --color-auth-ink: #242424;
-  --color-auth-ink-hover: #141414;
+  /* Button fills: shared bg; login-family hover vs signup (auth-pure) hover */
+  --color-auth-button: #242424;
+  --color-auth-button-hover: #141414;
   --color-auth-pure: #000000;
   --color-auth-muted: #6C6C6C;
   --color-auth-faint: #9A9A9A;
@@ -82,6 +84,7 @@
   --text-auth-input--line-height: 22.4px;
   --text-auth-divider: 16px;
   --text-auth-divider--line-height: 20.2px;
+  --leading-auth-link: 16.8px;
   --text-auth-input-filled: 16px;
   --text-auth-input-filled--line-height: 25.6px;
   --tracking-auth-input: 0.28px;
@@ -89,6 +92,8 @@
 
   /* Auth field rhythm */
   --spacing-auth-field-gap: clamp(16px, 2.2vh, 24px);
+  /* forgotPasswordRow top+bottom only (2.4vh middle term) */
+  --spacing-auth-row-gap: clamp(16px, 2.4vh, 24px);
   /* socialRow + dividerRow only (2.5vh middle term — do NOT unify with field-gap) */
   --spacing-auth-social-gap: clamp(16px, 2.5vh, 24px);
 }
@@ -1836,76 +1841,13 @@
    .login-inputFieldFilled, .login-inputField::placeholder, .login-inputIcon,
    .login-togglePasswordBtn, .login-errorMessage, .login-errorIcon. */
 
-/* Frame 132: Remember me row */
-.login-rememberRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 10px;
-  margin-bottom: clamp(16px, 2.2vh, 24px);
-  cursor: pointer;
-  user-select: none;
-  width: fit-content;
-}
-
-/* Rectangle 2: 20x20, radius 6px, stroke #E7EFEF */
-.login-checkboxBox {
-  width: 20px;
-  height: 20px;
-  border-radius: 6px;
-  border: 1px solid #E7EFEF;
-  background: #FFFFFF;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s ease;
-  flex-shrink: 0;
-}
-
-.login-checkboxBoxChecked {
-  background: #242424;
-  border-color: #242424;
-}
-
-.login-rememberText {
-  font-family: var(--font-main), sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  color: #242424;
-  line-height: 22.4px;
-  letter-spacing: 0.28px;
-}
+/* Login controls migrated to Tailwind auth-* utilities in LoginPage.tsx (pixel-identical).
+   Removed: .login-rememberRow, .login-checkboxBox, .login-checkboxBoxChecked,
+   .login-rememberText, .login-forgotPasswordRow, .login-resetLink. */
 
 /* Primary_button 568x48 radius 12px fill #242424 — migrated to Tailwind in LoginPage.tsx (see .login-primaryButton removal). */
 
-/* Frame 133: Forgot password row */
-.login-forgotPasswordRow {
-  font-family: var(--font-main), sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  color: #242424;
-  line-height: 22.4px;
-  letter-spacing: 0.28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: clamp(16px, 2.4vh, 24px);
-  margin-bottom: clamp(16px, 2.4vh, 24px);
-  width: 100%;
-}
-
-.login-resetLink {
-  color: #115D5D;
-  font-weight: 600;
-  line-height: 16.8px;
-  letter-spacing: 0.28px;
-  cursor: pointer;
-}
-
-.login-resetLink:hover {
-  text-decoration: underline;
-}
+/* (forgot-password row + reset link removed — see migration comment above) */
 
 /* Sign up for free 568x48 radius 10px — migrated to Tailwind in LoginPage.tsx (see .login-signupButton removal). */
 

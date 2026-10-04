@@ -307,31 +307,29 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
 
                 {/* Frame 132: Remember Me Checkbox */}
                 <div
-                  className={styles.rememberRow}
+                  className="flex items-center gap-2 mt-2.5 mb-auth-field-gap cursor-pointer select-none w-fit"
                   onClick={() => setRememberMe(!rememberMe)}
                   id="remember-me-toggle"
                 >
                   <div
-                    className={`${styles.checkboxBox} ${
-                      rememberMe ? styles.checkboxBoxChecked : ''
-                    }`}
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-auth-checkbox border bg-white transition-all duration-150 ${rememberMe ? 'bg-auth-button border-auth-button' : 'border-auth-check-line'}`}
                   >
                     {rememberMe && <Check size={12} strokeWidth={3} color="currentColor" className="text-white" />}
                   </div>
-                  <span className={styles.rememberText}>Remember me</span>
+                  <span className="text-auth-input tracking-auth-input font-normal text-auth-ink">Remember me</span>
                 </div>
 
-                {/* Primary_button in Figma: 568x48, radius 12px, fill auth-ink token */}
-                <button type="submit" className="flex h-12 w-full max-w-auth-form items-center justify-center rounded-xl bg-auth-ink text-auth-btn font-bold text-white select-none transition-colors duration-150 hover:bg-auth-ink-hover" id="login-submit-btn">
+                {/* Primary_button in Figma: 568x48, radius 12px, fill auth-button token */}
+                <button type="submit" className="flex h-12 w-full max-w-auth-form items-center justify-center rounded-xl bg-auth-button text-auth-btn font-bold text-white select-none transition-colors duration-150 hover:bg-auth-button-hover" id="login-submit-btn">
                   Log in
                 </button>
               </form>
 
               {/* Frame 133: Forgot Password Link */}
-              <div className={styles.forgotPasswordRow}>
+              <div className="flex w-full items-center justify-center gap-2 my-auth-row-gap text-auth-input tracking-auth-input font-normal text-auth-ink">
                 Did you forget your password?{' '}
                 <span
-                  className={styles.resetLink}
+                  className="text-auth-teal font-semibold leading-auth-link tracking-auth-input cursor-pointer hover:underline"
                   onClick={() => applyState('reset')}
                   id="goto-reset-btn"
                 >
@@ -383,7 +381,7 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
 
                 <button
                   type="submit"
-                  className="flex h-12 w-full max-w-auth-reset items-center justify-center rounded-xl bg-auth-ink text-auth-btn font-bold text-white select-none transition-colors duration-150 hover:bg-auth-ink-hover"
+                  className="flex h-12 w-full max-w-auth-reset items-center justify-center rounded-xl bg-auth-button text-auth-btn font-bold text-white select-none transition-colors duration-150 hover:bg-auth-button-hover"
                   id="reset-submit-btn"
                 >
                   Reset password
@@ -424,7 +422,7 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
               {/* Primary_button: Back to login */}
               <button
                 type="button"
-                className="flex h-12 w-full max-w-auth-recovery items-center justify-center rounded-xl bg-auth-ink text-auth-btn font-bold text-white select-none transition-colors duration-150 hover:bg-auth-ink-hover"
+                className="flex h-12 w-full max-w-auth-recovery items-center justify-center rounded-xl bg-auth-button text-auth-btn font-bold text-white select-none transition-colors duration-150 hover:bg-auth-button-hover"
                 onClick={() => applyState('default')}
                 id="back-to-login-btn"
               >
