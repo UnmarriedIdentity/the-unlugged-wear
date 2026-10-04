@@ -1003,382 +1003,643 @@ a {
 }
 
 /* ==========================================================================
-   SIDEBAR CREATIVE WIDGETS: ATELIER PULSE & STAFF SANDBOX
+   SIDEBAR CREATIVE LUXURY: ATELIER DROP LOOKBOOK & SOUNDSCAPE
    ========================================================================== */
 
-/* 1. Atelier Pulse / Live Storefront Card */
-.sidebarAtelierCard {
+/* 1. Atelier Lookbook Showcase Card */
+.atelierLookbookCard {
   margin-top: 14px;
-  padding: 12px;
-  background: linear-gradient(145deg, #181820 0%, #101015 100%);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 12px;
-  color: #FFFFFF;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
-  position: relative;
-  overflow: hidden;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-sizing: border-box;
-}
-
-.sidebarAtelierCard::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 70px;
-  height: 70px;
-  background: radial-gradient(circle, rgba(117, 57, 255, 0.18) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-.sidebarAtelierCard:hover {
-  border-color: rgba(200, 169, 106, 0.4);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(200, 169, 106, 0.15);
-}
-
-.atelierCardTop {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 9px;
-}
-
-.atelierBadge {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-
-.atelierPulseBeacon {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 10px;
-  height: 10px;
-}
-
-.atelierPulsePing {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background-color: #22C55E;
-  opacity: 0.75;
-  animation: tuwBeaconPing 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
-}
-
-.atelierPulseDot {
-  position: relative;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background-color: #22C55E;
-  box-shadow: 0 0 6px rgba(34, 197, 94, 0.8);
-}
-
-@keyframes tuwBeaconPing {
-  0% {
-    transform: scale(0.8);
-    opacity: 0.8;
-  }
-  75%, 100% {
-    transform: scale(2.4);
-    opacity: 0;
-  }
-}
-
-.atelierBadgeText {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: #F3F4F6;
-  text-transform: uppercase;
-  font-family: var(--font-urbanist);
-}
-
-.atelierShoppersBadge {
-  font-size: 10.5px;
-  font-weight: 600;
-  color: #34D399;
-  background-color: rgba(16, 185, 129, 0.14);
-  padding: 2px 7px;
-  border-radius: 12px;
-  border: 1px solid rgba(52, 211, 153, 0.25);
-  line-height: 1.2;
-}
-
-.atelierCardBody {
-  margin-bottom: 10px;
-}
-
-.atelierMetricRow {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  padding: 6px 8px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.atelierMetricItem {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.atelierMetricRight {
-  align-items: flex-end;
-  text-align: right;
-}
-
-.atelierMetricLabel {
-  font-size: 9.5px;
-  color: #94A3B8;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 600;
-}
-
-.atelierMetricValue {
-  font-size: 13.5px;
-  font-weight: 700;
-  color: #FFFFFF;
-  letter-spacing: -0.01em;
-  font-family: var(--font-urbanist);
-}
-
-.atelierCtaBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  width: 100%;
-  height: 30px;
-  border-radius: 7px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #F8FAFC;
-  font-size: 11.5px;
-  font-weight: 600;
-  text-decoration: none;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  box-sizing: border-box;
-}
-
-.atelierCtaBtn:hover {
-  background: rgba(255, 255, 255, 0.16);
-  border-color: rgba(255, 255, 255, 0.25);
-  color: #FFFFFF;
-  transform: translateY(-1px);
-}
-
-.atelierCtaArrow {
-  transition: transform 0.15s ease;
-}
-
-.atelierCtaBtn:hover .atelierCtaArrow {
-  transform: translate(1px, -1px);
-}
-
-/* Collapsed Atelier Button */
-.atelierCollapsedBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  margin: 12px auto 0 auto;
-  border-radius: 10px;
-  background: linear-gradient(145deg, #181820 0%, #101015 100%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #FFFFFF;
-  cursor: pointer;
-  position: relative;
-  transition: all 0.15s ease;
-  text-decoration: none;
-}
-
-.atelierCollapsedBtn:hover {
-  border-color: rgba(200, 169, 106, 0.5);
-  transform: scale(1.05);
-}
-
-.atelierCollapsedBtn .atelierPulseBeacon {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-}
-
-/* 2. Staff Profile & Demo Sandbox Control Card */
-.sidebarStaffCard {
-  margin-top: 10px;
-  padding: 10px;
   background-color: var(--tuw-bg-surface, #FFFFFF);
   border: 1px solid var(--tuw-border-subtle, #E9E9E9);
   border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  transition: all 0.15s ease;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   box-sizing: border-box;
 }
 
-.sidebarStaffCard:hover {
-  border-color: #D1D5DB;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+.atelierLookbookCard:hover {
+  border-color: #C8A96A;
+  box-shadow: 0 6px 18px rgba(200, 169, 106, 0.15), 0 2px 6px rgba(0, 0, 0, 0.04);
+  transform: translateY(-1px);
 }
 
-.staffProfileRow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.staffAvatarWrap {
+.lookbookImageWrap {
   position: relative;
-  flex-shrink: 0;
+  width: 100%;
+  height: 125px;
+  background-color: #111116;
+  cursor: pointer;
+  overflow: hidden;
+  display: block;
 }
 
-.staffAvatar {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #7539FF 0%, #9B6BFF 100%);
-  color: #FFFFFF;
-  font-size: 12px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  letter-spacing: 0.02em;
-  box-shadow: 0 2px 6px rgba(117, 57, 255, 0.22);
+.lookbookImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.staffStatusDot {
+.lookbookImageWrap:hover .lookbookImg {
+  transform: scale(1.08);
+}
+
+.lookbookImageOverlay {
   position: absolute;
-  bottom: -1px;
-  right: -1px;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background-color: #10B981;
-  border: 2px solid #FFFFFF;
-}
-
-.staffMeta {
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, transparent 40%, rgba(0, 0, 0, 0.75) 100%);
   display: flex;
   flex-direction: column;
-  min-width: 0;
-  flex: 1;
+  justify-content: space-between;
+  padding: 8px 10px;
+  box-sizing: border-box;
+  pointer-events: none;
 }
 
-.staffNameRow {
+.lookbookDropBadge {
+  align-self: flex-start;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #C8A96A;
+  background: rgba(17, 17, 22, 0.85);
+  backdrop-filter: blur(4px);
+  padding: 2.5px 7px;
+  border-radius: 4px;
+  border: 1px solid rgba(200, 169, 106, 0.4);
+  text-transform: uppercase;
+}
+
+.lookbookQuickViewBtn {
+  align-self: flex-end;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #111827;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 9px;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(4px);
+  transition: all 0.2s ease;
+}
+
+.lookbookImageWrap:hover .lookbookQuickViewBtn {
+  background: #FFFFFF;
+  color: #7539FF;
+  transform: scale(1.04);
+}
+
+.lookbookMeta {
+  padding: 10px 12px;
+  background: #FFFFFF;
+}
+
+.lookbookTitleRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
 }
 
-.staffName {
+.lookbookTitle {
   font-size: 12.5px;
   font-weight: 700;
   color: #111827;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.25;
+  font-family: var(--font-urbanist);
 }
 
-.staffRoleRow {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 1px;
-}
-
-.staffRole {
-  font-size: 11px;
-  color: #5D6772;
-  font-weight: 500;
-}
-
-.staffSandboxTag {
-  font-size: 9.5px;
+.lookbookGsmTag {
+  font-size: 10px;
   font-weight: 700;
   color: #7539FF;
   background-color: #F8F5FF;
-  padding: 1px 5px;
+  padding: 1.5px 6px;
   border-radius: 4px;
-  border: 1px solid rgba(117, 57, 255, 0.2);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+  border: 1px solid rgba(117, 57, 255, 0.15);
+  white-space: nowrap;
 }
 
-.resetDemoBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  width: 100%;
-  height: 28px;
-  background: #F9FAFB;
-  border: 1px dashed #CBD5E1;
-  border-radius: 7px;
-  color: #5D6772;
+.lookbookSubtitle {
   font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  user-select: none;
+  color: #717D8A;
+  margin-top: 3px;
+  font-weight: 500;
 }
 
-.resetDemoBtn:hover {
-  background-color: #F8F5FF;
-  border-color: #7539FF;
-  color: #7539FF;
-}
-
-.resetDemoBtn:active {
-  transform: scale(0.98);
-}
-
-.resetSpinning {
-  animation: tuwSpin 0.7s linear infinite;
-}
-
-@keyframes tuwSpin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Collapsed Staff Wrap */
-.staffCollapsedWrap {
-  display: flex;
-  justify-content: center;
-  margin-top: 10px;
-}
-
-.staffCollapsedBtn {
-  background: transparent;
-  border: none;
+/* Collapsed Lookbook Button */
+.lookbookCollapsedBtn {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  margin: 12px auto 0 auto;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1.5px solid #C8A96A;
+  background-color: #111116;
   cursor: pointer;
   padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.15s ease;
+  box-shadow: 0 2px 8px rgba(200, 169, 106, 0.2);
+  transition: transform 0.2s ease;
 }
 
-.staffCollapsedBtn:hover {
+.lookbookCollapsedBtn:hover {
   transform: scale(1.08);
+}
+
+.lookbookCollapsedImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lookbookSparkleDot {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 8px;
+  color: #C8A96A;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 2. Atelier Soundscape & Provenance Card */
+.atelierSoundscapeCard {
+  margin-top: 10px;
+  padding: 11px 12px;
+  background: linear-gradient(145deg, #181820 0%, #0F0F14 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  color: #FFFFFF;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.06);
+  box-sizing: border-box;
+}
+
+.soundscapeHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.soundscapeLeft {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.soundscapePlayBtn {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.soundscapePlayBtn:hover {
+  background: #C8A96A;
+  color: #111116;
+  border-color: #C8A96A;
+  transform: scale(1.06);
+}
+
+.soundscapePlayBtnActive {
+  background: rgba(200, 169, 106, 0.2);
+  border-color: #C8A96A;
+  color: #C8A96A;
+}
+
+.soundscapeInfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.soundscapeTitle {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #F3F4F6;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: var(--font-urbanist);
+}
+
+.soundscapeSubtitle {
+  font-size: 10px;
+  color: #94A3B8;
+  font-weight: 500;
+}
+
+/* Sound Equalizer Animated Bars */
+.soundEqualizer {
+  display: flex;
+  align-items: flex-end;
+  gap: 2.5px;
+  height: 16px;
+  padding: 0 2px;
+}
+
+.soundBar {
+  width: 2.5px;
+  background: #C8A96A;
+  border-radius: 2px;
+  animation-duration: 1.2s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+}
+
+.soundBar1 {
+  height: 6px;
+  animation-name: tuwWave1;
+}
+
+.soundBar2 {
+  height: 14px;
+  animation-name: tuwWave2;
+  animation-delay: 0.2s;
+}
+
+.soundBar3 {
+  height: 9px;
+  animation-name: tuwWave3;
+  animation-delay: 0.4s;
+}
+
+.soundBar4 {
+  height: 12px;
+  animation-name: tuwWave4;
+  animation-delay: 0.15s;
+}
+
+.soundEqualizerPaused .soundBar {
+  animation: none !important;
+  height: 3px !important;
+  background: #475569 !important;
+}
+
+@keyframes tuwWave1 {
+  0%, 100% { height: 4px; }
+  50% { height: 14px; }
+}
+
+@keyframes tuwWave2 {
+  0%, 100% { height: 15px; }
+  50% { height: 5px; }
+}
+
+@keyframes tuwWave3 {
+  0%, 100% { height: 8px; }
+  50% { height: 16px; }
+}
+
+@keyframes tuwWave4 {
+  0%, 100% { height: 12px; }
+  50% { height: 4px; }
+}
+
+/* Provenance Coordinates Seal */
+.atelierProvenanceRow {
+  margin-top: 9px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.provenanceCoordinates {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #C8A96A;
+  text-transform: uppercase;
+}
+
+.provenanceMotto {
+  font-size: 10px;
+  color: #94A3B8;
+  font-style: italic;
+}
+
+/* Collapsed Soundscape */
+.soundscapeCollapsedBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  margin: 10px auto 0 auto;
+  border-radius: 8px;
+  background: #181820;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #C8A96A;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.soundscapeCollapsedBtn:hover {
+  transform: scale(1.08);
+  border-color: #C8A96A;
+}
+
+.soundEqualizerMini {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 12px;
+}
+
+.soundBarMini {
+  width: 2px;
+  background: #C8A96A;
+  border-radius: 1px;
+}
+
+/* ==========================================================================
+   LOOKBOOK LIGHTBOX MODAL
+   ========================================================================== */
+.lookbookModalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 14, 0.75);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+  animation: tuwFadeIn 0.2s ease-out;
+}
+
+.lookbookModalContent {
+  background: #FFFFFF;
+  border-radius: 16px;
+  max-width: 940px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border: 1px solid #E5E7EB;
+  display: flex;
+  flex-direction: column;
+  animation: tuwModalScale 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes tuwFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes tuwModalScale {
+  from { opacity: 0; transform: scale(0.96) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.lookbookModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid #F1F5F9;
+}
+
+.lookbookModalBrand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lookbookModalStag {
+  font-size: 16px;
+  color: #C8A96A;
+  background: #FAF5EA;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(200, 169, 106, 0.3);
+}
+
+.lookbookModalHeading {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.lookbookModalSub {
+  font-size: 12px;
+  color: #64748B;
+}
+
+.lookbookCloseBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.lookbookCloseBtn:hover {
+  background: #0F172A;
+  color: #FFFFFF;
+  border-color: #0F172A;
+}
+
+.lookbookModalBody {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  padding: 24px;
+}
+
+@media (max-width: 768px) {
+  .lookbookModalBody {
+    grid-template-columns: 1fr;
+  }
+}
+
+.lookbookMainImgWrap {
+  position: relative;
+  width: 100%;
+  height: 420px;
+  background-color: #111116;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.lookbookMainImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lookbookNavOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  pointer-events: none;
+}
+
+.lookbookNavBtn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #111827;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.lookbookNavBtn:hover {
+  background: #FFFFFF;
+  transform: scale(1.08);
+  color: #7539FF;
+}
+
+.lookbookDetailsPane {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.lookbookBatchPill {
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #C8A96A;
+  background-color: #FAF5EA;
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(200, 169, 106, 0.3);
+  text-transform: uppercase;
+}
+
+.lookbookGarmentTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+  margin: 10px 0 8px 0;
+  letter-spacing: -0.02em;
+}
+
+.lookbookStory {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #475569;
+  margin: 0 0 16px 0;
+}
+
+.lookbookSpecGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 20px;
+  background-color: #F8FAFC;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #E2E8F0;
+}
+
+.lookbookSpecItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.specLabel {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94A3B8;
+  font-weight: 700;
+}
+
+.specValue {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #0F172A;
+}
+
+.lookbookThumbRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid #F1F5F9;
+}
+
+.lookbookThumbBtn {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  background-color: #111116;
+  transition: all 0.15s ease;
+}
+
+.lookbookThumbBtn:hover {
+  transform: translateY(-2px);
+}
+
+.lookbookThumbBtnActive {
+  border-color: #7539FF;
+  box-shadow: 0 0 0 2px rgba(117, 57, 255, 0.25);
+}
+
+.lookbookThumbImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .sidebarCollapsed .sidebarFooter {

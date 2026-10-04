@@ -25,10 +25,13 @@ import {
   Palette,
   FileText,
   ShieldCheck,
-  ArrowUpRight,
+  Eye,
+  Volume2,
+  VolumeX,
+  X,
+  Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
-import { useAdminState } from '@/mocks/state';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -36,38 +39,49 @@ interface SidebarProps {
   mobileMenuOpen?: boolean;
 }
 
+const ATELIER_DROP_LOOKBOOK = [
+  {
+    id: 1,
+    title: 'The Heavyweight Boxy Tee',
+    batch: 'Drop 04 · Limited 500 Pcs',
+    image: '/products/1.jpeg',
+    gsm: '280 GSM Organic Cotton',
+    color: 'Raw Umber & Obsidian',
+    story: 'Cut from ultra-dense combed organic cotton jersey. Built for timeless drape and quiet comfort.',
+  },
+  {
+    id: 2,
+    title: 'Tailored Indigo Overshirt',
+    batch: 'Drop 04 · Limited 350 Pcs',
+    image: '/products/3.jpeg',
+    gsm: '320 GSM Pure Linen-Twill',
+    color: 'Deep Botanical Indigo',
+    story: 'Woven with natural slub fibers. Features mother-of-pearl buttons and signature back yoke tucks.',
+  },
+  {
+    id: 3,
+    title: 'Slow Living Atelier Studio',
+    batch: 'Atelier Archive · 2026',
+    image: '/products/2.jpeg',
+    gsm: 'Handcrafted Heritage',
+    color: 'Indiranagar Atelier, Bangalore',
+    story: 'Mindful design in limited runs. Every piece is cut, assembled, and finished by master artisans.',
+  },
+];
+
 export default function Sidebar({
   isCollapsed,
   onToggleCollapse,
   mobileMenuOpen = false,
 }: SidebarProps) {
   const pathname = usePathname();
-  const { orders, resetDemoData, showToast } = useAdminState();
-  const [isResetting, setIsResetting] = useState(false);
 
-  // Compute live storefront stats from demo orders
-  const todayRevenue = orders
-    .filter((o) => o.paymentStatus === 'paid')
-    .reduce((sum, o) => sum + (o.paidAmount || 0), 0);
-  const formattedRevenue = `₹${(todayRevenue || 39190).toLocaleString('en-IN', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
+  // Editorial Lookbook modal state
+  const [lookbookOpen, setLookbookOpen] = useState(false);
+  const [activeLookbookIndex, setActiveLookbookIndex] = useState(0);
 
-  const handleResetDemo = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsResetting(true);
-    resetDemoData();
-    showToast({
-      type: 'info',
-      title: 'Demo State Reset',
-      description: 'Store fixtures and demo metrics restored to baseline.',
-    });
-    setTimeout(() => {
-      setIsResetting(false);
-    }, 700);
-  };
+  // Atelier Soundscape audio toggle state
+  const [isAmbiancePlaying, setIsAmbiancePlaying] = useState(true);
 
   // Collapsible state for each section (all expanded by default)
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
@@ -531,111 +545,255 @@ export default function Sidebar({
         </ul>
 
         {/* ================================================================
-            CREATIVE THING 1: STOREFRONT LIVE & ATELIER PULSE CARD
+            CREATIVE THING 1: ATELIER EDITORIAL DROP LOOKBOOK CARD
             ================================================================ */}
         {!isCollapsed ? (
-          <div className="sidebarAtelierCard">
-            <div className="atelierCardTop">
-              <div className="atelierBadge">
-                <span className="atelierPulseBeacon">
-                  <span className="atelierPulsePing" />
-                  <span className="atelierPulseDot" />
-                </span>
-                <span className="atelierBadgeText">Storefront Live</span>
-              </div>
-              <span className="atelierShoppersBadge">2 online</span>
-            </div>
-
-            <div className="atelierCardBody">
-              <div className="atelierMetricRow">
-                <div className="atelierMetricItem">
-                  <span className="atelierMetricLabel">Today&apos;s Revenue</span>
-                  <span className="atelierMetricValue">{formattedRevenue}</span>
-                </div>
-                <div className="atelierMetricItem atelierMetricRight">
-                  <span className="atelierMetricLabel">Active Carts</span>
-                  <span className="atelierMetricValue">4 items</span>
-                </div>
-              </div>
-            </div>
-
-            <a
-              href="http://localhost:3000"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="atelierCtaBtn"
-              title="Launch customer storefront in a new tab"
+          <div className="atelierLookbookCard">
+            <div
+              className="lookbookImageWrap"
+              onClick={() => setLookbookOpen(true)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && setLookbookOpen(true)}
+              title="Click to view full Atelier Lookbook"
             >
-              <span>View Storefront</span>
-              <ArrowUpRight size={13} className="atelierCtaArrow" />
-            </a>
+              <Image
+                src="/products/1.jpeg"
+                alt="Atelier Drop 04"
+                width={220}
+                height={125}
+                className="lookbookImg"
+                priority
+              />
+              <div className="lookbookImageOverlay">
+                <span className="lookbookDropBadge">✦ DROP 04</span>
+                <span className="lookbookQuickViewBtn">
+                  <Eye size={12} />
+                  <span>Lookbook</span>
+                </span>
+              </div>
+            </div>
+
+            <div className="lookbookMeta">
+              <div className="lookbookTitleRow">
+                <span className="lookbookTitle">Heavyweight Boxy Tee</span>
+                <span className="lookbookGsmTag">280 GSM</span>
+              </div>
+              <p className="lookbookSubtitle">Raw Umber · Limited 500 Pcs</p>
+            </div>
           </div>
         ) : (
-          <a
-            href="http://localhost:3000"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="atelierCollapsedBtn"
-            title="Storefront Live: 2 shoppers online (Click to view)"
+          <button
+            type="button"
+            className="lookbookCollapsedBtn"
+            onClick={() => setLookbookOpen(true)}
+            title="Open Atelier Drop 04 Lookbook"
           >
-            <span className="atelierPulseBeacon">
-              <span className="atelierPulsePing" />
-              <span className="atelierPulseDot" />
-            </span>
-            <ArrowUpRight size={14} />
-          </a>
+            <Image
+              src="/products/1.jpeg"
+              alt="Lookbook"
+              width={40}
+              height={40}
+              className="lookbookCollapsedImg"
+            />
+            <span className="lookbookSparkleDot">✦</span>
+          </button>
         )}
 
         {/* ================================================================
-            CREATIVE THING 2: STAFF IDENTITY & DEMO SANDBOX CONTROLS CARD
+            CREATIVE THING 2: ATELIER SOUNDSCAPE & PROVENANCE SEAL
             ================================================================ */}
         {!isCollapsed ? (
-          <div className="sidebarStaffCard">
-            <div className="staffProfileRow">
-              <div className="staffAvatarWrap">
-                <div className="staffAvatar">UK</div>
-                <span className="staffStatusDot" title="Active now" />
+          <div className="atelierSoundscapeCard">
+            <div className="soundscapeHeader">
+              <div className="soundscapeLeft">
+                <button
+                  type="button"
+                  onClick={() => setIsAmbiancePlaying(!isAmbiancePlaying)}
+                  className={cn(
+                    'soundscapePlayBtn',
+                    isAmbiancePlaying && 'soundscapePlayBtnActive'
+                  )}
+                  aria-label={isAmbiancePlaying ? 'Mute Atelier Ambience' : 'Play Atelier Ambience'}
+                  title={isAmbiancePlaying ? 'Mute Atelier Ambience' : 'Play Atelier Ambience'}
+                >
+                  {isAmbiancePlaying ? <Volume2 size={13} /> : <VolumeX size={13} />}
+                </button>
+                <div className="soundscapeInfo">
+                  <span className="soundscapeTitle">Atelier Soundscape</span>
+                  <span className="soundscapeSubtitle">
+                    {isAmbiancePlaying ? 'Vinyl & Rain · 432Hz' : 'Ambience Paused'}
+                  </span>
+                </div>
               </div>
-              <div className="staffMeta">
-                <div className="staffNameRow">
-                  <span className="staffName">Urvil Kargathala</span>
-                </div>
-                <div className="staffRoleRow">
-                  <span className="staffRole">Store Owner</span>
-                  <span className="staffSandboxTag">Sandbox</span>
-                </div>
+
+              {/* Animated Equalizer Wave Bars */}
+              <div
+                className={cn('soundEqualizer', !isAmbiancePlaying && 'soundEqualizerPaused')}
+                title={isAmbiancePlaying ? 'Resonating soundscape' : 'Paused'}
+              >
+                <span className="soundBar soundBar1" />
+                <span className="soundBar soundBar2" />
+                <span className="soundBar soundBar3" />
+                <span className="soundBar soundBar4" />
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={handleResetDemo}
-              className="resetDemoBtn"
-              title="Reset all orders, inventory, and activity fixtures to baseline"
-            >
-              <RotateCcw
-                size={12}
-                className={cn(isResetting && 'resetSpinning')}
-              />
-              <span>{isResetting ? 'Restoring Baseline...' : 'Reset Demo State'}</span>
-            </button>
+            {/* Provenance Coordinates Seal */}
+            <div className="atelierProvenanceRow">
+              <span className="provenanceCoordinates">12°58&apos;N 77°38&apos;E · INDIRANAGAR</span>
+              <span className="provenanceMotto">&ldquo;Less noise, more presence&rdquo;</span>
+            </div>
           </div>
         ) : (
-          <div className="staffCollapsedWrap">
-            <button
-              type="button"
-              onClick={handleResetDemo}
-              className="staffCollapsedBtn"
-              title="Urvil Kargathala (Store Owner) — Click to reset demo state"
-            >
-              <div className="staffAvatarWrap">
-                <div className="staffAvatar">UK</div>
-                <span className="staffStatusDot" />
+          <button
+            type="button"
+            onClick={() => setIsAmbiancePlaying(!isAmbiancePlaying)}
+            className="soundscapeCollapsedBtn"
+            title={isAmbiancePlaying ? 'Atelier Soundscape Playing' : 'Atelier Soundscape Paused'}
+          >
+            {isAmbiancePlaying ? (
+              <div className="soundEqualizerMini">
+                <span className="soundBarMini soundBar1" />
+                <span className="soundBarMini soundBar2" />
+                <span className="soundBarMini soundBar3" />
               </div>
-            </button>
-          </div>
+            ) : (
+              <VolumeX size={15} />
+            )}
+          </button>
         )}
       </div>
+
+      {/* ================================================================
+          ATELIER LOOKBOOK LIGHTBOX MODAL
+          ================================================================ */}
+      {lookbookOpen && (
+        <div
+          className="lookbookModalBackdrop"
+          onClick={() => setLookbookOpen(false)}
+        >
+          <div
+            className="lookbookModalContent"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="lookbookModalHeader">
+              <div className="lookbookModalBrand">
+                <span className="lookbookModalStag">✦</span>
+                <div>
+                  <h3 className="lookbookModalHeading">The Unplugged Wear — Atelier Drop 04</h3>
+                  <span className="lookbookModalSub">Slow Living Lookbook &amp; Material Provenance</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setLookbookOpen(false)}
+                className="lookbookCloseBtn"
+                aria-label="Close lookbook"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="lookbookModalBody">
+              {/* Large Image Showcase */}
+              <div className="lookbookMainImgWrap">
+                <Image
+                  src={ATELIER_DROP_LOOKBOOK[activeLookbookIndex].image}
+                  alt={ATELIER_DROP_LOOKBOOK[activeLookbookIndex].title}
+                  width={640}
+                  height={460}
+                  className="lookbookMainImg"
+                  priority
+                />
+                <div className="lookbookNavOverlay">
+                  <button
+                    type="button"
+                    className="lookbookNavBtn lookbookNavPrev"
+                    onClick={() =>
+                      setActiveLookbookIndex((prev) =>
+                        prev === 0 ? ATELIER_DROP_LOOKBOOK.length - 1 : prev - 1
+                      )
+                    }
+                    aria-label="Previous look"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                  <button
+                    type="button"
+                    className="lookbookNavBtn lookbookNavNext"
+                    onClick={() =>
+                      setActiveLookbookIndex((prev) =>
+                        prev === ATELIER_DROP_LOOKBOOK.length - 1 ? 0 : prev + 1
+                      )
+                    }
+                    aria-label="Next look"
+                  >
+                    <ChevronRight size={20} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Garment Details & Provenance */}
+              <div className="lookbookDetailsPane">
+                <div className="lookbookBatchPill">
+                  <span>{ATELIER_DROP_LOOKBOOK[activeLookbookIndex].batch}</span>
+                </div>
+                <h2 className="lookbookGarmentTitle">
+                  {ATELIER_DROP_LOOKBOOK[activeLookbookIndex].title}
+                </h2>
+                <p className="lookbookStory">
+                  {ATELIER_DROP_LOOKBOOK[activeLookbookIndex].story}
+                </p>
+
+                <div className="lookbookSpecGrid">
+                  <div className="lookbookSpecItem">
+                    <span className="specLabel">Weight &amp; Weave</span>
+                    <span className="specValue">{ATELIER_DROP_LOOKBOOK[activeLookbookIndex].gsm}</span>
+                  </div>
+                  <div className="lookbookSpecItem">
+                    <span className="specLabel">Palette</span>
+                    <span className="specValue">{ATELIER_DROP_LOOKBOOK[activeLookbookIndex].color}</span>
+                  </div>
+                  <div className="lookbookSpecItem">
+                    <span className="specLabel">Provenance</span>
+                    <span className="specValue">Indiranagar Atelier, IN</span>
+                  </div>
+                  <div className="lookbookSpecItem">
+                    <span className="specLabel">Certification</span>
+                    <span className="specValue">100% GOTS Organic</span>
+                  </div>
+                </div>
+
+                {/* Thumbnail Gallery Row */}
+                <div className="lookbookThumbRow">
+                  {ATELIER_DROP_LOOKBOOK.map((item, idx) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      className={cn(
+                        'lookbookThumbBtn',
+                        activeLookbookIndex === idx && 'lookbookThumbBtnActive'
+                      )}
+                      onClick={() => setActiveLookbookIndex(idx)}
+                    >
+                      <Image
+                        src={item.image}
+                        alt={item.title}
+                        width={60}
+                        height={60}
+                        className="lookbookThumbImg"
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </aside>
   );
 }
