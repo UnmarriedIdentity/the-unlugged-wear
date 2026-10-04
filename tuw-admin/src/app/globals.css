@@ -80,6 +80,8 @@
   /* Auth input type */
   --text-auth-input: 14px;
   --text-auth-input--line-height: 22.4px;
+  --text-auth-divider: 16px;
+  --text-auth-divider--line-height: 20.2px;
   --text-auth-input-filled: 16px;
   --text-auth-input-filled--line-height: 25.6px;
   --tracking-auth-input: 0.28px;
@@ -1817,44 +1819,13 @@
 }
 
 /* Frame 139: Social row (width 100%, max-width 568px, gap 24px) */
-.login-socialRow {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px;
-  width: 100%;
-  max-width: 568px;
-  margin-bottom: clamp(16px, 2.5vh, 24px);
-}
+/* Login social row + divider migrated to Tailwind utilities in LoginPage.tsx
+   (pixel-identical). Removed: .login-socialRow, .login-dividerRow,
+   .login-dividerLine, .login-dividerText. */
 
 /* Login social/auth buttons migrated to Tailwind utilities in LoginPage.tsx (pixel-identical). Removed: .login-socialButton, .login-socialIconBadge, .login-appleIcon, .login-googleIcon, .login-socialText. */
 
-/* Frame 136: Divider (width 100%, max-width 568px) */
-.login-dividerRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  max-width: 568px;
-  margin-bottom: clamp(16px, 2.5vh, 24px);
-  gap: 16px;
-}
-
-.login-dividerLine {
-  flex: 1;
-  height: 1px;
-  background-color: #BBBBBB;
-}
-
-.login-dividerText {
-  font-family: var(--font-main), sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  color: #6C6C6C;
-  line-height: 20.2px;
-  padding: 0 24px;
-  text-align: center;
-  flex-shrink: 0;
-}
+/* (divider classes removed — see migration comment above) */
 
 /* Form block */
 /* Login form + inputs migrated to Tailwind auth-* utilities in LoginPage.tsx (pixel-identical).
