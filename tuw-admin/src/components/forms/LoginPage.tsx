@@ -105,7 +105,7 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
   const isEmailActive = email.length > 0;
 
   return (
-    <main className={styles.pageWrapper}>
+    <main className="flex min-h-screen w-full max-w-full overflow-x-hidden bg-white max-lg:flex-col">
       {/* ==========================================================================
           LEFT HERO SECTION (Frame 124 - Width 712px, Height 1024px)
           ========================================================================== */}
@@ -113,20 +113,20 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
       {/* ==========================================================================
           LEFT HERO SECTION (Frame 124 - Width 712px, Height 1024px)
           ========================================================================== */}
-      <section className={styles.heroSection}>
+      <section className="relative flex min-h-screen w-[49.444%] flex-[0_0_49.444%] flex-col justify-end overflow-hidden bg-auth-hero max-lg:h-[420px] max-lg:min-h-[420px] max-lg:w-full max-lg:flex-none">
         <Image
           src="/images/login-hero.png"
           alt="Retail Storeflow Dashboard Owners"
           fill
           priority
           sizes="(max-width: 900px) 100vw, 50vw"
-          className={styles.heroImage}
+          className="absolute inset-0 h-full w-full object-cover object-top"
         />
         {/* Rectangle 96: Linear gradient overlay on bottom 50% */}
         <div className={styles.heroOverlay} />
 
         {/* Frame 60511: Brand, Headline, Subtitle */}
-        <div className={styles.heroContent}>
+        <div className="relative z-2 flex flex-col gap-4 px-14 pb-17 text-white max-lg:px-6 max-lg:pb-8">
           <div className={styles.brandTitle}>Storeflow</div>
           <h1 className={styles.heroHeadline}>
             Command Your{'\n'}Business with{'\n'}Confidence.
@@ -140,8 +140,8 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
       {/* ==========================================================================
           RIGHT AUTH SECTION (Frame 140 - Width 728px, Height 1024px)
           ========================================================================== */}
-      <section className={styles.formSection}>
-        <div className={styles.formContainer}>
+      <section className="relative flex min-h-screen w-[50.556%] flex-[0_0_50.556%] flex-col items-center justify-center overflow-y-auto bg-white bg-no-repeat py-[clamp(24px,4vh,48px)] px-6 max-lg:w-full max-lg:flex-none max-lg:px-5 max-lg:py-9 bg-[radial-gradient(circle_520px_at_78%_5%,rgba(229,245,211,0.6)_0%,rgba(255,255,255,0)_100%),radial-gradient(circle_420px_at_98%_8%,rgba(246,198,54,0.1)_0%,rgba(229,245,211,0.05)_50%,rgba(255,255,255,0)_100%)]">
+        <div className="flex w-full max-w-auth-form flex-col items-center">
           {/* Header Block: Frame 3 Logo Badge + Title */}
           <header className={styles.headerBlock}>
             <div className={styles.logoBadge}>
