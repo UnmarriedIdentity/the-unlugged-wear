@@ -188,7 +188,7 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
           {view === 'login' && (
             <>
               {/* Frame 139: Social Login Buttons */}
-              <div className="grid w-full max-w-auth-form grid-cols-2 gap-6 mb-auth-field-gap">
+              <div className="grid w-full max-w-auth-form grid-cols-2 gap-6 mb-auth-social-gap">
                 <button
                   type="button"
                   className="flex h-13 w-full items-center gap-2 rounded-auth-social border border-auth-line bg-white px-3.5 select-none transition-colors duration-200 hover:border-auth-line-hover hover:bg-auth-canvas"
@@ -227,7 +227,7 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
               </div>
 
               {/* Frame 136: Divider */}
-              <div className="flex w-full max-w-auth-form items-center justify-between gap-4 mb-auth-field-gap">
+              <div className="flex w-full max-w-auth-form items-center justify-between gap-4 mb-auth-social-gap">
                 <div className="h-px flex-1 bg-auth-divider" />
                 <span className="shrink-0 px-6 text-center text-auth-divider font-normal text-auth-muted">Or</span>
                 <div className="h-px flex-1 bg-auth-divider" />

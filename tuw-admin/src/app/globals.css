@@ -89,6 +89,8 @@
 
   /* Auth field rhythm */
   --spacing-auth-field-gap: clamp(16px, 2.2vh, 24px);
+  /* socialRow + dividerRow only (2.5vh middle term — do NOT unify with field-gap) */
+  --spacing-auth-social-gap: clamp(16px, 2.5vh, 24px);
 }
 
 :root {
