@@ -162,7 +162,7 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
             )}
 
             {view === 'reset-password' && (
-              <h2 className={styles.formTitle} style={{ color: '#000000' }}>
+              <h2 className={styles.formTitle} style={{ color: 'var(--color-auth-pure)' }}>
                 Reset password
               </h2>
             )}
@@ -174,7 +174,7 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
                   fontSize: '24px',
                   lineHeight: '28.8px',
                   letterSpacing: '0.72px',
-                  color: '#000000',
+                  color: 'var(--color-auth-pure)',
                 }}
               >
                 Reset password
@@ -191,38 +191,38 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
               <div className={styles.socialRow}>
                 <button
                   type="button"
-                  className={styles.socialButton}
+                  className="flex h-13 w-full items-center gap-2 rounded-auth-social border border-auth-line bg-white px-3.5 select-none transition-colors duration-200 hover:border-auth-line-hover hover:bg-auth-canvas"
                   onClick={() => applyState('filled')}
                   id="apple-login-btn"
                 >
-                  <div className={styles.socialIconBadge}>
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-auth-check-line bg-white">
                     <Image
                       src="/images/apple-logo.png"
                       alt="Apple"
                       width={18}
                       height={18}
-                      className={styles.appleIcon}
+                      className="h-4.5 w-4.5 object-contain"
                     />
                   </div>
-                  <span className={styles.socialText}>Use Apple</span>
+                  <span className="text-auth-social font-medium tracking-auth-social text-auth-ink whitespace-nowrap">Use Apple</span>
                 </button>
 
                 <button
                   type="button"
-                  className={styles.socialButton}
+                  className="flex h-13 w-full items-center gap-2 rounded-auth-social border border-auth-line bg-white px-3.5 select-none transition-colors duration-200 hover:border-auth-line-hover hover:bg-auth-canvas"
                   onClick={() => applyState('filled')}
                   id="google-login-btn"
                 >
-                  <div className={styles.socialIconBadge}>
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-auth-check-line bg-white">
                     <Image
                       src="/images/google-logo.png"
                       alt="Google"
                       width={16}
                       height={16}
-                      className={styles.googleIcon}
+                      className="h-4 w-4 object-contain"
                     />
                   </div>
-                  <span className={styles.socialText}>Use Google</span>
+                  <span className="text-auth-social font-medium tracking-auth-social text-auth-ink whitespace-nowrap">Use Google</span>
                 </button>
               </div>
 
@@ -324,13 +324,13 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
                       rememberMe ? styles.checkboxBoxChecked : ''
                     }`}
                   >
-                    {rememberMe && <Check size={12} strokeWidth={3} color="#FFFFFF" />}
+                    {rememberMe && <Check size={12} strokeWidth={3} color="currentColor" className="text-white" />}
                   </div>
                   <span className={styles.rememberText}>Remember me</span>
                 </div>
 
-                {/* Primary_button in Figma: 568x48, radius 12px, fill #242424 */}
-                <button type="submit" className={styles.primaryButton} id="login-submit-btn">
+                {/* Primary_button in Figma: 568x48, radius 12px, fill auth-ink token */}
+                <button type="submit" className="flex h-12 w-full max-w-auth-form items-center justify-center rounded-xl bg-auth-ink text-auth-btn font-bold text-white select-none transition-colors duration-150 hover:bg-auth-ink-hover" id="login-submit-btn">
                   Log in
                 </button>
               </form>
@@ -347,12 +347,11 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
                 </span>
               </div>
 
-              {/* Sign up for free: 568x48, radius 10px, 16px 700 */}
+              {/* Sign up for free: 568x48, radius auth-btn token, 16px 700 */}
               <Link
                 href="/signup"
-                className={styles.signupButton}
+                className="flex h-12 w-full max-w-auth-form cursor-pointer items-center justify-center rounded-auth-btn text-auth-btn font-bold text-auth-ink no-underline select-none transition-opacity duration-150 hover:opacity-75"
                 id="signup-link-btn"
-                style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
                 Sign up for free
               </Link>
@@ -361,7 +360,7 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
 
           {/* ==========================================================================
               STATE 4: RESET PASSWORD (Frame 1:20710)
-              Card width: 552px, radius: 20px, fill: #FFFFFF, stroke: #E9E9E9
+              Card width: 552px, radius: 20px, fill: surface token, stroke: auth-line token
               ========================================================================== */}
           {view === 'reset-password' && (
             <div className={styles.resetCard}>
@@ -392,7 +391,7 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
 
                 <button
                   type="submit"
-                  className={styles.resetButton}
+                  className="flex h-12 w-full max-w-auth-reset items-center justify-center rounded-xl bg-auth-ink text-auth-btn font-bold text-white select-none transition-colors duration-150 hover:bg-auth-ink-hover"
                   id="reset-submit-btn"
                 >
                   Reset password
@@ -410,13 +409,13 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
 
           {/* ==========================================================================
               STATE 5: RECOVERY EMAIL SENT (Frame 1:20690)
-              Card width: 552px, radius: 24px, fill: #FFFFFF, stroke: #E9E9E9
+              Card width: 552px, radius: 24px, fill: surface token, stroke: auth-line token
               ========================================================================== */}
           {view === 'recovery-sent' && (
             <div className={styles.recoveryCard}>
               {/* Frame 281: Success pill badge */}
               <div className={styles.recoveryPill}>
-                <CircleCheck size={20} strokeWidth={1.5} color="#009E5C" />
+                <CircleCheck size={20} strokeWidth={1.5} color="currentColor" className="text-auth-success" />
                 <span>Sending password reset link was successful</span>
               </div>
 
@@ -433,7 +432,7 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
               {/* Primary_button: Back to login */}
               <button
                 type="button"
-                className={styles.recoveryButton}
+                className="flex h-12 w-full max-w-auth-recovery items-center justify-center rounded-xl bg-auth-ink text-auth-btn font-bold text-white select-none transition-colors duration-150 hover:bg-auth-ink-hover"
                 onClick={() => applyState('default')}
                 id="back-to-login-btn"
               >
@@ -449,7 +448,7 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
 
 export default function LoginPage({ initialMode }: LoginPageProps) {
   return (
-    <Suspense fallback={<div style={{ minHeight: '100vh', background: '#FFFFFF' }} />}>
+      <Suspense fallback={<div style={{ minHeight: '100vh', background: 'var(--color-surface)' }} />}>
       <LoginPageContent initialMode={initialMode} />
     </Suspense>
   );

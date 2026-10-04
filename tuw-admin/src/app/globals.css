@@ -39,6 +39,42 @@
   --radius-card: 12px;
   --radius-modal: 16px;
   --radius-pill: 9999px;
+
+  /* Auth (login/signup) palette — Figma Storeflow frames, tokenized, no hardcodes in JSX.
+     Admin --color-* above untouched; auth uses its own namespace. */
+  --color-auth-ink: #242424;
+  --color-auth-ink-hover: #141414;
+  --color-auth-pure: #000000;
+  --color-auth-muted: #6C6C6C;
+  --color-auth-faint: #9A9A9A;
+  --color-auth-line: #E9E9E9;
+  --color-auth-line-hover: #D1D5DB;
+  --color-auth-check-line: #E7EFEF;
+  --color-auth-canvas: #FAFAFA;
+  --color-auth-teal: #115D5D;
+  --color-auth-error: #E94845;
+  --color-auth-error-bg: #FDEDEC;
+  --color-auth-success: #009E5C;
+  --color-auth-success-bg: #EDF8E2;
+  --color-auth-divider: #BBBBBB;
+
+  /* Auth radii */
+  --radius-auth-checkbox: 6px;
+  --radius-auth-btn: 10px;
+  --radius-auth-social: 14px;
+  --radius-auth-badge: 13.5px;
+
+  /* Auth type (size + line-height travel in one utility: text-auth-btn / text-auth-social) */
+  --text-auth-btn: 16px;
+  --text-auth-btn--line-height: 22.4px;
+  --text-auth-social: 14px;
+  --text-auth-social--line-height: 22.4px;
+  --tracking-auth-social: 0.14px;
+
+  /* Auth form widths */
+  --container-auth-form: 568px;
+  --container-auth-reset: 488px;
+  --container-auth-recovery: 392px;
 }
 
 :root {
@@ -324,41 +360,42 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Base — verbatim from old globals.css */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+/* Base resets — layered so Tailwind utilities (@layer utilities) win over them.
+   Values unchanged for legacy unlayered components; utilities now apply bg/border/padding. */
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 
-html,
-body {
-  min-height: 100%;
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-  font-family: var(--font-main);
-  color: var(--tuw-text-primary);
-  background-color: var(--tuw-bg-canvas);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+  html,
+  body {
+    min-height: 100%;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    font-family: var(--font-main);
+    color: var(--tuw-text-primary);
+    background-color: var(--tuw-bg-canvas);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-button {
-  font-family: inherit;
-  border: none;
-  background: none;
-  cursor: pointer;
-}
+  button {
+    font-family: inherit;
+    cursor: pointer;
+  }
 
-input, select, textarea {
-  font-family: inherit;
-  outline: none;
-}
+  input, select, textarea {
+    font-family: inherit;
+    outline: none;
+  }
 
-a {
-  color: inherit;
-  text-decoration: none;
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 }
 
 .tabular-nums {
@@ -1840,58 +1877,7 @@ a {
   margin-bottom: clamp(16px, 2.5vh, 24px);
 }
 
-.login-socialButton {
-  height: 52px;
-  width: 100%;
-  border-radius: 14px;
-  border: 1px solid #E9E9E9;
-  background: #FFFFFF;
-  display: flex;
-  align-items: center;
-  padding: 0 14px;
-  gap: 8px;
-  transition: all 0.2s ease;
-  user-select: none;
-}
-
-.login-socialButton:hover {
-  border-color: #D1D5DB;
-  background-color: #FAFAFA;
-}
-
-.login-socialIconBadge {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 1px solid #E7EFEF;
-  background: #FFFFFF;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.login-appleIcon {
-  width: 18px;
-  height: 18px;
-  object-fit: contain;
-}
-
-.login-googleIcon {
-  width: 16px;
-  height: 16px;
-  object-fit: contain;
-}
-
-.login-socialText {
-  font-family: var(--font-main), sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  color: #242424;
-  letter-spacing: 0.14px;
-  line-height: 22.4px;
-  white-space: nowrap;
-}
+/* Login social/auth buttons migrated to Tailwind utilities in LoginPage.tsx (pixel-identical). Removed: .login-socialButton, .login-socialIconBadge, .login-appleIcon, .login-googleIcon, .login-socialText. */
 
 /* Frame 136: Divider (width 100%, max-width 568px) */
 .login-dividerRow {
@@ -2078,28 +2064,7 @@ a {
   letter-spacing: 0.28px;
 }
 
-/* Primary_button: 568x48, radius 12px, fill #242424 */
-.login-primaryButton {
-  height: 48px;
-  width: 100%;
-  max-width: 568px;
-  border-radius: 12px;
-  background: #242424;
-  color: #FFFFFF;
-  font-family: var(--font-main), sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 22.4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s ease;
-  user-select: none;
-}
-
-.login-primaryButton:hover {
-  background: #141414;
-}
+/* Primary_button 568x48 radius 12px fill #242424 — migrated to Tailwind in LoginPage.tsx (see .login-primaryButton removal). */
 
 /* Frame 133: Forgot password row */
 .login-forgotPasswordRow {
@@ -2130,28 +2095,7 @@ a {
   text-decoration: underline;
 }
 
-/* Sign up for free: 568x48, radius 10px, transparent fill, 16px 700 #242424 */
-.login-signupButton {
-  height: 48px;
-  width: 100%;
-  max-width: 568px;
-  border-radius: 10px;
-  font-family: var(--font-main), sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  color: #242424;
-  line-height: 22.4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: opacity 0.15s ease;
-  user-select: none;
-}
-
-.login-signupButton:hover {
-  opacity: 0.75;
-}
+/* Sign up for free 568x48 radius 10px — migrated to Tailwind in LoginPage.tsx (see .login-signupButton removal). */
 
 /* ==========================================================================
    RESET PASSWORD VIEW (Frame 1:20710)
@@ -2201,26 +2145,7 @@ a {
   color: #9A9A9A;
 }
 
-.login-resetButton {
-  height: 48px;
-  width: 100%;
-  max-width: 488px;
-  border-radius: 12px;
-  background: #242424;
-  color: #FFFFFF;
-  font-family: var(--font-main), sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 22.4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s ease;
-}
-
-.login-resetButton:hover {
-  background: #141414;
-}
+/* .login-resetButton migrated to Tailwind in LoginPage.tsx (pixel-identical). */
 
 /* ==========================================================================
    RECOVERY SENT VIEW (Frame 1:20690)
@@ -2285,26 +2210,7 @@ a {
   color: #6C6C6C;
 }
 
-.login-recoveryButton {
-  width: 100%;
-  max-width: 392px;
-  height: 48px;
-  border-radius: 12px;
-  background: #242424;
-  color: #FFFFFF;
-  font-family: var(--font-main), sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 22.4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s ease;
-}
-
-.login-recoveryButton:hover {
-  background: #141414;
-}
+/* .login-recoveryButton migrated to Tailwind in LoginPage.tsx (pixel-identical). */
 
 /* Back link */
 .login-backLink {
