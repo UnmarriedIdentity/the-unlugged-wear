@@ -263,29 +263,60 @@ export default function Header({
           <div className="userProfile" title={`Logged in as ${activeRole}`}>
             <div className="avatarCodeWrapper">
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="20" cy="20" r="20" fill="url(#adminUserAvatarBg)" />
                 <defs>
-                  <linearGradient id="adminUserAvatarBg" x1="0" y1="0" x2="40" y2="40">
+                  <linearGradient id="boyAvatarBg" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
                     <stop offset="0%" stopColor="#F5DFB8" />
-                    <stop offset="100%" stopColor="#D4A76A" />
+                    <stop offset="100%" stopColor="#DDB57F" />
                   </linearGradient>
-                  <linearGradient id="adminUserHairGrad" x1="10" y1="5" x2="30" y2="35">
-                    <stop offset="0%" stopColor="#6C4123" />
-                    <stop offset="100%" stopColor="#4A2810" />
+                  <linearGradient id="boyHairGrad" x1="12" y1="6" x2="28" y2="22" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#3E2415" />
+                    <stop offset="100%" stopColor="#1E1008" />
+                  </linearGradient>
+                  <linearGradient id="boyJacketGrad" x1="10" y1="28" x2="30" y2="40" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#1E293B" />
+                    <stop offset="100%" stopColor="#0F172A" />
                   </linearGradient>
                 </defs>
-                <path d="M10 22C8 14 12 7 20 7C28 7 32 14 30 22C31 28 30 35 30 35H10C10 35 9 28 10 22Z" fill="url(#adminUserHairGrad)" />
-                <path d="M18 25V30H22V25H18Z" fill="#F0C5A0" />
-                <path d="M14 30C14 30 17 33 20 33C23 33 26 30 26 30L29 40H11L14 30Z" fill="#2C4E4B" />
-                <ellipse cx="20" cy="19" rx="6.5" ry="7.5" fill="#FCD9B8" />
-                <path d="M13 16C14 12 17 9 20 9C23 9 26 11 27 15C25 14 22 13 19 14C16 15 14 17 13 16Z" fill="url(#adminUserHairGrad)" />
-                <path d="M13 16C12.5 19 12 24 13.5 27C14.5 24 14.5 20 15 18L13 16Z" fill="url(#adminUserHairGrad)" />
-                <path d="M27 15C27.5 19 28 24 26.5 27C25.5 24 25.5 20 25 18L27 15Z" fill="url(#adminUserHairGrad)" />
-                <ellipse cx="17.8" cy="18.5" rx="0.9" ry="1.1" fill="#3D200E" />
-                <ellipse cx="22.2" cy="18.5" rx="0.9" ry="1.1" fill="#3D200E" />
-                <path d="M16.8 16.8C17.5 16.4 18.5 16.5 19 16.8" stroke="#5A341A" strokeWidth="0.8" strokeLinecap="round" />
-                <path d="M21 16.8C21.5 16.5 22.5 16.4 23.2 16.8" stroke="#5A341A" strokeWidth="0.8" strokeLinecap="round" />
-                <path d="M18.8 22.2C19.4 22.8 20.6 22.8 21.2 22.2" stroke="#B85C43" strokeWidth="1.2" strokeLinecap="round" />
+
+                {/* Background circle */}
+                <circle cx="20" cy="20" r="20" fill="url(#boyAvatarBg)" />
+
+                {/* Body / Shoulders & Atelier Shirt */}
+                <path d="M7 40C7 33.5 12 30 16 29L20 33L24 29C28 30 33 33.5 33 40H7Z" fill="url(#boyJacketGrad)" />
+                
+                {/* Inner collar / shirt accent */}
+                <path d="M17 29L20 34L23 29" stroke="#C8A96A" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+
+                {/* Neck */}
+                <path d="M17 23V29.5C17 31 23 31 23 29.5V23H17Z" fill="#E8B58D" />
+                <path d="M17 23C18.5 24.5 21.5 24.5 23 23V25C21.5 26.5 18.5 26.5 17 25V23Z" fill="#D39F75" />
+
+                {/* Face */}
+                <path d="M13.5 17C13.5 12.5 16.5 10 20 10C23.5 10 26.5 12.5 26.5 17C26.5 21.8 23.5 24.5 20 24.5C16.5 24.5 13.5 21.8 13.5 17Z" fill="#F2C5A0" />
+
+                {/* Ears */}
+                <circle cx="13.5" cy="18" r="2.2" fill="#E8B58D" />
+                <circle cx="26.5" cy="18" r="2.2" fill="#E8B58D" />
+
+                {/* Modern Short Hair - Clean textured top and short sides */}
+                <path d="M13 15.5C12.8 13 14 9.5 17.5 7.8C20 6.5 24 7 26 9C27.5 10.5 27.5 13.5 27.2 15.5C26 15 25.5 14 24.5 14C23 14 22 15 19 14.2C16.5 13.5 14.8 14.8 13 15.5Z" fill="url(#boyHairGrad)" />
+                <path d="M15 10C17 8 21 8.5 23 9.5C25 10.5 26 12 26 13C25 12 23 11 20 11.5C17.5 12 16 11 15 10Z" fill="#4E301D" />
+
+                {/* Eyebrows */}
+                <path d="M15.5 15.2C16.5 14.8 17.8 15 18.5 15.5" stroke="#2D1C13" strokeWidth="1" strokeLinecap="round" />
+                <path d="M21.5 15.5C22.2 15 23.5 14.8 24.5 15.2" stroke="#2D1C13" strokeWidth="1" strokeLinecap="round" />
+
+                {/* Eyes */}
+                <ellipse cx="17.2" cy="17.2" rx="1.1" ry="1.3" fill="#201209" />
+                <ellipse cx="22.8" cy="17.2" rx="1.1" ry="1.3" fill="#201209" />
+                <circle cx="16.9" cy="16.8" r="0.4" fill="#FFFFFF" />
+                <circle cx="22.5" cy="16.8" r="0.4" fill="#FFFFFF" />
+
+                {/* Nose */}
+                <path d="M19.5 18.5L20 19.5L20.5 18.5" stroke="#D39F75" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round" />
+
+                {/* Friendly smile */}
+                <path d="M18.2 21.2C19.2 22.3 20.8 22.3 21.8 21.2" stroke="#A85842" strokeWidth="1.2" strokeLinecap="round" />
               </svg>
             </div>
             <div className="userInfo">
