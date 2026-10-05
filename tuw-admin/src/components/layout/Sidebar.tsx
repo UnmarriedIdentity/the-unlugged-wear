@@ -291,7 +291,7 @@ export default function Sidebar({
         {/* Mobile Close Button */}
         <button
           type="button"
-          className="hidden size-7.5 shrink-0 cursor-pointer items-center justify-center rounded-control border border-subtle bg-surface text-primary transition-all duration-[180ms] hover:border-action-primary hover:bg-selected hover:text-action-primary ml-auto max-md:flex"
+          className="hidden size-7.5 shrink-0 cursor-pointer items-center justify-center rounded-control border border-subtle bg-surface text-primary transition-all duration-[180ms] hover:border-action-primary hover:bg-selected hover:text-action-primary ml-auto max-md:flex focus-visible:outline-2 focus-visible:outline-action-primary focus-visible:outline-offset-2"
           onClick={onCloseMobileMenu}
           aria-label="Close menu"
           title="Close menu"

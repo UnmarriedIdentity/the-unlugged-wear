@@ -39,7 +39,7 @@ export default function SidebarNavGroup({
       {!isCollapsed && (
         <button
           type="button"
-          className="flex w-full items-center justify-between rounded-nav-sm border-0 bg-transparent py-1.5 pl-2.5 pr-2 cursor-pointer select-none text-left transition-colors duration-150 hover:bg-nav-group-hover"
+          className="flex w-full items-center justify-between rounded-nav-sm border-0 bg-transparent py-1.5 pl-2.5 pr-2 cursor-pointer select-none text-left transition-colors duration-150 hover:bg-nav-group-hover focus-visible:outline-2 focus-visible:outline-action-primary focus-visible:outline-offset-2"
           onClick={() => onToggle(groupKey)}
         >
           <span className="flex items-center gap-2.5">
