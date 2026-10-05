@@ -8,8 +8,8 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 19,
-    "done": 12,
+    "total": 20,
+    "done": 13,
     "in_progress": 1,
     "backlog": 6
   },
@@ -17,7 +17,7 @@
     "branch": "v2",
     "tip": "85dd2d4",
     "unpushed": [],
-    "next_up": "verify polish fixes (gap/fades/toggle/rings); then primitives 015-018 or reconciliation 006/007",
+    "next_up": "await user computed readouts for collapsed clip; then targeted fix",
     "pending_verifications": [
       "trunk continuous-dark + elbow-only on 1st-4th actives (post Antigravity+z-lift)",
       "R-series parent icons + iconless rows + collapsed icons",
@@ -346,6 +346,27 @@
       "verified": true,
       "pushed": false,
       "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-DIAG-CLIP",
+      "title": "Collapsed rail clip forensic (curl SSR + computed readouts)",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-SIDEBAR-POLISH",
+      "started": "2026-10-05",
+      "finished": "2026-10-05",
+      "log": "forensic-only, no code commit",
+      "design_match": "yes",
+      "key_decisions": [
+        "curl proves SSR markup only: single aside, full width classes incl. w-60/md:w-55, navStemTo0 correct on /dashboard",
+        "curl CANNOT prove computed layout (needs live browser) - collapsed clip still needs devtools readouts",
+        "no code change: nothing convicted"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "user devtools readouts: aside width, link box, aside count, scrollHeight/clientHeight"
+      ]
     }
   ],
   "workflow": {
