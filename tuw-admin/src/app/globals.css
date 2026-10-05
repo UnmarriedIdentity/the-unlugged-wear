@@ -174,6 +174,9 @@
   --shadow-nav-logo: 0 2px 6px rgba(0, 0, 0, 0.08);
   --text-nav-group: 11px;
   --tracking-nav-group: 0.08em;
+  /* Parent/child nav labels: same 13.5px, separate tokens, no line-height declared */
+  --text-nav-parent: 13.5px;
+  --text-nav-child: 13.5px;
   --color-nav-group-label: #7E8793;
   --color-nav-chevron: #94A3B8;
   --color-nav-group-hover: rgba(0, 0, 0, 0.03);

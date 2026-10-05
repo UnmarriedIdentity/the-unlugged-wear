@@ -10,6 +10,8 @@ import {
   Package,
   Users,
   TrendingUp,
+  LayoutGrid,
+  ShoppingBag,
   Settings,
   Headphones,
   LogOut,
@@ -175,7 +177,8 @@ export default function Sidebar({
 
   // Index of the active child per group (-1 = none): drives the segmented dark stem.
   const childActiveIndex = (activeFlags: boolean[]) => activeFlags.findIndex(Boolean);
-  const coreFlags = [getIsActive('/dashboard'), getIsActive('/orders'), getIsActive('/products'), getIsActive('/customers'), getIsActive('/reports') || getIsActive('/analytics')];
+  // Route-based active parent group (independent of open state) for parent highlighting.
+  const activeGroup = getActiveGroupForPath(pathname);  const coreFlags = [getIsActive('/dashboard'), getIsActive('/orders'), getIsActive('/products'), getIsActive('/customers'), getIsActive('/reports') || getIsActive('/analytics')];
   const opsFlags = [getIsActive('/fulfillment'), getIsActive('/shipments'), getIsActive('/returns'), getIsActive('/refunds'), getIsActive('/payments')];
   const merchFlags = [getIsActive('/collections'), getIsActive('/designs'), getIsActive('/content')];
   const sysFlags = [getIsActive('/team'), getIsActive('/audit-log')];
@@ -227,10 +230,15 @@ export default function Sidebar({
               className="flex w-full items-center justify-between rounded-nav-sm border-0 bg-transparent py-1.5 pl-2.5 pr-2 cursor-pointer select-none text-left transition-colors duration-150 hover:bg-nav-group-hover"
               onClick={() => toggleGroup('core')}
             >
-              <span className="text-nav-group font-bold uppercase tracking-nav-group text-nav-group-label">CORE</span>
+              <span className="flex items-center gap-2.5">
+                <span className={cn('flex size-4.5 shrink-0 items-center justify-center', activeGroup === 'core' ? 'text-nav-active-text' : 'text-secondary')}>
+                  <LayoutGrid size={18} />
+                </span>
+                <span className={cn('text-nav-parent font-bold', activeGroup === 'core' ? 'text-nav-active-text' : 'text-nav-group-label')}>Core</span>
+              </span>
               <ChevronDown
                 size={13}
-                className={cn('flex items-center justify-center text-nav-chevron transition-transform duration-200', isGroupOpen('core') && 'rotate-180')}
+                className={cn('flex items-center justify-center transition-transform duration-200', activeGroup === 'core' ? 'text-nav-active-text' : 'text-nav-chevron', isGroupOpen('core') && 'rotate-180')}
               />
             </button>
           )}
@@ -340,10 +348,15 @@ export default function Sidebar({
               className="flex w-full items-center justify-between rounded-nav-sm border-0 bg-transparent py-1.5 pl-2.5 pr-2 cursor-pointer select-none text-left transition-colors duration-150 hover:bg-nav-group-hover"
               onClick={() => toggleGroup('operations')}
             >
-              <span className="text-nav-group font-bold uppercase tracking-nav-group text-nav-group-label">OPERATIONS</span>
+              <span className="flex items-center gap-2.5">
+                <span className={cn('flex size-4.5 shrink-0 items-center justify-center', activeGroup === 'operations' ? 'text-nav-active-text' : 'text-secondary')}>
+                  <Package size={18} />
+                </span>
+                <span className={cn('text-nav-parent font-bold', activeGroup === 'operations' ? 'text-nav-active-text' : 'text-nav-group-label')}>Operations</span>
+              </span>
               <ChevronDown
                 size={13}
-                className={cn('flex items-center justify-center text-nav-chevron transition-transform duration-200', isGroupOpen('operations') && 'rotate-180')}
+                className={cn('flex items-center justify-center transition-transform duration-200', activeGroup === 'operations' ? 'text-nav-active-text' : 'text-nav-chevron', isGroupOpen('operations') && 'rotate-180')}
               />
             </button>
           )}
@@ -463,10 +476,15 @@ export default function Sidebar({
               className="flex w-full items-center justify-between rounded-nav-sm border-0 bg-transparent py-1.5 pl-2.5 pr-2 cursor-pointer select-none text-left transition-colors duration-150 hover:bg-nav-group-hover"
               onClick={() => toggleGroup('merchandise')}
             >
-              <span className="text-nav-group font-bold uppercase tracking-nav-group text-nav-group-label">MERCHANDISE</span>
+              <span className="flex items-center gap-2.5">
+                <span className={cn('flex size-4.5 shrink-0 items-center justify-center', activeGroup === 'merchandise' ? 'text-nav-active-text' : 'text-secondary')}>
+                  <ShoppingBag size={18} />
+                </span>
+                <span className={cn('text-nav-parent font-bold', activeGroup === 'merchandise' ? 'text-nav-active-text' : 'text-nav-group-label')}>Merchandise</span>
+              </span>
               <ChevronDown
                 size={13}
-                className={cn('flex items-center justify-center text-nav-chevron transition-transform duration-200', isGroupOpen('merchandise') && 'rotate-180')}
+                className={cn('flex items-center justify-center transition-transform duration-200', activeGroup === 'merchandise' ? 'text-nav-active-text' : 'text-nav-chevron', isGroupOpen('merchandise') && 'rotate-180')}
               />
             </button>
           )}
@@ -540,10 +558,15 @@ export default function Sidebar({
               className="flex w-full items-center justify-between rounded-nav-sm border-0 bg-transparent py-1.5 pl-2.5 pr-2 cursor-pointer select-none text-left transition-colors duration-150 hover:bg-nav-group-hover"
               onClick={() => toggleGroup('system')}
             >
-              <span className="text-nav-group font-bold uppercase tracking-nav-group text-nav-group-label">SYSTEM</span>
+              <span className="flex items-center gap-2.5">
+                <span className={cn('flex size-4.5 shrink-0 items-center justify-center', activeGroup === 'system' ? 'text-nav-active-text' : 'text-secondary')}>
+                  <ShieldCheck size={18} />
+                </span>
+                <span className={cn('text-nav-parent font-bold', activeGroup === 'system' ? 'text-nav-active-text' : 'text-nav-group-label')}>System</span>
+              </span>
               <ChevronDown
                 size={13}
-                className={cn('flex items-center justify-center text-nav-chevron transition-transform duration-200', isGroupOpen('system') && 'rotate-180')}
+                className={cn('flex items-center justify-center transition-transform duration-200', activeGroup === 'system' ? 'text-nav-active-text' : 'text-nav-chevron', isGroupOpen('system') && 'rotate-180')}
               />
             </button>
           )}
