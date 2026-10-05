@@ -133,24 +133,24 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
   };
 
   return (
-    <main className={styles.pageWrapper}>
+    <main className="flex min-h-screen w-full max-w-full overflow-x-hidden bg-white text-auth-ink relative max-[900px]:flex-col max-[900px]:overflow-y-auto">
       {/* ==========================================================================
           LEFT HERO SECTION (Frame 124 - Width 712px, Height 1024px)
           ========================================================================== */}
-      <section className={styles.heroSection}>
+      <section className="relative flex h-full min-h-screen w-[49.444%] flex-[0_0_49.444%] flex-col justify-end overflow-hidden bg-auth-hero max-[900px]:h-[320px] max-[900px]:min-h-[320px] max-[900px]:w-full max-[900px]:flex-none">
         <Image
           src="/images/signup-hero.png"
           alt="Retail Storeflow Team Members"
           fill
           priority
           sizes="(max-width: 900px) 100vw, 50vw"
-          className={styles.heroImage}
+          className="absolute inset-0 h-full w-full object-cover object-top"
         />
-        {/* Rectangle 96: Linear gradient overlay on bottom 50% */}
+        {/* Rectangle 96: Linear gradient overlay on bottom half */}
         <div className={styles.heroOverlay} />
 
         {/* Frame 60511: Brand Mark, Headline, Subtitle */}
-        <div className={styles.heroContent}>
+        <div className="relative z-2 flex flex-col gap-[clamp(8px,1.4vh,16px)] px-[clamp(24px,3.88vw,56px)] pb-[clamp(24px,4.5vh,68px)] max-w-[600px] max-[900px]:px-6 max-[900px]:pb-7">
           <div className={styles.brandTitle}>Storeflow</div>
           <h1 className={styles.heroHeadline}>
             All your store{'\n'}essentials{'\n'}in one place
