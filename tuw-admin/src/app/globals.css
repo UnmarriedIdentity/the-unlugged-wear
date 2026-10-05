@@ -711,7 +711,10 @@
 /* Continuous dark path to the active branch (seamless): preceding items paint the full
    box (top:-6px to bottom:0) so gaps between cards are covered by overlap stacking.
    The terminal (active) item carries NO straight overlay — only its curved elbow —
-   so no dark bar is ever painted over the active card face. Same color throughout. */
+   so no dark bar is ever painted over the active card face. Same color throughout.
+   SCALABILITY LIMIT: stem/overlay/curve selectors cover up to 5 children per group
+   (navStemTo0–navStemTo4). A 6th item renders correctly EXCEPT its dark stem and
+   dark curve states — extend these selector sets before adding one. */
 .navStemTo1 > :nth-child(-n+1)::after,
 .navStemTo2 > :nth-child(-n+2)::after,
 .navStemTo3 > :nth-child(-n+3)::after,
