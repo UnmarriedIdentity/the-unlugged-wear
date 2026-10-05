@@ -172,20 +172,20 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
           {view === 'signup' && (
             <>
               {/* Header: Frame 128 (Badge + Title + Subtitle) */}
-              <header className={styles.headerBlock}>
-                <div className={styles.logoBadge}>
+              <header className="flex flex-col items-center text-center gap-[clamp(8px,1.2vh,14px)] mb-[clamp(12px,2vh,24px)]">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-auth-button">
                   <Image
                     src="/logos/tuw-stag-white.png"
                     alt="The Unplugged Wear"
                     width={27}
                     height={27}
-                    className={styles.logoMonogram}
+                    className="h-[25px] w-[25px] object-contain"
                   />
                 </div>
-                <h2 className={styles.formTitle}>Create an account</h2>
-                <div className={styles.formSubtitleRow}>
+                <h2 className="text-auth-signup-title font-semibold text-auth-ink tracking-auth-title m-0">Create an account</h2>
+                <div className="flex items-center justify-center gap-1.5 text-auth-subrow text-auth-muted m-0">
                   <span>Already have an account?</span>
-                  <Link href="/login" className={styles.loginLink} id="link-to-login">
+                  <Link href="/login" className="text-auth-teal font-semibold no-underline cursor-pointer transition-opacity duration-150 hover:opacity-80 hover:underline" id="link-to-login">
                     Login
                   </Link>
                 </div>

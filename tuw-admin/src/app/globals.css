@@ -120,6 +120,11 @@
   --text-auth-signup-sub--line-height: 1.35;
   --tracking-auth-signup-sub: 0.4px;
   --container-auth-hero-copy: 520px;
+  /* Signup header type (title fluid; subrow 15/22 shared with verifySubtitle) */
+  --text-auth-signup-title: clamp(24px, 2.2vw, 32px);
+  --text-auth-signup-title--line-height: 1.25;
+  --text-auth-subrow: 15px;
+  --text-auth-subrow--line-height: 22px;
   --container-auth-hero-head: 490px;
   --container-auth-hero-sub: 600px;
   --spacing-auth-header-gap: clamp(20px, 3vh, 32px);
@@ -1895,66 +1900,10 @@
    login uses min-h-screen; washes reuse the login bg arbitrary).
    Removed: .signup-formSection, .signup-formContainer. */
 
-/* ==========================================================================
-   HEADER BLOCK: Frame 128 (Badge 48x48 -> Title -> Subtitle)
-   ========================================================================== */
-.signup-headerBlock {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: clamp(8px, 1.2vh, 14px);
-  margin-bottom: clamp(12px, 2vh, 24px);
-}
-
-.signup-logoBadge {
-  width: 44px;
-  height: 44px;
-  background-color: #242424;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.signup-logoMonogram {
-  width: 25px;
-  height: 25px;
-  object-fit: contain;
-}
-
-.signup-formTitle {
-  font-size: clamp(24px, 2.2vw, 32px);
-  font-weight: 600;
-  line-height: 1.25;
-  color: #242424;
-  margin: 0;
-  letter-spacing: -0.01em;
-}
-
-.signup-formSubtitleRow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  font-size: 15px;
-  line-height: 22px;
-  color: #6C6C6C;
-  margin: 0;
-}
-
-.signup-loginLink {
-  color: #115D5D;
-  font-weight: 600;
-  text-decoration: none;
-  cursor: pointer;
-  transition: opacity 0.15s ease;
-}
-
-.signup-loginLink:hover {
-  opacity: 0.8;
-  text-decoration: underline;
-}
+/* Signup header migrated to Tailwind utilities in SignUpPage.tsx (pixel-identical; badge
+   deliberately shadow-/margin-less unlike login).
+   Removed: .signup-headerBlock, .signup-logoBadge, .signup-logoMonogram,
+   .signup-formTitle, .signup-formSubtitleRow, .signup-loginLink. */
 
 /* ==========================================================================
    FORM BODY (Frame 135)
