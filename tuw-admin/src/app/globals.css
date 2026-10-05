@@ -39,6 +39,130 @@
   --radius-card: 12px;
   --radius-modal: 16px;
   --radius-pill: 9999px;
+
+  /* Auth (login/signup) palette — Figma Storeflow frames, tokenized, no hardcodes in JSX.
+     Admin --color-* above untouched; auth uses its own namespace. */
+  --color-auth-ink: #242424;
+  /* Button fills: shared bg; login-family hover vs signup (auth-pure) hover */
+  --color-auth-button: #242424;
+  --color-auth-button-hover: #141414;
+  --color-auth-pure: #000000;
+  --color-auth-muted: #6C6C6C;
+  --color-auth-faint: #9A9A9A;
+  --color-auth-line: #E9E9E9;
+  --color-auth-line-hover: #D1D5DB;
+  --color-auth-check-line: #E7EFEF;
+  --color-auth-canvas: #FAFAFA;
+  --color-auth-teal: #115D5D;
+  --color-auth-error: #E94845;
+  --color-auth-error-bg: #FDEDEC;
+  --color-auth-success: #009E5C;
+  --color-auth-success-bg: #EDF8E2;
+  --color-auth-divider: #BBBBBB;
+  --color-auth-hero: #1A1A1A;
+  /* Signup social hover pair (distinct from login FAFAFA/D1D5DB); shared with backToLogin */
+  --color-auth-hover-canvas: #F8F9FA;
+  --color-auth-hover-line: #D6D6D6;
+
+  /* Auth radii */
+  --radius-auth-checkbox: 6px;
+  --radius-auth-btn: 10px;
+  --radius-auth-social: 14px;
+  --radius-auth-badge: 13.5px;
+
+  /* Auth type (size + line-height travel in one utility: text-auth-btn / text-auth-social) */
+  --text-auth-btn: 16px;
+  --text-auth-btn--line-height: 22.4px;
+  --text-auth-social: 14px;
+  --text-auth-social--line-height: 22.4px;
+  --tracking-auth-social: 0.14px;
+
+  /* Auth form widths */
+  --container-auth-form: 568px;
+  --container-auth-reset: 488px;
+  --container-auth-recovery: 392px;
+  --container-auth-card: 552px;
+  /* Auth cards */
+  --radius-auth-card: 20px;
+  --radius-auth-card-lg: 24px;
+  --shadow-auth-card: -1px 1px 40px rgba(0, 0, 0, 0.06);
+  /* Recovery heading */
+  --text-auth-recovery-head: 24px;
+  --text-auth-recovery-head--line-height: 28.8px;
+  --tracking-auth-recovery-head: 0.72px;
+  /* Back link: 14px/500 with NO line-height (computes normal) */
+  --text-auth-backlink: 14px;
+  --text-auth-backlink--line-height: normal;
+
+  /* Auth input type */
+  --text-auth-input: 14px;
+  --text-auth-input--line-height: 22.4px;
+  --text-auth-divider: 16px;
+  --text-auth-divider--line-height: 20.2px;
+  --leading-auth-link: 16.8px;
+  /* Auth hero + header type (Pass C; lead shared by heroSubtitle + formSubtitle) */
+  --text-auth-brand: 32px;
+  --text-auth-brand--line-height: 38.4px;
+  --text-auth-headline: clamp(38px, 4.4vw, 64px);
+  --leading-auth-headline: 1.2;
+  --text-auth-headline-md: 38px;
+  --text-auth-headline-md--line-height: 46px;
+  --text-auth-lead: 20px;
+  --text-auth-lead--line-height: 28px;
+  --text-auth-hero-sub-md: 15px;
+  --text-auth-title: 32px;
+  --text-auth-title--line-height: 40.3px;
+  --tracking-auth-title: -0.01em;
+  --tracking-auth-hero: -0.02em;
+  --tracking-auth-wide: 0.6px;
+  /* Signup input type + focus ring (.12 alpha — distinct from OTP .15) */
+  --text-auth-signup-input: 15px;
+  --text-auth-signup-input--line-height: 22px;
+  --tracking-auth-signup-input: 0.2px;
+  --shadow-auth-input: 0 0 0 3px rgba(17, 93, 93, 0.12);
+  /* OTP ring (.15 alpha — distinct from input .12) + idle border */
+  --shadow-auth-otp: 0 0 0 3px rgba(17, 93, 93, 0.15);
+  --color-auth-otp-line: #C6EAA0;
+  /* Signup terms (verbatim outliers: 5px check vs login 6px, E7EEEE vs E7EFEF) */
+  --color-auth-terms-line: #E7EEEE;
+  --radius-auth-terms-check: 5px;
+  --text-auth-terms: 13px;
+  --text-auth-terms--line-height: 18px;
+  --tracking-auth-terms: 0.15px;
+  /* Signup hero copy (fluid Figma specs; wrap-guards shared by headline+subtitle) */
+  --text-auth-signup-brand: clamp(20px, 2.22vw, 32px);
+  --text-auth-signup-headline: clamp(28px, 3.6vw, 64px);
+  --leading-auth-signup-headline: 1.15;
+  --text-auth-signup-sub: clamp(13px, 1.25vw, 20px);
+  --text-auth-signup-sub--line-height: 1.35;
+  --tracking-auth-signup-sub: 0.4px;
+  --container-auth-hero-copy: 520px;
+  --container-auth-verify: 350px;
+  /* Verify title (fluid) + resend row type (14/22 shared spec) */
+  --text-auth-verify-title: clamp(24px, 2.2vw, 32px);
+  --text-auth-verify-title--line-height: 1.25;
+  --text-auth-resend: 14px;
+  --text-auth-resend--line-height: 22px;
+  /* Signup header type (title fluid; subrow 15/22 shared with verifySubtitle) */
+  --text-auth-signup-title: clamp(24px, 2.2vw, 32px);
+  --text-auth-signup-title--line-height: 1.25;
+  --text-auth-subrow: 15px;
+  --text-auth-subrow--line-height: 22px;
+  --container-auth-hero-head: 490px;
+  --container-auth-hero-sub: 600px;
+  --spacing-auth-header-gap: clamp(20px, 3vh, 32px);
+  --shadow-auth-badge: 0 4px 14px rgba(36, 36, 36, 0.15);
+  --text-auth-input-filled: 16px;
+  --text-auth-input-filled--line-height: 25.6px;
+  --tracking-auth-input: 0.28px;
+  --tracking-auth-input-filled: 0.32px;
+
+  /* Auth field rhythm */
+  --spacing-auth-field-gap: clamp(16px, 2.2vh, 24px);
+  /* forgotPasswordRow top+bottom only (2.4vh middle term) */
+  --spacing-auth-row-gap: clamp(16px, 2.4vh, 24px);
+  /* socialRow + dividerRow only (2.5vh middle term — do NOT unify with field-gap) */
+  --spacing-auth-social-gap: clamp(16px, 2.5vh, 24px);
 }
 
 :root {
@@ -324,41 +448,42 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Base — verbatim from old globals.css */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+/* Base resets — layered so Tailwind utilities (@layer utilities) win over them.
+   Values unchanged for legacy unlayered components; utilities now apply bg/border/padding. */
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 
-html,
-body {
-  min-height: 100%;
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-  font-family: var(--font-main);
-  color: var(--tuw-text-primary);
-  background-color: var(--tuw-bg-canvas);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+  html,
+  body {
+    min-height: 100%;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    font-family: var(--font-main);
+    color: var(--tuw-text-primary);
+    background-color: var(--tuw-bg-canvas);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-button {
-  font-family: inherit;
-  border: none;
-  background: none;
-  cursor: pointer;
-}
+  button {
+    font-family: inherit;
+    cursor: pointer;
+  }
 
-input, select, textarea {
-  font-family: inherit;
-  outline: none;
-}
+  input, select, textarea {
+    font-family: inherit;
+    outline: none;
+  }
 
-a {
-  color: inherit;
-  text-decoration: none;
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 }
 
 .tabular-nums {
@@ -1656,40 +1781,13 @@ a {
    AUTH - LOGIN (verbatim port of LoginPage.module.css, login- prefix).
    Single app.css, no CSS Modules. JSX in components/forms/LoginPage.tsx untouched.
    ========================================================================== */
-.login-pageWrapper {
-  display: flex;
-  min-height: 100vh;
-  width: 100%;
-  max-width: 100%;
-  background-color: #FFFFFF;
-  overflow-x: hidden;
-}
+/* Login shell (wrapper, hero layout, form section) migrated to Tailwind utilities in
+   LoginPage.tsx (pixel-identical; 49.444%/50.556% Figma canvas fractions retained as
+   arbitrary flex basis). Removed: .login-pageWrapper, .login-heroSection, .login-heroImage,
+   .login-heroContent, .login-formSection, .login-formContainer. */
 
-/* ==========================================================================
-   LEFT HERO BANNER
-   Exact Figma Canvas: 712px width on 1440px canvas (49.444%)
-   ========================================================================== */
-.login-heroSection {
-  position: relative;
-  flex: 0 0 49.444%;
-  width: 49.444%;
-  min-height: 100vh;
-  background-color: #1A1A1A;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-}
-
-.login-heroImage {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center top;
-}
+/* LEFT HERO BANNER — section layout migrated to Tailwind; overlay gradient below is
+   retained custom CSS (5-stop 511px fade has no utility equivalent). */
 
 /* Rectangle 96 in Figma: 712x511 at y=513 (bottom 50%) */
 .login-heroOverlay {
@@ -1709,618 +1807,70 @@ a {
   pointer-events: none;
 }
 
-/* Frame 60511 in Figma: AutoLayout VERTICAL, gap: 16px, padding: 0 56px 68px 56px */
-.login-heroContent {
-  position: relative;
-  z-index: 2;
-  padding: 0 56px 68px 56px;
-  color: #FFFFFF;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
+/* Frame 60511 content spacing migrated to Tailwind (px-14 pb-17 gap-4, max-lg variants inline). */
 
-.login-brandTitle {
-  font-family: var(--font-brand), sans-serif;
-  font-size: 32px;
-  font-weight: 700;
-  line-height: 38.4px;
-  color: #FFFFFF;
-  letter-spacing: -0.01em;
-}
+/* Login hero type + header migrated to Tailwind auth-* utilities in LoginPage.tsx
+   (pixel-identical; headline clamp + wrap-guards preserved).
+   Removed: .login-brandTitle, .login-heroHeadline, .login-heroSubtitle,
+   .login-headerBlock, .login-logoBadge, .login-logoMonogram, .login-formSubtitle.
+   Kept: .login-formTitle (recovery-sent view still uses it — migrates in Pass E). */
 
-/* Exact Figma: max-width 490px causes the 3-line wrap */
-.login-heroHeadline {
-  font-family: var(--font-main), sans-serif;
-  font-size: clamp(38px, 4.4vw, 64px);
-  font-weight: 700;
-  line-height: 1.2;
-  color: #FFFFFF;
-  white-space: pre-line;
-  letter-spacing: -0.02em;
-  max-width: 490px;
-}
+/* RIGHT AUTH SECTION — layout migrated to Tailwind in LoginPage.tsx (flex fractions,
+   clamp rhythm, radial washes as bg arbitrary). Removed: .login-formSection,
+   .login-formContainer. */
 
-/* Exact Figma: max-width 600px */
-.login-heroSubtitle {
-  font-family: var(--font-main), sans-serif;
-  font-size: 20px;
-  font-weight: 500;
-  line-height: 28px;
-  letter-spacing: 0.6px;
-  color: #FFFFFF;
-  max-width: 600px;
-}
+/* (header block + logo + formSubtitle removed — see migration comment above) */
 
-/* ==========================================================================
-   RIGHT AUTH SECTION
-   Exact Figma Canvas: 728px width on 1440px canvas (50.556%)
-   ========================================================================== */
-.login-formSection {
-  flex: 0 0 50.556%;
-  width: 50.556%;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  padding: clamp(24px, 4vh, 48px) 24px;
-  background-color: #FFFFFF;
-  background-image: 
-    radial-gradient(circle 520px at 78% 5%, rgba(229, 245, 211, 0.6) 0%, rgba(255, 255, 255, 0) 100%),
-    radial-gradient(circle 420px at 98% 8%, rgba(246, 198, 54, 0.1) 0%, rgba(229, 245, 211, 0.05) 50%, rgba(255, 255, 255, 0) 100%);
-  background-repeat: no-repeat;
-  overflow-y: auto;
-}
+/* (formTitle removed — last consumer migrated in recovery view; see comment above) */
 
-/* Content container max-width 568px */
-.login-formContainer {
-  width: 100%;
-  max-width: 568px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-/* Frame 128 / Frame 282: Header Block */
-.login-headerBlock {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: clamp(20px, 3vh, 32px);
-  text-align: center;
-}
-
-/* Frame 3: 48x48 rounded square, radius 13.5px, fill #242424 */
-.login-logoBadge {
-  width: 48px;
-  height: 48px;
-  border-radius: 13.5px;
-  background: #242424;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16px;
-  box-shadow: 0 4px 14px rgba(36, 36, 36, 0.15);
-}
-
-.login-logoMonogram {
-  width: 27px;
-  height: 27px;
-  object-fit: contain;
-}
-
-.login-formTitle {
-  font-family: var(--font-main), sans-serif;
-  font-size: 32px;
-  font-weight: 600;
-  color: #242424;
-  line-height: 40.3px;
-  letter-spacing: -0.01em;
-  margin-bottom: 8px;
-}
-
-.login-formSubtitle {
-  font-family: var(--font-main), sans-serif;
-  font-size: 20px;
-  font-weight: 400;
-  color: #6C6C6C;
-  line-height: 28px;
-  letter-spacing: 0.6px;
-}
+/* (formSubtitle removed — see migration comment above; formTitle kept for recovery view) */
 
 /* Frame 139: Social row (width 100%, max-width 568px, gap 24px) */
-.login-socialRow {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px;
-  width: 100%;
-  max-width: 568px;
-  margin-bottom: clamp(16px, 2.5vh, 24px);
-}
+/* Login social row + divider migrated to Tailwind utilities in LoginPage.tsx
+   (pixel-identical). Removed: .login-socialRow, .login-dividerRow,
+   .login-dividerLine, .login-dividerText. */
 
-.login-socialButton {
-  height: 52px;
-  width: 100%;
-  border-radius: 14px;
-  border: 1px solid #E9E9E9;
-  background: #FFFFFF;
-  display: flex;
-  align-items: center;
-  padding: 0 14px;
-  gap: 8px;
-  transition: all 0.2s ease;
-  user-select: none;
-}
+/* Login social/auth buttons migrated to Tailwind utilities in LoginPage.tsx (pixel-identical). Removed: .login-socialButton, .login-socialIconBadge, .login-appleIcon, .login-googleIcon, .login-socialText. */
 
-.login-socialButton:hover {
-  border-color: #D1D5DB;
-  background-color: #FAFAFA;
-}
-
-.login-socialIconBadge {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 1px solid #E7EFEF;
-  background: #FFFFFF;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.login-appleIcon {
-  width: 18px;
-  height: 18px;
-  object-fit: contain;
-}
-
-.login-googleIcon {
-  width: 16px;
-  height: 16px;
-  object-fit: contain;
-}
-
-.login-socialText {
-  font-family: var(--font-main), sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  color: #242424;
-  letter-spacing: 0.14px;
-  line-height: 22.4px;
-  white-space: nowrap;
-}
-
-/* Frame 136: Divider (width 100%, max-width 568px) */
-.login-dividerRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  max-width: 568px;
-  margin-bottom: clamp(16px, 2.5vh, 24px);
-  gap: 16px;
-}
-
-.login-dividerLine {
-  flex: 1;
-  height: 1px;
-  background-color: #BBBBBB;
-}
-
-.login-dividerText {
-  font-family: var(--font-main), sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  color: #6C6C6C;
-  line-height: 20.2px;
-  padding: 0 24px;
-  text-align: center;
-  flex-shrink: 0;
-}
+/* (divider classes removed — see migration comment above) */
 
 /* Form block */
-.login-form {
-  width: 100%;
-  max-width: 568px;
-  display: flex;
-  flex-direction: column;
-}
+/* Login form + inputs migrated to Tailwind auth-* utilities in LoginPage.tsx (pixel-identical).
+   Removed: .login-form, .login-fieldGroup, .login-fieldLabel, .login-inputWrapper,
+   .login-inputWrapperActive, .login-inputWrapperError, .login-inputField,
+   .login-inputFieldFilled, .login-inputField::placeholder, .login-inputIcon,
+   .login-togglePasswordBtn, .login-errorMessage, .login-errorIcon. */
 
-/* Frame 129: Field group */
-.login-fieldGroup {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: clamp(16px, 2.2vh, 24px);
-  width: 100%;
-}
+/* Login controls migrated to Tailwind auth-* utilities in LoginPage.tsx (pixel-identical).
+   Removed: .login-rememberRow, .login-checkboxBox, .login-checkboxBoxChecked,
+   .login-rememberText, .login-forgotPasswordRow, .login-resetLink. */
 
-.login-fieldLabel {
-  font-family: var(--font-main), sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  color: #242424;
-  line-height: 22.4px;
-  letter-spacing: 0.14px;
-  margin-bottom: 8px;
-  text-align: left;
-}
+/* Primary_button 568x48 radius 12px fill #242424 — migrated to Tailwind in LoginPage.tsx (see .login-primaryButton removal). */
 
-/* Frame 125: Input box (height 48px, radius 12px, border #E9E9E9) */
-.login-inputWrapper {
-  height: 48px;
-  width: 100%;
-  border-radius: 12px;
-  border: 1px solid #E9E9E9;
-  background: #FFFFFF;
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  gap: 10px;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
-}
+/* (forgot-password row + reset link removed — see migration comment above) */
 
-/* Active email border (Frame 1:20776 & 1:20725) */
-.login-inputWrapperActive {
-  border-color: #115D5D !important;
-}
-
-/* Wrong password error state (Frame 1:20725) */
-.login-inputWrapperError {
-  border-color: #E94845 !important;
-  background-color: #FDEDEC !important;
-}
-
-.login-inputField {
-  flex: 1;
-  border: none;
-  background: transparent;
-  font-family: var(--font-main), sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  color: #242424;
-  line-height: 22.4px;
-  letter-spacing: 0.28px;
-  height: 100%;
-  width: 100%;
-}
-
-.login-inputFieldFilled {
-  font-size: 16px;
-  line-height: 25.6px;
-  letter-spacing: 0.32px;
-}
-
-.login-inputField::placeholder {
-  color: #9A9A9A;
-  font-size: 14px;
-}
-
-.login-inputIcon {
-  color: #9A9A9A;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.login-togglePasswordBtn {
-  color: #9A9A9A;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2px;
-  transition: color 0.15s ease;
-}
-
-.login-togglePasswordBtn:hover {
-  color: #242424;
-}
-
-/* Frame 281 in 1:20725: Error notification */
-.login-errorMessage {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-main), sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 22.4px;
-  letter-spacing: 0.28px;
-  color: #E94845;
-  margin-top: 6px;
-}
-
-.login-errorIcon {
-  color: #E94845;
-  flex-shrink: 0;
-}
-
-/* Frame 132: Remember me row */
-.login-rememberRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 10px;
-  margin-bottom: clamp(16px, 2.2vh, 24px);
-  cursor: pointer;
-  user-select: none;
-  width: fit-content;
-}
-
-/* Rectangle 2: 20x20, radius 6px, stroke #E7EFEF */
-.login-checkboxBox {
-  width: 20px;
-  height: 20px;
-  border-radius: 6px;
-  border: 1px solid #E7EFEF;
-  background: #FFFFFF;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s ease;
-  flex-shrink: 0;
-}
-
-.login-checkboxBoxChecked {
-  background: #242424;
-  border-color: #242424;
-}
-
-.login-rememberText {
-  font-family: var(--font-main), sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  color: #242424;
-  line-height: 22.4px;
-  letter-spacing: 0.28px;
-}
-
-/* Primary_button: 568x48, radius 12px, fill #242424 */
-.login-primaryButton {
-  height: 48px;
-  width: 100%;
-  max-width: 568px;
-  border-radius: 12px;
-  background: #242424;
-  color: #FFFFFF;
-  font-family: var(--font-main), sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 22.4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s ease;
-  user-select: none;
-}
-
-.login-primaryButton:hover {
-  background: #141414;
-}
-
-/* Frame 133: Forgot password row */
-.login-forgotPasswordRow {
-  font-family: var(--font-main), sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  color: #242424;
-  line-height: 22.4px;
-  letter-spacing: 0.28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: clamp(16px, 2.4vh, 24px);
-  margin-bottom: clamp(16px, 2.4vh, 24px);
-  width: 100%;
-}
-
-.login-resetLink {
-  color: #115D5D;
-  font-weight: 600;
-  line-height: 16.8px;
-  letter-spacing: 0.28px;
-  cursor: pointer;
-}
-
-.login-resetLink:hover {
-  text-decoration: underline;
-}
-
-/* Sign up for free: 568x48, radius 10px, transparent fill, 16px 700 #242424 */
-.login-signupButton {
-  height: 48px;
-  width: 100%;
-  max-width: 568px;
-  border-radius: 10px;
-  font-family: var(--font-main), sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  color: #242424;
-  line-height: 22.4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: opacity 0.15s ease;
-  user-select: none;
-}
-
-.login-signupButton:hover {
-  opacity: 0.75;
-}
+/* Sign up for free 568x48 radius 10px — migrated to Tailwind in LoginPage.tsx (see .login-signupButton removal). */
 
 /* ==========================================================================
    RESET PASSWORD VIEW (Frame 1:20710)
    Exact Figma: Card width 552px, radius 20px, stroke #E9E9E9,
    padding: 40px 32px, box-shadow: -1px 1px 40px rgba(0,0,0,0.06)
    ========================================================================== */
-.login-resetCard {
-  width: 100%;
-  max-width: 552px;
-  border-radius: 20px;
-  border: 1px solid #E9E9E9;
-  background: #FFFFFF;
-  box-shadow: -1px 1px 40px rgba(0, 0, 0, 0.06);
-  padding: 40px 32px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
+/* Login reset view migrated to Tailwind auth-* utilities in LoginPage.tsx (pixel-identical;
+   wrapper border resolved to auth-line via var(), placeholder inherits 16px).
+   Removed: .login-resetCard, .login-resetInputWrapper, .login-resetInput,
+   .login-resetInput::placeholder, .login-backLink. */
 
-.login-resetInputWrapper {
-  height: 48px;
-  width: 100%;
-  max-width: 488px;
-  border-radius: 12px;
-  border: 1px solid var(--tuw-border-control, #D1D5DB);
-  background: #FAFAFA;
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  gap: 10px;
-}
+/* .login-resetButton migrated to Tailwind in LoginPage.tsx (pixel-identical). */
 
-.login-resetInput {
-  flex: 1;
-  border: none;
-  background: transparent;
-  font-family: var(--font-main), sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  color: #242424;
-  line-height: 25.6px;
-  letter-spacing: 0.32px;
-  height: 100%;
-}
+/* Login recovery view migrated to Tailwind auth-* utilities in LoginPage.tsx (pixel-identical).
+   Removed: .login-recoveryCard, .login-recoveryPill, .login-recoveryTextBlock,
+   .login-recoveryHeading, .login-recoveryDescription, .login-formTitle.
+   Zero login-* selectors remain except the heroOverlay art exception. */
 
-.login-resetInput::placeholder {
-  color: #9A9A9A;
-}
+/* .login-recoveryButton migrated to Tailwind in LoginPage.tsx (pixel-identical). */
 
-.login-resetButton {
-  height: 48px;
-  width: 100%;
-  max-width: 488px;
-  border-radius: 12px;
-  background: #242424;
-  color: #FFFFFF;
-  font-family: var(--font-main), sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 22.4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s ease;
-}
-
-.login-resetButton:hover {
-  background: #141414;
-}
-
-/* ==========================================================================
-   RECOVERY SENT VIEW (Frame 1:20690)
-   Exact Figma: Card width 552px, radius 24px, stroke #E9E9E9,
-   padding: 40px 80px, gap 32px
-   ========================================================================== */
-.login-recoveryCard {
-  width: 100%;
-  max-width: 552px;
-  border-radius: 24px;
-  border: 1px solid #E9E9E9;
-  background: #FFFFFF;
-  padding: clamp(24px, 4vh, 40px) clamp(20px, 5vw, 80px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 32px;
-}
-
-/* Frame 281 in 1:20690: radius 12px, fill #EDF8E2, padding 8px 16px */
-.login-recoveryPill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: #EDF8E2;
-  border-radius: 12px;
-  padding: 8px 16px;
-  color: #009E5C;
-  font-family: var(--font-main), sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 25.6px;
-  letter-spacing: 0.32px;
-  white-space: nowrap;
-}
-
-.login-recoveryTextBlock {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  text-align: center;
-  width: 100%;
-  max-width: 392px;
-}
-
-.login-recoveryHeading {
-  font-family: var(--font-main), sans-serif;
-  font-size: 24px;
-  font-weight: 600;
-  line-height: 28.8px;
-  letter-spacing: 0.72px;
-  color: #115D5D;
-}
-
-.login-recoveryDescription {
-  font-family: var(--font-main), sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 25.6px;
-  letter-spacing: 0.32px;
-  color: #6C6C6C;
-}
-
-.login-recoveryButton {
-  width: 100%;
-  max-width: 392px;
-  height: 48px;
-  border-radius: 12px;
-  background: #242424;
-  color: #FFFFFF;
-  font-family: var(--font-main), sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 22.4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s ease;
-}
-
-.login-recoveryButton:hover {
-  background: #141414;
-}
-
-/* Back link */
-.login-backLink {
-  margin-top: 16px;
-  font-family: var(--font-main), sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  color: #6C6C6C;
-  cursor: pointer;
-  text-align: center;
-}
-
-.login-backLink:hover {
-  color: #242424;
-  text-decoration: underline;
-}
+/* (backLink removed — see reset-view migration comment above) */
 
 /* Subtle corner simulator pill (allows easy simulation of all 5 Figma screens) */
 /* ==========================================================================
@@ -2331,32 +1881,8 @@ a {
 /* ==========================================================================
    RESPONSIVENESS (Downscaling for tablet & mobile)
    ========================================================================== */
-@media (max-width: 1024px) {
-  .login-pageWrapper {
-    flex-direction: column;
-  }
-  .login-heroSection {
-    width: 100%;
-    flex: none;
-    min-height: 420px;
-    height: 420px;
-  }
-  .login-formSection {
-    width: 100%;
-    flex: none;
-    padding: 36px 20px;
-  }
-  .login-heroHeadline {
-    font-size: 38px;
-    line-height: 46px;
-  }
-  .login-heroSubtitle {
-    font-size: 15px;
-  }
-  .login-heroContent {
-    padding: 0 24px 32px 24px;
-  }
-}
+/* (≤1024px login rules removed — heroHeadline/Subtitle now use max-lg: variants inline;
+   shell rules migrated earlier. No login @media block remains.) */
 
 
 /* ==========================================================================
@@ -2368,43 +1894,12 @@ a {
    Exact Figma specs, zero horizontal overflow, perfectly fitting vertical viewport
    ========================================================================== */
 
-.signup-pageWrapper {
-  display: flex;
-  min-height: 100vh;
-  width: 100%;
-  max-width: 100%;
-  background-color: #FFFFFF;
-  font-family: var(--font-urbanist), 'Urbanist', sans-serif;
-  color: #242424;
-  overflow-x: hidden;
-  position: relative;
-}
+/* Signup shell wrapper + hero media migrated to Tailwind utilities in SignUpPage.tsx
+   (pixel-identical; fractions/washes mirror login). Removed: .signup-pageWrapper,
+   .signup-heroSection, .signup-heroImage, .signup-heroContent.
+   Kept: .signup-heroOverlay (distinct 55%/3-stop gradient — art exception). */
 
-/* ==========================================================================
-   LEFT HERO SECTION (Frame 124 - Width 712px / 1440px = 49.444%)
-   ========================================================================== */
-.signup-heroSection {
-  position: relative;
-  flex: 0 0 49.444%;
-  width: 49.444%;
-  height: 100%;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  overflow: hidden;
-  background-color: #1A1A1A;
-}
-
-.signup-heroImage {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center top;
-}
+/* (hero layout removed — see migration comment above) */
 
 /* Rectangle 96: Linear gradient overlay on bottom half */
 .signup-heroOverlay {
@@ -2418,599 +1913,69 @@ a {
   pointer-events: none;
 }
 
-/* Frame 60511: Brand Mark, Headline, Subtitle (Exact Figma: bottom anchored) */
-.signup-heroContent {
-  position: relative;
-  z-index: 2;
-  padding: 0 clamp(24px, 3.88vw, 56px) clamp(24px, 4.5vh, 68px) clamp(24px, 3.88vw, 56px);
-  display: flex;
-  flex-direction: column;
-  gap: clamp(8px, 1.4vh, 16px);
-  max-width: 600px;
-}
+/* (heroContent removed — see migration comment above) */
 
-.signup-brandTitle {
-  font-family: var(--font-urbanist), 'Urbanist', sans-serif;
-  font-weight: 700;
-  font-size: clamp(20px, 2.22vw, 32px);
-  line-height: 1.2;
-  color: #FFFFFF;
-}
+/* Signup hero copy migrated to Tailwind auth-* utilities in SignUpPage.tsx (pixel-identical;
+   fluid clamps + 520px wrap-guards preserved).
+   Removed: .signup-brandTitle, .signup-heroHeadline, .signup-heroSubtitle. */
 
-.signup-heroHeadline {
-  font-family: var(--font-urbanist), 'Urbanist', sans-serif;
-  font-weight: 700;
-  font-size: clamp(28px, 3.6vw, 64px);
-  line-height: 1.15;
-  letter-spacing: -0.01em;
-  color: #FFFFFF;
-  margin: 0;
-  white-space: pre-line;
-  max-width: 520px;
-}
+/* Signup form section migrated to Tailwind utilities in SignUpPage.tsx (h-screen kept —
+   login uses min-h-screen; washes reuse the login bg arbitrary).
+   Removed: .signup-formSection, .signup-formContainer. */
 
-.signup-heroSubtitle {
-  font-family: var(--font-urbanist), 'Urbanist', sans-serif;
-  font-weight: 500;
-  font-size: clamp(13px, 1.25vw, 20px);
-  line-height: 1.35;
-  letter-spacing: 0.4px;
-  color: #FFFFFF;
-  opacity: 0.9;
-  margin: 0;
-  max-width: 520px;
-}
+/* Signup header migrated to Tailwind utilities in SignUpPage.tsx (pixel-identical; badge
+   deliberately shadow-/margin-less unlike login).
+   Removed: .signup-headerBlock, .signup-logoBadge, .signup-logoMonogram,
+   .signup-formTitle, .signup-formSubtitleRow, .signup-loginLink. */
 
-/* ==========================================================================
-   RIGHT AUTH SECTION (Frame 140 - Width 728px / 1440px = 50.556%)
-   Centered vertically with radial ambient gradients matching Figma
-   ========================================================================== */
-.signup-formSection {
-  flex: 0 0 50.556%;
-  width: 50.556%;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: clamp(16px, 2.5vh, 40px) clamp(20px, 3vw, 48px);
-  box-sizing: border-box;
-  background-color: #FFFFFF;
-  background-image: 
-    radial-gradient(circle 520px at 78% 5%, rgba(229, 245, 211, 0.6) 0%, rgba(255, 255, 255, 0) 100%),
-    radial-gradient(circle 420px at 98% 8%, rgba(246, 198, 54, 0.1) 0%, rgba(229, 245, 211, 0.05) 50%, rgba(255, 255, 255, 0) 100%);
-  background-repeat: no-repeat;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
+/* Signup form shells migrated to Tailwind utilities in SignUpPage.tsx (pixel-identical;
+   gap-based rhythm with distinct clamps preserved per block).
+   Removed: .signup-formBody, .signup-formInputsWrapper, .signup-fieldGroup,
+   .signup-fieldLabel. */
 
-.signup-formContainer {
-  width: 100%;
-  max-width: 568px;
-  display: flex;
-  flex-direction: column;
-  margin: auto 0;
-}
+/* Signup social + divider migrated to Tailwind utilities in SignUpPage.tsx (pixel-identical;
+   centered h-12 buttons, F8F9FA/D6D6D6 hover pair, badge h-7.5, divider uses auth-line).
+   Removed: .signup-socialRow, .signup-socialButton, .signup-socialIconBadge,
+   .signup-socialText, .signup-dividerRow, .signup-dividerLine, .signup-dividerText. */
 
-/* ==========================================================================
-   HEADER BLOCK: Frame 128 (Badge 48x48 -> Title -> Subtitle)
-   ========================================================================== */
-.signup-headerBlock {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: clamp(8px, 1.2vh, 14px);
-  margin-bottom: clamp(12px, 2vh, 24px);
-}
+/* (inputs wrapper + field shells removed — see migration comment above) */
 
-.signup-logoBadge {
-  width: 44px;
-  height: 44px;
-  background-color: #242424;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+/* Signup inputs migrated to Tailwind utilities in SignUpPage.tsx (pixel-identical; border
+   carried by inputs, focus ring .12 alpha distinct from OTP .15).
+   Removed: .signup-inputWrapper, .signup-inputField, .signup-inputField::placeholder,
+   .signup-inputIcon, .signup-inputIconButton, .signup-helperText. */
 
-.signup-logoMonogram {
-  width: 25px;
-  height: 25px;
-  object-fit: contain;
-}
+/* Signup terms migrated to Tailwind utilities in SignUpPage.tsx (pixel-identical;
+   5px/E7EEEE outliers kept verbatim, teal-checked, SVG via props + currentColor).
+   Removed: .signup-footerActionsBlock, .signup-termsRow, .signup-checkbox,
+   .signup-checkboxChecked, .signup-checkboxIcon, .signup-termsText, .signup-termsLink. */
 
-.signup-formTitle {
-  font-size: clamp(24px, 2.2vw, 32px);
-  font-weight: 600;
-  line-height: 1.25;
-  color: #242424;
-  margin: 0;
-  letter-spacing: -0.01em;
-}
+/* Signup submit migrated to Tailwind utilities in SignUpPage.tsx (pixel-identical;
+   hover auth-pure, active scale-99). Removed: .signup-submitButton. */
 
-.signup-formSubtitleRow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  font-size: 15px;
-  line-height: 22px;
-  color: #6C6C6C;
-  margin: 0;
-}
+/* Signup verify shell + header migrated to Tailwind utilities in SignUpPage.tsx
+   (pixel-identical; title fluid, subrow token shared with C6).
+   Removed: .signup-verifyContainer, .signup-verifyHeaderBlock, .signup-verifyTitle,
+   .signup-verifySubtitle. (logoBadge/logoMonogram shared with C5 — already removed.) */
 
-.signup-loginLink {
-  color: #115D5D;
-  font-weight: 600;
-  text-decoration: none;
-  cursor: pointer;
-  transition: opacity 0.15s ease;
-}
+/* (verify header removed — see migration comment above) */
 
-.signup-loginLink:hover {
-  opacity: 0.8;
-  text-decoration: underline;
-}
+/* OTP boxes migrated to Tailwind utilities in SignUpPage.tsx (pixel-identical; 24px
+   size-only, .15 ring, ternary + focus: share teal state).
+   Removed: .signup-otpRow, .signup-otpInput, .signup-otpInputActive. */
 
-/* ==========================================================================
-   FORM BODY (Frame 135)
-   ========================================================================== */
-.signup-formBody {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(12px, 1.8vh, 20px);
-  width: 100%;
-}
-
-/* ==========================================================================
-   SOCIAL BUTTONS: Frame 139 (Apple & Google)
-   ========================================================================== */
-.signup-socialRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: clamp(12px, 1.5vw, 24px);
-}
-
-.signup-socialButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  height: 48px;
-  padding: 8px 14px;
-  border: 1px solid #E9E9E9;
-  border-radius: 14px;
-  background-color: #FFFFFF;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: inherit;
-  box-sizing: border-box;
-}
-
-.signup-socialButton:hover {
-  background-color: #F8F9FA;
-  border-color: #D6D6D6;
-}
-
-.signup-socialIconBadge {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  border: 1px solid #E9E9E9;
-  background-color: #FFFFFF;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.signup-socialText {
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0.14px;
-  line-height: 22.4px;
-  color: #242424;
-}
-
-/* ==========================================================================
-   DIVIDER ROW: Line 1 + "Or" + Line 2
-   ========================================================================== */
-.signup-dividerRow {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.signup-dividerLine {
-  flex: 1;
-  height: 1px;
-  background-color: #E9E9E9;
-}
-
-.signup-dividerText {
-  font-size: 14px;
-  font-weight: 500;
-  color: #BBBBBB;
-  line-height: 20px;
-}
-
-/* ==========================================================================
-   FORM INPUTS BLOCK (Frame 1410130422)
-   ========================================================================== */
-.signup-formInputsWrapper {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(8px, 1.2vh, 14px);
-}
-
-.signup-fieldGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.signup-fieldLabel {
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0.14px;
-  line-height: 20px;
-  color: #242424;
-}
-
-.signup-inputWrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 100%;
-}
-
-.signup-inputField {
-  width: 100%;
-  height: 46px;
-  padding: 10px 44px 10px 16px;
-  border: 1px solid #E9E9E9;
-  border-radius: 12px;
-  font-family: inherit;
-  font-size: 15px;
-  letter-spacing: 0.2px;
-  line-height: 22px;
-  color: #242424;
-  background-color: #FFFFFF;
-  outline: none;
-  box-sizing: border-box;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.signup-inputField::placeholder {
-  color: #9A9A9A;
-  font-weight: 400;
-}
-
-.signup-inputField:focus {
-  border-color: #115D5D;
-  box-shadow: 0 0 0 3px rgba(17, 93, 93, 0.12);
-}
-
-.signup-inputIcon {
-  position: absolute;
-  right: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #9A9A9A;
-  pointer-events: none;
-}
-
-.signup-inputIconButton {
-  position: absolute;
-  right: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #9A9A9A;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 6px;
-  transition: color 0.15s ease;
-}
-
-.signup-inputIconButton:hover {
-  color: #242424;
-}
-
-.signup-helperText {
-  font-size: 12px;
-  line-height: 16px;
-  color: #6C6C6C;
-  margin-top: 2px;
-}
-
-/* ==========================================================================
-   TERMS & PRIVACY CHECKBOX + BUTTON BLOCK (Frame 1410130423)
-   ========================================================================== */
-.signup-footerActionsBlock {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(8px, 1.2vh, 12px);
-  margin-top: clamp(6px, 1vh, 12px);
-}
-
-.signup-termsRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  user-select: none;
-}
-
-.signup-checkbox {
-  width: 18px;
-  height: 18px;
-  min-width: 18px;
-  border-radius: 5px;
-  border: 1px solid #E7EEEE;
-  background-color: #FFFFFF;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  padding: 0;
-}
-
-.signup-checkboxChecked {
-  background-color: #115D5D;
-  border-color: #115D5D;
-  color: #FFFFFF;
-}
-
-.signup-checkboxIcon {
-  width: 12px;
-  height: 12px;
-  stroke: #FFFFFF;
-  stroke-width: 2.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.signup-termsText {
-  font-size: 13px;
-  line-height: 18px;
-  letter-spacing: 0.15px;
-  color: #242424;
-}
-
-.signup-termsLink {
-  color: #115D5D;
-  font-weight: 600;
-  text-decoration: underline;
-  cursor: pointer;
-  transition: opacity 0.15s ease;
-}
-
-.signup-termsLink:hover {
-  opacity: 0.8;
-}
-
-/* ==========================================================================
-   PRIMARY SUBMIT BUTTON: Sign Up (Frame 1:21031)
-   ========================================================================== */
-.signup-submitButton {
-  width: 100%;
-  height: 48px;
-  background-color: #242424;
-  color: #FFFFFF;
-  border: none;
-  border-radius: 12px;
-  font-family: inherit;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 22.4px;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.signup-submitButton:hover {
-  background-color: #000000;
-}
-
-.signup-submitButton:active {
-  transform: scale(0.99);
-}
-
-/* ==========================================================================
-   EMAIL VERIFICATION VIEW (Frames 1:20890 & 1:20856)
-   Centered container width 350px, Gap 32px between header and body
-   ========================================================================== */
-.signup-verifyContainer {
-  width: 100%;
-  max-width: 350px;
-  margin: auto auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: clamp(20px, 3vh, 32px);
-}
-
-.signup-verifyHeaderBlock {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 14px;
-}
-
-.signup-verifyTitle {
-  font-size: clamp(24px, 2.2vw, 32px);
-  font-weight: 600;
-  line-height: 1.25;
-  color: #242424;
-  margin: 0;
-  letter-spacing: -0.01em;
-}
-
-.signup-verifySubtitle {
-  font-size: 15px;
-  font-weight: 400;
-  line-height: 22px;
-  color: #6C6C6C;
-  margin: 0;
-}
-
-/* 4 OTP Input Boxes: Frame 1410130425 (Total width 260px, 4x 56px boxes + 3x 12px gaps) */
-.signup-otpRow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  width: 260px;
-  margin: 0 auto;
-}
-
-.signup-otpInput {
-  width: 56px;
-  height: 56px;
-  border: 1px solid #C6EAA0;
-  border-radius: 8px;
-  background-color: #FFFFFF;
-  font-family: inherit;
-  font-size: 24px;
-  font-weight: 700;
-  color: #242424;
-  text-align: center;
-  outline: none;
-  transition: all 0.2s ease;
-  box-sizing: border-box;
-}
-
-.signup-otpInput:focus,
-.signup-otpInputActive {
-  border-color: #115D5D;
-  box-shadow: 0 0 0 3px rgba(17, 93, 93, 0.15);
-}
-
-/* Frame 1410130426: Verify actions block width: 350px, gap: 24px */
-.signup-verifyActions {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-}
-
-/* Frame 1410130427: button + resend text with gap 12px */
-.signup-verifyPrimaryGroup {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.signup-verifyButton {
-  width: 100%;
-  height: 48px;
-  background-color: #242424;
-  color: #FFFFFF;
-  border: none;
-  border-radius: 12px;
-  font-family: inherit;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 22.4px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.signup-verifyButton:hover {
-  background-color: #000000;
-}
-
-.signup-resendRow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  font-size: 14px;
-  line-height: 22px;
-  color: #242424;
-}
-
-.signup-resendLink {
-  color: #115D5D;
-  font-weight: 600;
-  text-decoration: underline;
-  background: none;
-  border: none;
-  padding: 0;
-  font-family: inherit;
-  font-size: 14px;
-  cursor: pointer;
-  transition: opacity 0.15s ease;
-}
-
-.signup-resendLink:hover {
-  opacity: 0.8;
-}
-
-.signup-backToLoginButton {
-  width: 100%;
-  height: 48px;
-  background-color: #FFFFFF;
-  border: 1px solid #E9E9E9;
-  border-radius: 12px;
-  color: #242424;
-  font-family: inherit;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 22.4px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  box-sizing: border-box;
-}
-
-.signup-backToLoginButton:hover {
-  background-color: #F8F9FA;
-  border-color: #D6D6D6;
-}
+/* Signup verify actions migrated to Tailwind utilities in SignUpPage.tsx (pixel-identical;
+   verifyButton reuses submit pattern without :active; resend link inherits row lh).
+   Removed: .signup-verifyActions, .signup-verifyPrimaryGroup, .signup-verifyButton,
+   .signup-resendRow, .signup-resendLink, .signup-backToLoginButton. */
 
 /* ==========================================================================
    RESPONSIVE DESIGN (Zero horizontal overflow, fluid stacking)
    ========================================================================== */
 @media (max-width: 900px) {
-  .signup-pageWrapper {
-    flex-direction: column;
-    height: auto;
-    min-height: 100vh;
-    overflow-y: auto;
-  }
+  /* Wrapper/hero/content stacking migrated to max-[900px]: variants (kept: formSection, socialRow). */
 
-  .signup-heroSection {
-    flex: none;
-    width: 100%;
-    height: 320px;
-    min-height: 320px;
-  }
-
-  .signup-heroContent {
-    padding: 0 24px 28px 24px;
-  }
-
-  .signup-formSection {
-    flex: none;
-    width: 100%;
-    height: auto;
-    min-height: auto;
-    padding: 36px 20px 60px 20px;
-  }
+  /* Shell stacking migrated to max-[900px]: variants (kept: formSection, socialRow). */
 
   .signup-socialRow {
     gap: 12px;

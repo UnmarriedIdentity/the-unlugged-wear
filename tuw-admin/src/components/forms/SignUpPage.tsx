@@ -133,29 +133,29 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
   };
 
   return (
-    <main className={styles.pageWrapper}>
+    <main className="flex min-h-screen w-full max-w-full overflow-x-hidden bg-white text-auth-ink relative max-[900px]:flex-col max-[900px]:overflow-y-auto">
       {/* ==========================================================================
           LEFT HERO SECTION (Frame 124 - Width 712px, Height 1024px)
           ========================================================================== */}
-      <section className={styles.heroSection}>
+      <section className="relative flex h-full min-h-screen w-[49.444%] flex-[0_0_49.444%] flex-col justify-end overflow-hidden bg-auth-hero max-[900px]:h-[320px] max-[900px]:min-h-[320px] max-[900px]:w-full max-[900px]:flex-none">
         <Image
           src="/images/signup-hero.png"
           alt="Retail Storeflow Team Members"
           fill
           priority
           sizes="(max-width: 900px) 100vw, 50vw"
-          className={styles.heroImage}
+          className="absolute inset-0 h-full w-full object-cover object-top"
         />
-        {/* Rectangle 96: Linear gradient overlay on bottom 50% */}
+        {/* Rectangle 96: Linear gradient overlay on bottom half */}
         <div className={styles.heroOverlay} />
 
         {/* Frame 60511: Brand Mark, Headline, Subtitle */}
-        <div className={styles.heroContent}>
-          <div className={styles.brandTitle}>Storeflow</div>
-          <h1 className={styles.heroHeadline}>
+        <div className="relative z-2 flex flex-col gap-[clamp(8px,1.4vh,16px)] px-[clamp(24px,3.88vw,56px)] pb-[clamp(24px,4.5vh,68px)] max-w-[600px] max-[900px]:px-6 max-[900px]:pb-7">
+          <div className="text-auth-signup-brand font-bold leading-auth-headline text-white">Storeflow</div>
+          <h1 className="text-auth-signup-headline font-bold leading-auth-signup-headline tracking-auth-title text-white whitespace-pre-line max-w-auth-hero-copy m-0">
             All your store{'\n'}essentials{'\n'}in one place
           </h1>
-          <p className={styles.heroSubtitle}>
+          <p className="text-auth-signup-sub font-medium tracking-auth-signup-sub text-white opacity-90 m-0 max-w-auth-hero-copy">
             Experience a new standard of efficiency through an intelligent, beautifully designed admin dashboard.
           </p>
         </div>
@@ -164,44 +164,44 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
       {/* ==========================================================================
           RIGHT AUTH SECTION (Frame 140 - Width 728px, Height 1024px)
           ========================================================================== */}
-      <section className={styles.formSection}>
-        <div className={styles.formContainer}>
+      <section className="relative flex h-screen w-[50.556%] flex-[0_0_50.556%] flex-col items-center justify-center overflow-y-auto overflow-x-hidden bg-white bg-no-repeat py-[clamp(16px,2.5vh,40px)] px-[clamp(20px,3vw,48px)] bg-[radial-gradient(circle_520px_at_78%_5%,rgba(229,245,211,0.6)_0%,rgba(255,255,255,0)_100%),radial-gradient(circle_420px_at_98%_8%,rgba(246,198,54,0.1)_0%,rgba(229,245,211,0.05)_50%,rgba(255,255,255,0)_100%)] max-[900px]:h-auto max-[900px]:min-h-auto max-[900px]:w-full max-[900px]:flex-none max-[900px]:px-5 max-[900px]:pt-9 max-[900px]:pb-15">
+        <div className="flex w-full max-w-auth-form flex-col my-auto">
           {/* ==========================================================================
               VIEW 1: SIGN UP FORM (Figma 1:20984 & 1:20920)
               ========================================================================== */}
           {view === 'signup' && (
             <>
               {/* Header: Frame 128 (Badge + Title + Subtitle) */}
-              <header className={styles.headerBlock}>
-                <div className={styles.logoBadge}>
+              <header className="flex flex-col items-center text-center gap-[clamp(8px,1.2vh,14px)] mb-[clamp(12px,2vh,24px)]">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-auth-button">
                   <Image
                     src="/logos/tuw-stag-white.png"
                     alt="The Unplugged Wear"
                     width={27}
                     height={27}
-                    className={styles.logoMonogram}
+                    className="h-[25px] w-[25px] object-contain"
                   />
                 </div>
-                <h2 className={styles.formTitle}>Create an account</h2>
-                <div className={styles.formSubtitleRow}>
+                <h2 className="text-auth-signup-title font-semibold text-auth-ink tracking-auth-title m-0">Create an account</h2>
+                <div className="flex items-center justify-center gap-1.5 text-auth-subrow text-auth-muted m-0">
                   <span>Already have an account?</span>
-                  <Link href="/login" className={styles.loginLink} id="link-to-login">
+                  <Link href="/login" className="text-auth-teal font-semibold no-underline cursor-pointer transition-opacity duration-150 hover:opacity-80 hover:underline" id="link-to-login">
                     Login
                   </Link>
                 </div>
               </header>
 
-              {/* Form Body: Frame 135 */}
-              <div className={styles.formBody}>
+                {/* Form Body: Frame 135 */}
+                <div className="flex w-full flex-col gap-[clamp(12px,1.8vh,20px)]">
                 {/* Social Login Buttons: Apple & Google (Frame 139) */}
-                <div className={styles.socialRow}>
+                <div className="grid grid-cols-2 gap-[clamp(12px,1.5vw,24px)]">
                   <button
                     type="button"
-                    className={styles.socialButton}
+                    className="flex h-12 items-center justify-center gap-2 rounded-auth-social border border-auth-line bg-white px-3.5 py-2 cursor-pointer transition-all duration-200 hover:bg-auth-hover-canvas hover:border-auth-hover-line"
                     onClick={() => applyState('filled')}
                     id="signup-apple-btn"
                   >
-                    <div className={styles.socialIconBadge}>
+                    <div className="flex h-7.5 w-7.5 items-center justify-center rounded-full border border-auth-line bg-white">
                       <Image
                         src="/images/apple-logo.png"
                         alt="Apple"
@@ -209,16 +209,16 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
                         height={18}
                       />
                     </div>
-                    <span className={styles.socialText}>Use Apple</span>
+                    <span className="text-[14px] font-medium tracking-auth-social text-auth-ink">Use Apple</span>
                   </button>
 
                   <button
                     type="button"
-                    className={styles.socialButton}
+                    className="flex h-12 items-center justify-center gap-2 rounded-auth-social border border-auth-line bg-white px-3.5 py-2 cursor-pointer transition-all duration-200 hover:bg-auth-hover-canvas hover:border-auth-hover-line"
                     onClick={() => applyState('filled')}
                     id="signup-google-btn"
                   >
-                    <div className={styles.socialIconBadge}>
+                    <div className="flex h-7.5 w-7.5 items-center justify-center rounded-full border border-auth-line bg-white">
                       <Image
                         src="/images/google-logo.png"
                         alt="Google"
@@ -226,80 +226,80 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
                         height={16}
                       />
                     </div>
-                    <span className={styles.socialText}>Use Google</span>
+                    <span className="text-[14px] font-medium tracking-auth-social text-auth-ink">Use Google</span>
                   </button>
                 </div>
 
                 {/* Divider: Or (Frame 136) */}
-                <div className={styles.dividerRow}>
-                  <div className={styles.dividerLine} />
-                  <span className={styles.dividerText}>Or</span>
-                  <div className={styles.dividerLine} />
+                <div className="flex items-center gap-4">
+                  <div className="h-px flex-1 bg-auth-line" />
+                  <span className="text-sm font-medium text-auth-divider">Or</span>
+                  <div className="h-px flex-1 bg-auth-line" />
                 </div>
 
                 {/* Sign Up Form Inputs */}
                 <form onSubmit={handleSignUpSubmit} id="signup-form">
-                  <div className={styles.formInputsWrapper}>
+                  <div className="flex flex-col gap-[clamp(8px,1.2vh,14px)]">
                     {/* 1. Username Field */}
-                    <div className={styles.fieldGroup}>
-                      <label htmlFor="signup-username" className={styles.fieldLabel}>
+                    <div className="flex flex-col gap-[5px]">
+                      <label htmlFor="signup-username" className="text-sm font-medium tracking-auth-social text-auth-ink">
                         Username
                       </label>
-                      <div className={styles.inputWrapper}>
+                      <div className="relative flex w-full items-center">
                         <input
                           id="signup-username"
                           type="text"
                           value={username}
                           onChange={(e) => setUsername(e.target.value)}
                           placeholder="Enter your name here"
-                          className={styles.inputField}
+                          className="w-full h-11.5 py-2.5 pl-4 pr-11 border border-auth-line rounded-xl bg-white outline-none text-auth-signup-input tracking-auth-signup-input text-auth-ink placeholder:text-auth-faint placeholder:font-normal transition-all duration-200 focus:border-auth-teal focus:shadow-auth-input"
                           required
                         />
-                        <div className={styles.inputIcon}>
+                        <div className="absolute right-4 flex items-center justify-center text-auth-faint pointer-events-none">
                           <UserRound size={20} strokeWidth={1.5} />
                         </div>
                       </div>
                     </div>
 
                     {/* 2. Email Field */}
-                    <div className={styles.fieldGroup}>
-                      <label htmlFor="signup-email" className={styles.fieldLabel}>
+                    <div className="flex flex-col gap-[5px]">
+                      <label htmlFor="signup-email" className="text-sm font-medium tracking-auth-social text-auth-ink">
                         Email
                       </label>
-                      <div className={styles.inputWrapper}>
+                      <div className="relative flex w-full items-center">
                         <input
                           id="signup-email"
                           type="email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           placeholder="Enter your email here"
-                          className={styles.inputField}
+                          className="w-full h-11.5 py-2.5 pl-4 pr-11 border border-auth-line rounded-xl bg-white outline-none text-auth-signup-input tracking-auth-signup-input text-auth-ink placeholder:text-auth-faint placeholder:font-normal transition-all duration-200 focus:border-auth-teal focus:shadow-auth-input"
                           required
                         />
-                        <div className={styles.inputIcon}>
+                        <div className="absolute right-4 flex items-center justify-center text-auth-faint pointer-events-none">
                           <Mail size={20} strokeWidth={1.5} />
                         </div>
                       </div>
                     </div>
 
                     {/* 3. Create Password Field */}
-                    <div className={styles.fieldGroup}>
-                      <label htmlFor="signup-password" className={styles.fieldLabel}>
+                    <div className="flex flex-col gap-[5px]">
+                      <label htmlFor="signup-password" className="text-sm font-medium tracking-auth-social text-auth-ink">
                         Create password
                       </label>
-                      <div className={styles.inputWrapper}>
+                      <div className="relative flex w-full items-center">
                         <input
                           id="signup-password"
                           type={showPassword ? 'text' : 'password'}
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           placeholder="Input your password"
-                          className={styles.inputField}
+                          className="w-full h-11.5 py-2.5 pl-4 pr-11 border border-auth-line rounded-xl bg-white outline-none text-auth-signup-input tracking-auth-signup-input text-auth-ink placeholder:text-auth-faint placeholder:font-normal transition-all duration-200 focus:border-auth-teal focus:shadow-auth-input"
                           required
                         />
                         <button
                           type="button"
-                          className={styles.inputIconButton}
+                          className="absolute right-4 flex items-center justify-center text-auth-faint bg-transparent border-0 cursor-pointer p-1 rounded-auth-checkbox transition-colors duration-150 hover:text-auth-ink"
                           onClick={() => setShowPassword(!showPassword)}
                           aria-label={showPassword ? 'Hide password' : 'Show password'}
                         >
@@ -310,29 +310,29 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
                           )}
                         </button>
                       </div>
-                      <div className={styles.helperText}>
+                      <div className="text-xs text-auth-muted mt-0.5">
                         Use 8 or more characters, with number and symbol combinations
                       </div>
                     </div>
 
                     {/* 4. Confirm Password Field */}
-                    <div className={styles.fieldGroup}>
-                      <label htmlFor="signup-confirm-password" className={styles.fieldLabel}>
+                    <div className="flex flex-col gap-[5px]">
+                      <label htmlFor="signup-confirm-password" className="text-sm font-medium tracking-auth-social text-auth-ink">
                         Confirm your password
                       </label>
-                      <div className={styles.inputWrapper}>
+                      <div className="relative flex w-full items-center">
                         <input
                           id="signup-confirm-password"
                           type={showConfirmPassword ? 'text' : 'password'}
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           placeholder="Input your password"
-                          className={styles.inputField}
+                          className="w-full h-11.5 py-2.5 pl-4 pr-11 border border-auth-line rounded-xl bg-white outline-none text-auth-signup-input tracking-auth-signup-input text-auth-ink placeholder:text-auth-faint placeholder:font-normal transition-all duration-200 focus:border-auth-teal focus:shadow-auth-input"
                           required
                         />
                         <button
                           type="button"
-                          className={styles.inputIconButton}
+                          className="absolute right-4 flex items-center justify-center text-auth-faint bg-transparent border-0 cursor-pointer p-1 rounded-auth-checkbox transition-colors duration-150 hover:text-auth-ink"
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                           aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
                         >
@@ -347,18 +347,17 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
                   </div>
 
                   {/* Frame 1410130423: Checkbox & Submit Button */}
-                  <div className={styles.footerActionsBlock}>
+                  <div className="flex flex-col gap-[clamp(8px,1.2vh,12px)] mt-[clamp(6px,1vh,12px)]">
                     {/* 5. Terms of Use & Privacy Checkbox */}
                     <div
-                      className={styles.termsRow}
+                      className="flex items-center gap-2 select-none cursor-pointer"
                       onClick={() => setAgreeTerms(!agreeTerms)}
-                      style={{ cursor: 'pointer' }}
                     >
                       <button
                         type="button"
                         role="checkbox"
                         aria-checked={agreeTerms}
-                        className={`${styles.checkbox} ${agreeTerms ? styles.checkboxChecked : ''}`}
+                        className={`flex h-4.5 w-4.5 min-w-4.5 items-center justify-center rounded-auth-terms-check border cursor-pointer transition-all duration-150 p-0 ${agreeTerms ? 'bg-auth-teal border-auth-teal text-white' : 'bg-white border-auth-terms-line'}`}
                         onClick={(e) => {
                           e.stopPropagation();
                           setAgreeTerms(!agreeTerms);
@@ -366,20 +365,20 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
                         id="terms-checkbox"
                       >
                         {agreeTerms && (
-                          <svg className={styles.checkboxIcon} viewBox="0 0 14 14" fill="none">
-                            <path d="M2.5 7.5L5.5 10.5L11.5 3.5" />
+                          <svg className="h-3 w-3 text-white" viewBox="0 0 14 14" fill="none">
+                            <path d="M2.5 7.5L5.5 10.5L11.5 3.5" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
                         )}
                       </button>
-                      <div className={styles.termsText}>
+                      <div className="text-auth-terms tracking-auth-terms text-auth-ink">
                         By creating an account you agree to the{' '}
-                        <span className={styles.termsLink}>Term of use</span> and{' '}
-                        <span className={styles.termsLink}>Privacy policy</span>
+                        <span className="text-auth-teal font-semibold underline cursor-pointer transition-opacity duration-150 hover:opacity-80">Term of use</span> and{' '}
+                        <span className="text-auth-teal font-semibold underline cursor-pointer transition-opacity duration-150 hover:opacity-80">Privacy policy</span>
                       </div>
                     </div>
 
                     {/* 6. Primary Button: Sign Up */}
-                    <button type="submit" className={styles.submitButton} id="signup-submit-btn">
+                    <button type="submit" className="flex h-12 w-full items-center justify-center rounded-xl bg-auth-button text-auth-btn font-bold text-white cursor-pointer transition-all duration-200 hover:bg-auth-pure active:scale-99" id="signup-submit-btn">
                       Sign Up
                     </button>
                   </div>
@@ -392,28 +391,28 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
               VIEW 2: EMAIL VERIFICATION (Figma 1:20890 & 1:20856)
               ========================================================================== */}
           {view === 'verify' && (
-            <div className={styles.verifyContainer}>
+            <div className="flex w-full max-w-auth-verify flex-col items-center gap-[clamp(20px,3vh,32px)] m-auto">
               {/* Header: Frame 128 (Badge + Title + Subtitle) */}
-              <header className={styles.verifyHeaderBlock}>
-                <div className={styles.logoBadge}>
+              <header className="flex flex-col items-center text-center gap-3.5">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-auth-button">
                   <Image
                     src="/logos/tuw-stag-white.png"
                     alt="The Unplugged Wear"
                     width={27}
                     height={27}
-                    className={styles.logoMonogram}
+                    className="h-[25px] w-[25px] object-contain"
                   />
                 </div>
-                <h2 className={styles.verifyTitle}>Email verification code</h2>
-                <p className={styles.verifySubtitle}>
+                <h2 className="text-auth-verify-title font-semibold text-auth-ink tracking-auth-title m-0">Email verification code</h2>
+                <p className="text-auth-subrow font-normal text-auth-muted m-0">
                   We have sent verification code to your email
                 </p>
               </header>
 
               {/* 4-Digit OTP Code Inputs Form (Frame 135) */}
-              <form onSubmit={handleVerifySubmit} style={{ width: '100%' }}>
+                <form onSubmit={handleVerifySubmit} className="w-full">
                 {/* 4 OTP Input Boxes */}
-                <div className={styles.otpRow} style={{ marginBottom: '32px' }}>
+                <div className="flex items-center justify-center gap-3 w-[260px] mx-auto mb-8">
                   {otp.map((digit, idx) => (
                     <input
                       key={idx}
@@ -427,25 +426,25 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
                       value={digit}
                       onChange={(e) => handleOtpChange(idx, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                      className={`${styles.otpInput} ${digit ? styles.otpInputActive : ''}`}
+                      className={`h-14 w-14 border rounded-control bg-white outline-none text-[24px] font-bold text-auth-ink text-center transition-all duration-200 focus:border-auth-teal focus:shadow-auth-otp ${digit ? 'border-auth-teal shadow-auth-otp' : 'border-auth-otp-line'}`}
                     />
                   ))}
                 </div>
 
                 {/* Verify Actions: Button + Resend + Back to login */}
-                <div className={styles.verifyActions}>
-                  <div className={styles.verifyPrimaryGroup}>
+                <div className="flex w-full flex-col items-center gap-5">
+                  <div className="flex w-full flex-col items-center gap-3">
                     {/* Primary Button: Verify email */}
-                    <button type="submit" className={styles.verifyButton} id="verify-email-btn">
+                    <button type="submit" className="flex h-12 w-full items-center justify-center rounded-xl bg-auth-button text-auth-btn font-bold text-white cursor-pointer transition-all duration-200 hover:bg-auth-pure" id="verify-email-btn">
                       Verify email
                     </button>
 
                     {/* Resend Code Prompt */}
-                    <div className={styles.resendRow}>
+                    <div className="flex items-center justify-center gap-1 text-auth-resend text-auth-ink">
                       <span>Don’t receive the email?</span>
                       <button
                         type="button"
-                        className={styles.resendLink}
+                        className="text-[14px] text-auth-teal font-semibold underline bg-transparent border-0 p-0 cursor-pointer transition-opacity duration-150 hover:opacity-80"
                         onClick={() => alert('Verification code resent to your email.')}
                         id="resend-code-btn"
                       >
@@ -455,7 +454,7 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
                   </div>
 
                   {/* Secondary Button: Back to login */}
-                  <Link href="/login" className={styles.backToLoginButton} id="back-to-login-btn">
+                  <Link href="/login" className="flex h-12 w-full items-center justify-center rounded-xl border border-auth-line bg-white text-auth-btn font-bold text-auth-ink cursor-pointer no-underline transition-all duration-200 hover:bg-auth-hover-canvas hover:border-auth-hover-line" id="back-to-login-btn">
                     Back to login
                   </Link>
                 </div>
@@ -470,7 +469,7 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
 
 export default function SignUpPage({ initialMode }: SignUpPageProps) {
   return (
-    <Suspense fallback={<div style={{ minHeight: '100vh', background: '#FFFFFF' }} />}>
+      <Suspense fallback={<div style={{ minHeight: '100vh', background: 'var(--color-surface)' }} />}>
       <SignUpPageContent initialMode={initialMode} />
     </Suspense>
   );
