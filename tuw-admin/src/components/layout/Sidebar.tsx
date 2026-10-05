@@ -166,6 +166,17 @@ export default function Sidebar({
     return pathname.startsWith(path);
   };
 
+  // Index of the active child per group (-1 = none): drives the segmented dark stem.
+  const childActiveIndex = (activeFlags: boolean[]) => activeFlags.findIndex(Boolean);
+  const coreFlags = [getIsActive('/dashboard'), getIsActive('/orders'), getIsActive('/products'), getIsActive('/customers'), getIsActive('/reports') || getIsActive('/analytics')];
+  const opsFlags = [getIsActive('/fulfillment'), getIsActive('/shipments'), getIsActive('/returns'), getIsActive('/refunds'), getIsActive('/payments')];
+  const merchFlags = [getIsActive('/collections'), getIsActive('/designs'), getIsActive('/content')];
+  const sysFlags = [getIsActive('/team'), getIsActive('/audit-log')];
+  const coreStem = childActiveIndex(coreFlags);
+  const opsStem = childActiveIndex(opsFlags);
+  const merchStem = childActiveIndex(merchFlags);
+  const sysStem = childActiveIndex(sysFlags);
+
   return (
     <aside
       className={cn('sidebar', 'fixed left-0 top-0 z-50 flex shrink-0 flex-col overflow-hidden border-r border-subtle bg-canvas transition-[width] duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)]', isCollapsed ? 'w-20 min-w-20 px-[10px] pb-[14px]' : 'w-65 min-w-65 px-[14px] pb-[10px]', mobileMenuOpen ? 'max-md:translate-x-0' : 'max-md:-translate-x-full', 'max-md:bottom-0 max-md:z-[100] max-md:max-w-[86vw] max-md:w-[290px] max-md:min-w-auto max-md:overflow-y-auto max-md:overflow-x-hidden max-md:px-[14px] max-md:pb-4 max-md:shadow-[4px_0_24px_rgba(0,0,0,0.15)] max-md:transition-transform')}
@@ -217,99 +228,101 @@ export default function Sidebar({
             </button>
           )}
 
-          {(!isCollapsed ? isGroupOpen('core') : true) && (
-            <div className={cn(!isCollapsed && 'relative mt-[3px] mb-1.5 flex flex-col gap-[3px]')}>
+          <div className={cn('grid transition-[grid-template-rows] duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)]', (!isCollapsed ? isGroupOpen('core') : true) ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]')}>
+            <div className="min-h-0 overflow-hidden">
+              <div className={cn(!isCollapsed && 'relative mt-[3px] mb-1.5 flex flex-col gap-[3px] navTree', !isCollapsed && coreStem >= 0 && `navStemTo${coreStem}`)}>
               {/* Dashboard */}
-              <div className={cn(!isCollapsed && 'navBranchItem')}>
+              <div className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
                 <Link
                   href="/dashboard"
                   className={cn(
-                    'navBranchLink',
-                    getIsActive('/dashboard') && 'navBranchLinkActive',
-                    isCollapsed && 'navItemCollapsed'
+                    'relative flex w-full text-[13.5px] no-underline transition-all duration-150',
+                    isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
+                    getIsActive('/dashboard') ? 'bg-nav-active-wash font-semibold text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
                   title={isCollapsed ? 'Dashboard' : undefined}
                 >
-                  <span className="navIcon">
+                                    <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/dashboard') ? 'text-action-primary' : 'text-secondary')}>
                     <HomeIcon size={17} />
                   </span>
-                  {!isCollapsed && <span className="navBranchLabel">Dashboard</span>}
+                  {!isCollapsed && <span className="truncate text-[13.5px]">Dashboard</span>}
                 </Link>
               </div>
 
               {/* Orders */}
-              <div className={cn(!isCollapsed && 'navBranchItem')}>
+              <div className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
                 <Link
                   href="/orders"
                   className={cn(
-                    'navBranchLink',
-                    getIsActive('/orders') && 'navBranchLinkActive',
-                    isCollapsed && 'navItemCollapsed'
+                    'relative flex w-full text-[13.5px] no-underline transition-all duration-150',
+                    isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
+                    getIsActive('/orders') ? 'bg-nav-active-wash font-semibold text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
                   title={isCollapsed ? 'Orders' : undefined}
                 >
-                  <span className="navIcon">
+                                    <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/orders') ? 'text-action-primary' : 'text-secondary')}>
                     <ClipboardList size={17} />
                   </span>
-                  {!isCollapsed && <span className="navBranchLabel">Orders</span>}
+                  {!isCollapsed && <span className="truncate text-[13.5px]">Orders</span>}
                 </Link>
               </div>
 
               {/* Products */}
-              <div className={cn(!isCollapsed && 'navBranchItem')}>
+              <div className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
                 <Link
                   href="/products"
                   className={cn(
-                    'navBranchLink',
-                    getIsActive('/products') && 'navBranchLinkActive',
-                    isCollapsed && 'navItemCollapsed'
+                    'relative flex w-full text-[13.5px] no-underline transition-all duration-150',
+                    isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
+                    getIsActive('/products') ? 'bg-nav-active-wash font-semibold text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
                   title={isCollapsed ? 'Products' : undefined}
                 >
-                  <span className="navIcon">
+                                    <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/products') ? 'text-action-primary' : 'text-secondary')}>
                     <Package size={17} />
                   </span>
-                  {!isCollapsed && <span className="navBranchLabel">Products</span>}
+                  {!isCollapsed && <span className="truncate text-[13.5px]">Products</span>}
                 </Link>
               </div>
 
               {/* Customers */}
-              <div className={cn(!isCollapsed && 'navBranchItem')}>
+              <div className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
                 <Link
                   href="/customers"
                   className={cn(
-                    'navBranchLink',
-                    getIsActive('/customers') && 'navBranchLinkActive',
-                    isCollapsed && 'navItemCollapsed'
+                    'relative flex w-full text-[13.5px] no-underline transition-all duration-150',
+                    isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
+                    getIsActive('/customers') ? 'bg-nav-active-wash font-semibold text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
                   title={isCollapsed ? 'Customers' : undefined}
                 >
-                  <span className="navIcon">
+                  <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/customers') ? 'text-action-primary' : 'text-secondary')}>
                     <Users size={17} />
                   </span>
-                  {!isCollapsed && <span className="navBranchLabel">Customers</span>}
+                  {!isCollapsed && <span className="truncate text-[13.5px]">Customers</span>}
                 </Link>
               </div>
 
               {/* Analytics & Reports */}
-              <div className={cn(!isCollapsed && 'navBranchItem')}>
+              <div className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
                 <Link
                   href="/reports"
                   className={cn(
-                    'navBranchLink',
-                    (getIsActive('/reports') || getIsActive('/analytics')) && 'navBranchLinkActive',
-                    isCollapsed && 'navItemCollapsed'
+                    'relative flex w-full text-[13.5px] no-underline transition-all duration-150',
+                    isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
+                    (getIsActive('/reports') || getIsActive('/analytics')) ? 'bg-nav-active-wash font-semibold text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
                   title={isCollapsed ? 'Analytics & Reports' : undefined}
                 >
-                  <span className="navIcon">
+                                    <span className={cn('flex size-4.5 shrink-0 items-center justify-center', (getIsActive('/reports') || getIsActive('/analytics')) ? 'text-action-primary' : 'text-secondary')}>
                     <TrendingUp size={17} />
                   </span>
-                  {!isCollapsed && <span className="navBranchLabel">Analytics & Reports</span>}
+                  {!isCollapsed && <span className="truncate text-[13.5px]">Analytics & Reports</span>}
                 </Link>
               </div>
+              </div>
             </div>
-          )}
+          </div>
         </div>
 
         {/* OPERATIONS Section */}
@@ -328,25 +341,26 @@ export default function Sidebar({
             </button>
           )}
 
-          {(!isCollapsed ? isGroupOpen('operations') : true) && (
-            <div className={cn(!isCollapsed && 'relative mt-[3px] mb-1.5 flex flex-col gap-[3px]')}>
+          <div className={cn('grid transition-[grid-template-rows] duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)]', (!isCollapsed ? isGroupOpen('operations') : true) ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]')}>
+            <div className="min-h-0 overflow-hidden">
+              <div className={cn(!isCollapsed && 'relative mt-[3px] mb-1.5 flex flex-col gap-[3px] navTree', !isCollapsed && opsStem >= 0 && `navStemTo${opsStem}`)}>
               {/* Fulfillment */}
-              <div className={cn(!isCollapsed && 'navBranchItem')}>
+              <div className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
                 <Link
                   href="/fulfillment"
                   className={cn(
-                    'navBranchLink',
-                    getIsActive('/fulfillment') && 'navBranchLinkActive',
-                    isCollapsed && 'navItemCollapsed'
+                    'relative flex w-full text-[13.5px] no-underline transition-all duration-150',
+                    isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
+                    getIsActive('/fulfillment') ? 'bg-nav-active-wash font-semibold text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
                   title={isCollapsed ? 'Fulfillment' : undefined}
                 >
-                  <span className="navIcon">
+                                    <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/fulfillment') ? 'text-action-primary' : 'text-secondary')}>
                     <PackageCheck size={17} />
                   </span>
                   {!isCollapsed && (
                     <>
-                      <span className="navBranchLabel">Fulfillment</span>
+                      <span className="truncate text-[13.5px]">Fulfillment</span>
                       <span className="navBadge navBadgePurple">4</span>
                     </>
                   )}
@@ -354,40 +368,40 @@ export default function Sidebar({
               </div>
 
               {/* Shipments */}
-              <div className={cn(!isCollapsed && 'navBranchItem')}>
+              <div className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
                 <Link
                   href="/shipments"
                   className={cn(
-                    'navBranchLink',
-                    getIsActive('/shipments') && 'navBranchLinkActive',
-                    isCollapsed && 'navItemCollapsed'
+                    'relative flex w-full text-[13.5px] no-underline transition-all duration-150',
+                    isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
+                    getIsActive('/shipments') ? 'bg-nav-active-wash font-semibold text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
                   title={isCollapsed ? 'Shipments' : undefined}
                 >
-                  <span className="navIcon">
+                                    <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/shipments') ? 'text-action-primary' : 'text-secondary')}>
                     <Truck size={17} />
                   </span>
-                  {!isCollapsed && <span className="navBranchLabel">Shipments</span>}
+                  {!isCollapsed && <span className="truncate text-[13.5px]">Shipments</span>}
                 </Link>
               </div>
 
               {/* Returns & RMA */}
-              <div className={cn(!isCollapsed && 'navBranchItem')}>
+              <div className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
                 <Link
                   href="/returns"
                   className={cn(
-                    'navBranchLink',
-                    getIsActive('/returns') && 'navBranchLinkActive',
-                    isCollapsed && 'navItemCollapsed'
+                    'relative flex w-full text-[13.5px] no-underline transition-all duration-150',
+                    isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
+                    getIsActive('/returns') ? 'bg-nav-active-wash font-semibold text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
                   title={isCollapsed ? 'Returns & RMA' : undefined}
                 >
-                  <span className="navIcon">
+                                    <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/returns') ? 'text-action-primary' : 'text-secondary')}>
                     <Undo2 size={17} />
                   </span>
                   {!isCollapsed && (
                     <>
-                      <span className="navBranchLabel">Returns & RMA</span>
+                      <span className="truncate text-[13.5px]">Returns & RMA</span>
                       <span className="navBadge navBadgeAmber">2</span>
                     </>
                   )}
@@ -395,42 +409,43 @@ export default function Sidebar({
               </div>
 
               {/* Refunds */}
-              <div className={cn(!isCollapsed && 'navBranchItem')}>
+              <div className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
                 <Link
                   href="/refunds"
                   className={cn(
-                    'navBranchLink',
-                    getIsActive('/refunds') && 'navBranchLinkActive',
-                    isCollapsed && 'navItemCollapsed'
+                    'relative flex w-full text-[13.5px] no-underline transition-all duration-150',
+                    isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
+                    getIsActive('/refunds') ? 'bg-nav-active-wash font-semibold text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
                   title={isCollapsed ? 'Refunds' : undefined}
                 >
-                  <span className="navIcon">
+                                    <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/refunds') ? 'text-action-primary' : 'text-secondary')}>
                     <RotateCcw size={17} />
                   </span>
-                  {!isCollapsed && <span className="navBranchLabel">Refunds</span>}
+                  {!isCollapsed && <span className="truncate text-[13.5px]">Refunds</span>}
                 </Link>
               </div>
 
               {/* Payments */}
-              <div className={cn(!isCollapsed && 'navBranchItem')}>
+              <div className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
                 <Link
                   href="/payments"
                   className={cn(
-                    'navBranchLink',
-                    getIsActive('/payments') && 'navBranchLinkActive',
-                    isCollapsed && 'navItemCollapsed'
+                    'relative flex w-full text-[13.5px] no-underline transition-all duration-150',
+                    isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
+                    getIsActive('/payments') ? 'bg-nav-active-wash font-semibold text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
                   title={isCollapsed ? 'Payments' : undefined}
                 >
-                  <span className="navIcon">
+                                    <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/payments') ? 'text-action-primary' : 'text-secondary')}>
                     <CreditCard size={17} />
                   </span>
-                  {!isCollapsed && <span className="navBranchLabel">Payments</span>}
+                  {!isCollapsed && <span className="truncate text-[13.5px]">Payments</span>}
                 </Link>
               </div>
+              </div>
             </div>
-          )}
+          </div>
         </div>
 
         {/* MERCHANDISE Section */}
@@ -449,63 +464,65 @@ export default function Sidebar({
             </button>
           )}
 
-          {(!isCollapsed ? isGroupOpen('merchandise') : true) && (
-            <div className={cn(!isCollapsed && 'relative mt-[3px] mb-1.5 flex flex-col gap-[3px]')}>
+          <div className={cn('grid transition-[grid-template-rows] duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)]', (!isCollapsed ? isGroupOpen('merchandise') : true) ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]')}>
+            <div className="min-h-0 overflow-hidden">
+              <div className={cn(!isCollapsed && 'relative mt-[3px] mb-1.5 flex flex-col gap-[3px] navTree', !isCollapsed && merchStem >= 0 && `navStemTo${merchStem}`)}>
               {/* Collections */}
-              <div className={cn(!isCollapsed && 'navBranchItem')}>
+              <div className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
                 <Link
                   href="/collections"
                   className={cn(
-                    'navBranchLink',
-                    getIsActive('/collections') && 'navBranchLinkActive',
-                    isCollapsed && 'navItemCollapsed'
+                    'relative flex w-full text-[13.5px] no-underline transition-all duration-150',
+                    isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
+                    getIsActive('/collections') ? 'bg-nav-active-wash font-semibold text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
                   title={isCollapsed ? 'Collections' : undefined}
                 >
-                  <span className="navIcon">
+                                    <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/collections') ? 'text-action-primary' : 'text-secondary')}>
                     <Layers size={17} />
                   </span>
-                  {!isCollapsed && <span className="navBranchLabel">Collections</span>}
+                  {!isCollapsed && <span className="truncate text-[13.5px]">Collections</span>}
                 </Link>
               </div>
 
               {/* Design Assets */}
-              <div className={cn(!isCollapsed && 'navBranchItem')}>
+              <div className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
                 <Link
                   href="/designs"
                   className={cn(
-                    'navBranchLink',
-                    getIsActive('/designs') && 'navBranchLinkActive',
-                    isCollapsed && 'navItemCollapsed'
+                    'relative flex w-full text-[13.5px] no-underline transition-all duration-150',
+                    isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
+                    getIsActive('/designs') ? 'bg-nav-active-wash font-semibold text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
                   title={isCollapsed ? 'Design Assets' : undefined}
                 >
-                  <span className="navIcon">
+                                    <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/designs') ? 'text-action-primary' : 'text-secondary')}>
                     <Palette size={17} />
                   </span>
-                  {!isCollapsed && <span className="navBranchLabel">Design Assets</span>}
+                  {!isCollapsed && <span className="truncate text-[13.5px]">Design Assets</span>}
                 </Link>
               </div>
 
               {/* Content CMS */}
-              <div className={cn(!isCollapsed && 'navBranchItem')}>
+              <div className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
                 <Link
                   href="/content"
                   className={cn(
-                    'navBranchLink',
-                    getIsActive('/content') && 'navBranchLinkActive',
-                    isCollapsed && 'navItemCollapsed'
+                    'relative flex w-full text-[13.5px] no-underline transition-all duration-150',
+                    isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
+                    getIsActive('/content') ? 'bg-nav-active-wash font-semibold text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
                   title={isCollapsed ? 'Content CMS' : undefined}
                 >
-                  <span className="navIcon">
+                                    <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/content') ? 'text-action-primary' : 'text-secondary')}>
                     <FileText size={17} />
                   </span>
-                  {!isCollapsed && <span className="navBranchLabel">Content CMS</span>}
+                  {!isCollapsed && <span className="truncate text-[13.5px]">Content CMS</span>}
                 </Link>
               </div>
+              </div>
             </div>
-          )}
+          </div>
         </div>
 
         {/* SYSTEM Section */}
@@ -524,45 +541,47 @@ export default function Sidebar({
             </button>
           )}
 
-          {(!isCollapsed ? isGroupOpen('system') : true) && (
-            <div className={cn(!isCollapsed && 'relative mt-[3px] mb-1.5 flex flex-col gap-[3px]')}>
+          <div className={cn('grid transition-[grid-template-rows] duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)]', (!isCollapsed ? isGroupOpen('system') : true) ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]')}>
+            <div className="min-h-0 overflow-hidden">
+              <div className={cn(!isCollapsed && 'relative mt-[3px] mb-1.5 flex flex-col gap-[3px] navTree', !isCollapsed && sysStem >= 0 && `navStemTo${sysStem}`)}>
               {/* Team */}
-              <div className={cn(!isCollapsed && 'navBranchItem')}>
+              <div className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
                 <Link
                   href="/team"
                   className={cn(
-                    'navBranchLink',
-                    getIsActive('/team') && 'navBranchLinkActive',
-                    isCollapsed && 'navItemCollapsed'
+                    'relative flex w-full text-[13.5px] no-underline transition-all duration-150',
+                    isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
+                    getIsActive('/team') ? 'bg-nav-active-wash font-semibold text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
                   title={isCollapsed ? 'Team' : undefined}
                 >
-                  <span className="navIcon">
+                  <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/team') ? 'text-action-primary' : 'text-secondary')}>
                     <Users size={17} />
                   </span>
-                  {!isCollapsed && <span className="navBranchLabel">Team</span>}
+                  {!isCollapsed && <span className="truncate text-[13.5px]">Team</span>}
                 </Link>
               </div>
 
               {/* Audit Log */}
-              <div className={cn(!isCollapsed && 'navBranchItem')}>
+              <div className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
                 <Link
                   href="/audit-log"
                   className={cn(
-                    'navBranchLink',
-                    getIsActive('/audit-log') && 'navBranchLinkActive',
-                    isCollapsed && 'navItemCollapsed'
+                    'relative flex w-full text-[13.5px] no-underline transition-all duration-150',
+                    isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
+                    getIsActive('/audit-log') ? 'bg-nav-active-wash font-semibold text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
                   title={isCollapsed ? 'Audit Log' : undefined}
                 >
-                  <span className="navIcon">
+                                    <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/audit-log') ? 'text-action-primary' : 'text-secondary')}>
                     <ShieldCheck size={17} />
                   </span>
-                  {!isCollapsed && <span className="navBranchLabel">Audit Log</span>}
+                  {!isCollapsed && <span className="truncate text-[13.5px]">Audit Log</span>}
                 </Link>
               </div>
+              </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
 
