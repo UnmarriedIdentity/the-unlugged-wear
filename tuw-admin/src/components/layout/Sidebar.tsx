@@ -301,7 +301,7 @@ export default function Sidebar({
       </div>
 
       {/* Navigation Sections */}
-      <div ref={navScrollRef} onScroll={updateScrollEdges} className={cn('flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden mt-0.5 pb-6 pr-1 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden', isCollapsed ? 'gap-0' : 'gap-2.5')}>
+      <div ref={navScrollRef} onScroll={updateScrollEdges} className={cn('flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden overscroll-y-contain mt-0.5 pb-6 pr-1 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden', isCollapsed ? 'gap-0' : 'gap-2.5')}>
         <div aria-hidden="true" className={cn('sticky top-0 z-10 h-6 -mb-6 bg-gradient-to-b from-canvas to-transparent pointer-events-none transition-opacity duration-200', canScrollUp ? 'opacity-100' : 'opacity-0')} />
         {NAV_GROUPS.map((group) => {
           const actives = group.items.map((item) => item.match.some((p) => getIsActive(p)));
