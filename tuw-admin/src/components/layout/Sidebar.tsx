@@ -15,9 +15,6 @@ import {
   Settings,
   Headphones,
   LogOut,
-  ChevronRight,
-  ChevronLeft,
-  ChevronDown,
   PackageCheck,
   Truck,
   Undo2,
@@ -27,12 +24,11 @@ import {
   Palette,
   FileText,
   ShieldCheck,
-  MoonStar,
-  Contrast,
   PanelLeft,
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
+import { SidebarNavGroup, SidebarNavItem, SidebarDock } from './sidebar-nav';
 import type { LucideIcon } from 'lucide-react';
 
 interface SidebarProps {
@@ -156,12 +152,12 @@ interface FooterItemDef {
   label: string;
   icon: LucideIcon;
   match: string[];
-  variant: 'default' | 'danger';
+  variant: 'footer' | 'danger';
 }
 
 const FOOTER_ITEMS: FooterItemDef[] = [
-  { href: '/settings', label: 'Settings', icon: Settings, match: ['/settings'], variant: 'default' },
-  { href: '/support', label: 'Help & Support', icon: Headphones, match: ['/support', '/help'], variant: 'default' },
+  { href: '/settings', label: 'Settings', icon: Settings, match: ['/settings'], variant: 'footer' },
+  { href: '/support', label: 'Help & Support', icon: Headphones, match: ['/support', '/help'], variant: 'footer' },
   { href: '/login', label: 'Log out', icon: LogOut, match: [], variant: 'danger' },
 ];
 
@@ -191,13 +187,6 @@ export default function Sidebar({
     if (target.closest('a') && mobileMenuOpen && onCloseMobileMenu) {
       onCloseMobileMenu();
     }
-  };
-
-  // Bottom dock toolbar theme state
-  const [activeThemeMode, setActiveThemeMode] = useState<'dark' | 'contrast' | 'default'>('dark');
-
-  const handleThemeToggle = (mode: 'dark' | 'contrast') => {
-    setActiveThemeMode((prev) => (prev === mode ? 'default' : mode));
   };
 
   // User-controlled accordion state: persists across route transitions & page loads.
@@ -309,56 +298,23 @@ export default function Sidebar({
           const actives = group.items.map((item) => item.match.some((p) => getIsActive(p)));
           const stemIdx = actives.findIndex(Boolean);
           const open = !isCollapsed ? isGroupOpen(group.key) : true;
-          const groupActive = activeGroup === group.key;
-          const GroupIcon = group.icon;
           return (
-            <div key={group.key} className="flex flex-col">
-              {!isCollapsed && (
-                <button
-                  type="button"
-                  className="flex w-full items-center justify-between rounded-nav-sm border-0 bg-transparent py-1.5 pl-2.5 pr-2 cursor-pointer select-none text-left transition-colors duration-150 hover:bg-nav-group-hover"
-                  onClick={() => toggleGroup(group.key)}
-                >
-                  <span className="flex items-center gap-2.5">
-                    <span className={cn('flex size-4.5 shrink-0 items-center justify-center', groupActive ? 'text-nav-active-text' : 'text-secondary')}>
-                      <GroupIcon size={18} />
-                    </span>
-                    <span className={cn('text-nav-parent font-bold', groupActive ? 'text-nav-active-text' : 'text-nav-group-label')}>{group.label}</span>
-                  </span>
-                  <ChevronDown
-                    size={13}
-                    className={cn('flex items-center justify-center transition-transform duration-200', groupActive ? 'text-nav-active-text' : 'text-nav-chevron', isGroupOpen(group.key) && 'rotate-180')}
-                  />
-                </button>
-              )}
-
-              <div className={cn('grid transition-[grid-template-rows] duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)]', open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]')}>
-                <div className="min-h-0 overflow-hidden">
-                  <div className={cn(!isCollapsed && 'relative mt-[3px] mb-1.5 flex flex-col gap-[3px] navTree', !isCollapsed && stemIdx >= 0 && `navStemTo${stemIdx}`)}>
-                    {group.items.map((item, idx) => {
-                      const ItemIcon = item.icon;
-                      const active = actives[idx];
-                      return (
-                      <div key={item.href} className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
-                      <Link
-                        href={item.href}
-                        className={cn(
-                          'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
-                          isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                          active ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
-                        )}
-                        title={isCollapsed ? item.label : undefined}
-                      >
-                        {isCollapsed && (<span className={cn('flex size-4.5 shrink-0 items-center justify-center', active ? 'text-action-primary' : 'text-secondary')}><ItemIcon size={17} /></span>)}
-                        {!isCollapsed && (<><span className="truncate text-nav-child">{item.label}</span>{item.badge && <span className={item.badge.className}>{item.badge.text}</span>}</>)}
-                      </Link>
-                      </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            </div>
+            <SidebarNavGroup
+              key={group.key}
+              groupKey={group.key}
+              label={group.label}
+              icon={group.icon}
+              isCollapsed={isCollapsed}
+              open={open}
+              chevronOpen={isGroupOpen(group.key)}
+              groupActive={activeGroup === group.key}
+              stemIdx={stemIdx}
+              onToggle={toggleGroup}
+            >
+            {group.items.map((item, idx) => (
+              <SidebarNavItem key={item.href} item={item} active={actives[idx]} isCollapsed={isCollapsed} variant="branch" />
+            ))}
+            </SidebarNavGroup>
           );
         })}
       </div>
@@ -368,24 +324,9 @@ export default function Sidebar({
         <ul className="list-none flex flex-col gap-[3px]">
           {FOOTER_ITEMS.map((item) => {
             const active = item.match.some((p) => getIsActive(p));
-            const ItemIcon = item.icon;
-            const danger = item.variant === 'danger';
             return (
             <li key={item.href}>
-            <Link
-              href={item.href}
-              className={cn(
-                'group relative flex w-full cursor-pointer select-none rounded-nav border-0 bg-transparent text-left text-[14px] transition-all duration-150',
-                isCollapsed ? 'justify-center p-2' : 'items-center gap-3 px-3 py-2',
-                danger ? 'font-medium text-secondary hover:bg-error-bg hover:text-error-text mt-0.5' : active ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 hover:bg-white hover:text-nav-active-text' : 'font-medium text-primary hover:bg-nav-hover-wash hover:text-action-primary'
-              )}
-              title={isCollapsed ? item.label : undefined}
-            >
-              <span className={cn('flex size-4.5 shrink-0 items-center justify-center', danger ? 'text-secondary group-hover:text-error-text' : active ? 'text-nav-active-text' : 'text-secondary group-hover:text-action-primary')}>
-                <ItemIcon size={18} />
-              </span>
-              {!isCollapsed && <span className="flex-1 truncate text-[14px]">{item.label}</span>}
-            </Link>
+              <SidebarNavItem item={item} active={active} isCollapsed={isCollapsed} variant={item.variant} />
             </li>
             );
           })}
@@ -394,49 +335,8 @@ export default function Sidebar({
         {/* ================================================================
             BOTTOM DOCKING TOOLBAR (NIGHT / THEME / SIDEBAR)
             ================================================================ */}
-        {!isCollapsed ? (
-          <div className="grid grid-cols-3 shrink-0 overflow-hidden rounded-control border border-nav-dock-line bg-nav-dock-bg mt-1.5 mb-0.5 h-8">
-            <button
-              type="button"
-              className={cn('flex h-full w-full items-center justify-center border-0 border-r border-nav-dock-line bg-transparent p-0 text-nav-dock-text cursor-pointer transition-all duration-150 last:border-r-0', activeThemeMode === 'dark' ? 'bg-nav-dock-active-bg text-white' : 'hover:bg-nav-dock-hover hover:text-white')}
-              onClick={() => handleThemeToggle('dark')}
-              aria-label="Toggle Night Mode"
-              title="Night Mode"
-            >
-              <MoonStar size={15} />
-            </button>
-            <button
-              type="button"
-              className={cn('flex h-full w-full items-center justify-center border-0 border-r border-nav-dock-line bg-transparent p-0 text-nav-dock-text cursor-pointer transition-all duration-150 last:border-r-0', activeThemeMode === 'contrast' ? 'bg-nav-dock-active-bg text-white' : 'hover:bg-nav-dock-hover hover:text-white')}
-              onClick={() => handleThemeToggle('contrast')}
-              aria-label="Toggle Theme Contrast"
-              title="Theme Contrast"
-            >
-              <Contrast size={15} />
-            </button>
-            <button
-              type="button"
-              className="flex h-full w-full items-center justify-center border-0 border-r border-nav-dock-line bg-transparent p-0 text-nav-dock-text cursor-pointer transition-all duration-150 last:border-r-0 hover:bg-nav-dock-hover hover:text-white"
-              onClick={onToggleCollapse}
-              aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-              title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            >
-              {isCollapsed ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
-            </button>
-          </div>
-        ) : (
-          <div className="flex w-full justify-center mt-2">
-            <button
-              type="button"
-              className="flex h-9 w-11 items-center justify-center rounded-control border border-nav-dock-line bg-nav-dock-bg text-nav-dock-text cursor-pointer transition-all duration-150 hover:bg-nav-dock-hover-light hover:text-white hover:border-nav-dock-line-hover"
-              onClick={onToggleCollapse}
-              title="Expand Sidebar"
-              aria-label="Expand Sidebar"
-            >
-              <ChevronRight size={16} />
-            </button>
-          </div>
-        )}
+        {/* Bottom docking toolbar (night / contrast / collapse) */}
+        <SidebarDock isCollapsed={isCollapsed} onToggleCollapse={onToggleCollapse} />
       </div>
     </aside>
   );
