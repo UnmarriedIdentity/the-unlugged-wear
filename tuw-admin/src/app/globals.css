@@ -85,6 +85,25 @@
   --text-auth-divider: 16px;
   --text-auth-divider--line-height: 20.2px;
   --leading-auth-link: 16.8px;
+  /* Auth hero + header type (Pass C; lead shared by heroSubtitle + formSubtitle) */
+  --text-auth-brand: 32px;
+  --text-auth-brand--line-height: 38.4px;
+  --text-auth-headline: clamp(38px, 4.4vw, 64px);
+  --leading-auth-headline: 1.2;
+  --text-auth-headline-md: 38px;
+  --text-auth-headline-md--line-height: 46px;
+  --text-auth-lead: 20px;
+  --text-auth-lead--line-height: 28px;
+  --text-auth-hero-sub-md: 15px;
+  --text-auth-title: 32px;
+  --text-auth-title--line-height: 40.3px;
+  --tracking-auth-title: -0.01em;
+  --tracking-auth-hero: -0.02em;
+  --tracking-auth-wide: 0.6px;
+  --container-auth-hero-head: 490px;
+  --container-auth-hero-sub: 600px;
+  --spacing-auth-header-gap: clamp(20px, 3vh, 32px);
+  --shadow-auth-badge: 0 4px 14px rgba(36, 36, 36, 0.15);
   --text-auth-input-filled: 16px;
   --text-auth-input-filled--line-height: 25.6px;
   --tracking-auth-input: 0.28px;
@@ -1742,69 +1761,17 @@
 
 /* Frame 60511 content spacing migrated to Tailwind (px-14 pb-17 gap-4, max-lg variants inline). */
 
-.login-brandTitle {
-  font-family: var(--font-brand), sans-serif;
-  font-size: 32px;
-  font-weight: 700;
-  line-height: 38.4px;
-  color: #FFFFFF;
-  letter-spacing: -0.01em;
-}
-
-/* Exact Figma: max-width 490px causes the 3-line wrap */
-.login-heroHeadline {
-  font-family: var(--font-main), sans-serif;
-  font-size: clamp(38px, 4.4vw, 64px);
-  font-weight: 700;
-  line-height: 1.2;
-  color: #FFFFFF;
-  white-space: pre-line;
-  letter-spacing: -0.02em;
-  max-width: 490px;
-}
-
-/* Exact Figma: max-width 600px */
-.login-heroSubtitle {
-  font-family: var(--font-main), sans-serif;
-  font-size: 20px;
-  font-weight: 500;
-  line-height: 28px;
-  letter-spacing: 0.6px;
-  color: #FFFFFF;
-  max-width: 600px;
-}
+/* Login hero type + header migrated to Tailwind auth-* utilities in LoginPage.tsx
+   (pixel-identical; headline clamp + wrap-guards preserved).
+   Removed: .login-brandTitle, .login-heroHeadline, .login-heroSubtitle,
+   .login-headerBlock, .login-logoBadge, .login-logoMonogram, .login-formSubtitle.
+   Kept: .login-formTitle (recovery-sent view still uses it — migrates in Pass E). */
 
 /* RIGHT AUTH SECTION — layout migrated to Tailwind in LoginPage.tsx (flex fractions,
    clamp rhythm, radial washes as bg arbitrary). Removed: .login-formSection,
    .login-formContainer. */
 
-/* Frame 128 / Frame 282: Header Block */
-.login-headerBlock {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: clamp(20px, 3vh, 32px);
-  text-align: center;
-}
-
-/* Frame 3: 48x48 rounded square, radius 13.5px, fill #242424 */
-.login-logoBadge {
-  width: 48px;
-  height: 48px;
-  border-radius: 13.5px;
-  background: #242424;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16px;
-  box-shadow: 0 4px 14px rgba(36, 36, 36, 0.15);
-}
-
-.login-logoMonogram {
-  width: 27px;
-  height: 27px;
-  object-fit: contain;
-}
+/* (header block + logo + formSubtitle removed — see migration comment above) */
 
 .login-formTitle {
   font-family: var(--font-main), sans-serif;
@@ -1816,14 +1783,7 @@
   margin-bottom: 8px;
 }
 
-.login-formSubtitle {
-  font-family: var(--font-main), sans-serif;
-  font-size: 20px;
-  font-weight: 400;
-  color: #6C6C6C;
-  line-height: 28px;
-  letter-spacing: 0.6px;
-}
+/* (formSubtitle removed — see migration comment above; formTitle kept for recovery view) */
 
 /* Frame 139: Social row (width 100%, max-width 568px, gap 24px) */
 /* Login social row + divider migrated to Tailwind utilities in LoginPage.tsx
@@ -1991,16 +1951,8 @@
 /* ==========================================================================
    RESPONSIVENESS (Downscaling for tablet & mobile)
    ========================================================================== */
-@media (max-width: 1024px) {
-  /* Shell stacking migrated to max-lg: variants in LoginPage.tsx (kept: hero type only). */
-  .login-heroHeadline {
-    font-size: 38px;
-    line-height: 46px;
-  }
-  .login-heroSubtitle {
-    font-size: 15px;
-  }
-}
+/* (≤1024px login rules removed — heroHeadline/Subtitle now use max-lg: variants inline;
+   shell rules migrated earlier. No login @media block remains.) */
 
 
 /* ==========================================================================

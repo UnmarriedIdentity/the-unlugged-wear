@@ -127,11 +127,11 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
 
         {/* Frame 60511: Brand, Headline, Subtitle */}
         <div className="relative z-2 flex flex-col gap-4 px-14 pb-17 text-white max-lg:px-6 max-lg:pb-8">
-          <div className={styles.brandTitle}>Storeflow</div>
-          <h1 className={styles.heroHeadline}>
+          <div className="text-auth-brand font-bold text-white tracking-auth-title">Storeflow</div>
+          <h1 className="text-auth-headline font-bold leading-auth-headline text-white tracking-auth-hero whitespace-pre-line max-w-auth-hero-head max-lg:text-auth-headline-md">
             Command Your{'\n'}Business with{'\n'}Confidence.
           </h1>
-          <p className={styles.heroSubtitle}>
+          <p className="text-auth-lead font-medium text-white tracking-auth-wide max-w-auth-hero-sub max-lg:text-auth-hero-sub-md">
             Experience a new standard of efficiency through an intelligent, beautifully designed admin dashboard.
           </p>
         </div>
@@ -143,26 +143,26 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
       <section className="relative flex min-h-screen w-[50.556%] flex-[0_0_50.556%] flex-col items-center justify-center overflow-y-auto bg-white bg-no-repeat py-[clamp(24px,4vh,48px)] px-6 max-lg:w-full max-lg:flex-none max-lg:px-5 max-lg:py-9 bg-[radial-gradient(circle_520px_at_78%_5%,rgba(229,245,211,0.6)_0%,rgba(255,255,255,0)_100%),radial-gradient(circle_420px_at_98%_8%,rgba(246,198,54,0.1)_0%,rgba(229,245,211,0.05)_50%,rgba(255,255,255,0)_100%)]">
         <div className="flex w-full max-w-auth-form flex-col items-center">
           {/* Header Block: Frame 3 Logo Badge + Title */}
-          <header className={styles.headerBlock}>
-            <div className={styles.logoBadge}>
+          <header className="flex flex-col items-center mb-auth-header-gap text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-auth-badge bg-auth-button shadow-auth-badge mb-4">
               <Image
                 src="/logos/tuw-stag-white.png"
                 alt="The Unplugged Wear"
                 width={27}
                 height={27}
-                className={styles.logoMonogram}
+                className="h-[27px] w-[27px] object-contain"
               />
             </div>
 
             {view === 'login' && (
               <>
-                <h2 className={styles.formTitle}>Log in or Sign up</h2>
-                <p className={styles.formSubtitle}>Welcome to Storeflow</p>
+                <h2 className="text-auth-title font-semibold text-auth-ink tracking-auth-title mb-2">Log in or Sign up</h2>
+                <p className="text-auth-lead font-normal text-auth-muted tracking-auth-wide">Welcome to Storeflow</p>
               </>
             )}
 
             {view === 'reset-password' && (
-              <h2 className={styles.formTitle} style={{ color: 'var(--color-auth-pure)' }}>
+              <h2 className="text-auth-title font-semibold tracking-auth-title mb-2 text-auth-pure">
                 Reset password
               </h2>
             )}
