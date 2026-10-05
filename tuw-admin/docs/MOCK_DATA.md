@@ -14,14 +14,14 @@ Include at least twenty mock orders across paid/pending/failed/refunded payment 
 
 ## Other fixtures
 
-Customers; customer addresses; staff/roles; support tickets; content pages/articles; mock media; activity/audit entries; settings; reporting summaries derived from the selected mock dataset.
+Customers; customer addresses; staff/roles; support tickets; content pages/articles; mock media; settings; reporting summaries derived from the selected mock dataset.
 
 ## Local interactions
 
 - Website cart/wishlist updates by product variant ID.
 - Successful demo checkout creates an order and updates local account history.
 - Admin create/edit/publish operations update the local catalog dataset.
-- Mock retry/refund actions update matching records and audit history.
+- Mock retry/refund actions update matching records.
 - Dashboard totals and reports reflect the active dataset rather than unrelated hardcoded numbers.
 
 Browser storage may preserve demo state; prefix keys by application and schema version and provide a reset-demo action. Explain that website and admin local changes do not automatically synchronize across separate deployments. Cross-app synchronization is deferred; use matching baseline fixtures or a deliberate development-only mock service if needed.

@@ -12,7 +12,6 @@ import {
   CollectionItem,
   DesignAsset,
   TeamMember,
-  AuditEntry,
   StoreSettings,
   StaffRole,
   initialProducts,
@@ -25,7 +24,6 @@ import {
   initialCollections,
   initialDesigns,
   initialTeam,
-  initialAuditLogs,
   initialSettings,
 } from './fixtures';
 
@@ -58,7 +56,6 @@ interface AdminStateContextType {
   collections: CollectionItem[];
   designs: DesignAsset[];
   team: TeamMember[];
-  auditLogs: AuditEntry[];
   settings: StoreSettings;
 
   toasts: ToastMessage[];
@@ -124,7 +121,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
   const [collections, setCollections] = useState<CollectionItem[]>(initialCollections);
   const [designs, setDesigns] = useState<DesignAsset[]>(initialDesigns);
   const [team, setTeam] = useState<TeamMember[]>(initialTeam);
-  const [auditLogs, setAuditLogs] = useState<AuditEntry[]>(initialAuditLogs);
   const [settings, setSettings] = useState<StoreSettings>(initialSettings);
 
   // Load from localStorage on mount
@@ -144,7 +140,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         if (parsed.collections) setCollections(parsed.collections);
         if (parsed.designs) setDesigns(parsed.designs);
         if (parsed.team) setTeam(parsed.team);
-        if (parsed.auditLogs) setAuditLogs(parsed.auditLogs);
         if (parsed.settings) setSettings(parsed.settings);
       }
     } catch {
@@ -166,7 +161,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
       collections?: CollectionItem[];
       designs?: DesignAsset[];
       team?: TeamMember[];
-      auditLogs?: AuditEntry[];
       settings?: StoreSettings;
     }) => {
       try {
@@ -182,7 +176,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
           collections,
           designs,
           team,
-          auditLogs,
           settings,
           ...newState,
         };
@@ -191,7 +184,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         // Storage quota / privacy protection
       }
     },
-    [activeRole, products, orders, shipments, refunds, returns, customers, supportTickets, collections, designs, team, auditLogs, settings]
+    [activeRole, products, orders, shipments, refunds, returns, customers, supportTickets, collections, designs, team, settings]
   );
 
   const showToast = useCallback((toast: Omit<ToastMessage, 'id'>) => {
@@ -214,21 +207,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
       title: `Switched Demo Role to ${role}`,
       description: `UI permissions adjusted for ${role} scenario testing.`,
     });
-  };
-
-  const logAuditAction = (action: string, resource: string, severity: 'info' | 'warning' | 'security' = 'info') => {
-    const newEntry: AuditEntry = {
-      id: `AUD-${Math.floor(1000 + Math.random() * 9000)}`,
-      actor: `demo_user (${activeRole})`,
-      action,
-      resource,
-      ipAddress: '127.0.0.1 (Local)',
-      timestamp: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' }),
-      severity,
-    };
-    const nextLogs = [newEntry, ...auditLogs];
-    setAuditLogs(nextLogs);
-    persistState({ auditLogs: nextLogs });
   };
 
   // Role check helper
@@ -278,7 +256,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     };
     const next = [newProduct, ...products];
     setProducts(next);
-    logAuditAction(`Created product "${p.name}" (${p.category})`, 'Products / Catalog');
     persistState({ products: next });
     showToast({
       type: 'success',
@@ -292,7 +269,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     if (!canPerformAction('products')) return false;
     const next = products.map((p) => (p.id === id ? { ...p, ...updates } : p));
     setProducts(next);
-    logAuditAction(`Updated product specifications for ${id}`, 'Products / Catalog');
     persistState({ products: next });
     showToast({
       type: 'success',
@@ -307,7 +283,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     const target = products.find((p) => p.id === id);
     const next = products.filter((p) => p.id !== id);
     setProducts(next);
-    logAuditAction(`Deleted product "${target?.name || id}"`, 'Products / Catalog', 'warning');
     persistState({ products: next });
     showToast({
       type: 'info',
@@ -329,7 +304,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     };
     const next = [newOrder, ...orders];
     setOrders(next);
-    logAuditAction(`Created manual order ${newOrder.id} for ${newOrder.customerName}`, 'Orders / Create');
     persistState({ orders: next });
     showToast({
       type: 'success',
@@ -368,7 +342,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
       return o;
     });
     setOrders(next);
-    logAuditAction(`Updated status for ${orderId}: ${[paymentStatus, fulfillmentStatus].filter(Boolean).join(', ')}`, 'Orders / Status');
     persistState({ orders: next });
     showToast({
       type: 'success',
@@ -406,7 +379,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
       return o;
     });
     setOrders(next);
-    logAuditAction(`Partner fulfillment retry successful for ${orderId}`, 'Fulfillment / Retry');
     persistState({ orders: next });
     showToast({
       type: 'success',
@@ -433,7 +405,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     setShipments(nextShipments);
     // Also update order status to shipped
     updateOrderStatus(s.orderId, undefined, 'shipped');
-    logAuditAction(`Created shipment ${s.trackingId} for ${s.orderId}`, 'Shipments / Create');
     persistState({ shipments: nextShipments });
     showToast({
       type: 'success',
@@ -504,7 +475,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     });
     setOrders(nextOrders);
 
-    logAuditAction(`Processed validated refund ${newRefundId} ($${params.amount.toFixed(2)}) for ${params.orderId}`, 'Refunds / Issue');
     persistState({ refunds: nextRefunds, orders: nextOrders });
     showToast({
       type: 'success',
@@ -519,7 +489,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     if (!canPerformAction('orders')) return false;
     const next = returns.map((r) => (r.id === returnId ? { ...r, stage } : r));
     setReturns(next);
-    logAuditAction(`Updated RMA ${returnId} stage to "${stage}"`, 'Returns / RMA');
     persistState({ returns: next });
     showToast({
       type: 'success',
@@ -533,7 +502,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     if (!canPerformAction('orders')) return false;
     const next = customers.map((c) => (c.id === customerId ? { ...c, notes: [note, ...c.notes] } : c));
     setCustomers(next);
-    logAuditAction(`Appended internal note for customer ${customerId}`, 'Customers / Notes');
     persistState({ customers: next });
     showToast({
       type: 'success',
@@ -570,7 +538,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     };
     const next = [newCustomer, ...customers];
     setCustomers(next);
-    logAuditAction(`Added new customer profile "${c.name}" (${c.email})`, 'Customers / Directory');
     persistState({ customers: next });
     showToast({
       type: 'success',
@@ -600,7 +567,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
       return t;
     });
     setSupportTickets(next);
-    logAuditAction(`Sent response and resolved support ticket ${ticketId}`, 'Support / Tickets');
     persistState({ supportTickets: next });
     showToast({
       type: 'success',
@@ -619,7 +585,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     };
     const next = [newCol, ...collections];
     setCollections(next);
-    logAuditAction(`Created new collection "${col.name}"`, 'Collections / Merchandising');
     persistState({ collections: next });
     showToast({
       type: 'success',
@@ -638,7 +603,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     };
     const next = [newAsset, ...designs];
     setDesigns(next);
-    logAuditAction(`Uploaded design asset "${asset.name}" (${asset.category})`, 'Designs / Upload');
     persistState({ designs: next });
     showToast({
       type: 'success',
@@ -659,7 +623,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     };
     const next = [newMember, ...team];
     setTeam(next);
-    logAuditAction(`Invited new staff member ${m.name} (${m.role})`, 'Team / Invite');
     persistState({ team: next });
     showToast({
       type: 'success',
@@ -674,7 +637,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     const target = team.find((m) => m.id === memberId);
     const next = team.filter((m) => m.id !== memberId);
     setTeam(next);
-    logAuditAction(`Removed staff member ${target?.name || memberId}`, 'Team / Removal', 'warning');
     persistState({ team: next });
     showToast({
       type: 'info',
@@ -688,7 +650,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     if (!canPerformAction('settings')) return false;
     const next = { ...settings, ...newSettings };
     setSettings(next);
-    logAuditAction('Updated store configuration settings', 'Settings / General');
     persistState({ settings: next });
     showToast({
       type: 'success',
@@ -788,7 +749,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     setCollections(initialCollections);
     setDesigns(initialDesigns);
     setTeam(initialTeam);
-    setAuditLogs(initialAuditLogs);
     setSettings(initialSettings);
 
     showToast({
@@ -818,7 +778,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         collections,
         designs,
         team,
-        auditLogs,
         settings,
         toasts,
         showToast,

@@ -70,8 +70,7 @@ function getActiveGroupForPath(pathname: string): string | null {
     return 'merchandise';
   }
   if (
-    pathname.startsWith('/team') ||
-    pathname.startsWith('/audit-log')
+    pathname.startsWith('/team')
   ) {
     return 'system';
   }
@@ -141,7 +140,6 @@ const NAV_GROUPS: NavGroupDef[] = [
     icon: ShieldCheck,
     items: [
       { href: '/team', label: 'Team', icon: Users, match: ['/team'] },
-      { href: '/audit-log', label: 'Audit Log', icon: ShieldCheck, match: ['/audit-log'] },
     ],
   },
 ];
@@ -252,7 +250,7 @@ export default function Sidebar({
   const activeGroup = getActiveGroupForPath(pathname);  const coreFlags = [getIsActive('/dashboard'), getIsActive('/orders'), getIsActive('/products'), getIsActive('/customers'), getIsActive('/reports') || getIsActive('/analytics')];
   const opsFlags = [getIsActive('/fulfillment'), getIsActive('/shipments'), getIsActive('/returns'), getIsActive('/refunds'), getIsActive('/payments')];
   const merchFlags = [getIsActive('/collections'), getIsActive('/designs'), getIsActive('/content')];
-  const sysFlags = [getIsActive('/team'), getIsActive('/audit-log')];
+  const sysFlags = [getIsActive('/team')];
   const coreStem = childActiveIndex(coreFlags);
   const opsStem = childActiveIndex(opsFlags);
   const merchStem = childActiveIndex(merchFlags);

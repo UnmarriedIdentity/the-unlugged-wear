@@ -260,7 +260,7 @@ export default function TeamPage() {
               </div>
             </div>
             <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
-              All simulated active sessions and API permissions will be terminated immediately and recorded in the audit log.
+              All simulated active sessions and API permissions will be terminated immediately.
             </p>
           </div>
         )}

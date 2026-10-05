@@ -22,7 +22,7 @@ Home; shop; collection; product detail; search; cart; checkout; order confirmati
 
 ## Admin screens
 
-Login; password recovery/reset; invitation acceptance; overview; products/list/create/edit; collections; designs; orders/list/detail; fulfillment; shipments; payments; refunds; returns; customers/list/detail; support; content pages/journal/navigation/media; reports; team; audit log; settings for general/brand/payments/fulfillment/shipping/taxes/notifications; not-found and error pages.
+Login; password recovery/reset; invitation acceptance; overview; products/list/create/edit; collections; designs; orders/list/detail; fulfillment; shipments; payments; refunds; returns; customers/list/detail; support; content pages/journal/navigation/media; reports; team; settings for general/brand/payments/fulfillment/shipping/taxes/notifications; not-found and error pages.
 
 ## Deferred
 
