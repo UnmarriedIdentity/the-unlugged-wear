@@ -723,12 +723,24 @@
   pointer-events: none;
   z-index: 1;
 }
+/* Dark path (trunk runs + active elbow only): the curve's vertical run takes the trunk
+   color for every item up to and including active (it coincides exactly with the
+   overlay boxes, so no light-over-dark can ever show); horizontal arms stay light
+   except on the active item, whose whole elbow goes dark. Double-class-equivalent
+   specificity wins regardless of order. */
+.navStemTo0 > :nth-child(-n+1)::before,
+.navStemTo1 > :nth-child(-n+2)::before,
+.navStemTo2 > :nth-child(-n+3)::before,
+.navStemTo3 > :nth-child(-n+4)::before,
+.navStemTo4 > :nth-child(-n+5)::before {
+  border-left-color: var(--color-nav-guide-active);
+}
 .navStemTo0 > :nth-child(1)::before,
 .navStemTo1 > :nth-child(2)::before,
 .navStemTo2 > :nth-child(3)::before,
 .navStemTo3 > :nth-child(4)::before,
 .navStemTo4 > :nth-child(5)::before {
-  border-color: var(--color-nav-guide-active);
+  border-bottom-color: var(--color-nav-guide-active);
 }
 
 /* Branch child item layout migrated to Tailwind utilities in Sidebar.tsx. */
