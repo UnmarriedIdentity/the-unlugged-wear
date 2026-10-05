@@ -39,6 +39,9 @@
   --radius-card: 12px;
   --radius-modal: 16px;
   --radius-pill: 9999px;
+  /* Sidebar role radii */
+  --radius-nav: 10px;
+  --radius-nav-sm: 6px;
 
   /* Auth (login/signup) palette — Figma Storeflow frames, tokenized, no hardcodes in JSX.
      Admin --color-* above untouched; auth uses its own namespace. */
@@ -152,6 +155,13 @@
   --container-auth-hero-sub: 600px;
   --spacing-auth-header-gap: clamp(20px, 3vh, 32px);
   --shadow-auth-badge: 0 4px 14px rgba(36, 36, 36, 0.15);
+  /* Sidebar chrome shadows + type */
+  --shadow-nav-logo: 0 2px 6px rgba(0, 0, 0, 0.08);
+  --text-nav-group: 11px;
+  --tracking-nav-group: 0.08em;
+  --color-nav-group-label: #7E8793;
+  --color-nav-chevron: #94A3B8;
+  --color-nav-group-hover: rgba(0, 0, 0, 0.03);
   --text-auth-input-filled: 16px;
   --text-auth-input-filled--line-height: 25.6px;
   --tracking-auth-input: 0.28px;
@@ -609,33 +619,12 @@
   height: 0;
 }
 
-/* Mobile close button (desktop hidden) */
-.sidebarMobileCloseBtn {
-  display: none;
-  width: 30px;
-  height: 30px;
-  background-color: var(--tuw-bg-surface, #FFFFFF);
-  border: 1px solid var(--tuw-border-subtle, #E9E9E9);
-  border-radius: 8px;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--tuw-text-primary, #262626);
-  transition: all 0.18s ease;
-  flex-shrink: 0;
-  margin-left: auto;
-}
-
-.sidebarMobileCloseBtn:hover,
-.sidebarMobileCloseBtn:active {
-  background-color: var(--tuw-bg-selected, #F8F5FF);
-  color: var(--tuw-action-primary, #7539FF);
-  border-color: var(--tuw-action-primary, #7539FF);
-}
+/* Mobile close button migrated to Tailwind (hidden → max-md:flex) in Sidebar.tsx.
+   Removed: .sidebarMobileCloseBtn (+hover). Dead: .desktopOnlyToggle. */
 
 @media (max-width: 768px) {
   /* Mobile heights retained custom (fallback order); layout/translate/shadow
-     migrated to max-md: variants in Sidebar.tsx. */
+     migrated to max-md: variants in Sidebar.tsx. Dead: .desktopOnlyToggle. */
   .sidebar {
     height: 100vh;
     height: 100dvh;
@@ -643,135 +632,16 @@
     max-height: 100dvh;
     -webkit-overflow-scrolling: touch;
   }
-
-  .desktopOnlyToggle {
-    display: none !important;
-  }
-
-  .sidebarMobileCloseBtn {
-    display: flex !important;
-  }
 }
 
-.sidebarHeader {
-  height: 60px;
-  min-height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: var(--tuw-bg-canvas, #F7F8F9);
-  padding: 0 4px;
-  width: 100%;
-  box-sizing: border-box;
-  z-index: 10;
-  border-bottom: 1px solid var(--tuw-border-subtle, #E9E9E9);
-  margin-bottom: 8px;
-  flex-shrink: 0;
-}
+/* Sidebar header + brand migrated to Tailwind utilities in Sidebar.tsx
+   (pixel-identical; collapsed 64px/centered preserved; close hidden→max-md:flex).
+   Removed: .sidebarHeader, .brandLink, .logoIconWrapper, .brandName.
+   Dead (zero JSX refs, verified): .sidebarToggleBtn. */
 
-.sidebarCollapsed .sidebarHeader {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 64px;
-  min-height: 64px;
-  padding: 0;
-}
-
-
-.brandLink {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none;
-  color: var(--tuw-text-primary, #262626);
-}
-
-.logoIconWrapper {
-  width: 32px;
-  height: 32px;
-  background-color: var(--tuw-text-primary, #262626);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-}
-
-.brandName {
-  font-family: var(--font-brand);
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--tuw-text-primary, #262626);
-  white-space: nowrap;
-}
-
-.sidebarToggleBtn {
-  width: 28px;
-  height: 28px;
-  background-color: var(--tuw-bg-surface, #FFFFFF);
-  border: 1px solid var(--tuw-border-subtle, #E9E9E9);
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--tuw-text-secondary, #5D6772);
-  transition: all 0.18s ease;
-  flex-shrink: 0;
-  margin-left: auto;
-}
-
-.sidebarToggleBtn:hover {
-  background-color: var(--tuw-bg-selected, #F8F5FF);
-  color: var(--tuw-action-primary, #7539FF);
-  border-color: var(--tuw-action-primary, #7539FF);
-}
-
-.sidebarCollapsed .sidebarToggleBtn {
-  margin: 0 auto;
-}
-
-.navSections {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 2px;
-  padding-bottom: 24px;
-  padding-right: 4px;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.12) transparent;
-}
-
-.navSections::-webkit-scrollbar {
-  width: 4px;
-}
-
-.navSections::-webkit-scrollbar-button {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-}
-
-.navSections::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.navSections::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.12);
-  border-radius: 4px;
-}
-
-.navSections::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.25);
-}
+/* Nav scroll layout migrated to Tailwind in Sidebar.tsx (scrollbar hidden via
+   [scrollbar-width:none] + webkit-hidden — no visible scrollbar per spec, scroll intact).
+   Removed: .navSections (+ all ::-webkit-scrollbar parts). */
 
 .sidebarFooter {
   flex-shrink: 0;
@@ -786,51 +656,9 @@
   z-index: 10;
 }
 
-.navGroup {
-  display: flex;
-  flex-direction: column;
-}
-
-.groupHeaderBtn {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 6px 8px 6px 10px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  box-sizing: border-box;
-  border-radius: 6px;
-  transition: background-color 0.15s ease;
-  user-select: none;
-  text-align: left;
-}
-
-.groupHeaderBtn:hover {
-  background-color: rgba(0, 0, 0, 0.03);
-}
-
-.groupLabel {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: #7E8793;
-  text-transform: uppercase;
-  font-family: var(--font-main);
-}
-
-.groupChevron {
-  color: #94A3B8;
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.groupChevronOpen {
-  transform: rotate(180deg);
-}
+/* Nav groups + headers + chevrons migrated to Tailwind utilities in Sidebar.tsx
+   (pixel-identical; chevron rotate-180; single font via inheritance).
+   Removed: .navGroup, .groupHeaderBtn, .groupLabel, .groupChevron, .groupChevronOpen. */
 
 .navList {
   list-style: none;
@@ -956,16 +784,8 @@
   transform: rotate(180deg);
 }
 
-/* Branched Navigation Tree Hierarchy */
-.navBranchTree {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  margin-top: 3px;
-  margin-bottom: 6px;
-}
-
+/* Branched Navigation Tree Hierarchy — container migrated to Tailwind in Sidebar.tsx.
+   Guide stem + curves stay custom (S5 converts widths/colors to 1px/#dddddd). */
 /* Continuous vertical guide line */
 .navBranchTree::before {
   content: '';

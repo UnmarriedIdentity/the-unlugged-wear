@@ -172,25 +172,25 @@ export default function Sidebar({
       onClick={handleSidebarClick}
     >
       {/* Brand Header */}
-      <div className="sidebarHeader">
-        <Link href="/" className="brandLink">
-          <div className="logoIconWrapper">
+      <div className={cn('flex w-full shrink-0 items-center bg-canvas border-b border-subtle mb-2 z-10', isCollapsed ? 'h-16 min-h-16 justify-center p-0' : 'h-15 min-h-15 justify-between px-1')}>
+        <Link href="/" className="flex items-center gap-2.5 no-underline text-primary">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-control bg-primary shadow-nav-logo">
             <Image
               src="/logos/tuw-stag-white.png"
               alt="The Unplugged Wear"
               width={22}
               height={22}
-              style={{ objectFit: 'contain', width: 'auto', height: '22px' }}
+              className="h-[22px] w-auto object-contain"
               priority
             />
           </div>
-          {!isCollapsed && <span className="brandName">TUW Admin</span>}
+          {!isCollapsed && <span className="text-[20px] font-bold tracking-auth-hero text-primary whitespace-nowrap">TUW Admin</span>}
         </Link>
 
         {/* Mobile Close Button */}
         <button
           type="button"
-          className="sidebarMobileCloseBtn"
+          className="hidden size-7.5 shrink-0 cursor-pointer items-center justify-center rounded-control border border-subtle bg-surface text-primary transition-all duration-[180ms] hover:border-action-primary hover:bg-selected hover:text-action-primary ml-auto max-md:flex"
           onClick={onCloseMobileMenu}
           aria-label="Close menu"
           title="Close menu"
@@ -200,25 +200,25 @@ export default function Sidebar({
       </div>
 
       {/* Navigation Sections */}
-      <div className="navSections">
+      <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto overflow-x-hidden mt-0.5 pb-6 pr-1 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
         {/* CORE Section */}
-        <div className="navGroup">
+        <div className="flex flex-col">
           {!isCollapsed && (
             <button
               type="button"
-              className="groupHeaderBtn"
+              className="flex w-full items-center justify-between rounded-nav-sm border-0 bg-transparent py-1.5 pl-2.5 pr-2 cursor-pointer select-none text-left transition-colors duration-150 hover:bg-nav-group-hover"
               onClick={() => toggleGroup('core')}
             >
-              <span className="groupLabel">CORE</span>
+              <span className="text-nav-group font-bold uppercase tracking-nav-group text-nav-group-label">CORE</span>
               <ChevronDown
                 size={13}
-                className={cn('groupChevron', isGroupOpen('core') && 'groupChevronOpen')}
+                className={cn('flex items-center justify-center text-nav-chevron transition-transform duration-200', isGroupOpen('core') && 'rotate-180')}
               />
             </button>
           )}
 
           {(!isCollapsed ? isGroupOpen('core') : true) && (
-            <div className={cn(!isCollapsed && 'navBranchTree')}>
+            <div className={cn(!isCollapsed && 'relative mt-[3px] mb-1.5 flex flex-col gap-[3px]')}>
               {/* Dashboard */}
               <div className={cn(!isCollapsed && 'navBranchItem')}>
                 <Link
@@ -313,23 +313,23 @@ export default function Sidebar({
         </div>
 
         {/* OPERATIONS Section */}
-        <div className="navGroup">
+        <div className="flex flex-col">
           {!isCollapsed && (
             <button
               type="button"
-              className="groupHeaderBtn"
+              className="flex w-full items-center justify-between rounded-nav-sm border-0 bg-transparent py-1.5 pl-2.5 pr-2 cursor-pointer select-none text-left transition-colors duration-150 hover:bg-nav-group-hover"
               onClick={() => toggleGroup('operations')}
             >
-              <span className="groupLabel">OPERATIONS</span>
+              <span className="text-nav-group font-bold uppercase tracking-nav-group text-nav-group-label">OPERATIONS</span>
               <ChevronDown
                 size={13}
-                className={cn('groupChevron', isGroupOpen('operations') && 'groupChevronOpen')}
+                className={cn('flex items-center justify-center text-nav-chevron transition-transform duration-200', isGroupOpen('operations') && 'rotate-180')}
               />
             </button>
           )}
 
           {(!isCollapsed ? isGroupOpen('operations') : true) && (
-            <div className={cn(!isCollapsed && 'navBranchTree')}>
+            <div className={cn(!isCollapsed && 'relative mt-[3px] mb-1.5 flex flex-col gap-[3px]')}>
               {/* Fulfillment */}
               <div className={cn(!isCollapsed && 'navBranchItem')}>
                 <Link
@@ -434,23 +434,23 @@ export default function Sidebar({
         </div>
 
         {/* MERCHANDISE Section */}
-        <div className="navGroup">
+        <div className="flex flex-col">
           {!isCollapsed && (
             <button
               type="button"
-              className="groupHeaderBtn"
+              className="flex w-full items-center justify-between rounded-nav-sm border-0 bg-transparent py-1.5 pl-2.5 pr-2 cursor-pointer select-none text-left transition-colors duration-150 hover:bg-nav-group-hover"
               onClick={() => toggleGroup('merchandise')}
             >
-              <span className="groupLabel">MERCHANDISE</span>
+              <span className="text-nav-group font-bold uppercase tracking-nav-group text-nav-group-label">MERCHANDISE</span>
               <ChevronDown
                 size={13}
-                className={cn('groupChevron', isGroupOpen('merchandise') && 'groupChevronOpen')}
+                className={cn('flex items-center justify-center text-nav-chevron transition-transform duration-200', isGroupOpen('merchandise') && 'rotate-180')}
               />
             </button>
           )}
 
           {(!isCollapsed ? isGroupOpen('merchandise') : true) && (
-            <div className={cn(!isCollapsed && 'navBranchTree')}>
+            <div className={cn(!isCollapsed && 'relative mt-[3px] mb-1.5 flex flex-col gap-[3px]')}>
               {/* Collections */}
               <div className={cn(!isCollapsed && 'navBranchItem')}>
                 <Link
@@ -509,23 +509,23 @@ export default function Sidebar({
         </div>
 
         {/* SYSTEM Section */}
-        <div className="navGroup">
+        <div className="flex flex-col">
           {!isCollapsed && (
             <button
               type="button"
-              className="groupHeaderBtn"
+              className="flex w-full items-center justify-between rounded-nav-sm border-0 bg-transparent py-1.5 pl-2.5 pr-2 cursor-pointer select-none text-left transition-colors duration-150 hover:bg-nav-group-hover"
               onClick={() => toggleGroup('system')}
             >
-              <span className="groupLabel">SYSTEM</span>
+              <span className="text-nav-group font-bold uppercase tracking-nav-group text-nav-group-label">SYSTEM</span>
               <ChevronDown
                 size={13}
-                className={cn('groupChevron', isGroupOpen('system') && 'groupChevronOpen')}
+                className={cn('flex items-center justify-center text-nav-chevron transition-transform duration-200', isGroupOpen('system') && 'rotate-180')}
               />
             </button>
           )}
 
           {(!isCollapsed ? isGroupOpen('system') : true) && (
-            <div className={cn(!isCollapsed && 'navBranchTree')}>
+            <div className={cn(!isCollapsed && 'relative mt-[3px] mb-1.5 flex flex-col gap-[3px]')}>
               {/* Team */}
               <div className={cn(!isCollapsed && 'navBranchItem')}>
                 <Link
