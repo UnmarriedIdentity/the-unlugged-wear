@@ -251,7 +251,7 @@ export default function Sidebar({
                 <Link
                   href="/dashboard"
                   className={cn(
-                    'relative flex w-full rounded-nav text-[13.5px] no-underline transition-all duration-150',
+                    'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
                     isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
                     getIsActive('/dashboard') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
@@ -264,7 +264,7 @@ export default function Sidebar({
                   ) : (
                     <span aria-hidden="true" className="size-4.5 shrink-0" />
                   )}
-                  {!isCollapsed && <span className="truncate text-[13.5px]">Dashboard</span>}
+                  {!isCollapsed && <span className="truncate text-nav-child">Dashboard</span>}
                 </Link>
               </div>
 
@@ -273,7 +273,7 @@ export default function Sidebar({
                 <Link
                   href="/orders"
                   className={cn(
-                    'relative flex w-full rounded-nav text-[13.5px] no-underline transition-all duration-150',
+                    'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
                     isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
                     getIsActive('/orders') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
@@ -286,7 +286,7 @@ export default function Sidebar({
                   ) : (
                     <span aria-hidden="true" className="size-4.5 shrink-0" />
                   )}
-                  {!isCollapsed && <span className="truncate text-[13.5px]">Orders</span>}
+                  {!isCollapsed && <span className="truncate text-nav-child">Orders</span>}
                 </Link>
               </div>
 
@@ -295,7 +295,7 @@ export default function Sidebar({
                 <Link
                   href="/products"
                   className={cn(
-                    'relative flex w-full rounded-nav text-[13.5px] no-underline transition-all duration-150',
+                    'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
                     isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
                     getIsActive('/products') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
@@ -308,7 +308,7 @@ export default function Sidebar({
                   ) : (
                     <span aria-hidden="true" className="size-4.5 shrink-0" />
                   )}
-                  {!isCollapsed && <span className="truncate text-[13.5px]">Products</span>}
+                  {!isCollapsed && <span className="truncate text-nav-child">Products</span>}
                 </Link>
               </div>
 
@@ -317,7 +317,7 @@ export default function Sidebar({
                 <Link
                   href="/customers"
                   className={cn(
-                    'relative flex w-full rounded-nav text-[13.5px] no-underline transition-all duration-150',
+                    'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
                     isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
                     getIsActive('/customers') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
@@ -330,7 +330,7 @@ export default function Sidebar({
                   ) : (
                     <span aria-hidden="true" className="size-4.5 shrink-0" />
                   )}
-                  {!isCollapsed && <span className="truncate text-[13.5px]">Customers</span>}
+                  {!isCollapsed && <span className="truncate text-nav-child">Customers</span>}
                 </Link>
               </div>
 
@@ -339,7 +339,7 @@ export default function Sidebar({
                 <Link
                   href="/reports"
                   className={cn(
-                    'relative flex w-full rounded-nav text-[13.5px] no-underline transition-all duration-150',
+                    'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
                     isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
                     (getIsActive('/reports') || getIsActive('/analytics')) ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
@@ -352,7 +352,7 @@ export default function Sidebar({
                   ) : (
                     <span aria-hidden="true" className="size-4.5 shrink-0" />
                   )}
-                  {!isCollapsed && <span className="truncate text-[13.5px]">Analytics & Reports</span>}
+                  {!isCollapsed && <span className="truncate text-nav-child">Analytics & Reports</span>}
                 </Link>
               </div>
               </div>
@@ -389,7 +389,7 @@ export default function Sidebar({
                 <Link
                   href="/fulfillment"
                   className={cn(
-                    'relative flex w-full rounded-nav text-[13.5px] no-underline transition-all duration-150',
+                    'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
                     isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
                     getIsActive('/fulfillment') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
@@ -404,7 +404,7 @@ export default function Sidebar({
                   )}
                   {!isCollapsed && (
                     <>
-                      <span className="truncate text-[13.5px]">Fulfillment</span>
+                      <span className="truncate text-nav-child">Fulfillment</span>
                       <span className="inline-flex min-w-[18px] items-center justify-center rounded-full bg-nav-badge-purple-bg px-[7.5px] py-[2.5px] text-center text-[11.5px] font-bold leading-none text-action-primary">4</span>
                     </>
                   )}
@@ -416,7 +416,7 @@ export default function Sidebar({
                 <Link
                   href="/shipments"
                   className={cn(
-                    'relative flex w-full rounded-nav text-[13.5px] no-underline transition-all duration-150',
+                    'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
                     isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
                     getIsActive('/shipments') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
@@ -429,7 +429,7 @@ export default function Sidebar({
                   ) : (
                     <span aria-hidden="true" className="size-4.5 shrink-0" />
                   )}
-                  {!isCollapsed && <span className="truncate text-[13.5px]">Shipments</span>}
+                  {!isCollapsed && <span className="truncate text-nav-child">Shipments</span>}
                 </Link>
               </div>
 
@@ -438,7 +438,7 @@ export default function Sidebar({
                 <Link
                   href="/returns"
                   className={cn(
-                    'relative flex w-full rounded-nav text-[13.5px] no-underline transition-all duration-150',
+                    'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
                     isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
                     getIsActive('/returns') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
@@ -453,7 +453,7 @@ export default function Sidebar({
                   )}
                   {!isCollapsed && (
                     <>
-                      <span className="truncate text-[13.5px]">Returns & RMA</span>
+                      <span className="truncate text-nav-child">Returns & RMA</span>
                       <span className="inline-flex min-w-[18px] items-center justify-center rounded-full bg-nav-badge-amber-bg px-[7.5px] py-[2.5px] text-center text-[11.5px] font-bold leading-none text-nav-badge-amber-text">2</span>
                     </>
                   )}
@@ -465,7 +465,7 @@ export default function Sidebar({
                 <Link
                   href="/refunds"
                   className={cn(
-                    'relative flex w-full rounded-nav text-[13.5px] no-underline transition-all duration-150',
+                    'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
                     isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
                     getIsActive('/refunds') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
@@ -478,7 +478,7 @@ export default function Sidebar({
                   ) : (
                     <span aria-hidden="true" className="size-4.5 shrink-0" />
                   )}
-                  {!isCollapsed && <span className="truncate text-[13.5px]">Refunds</span>}
+                  {!isCollapsed && <span className="truncate text-nav-child">Refunds</span>}
                 </Link>
               </div>
 
@@ -487,7 +487,7 @@ export default function Sidebar({
                 <Link
                   href="/payments"
                   className={cn(
-                    'relative flex w-full rounded-nav text-[13.5px] no-underline transition-all duration-150',
+                    'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
                     isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
                     getIsActive('/payments') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
@@ -500,7 +500,7 @@ export default function Sidebar({
                   ) : (
                     <span aria-hidden="true" className="size-4.5 shrink-0" />
                   )}
-                  {!isCollapsed && <span className="truncate text-[13.5px]">Payments</span>}
+                  {!isCollapsed && <span className="truncate text-nav-child">Payments</span>}
                 </Link>
               </div>
               </div>
@@ -537,7 +537,7 @@ export default function Sidebar({
                 <Link
                   href="/collections"
                   className={cn(
-                    'relative flex w-full rounded-nav text-[13.5px] no-underline transition-all duration-150',
+                    'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
                     isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
                     getIsActive('/collections') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
@@ -550,7 +550,7 @@ export default function Sidebar({
                   ) : (
                     <span aria-hidden="true" className="size-4.5 shrink-0" />
                   )}
-                  {!isCollapsed && <span className="truncate text-[13.5px]">Collections</span>}
+                  {!isCollapsed && <span className="truncate text-nav-child">Collections</span>}
                 </Link>
               </div>
 
@@ -559,7 +559,7 @@ export default function Sidebar({
                 <Link
                   href="/designs"
                   className={cn(
-                    'relative flex w-full rounded-nav text-[13.5px] no-underline transition-all duration-150',
+                    'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
                     isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
                     getIsActive('/designs') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
@@ -572,7 +572,7 @@ export default function Sidebar({
                   ) : (
                     <span aria-hidden="true" className="size-4.5 shrink-0" />
                   )}
-                  {!isCollapsed && <span className="truncate text-[13.5px]">Design Assets</span>}
+                  {!isCollapsed && <span className="truncate text-nav-child">Design Assets</span>}
                 </Link>
               </div>
 
@@ -581,7 +581,7 @@ export default function Sidebar({
                 <Link
                   href="/content"
                   className={cn(
-                    'relative flex w-full rounded-nav text-[13.5px] no-underline transition-all duration-150',
+                    'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
                     isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
                     getIsActive('/content') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
@@ -594,7 +594,7 @@ export default function Sidebar({
                   ) : (
                     <span aria-hidden="true" className="size-4.5 shrink-0" />
                   )}
-                  {!isCollapsed && <span className="truncate text-[13.5px]">Content CMS</span>}
+                  {!isCollapsed && <span className="truncate text-nav-child">Content CMS</span>}
                 </Link>
               </div>
               </div>
@@ -631,7 +631,7 @@ export default function Sidebar({
                 <Link
                   href="/team"
                   className={cn(
-                    'relative flex w-full rounded-nav text-[13.5px] no-underline transition-all duration-150',
+                    'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
                     isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
                     getIsActive('/team') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
@@ -644,7 +644,7 @@ export default function Sidebar({
                   ) : (
                     <span aria-hidden="true" className="size-4.5 shrink-0" />
                   )}
-                  {!isCollapsed && <span className="truncate text-[13.5px]">Team</span>}
+                  {!isCollapsed && <span className="truncate text-nav-child">Team</span>}
                 </Link>
               </div>
 
@@ -653,7 +653,7 @@ export default function Sidebar({
                 <Link
                   href="/audit-log"
                   className={cn(
-                    'relative flex w-full rounded-nav text-[13.5px] no-underline transition-all duration-150',
+                    'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
                     isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
                     getIsActive('/audit-log') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
@@ -666,7 +666,7 @@ export default function Sidebar({
                   ) : (
                     <span aria-hidden="true" className="size-4.5 shrink-0" />
                   )}
-                  {!isCollapsed && <span className="truncate text-[13.5px]">Audit Log</span>}
+                  {!isCollapsed && <span className="truncate text-nav-child">Audit Log</span>}
                 </Link>
               </div>
               </div>
