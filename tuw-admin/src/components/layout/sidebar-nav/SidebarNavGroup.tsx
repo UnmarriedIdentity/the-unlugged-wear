@@ -55,13 +55,17 @@ export default function SidebarNavGroup({
         </button>
       )}
 
+      {isCollapsed ? (
+        <>{children}</>
+      ) : (
       <div className={cn('grid transition-[grid-template-rows] duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)]', open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]')}>
         <div className="min-h-0 overflow-hidden">
-          <div className={cn(!isCollapsed && 'relative mt-[3px] mb-1.5 flex flex-col gap-[3px] navTree', !isCollapsed && stemIdx >= 0 && `navStemTo${stemIdx}`)}>
+          <div className={cn('relative mt-[3px] mb-1.5 flex flex-col gap-[3px] navTree', stemIdx >= 0 && `navStemTo${stemIdx}`)}>
             {children}
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }

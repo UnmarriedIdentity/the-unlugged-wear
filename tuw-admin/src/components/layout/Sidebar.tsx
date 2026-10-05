@@ -290,7 +290,7 @@ export default function Sidebar({
       </div>
 
       {/* Navigation Sections */}
-      <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto overflow-x-hidden mt-0.5 pb-6 pr-1 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
+      <div className={cn('flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden mt-0.5 pb-6 pr-1 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden', isCollapsed ? 'gap-0' : 'gap-2.5')}>
         {NAV_GROUPS.map((group) => {
           const actives = group.items.map((item) => item.match.some((p) => getIsActive(p)));
           const stemIdx = actives.findIndex(Boolean);
