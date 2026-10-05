@@ -687,40 +687,7 @@ export default function Sidebar({
         </ul>
 
         {/* ================================================================
-            BRAND LOGO ANIMAL ARTWORK & COPYRIGHT (SEAMLESS - BIGDIRTY.AGENCY STYLE)
-            ================================================================ */}
-        {!isCollapsed ? (
-          <div className="relative flex flex-col items-center justify-center overflow-visible bg-transparent mt-2 mb-1 py-0.5">
-            <div className="flex items-center justify-center w-full">
-              <div className="relative flex h-[62px] w-[85px] items-center justify-center">
-                <Image
-                  src="/logos/tuw-stag-dark.png"
-                  alt="The Unplugged Wear Stag"
-                  width={105}
-                  height={80}
-                  className="h-full w-full object-contain transition-transform duration-[250ms] hover:-translate-y-0.5"
-                  priority
-                />
-              </div>
-            </div>
-            <span className="block mt-1.5 text-center whitespace-nowrap select-none text-[11px] font-medium tracking-nav-copy text-secondary">© 2026 theunpluggedwear.com</span>
-          </div>
-        ) : (
-          <div className="flex size-9 cursor-pointer items-center justify-center mt-2.5 mx-auto mb-1 transition-transform duration-200 hover:scale-[1.08]" title="© 2026 theunpluggedwear.com">
-            <div className="relative flex size-6.5 items-center justify-center">
-              <Image
-                src="/logos/tuw-stag-dark.png"
-                alt="TUW Stag"
-                width={26}
-                height={26}
-                className="h-full w-full object-contain"
-              />
-            </div>
-          </div>
-        )}
-
-        {/* ================================================================
-            CREATIVE THING 3: BOTTOM DOCKING TOOLBAR (NIGHT / THEME / SIDEBAR)
+            BOTTOM DOCKING TOOLBAR (NIGHT / THEME / SIDEBAR)
             ================================================================ */}
         {!isCollapsed ? (
           <div className="grid grid-cols-3 shrink-0 overflow-hidden rounded-control border border-nav-dock-line bg-nav-dock-bg mt-1.5 mb-0.5 h-8">
