@@ -361,7 +361,7 @@ export default function Sidebar({
                   {!isCollapsed && (
                     <>
                       <span className="truncate text-[13.5px]">Fulfillment</span>
-                      <span className="navBadge navBadgePurple">4</span>
+                      <span className="inline-flex min-w-[18px] items-center justify-center rounded-full bg-nav-badge-purple-bg px-[7.5px] py-[2.5px] text-center text-[11.5px] font-bold leading-none text-action-primary">4</span>
                     </>
                   )}
                 </Link>
@@ -402,7 +402,7 @@ export default function Sidebar({
                   {!isCollapsed && (
                     <>
                       <span className="truncate text-[13.5px]">Returns & RMA</span>
-                      <span className="navBadge navBadgeAmber">2</span>
+                      <span className="inline-flex min-w-[18px] items-center justify-center rounded-full bg-nav-badge-amber-bg px-[7.5px] py-[2.5px] text-center text-[11.5px] font-bold leading-none text-nav-badge-amber-text">2</span>
                     </>
                   )}
                 </Link>
@@ -630,28 +630,30 @@ export default function Sidebar({
             BRAND LOGO ANIMAL ARTWORK & COPYRIGHT (SEAMLESS - BIGDIRTY.AGENCY STYLE)
             ================================================================ */}
         {!isCollapsed ? (
-          <div className="sidebarStagDirect">
-            <div className="stagImageWrapper">
-              <Image
-                src="/logos/tuw-stag-dark.png"
-                alt="The Unplugged Wear Stag"
-                width={105}
-                height={80}
-                className="stagArtImage"
-                priority
-              />
+          <div className="relative flex flex-col items-center justify-center overflow-visible bg-transparent mt-2 mb-1 py-0.5">
+            <div className="flex items-center justify-center w-full">
+              <div className="relative flex h-[62px] w-[85px] items-center justify-center">
+                <Image
+                  src="/logos/tuw-stag-dark.png"
+                  alt="The Unplugged Wear Stag"
+                  width={105}
+                  height={80}
+                  className="h-full w-full object-contain transition-transform duration-[250ms] hover:-translate-y-0.5"
+                  priority
+                />
+              </div>
             </div>
-            <span className="stagCopyrightText">© 2026 theunpluggedwear.com</span>
+            <span className="block mt-1.5 text-center whitespace-nowrap select-none text-[11px] font-medium tracking-nav-copy text-secondary">© 2026 theunpluggedwear.com</span>
           </div>
         ) : (
-          <div className="stagCollapsedDirect" title="© 2026 theunpluggedwear.com">
-            <div className="stagCollapsedImgWrap">
+          <div className="flex size-9 cursor-pointer items-center justify-center mt-2.5 mx-auto mb-1 transition-transform duration-200 hover:scale-[1.08]" title="© 2026 theunpluggedwear.com">
+            <div className="relative flex size-6.5 items-center justify-center">
               <Image
                 src="/logos/tuw-stag-dark.png"
                 alt="TUW Stag"
                 width={26}
                 height={26}
-                className="stagCollapsedImg"
+                className="h-full w-full object-contain"
               />
             </div>
           </div>
@@ -661,13 +663,10 @@ export default function Sidebar({
             CREATIVE THING 3: BOTTOM DOCKING TOOLBAR (NIGHT / THEME / SIDEBAR)
             ================================================================ */}
         {!isCollapsed ? (
-          <div className="sidebarDockToolbar">
+          <div className="grid grid-cols-3 shrink-0 overflow-hidden rounded-control border border-nav-dock-line bg-nav-dock-bg mt-1.5 mb-0.5 h-8">
             <button
               type="button"
-              className={cn(
-                'dockToolbarBtn',
-                activeThemeMode === 'dark' && 'dockToolbarBtnActive'
-              )}
+              className={cn('flex h-full w-full items-center justify-center border-0 border-r border-nav-dock-line bg-transparent p-0 text-nav-dock-text cursor-pointer transition-all duration-150 last:border-r-0', activeThemeMode === 'dark' ? 'bg-nav-dock-active-bg text-white' : 'hover:bg-nav-dock-hover hover:text-white')}
               onClick={() => handleThemeToggle('dark')}
               aria-label="Toggle Night Mode"
               title="Night Mode"
@@ -676,10 +675,7 @@ export default function Sidebar({
             </button>
             <button
               type="button"
-              className={cn(
-                'dockToolbarBtn',
-                activeThemeMode === 'contrast' && 'dockToolbarBtnActive'
-              )}
+              className={cn('flex h-full w-full items-center justify-center border-0 border-r border-nav-dock-line bg-transparent p-0 text-nav-dock-text cursor-pointer transition-all duration-150 last:border-r-0', activeThemeMode === 'contrast' ? 'bg-nav-dock-active-bg text-white' : 'hover:bg-nav-dock-hover hover:text-white')}
               onClick={() => handleThemeToggle('contrast')}
               aria-label="Toggle Theme Contrast"
               title="Theme Contrast"
@@ -688,7 +684,7 @@ export default function Sidebar({
             </button>
             <button
               type="button"
-              className="dockToolbarBtn"
+              className="flex h-full w-full items-center justify-center border-0 border-r border-nav-dock-line bg-transparent p-0 text-nav-dock-text cursor-pointer transition-all duration-150 last:border-r-0 hover:bg-nav-dock-hover hover:text-white"
               onClick={onToggleCollapse}
               aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
               title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
@@ -697,10 +693,10 @@ export default function Sidebar({
             </button>
           </div>
         ) : (
-          <div className="sidebarDockToolbarCollapsed">
+          <div className="flex w-full justify-center mt-2">
             <button
               type="button"
-              className="dockToolbarBtnCollapsed"
+              className="flex h-9 w-11 items-center justify-center rounded-control border border-nav-dock-line bg-nav-dock-bg text-nav-dock-text cursor-pointer transition-all duration-150 hover:bg-nav-dock-hover-light hover:text-white hover:border-nav-dock-line-hover"
               onClick={onToggleCollapse}
               title="Expand Sidebar"
               aria-label="Expand Sidebar"

@@ -171,6 +171,19 @@
   --color-nav-group-label: #7E8793;
   --color-nav-chevron: #94A3B8;
   --color-nav-group-hover: rgba(0, 0, 0, 0.03);
+  /* Live nav badges only (purple Fulfillment 4, amber Returns 2) */
+  --color-nav-badge-purple-bg: #F3E8FF;
+  --color-nav-badge-amber-bg: #FEF3C7;
+  --color-nav-badge-amber-text: #D97706;
+  /* Bottom dock (dark chrome) + stag caption tracking */
+  --color-nav-dock-bg: #0F0F12;
+  --color-nav-dock-line: rgba(255, 255, 255, 0.08);
+  --color-nav-dock-text: #8E95A2;
+  --color-nav-dock-hover: rgba(255, 255, 255, 0.08);
+  --color-nav-dock-active-bg: rgba(255, 255, 255, 0.12);
+  --color-nav-dock-hover-light: rgba(255, 255, 255, 0.1);
+  --color-nav-dock-line-hover: rgba(255, 255, 255, 0.2);
+  --tracking-nav-copy: 0.02em;
   --text-auth-input-filled: 16px;
   --text-auth-input-filled--line-height: 25.6px;
   --tracking-auth-input: 0.28px;
@@ -735,233 +748,23 @@
    Removed: .navBranchLink, .navBranchLinkActive, .navItemCollapsed, .navBranchLabel,
    collapsed tree rules. */
 
-/* Badges */
-.navBadge {
-  font-size: 11.5px;
-  font-weight: 700;
-  line-height: 1;
-  padding: 2.5px 7.5px;
-  border-radius: 9999px;
-  min-width: 18px;
-  text-align: center;
-  box-sizing: border-box;
-}
-
-.navBadgeOrange {
-  background-color: #FED7AA;
-  color: #C2410C;
-}
-
-.navBadgeGreen {
-  background-color: #BBF7D0;
-  color: #15803D;
-}
-
-.navBadgePurple {
-  background-color: #F3E8FF;
-  color: #7539FF;
-}
-
-.navBadgeAmber {
-  background-color: #FEF3C7;
-  color: #D97706;
-}
+/* Nav badges migrated to Tailwind utilities in Sidebar.tsx (pixel-identical; only live
+   purple/amber converted). Dead: .navBadgeOrange, .navBadgeGreen (zero refs). */
 
 /* (logOutItem migrated to Tailwind error-hover utilities in Sidebar.tsx) */
 
 /* (collapsed hide rules dead — JSX unmounts labels/trees when collapsed) */
 
-/* ==========================================================================
-   SIDEBAR BRAND LOGO ANIMAL ARTWORK & COPYRIGHT (SEAMLESS - BIGDIRTY.AGENCY STYLE)
-   ========================================================================== */
-.sidebarStagDirect,
-.sidebarStagArtCard {
-  margin-top: 8px;
-  margin-bottom: 4px;
-  padding: 2px 0;
-  background: transparent !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  position: relative;
-  overflow: visible;
-}
+/* Stag brand art + copyright migrated to Tailwind utilities in Sidebar.tsx (pixel-identical;
+   hover lift kept, seamless transparent treatment preserved).
+   Removed: .sidebarStagDirect, .sidebarStagArtCard, .stagIllustrationContainer,
+   .stagImageWrapper, .stagArtImage, .stagCopyrightRow, .stagCopyrightText,
+   .stagCollapsedDirect, .stagCollapsedCard, .stagCollapsedImgWrap, .stagCollapsedImg. */
 
-.sidebarStagDirect:hover,
-.sidebarStagArtCard:hover {
-  border: none !important;
-  box-shadow: none !important;
-  transform: none !important;
-}
-
-.stagIllustrationContainer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-}
-
-.stagImageWrapper {
-  position: relative;
-  width: 85px;
-  height: 62px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.stagArtImage {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  transition: transform 0.25s ease;
-}
-
-.sidebarStagDirect:hover .stagArtImage,
-.sidebarStagArtCard:hover .stagArtImage {
-  transform: translateY(-2px);
-}
-
-.stagCopyrightRow {
-  width: 100%;
-  margin-top: 4px;
-  padding-top: 0;
-  border-top: none !important;
-  text-align: center;
-}
-
-.stagCopyrightText {
-  margin-top: 6px;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  color: var(--tuw-text-secondary, #6B7280);
-  font-family: var(--font-urbanist), sans-serif;
-  user-select: none;
-  display: block;
-  text-align: center;
-  white-space: nowrap;
-}
-
-/* Collapsed Stag - Seamless */
-.stagCollapsedDirect,
-.stagCollapsedCard {
-  width: 36px;
-  height: 36px;
-  margin: 10px auto 4px auto;
-  border-radius: 0;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.stagCollapsedDirect:hover,
-.stagCollapsedCard:hover {
-  transform: scale(1.08);
-  border: none !important;
-}
-
-.stagCollapsedImgWrap {
-  position: relative;
-  width: 26px;
-  height: 26px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.stagCollapsedImg {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-/* ==========================================================================
-   3. BOTTOM DOCKING TOOLBAR (NIGHT / CONTRAST / SIDEBAR TOGGLE)
-   ========================================================================== */
-.sidebarDockToolbar {
-  margin-top: 6px;
-  margin-bottom: 2px;
-  height: 32px;
-  background-color: #0F0F12;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  overflow: hidden;
-  box-sizing: border-box;
-  flex-shrink: 0;
-}
-
-.dockToolbarBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  width: 100%;
-  background: transparent;
-  border: none;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
-  color: #8E95A2;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  padding: 0;
-}
-
-.dockToolbarBtn:last-child {
-  border-right: none;
-}
-
-.dockToolbarBtn:hover {
-  background-color: rgba(255, 255, 255, 0.08);
-  color: #FFFFFF;
-}
-
-.dockToolbarBtnActive {
-  color: #FFFFFF !important;
-  background-color: rgba(255, 255, 255, 0.12) !important;
-}
-
-.sidebarDockToolbarCollapsed {
-  margin-top: 8px;
-  display: flex;
-  justify-content: center;
-  width: 100%;
-}
-
-.dockToolbarBtnCollapsed {
-  width: 44px;
-  height: 36px;
-  border-radius: 8px;
-  background-color: #0F0F12;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #8E95A2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.dockToolbarBtnCollapsed:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #FFFFFF;
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.sidebarCollapsed .sidebarFooter {
-  align-items: center;
-}
+/* Bottom dock toolbar migrated to Tailwind utilities in Sidebar.tsx (pixel-identical;
+   active state via ternary, no !important needed).
+   Removed: .sidebarDockToolbar, .dockToolbarBtn, .dockToolbarBtnActive,
+   .sidebarDockToolbarCollapsed, .dockToolbarBtnCollapsed, collapsed footer rule. */
 
 /* Header */
 .topBar {
