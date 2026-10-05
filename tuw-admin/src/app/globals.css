@@ -120,6 +120,9 @@
   --text-auth-signup-input--line-height: 22px;
   --tracking-auth-signup-input: 0.2px;
   --shadow-auth-input: 0 0 0 3px rgba(17, 93, 93, 0.12);
+  /* OTP ring (.15 alpha — distinct from input .12) + idle border */
+  --shadow-auth-otp: 0 0 0 3px rgba(17, 93, 93, 0.15);
+  --color-auth-otp-line: #C6EAA0;
   /* Signup terms (verbatim outliers: 5px check vs login 6px, E7EEEE vs E7EFEF) */
   --color-auth-terms-line: #E7EEEE;
   --radius-auth-terms-check: 5px;
@@ -1957,37 +1960,9 @@
 
 /* (verify header removed — see migration comment above) */
 
-/* 4 OTP Input Boxes: Frame 1410130425 (Total width 260px, 4x 56px boxes + 3x 12px gaps) */
-.signup-otpRow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  width: 260px;
-  margin: 0 auto;
-}
-
-.signup-otpInput {
-  width: 56px;
-  height: 56px;
-  border: 1px solid #C6EAA0;
-  border-radius: 8px;
-  background-color: #FFFFFF;
-  font-family: inherit;
-  font-size: 24px;
-  font-weight: 700;
-  color: #242424;
-  text-align: center;
-  outline: none;
-  transition: all 0.2s ease;
-  box-sizing: border-box;
-}
-
-.signup-otpInput:focus,
-.signup-otpInputActive {
-  border-color: #115D5D;
-  box-shadow: 0 0 0 3px rgba(17, 93, 93, 0.15);
-}
+/* OTP boxes migrated to Tailwind utilities in SignUpPage.tsx (pixel-identical; 24px
+   size-only, .15 ring, ternary + focus: share teal state).
+   Removed: .signup-otpRow, .signup-otpInput, .signup-otpInputActive. */
 
 /* Frame 1410130426: Verify actions block width: 350px, gap: 24px */
 .signup-verifyActions {

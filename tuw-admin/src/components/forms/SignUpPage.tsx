@@ -412,7 +412,7 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
               {/* 4-Digit OTP Code Inputs Form (Frame 135) */}
               <form onSubmit={handleVerifySubmit} style={{ width: '100%' }}>
                 {/* 4 OTP Input Boxes */}
-                <div className={styles.otpRow} style={{ marginBottom: '32px' }}>
+                <div className="flex items-center justify-center gap-3 w-[260px] mx-auto mb-8">
                   {otp.map((digit, idx) => (
                     <input
                       key={idx}
@@ -426,7 +426,7 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
                       value={digit}
                       onChange={(e) => handleOtpChange(idx, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                      className={`${styles.otpInput} ${digit ? styles.otpInputActive : ''}`}
+                      className={`h-14 w-14 border rounded-control bg-white outline-none text-[24px] font-bold text-auth-ink text-center transition-all duration-200 focus:border-auth-teal focus:shadow-auth-otp ${digit ? 'border-auth-teal shadow-auth-otp' : 'border-auth-otp-line'}`}
                     />
                   ))}
                 </div>
