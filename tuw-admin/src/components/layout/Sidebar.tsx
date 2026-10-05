@@ -27,7 +27,6 @@ import {
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
-import { useAdminState } from '@/mocks/state';
 import { SidebarNavGroup, SidebarNavItem, SidebarDock } from './sidebar-nav';
 import type { SidebarNavItemDef } from './sidebar-nav';
 import type { LucideIcon } from 'lucide-react';
@@ -154,9 +153,6 @@ export default function Sidebar({
   onCloseMobileMenu,
 }: SidebarProps) {
   const pathname = usePathname();
-  // Preview toggle (Settings → General): collapsed badge dots, off by default.
-  const { settings } = useAdminState();
-  const showCollapsedBadgeDots = settings.showCollapsedBadgeDots ?? false;
 
   // Close mobile drawer when pressing Escape
   React.useEffect(() => {
@@ -321,7 +317,7 @@ export default function Sidebar({
               onToggle={toggleGroup}
             >
             {group.items.map((item, idx) => (
-              <SidebarNavItem key={item.href} item={item} active={actives[idx]} isCollapsed={isCollapsed} variant="branch" showBadgeDot={showCollapsedBadgeDots} />
+              <SidebarNavItem key={item.href} item={item} active={actives[idx]} isCollapsed={isCollapsed} variant="branch" />
             ))}
             </SidebarNavGroup>
           );

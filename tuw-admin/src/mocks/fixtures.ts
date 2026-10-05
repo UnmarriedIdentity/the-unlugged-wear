@@ -1305,7 +1305,6 @@ export interface StoreSettings {
   standardShippingFee: number;
   taxIncluded: boolean;
   orderNotificationEmail: string;
-  showCollapsedBadgeDots: boolean;
 }
 
 export const initialSettings: StoreSettings = {
@@ -1323,5 +1322,4 @@ export const initialSettings: StoreSettings = {
   standardShippingFee: 12,
   taxIncluded: true,
   orderNotificationEmail: 'orders@theunpluggedwear.com',
-  showCollapsedBadgeDots: false,
 };
