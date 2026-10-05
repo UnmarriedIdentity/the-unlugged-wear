@@ -17,22 +17,24 @@ export default function DashboardShell({
   children,
   pageTitle = 'Dashboard',
 }: DashboardShellProps) {
-  const [isCollapsed, setIsCollapsed] = useState(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const stored = localStorage.getItem('tuw_admin_sidebar_collapsed');
-        if (stored !== null) {
-          const val = stored === 'true';
-          globalIsCollapsed = val;
-          return val;
-        }
-      } catch {
-        // fallback
-      }
-    }
-    return globalIsCollapsed;
-  });
+  // Hydration-safe: the module cache is false on both server and first client render
+  // (identical output → no SSR mismatch); stored preference applies client-only below.
+  // Client-side navigations reuse the live cache with no flash.
+  const [isCollapsed, setIsCollapsed] = useState(() => globalIsCollapsed);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  React.useEffect(() => {
+    try {
+      const stored = localStorage.getItem('tuw_admin_sidebar_collapsed');
+      if (stored !== null) {
+        const val = stored === 'true';
+        globalIsCollapsed = val;
+        setIsCollapsed(val);
+      }
+    } catch {
+      // fallback: keep default
+    }
+  }, []);
 
   const handleToggleCollapse = () => {
     setIsCollapsed((prev) => {
@@ -50,12 +52,12 @@ export default function DashboardShell({
   };
 
   return (
-    <div className="dashboardLayoutRoot">
+    <div className="relative flex min-h-screen w-full items-stretch bg-canvas font-sans text-primary">
       {/* Mobile Backdrop */}
       {mobileMenuOpen && (
         <div
           onClick={() => setMobileMenuOpen(false)}
-          className="dashboardMobileBackdrop"
+          className="fixed inset-0 z-[95] cursor-pointer touch-manipulation bg-black/45 blur-[2px] animate-[tuwFadeIn_0.2s_ease-out]"
         />
       )}
 
@@ -68,7 +70,7 @@ export default function DashboardShell({
       />
 
       {/* Main Container - Offsets cleanly for fixed sidebar */}
-      <div className={cn('dashboardMainWrapper', isCollapsed && 'dashboardMainWrapperCollapsed')}>
+      <div className={cn('flex min-h-screen min-w-0 flex-1 flex-col bg-canvas', isCollapsed ? 'ml-20' : 'ml-65', 'max-md:ml-0')}>
         <Header
           pageTitle={pageTitle}
           mobileMenuOpen={mobileMenuOpen}
@@ -79,7 +81,7 @@ export default function DashboardShell({
         <main
           id="main-content"
           tabIndex={-1}
-          className="dashboardMainContent"
+          className="mx-auto flex w-full min-w-0 max-w-[1400px] flex-col gap-5 px-7 pb-10 pt-6 max-md:px-4 max-md:pb-8 max-md:pt-4"
         >
           {children}
         </main>

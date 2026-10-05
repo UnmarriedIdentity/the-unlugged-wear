@@ -33,12 +33,30 @@
   --color-error-text: #C91818;
   --color-error-bg: #FEF4F4;
 
+  /* Compatibility aliases (documented): short utility spellings for the three most
+     reused roles. text-primary/border-subtle/bg-primary etc. had zero generated
+     output before these existed (utilities derive from full token names). */
+  --color-primary: #262626;
+  --color-secondary: #5D6772;
+  --color-subtle: #E9E9E9;
+
   /* Admin Radii */
   --radius-sm: 4px;
   --radius-control: 8px;
   --radius-card: 12px;
   --radius-modal: 16px;
   --radius-pill: 9999px;
+  /* Sidebar role radii */
+  --radius-nav: 10px;
+  --radius-nav-sm: 6px;
+  /* Sidebar active + hover treatments (3D uplift: inset edge replaces drop shadow) */
+  --shadow-nav-edge: inset 0 -2px 0 #d6d6d6;
+  --color-nav-active-text: #111827;
+  --color-nav-hover-wash: rgba(117, 57, 255, 0.06);
+  /* Branch tree treatments */
+  --color-nav-branch-hover: rgba(0, 0, 0, 0.04);
+  --color-nav-guide: #dddddd;
+  --color-nav-guide-active: #c4c4c4;
 
   /* Auth (login/signup) palette — Figma Storeflow frames, tokenized, no hardcodes in JSX.
      Admin --color-* above untouched; auth uses its own namespace. */
@@ -152,6 +170,26 @@
   --container-auth-hero-sub: 600px;
   --spacing-auth-header-gap: clamp(20px, 3vh, 32px);
   --shadow-auth-badge: 0 4px 14px rgba(36, 36, 36, 0.15);
+  /* Sidebar chrome shadows + type */
+  --shadow-nav-logo: 0 2px 6px rgba(0, 0, 0, 0.08);
+  --text-nav-group: 11px;
+  --tracking-nav-group: 0.08em;
+  --color-nav-group-label: #7E8793;
+  --color-nav-chevron: #94A3B8;
+  --color-nav-group-hover: rgba(0, 0, 0, 0.03);
+  /* Live nav badges only (purple Fulfillment 4, amber Returns 2) */
+  --color-nav-badge-purple-bg: #F3E8FF;
+  --color-nav-badge-amber-bg: #FEF3C7;
+  --color-nav-badge-amber-text: #D97706;
+  /* Bottom dock (dark chrome) + stag caption tracking */
+  --color-nav-dock-bg: #0F0F12;
+  --color-nav-dock-line: rgba(255, 255, 255, 0.08);
+  --color-nav-dock-text: #8E95A2;
+  --color-nav-dock-hover: rgba(255, 255, 255, 0.08);
+  --color-nav-dock-active-bg: rgba(255, 255, 255, 0.12);
+  --color-nav-dock-hover-light: rgba(255, 255, 255, 0.1);
+  --color-nav-dock-line-hover: rgba(255, 255, 255, 0.2);
+  --tracking-nav-copy: 0.02em;
   --text-auth-input-filled: 16px;
   --text-auth-input-filled--line-height: 25.6px;
   --tracking-auth-input: 0.28px;
@@ -166,10 +204,11 @@
 }
 
 :root {
-  /* Typography - Urbanist is the primary font family per DESIGN_SYSTEM.md */
-  --font-urbanist: 'Urbanist', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-main: var(--font-urbanist), sans-serif;
-  --font-brand: var(--font-urbanist), sans-serif;
+  /* Typography — single canonical Urbanist stack (matches @theme --font-sans exactly).
+     One font across the dashboard; font-sans is the utility spelling. */
+  --font-urbanist: "Urbanist", ui-sans-serif, system-ui, sans-serif;
+  --font-main: "Urbanist", ui-sans-serif, system-ui, sans-serif;
+  --font-brand: "Urbanist", ui-sans-serif, system-ui, sans-serif;
 
   /* TUW Semantic Colour Roles (18 roles) - Standard & Figma Web Code Syntax */
   --tuw-bg-canvas: #F7F8F9;
@@ -587,79 +626,19 @@
    Single app.css, no CSS Modules. Class names unchanged so JSX is identical.
    ========================================================================== */
 /* Dashboard Layout Shell - Natural Page Scroll, Zero Cutoffs, Sidebar Matches Full Page Height */
-.dashboardLayoutRoot {
-  display: flex;
-  width: 100%;
-  min-height: 100vh;
-  background-color: var(--tuw-bg-canvas, #F7F8F9);
-  color: var(--tuw-text-primary, #262626);
-  font-family: var(--font-main);
-  position: relative;
-  align-items: stretch;
-}
+/* Dashboard shell (root, backdrop, main wrapper/content) migrated to Tailwind utilities
+   in DashboardShell.tsx (pixel-identical; root carries font-sans — single dashboard font).
+   Removed: .dashboardLayoutRoot, .dashboardMobileBackdrop, .dashboardMainWrapper,
+   .dashboardMainWrapperCollapsed, .dashboardMainContent. */
 
-.dashboardMobileBackdrop {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.45);
-  z-index: 95;
-  backdrop-filter: blur(2px);
-  cursor: pointer;
-  touch-action: manipulation;
-  animation: tuwFadeIn 0.2s ease-out;
-}
-
-.dashboardMainWrapper {
-  flex: 1;
-  min-width: 0;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background-color: var(--tuw-bg-canvas, #F7F8F9);
-}
-
-.dashboardMainWrapperCollapsed {
-  /* Flex automatically allocates space without margin-left */
-}
-
-.dashboardMainContent {
-  padding: 24px 28px 40px 28px;
-  max-width: 1400px;
-  width: 100%;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  box-sizing: border-box;
-  min-width: 0;
-}
-
-@media (max-width: 768px) {
-  .dashboardMainContent {
-    padding: 16px 16px 32px 16px;
-  }
-}
-
-/* Sidebar - Viewport-locked, sticky with pinned bottom footer */
+/* Sidebar - fixed to viewport with pinned footer (migrated to Tailwind utilities in
+   Sidebar.tsx + DashboardShell.tsx margin offsets; frame is fully ternary-swapped).
+   Retained custom: 100vh/100dvh fallback order + hidden outer scrollbars. */
 .sidebar {
-  width: 260px;
-  min-width: 260px;
-  background-color: var(--tuw-bg-canvas, #F7F8F9);
-  border-right: 1px solid var(--tuw-border-subtle, #E9E9E9);
-  display: flex;
-  flex-direction: column;
-  padding: 0 14px 10px 14px;
-  flex-shrink: 0;
-  position: sticky;
-  top: 0;
   height: 100vh;
   height: 100dvh;
   max-height: 100vh;
   max-height: 100dvh;
-  overflow: hidden; /* Outer sidebar is locked to viewport, never scrolls away */
-  box-sizing: border-box;
-  z-index: 50;
-  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar::-webkit-scrollbar {
@@ -668,343 +647,36 @@
   height: 0;
 }
 
-.sidebarCollapsed {
-  width: 80px;
-  min-width: 80px;
-  padding: 0 10px 14px 10px;
-}
-
-/* Mobile close button (desktop hidden) */
-.sidebarMobileCloseBtn {
-  display: none;
-  width: 30px;
-  height: 30px;
-  background-color: var(--tuw-bg-surface, #FFFFFF);
-  border: 1px solid var(--tuw-border-subtle, #E9E9E9);
-  border-radius: 8px;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--tuw-text-primary, #262626);
-  transition: all 0.18s ease;
-  flex-shrink: 0;
-  margin-left: auto;
-}
-
-.sidebarMobileCloseBtn:hover,
-.sidebarMobileCloseBtn:active {
-  background-color: var(--tuw-bg-selected, #F8F5FF);
-  color: var(--tuw-action-primary, #7539FF);
-  border-color: var(--tuw-action-primary, #7539FF);
-}
+/* Mobile close button migrated to Tailwind (hidden → max-md:flex) in Sidebar.tsx.
+   Removed: .sidebarMobileCloseBtn (+hover). Dead: .desktopOnlyToggle. */
 
 @media (max-width: 768px) {
+  /* Mobile heights retained custom (fallback order); layout/translate/shadow
+     migrated to max-md: variants in Sidebar.tsx. Dead: .desktopOnlyToggle. */
   .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 290px;
-    max-width: 86vw;
-    min-width: unset;
     height: 100vh;
     height: 100dvh;
     max-height: 100vh;
     max-height: 100dvh;
-    transform: translateX(-100%);
-    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 100;
-    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
-    padding: 0 14px 16px 14px;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
   }
-
-  .sidebar.sidebarMobileOpen {
-    transform: translateX(0);
-  }
-
-  .desktopOnlyToggle {
-    display: none !important;
-  }
-
-  .sidebarMobileCloseBtn {
-    display: flex !important;
-  }
 }
 
-.sidebarHeader {
-  height: 60px;
-  min-height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: var(--tuw-bg-canvas, #F7F8F9);
-  padding: 0 4px;
-  width: 100%;
-  box-sizing: border-box;
-  z-index: 10;
-  border-bottom: 1px solid var(--tuw-border-subtle, #E9E9E9);
-  margin-bottom: 8px;
-  flex-shrink: 0;
-}
+/* Sidebar header + brand migrated to Tailwind utilities in Sidebar.tsx
+   (pixel-identical; collapsed 64px/centered preserved; close hidden→max-md:flex).
+   Removed: .sidebarHeader, .brandLink, .logoIconWrapper, .brandName.
+   Dead (zero JSX refs, verified): .sidebarToggleBtn. */
 
-.sidebarCollapsed .sidebarHeader {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 64px;
-  min-height: 64px;
-  padding: 0;
-}
+/* Nav scroll layout migrated to Tailwind in Sidebar.tsx (scrollbar hidden via
+   [scrollbar-width:none] + webkit-hidden — no visible scrollbar per spec, scroll intact).
+   Removed: .navSections (+ all ::-webkit-scrollbar parts). */
 
-
-.brandLink {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none;
-  color: var(--tuw-text-primary, #262626);
-}
-
-.logoIconWrapper {
-  width: 32px;
-  height: 32px;
-  background-color: var(--tuw-text-primary, #262626);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-}
-
-.brandName {
-  font-family: var(--font-brand);
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--tuw-text-primary, #262626);
-  white-space: nowrap;
-}
-
-.sidebarToggleBtn {
-  width: 28px;
-  height: 28px;
-  background-color: var(--tuw-bg-surface, #FFFFFF);
-  border: 1px solid var(--tuw-border-subtle, #E9E9E9);
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--tuw-text-secondary, #5D6772);
-  transition: all 0.18s ease;
-  flex-shrink: 0;
-  margin-left: auto;
-}
-
-.sidebarToggleBtn:hover {
-  background-color: var(--tuw-bg-selected, #F8F5FF);
-  color: var(--tuw-action-primary, #7539FF);
-  border-color: var(--tuw-action-primary, #7539FF);
-}
-
-.sidebarCollapsed .sidebarToggleBtn {
-  margin: 0 auto;
-}
-
-.navSections {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 2px;
-  padding-bottom: 24px;
-  padding-right: 4px;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.12) transparent;
-}
-
-.navSections::-webkit-scrollbar {
-  width: 4px;
-}
-
-.navSections::-webkit-scrollbar-button {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-}
-
-.navSections::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.navSections::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.12);
-  border-radius: 4px;
-}
-
-.navSections::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.25);
-}
-
-.sidebarFooter {
-  flex-shrink: 0;
-  margin-top: auto;
-  padding-top: 8px;
-  padding-bottom: 0;
-  border-top: 1px solid var(--tuw-border-subtle, #E9E9E9);
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  background-color: var(--tuw-bg-canvas, #F7F8F9);
-  z-index: 10;
-}
-
-.navGroup {
-  display: flex;
-  flex-direction: column;
-}
-
-.groupHeaderBtn {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 6px 8px 6px 10px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  box-sizing: border-box;
-  border-radius: 6px;
-  transition: background-color 0.15s ease;
-  user-select: none;
-  text-align: left;
-}
-
-.groupHeaderBtn:hover {
-  background-color: rgba(0, 0, 0, 0.03);
-}
-
-.groupLabel {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: #7E8793;
-  text-transform: uppercase;
-  font-family: var(--font-main);
-}
-
-.groupChevron {
-  color: #94A3B8;
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.groupChevronOpen {
-  transform: rotate(180deg);
-}
-
-.navList {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.navItem {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 12px;
-  border-radius: 10px;
-  color: #262626;
-  font-size: 14px;
-  font-weight: 500;
-  text-decoration: none;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  user-select: none;
-  position: relative;
-  background: transparent;
-  width: 100%;
-  box-sizing: border-box;
-  border: none;
-  text-align: left;
-}
-
-.navItem:hover {
-  background-color: rgba(117, 57, 255, 0.06);
-  color: var(--tuw-action-primary, #7539FF);
-}
-
-.navItemActive {
-  background: #FFFFFF;
-  color: #111827;
-  font-weight: 600;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-}
-
-.navItemActive:hover {
-  background: #FFFFFF;
-  color: #111827;
-}
-
-.navItemActive .navIcon {
-  color: #7539FF;
-}
-
-/* Expandable Parent Items */
-.navParentBtn,
-.navParentItem {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  width: 100% !important;
-  padding: 9px 12px;
-  border-radius: 10px;
-  border: none;
-  background: transparent;
-  color: #262626;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  user-select: none;
-  box-sizing: border-box;
-  text-align: left;
-}
-
-.navParentBtn:hover,
-.navParentItem:hover {
-  background-color: rgba(117, 57, 255, 0.06);
-  color: var(--tuw-action-primary, #7539FF);
-}
-
-.navParentBtnActive,
-.navParentItemActive {
-  color: #111827;
-}
-
-.navParentLeft {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 1;
-  min-width: 0;
-}
-
+/* Footer items + logout migrated to Tailwind utilities in Sidebar.tsx (pixel-identical;
+   active uses inset-edge treatment; logout keeps error hover).
+   Removed: .sidebarFooter, .navList, .navItem, .navItemActive, .navParentBtn,
+   .navParentItem, .navParentBtnActive, .navParentItemActive, .navParentLeft,
+   .navLabel, .navChevron, .navChevronOpen, .logOutItem, collapsed hide block.
+   Kept: .navIcon (branch items, S5), .navItemCollapsed (branch links, S5). */
 .navIcon {
   width: 18px;
   height: 18px;
@@ -1015,392 +687,102 @@
   color: #5D6772;
 }
 
-.navLabel {
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 14px;
-}
+/* (navLabel/navChevron dead — zero JSX refs; footer labels use truncate utilities) */
 
-.navChevron {
-  width: 16px;
-  height: 16px;
-  color: #8A94A6;
-  margin-left: auto;
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.navChevronOpen {
-  transform: rotate(180deg);
-}
-
-/* Branched Navigation Tree Hierarchy */
-.navBranchTree {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  margin-top: 3px;
-  margin-bottom: 6px;
-}
-
-/* Continuous vertical guide line */
-.navBranchTree::before {
+/* Branched Navigation Tree Hierarchy — container migrated to Tailwind in Sidebar.tsx.
+   Guide stem + curves stay custom (S5 converts widths/colors to 1px/#dddddd). */
+/* Continuous vertical guide line, light full-length (dark path overlaid per segment below) */
+.navTree::before {
   content: '';
   position: absolute;
   left: 21px;
   top: -6px;
   bottom: 19px; /* stops exactly at vertical center of last child item */
-  width: 1.5px;
-  background-color: #CBD5E1;
+  width: 1px;
+  background-color: var(--color-nav-guide);
   border-radius: 1px;
   pointer-events: none;
   z-index: 1;
 }
 
-/* Branch child item */
-.navBranchItem {
-  position: relative;
-  display: flex;
-  align-items: center;
-  padding-left: 36px;
-  width: 100%;
-  box-sizing: border-box;
+/* Continuous dark path to the active branch (seamless): preceding items paint the full
+   box (top:-6px EI bottom:0) so gaps between cards are covered by overlap stacking.
+   The terminal (active) item carries NO straight overlay — only its curved elbow —
+   so no dark bar is ever painted over the active card face. Same color throughout. */
+.navStemTo1 > :nth-child(-n+1)::after,
+.navStemTo2 > :nth-child(-n+2)::after,
+.navStemTo3 > :nth-child(-n+3)::after,
+.navStemTo4 > :nth-child(-n+4)::after {
+  content: '';
+  position: absolute;
+  left: 21px;
+  top: -6px;
+  bottom: 0;
+  width: 1px;
+  background-color: var(--color-nav-guide-active);
+  pointer-events: none;
+  z-index: 1;
+}
+/* Dark path (trunk runs + active elbow only): the curve's vertical run takes the trunk
+   color for every item up to and including active (it coincides exactly with the
+   overlay boxes, so no light-over-dark can ever show); horizontal arms stay light
+   except on the active item, whose whole elbow goes dark. Double-class-equivalent
+   specificity wins regardless of order. */
+.navStemTo0 > :nth-child(-n+1)::before,
+.navStemTo1 > :nth-child(-n+2)::before,
+.navStemTo2 > :nth-child(-n+3)::before,
+.navStemTo3 > :nth-child(-n+4)::before,
+.navStemTo4 > :nth-child(-n+5)::before {
+  border-left-color: var(--color-nav-guide-active);
+}
+.navStemTo0 > :nth-child(1)::before,
+.navStemTo1 > :nth-child(2)::before,
+.navStemTo2 > :nth-child(3)::before,
+.navStemTo3 > :nth-child(4)::before,
+.navStemTo4 > :nth-child(5)::before {
+  border-bottom-color: var(--color-nav-guide-active);
 }
 
-/* Smooth curved branch line connecting vertical stem to this item */
-.navBranchItem::before {
+/* Branch child item layout migrated to Tailwind utilities in Sidebar.tsx. */
+
+/* Smooth curved branch line connecting vertical stem to this item (container-indexed;
+   layout lives in Tailwind utilities on the JSX element) */
+.navTree > *::before {
   content: '';
   position: absolute;
   left: 21px;
   top: -6px;
   width: 14px;
   height: calc(50% + 6px);
-  border-left: 1.5px solid #CBD5E1;
-  border-bottom: 1.5px solid #CBD5E1;
-  border-bottom-left-radius: 10px;
+  border-left: 1px solid var(--color-nav-guide);
+  border-bottom: 1px solid var(--color-nav-guide);
+  border-bottom-left-radius: var(--radius-nav);
   pointer-events: none;
   z-index: 2;
 }
 
-/* Branch child link button */
-.navBranchLink {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  height: 38px;
-  padding: 0 12px;
-  border-radius: 10px;
-  text-decoration: none;
-  font-size: 13.5px;
-  font-weight: 500;
-  color: #5D6772;
-  transition: all 0.15s ease;
-  position: relative;
-  box-sizing: border-box;
-  background: transparent;
-}
+/* Branch links migrated to Tailwind utilities in Sidebar.tsx (pixel-identical; active is
+   a wash, not a card — shadow/border removed per 3D spec).
+   Removed: .navBranchLink, .navBranchLinkActive, .navItemCollapsed, .navBranchLabel,
+   collapsed tree rules. */
 
-.navBranchLink:hover {
-  color: #111827;
-  background-color: rgba(0, 0, 0, 0.04);
-}
+/* Nav badges migrated to Tailwind utilities in Sidebar.tsx (pixel-identical; only live
+   purple/amber converted). Dead: .navBadgeOrange, .navBadgeGreen (zero refs). */
 
-/* Active state - crisp floating card pill like in reference */
-.navBranchLinkActive {
-  background-color: #FFFFFF !important;
-  color: #111827 !important;
-  font-weight: 600 !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.02) !important;
-  border: 1px solid rgba(0, 0, 0, 0.04) !important;
-}
+/* (logOutItem migrated to Tailwind error-hover utilities in Sidebar.tsx) */
 
-.navBranchLinkActive .navIcon {
-  color: #7539FF !important;
-}
+/* (collapsed hide rules dead — JSX unmounts labels/trees when collapsed) */
 
-.navBranchLinkActive:hover {
-  background-color: #FFFFFF !important;
-  color: #111827 !important;
-}
+/* Stag brand art + copyright migrated to Tailwind utilities in Sidebar.tsx (pixel-identical;
+   hover lift kept, seamless transparent treatment preserved).
+   Removed: .sidebarStagDirect, .sidebarStagArtCard, .stagIllustrationContainer,
+   .stagImageWrapper, .stagArtImage, .stagCopyrightRow, .stagCopyrightText,
+   .stagCollapsedDirect, .stagCollapsedCard, .stagCollapsedImgWrap, .stagCollapsedImg. */
 
-.navItemCollapsed {
-  justify-content: center;
-  padding: 8px;
-}
-
-.sidebarCollapsed .navBranchTree::before,
-.sidebarCollapsed .navBranchItem::before {
-  display: none !important;
-}
-
-.sidebarCollapsed .navBranchItem {
-  padding-left: 0;
-}
-
-.navBranchLabel {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Badges */
-.navBadge {
-  font-size: 11.5px;
-  font-weight: 700;
-  line-height: 1;
-  padding: 2.5px 7.5px;
-  border-radius: 9999px;
-  min-width: 18px;
-  text-align: center;
-  box-sizing: border-box;
-}
-
-.navBadgeOrange {
-  background-color: #FED7AA;
-  color: #C2410C;
-}
-
-.navBadgeGreen {
-  background-color: #BBF7D0;
-  color: #15803D;
-}
-
-.navBadgePurple {
-  background-color: #F3E8FF;
-  color: #7539FF;
-}
-
-.navBadgeAmber {
-  background-color: #FEF3C7;
-  color: #D97706;
-}
-
-.logOutItem {
-  margin-top: 2px;
-  color: var(--tuw-text-secondary, #5D6772);
-}
-
-.logOutItem:hover {
-  background-color: var(--tuw-bg-error, #FEF4F4);
-  color: var(--tuw-text-error, #C91818);
-}
-
-.logOutItem:hover .navIcon {
-  color: var(--tuw-text-error, #C91818);
-}
-
-.sidebarCollapsed .brandName,
-.sidebarCollapsed .groupLabel,
-.sidebarCollapsed .navLabel,
-.sidebarCollapsed .navChevron,
-.sidebarCollapsed .navBranchTree {
-  display: none !important;
-}
-
-.sidebarCollapsed .navItem,
-.sidebarCollapsed .navParentItem {
-  justify-content: center;
-  padding: 8px;
-}
-
-/* ==========================================================================
-   SIDEBAR BRAND LOGO ANIMAL ARTWORK & COPYRIGHT (SEAMLESS - BIGDIRTY.AGENCY STYLE)
-   ========================================================================== */
-.sidebarStagDirect,
-.sidebarStagArtCard {
-  margin-top: 8px;
-  margin-bottom: 4px;
-  padding: 2px 0;
-  background: transparent !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  position: relative;
-  overflow: visible;
-}
-
-.sidebarStagDirect:hover,
-.sidebarStagArtCard:hover {
-  border: none !important;
-  box-shadow: none !important;
-  transform: none !important;
-}
-
-.stagIllustrationContainer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-}
-
-.stagImageWrapper {
-  position: relative;
-  width: 85px;
-  height: 62px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.stagArtImage {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  transition: transform 0.25s ease;
-}
-
-.sidebarStagDirect:hover .stagArtImage,
-.sidebarStagArtCard:hover .stagArtImage {
-  transform: translateY(-2px);
-}
-
-.stagCopyrightRow {
-  width: 100%;
-  margin-top: 4px;
-  padding-top: 0;
-  border-top: none !important;
-  text-align: center;
-}
-
-.stagCopyrightText {
-  margin-top: 6px;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  color: var(--tuw-text-secondary, #6B7280);
-  font-family: var(--font-urbanist), sans-serif;
-  user-select: none;
-  display: block;
-  text-align: center;
-  white-space: nowrap;
-}
-
-/* Collapsed Stag - Seamless */
-.stagCollapsedDirect,
-.stagCollapsedCard {
-  width: 36px;
-  height: 36px;
-  margin: 10px auto 4px auto;
-  border-radius: 0;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.stagCollapsedDirect:hover,
-.stagCollapsedCard:hover {
-  transform: scale(1.08);
-  border: none !important;
-}
-
-.stagCollapsedImgWrap {
-  position: relative;
-  width: 26px;
-  height: 26px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.stagCollapsedImg {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-/* ==========================================================================
-   3. BOTTOM DOCKING TOOLBAR (NIGHT / CONTRAST / SIDEBAR TOGGLE)
-   ========================================================================== */
-.sidebarDockToolbar {
-  margin-top: 6px;
-  margin-bottom: 2px;
-  height: 32px;
-  background-color: #0F0F12;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  overflow: hidden;
-  box-sizing: border-box;
-  flex-shrink: 0;
-}
-
-.dockToolbarBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  width: 100%;
-  background: transparent;
-  border: none;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
-  color: #8E95A2;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  padding: 0;
-}
-
-.dockToolbarBtn:last-child {
-  border-right: none;
-}
-
-.dockToolbarBtn:hover {
-  background-color: rgba(255, 255, 255, 0.08);
-  color: #FFFFFF;
-}
-
-.dockToolbarBtnActive {
-  color: #FFFFFF !important;
-  background-color: rgba(255, 255, 255, 0.12) !important;
-}
-
-.sidebarDockToolbarCollapsed {
-  margin-top: 8px;
-  display: flex;
-  justify-content: center;
-  width: 100%;
-}
-
-.dockToolbarBtnCollapsed {
-  width: 44px;
-  height: 36px;
-  border-radius: 8px;
-  background-color: #0F0F12;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #8E95A2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.dockToolbarBtnCollapsed:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #FFFFFF;
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.sidebarCollapsed .sidebarFooter {
-  align-items: center;
-}
+/* Bottom dock toolbar migrated to Tailwind utilities in Sidebar.tsx (pixel-identical;
+   active state via ternary, no !important needed).
+   Removed: .sidebarDockToolbar, .dockToolbarBtn, .dockToolbarBtnActive,
+   .sidebarDockToolbarCollapsed, .dockToolbarBtnCollapsed, collapsed footer rule. */
 
 /* Header */
 .topBar {
@@ -2360,524 +1742,7 @@
   position: relative;
 }
 
-/* --------------------------------------------------------------------------
-   1. SIDEBAR NAVIGATION
-   -------------------------------------------------------------------------- */
-.home-sidebar {
-  width: 240px;
-  min-width: 240px;
-  background-color: #FFFFFF;
-  border-right: 1px solid #ECECEC;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 0 20px 20px 20px;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow-y: auto;
-  overflow-x: visible;
-  z-index: 100;
-  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s ease;
-}
-
-.home-sidebar::-webkit-scrollbar {
-  width: 4px;
-}
-.home-sidebar::-webkit-scrollbar-thumb {
-  background: #E5E5E5;
-  border-radius: 4px;
-}
-
-.home-sidebarCollapsed {
-  width: 80px;
-  min-width: 80px;
-  padding: 0 12px 20px 12px;
-}
-
-.home-sidebarHeader {
-  height: 96px;
-  min-height: 96px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  position: relative;
-}
-
-.home-brandLink {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  text-decoration: none;
-  color: #242424;
-}
-
-/* Pure Code Logo Wrapper */
-.home-logoIconWrapper {
-  width: 32px;
-  height: 32px;
-  background-color: #242424;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-}
-
-.home-brandName {
-  font-family: var(--font-brand);
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: #242424;
-  white-space: nowrap;
-}
-
-/* Sidebar Toggle Pin centered exactly on the border line */
-.home-sidebarToggleBtn {
-  position: absolute;
-  right: -36px;
-  top: 32px;
-  width: 32px;
-  height: 32px;
-  background-color: #FEFEFE;
-  border: 1px solid #ECECEC;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #6C6C6C;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  z-index: 120;
-  transition: all 0.2s ease;
-}
-
-.home-sidebarToggleBtn:hover {
-  background-color: #F8F9FA;
-  color: #115D5D;
-  transform: scale(1.08);
-}
-
-.home-sidebarCollapsed .home-sidebarToggleBtn {
-  right: -28px;
-}
-
-.home-navSections {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-top: 4px;
-  flex: 1;
-}
-
-.home-navGroup {
-  display: flex;
-  flex-direction: column;
-}
-
-.home-groupLabel {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  color: #6C6C6C;
-  text-transform: uppercase;
-  padding: 0 10px 8px 10px;
-}
-
-.home-navList {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.home-navItem {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 9px 12px;
-  border-radius: 12px;
-  color: #242424;
-  font-size: 15px;
-  font-weight: 400;
-  text-decoration: none;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  user-select: none;
-  position: relative;
-  background: transparent;
-  width: 100%;
-}
-
-.home-navItem:hover {
-  background-color: #F8FAF9;
-  color: #115D5D;
-}
-
-.home-navItemActive {
-  background: linear-gradient(90deg, #EAF5E1 0%, #EEF7E6 100%);
-  color: #115D5D;
-  font-weight: 600;
-}
-
-.home-navItemActive:hover {
-  background: linear-gradient(90deg, #E2F0D8 0%, #E8F4DE 100%);
-  color: #115D5D;
-}
-
-.home-navIcon {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.home-navLabel {
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.home-navChevron {
-  width: 16px;
-  height: 16px;
-  color: #6C6C6C;
-  margin-left: auto;
-}
-
-.home-logOutItem {
-  margin-top: 4px;
-  color: #242424;
-}
-
-.home-logOutItem:hover {
-  background-color: #FDEDEC;
-  color: #E94845;
-}
-
-.home-logOutItem:hover .home-navIcon {
-  color: #E94845;
-}
-
-/* 100% Pure Code: Become Pro Card with Animated/Flowing SVG Waves */
-.home-becomeProCard {
-  width: 100%;
-  min-height: 205px;
-  background-color: #071714;
-  border-radius: 20px;
-  padding: 18px 16px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  position: relative;
-  overflow: hidden;
-  margin-top: 14px;
-  box-shadow: 0 6px 18px rgba(17, 93, 93, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.home-becomeProWaveBg {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-  overflow: hidden;
-}
-
-.home-waveSvg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.home-becomeProContent {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  z-index: 2;
-  position: relative;
-}
-
-.home-becomeProTitle {
-  font-size: 16px;
-  font-weight: 700;
-  color: #FFFFFF;
-}
-
-.home-becomeProDesc {
-  font-size: 12px;
-  font-weight: 500;
-  color: #E8ECEB;
-  line-height: 1.4;
-}
-
-.home-becomeProBtn {
-  background-color: #FFFFFF;
-  color: #242424;
-  border-radius: 12px;
-  height: 38px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-  z-index: 2;
-  position: relative;
-  text-decoration: none;
-  margin-top: 10px;
-}
-
-.home-becomeProBtn:hover {
-  background-color: #F0F4F4;
-  transform: translateY(-1px);
-}
-
-/* Collapsed Sidebar tweaks */
-.home-sidebarCollapsed .home-brandName,
-.home-sidebarCollapsed .home-groupLabel,
-.home-sidebarCollapsed .home-navLabel,
-.home-sidebarCollapsed .home-navChevron,
-.home-sidebarCollapsed .home-becomeProCard {
-  display: none;
-}
-
-.home-sidebarCollapsed .home-navItem {
-  justify-content: center;
-  padding: 10px;
-}
-
-/* --------------------------------------------------------------------------
-   2. MAIN CONTENT AREA & TOP BAR
-   -------------------------------------------------------------------------- */
-.home-mainContainer {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  background-color: #F5F5F5;
-  overflow-x: hidden;
-}
-
-/* Top Bar */
-.home-topBar {
-  height: 96px;
-  min-height: 96px;
-  background-color: #FFFFFF;
-  border-bottom: 1px solid #ECECEC;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 30px;
-  position: sticky;
-  top: 0;
-  z-index: 90;
-}
-
-.home-topBarLeft {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.home-mobileMenuBtn {
-  display: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background-color: #F5F5F5;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #242424;
-}
-
-.home-pageTitle {
-  font-size: 24px;
-  font-weight: 700;
-  color: #242424;
-  letter-spacing: -0.01em;
-}
-
-.home-searchContainer {
-  flex: 1;
-  max-width: 570px;
-  height: 48px;
-  background-color: #F5F5F5;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  gap: 12px;
-  margin: 0 30px;
-  border: 1px solid transparent;
-  transition: all 0.2s ease;
-}
-
-.home-searchContainer:focus-within {
-  border-color: #115D5D;
-  background-color: #FFFFFF;
-  box-shadow: 0 0 0 3px rgba(17, 93, 93, 0.08);
-}
-
-.home-searchIcon {
-  width: 20px;
-  height: 20px;
-  color: #9A9A9A;
-  flex-shrink: 0;
-}
-
-.home-searchInput {
-  border: none;
-  background: transparent;
-  outline: none;
-  width: 100%;
-  font-size: 14px;
-  color: #242424;
-  font-family: inherit;
-}
-
-.home-searchInput::placeholder {
-  color: #BBBBBB;
-}
-
-.home-searchPlusIcon {
-  width: 18px;
-  height: 18px;
-  color: #9A9A9A;
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-
-.home-searchPlusIcon:hover {
-  color: #115D5D;
-}
-
-.home-topBarRight {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.home-actionIcons {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.home-aiBotBtn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: #115D5D;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: transform 0.2s ease, background-color 0.2s ease;
-  box-shadow: 0 2px 8px rgba(17, 93, 93, 0.2);
-}
-
-.home-aiBotBtn:hover {
-  background-color: #0d4848;
-  transform: scale(1.05);
-}
-
-.home-notificationBtn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: #F5F5F5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  position: relative;
-  color: #242424;
-  transition: background-color 0.2s ease;
-}
-
-.home-notificationBtn:hover {
-  background-color: #EBEBEB;
-}
-
-.home-notificationBadge {
-  position: absolute;
-  top: -2px;
-  right: -2px;
-  width: 18px;
-  height: 18px;
-  background-color: #E94845;
-  color: #FFFFFF;
-  border-radius: 50%;
-  font-size: 11px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid #FFFFFF;
-}
-
-.home-userProfile {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding-left: 8px;
-  cursor: pointer;
-  user-select: none;
-}
-
-/* 100% Pure Code: Avatar Container */
-.home-avatarCodeWrapper {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #ECECEC;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-}
-
-.home-userInfo {
-  display: flex;
-  flex-direction: column;
-}
-
-.home-userName {
-  font-size: 16px;
-  font-weight: 700;
-  color: #242424;
-  line-height: 1.2;
-}
-
-.home-userRole {
-  font-size: 14px;
-  font-weight: 500;
-  color: #6C6C6C;
-}
-
-/* --------------------------------------------------------------------------
-   3. DASHBOARD MAIN BODY
-   -------------------------------------------------------------------------- */
-.home-dashboardBody {
-  padding: 30px;
-  max-width: 1200px;
-  width: 100%;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  box-sizing: border-box;
-}
+/* Dead home chrome removed (S8): home-sidebar/topBar/mainContainer/dashboardBody family had zero JSX refs (HomeView renders in DashboardShell). Live home content classes (kpi/charts/tables/badges) untouched. */
 
 /* Welcome Row */
 .home-welcomeRow {
@@ -3838,18 +2703,7 @@
 }
 
 @media (max-width: 680px) {
-  .home-topBar {
-    padding: 0 16px;
-  }
-
-  .home-searchContainer {
-    display: none;
-  }
-
-  .home-dashboardBody {
-    padding: 16px;
-  }
-
+  /* (dead home-topBar/searchContainer/dashboardBody rules removed S8) */
   .home-welcomeRow {
     flex-direction: column;
     align-items: flex-start;
