@@ -8,16 +8,16 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 14,
+    "total": 19,
     "done": 8,
-    "in_progress": 0,
-    "backlog": 6
+    "in_progress": 1,
+    "backlog": 10
   },
   "session": {
     "branch": "v2",
     "tip": "8e0d12a",
     "unpushed": [],
-    "next_up": "primitives 015-018 or reconciliation 006/007 (awaiting human direction); verify trunk + R-series visuals on fresh preview",
+    "next_up": "TL-SIDEBAR-POLISH children A-D in order",
     "pending_verifications": [
       "trunk continuous-dark + elbow-only on 1st-4th actives (post Antigravity+z-lift)",
       "R-series parent icons + iconless rows + collapsed icons",
@@ -263,6 +263,80 @@
       ],
       "verified": true,
       "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-POLISH",
+      "title": "Sidebar polish (collapsed gap, fade masks, badge-dot preview, focus rings)",
+      "status": "in_progress",
+      "owner": "agent",
+      "started": "2026-10-05",
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-POLISH-A",
+      "title": "collapsed gap zero + skip dead wrappers",
+      "status": "backlog",
+      "owner": null,
+      "parent": "TL-SIDEBAR-POLISH",
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-POLISH-B",
+      "title": "fade masks with documented fallbacks",
+      "status": "backlog",
+      "owner": null,
+      "parent": "TL-SIDEBAR-POLISH",
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-POLISH-C",
+      "title": "badge-dot preview toggle in settings",
+      "status": "backlog",
+      "owner": null,
+      "parent": "TL-SIDEBAR-POLISH",
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-POLISH-D",
+      "title": "keyboard focus-visible rings",
+      "status": "backlog",
+      "owner": null,
+      "parent": "TL-SIDEBAR-POLISH",
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
       "follow_ups": []
     }
   ],
