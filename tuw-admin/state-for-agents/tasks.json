@@ -8,24 +8,18 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 13,
-    "done": 6,
-    "in_progress": 1,
+    "total": 14,
+    "done": 8,
+    "in_progress": 0,
     "backlog": 6
   },
   "session": {
     "branch": "v2",
-    "tip": "2e66d88",
-    "unpushed": [
-      "8f784ef",
-      "405f876",
-      "ef834b3",
-      "e3c21c9",
-      "state-for-agents docs batch (rules/skills/guide, incl. this tracker)"
-    ],
+    "tip": "8e0d12a",
+    "unpushed": [],
     "next_up": "primitives 015-018 or reconciliation 006/007 (awaiting human direction); verify trunk + R-series visuals on fresh preview",
     "pending_verifications": [
-      "trunk continuous-dark + elbow-only on 1st-4th actives",
+      "trunk continuous-dark + elbow-only on 1st-4th actives (post Antigravity+z-lift)",
       "R-series parent icons + iconless rows + collapsed icons",
       "settings/help purple hover + black cards",
       "responsive widths 767/768/1023/1024/1440/1920"
@@ -41,7 +35,7 @@
       "owner": "agent",
       "started": "2026-10-04",
       "finished": "2026-10-04",
-      "log": "v2:ef392b0..v2:1ef3c82 + v2:41234d7 + v2:73ee02d + v2:fdaa637",
+      "log": "v2:ef392b0..v2:1ef3c82 + v2:41234d7 + v2:73ee02d + v2:fdaa637 + v2:fdaa637",
       "design_match": "yes",
       "key_decisions": [
         "auth-* namespace; admin tokens untouched",
@@ -88,7 +82,9 @@
       ],
       "verified": true,
       "pushed": true,
-      "follow_ups": ["trunk saga below"]
+      "follow_ups": [
+        "trunk saga below"
+      ]
     },
     {
       "id": "TL-TRUNK",
@@ -97,18 +93,21 @@
       "owner": "agent",
       "started": "2026-10-05",
       "finished": "2026-10-05",
-      "log": "v2:088d2d3, v2:adfbbdf, v2:f52edfd, v2:2f9deac, v2:2334217, v2:85ad12f, v2:dac0e4c, v2:a46d58a, v2:d1d8dcc",
+      "log": "v2:088d2d3, v2:adfbbdf, v2:f52edfd, v2:2f9deac, v2:2334217, v2:85ad12f, v2:dac0e4c, v2:a46d58a, v2:d1d8dcc + v2:efa65ac",
       "design_match": "yes",
       "key_decisions": [
         "3 alias tokens fixed site-wide black borders/logo (substring proofs are invalid)",
         "segmented dark path via nth-child overlays; terminal bar deleted (painted over card)",
         "trunk/arm border-color split (light curve covered dark trunk at higher z)",
         "white actives lifted above stem (z-1), elbow stays topmost (z-2)",
-        "branch actives unified to Settings-card treatment"
+        "branch actives unified to Settings-card treatment",
+        "Antigravity efa65ac: stem stops at bottom:29px tangent point; overlays to z-index 2; isolate on active cards; redundant with z-lift work, kept"
       ],
       "verified": true,
       "pushed": true,
-      "follow_ups": ["live-DOM confirmation of final leak fix on fresh preview"]
+      "follow_ups": [
+        "live-DOM confirmation of final leak fix on fresh preview"
+      ]
     },
     {
       "id": "TL-RESTRUCT",
@@ -124,7 +123,7 @@
         "collapsed re-shows icons; text-nav-parent/child tokens share 13.5px"
       ],
       "verified": true,
-      "pushed": false,
+      "pushed": true,
       "follow_ups": []
     },
     {
@@ -140,22 +139,27 @@
         "logout stays red hover; settings/help purple hover; actives are black sidebar cards"
       ],
       "verified": true,
-      "pushed": false,
+      "pushed": true,
       "follow_ups": []
     },
     {
       "id": "TL-AGENTSYS",
       "title": "state-for-agents system (rules/skills/tracker/guide)",
-      "status": "in_progress",
+      "status": "done",
       "owner": "agent",
       "started": "2026-10-05",
-      "finished": null,
-      "log": null,
-      "design_match": null,
-      "key_decisions": [],
-      "verified": false,
-      "pushed": false,
-      "follow_ups": ["this tasks.json entry itself"]
+      "finished": "2026-10-05",
+      "log": "v2:3c74daa..v2:5d04980 (4 rules, 14 skills, guide, tasks.json, AGENTS.md, archive)",
+      "design_match": "yes",
+      "key_decisions": [
+        "global (not section) skill names",
+        "rules-vs-skills split doctrine",
+        "good/bad pairs in every skill",
+        "propose-then-approve self-improvement loop"
+      ],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
     },
     {
       "id": "006",
@@ -239,6 +243,26 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-COMP",
+      "title": "Sidebar componentization (stag removal, loops, sidebar-nav components)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-05",
+      "finished": "2026-10-05",
+      "log": "v2:a47858f, v2:c0e04b8, v2:03b5102, v2:5b46330, v2:a1f0d70",
+      "design_match": "yes",
+      "key_decisions": [
+        "stag art removed from footer (JSX-only; CSS was already gone)",
+        "NAV_GROUPS/FOOTER_ITEMS configs + .map() replaced ~450 hand-written lines",
+        "sidebar-nav/ components own row treatments; Sidebar slimmed 771 to 319 lines",
+        "sidebar/ vs Sidebar.tsx case-collision forced sidebar-nav/ dirname",
+        "5-child stem selector limit documented at constraint site"
+      ],
+      "verified": true,
+      "pushed": true,
       "follow_ups": []
     }
   ],
