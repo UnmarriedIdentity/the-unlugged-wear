@@ -194,14 +194,14 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
               {/* Form Body: Frame 135 */}
               <div className={styles.formBody}>
                 {/* Social Login Buttons: Apple & Google (Frame 139) */}
-                <div className={styles.socialRow}>
+                <div className="grid grid-cols-2 gap-[clamp(12px,1.5vw,24px)]">
                   <button
                     type="button"
-                    className={styles.socialButton}
+                    className="flex h-12 items-center justify-center gap-2 rounded-auth-social border border-auth-line bg-white px-3.5 py-2 cursor-pointer transition-all duration-200 hover:bg-auth-hover-canvas hover:border-auth-hover-line"
                     onClick={() => applyState('filled')}
                     id="signup-apple-btn"
                   >
-                    <div className={styles.socialIconBadge}>
+                    <div className="flex h-7.5 w-7.5 items-center justify-center rounded-full border border-auth-line bg-white">
                       <Image
                         src="/images/apple-logo.png"
                         alt="Apple"
@@ -209,16 +209,16 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
                         height={18}
                       />
                     </div>
-                    <span className={styles.socialText}>Use Apple</span>
+                    <span className="text-[14px] font-medium tracking-auth-social text-auth-ink">Use Apple</span>
                   </button>
 
                   <button
                     type="button"
-                    className={styles.socialButton}
+                    className="flex h-12 items-center justify-center gap-2 rounded-auth-social border border-auth-line bg-white px-3.5 py-2 cursor-pointer transition-all duration-200 hover:bg-auth-hover-canvas hover:border-auth-hover-line"
                     onClick={() => applyState('filled')}
                     id="signup-google-btn"
                   >
-                    <div className={styles.socialIconBadge}>
+                    <div className="flex h-7.5 w-7.5 items-center justify-center rounded-full border border-auth-line bg-white">
                       <Image
                         src="/images/google-logo.png"
                         alt="Google"
@@ -226,15 +226,15 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
                         height={16}
                       />
                     </div>
-                    <span className={styles.socialText}>Use Google</span>
+                    <span className="text-[14px] font-medium tracking-auth-social text-auth-ink">Use Google</span>
                   </button>
                 </div>
 
                 {/* Divider: Or (Frame 136) */}
-                <div className={styles.dividerRow}>
-                  <div className={styles.dividerLine} />
-                  <span className={styles.dividerText}>Or</span>
-                  <div className={styles.dividerLine} />
+                <div className="flex items-center gap-4">
+                  <div className="h-px flex-1 bg-auth-line" />
+                  <span className="text-sm font-medium text-auth-divider">Or</span>
+                  <div className="h-px flex-1 bg-auth-line" />
                 </div>
 
                 {/* Sign Up Form Inputs */}

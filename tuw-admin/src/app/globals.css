@@ -60,6 +60,9 @@
   --color-auth-success-bg: #EDF8E2;
   --color-auth-divider: #BBBBBB;
   --color-auth-hero: #1A1A1A;
+  /* Signup social hover pair (distinct from login FAFAFA/D1D5DB); shared with backToLogin */
+  --color-auth-hover-canvas: #F8F9FA;
+  --color-auth-hover-line: #D6D6D6;
 
   /* Auth radii */
   --radius-auth-checkbox: 6px;
@@ -1915,76 +1918,10 @@
   width: 100%;
 }
 
-/* ==========================================================================
-   SOCIAL BUTTONS: Frame 139 (Apple & Google)
-   ========================================================================== */
-.signup-socialRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: clamp(12px, 1.5vw, 24px);
-}
-
-.signup-socialButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  height: 48px;
-  padding: 8px 14px;
-  border: 1px solid #E9E9E9;
-  border-radius: 14px;
-  background-color: #FFFFFF;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: inherit;
-  box-sizing: border-box;
-}
-
-.signup-socialButton:hover {
-  background-color: #F8F9FA;
-  border-color: #D6D6D6;
-}
-
-.signup-socialIconBadge {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  border: 1px solid #E9E9E9;
-  background-color: #FFFFFF;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.signup-socialText {
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0.14px;
-  line-height: 22.4px;
-  color: #242424;
-}
-
-/* ==========================================================================
-   DIVIDER ROW: Line 1 + "Or" + Line 2
-   ========================================================================== */
-.signup-dividerRow {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.signup-dividerLine {
-  flex: 1;
-  height: 1px;
-  background-color: #E9E9E9;
-}
-
-.signup-dividerText {
-  font-size: 14px;
-  font-weight: 500;
-  color: #BBBBBB;
-  line-height: 20px;
-}
+/* Signup social + divider migrated to Tailwind utilities in SignUpPage.tsx (pixel-identical;
+   centered h-12 buttons, F8F9FA/D6D6D6 hover pair, badge h-7.5, divider uses auth-line).
+   Removed: .signup-socialRow, .signup-socialButton, .signup-socialIconBadge,
+   .signup-socialText, .signup-dividerRow, .signup-dividerLine, .signup-dividerText. */
 
 /* ==========================================================================
    FORM INPUTS BLOCK (Frame 1410130422)
