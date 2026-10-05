@@ -347,18 +347,17 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
                   </div>
 
                   {/* Frame 1410130423: Checkbox & Submit Button */}
-                  <div className={styles.footerActionsBlock}>
+                  <div className="flex flex-col gap-[clamp(8px,1.2vh,12px)] mt-[clamp(6px,1vh,12px)]">
                     {/* 5. Terms of Use & Privacy Checkbox */}
                     <div
-                      className={styles.termsRow}
+                      className="flex items-center gap-2 select-none cursor-pointer"
                       onClick={() => setAgreeTerms(!agreeTerms)}
-                      style={{ cursor: 'pointer' }}
                     >
                       <button
                         type="button"
                         role="checkbox"
                         aria-checked={agreeTerms}
-                        className={`${styles.checkbox} ${agreeTerms ? styles.checkboxChecked : ''}`}
+                        className={`flex h-4.5 w-4.5 min-w-4.5 items-center justify-center rounded-auth-terms-check border bg-white cursor-pointer transition-all duration-150 p-0 ${agreeTerms ? 'bg-auth-teal border-auth-teal text-white' : 'border-auth-terms-line'}`}
                         onClick={(e) => {
                           e.stopPropagation();
                           setAgreeTerms(!agreeTerms);
@@ -366,20 +365,20 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
                         id="terms-checkbox"
                       >
                         {agreeTerms && (
-                          <svg className={styles.checkboxIcon} viewBox="0 0 14 14" fill="none">
-                            <path d="M2.5 7.5L5.5 10.5L11.5 3.5" />
+                          <svg className="h-3 w-3 text-white" viewBox="0 0 14 14" fill="none">
+                            <path d="M2.5 7.5L5.5 10.5L11.5 3.5" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
                         )}
                       </button>
-                      <div className={styles.termsText}>
+                      <div className="text-auth-terms tracking-auth-terms text-auth-ink">
                         By creating an account you agree to the{' '}
-                        <span className={styles.termsLink}>Term of use</span> and{' '}
-                        <span className={styles.termsLink}>Privacy policy</span>
+                        <span className="text-auth-teal font-semibold underline cursor-pointer transition-opacity duration-150 hover:opacity-80">Term of use</span> and{' '}
+                        <span className="text-auth-teal font-semibold underline cursor-pointer transition-opacity duration-150 hover:opacity-80">Privacy policy</span>
                       </div>
                     </div>
 
                     {/* 6. Primary Button: Sign Up */}
-                    <button type="submit" className={styles.submitButton} id="signup-submit-btn">
+                    <button type="submit" className="flex h-12 w-full items-center justify-center rounded-xl bg-auth-button text-auth-btn font-bold text-white cursor-pointer transition-all duration-200 hover:bg-auth-pure active:scale-99" id="signup-submit-btn">
                       Sign Up
                     </button>
                   </div>
