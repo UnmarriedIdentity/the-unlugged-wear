@@ -1908,43 +1908,17 @@
    Removed: .signup-headerBlock, .signup-logoBadge, .signup-logoMonogram,
    .signup-formTitle, .signup-formSubtitleRow, .signup-loginLink. */
 
-/* ==========================================================================
-   FORM BODY (Frame 135)
-   ========================================================================== */
-.signup-formBody {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(12px, 1.8vh, 20px);
-  width: 100%;
-}
+/* Signup form shells migrated to Tailwind utilities in SignUpPage.tsx (pixel-identical;
+   gap-based rhythm with distinct clamps preserved per block).
+   Removed: .signup-formBody, .signup-formInputsWrapper, .signup-fieldGroup,
+   .signup-fieldLabel. */
 
 /* Signup social + divider migrated to Tailwind utilities in SignUpPage.tsx (pixel-identical;
    centered h-12 buttons, F8F9FA/D6D6D6 hover pair, badge h-7.5, divider uses auth-line).
    Removed: .signup-socialRow, .signup-socialButton, .signup-socialIconBadge,
    .signup-socialText, .signup-dividerRow, .signup-dividerLine, .signup-dividerText. */
 
-/* ==========================================================================
-   FORM INPUTS BLOCK (Frame 1410130422)
-   ========================================================================== */
-.signup-formInputsWrapper {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(8px, 1.2vh, 14px);
-}
-
-.signup-fieldGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.signup-fieldLabel {
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0.14px;
-  line-height: 20px;
-  color: #242424;
-}
+/* (inputs wrapper + field shells removed — see migration comment above) */
 
 .signup-inputWrapper {
   position: relative;

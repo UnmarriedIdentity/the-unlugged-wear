@@ -191,8 +191,8 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
                 </div>
               </header>
 
-              {/* Form Body: Frame 135 */}
-              <div className={styles.formBody}>
+                {/* Form Body: Frame 135 */}
+                <div className="flex w-full flex-col gap-[clamp(12px,1.8vh,20px)]">
                 {/* Social Login Buttons: Apple & Google (Frame 139) */}
                 <div className="grid grid-cols-2 gap-[clamp(12px,1.5vw,24px)]">
                   <button
@@ -239,10 +239,10 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
 
                 {/* Sign Up Form Inputs */}
                 <form onSubmit={handleSignUpSubmit} id="signup-form">
-                  <div className={styles.formInputsWrapper}>
+                  <div className="flex flex-col gap-[clamp(8px,1.2vh,14px)]">
                     {/* 1. Username Field */}
-                    <div className={styles.fieldGroup}>
-                      <label htmlFor="signup-username" className={styles.fieldLabel}>
+                    <div className="flex flex-col gap-[5px]">
+                      <label htmlFor="signup-username" className="text-sm font-medium tracking-auth-social text-auth-ink">
                         Username
                       </label>
                       <div className={styles.inputWrapper}>
@@ -262,8 +262,8 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
                     </div>
 
                     {/* 2. Email Field */}
-                    <div className={styles.fieldGroup}>
-                      <label htmlFor="signup-email" className={styles.fieldLabel}>
+                    <div className="flex flex-col gap-[5px]">
+                      <label htmlFor="signup-email" className="text-sm font-medium tracking-auth-social text-auth-ink">
                         Email
                       </label>
                       <div className={styles.inputWrapper}>
@@ -283,8 +283,8 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
                     </div>
 
                     {/* 3. Create Password Field */}
-                    <div className={styles.fieldGroup}>
-                      <label htmlFor="signup-password" className={styles.fieldLabel}>
+                    <div className="flex flex-col gap-[5px]">
+                      <label htmlFor="signup-password" className="text-sm font-medium tracking-auth-social text-auth-ink">
                         Create password
                       </label>
                       <div className={styles.inputWrapper}>
@@ -316,8 +316,8 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
                     </div>
 
                     {/* 4. Confirm Password Field */}
-                    <div className={styles.fieldGroup}>
-                      <label htmlFor="signup-confirm-password" className={styles.fieldLabel}>
+                    <div className="flex flex-col gap-[5px]">
+                      <label htmlFor="signup-confirm-password" className="text-sm font-medium tracking-auth-social text-auth-ink">
                         Confirm your password
                       </label>
                       <div className={styles.inputWrapper}>
