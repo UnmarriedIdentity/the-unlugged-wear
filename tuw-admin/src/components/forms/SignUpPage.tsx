@@ -151,11 +151,11 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
 
         {/* Frame 60511: Brand Mark, Headline, Subtitle */}
         <div className="relative z-2 flex flex-col gap-[clamp(8px,1.4vh,16px)] px-[clamp(24px,3.88vw,56px)] pb-[clamp(24px,4.5vh,68px)] max-w-[600px] max-[900px]:px-6 max-[900px]:pb-7">
-          <div className={styles.brandTitle}>Storeflow</div>
-          <h1 className={styles.heroHeadline}>
+          <div className="text-auth-signup-brand font-bold leading-auth-headline text-white">Storeflow</div>
+          <h1 className="text-auth-signup-headline font-bold leading-auth-signup-headline tracking-auth-title text-white whitespace-pre-line max-w-auth-hero-copy m-0">
             All your store{'\n'}essentials{'\n'}in one place
           </h1>
-          <p className={styles.heroSubtitle}>
+          <p className="text-auth-signup-sub font-medium tracking-auth-signup-sub text-white opacity-90 m-0 max-w-auth-hero-copy">
             Experience a new standard of efficiency through an intelligent, beautifully designed admin dashboard.
           </p>
         </div>
@@ -164,8 +164,8 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
       {/* ==========================================================================
           RIGHT AUTH SECTION (Frame 140 - Width 728px, Height 1024px)
           ========================================================================== */}
-      <section className={styles.formSection}>
-        <div className={styles.formContainer}>
+      <section className="relative flex h-screen w-[50.556%] flex-[0_0_50.556%] flex-col items-center justify-center overflow-y-auto overflow-x-hidden bg-white bg-no-repeat py-[clamp(16px,2.5vh,40px)] px-[clamp(20px,3vw,48px)] bg-[radial-gradient(circle_520px_at_78%_5%,rgba(229,245,211,0.6)_0%,rgba(255,255,255,0)_100%),radial-gradient(circle_420px_at_98%_8%,rgba(246,198,54,0.1)_0%,rgba(229,245,211,0.05)_50%,rgba(255,255,255,0)_100%)] max-[900px]:h-auto max-[900px]:min-h-auto max-[900px]:w-full max-[900px]:flex-none max-[900px]:px-5 max-[900px]:pt-9 max-[900px]:pb-15">
+        <div className="flex w-full max-w-auth-form flex-col my-auto">
           {/* ==========================================================================
               VIEW 1: SIGN UP FORM (Figma 1:20984 & 1:20920)
               ========================================================================== */}

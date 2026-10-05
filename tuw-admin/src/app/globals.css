@@ -112,6 +112,14 @@
   --tracking-auth-title: -0.01em;
   --tracking-auth-hero: -0.02em;
   --tracking-auth-wide: 0.6px;
+  /* Signup hero copy (fluid Figma specs; wrap-guards shared by headline+subtitle) */
+  --text-auth-signup-brand: clamp(20px, 2.22vw, 32px);
+  --text-auth-signup-headline: clamp(28px, 3.6vw, 64px);
+  --leading-auth-signup-headline: 1.15;
+  --text-auth-signup-sub: clamp(13px, 1.25vw, 20px);
+  --text-auth-signup-sub--line-height: 1.35;
+  --tracking-auth-signup-sub: 0.4px;
+  --container-auth-hero-copy: 520px;
   --container-auth-hero-head: 490px;
   --container-auth-hero-sub: 600px;
   --spacing-auth-header-gap: clamp(20px, 3vh, 32px);
@@ -1879,68 +1887,13 @@
 
 /* (heroContent removed — see migration comment above) */
 
-.signup-brandTitle {
-  font-family: var(--font-urbanist), 'Urbanist', sans-serif;
-  font-weight: 700;
-  font-size: clamp(20px, 2.22vw, 32px);
-  line-height: 1.2;
-  color: #FFFFFF;
-}
+/* Signup hero copy migrated to Tailwind auth-* utilities in SignUpPage.tsx (pixel-identical;
+   fluid clamps + 520px wrap-guards preserved).
+   Removed: .signup-brandTitle, .signup-heroHeadline, .signup-heroSubtitle. */
 
-.signup-heroHeadline {
-  font-family: var(--font-urbanist), 'Urbanist', sans-serif;
-  font-weight: 700;
-  font-size: clamp(28px, 3.6vw, 64px);
-  line-height: 1.15;
-  letter-spacing: -0.01em;
-  color: #FFFFFF;
-  margin: 0;
-  white-space: pre-line;
-  max-width: 520px;
-}
-
-.signup-heroSubtitle {
-  font-family: var(--font-urbanist), 'Urbanist', sans-serif;
-  font-weight: 500;
-  font-size: clamp(13px, 1.25vw, 20px);
-  line-height: 1.35;
-  letter-spacing: 0.4px;
-  color: #FFFFFF;
-  opacity: 0.9;
-  margin: 0;
-  max-width: 520px;
-}
-
-/* ==========================================================================
-   RIGHT AUTH SECTION (Frame 140 - Width 728px / 1440px = 50.556%)
-   Centered vertically with radial ambient gradients matching Figma
-   ========================================================================== */
-.signup-formSection {
-  flex: 0 0 50.556%;
-  width: 50.556%;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: clamp(16px, 2.5vh, 40px) clamp(20px, 3vw, 48px);
-  box-sizing: border-box;
-  background-color: #FFFFFF;
-  background-image: 
-    radial-gradient(circle 520px at 78% 5%, rgba(229, 245, 211, 0.6) 0%, rgba(255, 255, 255, 0) 100%),
-    radial-gradient(circle 420px at 98% 8%, rgba(246, 198, 54, 0.1) 0%, rgba(229, 245, 211, 0.05) 50%, rgba(255, 255, 255, 0) 100%);
-  background-repeat: no-repeat;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.signup-formContainer {
-  width: 100%;
-  max-width: 568px;
-  display: flex;
-  flex-direction: column;
-  margin: auto 0;
-}
+/* Signup form section migrated to Tailwind utilities in SignUpPage.tsx (h-screen kept —
+   login uses min-h-screen; washes reuse the login bg arbitrary).
+   Removed: .signup-formSection, .signup-formContainer. */
 
 /* ==========================================================================
    HEADER BLOCK: Frame 128 (Badge 48x48 -> Title -> Subtitle)
@@ -2438,13 +2391,7 @@
 @media (max-width: 900px) {
   /* Wrapper/hero/content stacking migrated to max-[900px]: variants (kept: formSection, socialRow). */
 
-  .signup-formSection {
-    flex: none;
-    width: 100%;
-    height: auto;
-    min-height: auto;
-    padding: 36px 20px 60px 20px;
-  }
+  /* Shell stacking migrated to max-[900px]: variants (kept: formSection, socialRow). */
 
   .signup-socialRow {
     gap: 12px;
