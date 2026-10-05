@@ -357,7 +357,7 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
                         type="button"
                         role="checkbox"
                         aria-checked={agreeTerms}
-                        className={`flex h-4.5 w-4.5 min-w-4.5 items-center justify-center rounded-auth-terms-check border bg-white cursor-pointer transition-all duration-150 p-0 ${agreeTerms ? 'bg-auth-teal border-auth-teal text-white' : 'border-auth-terms-line'}`}
+                        className={`flex h-4.5 w-4.5 min-w-4.5 items-center justify-center rounded-auth-terms-check border cursor-pointer transition-all duration-150 p-0 ${agreeTerms ? 'bg-auth-teal border-auth-teal text-white' : 'bg-white border-auth-terms-line'}`}
                         onClick={(e) => {
                           e.stopPropagation();
                           setAgreeTerms(!agreeTerms);

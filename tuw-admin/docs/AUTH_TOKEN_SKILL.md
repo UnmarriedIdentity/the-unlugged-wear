@@ -59,6 +59,9 @@ beats them regardless of order. Rules:
 - State overrides (`:hover`, error, active) use **ternary class swaps**
   (`active ? 'border-auth-teal' : 'border-auth-line'`), never additive
   same-property utilities (intra-layer order is not author-controlled).
+  Ternaries must enumerate ALL state-varying properties INCLUDING `bg-*`:
+  a base `bg-white` plus a conditional second bg is a silent conflict
+  (white sorts last — checked/error fills never appear), not an override.
 - Never invent focus rings or hover states that never existed.
 
 ## 5. Examples (wrong → right)

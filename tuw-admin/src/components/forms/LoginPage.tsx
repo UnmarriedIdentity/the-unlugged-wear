@@ -261,7 +261,7 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
                     Password
                   </label>
                   <div
-                    className={`flex h-12 w-full items-center gap-2.5 rounded-xl border bg-white px-4 transition-colors duration-200 ${hasError ? 'border-auth-error bg-auth-error-bg' : 'border-auth-line'}`}
+                    className={`flex h-12 w-full items-center gap-2.5 rounded-xl border px-4 transition-colors duration-200 ${hasError ? 'border-auth-error bg-auth-error-bg' : 'border-auth-line bg-white'}`}
                   >
                     <input
                       id="password-input"
@@ -306,7 +306,7 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
                   id="remember-me-toggle"
                 >
                   <div
-                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-auth-checkbox border bg-white transition-all duration-150 ${rememberMe ? 'bg-auth-button border-auth-button' : 'border-auth-check-line'}`}
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-auth-checkbox border transition-all duration-150 ${rememberMe ? 'bg-auth-button border-auth-button' : 'bg-white border-auth-check-line'}`}
                   >
                     {rememberMe && <Check size={12} strokeWidth={3} color="currentColor" className="text-white" />}
                   </div>
