@@ -169,13 +169,7 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
 
             {view === 'recovery-sent' && (
               <h2
-                className={styles.formTitle}
-                style={{
-                  fontSize: '24px',
-                  lineHeight: '28.8px',
-                  letterSpacing: '0.72px',
-                  color: 'var(--color-auth-pure)',
-                }}
+                className="text-auth-recovery-head font-semibold tracking-auth-recovery-head text-auth-pure"
               >
                 Reset password
               </h2>
@@ -401,19 +395,19 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
               Card width: 552px, radius: 24px, fill: surface token, stroke: auth-line token
               ========================================================================== */}
           {view === 'recovery-sent' && (
-            <div className={styles.recoveryCard}>
+            <div className="flex w-full max-w-auth-card flex-col items-center gap-8 rounded-auth-card-lg border border-auth-line bg-white py-[clamp(24px,4vh,40px)] px-[clamp(20px,5vw,80px)]">
               {/* Frame 281: Success pill badge */}
-              <div className={styles.recoveryPill}>
+              <div className="inline-flex items-center gap-1.5 rounded-xl bg-auth-success-bg px-4 py-2 text-auth-input-filled tracking-auth-input-filled font-normal text-auth-success whitespace-nowrap">
                 <CircleCheck size={20} strokeWidth={1.5} color="currentColor" className="text-auth-success" />
                 <span>Sending password reset link was successful</span>
               </div>
 
               {/* Frame 283: Headline & Description */}
-              <div className={styles.recoveryTextBlock}>
-                <h3 className={styles.recoveryHeading}>
+              <div className="flex w-full max-w-auth-recovery flex-col items-center gap-4 text-center">
+                <h3 className="text-auth-recovery-head font-semibold tracking-auth-recovery-head text-auth-teal">
                   The recovery email was sent successfully!
                 </h3>
-                <p className={styles.recoveryDescription}>
+                <p className="text-auth-input-filled tracking-auth-input-filled font-normal text-auth-muted">
                   Check your e-mail and click on the link, where you will able to change your password.
                 </p>
               </div>

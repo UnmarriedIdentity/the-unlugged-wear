@@ -81,7 +81,12 @@
   --container-auth-card: 552px;
   /* Auth cards */
   --radius-auth-card: 20px;
+  --radius-auth-card-lg: 24px;
   --shadow-auth-card: -1px 1px 40px rgba(0, 0, 0, 0.06);
+  /* Recovery heading */
+  --text-auth-recovery-head: 24px;
+  --text-auth-recovery-head--line-height: 28.8px;
+  --tracking-auth-recovery-head: 0.72px;
   /* Back link: 14px/500 with NO line-height (computes normal) */
   --text-auth-backlink: 14px;
   --text-auth-backlink--line-height: normal;
@@ -1780,15 +1785,7 @@
 
 /* (header block + logo + formSubtitle removed — see migration comment above) */
 
-.login-formTitle {
-  font-family: var(--font-main), sans-serif;
-  font-size: 32px;
-  font-weight: 600;
-  color: #242424;
-  line-height: 40.3px;
-  letter-spacing: -0.01em;
-  margin-bottom: 8px;
-}
+/* (formTitle removed — last consumer migrated in recovery view; see comment above) */
 
 /* (formSubtitle removed — see migration comment above; formTitle kept for recovery view) */
 
@@ -1830,68 +1827,10 @@
 
 /* .login-resetButton migrated to Tailwind in LoginPage.tsx (pixel-identical). */
 
-/* ==========================================================================
-   RECOVERY SENT VIEW (Frame 1:20690)
-   Exact Figma: Card width 552px, radius 24px, stroke #E9E9E9,
-   padding: 40px 80px, gap 32px
-   ========================================================================== */
-.login-recoveryCard {
-  width: 100%;
-  max-width: 552px;
-  border-radius: 24px;
-  border: 1px solid #E9E9E9;
-  background: #FFFFFF;
-  padding: clamp(24px, 4vh, 40px) clamp(20px, 5vw, 80px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 32px;
-}
-
-/* Frame 281 in 1:20690: radius 12px, fill #EDF8E2, padding 8px 16px */
-.login-recoveryPill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: #EDF8E2;
-  border-radius: 12px;
-  padding: 8px 16px;
-  color: #009E5C;
-  font-family: var(--font-main), sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 25.6px;
-  letter-spacing: 0.32px;
-  white-space: nowrap;
-}
-
-.login-recoveryTextBlock {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  text-align: center;
-  width: 100%;
-  max-width: 392px;
-}
-
-.login-recoveryHeading {
-  font-family: var(--font-main), sans-serif;
-  font-size: 24px;
-  font-weight: 600;
-  line-height: 28.8px;
-  letter-spacing: 0.72px;
-  color: #115D5D;
-}
-
-.login-recoveryDescription {
-  font-family: var(--font-main), sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 25.6px;
-  letter-spacing: 0.32px;
-  color: #6C6C6C;
-}
+/* Login recovery view migrated to Tailwind auth-* utilities in LoginPage.tsx (pixel-identical).
+   Removed: .login-recoveryCard, .login-recoveryPill, .login-recoveryTextBlock,
+   .login-recoveryHeading, .login-recoveryDescription, .login-formTitle.
+   Zero login-* selectors remain except the heroOverlay art exception. */
 
 /* .login-recoveryButton migrated to Tailwind in LoginPage.tsx (pixel-identical). */
 
