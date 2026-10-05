@@ -55,7 +55,6 @@
   --color-nav-hover-wash: rgba(117, 57, 255, 0.06);
   /* Branch tree treatments */
   --color-nav-branch-hover: rgba(0, 0, 0, 0.04);
-  --color-nav-active-wash: rgba(0, 0, 0, 0.08);
   --color-nav-guide: #dddddd;
   --color-nav-guide-active: #c4c4c4;
 
@@ -724,11 +723,11 @@
   pointer-events: none;
   z-index: 1;
 }
-.navStemTo0 > :nth-child(-n+1)::before,
-.navStemTo1 > :nth-child(-n+2)::before,
-.navStemTo2 > :nth-child(-n+3)::before,
-.navStemTo3 > :nth-child(-n+4)::before,
-.navStemTo4 > :nth-child(-n+5)::before {
+.navStemTo0 > :nth-child(1)::before,
+.navStemTo1 > :nth-child(2)::before,
+.navStemTo2 > :nth-child(3)::before,
+.navStemTo3 > :nth-child(4)::before,
+.navStemTo4 > :nth-child(5)::before {
   border-color: var(--color-nav-guide-active);
 }
 
