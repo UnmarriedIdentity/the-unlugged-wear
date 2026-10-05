@@ -115,31 +115,38 @@ export default function Sidebar({
     setActiveThemeMode((prev) => (prev === mode ? 'default' : mode));
   };
 
-  // User-controlled accordion state: persists across route transitions & page loads
+  // User-controlled accordion state: persists across route transitions & page loads.
+  // Hydration-safe: the module cache is null on both server and first client render,
+  // so both derive ONLY from pathname (identical output → no SSR mismatch).
+  // Client-side navigations reuse the live cache with no flash; stored groups
+  // apply in the client-only effect below.
   const [openGroups, setOpenGroups] = useState<Set<string>>(() => {
     if (globalOpenGroups !== null) {
       return new Set(globalOpenGroups);
     }
-    if (typeof window !== 'undefined') {
-      try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (Array.isArray(parsed)) {
-            const set = new Set<string>(parsed);
-            globalOpenGroups = set;
-            return set;
-          }
-        }
-      } catch {
-        // fallback
-      }
-    }
     const activeGroup = getActiveGroupForPath(pathname) || 'core';
-    const initial = new Set<string>([activeGroup]);
-    globalOpenGroups = initial;
-    return initial;
+    return new Set<string>([activeGroup]);
   });
+
+  React.useEffect(() => {
+    try {
+      if (globalOpenGroups !== null) {
+        setOpenGroups(new Set(globalOpenGroups));
+        return;
+      }
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          const set = new Set<string>(parsed);
+          globalOpenGroups = set;
+          setOpenGroups(set);
+        }
+      }
+    } catch {
+      // fallback: keep pathname-derived default
+    }
+  }, []);
 
   const toggleGroup = (key: string) => {
     setOpenGroups((prev) => {
@@ -615,10 +622,10 @@ export default function Sidebar({
           <li>
             <Link
               href="/login"
-              className={cn('group relative flex w-full cursor-pointer select-none rounded-nav border-0 bg-transparent text-left text-[14px] font-medium transition-all duration-150 mt-0.5', isCollapsed ? 'justify-center p-2' : 'items-center gap-3 px-3 py-2', 'text-secondary hover:bg-error hover:text-error')}
+              className={cn('group relative flex w-full cursor-pointer select-none rounded-nav border-0 bg-transparent text-left text-[14px] font-medium transition-all duration-150 mt-0.5', isCollapsed ? 'justify-center p-2' : 'items-center gap-3 px-3 py-2', 'text-secondary hover:bg-error-bg hover:text-error-text')}
               title={isCollapsed ? 'Log out' : undefined}
             >
-              <span className="flex size-4.5 shrink-0 items-center justify-center text-secondary group-hover:text-error">
+              <span className="flex size-4.5 shrink-0 items-center justify-center text-secondary group-hover:text-error-text">
                 <LogOut size={18} />
               </span>
               {!isCollapsed && <span className="flex-1 truncate text-[14px]">Log out</span>}

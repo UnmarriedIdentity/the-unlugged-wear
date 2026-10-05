@@ -17,22 +17,24 @@ export default function DashboardShell({
   children,
   pageTitle = 'Dashboard',
 }: DashboardShellProps) {
-  const [isCollapsed, setIsCollapsed] = useState(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const stored = localStorage.getItem('tuw_admin_sidebar_collapsed');
-        if (stored !== null) {
-          const val = stored === 'true';
-          globalIsCollapsed = val;
-          return val;
-        }
-      } catch {
-        // fallback
-      }
-    }
-    return globalIsCollapsed;
-  });
+  // Hydration-safe: the module cache is false on both server and first client render
+  // (identical output → no SSR mismatch); stored preference applies client-only below.
+  // Client-side navigations reuse the live cache with no flash.
+  const [isCollapsed, setIsCollapsed] = useState(() => globalIsCollapsed);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  React.useEffect(() => {
+    try {
+      const stored = localStorage.getItem('tuw_admin_sidebar_collapsed');
+      if (stored !== null) {
+        const val = stored === 'true';
+        globalIsCollapsed = val;
+        setIsCollapsed(val);
+      }
+    } catch {
+      // fallback: keep default
+    }
+  }, []);
 
   const handleToggleCollapse = () => {
     setIsCollapsed((prev) => {
