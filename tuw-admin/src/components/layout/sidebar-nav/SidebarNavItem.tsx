@@ -14,6 +14,7 @@ export interface SidebarNavItemDef {
   badge?: {
     text: string;
     className: string;
+    dotClassName: string;
   };
 }
 
@@ -22,6 +23,7 @@ interface SidebarNavItemProps {
   active: boolean;
   isCollapsed: boolean;
   variant?: 'branch' | 'footer' | 'danger';
+  showBadgeDot?: boolean;
 }
 
 /**
@@ -31,7 +33,7 @@ interface SidebarNavItemProps {
  * - footer: 14px rows (settings/support black-card actives, purple hover).
  * - danger: logout row (error hover, never active).
  */
-export default function SidebarNavItem({ item, active, isCollapsed, variant = 'branch' }: SidebarNavItemProps) {
+export default function SidebarNavItem({ item, active, isCollapsed, variant = 'branch', showBadgeDot = false }: SidebarNavItemProps) {
   const ItemIcon = item.icon;
   const iconSize = variant === 'branch' ? 17 : 18;
 
@@ -86,7 +88,7 @@ export default function SidebarNavItem({ item, active, isCollapsed, variant = 'b
         )}
         title={isCollapsed ? item.label : undefined}
       >
-        {isCollapsed && (<span className={cn('flex size-4.5 shrink-0 items-center justify-center', active ? 'text-action-primary' : 'text-secondary')}><ItemIcon size={iconSize} /></span>)}
+        {isCollapsed && (<span className={cn('relative flex size-4.5 shrink-0 items-center justify-center', active ? 'text-action-primary' : 'text-secondary')}><ItemIcon size={iconSize} />{showBadgeDot && item.badge && <span aria-hidden="true" className={cn('absolute -right-0.5 -top-0.5 size-2 rounded-full', item.badge.dotClassName)} />}</span>)}
         {!isCollapsed && (<><span className="truncate text-nav-child">{item.label}</span>{item.badge && <SidebarNavBadge text={item.badge.text} className={item.badge.className} />}</>)}
       </Link>
     </div>

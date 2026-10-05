@@ -3,10 +3,12 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, Button, Input } from '@/components/ui';
+import { ContentCard, Button, Input, Switch } from '@/components/ui';
+import { useAdminState } from '@/mocks/state';
 import { Settings as SettingsIcon, Save, Check, ArrowLeft } from 'lucide-react';
 
 export default function GeneralSettingsPage() {
+  const { settings, updateSettings } = useAdminState();
   const [storeName, setStoreName] = useState('The Unplugged Wear');
   const [supportEmail, setSupportEmail] = useState('support@theunpluggedwear.com');
   const [timezone, setTimezone] = useState('America/New_York (EST)');
@@ -48,6 +50,12 @@ export default function GeneralSettingsPage() {
             <Input label="Support Email" value={supportEmail} onChange={(e) => setSupportEmail(e.target.value)} />
             <Input label="Timezone" value={timezone} onChange={(e) => setTimezone(e.target.value)} />
           </div>
+          <Switch
+            label="Collapsed badge dots (preview)"
+            description="Show count dots on collapsed sidebar icons to compare both options."
+            checked={settings.showCollapsedBadgeDots ?? false}
+            onChange={(checked) => updateSettings({ showCollapsedBadgeDots: checked })}
+          />
         </div>
       </ContentCard>
     </DashboardShell>

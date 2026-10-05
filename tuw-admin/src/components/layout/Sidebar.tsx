@@ -27,7 +27,9 @@ import {
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
+import { useAdminState } from '@/mocks/state';
 import { SidebarNavGroup, SidebarNavItem, SidebarDock } from './sidebar-nav';
+import type { SidebarNavItemDef } from './sidebar-nav';
 import type { LucideIcon } from 'lucide-react';
 
 interface SidebarProps {
@@ -77,24 +79,11 @@ function getActiveGroupForPath(pathname: string): string | null {
   return null;
 }
 
-interface NavBadgeDef {
-  text: string;
-  className: string;
-}
-
-interface NavItemDef {
-  href: string;
-  label: string;
-  icon: LucideIcon;
-  match: string[];
-  badge?: NavBadgeDef;
-}
-
 interface NavGroupDef {
   key: string;
   label: string;
   icon: LucideIcon;
-  items: NavItemDef[];
+  items: SidebarNavItemDef[];
 }
 
 // Single source of truth for sidebar navigation (pixel-identical rendering;
@@ -117,9 +106,9 @@ const NAV_GROUPS: NavGroupDef[] = [
     label: 'Operations',
     icon: Package,
     items: [
-      { href: '/fulfillment', label: 'Fulfillment', icon: PackageCheck, match: ['/fulfillment'], badge: { text: '4', className: 'inline-flex min-w-[18px] items-center justify-center rounded-full bg-nav-badge-purple-bg px-[7.5px] py-[2.5px] text-center text-[11.5px] font-bold leading-none text-action-primary' } },
+      { href: '/fulfillment', label: 'Fulfillment', icon: PackageCheck, match: ['/fulfillment'], badge: { text: '4', dotClassName: 'bg-action-primary', className: 'inline-flex min-w-[18px] items-center justify-center rounded-full bg-nav-badge-purple-bg px-[7.5px] py-[2.5px] text-center text-[11.5px] font-bold leading-none text-action-primary' } },
       { href: '/shipments', label: 'Shipments', icon: Truck, match: ['/shipments'] },
-      { href: '/returns', label: 'Returns & RMA', icon: Undo2, match: ['/returns'], badge: { text: '2', className: 'inline-flex min-w-[18px] items-center justify-center rounded-full bg-nav-badge-amber-bg px-[7.5px] py-[2.5px] text-center text-[11.5px] font-bold leading-none text-nav-badge-amber-text' } },
+      { href: '/returns', label: 'Returns & RMA', icon: Undo2, match: ['/returns'], badge: { text: '2', dotClassName: 'bg-nav-badge-amber-text', className: 'inline-flex min-w-[18px] items-center justify-center rounded-full bg-nav-badge-amber-bg px-[7.5px] py-[2.5px] text-center text-[11.5px] font-bold leading-none text-nav-badge-amber-text' } },
       { href: '/refunds', label: 'Refunds', icon: RotateCcw, match: ['/refunds'] },
       { href: '/payments', label: 'Payments', icon: CreditCard, match: ['/payments'] },
     ],
@@ -165,6 +154,9 @@ export default function Sidebar({
   onCloseMobileMenu,
 }: SidebarProps) {
   const pathname = usePathname();
+  // Preview toggle (Settings → General): collapsed badge dots, off by default.
+  const { settings } = useAdminState();
+  const showCollapsedBadgeDots = settings.showCollapsedBadgeDots ?? false;
 
   // Close mobile drawer when pressing Escape
   React.useEffect(() => {
@@ -329,7 +321,7 @@ export default function Sidebar({
               onToggle={toggleGroup}
             >
             {group.items.map((item, idx) => (
-              <SidebarNavItem key={item.href} item={item} active={actives[idx]} isCollapsed={isCollapsed} variant="branch" />
+              <SidebarNavItem key={item.href} item={item} active={actives[idx]} isCollapsed={isCollapsed} variant="branch" showBadgeDot={showCollapsedBadgeDots} />
             ))}
             </SidebarNavGroup>
           );
