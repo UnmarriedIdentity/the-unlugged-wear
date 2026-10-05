@@ -391,20 +391,20 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
               VIEW 2: EMAIL VERIFICATION (Figma 1:20890 & 1:20856)
               ========================================================================== */}
           {view === 'verify' && (
-            <div className={styles.verifyContainer}>
+            <div className="flex w-full max-w-auth-verify flex-col items-center gap-[clamp(20px,3vh,32px)] m-auto">
               {/* Header: Frame 128 (Badge + Title + Subtitle) */}
-              <header className={styles.verifyHeaderBlock}>
-                <div className={styles.logoBadge}>
+              <header className="flex flex-col items-center text-center gap-3.5">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-auth-button">
                   <Image
                     src="/logos/tuw-stag-white.png"
                     alt="The Unplugged Wear"
                     width={27}
                     height={27}
-                    className={styles.logoMonogram}
+                    className="h-[25px] w-[25px] object-contain"
                   />
                 </div>
-                <h2 className={styles.verifyTitle}>Email verification code</h2>
-                <p className={styles.verifySubtitle}>
+                <h2 className="text-auth-verify-title font-semibold text-auth-ink tracking-auth-title m-0">Email verification code</h2>
+                <p className="text-auth-subrow font-normal text-auth-muted m-0">
                   We have sent verification code to your email
                 </p>
               </header>

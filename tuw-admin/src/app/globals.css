@@ -134,6 +134,12 @@
   --text-auth-signup-sub--line-height: 1.35;
   --tracking-auth-signup-sub: 0.4px;
   --container-auth-hero-copy: 520px;
+  --container-auth-verify: 350px;
+  /* Verify title (fluid) + resend row type (14/22 shared spec) */
+  --text-auth-verify-title: clamp(24px, 2.2vw, 32px);
+  --text-auth-verify-title--line-height: 1.25;
+  --text-auth-resend: 14px;
+  --text-auth-resend--line-height: 22px;
   /* Signup header type (title fluid; subrow 15/22 shared with verifySubtitle) */
   --text-auth-signup-title: clamp(24px, 2.2vw, 32px);
   --text-auth-signup-title--line-height: 1.25;
@@ -1944,44 +1950,12 @@
 /* Signup submit migrated to Tailwind utilities in SignUpPage.tsx (pixel-identical;
    hover auth-pure, active scale-99). Removed: .signup-submitButton. */
 
-/* ==========================================================================
-   EMAIL VERIFICATION VIEW (Frames 1:20890 & 1:20856)
-   Centered container width 350px, Gap 32px between header and body
-   ========================================================================== */
-.signup-verifyContainer {
-  width: 100%;
-  max-width: 350px;
-  margin: auto auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: clamp(20px, 3vh, 32px);
-}
+/* Signup verify shell + header migrated to Tailwind utilities in SignUpPage.tsx
+   (pixel-identical; title fluid, subrow token shared with C6).
+   Removed: .signup-verifyContainer, .signup-verifyHeaderBlock, .signup-verifyTitle,
+   .signup-verifySubtitle. (logoBadge/logoMonogram shared with C5 — already removed.) */
 
-.signup-verifyHeaderBlock {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 14px;
-}
-
-.signup-verifyTitle {
-  font-size: clamp(24px, 2.2vw, 32px);
-  font-weight: 600;
-  line-height: 1.25;
-  color: #242424;
-  margin: 0;
-  letter-spacing: -0.01em;
-}
-
-.signup-verifySubtitle {
-  font-size: 15px;
-  font-weight: 400;
-  line-height: 22px;
-  color: #6C6C6C;
-  margin: 0;
-}
+/* (verify header removed — see migration comment above) */
 
 /* 4 OTP Input Boxes: Frame 1410130425 (Total width 260px, 4x 56px boxes + 3x 12px gaps) */
 .signup-otpRow {
