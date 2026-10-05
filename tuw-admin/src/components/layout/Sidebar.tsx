@@ -651,10 +651,10 @@ export default function Sidebar({
           <li>
             <Link
               href="/settings"
-              className={cn('group relative flex w-full cursor-pointer select-none rounded-nav border-0 bg-transparent text-left text-[14px] transition-all duration-150', isCollapsed ? 'justify-center p-2' : 'items-center gap-3 px-3 py-2', getIsActive('/settings') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-primary hover:bg-nav-hover-wash hover:text-action-primary')}
+              className={cn('group relative flex w-full cursor-pointer select-none rounded-nav border-0 bg-transparent text-left text-[14px] transition-all duration-150', isCollapsed ? 'justify-center p-2' : 'items-center gap-3 px-3 py-2', getIsActive('/settings') ? 'bg-transparent font-semibold text-nav-active-text' : 'font-medium text-primary hover:bg-error-bg hover:text-error-text')}
               title={isCollapsed ? 'Settings' : undefined}
             >
-              <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/settings') ? 'text-action-primary' : 'text-secondary')}>
+              <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/settings') ? 'text-nav-active-text' : 'text-secondary group-hover:text-error-text')}>
                 <Settings size={18} />
               </span>
               {!isCollapsed && <span className="flex-1 truncate text-[14px]">Settings</span>}
@@ -663,10 +663,10 @@ export default function Sidebar({
           <li>
             <Link
               href="/support"
-              className={cn('group relative flex w-full cursor-pointer select-none rounded-nav border-0 bg-transparent text-left text-[14px] transition-all duration-150', isCollapsed ? 'justify-center p-2' : 'items-center gap-3 px-3 py-2', (getIsActive('/support') || getIsActive('/help')) ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-primary hover:bg-nav-hover-wash hover:text-action-primary')}
+              className={cn('group relative flex w-full cursor-pointer select-none rounded-nav border-0 bg-transparent text-left text-[14px] transition-all duration-150', isCollapsed ? 'justify-center p-2' : 'items-center gap-3 px-3 py-2', (getIsActive('/support') || getIsActive('/help')) ? 'bg-transparent font-semibold text-nav-active-text' : 'font-medium text-primary hover:bg-error-bg hover:text-error-text')}
               title={isCollapsed ? 'Help & Support' : undefined}
             >
-              <span className={cn('flex size-4.5 shrink-0 items-center justify-center', (getIsActive('/support') || getIsActive('/help')) ? 'text-action-primary' : 'text-secondary')}>
+              <span className={cn('flex size-4.5 shrink-0 items-center justify-center', (getIsActive('/support') || getIsActive('/help')) ? 'text-nav-active-text' : 'text-secondary group-hover:text-error-text')}>
                 <Headphones size={18} />
               </span>
               {!isCollapsed && <span className="flex-1 truncate text-[14px]">Help & Support</span>}
