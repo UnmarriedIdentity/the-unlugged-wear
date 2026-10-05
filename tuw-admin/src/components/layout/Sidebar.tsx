@@ -24,7 +24,6 @@ import {
   Palette,
   FileText,
   ShieldCheck,
-  PanelLeft,
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
