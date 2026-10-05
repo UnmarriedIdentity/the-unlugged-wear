@@ -41,13 +41,13 @@ export default function SidebarNavItem({ item, active, isCollapsed, variant = 'b
     return (
       <Link
         href={item.href}
-        className={cn('group relative flex w-full cursor-pointer select-none rounded-nav border-0 bg-transparent text-left text-[14px] font-medium transition-all duration-150 mt-0.5', isCollapsed ? 'justify-center p-2' : 'items-center gap-3 px-3 py-2', 'text-secondary hover:bg-error-bg hover:text-error-text')}
+        className={cn('group relative flex w-full cursor-pointer select-none rounded-nav border-0 bg-transparent text-left text-[14px] font-medium transition-all duration-150 mt-0.5 focus-visible:outline-2 focus-visible:outline-error-text focus-visible:outline-offset-2', isCollapsed ? 'justify-center p-2' : 'items-center gap-3 px-3 py-2', 'text-secondary hover:bg-error-bg hover:text-error-text')}
         title={isCollapsed ? item.label : undefined}
       >
         {isCollapsed && (<span className="flex size-4.5 shrink-0 items-center justify-center text-secondary"><ItemIcon size={iconSize} /></span>)}
         {!isCollapsed && (
           <>
-            <span className="flex size-4.5 shrink-0 items-center justify-center text-secondary group-hover:text-error-text">
+              <span className="flex size-4.5 shrink-0 items-center justify-center text-secondary group-hover:text-error-text group-focus-visible:text-error-text">
               <ItemIcon size={iconSize} />
             </span>
             <span className="flex-1 truncate text-[14px]">{item.label}</span>
