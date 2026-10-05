@@ -718,7 +718,7 @@
   position: absolute;
   left: 21px;
   top: -6px;
-  height: calc(50% + 6px);
+  bottom: 50%; /* ends exactly at item center (curve start); height-independent */
   width: 1px;
   background-color: var(--color-nav-guide-active);
   pointer-events: none;
