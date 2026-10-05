@@ -33,6 +33,7 @@ import {
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
+import type { LucideIcon } from 'lucide-react';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -81,6 +82,88 @@ function getActiveGroupForPath(pathname: string): string | null {
   }
   return null;
 }
+
+interface NavBadgeDef {
+  text: string;
+  className: string;
+}
+
+interface NavItemDef {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  match: string[];
+  badge?: NavBadgeDef;
+}
+
+interface NavGroupDef {
+  key: string;
+  label: string;
+  icon: LucideIcon;
+  items: NavItemDef[];
+}
+
+// Single source of truth for sidebar navigation (pixel-identical rendering;
+// groups and items below map over this config — no hand-written repeats).
+const NAV_GROUPS: NavGroupDef[] = [
+  {
+    key: 'core',
+    label: 'Core',
+    icon: LayoutGrid,
+    items: [
+      { href: '/dashboard', label: 'Dashboard', icon: HomeIcon, match: ['/dashboard'] },
+      { href: '/orders', label: 'Orders', icon: ClipboardList, match: ['/orders'] },
+      { href: '/products', label: 'Products', icon: Package, match: ['/products'] },
+      { href: '/customers', label: 'Customers', icon: Users, match: ['/customers'] },
+      { href: '/reports', label: 'Analytics & Reports', icon: TrendingUp, match: ['/reports', '/analytics'] },
+    ],
+  },
+  {
+    key: 'operations',
+    label: 'Operations',
+    icon: Package,
+    items: [
+      { href: '/fulfillment', label: 'Fulfillment', icon: PackageCheck, match: ['/fulfillment'], badge: { text: '4', className: 'inline-flex min-w-[18px] items-center justify-center rounded-full bg-nav-badge-purple-bg px-[7.5px] py-[2.5px] text-center text-[11.5px] font-bold leading-none text-action-primary' } },
+      { href: '/shipments', label: 'Shipments', icon: Truck, match: ['/shipments'] },
+      { href: '/returns', label: 'Returns & RMA', icon: Undo2, match: ['/returns'], badge: { text: '2', className: 'inline-flex min-w-[18px] items-center justify-center rounded-full bg-nav-badge-amber-bg px-[7.5px] py-[2.5px] text-center text-[11.5px] font-bold leading-none text-nav-badge-amber-text' } },
+      { href: '/refunds', label: 'Refunds', icon: RotateCcw, match: ['/refunds'] },
+      { href: '/payments', label: 'Payments', icon: CreditCard, match: ['/payments'] },
+    ],
+  },
+  {
+    key: 'merchandise',
+    label: 'Merchandise',
+    icon: ShoppingBag,
+    items: [
+      { href: '/collections', label: 'Collections', icon: Layers, match: ['/collections'] },
+      { href: '/designs', label: 'Design Assets', icon: Palette, match: ['/designs'] },
+      { href: '/content', label: 'Content CMS', icon: FileText, match: ['/content'] },
+    ],
+  },
+  {
+    key: 'system',
+    label: 'System',
+    icon: ShieldCheck,
+    items: [
+      { href: '/team', label: 'Team', icon: Users, match: ['/team'] },
+      { href: '/audit-log', label: 'Audit Log', icon: ShieldCheck, match: ['/audit-log'] },
+    ],
+  },
+];
+
+interface FooterItemDef {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  match: string[];
+  variant: 'default' | 'danger';
+}
+
+const FOOTER_ITEMS: FooterItemDef[] = [
+  { href: '/settings', label: 'Settings', icon: Settings, match: ['/settings'], variant: 'default' },
+  { href: '/support', label: 'Help & Support', icon: Headphones, match: ['/support', '/help'], variant: 'default' },
+  { href: '/login', label: 'Log out', icon: LogOut, match: [], variant: 'danger' },
+];
 
 export default function Sidebar({
   isCollapsed,
@@ -222,468 +305,90 @@ export default function Sidebar({
 
       {/* Navigation Sections */}
       <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto overflow-x-hidden mt-0.5 pb-6 pr-1 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
-        {/* CORE Section */}
-        <div className="flex flex-col">
-          {!isCollapsed && (
-            <button
-              type="button"
-              className="flex w-full items-center justify-between rounded-nav-sm border-0 bg-transparent py-1.5 pl-2.5 pr-2 cursor-pointer select-none text-left transition-colors duration-150 hover:bg-nav-group-hover"
-              onClick={() => toggleGroup('core')}
-            >
-              <span className="flex items-center gap-2.5">
-                <span className={cn('flex size-4.5 shrink-0 items-center justify-center', activeGroup === 'core' ? 'text-nav-active-text' : 'text-secondary')}>
-                  <LayoutGrid size={18} />
-                </span>
-                <span className={cn('text-nav-parent font-bold', activeGroup === 'core' ? 'text-nav-active-text' : 'text-nav-group-label')}>Core</span>
-              </span>
-              <ChevronDown
-                size={13}
-                className={cn('flex items-center justify-center transition-transform duration-200', activeGroup === 'core' ? 'text-nav-active-text' : 'text-nav-chevron', isGroupOpen('core') && 'rotate-180')}
-              />
-            </button>
-          )}
-
-          <div className={cn('grid transition-[grid-template-rows] duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)]', (!isCollapsed ? isGroupOpen('core') : true) ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]')}>
-            <div className="min-h-0 overflow-hidden">
-              <div className={cn(!isCollapsed && 'relative mt-[3px] mb-1.5 flex flex-col gap-[3px] navTree', !isCollapsed && coreStem >= 0 && `navStemTo${coreStem}`)}>
-              {/* Dashboard */}
-              <div className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
-                <Link
-                  href="/dashboard"
-                  className={cn(
-                    'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
-                    isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                    getIsActive('/dashboard') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
-                  )}
-                  title={isCollapsed ? 'Dashboard' : undefined}
+        {NAV_GROUPS.map((group) => {
+          const actives = group.items.map((item) => item.match.some((p) => getIsActive(p)));
+          const stemIdx = actives.findIndex(Boolean);
+          const open = !isCollapsed ? isGroupOpen(group.key) : true;
+          const groupActive = activeGroup === group.key;
+          const GroupIcon = group.icon;
+          return (
+            <div key={group.key} className="flex flex-col">
+              {!isCollapsed && (
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between rounded-nav-sm border-0 bg-transparent py-1.5 pl-2.5 pr-2 cursor-pointer select-none text-left transition-colors duration-150 hover:bg-nav-group-hover"
+                  onClick={() => toggleGroup(group.key)}
                 >
-                                    {isCollapsed && (
-                    <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/dashboard') ? 'text-action-primary' : 'text-secondary')}>
-                      <HomeIcon size={17} />
+                  <span className="flex items-center gap-2.5">
+                    <span className={cn('flex size-4.5 shrink-0 items-center justify-center', groupActive ? 'text-nav-active-text' : 'text-secondary')}>
+                      <GroupIcon size={18} />
                     </span>
-                  )}
-                  {!isCollapsed && <span className="truncate text-nav-child">Dashboard</span>}
-                </Link>
-              </div>
+                    <span className={cn('text-nav-parent font-bold', groupActive ? 'text-nav-active-text' : 'text-nav-group-label')}>{group.label}</span>
+                  </span>
+                  <ChevronDown
+                    size={13}
+                    className={cn('flex items-center justify-center transition-transform duration-200', groupActive ? 'text-nav-active-text' : 'text-nav-chevron', isGroupOpen(group.key) && 'rotate-180')}
+                  />
+                </button>
+              )}
 
-              {/* Orders */}
-              <div className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
-                <Link
-                  href="/orders"
-                  className={cn(
-                    'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
-                    isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                    getIsActive('/orders') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
-                  )}
-                  title={isCollapsed ? 'Orders' : undefined}
-                >
-                                    {isCollapsed && (
-                    <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/orders') ? 'text-action-primary' : 'text-secondary')}>
-                      <ClipboardList size={17} />
-                    </span>
-                  )}
-                  {!isCollapsed && <span className="truncate text-nav-child">Orders</span>}
-                </Link>
-              </div>
-
-              {/* Products */}
-              <div className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
-                <Link
-                  href="/products"
-                  className={cn(
-                    'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
-                    isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                    getIsActive('/products') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
-                  )}
-                  title={isCollapsed ? 'Products' : undefined}
-                >
-                                    {isCollapsed && (
-                    <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/products') ? 'text-action-primary' : 'text-secondary')}>
-                      <Package size={17} />
-                    </span>
-                  )}
-                  {!isCollapsed && <span className="truncate text-nav-child">Products</span>}
-                </Link>
-              </div>
-
-              {/* Customers */}
-              <div className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
-                <Link
-                  href="/customers"
-                  className={cn(
-                    'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
-                    isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                    getIsActive('/customers') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
-                  )}
-                  title={isCollapsed ? 'Customers' : undefined}
-                >
-                  {isCollapsed && (
-                    <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/customers') ? 'text-action-primary' : 'text-secondary')}>
-                      <Users size={17} />
-                    </span>
-                  )}
-                  {!isCollapsed && <span className="truncate text-nav-child">Customers</span>}
-                </Link>
-              </div>
-
-              {/* Analytics & Reports */}
-              <div className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
-                <Link
-                  href="/reports"
-                  className={cn(
-                    'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
-                    isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                    (getIsActive('/reports') || getIsActive('/analytics')) ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
-                  )}
-                  title={isCollapsed ? 'Analytics & Reports' : undefined}
-                >
-                                    {isCollapsed && (
-                    <span className={cn('flex size-4.5 shrink-0 items-center justify-center', (getIsActive('/reports') || getIsActive('/analytics')) ? 'text-action-primary' : 'text-secondary')}>
-                      <TrendingUp size={17} />
-                    </span>
-                  )}
-                  {!isCollapsed && <span className="truncate text-nav-child">Analytics & Reports</span>}
-                </Link>
-              </div>
+              <div className={cn('grid transition-[grid-template-rows] duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)]', open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]')}>
+                <div className="min-h-0 overflow-hidden">
+                  <div className={cn(!isCollapsed && 'relative mt-[3px] mb-1.5 flex flex-col gap-[3px] navTree', !isCollapsed && stemIdx >= 0 && `navStemTo${stemIdx}`)}>
+                    {group.items.map((item, idx) => {
+                      const ItemIcon = item.icon;
+                      const active = actives[idx];
+                      return (
+                      <div key={item.href} className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
+                      <Link
+                        href={item.href}
+                        className={cn(
+                          'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
+                          isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
+                          active ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
+                        )}
+                        title={isCollapsed ? item.label : undefined}
+                      >
+                        {isCollapsed && (<span className={cn('flex size-4.5 shrink-0 items-center justify-center', active ? 'text-action-primary' : 'text-secondary')}><ItemIcon size={17} /></span>)}
+                        {!isCollapsed && (<><span className="truncate text-nav-child">{item.label}</span>{item.badge && <span className={item.badge.className}>{item.badge.text}</span>}</>)}
+                      </Link>
+                      </div>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* OPERATIONS Section */}
-        <div className="flex flex-col">
-          {!isCollapsed && (
-            <button
-              type="button"
-              className="flex w-full items-center justify-between rounded-nav-sm border-0 bg-transparent py-1.5 pl-2.5 pr-2 cursor-pointer select-none text-left transition-colors duration-150 hover:bg-nav-group-hover"
-              onClick={() => toggleGroup('operations')}
-            >
-              <span className="flex items-center gap-2.5">
-                <span className={cn('flex size-4.5 shrink-0 items-center justify-center', activeGroup === 'operations' ? 'text-nav-active-text' : 'text-secondary')}>
-                  <Package size={18} />
-                </span>
-                <span className={cn('text-nav-parent font-bold', activeGroup === 'operations' ? 'text-nav-active-text' : 'text-nav-group-label')}>Operations</span>
-              </span>
-              <ChevronDown
-                size={13}
-                className={cn('flex items-center justify-center transition-transform duration-200', activeGroup === 'operations' ? 'text-nav-active-text' : 'text-nav-chevron', isGroupOpen('operations') && 'rotate-180')}
-              />
-            </button>
-          )}
-
-          <div className={cn('grid transition-[grid-template-rows] duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)]', (!isCollapsed ? isGroupOpen('operations') : true) ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]')}>
-            <div className="min-h-0 overflow-hidden">
-              <div className={cn(!isCollapsed && 'relative mt-[3px] mb-1.5 flex flex-col gap-[3px] navTree', !isCollapsed && opsStem >= 0 && `navStemTo${opsStem}`)}>
-              {/* Fulfillment */}
-              <div className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
-                <Link
-                  href="/fulfillment"
-                  className={cn(
-                    'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
-                    isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                    getIsActive('/fulfillment') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
-                  )}
-                  title={isCollapsed ? 'Fulfillment' : undefined}
-                >
-                                    {isCollapsed && (
-                    <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/fulfillment') ? 'text-action-primary' : 'text-secondary')}>
-                      <PackageCheck size={17} />
-                    </span>
-                  )}
-                  {!isCollapsed && (
-                    <>
-                      <span className="truncate text-nav-child">Fulfillment</span>
-                      <span className="inline-flex min-w-[18px] items-center justify-center rounded-full bg-nav-badge-purple-bg px-[7.5px] py-[2.5px] text-center text-[11.5px] font-bold leading-none text-action-primary">4</span>
-                    </>
-                  )}
-                </Link>
-              </div>
-
-              {/* Shipments */}
-              <div className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
-                <Link
-                  href="/shipments"
-                  className={cn(
-                    'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
-                    isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                    getIsActive('/shipments') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
-                  )}
-                  title={isCollapsed ? 'Shipments' : undefined}
-                >
-                                    {isCollapsed && (
-                    <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/shipments') ? 'text-action-primary' : 'text-secondary')}>
-                      <Truck size={17} />
-                    </span>
-                  )}
-                  {!isCollapsed && <span className="truncate text-nav-child">Shipments</span>}
-                </Link>
-              </div>
-
-              {/* Returns & RMA */}
-              <div className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
-                <Link
-                  href="/returns"
-                  className={cn(
-                    'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
-                    isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                    getIsActive('/returns') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
-                  )}
-                  title={isCollapsed ? 'Returns & RMA' : undefined}
-                >
-                                    {isCollapsed && (
-                    <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/returns') ? 'text-action-primary' : 'text-secondary')}>
-                      <Undo2 size={17} />
-                    </span>
-                  )}
-                  {!isCollapsed && (
-                    <>
-                      <span className="truncate text-nav-child">Returns & RMA</span>
-                      <span className="inline-flex min-w-[18px] items-center justify-center rounded-full bg-nav-badge-amber-bg px-[7.5px] py-[2.5px] text-center text-[11.5px] font-bold leading-none text-nav-badge-amber-text">2</span>
-                    </>
-                  )}
-                </Link>
-              </div>
-
-              {/* Refunds */}
-              <div className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
-                <Link
-                  href="/refunds"
-                  className={cn(
-                    'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
-                    isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                    getIsActive('/refunds') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
-                  )}
-                  title={isCollapsed ? 'Refunds' : undefined}
-                >
-                                    {isCollapsed && (
-                    <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/refunds') ? 'text-action-primary' : 'text-secondary')}>
-                      <RotateCcw size={17} />
-                    </span>
-                  )}
-                  {!isCollapsed && <span className="truncate text-nav-child">Refunds</span>}
-                </Link>
-              </div>
-
-              {/* Payments */}
-              <div className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
-                <Link
-                  href="/payments"
-                  className={cn(
-                    'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
-                    isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                    getIsActive('/payments') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
-                  )}
-                  title={isCollapsed ? 'Payments' : undefined}
-                >
-                                    {isCollapsed && (
-                    <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/payments') ? 'text-action-primary' : 'text-secondary')}>
-                      <CreditCard size={17} />
-                    </span>
-                  )}
-                  {!isCollapsed && <span className="truncate text-nav-child">Payments</span>}
-                </Link>
-              </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* MERCHANDISE Section */}
-        <div className="flex flex-col">
-          {!isCollapsed && (
-            <button
-              type="button"
-              className="flex w-full items-center justify-between rounded-nav-sm border-0 bg-transparent py-1.5 pl-2.5 pr-2 cursor-pointer select-none text-left transition-colors duration-150 hover:bg-nav-group-hover"
-              onClick={() => toggleGroup('merchandise')}
-            >
-              <span className="flex items-center gap-2.5">
-                <span className={cn('flex size-4.5 shrink-0 items-center justify-center', activeGroup === 'merchandise' ? 'text-nav-active-text' : 'text-secondary')}>
-                  <ShoppingBag size={18} />
-                </span>
-                <span className={cn('text-nav-parent font-bold', activeGroup === 'merchandise' ? 'text-nav-active-text' : 'text-nav-group-label')}>Merchandise</span>
-              </span>
-              <ChevronDown
-                size={13}
-                className={cn('flex items-center justify-center transition-transform duration-200', activeGroup === 'merchandise' ? 'text-nav-active-text' : 'text-nav-chevron', isGroupOpen('merchandise') && 'rotate-180')}
-              />
-            </button>
-          )}
-
-          <div className={cn('grid transition-[grid-template-rows] duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)]', (!isCollapsed ? isGroupOpen('merchandise') : true) ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]')}>
-            <div className="min-h-0 overflow-hidden">
-              <div className={cn(!isCollapsed && 'relative mt-[3px] mb-1.5 flex flex-col gap-[3px] navTree', !isCollapsed && merchStem >= 0 && `navStemTo${merchStem}`)}>
-              {/* Collections */}
-              <div className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
-                <Link
-                  href="/collections"
-                  className={cn(
-                    'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
-                    isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                    getIsActive('/collections') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
-                  )}
-                  title={isCollapsed ? 'Collections' : undefined}
-                >
-                                    {isCollapsed && (
-                    <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/collections') ? 'text-action-primary' : 'text-secondary')}>
-                      <Layers size={17} />
-                    </span>
-                  )}
-                  {!isCollapsed && <span className="truncate text-nav-child">Collections</span>}
-                </Link>
-              </div>
-
-              {/* Design Assets */}
-              <div className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
-                <Link
-                  href="/designs"
-                  className={cn(
-                    'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
-                    isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                    getIsActive('/designs') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
-                  )}
-                  title={isCollapsed ? 'Design Assets' : undefined}
-                >
-                                    {isCollapsed && (
-                    <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/designs') ? 'text-action-primary' : 'text-secondary')}>
-                      <Palette size={17} />
-                    </span>
-                  )}
-                  {!isCollapsed && <span className="truncate text-nav-child">Design Assets</span>}
-                </Link>
-              </div>
-
-              {/* Content CMS */}
-              <div className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
-                <Link
-                  href="/content"
-                  className={cn(
-                    'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
-                    isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                    getIsActive('/content') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
-                  )}
-                  title={isCollapsed ? 'Content CMS' : undefined}
-                >
-                                    {isCollapsed && (
-                    <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/content') ? 'text-action-primary' : 'text-secondary')}>
-                      <FileText size={17} />
-                    </span>
-                  )}
-                  {!isCollapsed && <span className="truncate text-nav-child">Content CMS</span>}
-                </Link>
-              </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* SYSTEM Section */}
-        <div className="flex flex-col">
-          {!isCollapsed && (
-            <button
-              type="button"
-              className="flex w-full items-center justify-between rounded-nav-sm border-0 bg-transparent py-1.5 pl-2.5 pr-2 cursor-pointer select-none text-left transition-colors duration-150 hover:bg-nav-group-hover"
-              onClick={() => toggleGroup('system')}
-            >
-              <span className="flex items-center gap-2.5">
-                <span className={cn('flex size-4.5 shrink-0 items-center justify-center', activeGroup === 'system' ? 'text-nav-active-text' : 'text-secondary')}>
-                  <ShieldCheck size={18} />
-                </span>
-                <span className={cn('text-nav-parent font-bold', activeGroup === 'system' ? 'text-nav-active-text' : 'text-nav-group-label')}>System</span>
-              </span>
-              <ChevronDown
-                size={13}
-                className={cn('flex items-center justify-center transition-transform duration-200', activeGroup === 'system' ? 'text-nav-active-text' : 'text-nav-chevron', isGroupOpen('system') && 'rotate-180')}
-              />
-            </button>
-          )}
-
-          <div className={cn('grid transition-[grid-template-rows] duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)]', (!isCollapsed ? isGroupOpen('system') : true) ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]')}>
-            <div className="min-h-0 overflow-hidden">
-              <div className={cn(!isCollapsed && 'relative mt-[3px] mb-1.5 flex flex-col gap-[3px] navTree', !isCollapsed && sysStem >= 0 && `navStemTo${sysStem}`)}>
-              {/* Team */}
-              <div className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
-                <Link
-                  href="/team"
-                  className={cn(
-                    'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
-                    isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                    getIsActive('/team') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
-                  )}
-                  title={isCollapsed ? 'Team' : undefined}
-                >
-                  {isCollapsed && (
-                    <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/team') ? 'text-action-primary' : 'text-secondary')}>
-                      <Users size={17} />
-                    </span>
-                  )}
-                  {!isCollapsed && <span className="truncate text-nav-child">Team</span>}
-                </Link>
-              </div>
-
-              {/* Audit Log */}
-              <div className={cn(!isCollapsed && 'relative flex w-full items-center pl-9')}>
-                <Link
-                  href="/audit-log"
-                  className={cn(
-                    'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150',
-                    isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                    getIsActive('/audit-log') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
-                  )}
-                  title={isCollapsed ? 'Audit Log' : undefined}
-                >
-                                    {isCollapsed && (
-                    <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/audit-log') ? 'text-action-primary' : 'text-secondary')}>
-                      <ShieldCheck size={17} />
-                    </span>
-                  )}
-                  {!isCollapsed && <span className="truncate text-nav-child">Audit Log</span>}
-                </Link>
-              </div>
-              </div>
-            </div>
-          </div>
-        </div>
+          );
+        })}
       </div>
 
       {/* Footer Controls */}
       <div className="flex flex-col gap-0.5 border-t border-subtle bg-canvas pt-2 pb-0 mt-auto shrink-0 z-10">
         <ul className="list-none flex flex-col gap-[3px]">
-          <li>
+          {FOOTER_ITEMS.map((item) => {
+            const active = item.match.some((p) => getIsActive(p));
+            const ItemIcon = item.icon;
+            const danger = item.variant === 'danger';
+            return (
+            <li key={item.href}>
             <Link
-              href="/settings"
-              className={cn('group relative flex w-full cursor-pointer select-none rounded-nav border-0 bg-transparent text-left text-[14px] transition-all duration-150', isCollapsed ? 'justify-center p-2' : 'items-center gap-3 px-3 py-2', getIsActive('/settings') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 hover:bg-white hover:text-nav-active-text' : 'font-medium text-primary hover:bg-nav-hover-wash hover:text-action-primary')}
-              title={isCollapsed ? 'Settings' : undefined}
+              href={item.href}
+              className={cn(
+                'group relative flex w-full cursor-pointer select-none rounded-nav border-0 bg-transparent text-left text-[14px] transition-all duration-150',
+                isCollapsed ? 'justify-center p-2' : 'items-center gap-3 px-3 py-2',
+                danger ? 'font-medium text-secondary hover:bg-error-bg hover:text-error-text mt-0.5' : active ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 hover:bg-white hover:text-nav-active-text' : 'font-medium text-primary hover:bg-nav-hover-wash hover:text-action-primary'
+              )}
+              title={isCollapsed ? item.label : undefined}
             >
-              <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/settings') ? 'text-nav-active-text' : 'text-secondary group-hover:text-action-primary')}>
-                <Settings size={18} />
+              <span className={cn('flex size-4.5 shrink-0 items-center justify-center', danger ? 'text-secondary group-hover:text-error-text' : active ? 'text-nav-active-text' : 'text-secondary group-hover:text-action-primary')}>
+                <ItemIcon size={18} />
               </span>
-              {!isCollapsed && <span className="flex-1 truncate text-[14px]">Settings</span>}
+              {!isCollapsed && <span className="flex-1 truncate text-[14px]">{item.label}</span>}
             </Link>
-          </li>
-          <li>
-            <Link
-              href="/support"
-              className={cn('group relative flex w-full cursor-pointer select-none rounded-nav border-0 bg-transparent text-left text-[14px] transition-all duration-150', isCollapsed ? 'justify-center p-2' : 'items-center gap-3 px-3 py-2', (getIsActive('/support') || getIsActive('/help')) ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 hover:bg-white hover:text-nav-active-text' : 'font-medium text-primary hover:bg-nav-hover-wash hover:text-action-primary')}
-              title={isCollapsed ? 'Help & Support' : undefined}
-            >
-              <span className={cn('flex size-4.5 shrink-0 items-center justify-center', (getIsActive('/support') || getIsActive('/help')) ? 'text-nav-active-text' : 'text-secondary group-hover:text-action-primary')}>
-                <Headphones size={18} />
-              </span>
-              {!isCollapsed && <span className="flex-1 truncate text-[14px]">Help & Support</span>}
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/login"
-              className={cn('group relative flex w-full cursor-pointer select-none rounded-nav border-0 bg-transparent text-left text-[14px] font-medium transition-all duration-150 mt-0.5', isCollapsed ? 'justify-center p-2' : 'items-center gap-3 px-3 py-2', 'text-secondary hover:bg-error-bg hover:text-error-text')}
-              title={isCollapsed ? 'Log out' : undefined}
-            >
-              <span className="flex size-4.5 shrink-0 items-center justify-center text-secondary group-hover:text-error-text">
-                <LogOut size={18} />
-              </span>
-              {!isCollapsed && <span className="flex-1 truncate text-[14px]">Log out</span>}
-            </Link>
-          </li>
+            </li>
+            );
+          })}
         </ul>
 
         {/* ================================================================
