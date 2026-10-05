@@ -245,17 +245,17 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
                       <label htmlFor="signup-username" className="text-sm font-medium tracking-auth-social text-auth-ink">
                         Username
                       </label>
-                      <div className={styles.inputWrapper}>
+                      <div className="relative flex w-full items-center">
                         <input
                           id="signup-username"
                           type="text"
                           value={username}
                           onChange={(e) => setUsername(e.target.value)}
                           placeholder="Enter your name here"
-                          className={styles.inputField}
+                          className="w-full h-11.5 py-2.5 pl-4 pr-11 border border-auth-line rounded-xl bg-white outline-none text-auth-signup-input tracking-auth-signup-input text-auth-ink placeholder:text-auth-faint placeholder:font-normal transition-all duration-200 focus:border-auth-teal focus:shadow-auth-input"
                           required
                         />
-                        <div className={styles.inputIcon}>
+                        <div className="absolute right-4 flex items-center justify-center text-auth-faint pointer-events-none">
                           <UserRound size={20} strokeWidth={1.5} />
                         </div>
                       </div>
@@ -266,17 +266,17 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
                       <label htmlFor="signup-email" className="text-sm font-medium tracking-auth-social text-auth-ink">
                         Email
                       </label>
-                      <div className={styles.inputWrapper}>
+                      <div className="relative flex w-full items-center">
                         <input
                           id="signup-email"
                           type="email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           placeholder="Enter your email here"
-                          className={styles.inputField}
+                          className="w-full h-11.5 py-2.5 pl-4 pr-11 border border-auth-line rounded-xl bg-white outline-none text-auth-signup-input tracking-auth-signup-input text-auth-ink placeholder:text-auth-faint placeholder:font-normal transition-all duration-200 focus:border-auth-teal focus:shadow-auth-input"
                           required
                         />
-                        <div className={styles.inputIcon}>
+                        <div className="absolute right-4 flex items-center justify-center text-auth-faint pointer-events-none">
                           <Mail size={20} strokeWidth={1.5} />
                         </div>
                       </div>
@@ -287,19 +287,19 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
                       <label htmlFor="signup-password" className="text-sm font-medium tracking-auth-social text-auth-ink">
                         Create password
                       </label>
-                      <div className={styles.inputWrapper}>
+                      <div className="relative flex w-full items-center">
                         <input
                           id="signup-password"
                           type={showPassword ? 'text' : 'password'}
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           placeholder="Input your password"
-                          className={styles.inputField}
+                          className="w-full h-11.5 py-2.5 pl-4 pr-11 border border-auth-line rounded-xl bg-white outline-none text-auth-signup-input tracking-auth-signup-input text-auth-ink placeholder:text-auth-faint placeholder:font-normal transition-all duration-200 focus:border-auth-teal focus:shadow-auth-input"
                           required
                         />
                         <button
                           type="button"
-                          className={styles.inputIconButton}
+                          className="absolute right-4 flex items-center justify-center text-auth-faint bg-transparent border-0 cursor-pointer p-1 rounded-auth-checkbox transition-colors duration-150 hover:text-auth-ink"
                           onClick={() => setShowPassword(!showPassword)}
                           aria-label={showPassword ? 'Hide password' : 'Show password'}
                         >
@@ -310,7 +310,7 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
                           )}
                         </button>
                       </div>
-                      <div className={styles.helperText}>
+                      <div className="text-xs text-auth-muted mt-0.5">
                         Use 8 or more characters, with number and symbol combinations
                       </div>
                     </div>
@@ -320,19 +320,19 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
                       <label htmlFor="signup-confirm-password" className="text-sm font-medium tracking-auth-social text-auth-ink">
                         Confirm your password
                       </label>
-                      <div className={styles.inputWrapper}>
+                      <div className="relative flex w-full items-center">
                         <input
                           id="signup-confirm-password"
                           type={showConfirmPassword ? 'text' : 'password'}
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           placeholder="Input your password"
-                          className={styles.inputField}
+                          className="w-full h-11.5 py-2.5 pl-4 pr-11 border border-auth-line rounded-xl bg-white outline-none text-auth-signup-input tracking-auth-signup-input text-auth-ink placeholder:text-auth-faint placeholder:font-normal transition-all duration-200 focus:border-auth-teal focus:shadow-auth-input"
                           required
                         />
                         <button
                           type="button"
-                          className={styles.inputIconButton}
+                          className="absolute right-4 flex items-center justify-center text-auth-faint bg-transparent border-0 cursor-pointer p-1 rounded-auth-checkbox transition-colors duration-150 hover:text-auth-ink"
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                           aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
                         >

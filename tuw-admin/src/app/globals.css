@@ -115,6 +115,11 @@
   --tracking-auth-title: -0.01em;
   --tracking-auth-hero: -0.02em;
   --tracking-auth-wide: 0.6px;
+  /* Signup input type + focus ring (.12 alpha — distinct from OTP .15) */
+  --text-auth-signup-input: 15px;
+  --text-auth-signup-input--line-height: 22px;
+  --tracking-auth-signup-input: 0.2px;
+  --shadow-auth-input: 0 0 0 3px rgba(17, 93, 93, 0.12);
   /* Signup hero copy (fluid Figma specs; wrap-guards shared by headline+subtitle) */
   --text-auth-signup-brand: clamp(20px, 2.22vw, 32px);
   --text-auth-signup-headline: clamp(28px, 3.6vw, 64px);
@@ -1920,75 +1925,10 @@
 
 /* (inputs wrapper + field shells removed — see migration comment above) */
 
-.signup-inputWrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 100%;
-}
-
-.signup-inputField {
-  width: 100%;
-  height: 46px;
-  padding: 10px 44px 10px 16px;
-  border: 1px solid #E9E9E9;
-  border-radius: 12px;
-  font-family: inherit;
-  font-size: 15px;
-  letter-spacing: 0.2px;
-  line-height: 22px;
-  color: #242424;
-  background-color: #FFFFFF;
-  outline: none;
-  box-sizing: border-box;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.signup-inputField::placeholder {
-  color: #9A9A9A;
-  font-weight: 400;
-}
-
-.signup-inputField:focus {
-  border-color: #115D5D;
-  box-shadow: 0 0 0 3px rgba(17, 93, 93, 0.12);
-}
-
-.signup-inputIcon {
-  position: absolute;
-  right: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #9A9A9A;
-  pointer-events: none;
-}
-
-.signup-inputIconButton {
-  position: absolute;
-  right: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #9A9A9A;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 6px;
-  transition: color 0.15s ease;
-}
-
-.signup-inputIconButton:hover {
-  color: #242424;
-}
-
-.signup-helperText {
-  font-size: 12px;
-  line-height: 16px;
-  color: #6C6C6C;
-  margin-top: 2px;
-}
+/* Signup inputs migrated to Tailwind utilities in SignUpPage.tsx (pixel-identical; border
+   carried by inputs, focus ring .12 alpha distinct from OTP .15).
+   Removed: .signup-inputWrapper, .signup-inputField, .signup-inputField::placeholder,
+   .signup-inputIcon, .signup-inputIconButton, .signup-helperText. */
 
 /* ==========================================================================
    TERMS & PRIVACY CHECKBOX + BUTTON BLOCK (Frame 1410130423)
