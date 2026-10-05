@@ -257,12 +257,10 @@ export default function Sidebar({
                   )}
                   title={isCollapsed ? 'Dashboard' : undefined}
                 >
-                                    {isCollapsed ? (
+                                    {isCollapsed && (
                     <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/dashboard') ? 'text-action-primary' : 'text-secondary')}>
                       <HomeIcon size={17} />
                     </span>
-                  ) : (
-                    <span aria-hidden="true" className="size-4.5 shrink-0" />
                   )}
                   {!isCollapsed && <span className="truncate text-nav-child">Dashboard</span>}
                 </Link>
@@ -279,12 +277,10 @@ export default function Sidebar({
                   )}
                   title={isCollapsed ? 'Orders' : undefined}
                 >
-                                    {isCollapsed ? (
+                                    {isCollapsed && (
                     <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/orders') ? 'text-action-primary' : 'text-secondary')}>
                       <ClipboardList size={17} />
                     </span>
-                  ) : (
-                    <span aria-hidden="true" className="size-4.5 shrink-0" />
                   )}
                   {!isCollapsed && <span className="truncate text-nav-child">Orders</span>}
                 </Link>
@@ -301,12 +297,10 @@ export default function Sidebar({
                   )}
                   title={isCollapsed ? 'Products' : undefined}
                 >
-                                    {isCollapsed ? (
+                                    {isCollapsed && (
                     <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/products') ? 'text-action-primary' : 'text-secondary')}>
                       <Package size={17} />
                     </span>
-                  ) : (
-                    <span aria-hidden="true" className="size-4.5 shrink-0" />
                   )}
                   {!isCollapsed && <span className="truncate text-nav-child">Products</span>}
                 </Link>
@@ -323,12 +317,10 @@ export default function Sidebar({
                   )}
                   title={isCollapsed ? 'Customers' : undefined}
                 >
-                  {isCollapsed ? (
+                  {isCollapsed && (
                     <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/customers') ? 'text-action-primary' : 'text-secondary')}>
                       <Users size={17} />
                     </span>
-                  ) : (
-                    <span aria-hidden="true" className="size-4.5 shrink-0" />
                   )}
                   {!isCollapsed && <span className="truncate text-nav-child">Customers</span>}
                 </Link>
@@ -345,12 +337,10 @@ export default function Sidebar({
                   )}
                   title={isCollapsed ? 'Analytics & Reports' : undefined}
                 >
-                                    {isCollapsed ? (
+                                    {isCollapsed && (
                     <span className={cn('flex size-4.5 shrink-0 items-center justify-center', (getIsActive('/reports') || getIsActive('/analytics')) ? 'text-action-primary' : 'text-secondary')}>
                       <TrendingUp size={17} />
                     </span>
-                  ) : (
-                    <span aria-hidden="true" className="size-4.5 shrink-0" />
                   )}
                   {!isCollapsed && <span className="truncate text-nav-child">Analytics & Reports</span>}
                 </Link>
@@ -395,12 +385,10 @@ export default function Sidebar({
                   )}
                   title={isCollapsed ? 'Fulfillment' : undefined}
                 >
-                                    {isCollapsed ? (
+                                    {isCollapsed && (
                     <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/fulfillment') ? 'text-action-primary' : 'text-secondary')}>
                       <PackageCheck size={17} />
                     </span>
-                  ) : (
-                    <span aria-hidden="true" className="size-4.5 shrink-0" />
                   )}
                   {!isCollapsed && (
                     <>
@@ -422,12 +410,10 @@ export default function Sidebar({
                   )}
                   title={isCollapsed ? 'Shipments' : undefined}
                 >
-                                    {isCollapsed ? (
+                                    {isCollapsed && (
                     <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/shipments') ? 'text-action-primary' : 'text-secondary')}>
                       <Truck size={17} />
                     </span>
-                  ) : (
-                    <span aria-hidden="true" className="size-4.5 shrink-0" />
                   )}
                   {!isCollapsed && <span className="truncate text-nav-child">Shipments</span>}
                 </Link>
@@ -444,12 +430,10 @@ export default function Sidebar({
                   )}
                   title={isCollapsed ? 'Returns & RMA' : undefined}
                 >
-                                    {isCollapsed ? (
+                                    {isCollapsed && (
                     <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/returns') ? 'text-action-primary' : 'text-secondary')}>
                       <Undo2 size={17} />
                     </span>
-                  ) : (
-                    <span aria-hidden="true" className="size-4.5 shrink-0" />
                   )}
                   {!isCollapsed && (
                     <>
@@ -471,12 +455,10 @@ export default function Sidebar({
                   )}
                   title={isCollapsed ? 'Refunds' : undefined}
                 >
-                                    {isCollapsed ? (
+                                    {isCollapsed && (
                     <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/refunds') ? 'text-action-primary' : 'text-secondary')}>
                       <RotateCcw size={17} />
                     </span>
-                  ) : (
-                    <span aria-hidden="true" className="size-4.5 shrink-0" />
                   )}
                   {!isCollapsed && <span className="truncate text-nav-child">Refunds</span>}
                 </Link>
@@ -493,12 +475,10 @@ export default function Sidebar({
                   )}
                   title={isCollapsed ? 'Payments' : undefined}
                 >
-                                    {isCollapsed ? (
+                                    {isCollapsed && (
                     <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/payments') ? 'text-action-primary' : 'text-secondary')}>
                       <CreditCard size={17} />
                     </span>
-                  ) : (
-                    <span aria-hidden="true" className="size-4.5 shrink-0" />
                   )}
                   {!isCollapsed && <span className="truncate text-nav-child">Payments</span>}
                 </Link>
@@ -543,12 +523,10 @@ export default function Sidebar({
                   )}
                   title={isCollapsed ? 'Collections' : undefined}
                 >
-                                    {isCollapsed ? (
+                                    {isCollapsed && (
                     <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/collections') ? 'text-action-primary' : 'text-secondary')}>
                       <Layers size={17} />
                     </span>
-                  ) : (
-                    <span aria-hidden="true" className="size-4.5 shrink-0" />
                   )}
                   {!isCollapsed && <span className="truncate text-nav-child">Collections</span>}
                 </Link>
@@ -565,12 +543,10 @@ export default function Sidebar({
                   )}
                   title={isCollapsed ? 'Design Assets' : undefined}
                 >
-                                    {isCollapsed ? (
+                                    {isCollapsed && (
                     <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/designs') ? 'text-action-primary' : 'text-secondary')}>
                       <Palette size={17} />
                     </span>
-                  ) : (
-                    <span aria-hidden="true" className="size-4.5 shrink-0" />
                   )}
                   {!isCollapsed && <span className="truncate text-nav-child">Design Assets</span>}
                 </Link>
@@ -587,12 +563,10 @@ export default function Sidebar({
                   )}
                   title={isCollapsed ? 'Content CMS' : undefined}
                 >
-                                    {isCollapsed ? (
+                                    {isCollapsed && (
                     <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/content') ? 'text-action-primary' : 'text-secondary')}>
                       <FileText size={17} />
                     </span>
-                  ) : (
-                    <span aria-hidden="true" className="size-4.5 shrink-0" />
                   )}
                   {!isCollapsed && <span className="truncate text-nav-child">Content CMS</span>}
                 </Link>
@@ -637,12 +611,10 @@ export default function Sidebar({
                   )}
                   title={isCollapsed ? 'Team' : undefined}
                 >
-                  {isCollapsed ? (
+                  {isCollapsed && (
                     <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/team') ? 'text-action-primary' : 'text-secondary')}>
                       <Users size={17} />
                     </span>
-                  ) : (
-                    <span aria-hidden="true" className="size-4.5 shrink-0" />
                   )}
                   {!isCollapsed && <span className="truncate text-nav-child">Team</span>}
                 </Link>
@@ -659,12 +631,10 @@ export default function Sidebar({
                   )}
                   title={isCollapsed ? 'Audit Log' : undefined}
                 >
-                                    {isCollapsed ? (
+                                    {isCollapsed && (
                     <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/audit-log') ? 'text-action-primary' : 'text-secondary')}>
                       <ShieldCheck size={17} />
                     </span>
-                  ) : (
-                    <span aria-hidden="true" className="size-4.5 shrink-0" />
                   )}
                   {!isCollapsed && <span className="truncate text-nav-child">Audit Log</span>}
                 </Link>
