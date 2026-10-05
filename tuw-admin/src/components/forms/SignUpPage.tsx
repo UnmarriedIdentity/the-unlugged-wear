@@ -410,7 +410,7 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
               </header>
 
               {/* 4-Digit OTP Code Inputs Form (Frame 135) */}
-              <form onSubmit={handleVerifySubmit} style={{ width: '100%' }}>
+                <form onSubmit={handleVerifySubmit} className="w-full">
                 {/* 4 OTP Input Boxes */}
                 <div className="flex items-center justify-center gap-3 w-[260px] mx-auto mb-8">
                   {otp.map((digit, idx) => (
@@ -432,19 +432,19 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
                 </div>
 
                 {/* Verify Actions: Button + Resend + Back to login */}
-                <div className={styles.verifyActions}>
-                  <div className={styles.verifyPrimaryGroup}>
+                <div className="flex w-full flex-col items-center gap-5">
+                  <div className="flex w-full flex-col items-center gap-3">
                     {/* Primary Button: Verify email */}
-                    <button type="submit" className={styles.verifyButton} id="verify-email-btn">
+                    <button type="submit" className="flex h-12 w-full items-center justify-center rounded-xl bg-auth-button text-auth-btn font-bold text-white cursor-pointer transition-all duration-200 hover:bg-auth-pure" id="verify-email-btn">
                       Verify email
                     </button>
 
                     {/* Resend Code Prompt */}
-                    <div className={styles.resendRow}>
+                    <div className="flex items-center justify-center gap-1 text-auth-resend text-auth-ink">
                       <span>Don’t receive the email?</span>
                       <button
                         type="button"
-                        className={styles.resendLink}
+                        className="text-[14px] text-auth-teal font-semibold underline bg-transparent border-0 p-0 cursor-pointer transition-opacity duration-150 hover:opacity-80"
                         onClick={() => alert('Verification code resent to your email.')}
                         id="resend-code-btn"
                       >
@@ -454,7 +454,7 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
                   </div>
 
                   {/* Secondary Button: Back to login */}
-                  <Link href="/login" className={styles.backToLoginButton} id="back-to-login-btn">
+                  <Link href="/login" className="flex h-12 w-full items-center justify-center rounded-xl border border-auth-line bg-white text-auth-btn font-bold text-auth-ink cursor-pointer no-underline transition-all duration-200 hover:bg-auth-hover-canvas hover:border-auth-hover-line" id="back-to-login-btn">
                     Back to login
                   </Link>
                 </div>
@@ -469,7 +469,7 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
 
 export default function SignUpPage({ initialMode }: SignUpPageProps) {
   return (
-    <Suspense fallback={<div style={{ minHeight: '100vh', background: '#FFFFFF' }} />}>
+      <Suspense fallback={<div style={{ minHeight: '100vh', background: 'var(--color-surface)' }} />}>
       <SignUpPageContent initialMode={initialMode} />
     </Suspense>
   );
