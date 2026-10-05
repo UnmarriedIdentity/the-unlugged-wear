@@ -42,6 +42,10 @@
   /* Sidebar role radii */
   --radius-nav: 10px;
   --radius-nav-sm: 6px;
+  /* Sidebar active + hover treatments (3D uplift: inset edge replaces drop shadow) */
+  --shadow-nav-edge: inset 0 -2px 0 #d6d6d6;
+  --color-nav-active-text: #111827;
+  --color-nav-hover-wash: rgba(117, 57, 255, 0.06);
 
   /* Auth (login/signup) palette — Figma Storeflow frames, tokenized, no hardcodes in JSX.
      Admin --color-* above untouched; auth uses its own namespace. */
@@ -643,113 +647,12 @@
    [scrollbar-width:none] + webkit-hidden — no visible scrollbar per spec, scroll intact).
    Removed: .navSections (+ all ::-webkit-scrollbar parts). */
 
-.sidebarFooter {
-  flex-shrink: 0;
-  margin-top: auto;
-  padding-top: 8px;
-  padding-bottom: 0;
-  border-top: 1px solid var(--tuw-border-subtle, #E9E9E9);
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  background-color: var(--tuw-bg-canvas, #F7F8F9);
-  z-index: 10;
-}
-
-/* Nav groups + headers + chevrons migrated to Tailwind utilities in Sidebar.tsx
-   (pixel-identical; chevron rotate-180; single font via inheritance).
-   Removed: .navGroup, .groupHeaderBtn, .groupLabel, .groupChevron, .groupChevronOpen. */
-
-.navList {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.navItem {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 12px;
-  border-radius: 10px;
-  color: #262626;
-  font-size: 14px;
-  font-weight: 500;
-  text-decoration: none;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  user-select: none;
-  position: relative;
-  background: transparent;
-  width: 100%;
-  box-sizing: border-box;
-  border: none;
-  text-align: left;
-}
-
-.navItem:hover {
-  background-color: rgba(117, 57, 255, 0.06);
-  color: var(--tuw-action-primary, #7539FF);
-}
-
-.navItemActive {
-  background: #FFFFFF;
-  color: #111827;
-  font-weight: 600;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-}
-
-.navItemActive:hover {
-  background: #FFFFFF;
-  color: #111827;
-}
-
-.navItemActive .navIcon {
-  color: #7539FF;
-}
-
-/* Expandable Parent Items */
-.navParentBtn,
-.navParentItem {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  width: 100% !important;
-  padding: 9px 12px;
-  border-radius: 10px;
-  border: none;
-  background: transparent;
-  color: #262626;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  user-select: none;
-  box-sizing: border-box;
-  text-align: left;
-}
-
-.navParentBtn:hover,
-.navParentItem:hover {
-  background-color: rgba(117, 57, 255, 0.06);
-  color: var(--tuw-action-primary, #7539FF);
-}
-
-.navParentBtnActive,
-.navParentItemActive {
-  color: #111827;
-}
-
-.navParentLeft {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 1;
-  min-width: 0;
-}
-
+/* Footer items + logout migrated to Tailwind utilities in Sidebar.tsx (pixel-identical;
+   active uses inset-edge treatment; logout keeps error hover).
+   Removed: .sidebarFooter, .navList, .navItem, .navItemActive, .navParentBtn,
+   .navParentItem, .navParentBtnActive, .navParentItemActive, .navParentLeft,
+   .navLabel, .navChevron, .navChevronOpen, .logOutItem, collapsed hide block.
+   Kept: .navIcon (branch items, S5), .navItemCollapsed (branch links, S5). */
 .navIcon {
   width: 18px;
   height: 18px;
@@ -760,29 +663,7 @@
   color: #5D6772;
 }
 
-.navLabel {
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 14px;
-}
-
-.navChevron {
-  width: 16px;
-  height: 16px;
-  color: #8A94A6;
-  margin-left: auto;
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.navChevronOpen {
-  transform: rotate(180deg);
-}
+/* (navLabel/navChevron dead — zero JSX refs; footer labels use truncate utilities) */
 
 /* Branched Navigation Tree Hierarchy — container migrated to Tailwind in Sidebar.tsx.
    Guide stem + curves stay custom (S5 converts widths/colors to 1px/#dddddd). */
@@ -919,33 +800,9 @@
   color: #D97706;
 }
 
-.logOutItem {
-  margin-top: 2px;
-  color: var(--tuw-text-secondary, #5D6772);
-}
+/* (logOutItem migrated to Tailwind error-hover utilities in Sidebar.tsx) */
 
-.logOutItem:hover {
-  background-color: var(--tuw-bg-error, #FEF4F4);
-  color: var(--tuw-text-error, #C91818);
-}
-
-.logOutItem:hover .navIcon {
-  color: var(--tuw-text-error, #C91818);
-}
-
-.sidebarCollapsed .brandName,
-.sidebarCollapsed .groupLabel,
-.sidebarCollapsed .navLabel,
-.sidebarCollapsed .navChevron,
-.sidebarCollapsed .navBranchTree {
-  display: none !important;
-}
-
-.sidebarCollapsed .navItem,
-.sidebarCollapsed .navParentItem {
-  justify-content: center;
-  padding: 8px;
-}
+/* (collapsed hide rules dead — JSX unmounts labels/trees when collapsed) */
 
 /* ==========================================================================
    SIDEBAR BRAND LOGO ANIMAL ARTWORK & COPYRIGHT (SEAMLESS - BIGDIRTY.AGENCY STYLE)

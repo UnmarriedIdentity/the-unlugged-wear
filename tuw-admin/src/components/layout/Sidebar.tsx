@@ -567,42 +567,42 @@ export default function Sidebar({
       </div>
 
       {/* Footer Controls */}
-      <div className="sidebarFooter">
-        <ul className="navList">
+      <div className="flex flex-col gap-0.5 border-t border-subtle bg-canvas pt-2 pb-0 mt-auto shrink-0 z-10">
+        <ul className="list-none flex flex-col gap-[3px]">
           <li>
             <Link
               href="/settings"
-              className={cn('navItem', getIsActive('/settings') && 'navItemActive')}
+              className={cn('group relative flex w-full cursor-pointer select-none rounded-nav border-0 bg-transparent text-left text-[14px] transition-all duration-150', isCollapsed ? 'justify-center p-2' : 'items-center gap-3 px-3 py-2', getIsActive('/settings') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge hover:bg-white hover:text-nav-active-text' : 'font-medium text-primary hover:bg-nav-hover-wash hover:text-action-primary')}
               title={isCollapsed ? 'Settings' : undefined}
             >
-              <span className="navIcon">
+              <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/settings') ? 'text-action-primary' : 'text-secondary')}>
                 <Settings size={18} />
               </span>
-              {!isCollapsed && <span className="navLabel">Settings</span>}
+              {!isCollapsed && <span className="flex-1 truncate text-[14px]">Settings</span>}
             </Link>
           </li>
           <li>
             <Link
               href="/support"
-              className={cn('navItem', (getIsActive('/support') || getIsActive('/help')) && 'navItemActive')}
+              className={cn('group relative flex w-full cursor-pointer select-none rounded-nav border-0 bg-transparent text-left text-[14px] transition-all duration-150', isCollapsed ? 'justify-center p-2' : 'items-center gap-3 px-3 py-2', (getIsActive('/support') || getIsActive('/help')) ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge hover:bg-white hover:text-nav-active-text' : 'font-medium text-primary hover:bg-nav-hover-wash hover:text-action-primary')}
               title={isCollapsed ? 'Help & Support' : undefined}
             >
-              <span className="navIcon">
+              <span className={cn('flex size-4.5 shrink-0 items-center justify-center', (getIsActive('/support') || getIsActive('/help')) ? 'text-action-primary' : 'text-secondary')}>
                 <Headphones size={18} />
               </span>
-              {!isCollapsed && <span className="navLabel">Help & Support</span>}
+              {!isCollapsed && <span className="flex-1 truncate text-[14px]">Help & Support</span>}
             </Link>
           </li>
           <li>
             <Link
               href="/login"
-              className="navItem logOutItem"
+              className={cn('group relative flex w-full cursor-pointer select-none rounded-nav border-0 bg-transparent text-left text-[14px] font-medium transition-all duration-150 mt-0.5', isCollapsed ? 'justify-center p-2' : 'items-center gap-3 px-3 py-2', 'text-secondary hover:bg-error hover:text-error')}
               title={isCollapsed ? 'Log out' : undefined}
             >
-              <span className="navIcon">
+              <span className="flex size-4.5 shrink-0 items-center justify-center text-secondary group-hover:text-error">
                 <LogOut size={18} />
               </span>
-              {!isCollapsed && <span className="navLabel">Log out</span>}
+              {!isCollapsed && <span className="flex-1 truncate text-[14px]">Log out</span>}
             </Link>
           </li>
         </ul>
