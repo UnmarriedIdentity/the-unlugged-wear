@@ -33,6 +33,13 @@
   --color-error-text: #C91818;
   --color-error-bg: #FEF4F4;
 
+  /* Compatibility aliases (documented): short utility spellings for the three most
+     reused roles. text-primary/border-subtle/bg-primary etc. had zero generated
+     output before these existed (utilities derive from full token names). */
+  --color-primary: #262626;
+  --color-secondary: #5D6772;
+  --color-subtle: #E9E9E9;
+
   /* Admin Radii */
   --radius-sm: 4px;
   --radius-control: 8px;

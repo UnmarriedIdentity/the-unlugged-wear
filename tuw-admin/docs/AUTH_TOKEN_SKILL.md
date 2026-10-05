@@ -91,7 +91,12 @@ beats them regardless of order. Rules:
    - `pnpm --dir tuw-admin typecheck` clean;
    - `pnpm --dir tuw-admin test` 4/4;
    - `pnpm --dir tuw-admin build` (38 routes);
-   - every new utility present in `.next/static` production CSS;
+   - every new utility present in `.next/static` production CSS, proven at
+     SELECTOR level (`\.util\{` escaped — substring counts are invalid in a file
+     containing token definitions, e.g. `border-subtle` matches
+     `--color-border-subtle`; short names like `bg-primary`/`text-primary`
+     generate NOTHING unless a matching `--color-*` token exists — add a
+     documented compatibility alias instead of renaming call sites);
    - screenshots vs production for all `?state=` variants at 360/1024/1440px.
 4. Update the JSON tracker (status/log/design_match/key_decisions/verified/
    finished + summary counts) in the SAME commit as the block.
