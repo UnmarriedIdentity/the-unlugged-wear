@@ -166,10 +166,11 @@
 }
 
 :root {
-  /* Typography - Urbanist is the primary font family per DESIGN_SYSTEM.md */
-  --font-urbanist: 'Urbanist', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-main: var(--font-urbanist), sans-serif;
-  --font-brand: var(--font-urbanist), sans-serif;
+  /* Typography — single canonical Urbanist stack (matches @theme --font-sans exactly).
+     One font across the dashboard; font-sans is the utility spelling. */
+  --font-urbanist: "Urbanist", ui-sans-serif, system-ui, sans-serif;
+  --font-main: "Urbanist", ui-sans-serif, system-ui, sans-serif;
+  --font-brand: "Urbanist", ui-sans-serif, system-ui, sans-serif;
 
   /* TUW Semantic Colour Roles (18 roles) - Standard & Figma Web Code Syntax */
   --tuw-bg-canvas: #F7F8F9;
@@ -587,91 +588,25 @@
    Single app.css, no CSS Modules. Class names unchanged so JSX is identical.
    ========================================================================== */
 /* Dashboard Layout Shell - Natural Page Scroll, Zero Cutoffs, Sidebar Matches Full Page Height */
-.dashboardLayoutRoot {
-  display: flex;
-  width: 100%;
-  min-height: 100vh;
-  background-color: var(--tuw-bg-canvas, #F7F8F9);
-  color: var(--tuw-text-primary, #262626);
-  font-family: var(--font-main);
-  position: relative;
-  align-items: stretch;
-}
+/* Dashboard shell (root, backdrop, main wrapper/content) migrated to Tailwind utilities
+   in DashboardShell.tsx (pixel-identical; root carries font-sans — single dashboard font).
+   Removed: .dashboardLayoutRoot, .dashboardMobileBackdrop, .dashboardMainWrapper,
+   .dashboardMainWrapperCollapsed, .dashboardMainContent. */
 
-.dashboardMobileBackdrop {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.45);
-  z-index: 95;
-  backdrop-filter: blur(2px);
-  cursor: pointer;
-  touch-action: manipulation;
-  animation: tuwFadeIn 0.2s ease-out;
-}
-
-.dashboardMainWrapper {
-  flex: 1;
-  min-width: 0;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background-color: var(--tuw-bg-canvas, #F7F8F9);
-}
-
-.dashboardMainWrapperCollapsed {
-  /* Flex automatically allocates space without margin-left */
-}
-
-.dashboardMainContent {
-  padding: 24px 28px 40px 28px;
-  max-width: 1400px;
-  width: 100%;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  box-sizing: border-box;
-  min-width: 0;
-}
-
-@media (max-width: 768px) {
-  .dashboardMainContent {
-    padding: 16px 16px 32px 16px;
-  }
-}
-
-/* Sidebar - Viewport-locked, sticky with pinned bottom footer */
+/* Sidebar - fixed to viewport with pinned footer (migrated to Tailwind utilities in
+   Sidebar.tsx + DashboardShell.tsx margin offsets; frame is fully ternary-swapped).
+   Retained custom: 100vh/100dvh fallback order + hidden outer scrollbars. */
 .sidebar {
-  width: 260px;
-  min-width: 260px;
-  background-color: var(--tuw-bg-canvas, #F7F8F9);
-  border-right: 1px solid var(--tuw-border-subtle, #E9E9E9);
-  display: flex;
-  flex-direction: column;
-  padding: 0 14px 10px 14px;
-  flex-shrink: 0;
-  position: sticky;
-  top: 0;
   height: 100vh;
   height: 100dvh;
   max-height: 100vh;
   max-height: 100dvh;
-  overflow: hidden; /* Outer sidebar is locked to viewport, never scrolls away */
-  box-sizing: border-box;
-  z-index: 50;
-  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar::-webkit-scrollbar {
   display: none;
   width: 0;
   height: 0;
-}
-
-.sidebarCollapsed {
-  width: 80px;
-  min-width: 80px;
-  padding: 0 10px 14px 10px;
 }
 
 /* Mobile close button (desktop hidden) */
@@ -699,32 +634,14 @@
 }
 
 @media (max-width: 768px) {
+  /* Mobile heights retained custom (fallback order); layout/translate/shadow
+     migrated to max-md: variants in Sidebar.tsx. */
   .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 290px;
-    max-width: 86vw;
-    min-width: unset;
     height: 100vh;
     height: 100dvh;
     max-height: 100vh;
     max-height: 100dvh;
-    transform: translateX(-100%);
-    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 100;
-    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
-    padding: 0 14px 16px 14px;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
-  }
-
-  .sidebar.sidebarMobileOpen {
-    transform: translateX(0);
   }
 
   .desktopOnlyToggle {
