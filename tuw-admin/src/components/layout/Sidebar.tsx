@@ -245,7 +245,7 @@ export default function Sidebar({
                   className={cn(
                     'relative flex w-full rounded-nav text-[13.5px] no-underline transition-all duration-150',
                     isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                    getIsActive('/dashboard') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
+                    getIsActive('/dashboard') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
                   title={isCollapsed ? 'Dashboard' : undefined}
                 >
@@ -263,7 +263,7 @@ export default function Sidebar({
                   className={cn(
                     'relative flex w-full rounded-nav text-[13.5px] no-underline transition-all duration-150',
                     isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                    getIsActive('/orders') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
+                    getIsActive('/orders') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
                   title={isCollapsed ? 'Orders' : undefined}
                 >
@@ -281,7 +281,7 @@ export default function Sidebar({
                   className={cn(
                     'relative flex w-full rounded-nav text-[13.5px] no-underline transition-all duration-150',
                     isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                    getIsActive('/products') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
+                    getIsActive('/products') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
                   title={isCollapsed ? 'Products' : undefined}
                 >
@@ -299,7 +299,7 @@ export default function Sidebar({
                   className={cn(
                     'relative flex w-full rounded-nav text-[13.5px] no-underline transition-all duration-150',
                     isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                    getIsActive('/customers') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
+                    getIsActive('/customers') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
                   title={isCollapsed ? 'Customers' : undefined}
                 >
@@ -317,7 +317,7 @@ export default function Sidebar({
                   className={cn(
                     'relative flex w-full rounded-nav text-[13.5px] no-underline transition-all duration-150',
                     isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                    (getIsActive('/reports') || getIsActive('/analytics')) ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
+                    (getIsActive('/reports') || getIsActive('/analytics')) ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
                   title={isCollapsed ? 'Analytics & Reports' : undefined}
                 >
@@ -358,7 +358,7 @@ export default function Sidebar({
                   className={cn(
                     'relative flex w-full rounded-nav text-[13.5px] no-underline transition-all duration-150',
                     isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                    getIsActive('/fulfillment') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
+                    getIsActive('/fulfillment') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
                   title={isCollapsed ? 'Fulfillment' : undefined}
                 >
@@ -381,7 +381,7 @@ export default function Sidebar({
                   className={cn(
                     'relative flex w-full rounded-nav text-[13.5px] no-underline transition-all duration-150',
                     isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                    getIsActive('/shipments') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
+                    getIsActive('/shipments') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
                   title={isCollapsed ? 'Shipments' : undefined}
                 >
@@ -399,7 +399,7 @@ export default function Sidebar({
                   className={cn(
                     'relative flex w-full rounded-nav text-[13.5px] no-underline transition-all duration-150',
                     isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                    getIsActive('/returns') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
+                    getIsActive('/returns') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
                   title={isCollapsed ? 'Returns & RMA' : undefined}
                 >
@@ -422,7 +422,7 @@ export default function Sidebar({
                   className={cn(
                     'relative flex w-full rounded-nav text-[13.5px] no-underline transition-all duration-150',
                     isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                    getIsActive('/refunds') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
+                    getIsActive('/refunds') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
                   title={isCollapsed ? 'Refunds' : undefined}
                 >
@@ -440,7 +440,7 @@ export default function Sidebar({
                   className={cn(
                     'relative flex w-full rounded-nav text-[13.5px] no-underline transition-all duration-150',
                     isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                    getIsActive('/payments') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
+                    getIsActive('/payments') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
                   title={isCollapsed ? 'Payments' : undefined}
                 >
@@ -481,7 +481,7 @@ export default function Sidebar({
                   className={cn(
                     'relative flex w-full rounded-nav text-[13.5px] no-underline transition-all duration-150',
                     isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                    getIsActive('/collections') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
+                    getIsActive('/collections') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
                   title={isCollapsed ? 'Collections' : undefined}
                 >
@@ -499,7 +499,7 @@ export default function Sidebar({
                   className={cn(
                     'relative flex w-full rounded-nav text-[13.5px] no-underline transition-all duration-150',
                     isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                    getIsActive('/designs') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
+                    getIsActive('/designs') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
                   title={isCollapsed ? 'Design Assets' : undefined}
                 >
@@ -517,7 +517,7 @@ export default function Sidebar({
                   className={cn(
                     'relative flex w-full rounded-nav text-[13.5px] no-underline transition-all duration-150',
                     isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                    getIsActive('/content') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
+                    getIsActive('/content') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
                   title={isCollapsed ? 'Content CMS' : undefined}
                 >
@@ -558,7 +558,7 @@ export default function Sidebar({
                   className={cn(
                     'relative flex w-full rounded-nav text-[13.5px] no-underline transition-all duration-150',
                     isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                    getIsActive('/team') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
+                    getIsActive('/team') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
                   title={isCollapsed ? 'Team' : undefined}
                 >
@@ -576,7 +576,7 @@ export default function Sidebar({
                   className={cn(
                     'relative flex w-full rounded-nav text-[13.5px] no-underline transition-all duration-150',
                     isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-                    getIsActive('/audit-log') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
+                    getIsActive('/audit-log') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
                   )}
                   title={isCollapsed ? 'Audit Log' : undefined}
                 >
@@ -598,7 +598,7 @@ export default function Sidebar({
           <li>
             <Link
               href="/settings"
-              className={cn('group relative flex w-full cursor-pointer select-none rounded-nav border-0 bg-transparent text-left text-[14px] transition-all duration-150', isCollapsed ? 'justify-center p-2' : 'items-center gap-3 px-3 py-2', getIsActive('/settings') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge hover:bg-white hover:text-nav-active-text' : 'font-medium text-primary hover:bg-nav-hover-wash hover:text-action-primary')}
+              className={cn('group relative flex w-full cursor-pointer select-none rounded-nav border-0 bg-transparent text-left text-[14px] transition-all duration-150', isCollapsed ? 'justify-center p-2' : 'items-center gap-3 px-3 py-2', getIsActive('/settings') ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-primary hover:bg-nav-hover-wash hover:text-action-primary')}
               title={isCollapsed ? 'Settings' : undefined}
             >
               <span className={cn('flex size-4.5 shrink-0 items-center justify-center', getIsActive('/settings') ? 'text-action-primary' : 'text-secondary')}>
@@ -610,7 +610,7 @@ export default function Sidebar({
           <li>
             <Link
               href="/support"
-              className={cn('group relative flex w-full cursor-pointer select-none rounded-nav border-0 bg-transparent text-left text-[14px] transition-all duration-150', isCollapsed ? 'justify-center p-2' : 'items-center gap-3 px-3 py-2', (getIsActive('/support') || getIsActive('/help')) ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge hover:bg-white hover:text-nav-active-text' : 'font-medium text-primary hover:bg-nav-hover-wash hover:text-action-primary')}
+              className={cn('group relative flex w-full cursor-pointer select-none rounded-nav border-0 bg-transparent text-left text-[14px] transition-all duration-150', isCollapsed ? 'justify-center p-2' : 'items-center gap-3 px-3 py-2', (getIsActive('/support') || getIsActive('/help')) ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-primary hover:bg-nav-hover-wash hover:text-action-primary')}
               title={isCollapsed ? 'Help & Support' : undefined}
             >
               <span className={cn('flex size-4.5 shrink-0 items-center justify-center', (getIsActive('/support') || getIsActive('/help')) ? 'text-action-primary' : 'text-secondary')}>
