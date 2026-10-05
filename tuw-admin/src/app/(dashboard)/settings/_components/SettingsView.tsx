@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Save, Store, Palette, CreditCard, Truck, Receipt, Bell, ShieldCheck, Check, AlertCircle, RefreshCw } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
 import { Button, Input, ContentCard, Badge } from '@/components/ui';
+import ScrollIndicatorDemo from './ScrollIndicatorDemo';
 import { useAdminState } from '@/mocks/state';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
@@ -210,6 +211,7 @@ export default function SettingsView() {
                 Reset Demo State
               </Button>
             </div>
+            <ScrollIndicatorDemo />
           </ContentCard>
         )}
 
