@@ -70,7 +70,7 @@ export default function DashboardShell({
       />
 
       {/* Main Container - Offsets cleanly for fixed sidebar */}
-      <div className={cn('flex min-h-screen min-w-0 flex-1 flex-col bg-canvas', isCollapsed ? 'ml-20' : 'ml-65', 'max-md:ml-0')}>
+      <div className={cn('flex min-h-screen min-w-0 flex-1 flex-col bg-canvas', isCollapsed ? 'ml-20' : 'ml-60 md:ml-55 lg:ml-60', 'max-md:ml-0')}>
         <Header
           pageTitle={pageTitle}
           mobileMenuOpen={mobileMenuOpen}
