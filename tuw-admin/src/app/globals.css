@@ -705,13 +705,10 @@
   z-index: 1;
 }
 
-/* Segmented dark path: overlay pieces up to and including the active branch only.
-   Same left/width/geometry as the light stem — seams impossible. Item curves take
-   the dark color on the same condition (double-class wins regardless of order). */
 /* Continuous dark path to the active branch (seamless): preceding items paint the full
-   box (top:-6px EI bottom:0) so gaps between cards are covered by overlap stacking;
-   the terminal (active) item ends exactly at its center (curve start) so nothing
-   dark leaks into inactive branches after it. Same color throughout. */
+   box (top:-6px EI bottom:0) so gaps between cards are covered by overlap stacking.
+   The terminal (active) item carries NO straight overlay — only its curved elbow —
+   so no dark bar is ever painted over the active card face. Same color throughout. */
 .navStemTo1 > :nth-child(-n+1)::after,
 .navStemTo2 > :nth-child(-n+2)::after,
 .navStemTo3 > :nth-child(-n+3)::after,
@@ -721,21 +718,6 @@
   left: 21px;
   top: -6px;
   bottom: 0;
-  width: 1px;
-  background-color: var(--color-nav-guide-active);
-  pointer-events: none;
-  z-index: 1;
-}
-.navStemTo0 > :nth-child(1)::after,
-.navStemTo1 > :nth-child(2)::after,
-.navStemTo2 > :nth-child(3)::after,
-.navStemTo3 > :nth-child(4)::after,
-.navStemTo4 > :nth-child(5)::after {
-  content: '';
-  position: absolute;
-  left: 21px;
-  top: -6px;
-  bottom: 50%;
   width: 1px;
   background-color: var(--color-nav-guide-active);
   pointer-events: none;
