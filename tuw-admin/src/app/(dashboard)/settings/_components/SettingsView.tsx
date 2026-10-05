@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Save, Store, Palette, CreditCard, Truck, Receipt, Bell, ShieldCheck, Check, AlertCircle, RefreshCw } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { Button, Input, ContentCard, Badge } from '@/components/ui';
+import { Button, Input, ContentCard, Badge, Switch } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
@@ -186,6 +186,22 @@ export default function SettingsView() {
                   <option value="INR (₹)">INR (₹) — Indian Rupee</option>
                 </select>
               </div>
+            </div>
+
+            <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid var(--tuw-border-subtle, #E2E4E6)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+              <div>
+                <h4 style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', margin: 0 }}>
+                  Collapsed badge dots (preview)
+                </h4>
+                <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: '4px 0 0' }}>
+                  Show count dots on collapsed sidebar icons to compare both options.
+                </p>
+              </div>
+              <Switch
+                label=""
+                checked={settings.showCollapsedBadgeDots ?? false}
+                onChange={(checked) => updateSettings({ showCollapsedBadgeDots: checked })}
+              />
             </div>
 
             <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid var(--tuw-border-subtle, #E2E4E6)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
