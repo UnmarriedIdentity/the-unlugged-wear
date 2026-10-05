@@ -78,6 +78,13 @@
   --container-auth-form: 568px;
   --container-auth-reset: 488px;
   --container-auth-recovery: 392px;
+  --container-auth-card: 552px;
+  /* Auth cards */
+  --radius-auth-card: 20px;
+  --shadow-auth-card: -1px 1px 40px rgba(0, 0, 0, 0.06);
+  /* Back link: 14px/500 with NO line-height (computes normal) */
+  --text-auth-backlink: 14px;
+  --text-auth-backlink--line-height: normal;
 
   /* Auth input type */
   --text-auth-input: 14px;
@@ -1816,48 +1823,10 @@
    Exact Figma: Card width 552px, radius 20px, stroke #E9E9E9,
    padding: 40px 32px, box-shadow: -1px 1px 40px rgba(0,0,0,0.06)
    ========================================================================== */
-.login-resetCard {
-  width: 100%;
-  max-width: 552px;
-  border-radius: 20px;
-  border: 1px solid #E9E9E9;
-  background: #FFFFFF;
-  box-shadow: -1px 1px 40px rgba(0, 0, 0, 0.06);
-  padding: 40px 32px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.login-resetInputWrapper {
-  height: 48px;
-  width: 100%;
-  max-width: 488px;
-  border-radius: 12px;
-  border: 1px solid var(--tuw-border-control, #D1D5DB);
-  background: #FAFAFA;
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  gap: 10px;
-}
-
-.login-resetInput {
-  flex: 1;
-  border: none;
-  background: transparent;
-  font-family: var(--font-main), sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  color: #242424;
-  line-height: 25.6px;
-  letter-spacing: 0.32px;
-  height: 100%;
-}
-
-.login-resetInput::placeholder {
-  color: #9A9A9A;
-}
+/* Login reset view migrated to Tailwind auth-* utilities in LoginPage.tsx (pixel-identical;
+   wrapper border resolved to auth-line via var(), placeholder inherits 16px).
+   Removed: .login-resetCard, .login-resetInputWrapper, .login-resetInput,
+   .login-resetInput::placeholder, .login-backLink. */
 
 /* .login-resetButton migrated to Tailwind in LoginPage.tsx (pixel-identical). */
 
@@ -1926,21 +1895,7 @@
 
 /* .login-recoveryButton migrated to Tailwind in LoginPage.tsx (pixel-identical). */
 
-/* Back link */
-.login-backLink {
-  margin-top: 16px;
-  font-family: var(--font-main), sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  color: #6C6C6C;
-  cursor: pointer;
-  text-align: center;
-}
-
-.login-backLink:hover {
-  color: #242424;
-  text-decoration: underline;
-}
+/* (backLink removed — see reset-view migration comment above) */
 
 /* Subtle corner simulator pill (allows easy simulation of all 5 Figma screens) */
 /* ==========================================================================

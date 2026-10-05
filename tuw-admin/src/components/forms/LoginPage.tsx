@@ -353,27 +353,26 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
               Card width: 552px, radius: 20px, fill: surface token, stroke: auth-line token
               ========================================================================== */}
           {view === 'reset-password' && (
-            <div className={styles.resetCard}>
-              <form className={styles.form} onSubmit={handleResetSubmit}>
-                <div className={styles.fieldGroup} style={{ marginBottom: '24px' }}>
+            <div className="flex w-full max-w-auth-card flex-col gap-6 rounded-auth-card border border-auth-line bg-white shadow-auth-card p-10 px-8">
+              <form className="flex w-full max-w-auth-form flex-col" onSubmit={handleResetSubmit}>
+                <div className="flex w-full flex-col mb-6">
                   <label
                     htmlFor="reset-email-input"
-                    className={styles.fieldLabel}
-                    style={{ fontWeight: 600, letterSpacing: '0.28px' }}
+                    className="text-auth-input tracking-auth-input font-semibold text-auth-ink mb-2"
                   >
                     Email
                   </label>
-                  <div className={styles.resetInputWrapper}>
+                  <div className="flex h-12 w-full max-w-auth-reset items-center gap-2.5 rounded-xl border border-auth-line bg-auth-canvas px-4">
                     <input
                       id="reset-email-input"
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="Enter your email here"
-                      className={styles.resetInput}
+                      className="h-full w-full flex-1 border-none bg-transparent text-auth-input-filled tracking-auth-input-filled font-normal text-auth-ink placeholder:text-auth-faint"
                       required
                     />
-                    <div className={styles.inputIcon}>
+                    <div className="flex items-center justify-center shrink-0 text-auth-faint">
                       <Mail size={20} strokeWidth={1.5} />
                     </div>
                   </div>
@@ -389,7 +388,7 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
               </form>
 
               <div
-                className={styles.backLink}
+                className="mt-4 text-auth-backlink font-medium text-auth-muted cursor-pointer text-center hover:text-auth-ink hover:underline"
                 onClick={() => applyState('default')}
               >
                 Back to log in
