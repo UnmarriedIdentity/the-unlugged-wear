@@ -74,8 +74,8 @@ export default function MonthCalendar({ year, month, range, showPrev, showNext, 
                 'flex h-9 w-full items-center justify-center text-[14px] transition-colors duration-150 cursor-pointer',
                 st === 'idle' && 'font-normal text-primary hover:bg-canvas rounded-full',
                 st === 'in' && 'font-normal text-primary bg-selected',
-                (st === 'start' || st === 'single') && 'font-semibold text-white bg-action-primary rounded-full',
-                st === 'end' && 'font-semibold text-white bg-action-primary rounded-full'
+                (st === 'start' || st === 'single') && 'font-semibold text-white bg-action-primary rounded-lg',
+                st === 'end' && 'font-semibold text-white bg-action-primary rounded-lg'
               )}
             >
               {day.getDate()}
