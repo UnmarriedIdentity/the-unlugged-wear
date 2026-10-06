@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
-import { ArrowUp, BarChart3, ChevronDown } from 'lucide-react';
+import React from 'react';
+import { BarChart3 } from 'lucide-react';
 import { DashboardCard } from './DashboardCard';
+import { FilterMenu } from './FilterMenu';
+import { TrendBadge } from './TrendBadge';
 import EmptyState from '@/components/ui/EmptyState';
 import { SALES_RANGES, type SalesTrendPoint } from '@/hooks/useDashboardData';
 
@@ -37,8 +39,6 @@ export function SalesTrendCard({
   timeRange,
   onRangeChange,
 }: SalesTrendCardProps) {
-  const [menuOpen, setMenuOpen] = useState(false);
-
   return (
     <DashboardCard
       variant="sales"
@@ -56,53 +56,18 @@ export function SalesTrendCard({
             </span>
           </div>
 
-          <div className="relative">
-            <button
-              type="button"
-              className={styles.filterSelectBtn}
-              onClick={() => setMenuOpen((v) => !v)}
-              aria-expanded={menuOpen}
-              aria-haspopup="menu"
-            >
-              <span>{timeRange}</span>
-              <ChevronDown size={14} />
-            </button>
-            {menuOpen && (
-              <>
-                <div
-                  aria-hidden="true"
-                  onClick={() => setMenuOpen(false)}
-                  className="fixed inset-0 z-40 cursor-default"
-                />
-                <div role="menu" className={`${styles.rangeMenu} absolute right-0 top-full z-50 mt-2`}>
-                  {SALES_RANGES.map((range) => (
-                    <button
-                      key={range}
-                      type="button"
-                      role="menuitemradio"
-                      aria-checked={range === timeRange}
-                      className={range === timeRange ? styles.rangeMenuItemSelected : styles.rangeMenuItem}
-                      onClick={() => {
-                        onRangeChange(range);
-                        setMenuOpen(false);
-                      }}
-                    >
-                      {range}
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
+          <FilterMenu
+            options={SALES_RANGES.map((range) => ({ value: range, label: range }))}
+            value={timeRange}
+            onChange={onRangeChange}
+            ariaLabel="Sales time range"
+          />
         </div>
       }
       subheader={
         <div className={styles.salesStatRow}>
           <span className={`${styles.salesLargeNumber} tuw-tabular-nums`}>{total}</span>
-          <span className={styles.trendBadgeGreen}>
-            <ArrowUp size={13} strokeWidth={2.5} />
-            {delta.toFixed(1)}%
-          </span>
+          <TrendBadge value={`${delta.toFixed(1)}%`} iconSize={13} iconStrokeWidth={2.5} />
           <span className={styles.trendSubtext}>{compareLabel}</span>
         </div>
       }

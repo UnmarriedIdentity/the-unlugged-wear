@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { DashboardCard } from './DashboardCard';
+import { SeeAllLink } from './SeeAllLink';
 import type { FulfillmentStatus, OrderItem } from '@/mocks/fixtures';
 
 // Class map - selectors live in src/app/globals.css (single app.css, home- prefix).
@@ -25,9 +26,7 @@ export function RecentOrdersCard({ orders }: RecentOrdersCardProps) {
       variant="orders"
       title="Recent orders"
       action={
-        <Link href="/orders" className={styles.seeAllBtn} style={{ textDecoration: 'none' }}>
-          See all
-        </Link>
+        <SeeAllLink href="/orders" />
       }
     >
       <div className={styles.ordersTableWrapper}>

@@ -1,6 +1,6 @@
 import React from 'react';
-import { ArrowUp } from 'lucide-react';
 import { Sparkline, type SparklineTone } from './Sparkline';
+import { TrendBadge } from './TrendBadge';
 
 // Class map - selectors live in src/app/globals.css (single app.css, home- prefix).
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'home-' + String(p) });
@@ -35,10 +35,7 @@ export function MetricCard({
         <Sparkline tone={sparkTone} label={`${label} trend`} />
       </div>
       <div className={styles.kpiBottomRow}>
-        <span className={deltaTone === 'up' ? styles.trendBadgeGreen : styles.trendBadgeRed}>
-          <ArrowUp size={14} />
-          {delta}
-        </span>
+        <TrendBadge value={delta} tone={deltaTone} />
         <span className={styles.trendVs}>{vsText}</span>
       </div>
     </div>

@@ -1,8 +1,11 @@
 export { DashboardCard, type DashboardCardVariant } from './DashboardCard';
 export { DashboardHeader } from './DashboardHeader';
+export { FilterMenu, type FilterMenuOption } from './FilterMenu';
 export { InventoryAlertsCard } from './InventoryAlertsCard';
 export { MetricCard } from './MetricCard';
 export { ProductListCard } from './ProductListCard';
 export { RecentOrdersCard } from './RecentOrdersCard';
 export { SalesTrendCard } from './SalesTrendCard';
+export { SeeAllLink } from './SeeAllLink';
 export { Sparkline, type SparklineTone } from './Sparkline';
+export { TrendBadge } from './TrendBadge';

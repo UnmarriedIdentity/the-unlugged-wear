@@ -1,6 +1,6 @@
 import React from 'react';
-import Link from 'next/link';
 import { DashboardCard } from './DashboardCard';
+import { SeeAllLink } from './SeeAllLink';
 import type { InventoryAlert } from '@/hooks/useDashboardData';
 
 // Class map - selectors live in src/app/globals.css (single app.css, home- prefix).
@@ -17,9 +17,7 @@ export function InventoryAlertsCard({ alerts }: InventoryAlertsCardProps) {
       title="Inventory alerts"
       subtitle={`${alerts.length} items need attention`}
       action={
-        <Link href="/products" className={styles.seeAllBtn} style={{ textDecoration: 'none' }}>
-          See all
-        </Link>
+        <SeeAllLink href="/products" />
       }
     >
       <div className={styles.alertsList}>

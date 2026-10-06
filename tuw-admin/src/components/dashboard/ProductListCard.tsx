@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Image from 'next/image';
-import { ChevronDown } from 'lucide-react';
 import { DashboardCard } from './DashboardCard';
+import { FilterMenu } from './FilterMenu';
 import { PRODUCT_SORTS, type TopProduct } from '@/hooks/useDashboardData';
 
 // Class map - selectors live in src/app/globals.css (single app.css, home- prefix).
@@ -16,51 +16,17 @@ interface ProductListCardProps {
 }
 
 export function ProductListCard({ products, sort, onSortChange }: ProductListCardProps) {
-  const [menuOpen, setMenuOpen] = useState(false);
-
   return (
     <DashboardCard
       variant="products"
       title="Top product"
       action={
-        <div className="relative">
-          <button
-            type="button"
-            className={styles.filterSelectBtn}
-            onClick={() => setMenuOpen((v) => !v)}
-            aria-expanded={menuOpen}
-            aria-haspopup="menu"
-          >
-            <span>{sort}</span>
-            <ChevronDown size={14} />
-          </button>
-          {menuOpen && (
-            <>
-              <div
-                aria-hidden="true"
-                onClick={() => setMenuOpen(false)}
-                className="fixed inset-0 z-40 cursor-default"
-              />
-              <div role="menu" className={`${styles.rangeMenu} absolute right-0 top-full z-50 mt-2`}>
-                {PRODUCT_SORTS.map((option) => (
-                  <button
-                    key={option}
-                    type="button"
-                    role="menuitemradio"
-                    aria-checked={option === sort}
-                    className={option === sort ? styles.rangeMenuItemSelected : styles.rangeMenuItem}
-                    onClick={() => {
-                      onSortChange(option);
-                      setMenuOpen(false);
-                    }}
-                  >
-                    {option}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
+        <FilterMenu
+          options={PRODUCT_SORTS.map((option) => ({ value: option, label: option }))}
+          value={sort}
+          onChange={onSortChange}
+          ariaLabel="Product sort order"
+        />
       }
     >
       <div className={styles.productList}>
