@@ -28,6 +28,9 @@ interface SpotlightRowProps {
   result: SpotlightResult;
   onJump: (result: SpotlightResult) => void;
   highlight?: string;
+  /** compact: no icon tile, tighter padding, optional use-count chip. */
+  variant?: 'full' | 'compact';
+  count?: number;
 }
 
 // Query-match highlighter (P3): matched substring in action-purple
@@ -62,8 +65,9 @@ function highlightMatch(text: string, term: string): React.ReactNode {
 // Whole-row click jumps (pill is a visual affordance of the same action).
 // Jump-pill reuse verdict: ui Button outline/sm renders 36px tall — too
 // heavy for this pill, so the row owns a token-driven 28px pill instead.
-export function SpotlightRow({ result, onJump, highlight = '' }: SpotlightRowProps) {
+export function SpotlightRow({ result, onJump, highlight = '', variant = 'full', count }: SpotlightRowProps) {
   const tile = TILE_STYLES[result.tileTone];
+  const compact = variant === 'compact';
   return (
     <button
       type="button"
@@ -72,10 +76,10 @@ export function SpotlightRow({ result, onJump, highlight = '' }: SpotlightRowPro
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '12px',
+        gap: compact ? '10px' : '12px',
         width: '100%',
         textAlign: 'left',
-        padding: '10px 12px',
+        padding: compact ? '8px 12px' : '10px 12px',
         borderRadius: 'var(--tuw-radius-card, 12px)',
         backgroundColor: 'transparent',
         border: '1px solid transparent',
@@ -84,6 +88,7 @@ export function SpotlightRow({ result, onJump, highlight = '' }: SpotlightRowPro
         transition: 'background-color 0.15s ease, border-color 0.15s ease',
       }}
     >
+      {compact ? null : (
       <span
         aria-hidden="true"
         className="spot-tile"
@@ -103,6 +108,7 @@ export function SpotlightRow({ result, onJump, highlight = '' }: SpotlightRowPro
       >
         {SCOPE_ICONS[result.scope]}
       </span>
+      )}
       <span style={{ flex: 1, minWidth: 0 }}>
         <span
           style={{
@@ -132,6 +138,25 @@ export function SpotlightRow({ result, onJump, highlight = '' }: SpotlightRowPro
           {highlightMatch(result.subtitle, highlight)}
         </span>
       </span>
+      {compact && typeof count === 'number' && (
+        <span
+          aria-label={`Used ${count} times`}
+          title={`Used ${count} times`}
+          style={{
+            fontSize: '12px',
+            fontWeight: 600,
+            fontFamily: 'var(--font-main)',
+            color: 'var(--tuw-action-primary, #7539FF)',
+            backgroundColor: 'var(--tuw-bg-selected, #F8F5FF)',
+            borderRadius: '9999px',
+            padding: '2px 8px',
+            flexShrink: 0,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          ×{count}
+        </span>
+      )}
       <span
         aria-hidden="true"
         className="spot-jump"

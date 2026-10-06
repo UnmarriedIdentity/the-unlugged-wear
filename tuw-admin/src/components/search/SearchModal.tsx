@@ -227,7 +227,13 @@ export function SearchModal({ orders, products, customers, shipments, onNavigate
                   </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                       {frequent.frequentJumps.map((jump) => (
-                        <SpotlightRow key={jump.id} result={jump} onJump={handleJump} />
+                        <SpotlightRow
+                          key={jump.id}
+                          result={jump}
+                          onJump={handleJump}
+                          variant="compact"
+                          count={jump.count}
+                        />
                       ))}
                     </div>
                   </div>
