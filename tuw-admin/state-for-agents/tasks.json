@@ -8,8 +8,8 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 65,
-    "done": 51,
+    "total": 66,
+    "done": 52,
     "in_progress": 3,
     "backlog": 11
   },
@@ -169,7 +169,7 @@
       "owner": "agent",
       "started": "2026-10-06",
       "finished": "2026-10-06",
-      "log": "v2:5a7c3e3 (Header-only: commands config + recents + focus-based arrows/Enter + ⌘K chip)",
+      "log": "v2:5a7c3e3 (Header-only: commands config + recents + focus-based arrows/Enter + ⌘K chip) + REVERTED v2:ac0e13f for spotlight rebuild",
       "design_match": "yes",
       "key_decisions": [
         "actions reuse store mutations via same guards; executors swap to API calls later",
@@ -179,8 +179,22 @@
       "verified": true,
       "pushed": false,
       "follow_ups": [
-        "human browser check: Ctrl+K, arrows/Enter, retry-syncs toast, recents"
+        "REVERTED for spotlight overhaul track (S0); kbd/prefix/nav return rebuilt in S5/S6"
       ]
+    },
+    {
+      "id": "TL-DASH-S0",
+      "title": "Revert N4 search improvements for spotlight rebuild",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:ac0e13f (git revert of 5a7c3e3; trigger back to icon-only)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
     },
     {
       "id": "TL-DASH-N0",
