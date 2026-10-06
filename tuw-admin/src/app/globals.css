@@ -2549,11 +2549,27 @@
   flex-direction: column;
   gap: 8px;
   background-color: var(--tuw-bg-surface, #FFFFFF);
-  transition: transform 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
 .home-alertItem:hover {
-  transform: translateY(-1px);
+  border-color: #D8DDE3;
+  background-color: #FCFCFD;
+}
+
+/* Severity dot glow on row hover (B6): static halo, not a pulse —
+   attention without infinite motion. */
+.home-alertDotRed,
+.home-alertDotOrange {
+  transition: box-shadow 0.2s ease;
+}
+
+.home-alertItem:hover .home-alertDotRed {
+  box-shadow: 0 0 0 4px rgba(233, 72, 69, 0.15);
+}
+
+.home-alertItem:hover .home-alertDotOrange {
+  box-shadow: 0 0 0 4px rgba(248, 135, 52, 0.18);
 }
 
 .home-alertTopRow {
@@ -2711,6 +2727,12 @@
 .home-orderIdCell {
   font-weight: 600;
   color: var(--tuw-text-primary, #262626);
+  transition: color 0.15s ease;
+}
+
+/* Order id tints purple on row hover (B6) — pairs with the existing row wash. */
+.home-orderDataRow:hover .home-orderIdCell {
+  color: var(--tuw-action-primary, #7539FF);
 }
 
 .home-orderTimeCell {
