@@ -17,6 +17,21 @@ const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'home-' +
 
 const SALES_Y_TICKS = ['₹10K', '₹8K', '₹6K', '₹4K', '₹2K', '₹0'];
 
+// Fixed slot pool (B2, motion skill data-change rule): every feed pads to
+// MAX_SLOTS index-keyed slots so range switches travel through the CSS
+// height transition — including to/from zero — instead of remounting.
+// Empty slots render zero bars, blank labels, and no tooltip.
+const MAX_SLOTS = 7;
+
+function padSlots(points: SalesTrendPoint[]): SalesTrendPoint[] {
+  if (points.length >= MAX_SLOTS) return points.slice(0, MAX_SLOTS);
+  const blanks: SalesTrendPoint[] = Array.from(
+    { length: MAX_SLOTS - points.length },
+    () => ({ day: '', lastWeek: 0, thisWeek: 0, lastVal: '', thisVal: '' }),
+  );
+  return [...points, ...blanks];
+}
+
 interface SalesTrendCardProps {
   points: SalesTrendPoint[];
   total: string;
@@ -45,6 +60,7 @@ export function SalesTrendCard({
   timeRange,
   onRangeChange,
 }: SalesTrendCardProps) {
+  const slots = padSlots(points);
   return (
     <DashboardCard
       variant="sales"
@@ -78,20 +94,22 @@ export function SalesTrendCard({
           onAction={() => onRangeChange('This week')}
         />
       ) : (
-        <ChartFrame ticks={SALES_Y_TICKS} labels={points.map((item) => item.day)}>
-          {points.map((item) => (
+        <ChartFrame ticks={SALES_Y_TICKS} labels={slots.map((item) => item.day)}>
+          {slots.map((item, i) => (
             <BarGroup
-              key={item.day}
-              pastHeight={barHeight(item.lastWeek, points)}
-              currentHeight={barHeight(item.thisWeek, points)}
+              key={`slot-${i}`}
+              pastHeight={barHeight(item.lastWeek, slots)}
+              currentHeight={barHeight(item.thisWeek, slots)}
               tooltip={
-                <ChartTooltip
-                  title={item.day}
-                  rows={[
-                    { series: 'current', label: legendCurrent, value: item.thisVal },
-                    { series: 'past', label: legendPast, value: item.lastVal },
-                  ]}
-                />
+                item.lastWeek === 0 && item.thisWeek === 0 ? null : (
+                  <ChartTooltip
+                    title={item.day}
+                    rows={[
+                      { series: 'current', label: legendCurrent, value: item.thisVal },
+                      { series: 'past', label: legendPast, value: item.lastVal },
+                    ]}
+                  />
+                )
               }
             />
           ))}
