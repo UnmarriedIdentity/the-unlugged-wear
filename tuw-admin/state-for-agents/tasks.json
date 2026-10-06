@@ -8,15 +8,15 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 28,
-    "done": 14,
+    "total": 29,
+    "done": 15,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "v2",
-    "tip": "85dd2d4",
-    "unpushed": [],
+    "tip": "cc65338",
+    "unpushed": ["7943a07", "cc65338"],
     "next_up": "await user computed readouts for collapsed clip; then targeted fix",
     "pending_verifications": [
       "trunk continuous-dark + elbow-only on 1st-4th actives (post Antigravity+z-lift)",
@@ -159,6 +159,24 @@
       ],
       "verified": true,
       "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-D1",
+      "title": "Dashboard data layer: useDashboardData + mock adapter",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:cc65338 (new src/hooks/useDashboardData.ts + HomeView consumes hook)",
+      "design_match": "yes",
+      "key_decisions": [
+        "DashboardAdapter interface (trend/alerts/conversion) swappable later; mock adapter holds Figma Frame 1:20300 values",
+        "live KPIs (revenue/orders/AOV) derive from demo store inside hook; HomeView renders identical JSX",
+        "severity-to-class mapping stays in JSX (ternary); adapter returns data only"
+      ],
+      "verified": true,
+      "pushed": false,
       "follow_ups": []
     },
     {
