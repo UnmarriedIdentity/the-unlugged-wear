@@ -45,7 +45,7 @@ export default function Calendar({ onApply, onClose }: CalendarProps) {
     <div
       role="dialog"
       aria-label="Choose date range"
-      className="flex flex-col gap-5 rounded-modal border border-subtle bg-surface p-5 shadow-popover animate-[calendarIn_0.18s_ease-out]"
+      className="flex flex-col gap-5 rounded-modal border border-subtle bg-surface p-5 shadow-popover"
     >
       <div className="flex gap-5">
         <PresetList active={cal.preset} onSelect={cal.applyPreset} />

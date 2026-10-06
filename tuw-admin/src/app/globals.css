@@ -896,18 +896,6 @@
   }
 }
 
-/* Calendar popover entrance (subtle scale-fade, under reduced-motion rule) */
-@keyframes calendarIn {
-  from {
-    opacity: 0;
-    transform: translateY(-6px) scale(0.99);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
 /* Shared popover motion (M1): enter 180ms ease-out, exit 150ms ease-in
    (faster out). Under prefers-reduced-motion both collapse to instant. */
 @keyframes popoverIn {
