@@ -95,24 +95,28 @@ export function SalesTrendCard({
         />
       ) : (
         <ChartFrame ticks={SALES_Y_TICKS} labels={slots.map((item) => item.day)}>
-          {slots.map((item, i) => (
-            <BarGroup
-              key={`slot-${i}`}
-              pastHeight={barHeight(item.lastWeek, slots)}
-              currentHeight={barHeight(item.thisWeek, slots)}
-              tooltip={
-                item.lastWeek === 0 && item.thisWeek === 0 ? null : (
-                  <ChartTooltip
-                    title={item.day}
-                    rows={[
-                      { series: 'current', label: legendCurrent, value: item.thisVal },
-                      { series: 'past', label: legendPast, value: item.lastVal },
-                    ]}
-                  />
-                )
-              }
-            />
-          ))}
+          {slots.map((item, i) => {
+            const isLive = item.lastWeek !== 0 || item.thisWeek !== 0;
+            return (
+              <BarGroup
+                key={`slot-${i}`}
+                pastHeight={barHeight(item.lastWeek, slots)}
+                currentHeight={barHeight(item.thisWeek, slots)}
+                active={isLive}
+                tooltip={
+                  !isLive ? null : (
+                    <ChartTooltip
+                      title={item.day}
+                      rows={[
+                        { series: 'current', label: legendCurrent, value: item.thisVal },
+                        { series: 'past', label: legendPast, value: item.lastVal },
+                      ]}
+                    />
+                  )
+                }
+              />
+            );
+          })}
         </ChartFrame>
       )}
     </DashboardCard>

@@ -16,23 +16,23 @@ export function ChartFrame({ ticks, labels, children }: ChartFrameProps) {
   return (
     <div className={styles.chartContainer}>
       <div className={`${styles.yAxisLabels} tuw-tabular-nums`}>
-        {ticks.map((tick) => (
-          <span key={tick}>{tick}</span>
+        {ticks.map((tick, i) => (
+          <span key={`tick-${i}`}>{tick}</span>
         ))}
       </div>
 
       <div className={styles.chartPlotArea}>
         <div className={styles.gridLinesWrapper} aria-hidden="true">
-          {ticks.map((tick) => (
-            <div key={tick} className={styles.gridLine} />
+          {ticks.map((tick, i) => (
+            <div key={`grid-${i}`} className={styles.gridLine} />
           ))}
         </div>
 
         <div className={styles.barsArea}>{children}</div>
 
         <div className={styles.xAxisLabels}>
-          {labels.map((label) => (
-            <span key={label} className={styles.xAxisDay}>
+          {labels.map((label, i) => (
+            <span key={`x-${i}`} className={styles.xAxisDay}>
               {label}
             </span>
           ))}

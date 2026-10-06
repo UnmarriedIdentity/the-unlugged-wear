@@ -2218,6 +2218,23 @@
   background-color: rgba(117, 57, 255, 0.04);
 }
 
+/* Empty slot (F1): keeps its grid column for layout rhythm, ignores hover,
+   and hides its bars AFTER the sink transition (visibility flips on a
+   delay, so the animate-to-zero still plays; growing back is instant). */
+.home-barGroupEmpty {
+  pointer-events: none;
+  cursor: default;
+}
+
+.home-barGroupEmpty:hover {
+  background-color: transparent;
+}
+
+.home-barGroupEmpty .home-barColumn {
+  visibility: hidden;
+  transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease, visibility 0s linear 0.4s;
+}
+
 .home-barColumn {
   width: clamp(8px, 1.4vw, 12px);
   border-radius: 6px 6px 2px 2px;
