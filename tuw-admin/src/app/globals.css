@@ -172,6 +172,8 @@
   --shadow-auth-badge: 0 4px 14px rgba(36, 36, 36, 0.15);
   /* Sidebar chrome shadows + type */
   --shadow-nav-logo: 0 2px 6px rgba(0, 0, 0, 0.08);
+  /* Popover elevation (calendar, dropdowns) */
+  --shadow-popover: 0 8px 30px rgba(0, 0, 0, 0.12);
   --text-nav-group: 11px;
   --tracking-nav-group: 0.08em;
   /* Parent/child nav labels: same 13.5px, separate tokens, no line-height declared */
@@ -894,6 +896,30 @@
   }
 }
 
+/* Shared popover motion (M1): enter 180ms ease-out, exit 150ms ease-in
+   (faster out). Under prefers-reduced-motion both collapse to instant. */
+@keyframes popoverIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes popoverOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.99);
+  }
+}
+
 .commandPaletteHeader {
   display: flex;
   align-items: center;
@@ -1574,11 +1600,10 @@
 
 .sub-tableHeaderRow th {
   padding: 14px 16px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  color: var(--tuw-text-secondary, #5D6772);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  color: var(--tuw-text-primary, #262626);
+  letter-spacing: normal;
   text-align: left;
   font-family: var(--font-main);
 }
@@ -1827,8 +1852,16 @@
 }
 
 .home-dateFilterBtn:hover {
-  background-color: #F8FAF9;
-  border-color: #E2E8E8;
+  border-color: var(--tuw-action-primary, #7539FF);
+  color: var(--tuw-action-primary, #7539FF);
+  background-color: var(--tuw-bg-selected, #F8F5FF);
+}
+
+/* Applied-range tint (D7): signals a non-default date filter is active. */
+.home-dateFilterBtnActive {
+  background-color: var(--tuw-bg-selected, #F8F5FF);
+  border-color: var(--tuw-action-primary, #7539FF);
+  color: var(--tuw-action-primary, #7539FF);
 }
 
 /* --------------------------------------------------------------------------
@@ -1836,7 +1869,7 @@
    -------------------------------------------------------------------------- */
 .home-kpiGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
   width: 100%;
   min-width: 0;
@@ -1851,13 +1884,14 @@
   flex-direction: column;
   gap: 8px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
   min-width: 0;
   box-sizing: border-box;
 }
 
 .home-kpiCard:hover {
-  transform: translateY(-1px);
+  border-color: rgba(117, 57, 255, 0.35);
+  background-color: #FBFAFF;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
@@ -2025,6 +2059,47 @@
   background-color: var(--tuw-bg-selected, #F8F5FF);
 }
 
+/* Sales range dropdown menu (D4) — opens from the filter select button. */
+.home-rangeMenu {
+  background-color: var(--tuw-bg-surface, #FFFFFF);
+  border: 1px solid var(--tuw-border-subtle, #E9E9E9);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(38, 38, 38, 0.1);
+  padding: 4px;
+  min-width: 148px;
+  display: flex;
+  flex-direction: column;
+}
+
+.home-rangeMenuItem {
+  background: transparent;
+  border: 0;
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tuw-text-primary, #262626);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.home-rangeMenuItem:hover {
+  background-color: var(--tuw-bg-selected, #F8F5FF);
+  color: var(--tuw-action-primary, #7539FF);
+}
+
+.home-rangeMenuItemSelected {
+  background-color: var(--tuw-bg-selected, #F8F5FF);
+  border: 0;
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tuw-action-primary, #7539FF);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
 .home-salesStatRow {
   display: flex;
   align-items: center;
@@ -2038,6 +2113,17 @@
   font-weight: 700;
   color: var(--tuw-text-primary, #262626);
   letter-spacing: -0.03em;
+  transition: color 0.35s ease;
+}
+
+/* Count-tween direction tints (N2): applied while AnimatedNumber climbs
+   or falls, cleared on settle. Token colors, no layout impact. */
+.home-salesTotalUp {
+  color: var(--tuw-text-success, #187343);
+}
+
+.home-salesTotalDown {
+  color: var(--tuw-text-error, #C91818);
 }
 
 .home-trendBadgeGreen {
@@ -2079,6 +2165,7 @@
   min-width: 38px;
   text-align: right;
   user-select: none;
+  transition: color 0.2s ease;
 }
 
 .home-chartPlotArea {
@@ -2105,6 +2192,7 @@
   width: 100%;
   height: 1px;
   border-bottom: 1px dashed var(--tuw-border-subtle, #EEF0F2);
+  transition: border-color 0.2s ease;
 }
 
 .home-gridLine:last-child {
@@ -2120,7 +2208,7 @@
   height: 100%;
   padding: 0 4px;
   z-index: 2;
-  margin-bottom: 6px;
+  margin-bottom: 2px;
 }
 
 .home-barGroup {
@@ -2131,7 +2219,7 @@
   height: 100%;
   position: relative;
   cursor: pointer;
-  padding: 0 2px 2px 2px;
+  padding: 0 2px;
   border-radius: 8px;
   transition: background-color 0.2s ease;
 }
@@ -2140,10 +2228,27 @@
   background-color: rgba(117, 57, 255, 0.04);
 }
 
+/* Empty slot (F1): keeps its grid column for layout rhythm, ignores hover,
+   and hides its bars AFTER the sink transition (visibility flips on a
+   delay, so the animate-to-zero still plays; growing back is instant). */
+.home-barGroupEmpty {
+  pointer-events: none;
+  cursor: default;
+}
+
+.home-barGroupEmpty:hover {
+  background-color: transparent;
+}
+
+.home-barGroupEmpty .home-barColumn {
+  visibility: hidden;
+  transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease, visibility 0s linear 0.4s;
+}
+
 .home-barColumn {
   width: clamp(8px, 1.4vw, 12px);
   border-radius: 6px 6px 2px 2px;
-  transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s ease, box-shadow 0.2s ease;
+  transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
   position: relative;
 }
 
@@ -2160,12 +2265,24 @@
 .home-barGroup:hover .home-barColumnThisWeek {
   background: linear-gradient(180deg, #874FFF 0%, #7539FF 100%);
   box-shadow: 0 4px 12px rgba(117, 57, 255, 0.35);
-  transform: translateY(-2px);
 }
 
 .home-barGroup:hover .home-barColumnLastWeek {
   background-color: #D6C8F2;
-  transform: translateY(-2px);
+}
+
+/* Card-level axis emphasis (B4): hovering the sales card brightens the
+   gridlines and darkens the Y labels — attention without displacement. */
+.home-salesTrendCard:hover .home-gridLine {
+  border-bottom-color: #D8DDE3;
+}
+
+.home-salesTrendCard:hover .home-gridLine:last-child {
+  border-bottom-color: #C9CED6;
+}
+
+.home-salesTrendCard:hover .home-yAxisLabels {
+  color: var(--tuw-text-secondary, #5D6772);
 }
 
 .home-barTooltip {
@@ -2287,11 +2404,11 @@
   align-items: center;
   gap: 12px;
   background-color: #FFFFFF;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .home-productCardItem:hover {
-  transform: translateY(-1px);
+  border-color: rgba(117, 57, 255, 0.35);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
@@ -2306,6 +2423,16 @@
   flex-shrink: 0;
   overflow: hidden;
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+
+/* In-place thumbnail zoom (B5): image scales inside the clipped frame —
+   attention without displacing the row. */
+.home-productIllustrationWrapper img {
+  transition: transform 0.25s ease;
+}
+
+.home-productCardItem:hover .home-productIllustrationWrapper img {
+  transform: scale(1.05);
 }
 
 .home-productInfo {
@@ -2449,11 +2576,27 @@
   flex-direction: column;
   gap: 8px;
   background-color: var(--tuw-bg-surface, #FFFFFF);
-  transition: transform 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
 .home-alertItem:hover {
-  transform: translateY(-1px);
+  border-color: #D8DDE3;
+  background-color: #FCFCFD;
+}
+
+/* Severity dot glow on row hover (B6): static halo, not a pulse —
+   attention without infinite motion. */
+.home-alertDotRed,
+.home-alertDotOrange {
+  transition: box-shadow 0.2s ease;
+}
+
+.home-alertItem:hover .home-alertDotRed {
+  box-shadow: 0 0 0 4px rgba(233, 72, 69, 0.15);
+}
+
+.home-alertItem:hover .home-alertDotOrange {
+  box-shadow: 0 0 0 4px rgba(248, 135, 52, 0.18);
 }
 
 .home-alertTopRow {
@@ -2575,11 +2718,10 @@
 
 .home-ordersTableHeaderRow th {
   padding: 12px 14px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--tuw-text-secondary, #5D6772);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--tuw-text-primary, #262626);
+  letter-spacing: normal;
   text-align: left;
   font-family: var(--font-main);
 }
@@ -2611,6 +2753,12 @@
 .home-orderIdCell {
   font-weight: 600;
   color: var(--tuw-text-primary, #262626);
+  transition: color 0.15s ease;
+}
+
+/* Order id tints purple on row hover (B6) — pairs with the existing row wash. */
+.home-orderDataRow:hover .home-orderIdCell {
+  color: var(--tuw-action-primary, #7539FF);
 }
 
 .home-orderTimeCell {
@@ -2696,6 +2844,9 @@
   }
   .home-bottomGrid {
     grid-template-columns: 1fr;
+  }
+  .home-kpiGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

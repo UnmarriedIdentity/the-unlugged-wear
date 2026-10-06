@@ -23,5 +23,42 @@ hovers, lifts, fades, drawer slides. One motion language everywhere.
 - ❌ `{open && <Tree/>}` (appears suddenly — nothing to transition).
 - ✅ `duration-[180ms]` preserving a legacy `0.18s` toggle feel.
 - ❌ `duration-200` "close enough" on a specified timing.
-- ✅ `hover:-translate-y-0.5` where the card design specifies lift.
+- ✅ `hover:-translate-y-0.5` only where a legacy design specifies lift and no B1 non-displacing treatment has replaced it.
 - ❌ Adding entrance animations to static content.
+
+## Data changes (B1 — charts, lists, feeds)
+
+- When data changes identity (range switch, filter, live refresh), prefer
+  stable keys + value transitions (height/width/opacity on persistent nodes)
+  over unmount/remount. Mounts pop in; unmounts vanish — neither animates.
+- Pad variable-length feeds to a fixed slot pool with zero-states (blank
+  labels, suppressed tooltips) so enter AND exit travel through the same CSS
+  transition — including to/from zero. Key slots by index, never by label.
+- Never rely on mount/unmount to animate a data change.
+
+## Hover language (B1 — dense admin surfaces)
+
+- Hover feedback must be non-displacing: border tint, background wash,
+  in-place zoom (overflow-hidden thumb + image scale), glow, shadow.
+- No translate/float lifts on cards, rows, or bars — displacement on dense
+  surfaces reads as instability, not delight. Reserve translate for state
+  changes (popover travel, drawer slides, selection moves).
+- Continuous/infinite motion (marching ants, perpetual pulse) is reserved
+  for progress and drop targets — never for resting cards or rows.
+
+## Exit choreography (B1 — closes)
+
+- Closes play the reverse curve, then unmount (`usePopoverAnimation`):
+  exit faster than enter (150ms in / 180ms out is the house ratio), same
+  transform path mirrored.
+- Under `prefers-reduced-motion`, exits collapse to instant unmount —
+  never leave a dead timer wait.
+
+## Good / bad (B1 additions)
+
+- ✅ Index-keyed bar slots that shrink to zero and grow back on range switch.
+- ❌ Label-keyed bars that pop out and pop in when the feed changes shape.
+- ✅ Card hover that tints the border and washes the background in place.
+- ❌ Card hover that floats the whole card upward.
+- ✅ `requestClose()` → exit curve → unmount → parent state sync.
+- ❌ Flipping the open flag and letting the tree vanish mid-frame.

@@ -8,23 +8,24 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 28,
-    "done": 14,
+    "total": 60,
+    "done": 46,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "v2",
-    "tip": "85dd2d4",
-    "unpushed": [],
-    "next_up": "await user computed readouts for collapsed clip; then targeted fix",
+    "tip": "fc9ae6f",
+    "unpushed": ["8e2319d", "ffe23aa", "2fb743a", "7943a07", "cc65338", "63e1cd3", "8f8ffaf", "7412752", "1f8821f", "d5de54e", "986e3c8", "26782eb", "8d55159", "00d43c9", "54adc41", "aaf2557", "049c4e1", "32d4381", "30b432e", "e735a97", "b0d4f52", "774efcc", "9e81c07", "43a3ee6", "31925fe", "2042371", "ef9ea22", "eb620ec", "b5d1df6", "dfbf5cf", "195b8aa", "3f9b5d3", "c2398af", "d65fe51", "cce6092", "09f1f33", "3375ed0", "87541ce", "2125586", "822c153", "14089ec", "2dcd71e", "f5f0657", "41503d6", "b3ee1f5", "18f6a8a", "ec447d6", "bd0d476", "f6ecd93", "c3d94c2", "81dd9da", "695d9c6", "6004bd7", "fc9ae6f"],
+    "next_up": "human feel-check three-beat count + header read, then push v2",
     "pending_verifications": [
+      "dashboard D-series: KPI tiers, range/sort menus, badge mapping, calendar pills, header tint (360/768/1024/1440)",
       "trunk continuous-dark + elbow-only on 1st-4th actives (post Antigravity+z-lift)",
       "R-series parent icons + iconless rows + collapsed icons",
       "settings/help purple hover + black cards",
       "responsive widths 767/768/1023/1024/1440/1920"
     ],
-    "last_updated": "2026-10-05",
+    "last_updated": "2026-10-06",
     "updated_by": "agent"
   },
   "tasks": [
@@ -159,6 +160,543 @@
       ],
       "verified": true,
       "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-W1",
+      "title": "Tint rides to finish, lingers 150ms, melts back over 350ms",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:fc9ae6f (70% early-release deleted; linger timer; color transition 0.2 to 0.35s)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-V1",
+      "title": "Count redesigned: single ease-in-out traverse 1000-1500ms, no pulse, no dock",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:695d9c6 (component rewrite + badge/card strip + land keyframes deleted; V1+V2 as one coherent commit)",
+      "design_match": "yes",
+      "key_decisions": [
+        "dock removed: natural flow restored, resting and mid-tween layout identical to before",
+        "easeInOutCubic replaces hold+expo+land; tint entry/70%-release kept",
+        "defaults now min 1000ms / max 1500ms at >=50% change"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-N3",
+      "title": "AnimatedNumber three-beat count (hold/traverse/land, transient dock, expo)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:bd0d476 (phase machine + dock + expo + numberLand/trendLand keyframes)",
+      "design_match": "yes",
+      "key_decisions": [
+        "hold 180ms with tint = anticipation; tint releases at 70%; land pulse 180ms",
+        "dock sized to wider endpoint, removed on settle — resting DOM byte-identical"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-N4",
+      "title": "Sales landing choreography (badge pops with number)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:f6ecd93 (onLanded drives 220ms TrendBadge landed pop)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-H1",
+      "title": "Dashboard table headers 16px bold",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:c3d94c2 (home headers only; universal 12px sites untouched)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human feel-check: three-beat count both directions + header read"
+      ]
+    },
+    {
+      "id": "TL-DASH-R1",
+      "title": "Revert dashboard status column to right alignment",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:41503d6 (th:last-child + orderStatusCell back to right; T1 typography kept)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-N1",
+      "title": "Numeric sales totals + formatINRWhole helper",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:b3ee1f5 (totalValue per feed; hook/data/card carry numbers, format at render)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-N2",
+      "title": "Global AnimatedNumber count-tween + direction tint on sales total",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:18f6a8a (new ui/AnimatedNumber + barrel + sales tint classes + stat wiring)",
+      "design_match": "yes",
+      "key_decisions": [
+        "800ms floor, 1200ms ceiling at >=50% relative change; ease-out cubic; integer rupees",
+        "tint via props (success/error tokens) so the global stays treatment-free; cleared on settle",
+        "reduced-motion swaps instantly with no tint; rAF cleaned on unmount/supersede"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human feel-check: range switches both directions + reduced-motion"
+      ]
+    },
+    {
+      "id": "TL-DASH-T1",
+      "title": "Universal 12px near-black Title-Case headers; dashboard status left",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:2dcd71e (ui TableHead + home + sub rules to text-primary token; dashboard status cells left)",
+      "design_match": "yes",
+      "key_decisions": [
+        "Title Case needed zero JSX edits (markup already Title Case; caps were CSS-only)",
+        "single TableHead edit propagates to Orders/Customers/design-system tables",
+        "near-black is --tuw-text-primary #262626, not pure #000"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-F2",
+      "title": "Bars seated on baseline (8px float gap removed)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:822c153 (barsArea margin 6 to 2px + barGroup bottom padding 2 to 0; geometry needs exactly 2px)",
+      "design_match": "yes",
+      "key_decisions": [
+        "label rotation has no mechanism in committed code (feed order verified, single slots array, index keys) — attributed to stale dev bundle pending clean-restart verdict"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "user clean-restart verdict on label rotation; runtime probe commit if it persists"
+      ]
+    },
+    {
+      "id": "TL-DASH-F1",
+      "title": "Chart keys unique + zero-bar slivers hidden after sink",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:87541ce (index keys in ChartFrame; BarGroup active flag; barGroupEmpty CSS with delayed visibility)",
+      "design_match": "yes",
+      "key_decisions": [
+        "console error was 3 blank slots sharing key '' (also misplacing X labels per React warning)",
+        "slivers were 1px border + box-shadow on 0-height bars, not data — month feed verified correct",
+        "visibility flips on 0.4s delay so sink plays, then hides; grow-back is instant"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-B1",
+      "title": "Motion skill: data-change, hover-language, exit rules",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:195b8aa (SKILL.md additions + legacy lift line qualified)",
+      "design_match": "yes",
+      "key_decisions": [
+        "marching-ants rejected for cards (false affordance + infinite motion); reserved for progress/drop targets"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-B2",
+      "title": "Slot-pool bars: all range switches animate incl. to/from zero",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:3f9b5d3 (7 index-keyed slots, zero-fill, blank labels, tooltip suppressed on zeros)",
+      "design_match": "yes",
+      "key_decisions": [
+        "empty check stays on raw points so EmptyState remains reachable",
+        "normalization max unaffected by zero padding"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-B3",
+      "title": "KPI hover tint/wash replaces float lift",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:c2398af (CSS only)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-B4",
+      "title": "Sales axis-emphasis hover; bar lifts removed",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:d65fe51 (CSS only; gridline brighten + Y-label darken on card hover)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-B5",
+      "title": "Product thumb zoom + tint replaces row lift",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:cce6092 (CSS only; scale(1.05) inside clipped 72px frame)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-B6",
+      "title": "Alert dot-glow + order-id tint hovers; alert lift removed",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:09f1f33 (CSS only; fourth float found on alertItem also removed)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser feel-check: range switches incl. This month + all card hovers"
+      ]
+    },
+    {
+      "id": "TL-DASH-M1",
+      "title": "Popover motion infra: popoverIn/Out + usePopoverAnimation",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:ef9ea22 (keyframes in globals.css + new src/hooks/usePopoverAnimation.ts)",
+      "design_match": "yes",
+      "key_decisions": [
+        "exit 150ms ease-in, enter 180ms ease-out; reduced-motion unmounts immediately",
+        "parent flips open false; hook plays exit, unmounts, fires onClosed for state sync"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-M2",
+      "title": "FilterMenu enter/exit motion + chevron rotation",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:eb620ec (FilterMenu wired to hook; both dropdowns fixed in one shared change)",
+      "design_match": "yes",
+      "key_decisions": [
+        "chevron rotate-180 with transition-transform per motion skill"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-M3",
+      "title": "Calendar popover enter/exit motion; calendarIn retired",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:b5d1df6 (DashboardHeader owns phase; Calendar root animation removed; calendarIn deleted)",
+      "design_match": "yes",
+      "key_decisions": [
+        "animation lives on parent wrapper (single phase source); fixes date-filter popover too"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser feel-check: menu/calendar open + close + Escape"
+      ]
+    },
+    {
+      "id": "TL-DASH-P1",
+      "title": "Controls: FilterMenu + SeeAllLink + TrendBadge; cards rewired",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:9e81c07 (3 new controls + 5 cards rewired, ~100 duplicated menu lines deleted)",
+      "design_match": "yes",
+      "key_decisions": [
+        "FilterMenu is options/value/onChange dumb; mock or live feeds behave the same",
+        "covers the dashboard button gap (ui/Button has no filter-select variant)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-P2",
+      "title": "Chart atoms: ChartFrame/BarGroup/Tooltip/Legend; sales rewired",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:43a3ee6 (4 new atoms + SalesTrendCard composes them; gridlines driven by ticks)",
+      "design_match": "yes",
+      "key_decisions": [
+        "ChartFrame fluid width, CSS-owned height; any point count renders",
+        "normalization stays in card (pre-normalized heights into BarGroup)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-P3",
+      "title": "Meters: ProgressBar/SegmentedBar/OnlineBadge; cards rewired",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:31925fe (3 new atoms + Product/Inventory/Header rewired)",
+      "design_match": "yes",
+      "key_decisions": [
+        "all meter props are raw data (pct, filled/tone, label) — live values drop in later",
+        "dashboard table stays frozen home-* per scope decision"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-GAP1",
+      "title": "Sales header gap: subheader slot pins stat row to header",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:b0d4f52 (DashboardCard subheader slot + SalesTrendCard stat row moved, extra wrapper removed)",
+      "design_match": "yes",
+      "key_decisions": [
+        "root cause: space-between card went from 2 to 3 flex items in D4, stretching header-stat gap",
+        "fix restores 2-item structure; zero CSS changes; other cards neutral (plain flex-column, no space-between)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser confirm header-stat gap matches reference"
+      ]
+    },
+    {
+      "id": "TL-DASH-D8",
+      "title": "Dashboard sweep: hex/bracket audit, full gates, tracker, report",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "sweep-only, no code commit (typecheck + test 4/4 + build 37/37 re-verified on final stack)",
+      "design_match": "yes",
+      "key_decisions": [
+        "Sparkline SVG hex kept as chart-art (same class as heroOverlay exception)",
+        "no Tailwind arbitrary values in dashboard components (brackets are useState generics/array literals only)",
+        "HomeView 565 to 99 lines: layout + data wiring only"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser verify at 360/768/1024/1440 + push v2"
+      ]
+    },
+    {
+      "id": "TL-DASH-D7",
+      "title": "DashboardHeader: purple filter hover + applied tint + online badge",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:049c4e1 (new DashboardHeader owns label/popover state + dateFilterBtn purple hover + dateFilterBtnActive tint + HomeView slimmed)",
+      "design_match": "yes",
+      "key_decisions": [
+        "dateFilterBtn hover grey to purple (mirrors filterSelectBtn); default resting pixels unchanged",
+        "applied tint only when label != Today via className ternary",
+        "online badge kept verbatim (pulse + 2 online customers) inside header"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-D6",
+      "title": "Calendar C0 review feedback promoted (endpoint pill caps)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:54adc41 (MonthCalendar start/single/end rounded-full to rounded-lg)",
+      "design_match": "yes",
+      "key_decisions": [
+        "photo endpoints are rounded-square band caps, not circles; idle hover stays rounded-full (transient only)",
+        "earlier C0b verdicts stand: purple mapping, dual arrows with push-along"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-D5",
+      "title": "ProductList + InventoryAlerts + RecentOrders cards; status badge fix",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:8d55159 (3 new cards + TopProduct adapter feed + HomeView slimmed to layout + hook wiring)",
+      "design_match": "yes",
+      "key_decisions": [
+        "shipped-only bug fixed via statusBadge map (queued/printing amber, delivered blue, failed red, shipped green) + Title-Case labels",
+        "home-* table/badge classes kept (generic Table/Badge primitives would restyle) — deviation noted",
+        "sort menu: curated default order untouched; By-units-sold reorders desc",
+        "alerts subtitle derives count from data"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-D4",
+      "title": "SalesTrendCard: range menu, normalized bars, empty state",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:986e3c8 (new SalesTrendCard + adapter SalesTrendFeed per-range + home-rangeMenu CSS + HomeView swap)",
+      "design_match": "yes",
+      "key_decisions": [
+        "adapter returns per-range feed (total/delta/legends/compare) — range button now live, kills dead control",
+        "barHeight normalizes vs max(100,...) — default feed heights string-identical to Figma percentages",
+        "empty feed renders ui/EmptyState with working reset action"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-D3",
+      "title": "KPI grid explicit 4-2-1 responsive tiers",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:1f8821f (home-kpiGrid repeat(4) + 2-col at <=1100px; 1-col at <=680px retained; live values already wired D1/D2)",
+      "design_match": "yes",
+      "key_decisions": [
+        "replaced auto-fit minmax(220px,1fr) with explicit tiers; 1440/768/360 paint unchanged, 1024 now 2-col by design"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-D2",
+      "title": "DashboardCard shell + MetricCard + Sparkline; KPIs componentized",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:8f8ffaf (new src/components/dashboard/* + HomeView KPI section uses MetricCard)",
+      "design_match": "yes",
+      "key_decisions": [
+        "Sparkline uses useId gradient ids (removes 3x duplicate sparkGreenGrad ids, identical paint)",
+        "MetricCard tabular prop preserves orders-count non-tabular exception",
+        "DashboardCard variant shell ready for D4/D5 panels"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-D1",
+      "title": "Dashboard data layer: useDashboardData + mock adapter",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:cc65338 (new src/hooks/useDashboardData.ts + HomeView consumes hook)",
+      "design_match": "yes",
+      "key_decisions": [
+        "DashboardAdapter interface (trend/alerts/conversion) swappable later; mock adapter holds Figma Frame 1:20300 values",
+        "live KPIs (revenue/orders/AOV) derive from demo store inside hook; HomeView renders identical JSX",
+        "severity-to-class mapping stays in JSX (ternary); adapter returns data only"
+      ],
+      "verified": true,
+      "pushed": false,
       "follow_ups": []
     },
     {

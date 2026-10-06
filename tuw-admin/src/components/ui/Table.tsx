@@ -75,11 +75,10 @@ export function TableHead({ children, style = {}, ...props }: React.ThHTMLAttrib
     <th
       style={{
         padding: '14px 16px',
-        fontSize: '11px',
+        fontSize: '12px',
         fontWeight: 600,
-        color: 'var(--tuw-text-secondary, #5D6772)',
-        textTransform: 'uppercase',
-        letterSpacing: '0.05em',
+        color: 'var(--tuw-text-primary, #262626)',
+        letterSpacing: 'normal',
         fontFamily: 'var(--font-main)',
         whiteSpace: 'nowrap',
         ...style,

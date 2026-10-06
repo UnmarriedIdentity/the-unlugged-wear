@@ -1,3 +1,6 @@
+export { default as AnimatedNumber } from './AnimatedNumber';
+export type { AnimatedNumberProps } from './AnimatedNumber';
+
 export { default as Button } from './Button';
 export type { ButtonProps } from './Button';
 
