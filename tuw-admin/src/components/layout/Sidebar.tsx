@@ -253,7 +253,7 @@ export default function Sidebar({
       onClick={handleSidebarClick}
     >
       {/* Brand Header */}
-      <div className={cn('flex w-full shrink-0 items-center bg-canvas border-b border-subtle mb-2 z-10', isCollapsed ? 'h-16 min-h-16 justify-center p-0' : 'h-15 min-h-15 justify-between px-1')}>
+      <div className={cn('flex w-full shrink-0 items-center bg-canvas border-b border-subtle mb-2 z-10 h-20 min-h-20', isCollapsed ? 'justify-center p-0' : 'justify-between px-1')}>
         <Link href="/" className="flex items-center gap-2.5 no-underline text-primary">
           <div className="flex size-8 shrink-0 items-center justify-center rounded-control bg-primary shadow-nav-logo">
             <Image
