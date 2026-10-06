@@ -8,15 +8,15 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 29,
-    "done": 15,
+    "total": 30,
+    "done": 16,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "v2",
-    "tip": "cc65338",
-    "unpushed": ["7943a07", "cc65338"],
+    "tip": "8f8ffaf",
+    "unpushed": ["7943a07", "cc65338", "63e1cd3", "8f8ffaf"],
     "next_up": "await user computed readouts for collapsed clip; then targeted fix",
     "pending_verifications": [
       "trunk continuous-dark + elbow-only on 1st-4th actives (post Antigravity+z-lift)",
@@ -159,6 +159,24 @@
       ],
       "verified": true,
       "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-D2",
+      "title": "DashboardCard shell + MetricCard + Sparkline; KPIs componentized",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:8f8ffaf (new src/components/dashboard/* + HomeView KPI section uses MetricCard)",
+      "design_match": "yes",
+      "key_decisions": [
+        "Sparkline uses useId gradient ids (removes 3x duplicate sparkGreenGrad ids, identical paint)",
+        "MetricCard tabular prop preserves orders-count non-tabular exception",
+        "DashboardCard variant shell ready for D4/D5 panels"
+      ],
+      "verified": true,
+      "pushed": false,
       "follow_ups": []
     },
     {
