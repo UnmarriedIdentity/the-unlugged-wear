@@ -70,34 +70,46 @@ export function sameDay(a: Date | null, b: Date | null): boolean {
  */
 export function useCalendarRange(today: Date = new Date()) {
   const now = useMemo(() => startOfDay(today), [today.getTime()]);
-  const [window, setWindow] = useState(() => {
+  // Independent panel months (left starts one behind). Push-along guard below
+  // keeps two distinct months: panels never meet, arrows never dead-end.
+  const [left, setLeft] = useState(() => {
     const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const cur = new Date(now.getFullYear(), now.getMonth(), 1);
-    return {
-      left: { year: prev.getFullYear(), month: prev.getMonth() },
-      right: { year: cur.getFullYear(), month: cur.getMonth() },
-    };
+    return { year: prev.getFullYear(), month: prev.getMonth() };
   });
+  const [right, setRight] = useState(() => ({ year: now.getFullYear(), month: now.getMonth() }));
   const [draft, setDraft] = useState<DateRange>({ start: null, end: null });
   const [committed, setCommitted] = useState<DateRange>({ start: null, end: null });
   const [preset, setPreset] = useState<PresetKey | 'custom' | null>(null);
 
-  const keyOf = (m: { year: number; month: number }) => m.year * 12 + m.month;
-  const fromKey = (k: number) => ({ year: Math.floor(k / 12), month: k % 12 });
-
-  // Independent panels with push-along guard: the two months always differ.
-  // Pure updaters (no nested setters) so StrictMode double-invoke stays safe.
   const shiftLeft = useCallback((dir: 1 | -1) => {
-    setWindow((w) => {
-      const next = fromKey(keyOf(w.left) + dir);
-      return { left: next, right: keyOf(next) >= keyOf(w.right) ? fromKey(keyOf(next) + 1) : w.right };
+    setLeft((l) => {
+      const next = new Date(l.year, l.month + dir, 1);
+      const nextKey = { year: next.getFullYear(), month: next.getMonth() };
+      setRight((r) => {
+        // Push-along: left may never reach or pass right.
+        if (nextKey.year > r.year || (nextKey.year === r.year && nextKey.month >= r.month)) {
+          const pushed = new Date(nextKey.year, nextKey.month + 1, 1);
+          return { year: pushed.getFullYear(), month: pushed.getMonth() };
+        }
+        return r;
+      });
+      return nextKey;
     });
   }, []);
 
   const shiftRight = useCallback((dir: 1 | -1) => {
-    setWindow((w) => {
-      const next = fromKey(keyOf(w.right) + dir);
-      return { left: keyOf(next) <= keyOf(w.left) ? fromKey(keyOf(next) - 1) : w.left, right: next };
+    setRight((r) => {
+      const next = new Date(r.year, r.month + dir, 1);
+      const nextKey = { year: next.getFullYear(), month: next.getMonth() };
+      setLeft((l) => {
+        // Push-along: right may never reach or pass left.
+        if (nextKey.year < l.year || (nextKey.year === l.year && nextKey.month <= l.month)) {
+          const pushed = new Date(nextKey.year, nextKey.month - 1, 1);
+          return { year: pushed.getFullYear(), month: pushed.getMonth() };
+        }
+        return l;
+      });
+      return nextKey;
     });
   }, []);
 
@@ -143,7 +155,7 @@ export function useCalendarRange(today: Date = new Date()) {
   }, []);
 
   return {
-    months: [window.left, window.right],
+    months: [left, right],
     shiftLeft,
     shiftRight,
     draft,
