@@ -8,14 +8,14 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 52,
-    "done": 38,
+    "total": 55,
+    "done": 41,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "v2",
-    "tip": "2dcd71e",
+    "tip": "18f6a8a",
     "unpushed": ["8e2319d", "ffe23aa", "2fb743a", "7943a07", "cc65338", "63e1cd3", "8f8ffaf", "7412752", "1f8821f", "d5de54e", "986e3c8", "26782eb", "8d55159", "00d43c9", "54adc41", "aaf2557", "049c4e1", "32d4381", "30b432e", "e735a97", "b0d4f52", "774efcc", "9e81c07", "43a3ee6", "31925fe", "2042371", "ef9ea22", "eb620ec", "b5d1df6", "dfbf5cf", "195b8aa", "3f9b5d3", "c2398af", "d65fe51", "cce6092", "09f1f33", "3375ed0", "87541ce", "2125586", "822c153", "14089ec", "2dcd71e"],
     "next_up": "human browser verify dashboard (360/768/1024/1440, ranges, sort, calendar) then push v2",
     "pending_verifications": [
@@ -161,6 +161,54 @@
       "verified": true,
       "pushed": true,
       "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-R1",
+      "title": "Revert dashboard status column to right alignment",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:41503d6 (th:last-child + orderStatusCell back to right; T1 typography kept)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-N1",
+      "title": "Numeric sales totals + formatINRWhole helper",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:b3ee1f5 (totalValue per feed; hook/data/card carry numbers, format at render)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-N2",
+      "title": "Global AnimatedNumber count-tween + direction tint on sales total",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:18f6a8a (new ui/AnimatedNumber + barrel + sales tint classes + stat wiring)",
+      "design_match": "yes",
+      "key_decisions": [
+        "800ms floor, 1200ms ceiling at >=50% relative change; ease-out cubic; integer rupees",
+        "tint via props (success/error tokens) so the global stays treatment-free; cleared on settle",
+        "reduced-motion swaps instantly with no tint; rAF cleaned on unmount/supersede"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human feel-check: range switches both directions + reduced-motion"
+      ]
     },
     {
       "id": "TL-DASH-T1",
