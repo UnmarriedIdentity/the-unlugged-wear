@@ -1,6 +1,7 @@
 import React from 'react';
 import { DashboardCard } from './DashboardCard';
 import { SeeAllLink } from './SeeAllLink';
+import { SegmentedBar } from './SegmentedBar';
 import type { InventoryAlert } from '@/hooks/useDashboardData';
 
 // Class map - selectors live in src/app/globals.css (single app.css, home- prefix).
@@ -36,20 +37,7 @@ export function InventoryAlertsCard({ alerts }: InventoryAlertsCardProps) {
               <span className={styles.alertVelocity}>{alert.velocity}</span>
             </div>
 
-            <div className={styles.segmentedBar}>
-              {[1, 2, 3, 4, 5].map((idx) => (
-                <div
-                  key={idx}
-                  className={`${styles.barSegment} ${
-                    idx <= alert.filledSegments
-                      ? alert.severity === 'Critical'
-                        ? styles.segmentFilledRed
-                        : styles.segmentFilledOrange
-                      : styles.segmentEmpty
-                  }`}
-                />
-              ))}
-            </div>
+            <SegmentedBar filled={alert.filledSegments} tone={alert.severity === 'Critical' ? 'red' : 'orange'} />
           </div>
         ))}
       </div>

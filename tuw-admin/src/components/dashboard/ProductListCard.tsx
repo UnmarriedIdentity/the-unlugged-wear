@@ -4,6 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import { DashboardCard } from './DashboardCard';
 import { FilterMenu } from './FilterMenu';
+import { ProgressBar } from './ProgressBar';
 import { PRODUCT_SORTS, type TopProduct } from '@/hooks/useDashboardData';
 
 // Class map - selectors live in src/app/globals.css (single app.css, home- prefix).
@@ -50,12 +51,7 @@ export function ProductListCard({ products, sort, onSortChange }: ProductListCar
                 <span className={styles.productSoldGray}>/{product.soldTotal} Sold</span>
               </div>
               <span className={styles.productStock}>{product.stockLabel}</span>
-              <div className={styles.productProgressContainer}>
-                <div className={styles.progressBarTrack}>
-                  <div className={styles.progressBarFill} style={{ width: `${product.progressPct}%` }} />
-                </div>
-                <span className={styles.progressPercentText}>{product.progressPct}%</span>
-              </div>
+              <ProgressBar pct={product.progressPct} />
             </div>
           </div>
         ))}

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Calendar } from 'lucide-react';
 import { Calendar as DateRangeCalendar } from '@/components/calendar';
+import { OnlineBadge } from './OnlineBadge';
 import type { DateRange } from '@/hooks/useCalendarRange';
 
 // Class map - selectors live in src/app/globals.css (single app.css, home- prefix).
@@ -30,10 +31,7 @@ export function DashboardHeader({ title, subtitle, onlineLabel = '2 online custo
       </div>
 
       <div className={styles.welcomeControls}>
-        <div className={styles.onlineBadge}>
-          <span className={styles.pulseDot} />
-          <span>{onlineLabel}</span>
-        </div>
+        <OnlineBadge label={onlineLabel} />
 
         <div className="relative">
           <button
