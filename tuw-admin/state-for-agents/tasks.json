@@ -8,8 +8,8 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 68,
-    "done": 54,
+    "total": 69,
+    "done": 55,
     "in_progress": 3,
     "backlog": 11
   },
@@ -181,6 +181,20 @@
       "follow_ups": [
         "REVERTED for spotlight overhaul track (S0); kbd/prefix/nav return rebuilt in S5/S6"
       ]
+    },
+    {
+      "id": "TL-DASH-G2",
+      "title": "Rule 06 hardened: protected modals, forbidden commits, merge refusal gate",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:6a00935 (sections 5-7: protected inventory, hard stops, 7 refusal conditions)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
     },
     {
       "id": "TL-DASH-G1",
