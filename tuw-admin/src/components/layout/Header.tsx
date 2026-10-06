@@ -52,18 +52,13 @@ export default function Header({
     orders,
     products,
     customers,
-    canPerformAction,
-    retryFulfillment,
-    showToast,
   } = useAdminState();
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [recentQueries, setRecentQueries] = useState<string[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const notifAnim = usePopoverAnimation(showNotifications, () => setShowNotifications(false));
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const paletteDialogRef = useRef<HTMLDivElement>(null);
 
   // Keyboard shortcut Ctrl+K / Cmd+K and Escape
   useEffect(() => {
@@ -92,71 +87,9 @@ export default function Header({
   }, [isSearchOpen]);
 
   const handleNavigate = (href: string) => {
-    const q = searchQuery.trim();
-    if (q) {
-      setRecentQueries((prev) => [q, ...prev.filter((r) => r.toLowerCase() !== q.toLowerCase())].slice(0, 5));
-    }
     setIsSearchOpen(false);
     router.push(href);
   };
-
-  // Arrow-key navigation across palette items (N4): moves DOM focus so the
-  // existing focus-visible treatment marks the active row; Enter runs it.
-  const handlePaletteKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp' && e.key !== 'Enter') return;
-    const root = paletteDialogRef.current;
-    if (!root) return;
-    const items = Array.from(root.querySelectorAll<HTMLButtonElement>('.commandPaletteItem'));
-    if (items.length === 0) return;
-    const active = document.activeElement as HTMLElement | null;
-    const at = items.findIndex((el) => el === active);
-    if (e.key === 'Enter') {
-      if (at >= 0) {
-        e.preventDefault();
-        items[at].click();
-      }
-      return;
-    }
-    e.preventDefault();
-    const next = e.key === 'ArrowDown' ? (at + 1) % items.length : (at - 1 + items.length) % items.length;
-    items[next].focus();
-  };
-
-  // Action commands (N4): navigation + guarded mutations, filtered by query.
-  // Executors call the same store mutations as the pages (API calls later).
-  const failedSyncs = orders.filter((o) => o.fulfillmentStatus === 'submission_failed');
-  const actionCommands = [
-    { id: 'go-orders', label: 'Go to Orders', hint: 'Navigation', icon: <ClipboardList size={16} />, run: () => handleNavigate('/orders') },
-    { id: 'go-products', label: 'Go to Products', hint: 'Navigation', icon: <Package size={16} />, run: () => handleNavigate('/products') },
-    { id: 'go-customers', label: 'Go to Customers', hint: 'Navigation', icon: <Users size={16} />, run: () => handleNavigate('/customers') },
-    { id: 'go-fulfillment', label: 'Go to Fulfillment', hint: 'Navigation', icon: <Sparkles size={16} />, run: () => handleNavigate('/fulfillment') },
-  ];
-  const canRetrySyncs = canPerformAction('fulfillment') && failedSyncs.length > 0;
-  const retryCommand = canRetrySyncs
-    ? [
-        {
-          id: 'retry-syncs',
-          label: `Retry ${failedSyncs.length} failed partner sync${failedSyncs.length === 1 ? '' : 's'}`,
-          hint: 'Demo action',
-          icon: <RotateCcw size={16} />,
-          run: async () => {
-            let ok = 0;
-            for (const o of failedSyncs) {
-              if (await retryFulfillment(o.id)) ok += 1;
-            }
-            showToast({
-              type: ok === failedSyncs.length ? 'success' : 'warning',
-              title: 'Demo sync retry',
-              description: `${ok} of ${failedSyncs.length} queued orders re-submitted (no live partner call).`,
-            });
-            setIsSearchOpen(false);
-          },
-        },
-      ]
-    : [];
-  const allCommands = [...actionCommands, ...retryCommand];
-  const q = searchQuery.trim().toLowerCase();
-  const matchingCommands = allCommands.filter((c) => !q || c.label.toLowerCase().includes(q));
 
   const pendingIssuesCount =
     orders.filter((o) => o.fulfillmentStatus === 'submission_failed').length +
@@ -278,22 +211,6 @@ export default function Header({
               onClick={() => setIsSearchOpen(true)}
             >
               <Search size={18} />
-              <kbd
-                aria-hidden="true"
-                style={{
-                  fontSize: '11px',
-                  fontWeight: 600,
-                  fontFamily: 'var(--font-main)',
-                  color: 'var(--tuw-text-secondary, #5D6772)',
-                  backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)',
-                  border: '1px solid var(--tuw-border-subtle, #E5E7EB)',
-                  borderRadius: '4px',
-                  padding: '1px 5px',
-                  lineHeight: 1.4,
-                }}
-              >
-                ⌘K
-              </kbd>
             </button>
 
             {/* Notification Bell */}
@@ -383,10 +300,8 @@ export default function Header({
           onClick={() => setIsSearchOpen(false)}
         >
           <div
-            ref={paletteDialogRef}
             className="commandPaletteDialog"
             onClick={(e) => e.stopPropagation()}
-            onKeyDown={handlePaletteKeyDown}
             role="dialog"
             aria-modal="true"
             aria-label="Global search command palette"
@@ -435,8 +350,7 @@ export default function Header({
                   {filteredOrders.length === 0 &&
                   filteredProducts.length === 0 &&
                   filteredCustomers.length === 0 &&
-                  filteredNav.length === 0 &&
-                  matchingCommands.length === 0 ? (
+                  filteredNav.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '36px 16px', color: 'var(--tuw-text-secondary, #5D6772)' }}>
                       <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', margin: '0 0 6px' }}>
                         No matches found
@@ -447,32 +361,6 @@ export default function Header({
                     </div>
                   ) : (
                     <>
-                      {/* Action Commands */}
-                      {matchingCommands.length > 0 && (
-                        <div>
-                          <div className="commandPaletteSectionTitle">Actions</div>
-                          {matchingCommands.map((cmd) => (
-                            <button
-                              key={cmd.id}
-                              type="button"
-                              className="commandPaletteItem"
-                              onClick={() => void cmd.run()}
-                            >
-                              <div className="commandPaletteItemLeft">
-                                <div className="commandPaletteItemIcon">
-                                  {cmd.icon}
-                                </div>
-                                <div className="commandPaletteItemText">
-                                  <span className="commandPaletteItemTitle">{cmd.label}</span>
-                                  <span className="commandPaletteItemSubtitle">{cmd.hint} · Enter to run</span>
-                                </div>
-                              </div>
-                              <ArrowRight size={14} color="#90979F" />
-                            </button>
-                          ))}
-                        </div>
-                      )}
-
                       {/* Matching Orders */}
                       {filteredOrders.length > 0 && (
                         <div>
@@ -586,54 +474,8 @@ export default function Header({
                   )}
                 </>
               ) : (
-                /* Empty state - Recents, Actions, Quick Jump Shortcuts */
+                /* Empty state - Quick Jump Shortcuts */
                 <div>
-                  {recentQueries.length > 0 && (
-                    <div>
-                      <div className="commandPaletteSectionTitle">Recent Searches</div>
-                      {recentQueries.map((recent) => (
-                        <button
-                          key={recent}
-                          type="button"
-                          className="commandPaletteItem"
-                          onClick={() => setSearchQuery(recent)}
-                        >
-                          <div className="commandPaletteItemLeft">
-                            <div className="commandPaletteItemIcon">
-                              <Search size={16} />
-                            </div>
-                            <div className="commandPaletteItemText">
-                              <span className="commandPaletteItemTitle">{recent}</span>
-                              <span className="commandPaletteItemSubtitle">Search again</span>
-                            </div>
-                          </div>
-                          <ArrowRight size={14} color="#90979F" />
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  <div>
-                    <div className="commandPaletteSectionTitle">Actions</div>
-                    {matchingCommands.map((cmd) => (
-                      <button
-                        key={cmd.id}
-                        type="button"
-                        className="commandPaletteItem"
-                        onClick={() => void cmd.run()}
-                      >
-                        <div className="commandPaletteItemLeft">
-                          <div className="commandPaletteItemIcon">
-                            {cmd.icon}
-                          </div>
-                          <div className="commandPaletteItemText">
-                            <span className="commandPaletteItemTitle">{cmd.label}</span>
-                            <span className="commandPaletteItemSubtitle">{cmd.hint} · Enter to run</span>
-                          </div>
-                        </div>
-                        <ArrowRight size={14} color="#90979F" />
-                      </button>
-                    ))}
-                  </div>
                   <div className="commandPaletteSectionTitle">Quick Navigation</div>
                   {quickLinks.map((item) => (
                     <button
