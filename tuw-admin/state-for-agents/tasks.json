@@ -8,8 +8,8 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 75,
-    "done": 61,
+    "total": 79,
+    "done": 65,
     "in_progress": 3,
     "backlog": 11
   },
@@ -259,6 +259,72 @@
       "verified": true,
       "pushed": false,
       "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-SP1",
+      "title": "Frequent searches engine with jump-back and curated defaults",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:dd70dc7 (useFrequentQueries + popular targets + modal wiring + reset clear)",
+      "design_match": "yes",
+      "key_decisions": [
+        "localStorage counts ranked top-5 + top-3 jumps; injectable seam for server counts later",
+        "return shape frozen so a DB adapter swaps internals unchanged"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-SP2",
+      "title": "Spotlight micro-interactions: border light-up, counts, sticky, footer",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:537ffbc (tile border tint + Jump fill + focus tint + sticky/counts/footer)",
+      "design_match": "yes",
+      "key_decisions": [
+        "tile-scale idea rejected: KPI-card border language instead, zero scale in system"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-SP3",
+      "title": "Query-match highlighting in spotlight rows",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:4f98d6c (action-purple semibold, regex-escaped, prefix-aware term)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-SP4",
+      "title": "Admin scrollbar language with gray pill tokens",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:7646bb0 (3 tokens + global overlay-gutter rules + skill codified)",
+      "design_match": "yes",
+      "key_decisions": [
+        "8px overlay gutters + padding-box clip = zero layout shift; arrows explicitly none",
+        "sidebar/nav hidden exceptions win by specificity and stay documented"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser review: frequent ranking, hovers, highlights, scrollbars everywhere"
+      ]
     },
     {
       "id": "TL-DASH-S7",
