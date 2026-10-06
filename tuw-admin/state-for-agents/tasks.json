@@ -8,15 +8,15 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 51,
-    "done": 37,
+    "total": 52,
+    "done": 38,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "v2",
-    "tip": "822c153",
-    "unpushed": ["8e2319d", "ffe23aa", "2fb743a", "7943a07", "cc65338", "63e1cd3", "8f8ffaf", "7412752", "1f8821f", "d5de54e", "986e3c8", "26782eb", "8d55159", "00d43c9", "54adc41", "aaf2557", "049c4e1", "32d4381", "30b432e", "e735a97", "b0d4f52", "774efcc", "9e81c07", "43a3ee6", "31925fe", "2042371", "ef9ea22", "eb620ec", "b5d1df6", "dfbf5cf", "195b8aa", "3f9b5d3", "c2398af", "d65fe51", "cce6092", "09f1f33", "3375ed0", "87541ce", "2125586", "822c153"],
+    "tip": "2dcd71e",
+    "unpushed": ["8e2319d", "ffe23aa", "2fb743a", "7943a07", "cc65338", "63e1cd3", "8f8ffaf", "7412752", "1f8821f", "d5de54e", "986e3c8", "26782eb", "8d55159", "00d43c9", "54adc41", "aaf2557", "049c4e1", "32d4381", "30b432e", "e735a97", "b0d4f52", "774efcc", "9e81c07", "43a3ee6", "31925fe", "2042371", "ef9ea22", "eb620ec", "b5d1df6", "dfbf5cf", "195b8aa", "3f9b5d3", "c2398af", "d65fe51", "cce6092", "09f1f33", "3375ed0", "87541ce", "2125586", "822c153", "14089ec", "2dcd71e"],
     "next_up": "human browser verify dashboard (360/768/1024/1440, ranges, sort, calendar) then push v2",
     "pending_verifications": [
       "dashboard D-series: KPI tiers, range/sort menus, badge mapping, calendar pills, header tint (360/768/1024/1440)",
@@ -160,6 +160,24 @@
       ],
       "verified": true,
       "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-T1",
+      "title": "Universal 12px near-black Title-Case headers; dashboard status left",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:2dcd71e (ui TableHead + home + sub rules to text-primary token; dashboard status cells left)",
+      "design_match": "yes",
+      "key_decisions": [
+        "Title Case needed zero JSX edits (markup already Title Case; caps were CSS-only)",
+        "single TableHead edit propagates to Orders/Customers/design-system tables",
+        "near-black is --tuw-text-primary #262626, not pure #000"
+      ],
+      "verified": true,
+      "pushed": false,
       "follow_ups": []
     },
     {
