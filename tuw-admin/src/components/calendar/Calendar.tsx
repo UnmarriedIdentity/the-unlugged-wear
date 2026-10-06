@@ -54,7 +54,7 @@ export default function Calendar({ onApply, onClose }: CalendarProps) {
           month={leftMonth.month}
           range={cal.draft}
           showPrev
-          showNext={false}
+          showNext
           onPrev={() => cal.shiftLeft(-1)}
           onNext={() => cal.shiftLeft(1)}
           onPick={cal.pickDay}
@@ -63,7 +63,7 @@ export default function Calendar({ onApply, onClose }: CalendarProps) {
           year={rightMonth.year}
           month={rightMonth.month}
           range={cal.draft}
-          showPrev={false}
+          showPrev
           showNext
           onPrev={() => cal.shiftRight(-1)}
           onNext={() => cal.shiftRight(1)}

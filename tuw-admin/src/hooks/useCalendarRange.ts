@@ -70,48 +70,48 @@ export function sameDay(a: Date | null, b: Date | null): boolean {
  */
 export function useCalendarRange(today: Date = new Date()) {
   const now = useMemo(() => startOfDay(today), [today.getTime()]);
-  // Independent panel months (left starts one behind). Push-along guard below
-  // keeps two distinct months: panels never meet, arrows never dead-end.
+  // Independent panel months (right starts one ahead). Navigating a panel past
+  // its sibling pushes the sibling along so the two never meet or cross.
   const [left, setLeft] = useState(() => {
     const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     return { year: prev.getFullYear(), month: prev.getMonth() };
   });
-  const [right, setRight] = useState(() => ({ year: now.getFullYear(), month: now.getMonth() }));
+  const [right, setRight] = useState(() => {
+    return { year: now.getFullYear(), month: now.getMonth() };
+  });
   const [draft, setDraft] = useState<DateRange>({ start: null, end: null });
   const [committed, setCommitted] = useState<DateRange>({ start: null, end: null });
   const [preset, setPreset] = useState<PresetKey | 'custom' | null>(null);
 
-  const shiftLeft = useCallback((dir: 1 | -1) => {
-    setLeft((l) => {
-      const next = new Date(l.year, l.month + dir, 1);
-      const nextKey = { year: next.getFullYear(), month: next.getMonth() };
-      setRight((r) => {
-        // Push-along: left may never reach or pass right.
-        if (nextKey.year > r.year || (nextKey.year === r.year && nextKey.month >= r.month)) {
-          const pushed = new Date(nextKey.year, nextKey.month + 1, 1);
-          return { year: pushed.getFullYear(), month: pushed.getMonth() };
-        }
-        return r;
-      });
-      return nextKey;
-    });
-  }, []);
+  const step = (ym: { year: number; month: number }, dir: 1 | -1) => {
+    const d = new Date(ym.year, ym.month + dir, 1);
+    return { year: d.getFullYear(), month: d.getMonth() };
+  };
 
-  const shiftRight = useCallback((dir: 1 | -1) => {
-    setRight((r) => {
-      const next = new Date(r.year, r.month + dir, 1);
-      const nextKey = { year: next.getFullYear(), month: next.getMonth() };
-      setLeft((l) => {
-        // Push-along: right may never reach or pass left.
-        if (nextKey.year < l.year || (nextKey.year === l.year && nextKey.month <= l.month)) {
-          const pushed = new Date(nextKey.year, nextKey.month - 1, 1);
-          return { year: pushed.getFullYear(), month: pushed.getMonth() };
-        }
-        return l;
-      });
-      return nextKey;
-    });
-  }, []);
+  const before = (a: { year: number; month: number }, b: { year: number; month: number }) =>
+    a.year < b.year || (a.year === b.year && a.month < b.month);
+
+  const shiftLeft = useCallback(
+    (dir: 1 | -1) => {
+      const next = step(left, dir);
+      if (!before(next, right)) {
+        setRight(step(next, 1));
+      }
+      setLeft(next);
+    },
+    [left, right]
+  );
+
+  const shiftRight = useCallback(
+    (dir: 1 | -1) => {
+      const next = step(right, dir);
+      if (!before(left, next)) {
+        setLeft(step(next, -1));
+      }
+      setRight(next);
+    },
+    [left, right]
+  );
 
   const applyPreset = useCallback(
     (key: PresetKey) => {
@@ -155,6 +155,8 @@ export function useCalendarRange(today: Date = new Date()) {
   }, []);
 
   return {
+    left,
+    right,
     months: [left, right],
     shiftLeft,
     shiftRight,
