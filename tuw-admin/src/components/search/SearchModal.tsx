@@ -43,6 +43,19 @@ export function SearchModal({ orders, products, customers, shipments, onNavigate
   const showingHome = query.trim() === '';
   const hasFrequent = frequent.topQueries.length > 0 || frequent.frequentJumps.length > 0;
 
+  // Shared section heading: sticky over the scroll list with surface blur.
+  const sectionTitle: React.CSSProperties = {
+    fontSize: '11px',
+    fontWeight: 600,
+    letterSpacing: '0.04em',
+    color: 'var(--tuw-text-secondary, #5D6772)',
+    padding: '4px 12px 6px',
+    position: 'sticky',
+    top: -12,
+    backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
+    zIndex: 1,
+  };
+
   const handleJump = (result: SpotlightResult) => {
     frequent.record(query, result);
     onNavigate(result.href);
@@ -93,15 +106,17 @@ export function SearchModal({ orders, products, customers, shipments, onNavigate
         animation: 'commandSlideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
       }}
     >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          padding: '16px 16px 16px 20px',
-          borderBottom: '1px solid var(--tuw-border-subtle, #E5E7EB)',
-        }}
-      >
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '16px 16px 16px 20px',
+                  borderBottom: '1px solid var(--tuw-border-subtle, #E5E7EB)',
+                  transition: 'border-color 0.15s ease',
+                }}
+                className="spot-inputrow"
+              >
         <span
           aria-hidden="true"
           style={{
@@ -175,17 +190,9 @@ export function SearchModal({ orders, products, customers, shipments, onNavigate
               <>
                 {frequent.topQueries.length > 0 && (
                   <div>
-                    <div
-                      style={{
-                        fontSize: '11px',
-                        fontWeight: 600,
-                        letterSpacing: '0.04em',
-                        color: 'var(--tuw-text-secondary, #5D6772)',
-                        padding: '0 12px 6px',
-                      }}
-                    >
-                      Frequent Searches
-                    </div>
+                  <div style={sectionTitle}>
+                    Frequent Searches
+                  </div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', padding: '0 12px' }}>
                       {frequent.topQueries.map((q) => (
                         <button
@@ -212,17 +219,9 @@ export function SearchModal({ orders, products, customers, shipments, onNavigate
                 )}
                 {frequent.frequentJumps.length > 0 && (
                   <div>
-                    <div
-                      style={{
-                        fontSize: '11px',
-                        fontWeight: 600,
-                        letterSpacing: '0.04em',
-                        color: 'var(--tuw-text-secondary, #5D6772)',
-                        padding: '0 12px 6px',
-                      }}
-                    >
-                      Jump Back To
-                    </div>
+                  <div style={sectionTitle}>
+                    Jump Back To
+                  </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                       {frequent.frequentJumps.map((jump) => (
                         <SpotlightRow key={jump.id} result={jump} onJump={handleJump} />
@@ -233,15 +232,7 @@ export function SearchModal({ orders, products, customers, shipments, onNavigate
               </>
             ) : (
               <div>
-                <div
-                  style={{
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    letterSpacing: '0.04em',
-                    color: 'var(--tuw-text-secondary, #5D6772)',
-                    padding: '0 12px 6px',
-                  }}
-                >
+                <div style={sectionTitle}>
                   Jump To
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
@@ -264,16 +255,8 @@ export function SearchModal({ orders, products, customers, shipments, onNavigate
         ) : (
           sections.map((section) => (
             <div key={section.key}>
-              <div
-                style={{
-                  fontSize: '11px',
-                  fontWeight: 600,
-                  letterSpacing: '0.04em',
-                  color: 'var(--tuw-text-secondary, #5D6772)',
-                  padding: '0 12px 6px',
-                }}
-              >
-                {section.title}
+              <div style={sectionTitle}>
+                {section.title} · {section.items.length}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                 {section.items.map((item) => (
@@ -283,6 +266,42 @@ export function SearchModal({ orders, products, customers, shipments, onNavigate
             </div>
           ))
         )}
+      </div>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          padding: '10px 20px',
+          borderTop: '1px solid var(--tuw-border-subtle, #E5E7EB)',
+          backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)',
+          fontSize: '12px',
+          color: 'var(--tuw-text-secondary, #5D6772)',
+          fontFamily: 'var(--font-main)',
+        }}
+      >
+        {[
+          { k: '↑↓', label: 'navigate' },
+          { k: 'Enter', label: 'jump' },
+          { k: 'ESC', label: 'close' },
+        ].map((hint) => (
+          <span key={hint.k} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            <kbd
+              style={{
+                fontSize: '11px',
+                fontWeight: 600,
+                fontFamily: 'var(--font-main)',
+                backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
+                border: '1px solid var(--tuw-border-subtle, #E5E7EB)',
+                borderRadius: '4px',
+                padding: '1px 6px',
+              }}
+            >
+              {hint.k}
+            </kbd>
+            {hint.label}
+          </span>
+        ))}
       </div>
     </div>
   );

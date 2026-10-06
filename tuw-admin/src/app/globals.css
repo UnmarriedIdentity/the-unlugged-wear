@@ -1011,6 +1011,23 @@
   outline: none;
 }
 
+/* Tile border light-up + Jump pill fill on row hover (P2): KPI-card
+   language — borders and washes only, no scale anywhere. */
+.spotlightRow:hover .spot-tile {
+  border-color: rgba(117, 57, 255, 0.35);
+  box-shadow: 0 1px 4px rgba(117, 57, 255, 0.12);
+}
+
+.spotlightRow:hover .spot-jump {
+  background-color: var(--tuw-action-primary, #7539FF);
+  color: #FFFFFF;
+  border-color: transparent;
+}
+
+.spot-inputrow:focus-within {
+  border-bottom-color: var(--tuw-action-primary, #7539FF);
+}
+
 .commandPaletteItemLeft {
   display: flex;
   align-items: center;

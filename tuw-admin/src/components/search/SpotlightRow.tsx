@@ -57,6 +57,7 @@ export function SpotlightRow({ result, onJump }: SpotlightRowProps) {
     >
       <span
         aria-hidden="true"
+        className="spot-tile"
         style={{
           width: '40px',
           height: '40px',
@@ -67,6 +68,8 @@ export function SpotlightRow({ result, onJump }: SpotlightRowProps) {
           flexShrink: 0,
           backgroundColor: tile.wash,
           color: tile.ink,
+          border: '1px solid transparent',
+          transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
         }}
       >
         {SCOPE_ICONS[result.scope]}
@@ -102,6 +105,7 @@ export function SpotlightRow({ result, onJump }: SpotlightRowProps) {
       </span>
       <span
         aria-hidden="true"
+        className="spot-jump"
         style={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -114,6 +118,7 @@ export function SpotlightRow({ result, onJump }: SpotlightRowProps) {
           borderRadius: '9999px',
           padding: '4px 10px',
           flexShrink: 0,
+          transition: 'background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease',
         }}
       >
         Jump
