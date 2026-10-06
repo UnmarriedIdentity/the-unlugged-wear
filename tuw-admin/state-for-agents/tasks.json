@@ -8,16 +8,16 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 73,
-    "done": 59,
+    "total": 75,
+    "done": 61,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "d166ae1",
-    "unpushed": ["5962ddf", "c90db70", "f798685", "b29d8fc", "7b645d3", "5a7c3e3"],
-    "next_up": "human feel-check three-beat count + header read, then push v2",
+    "tip": "2dc810e",
+    "unpushed": ["5962ddf", "c90db70", "f798685", "b29d8fc", "7b645d3", "5a7c3e3", "6a00935", "2dc810e"],
+    "next_up": "verify merged branch gates + footprint, then human pushes both branches",
     "pending_verifications": [
       "dashboard D-series: KPI tiers, range/sort menus, badge mapping, calendar pills, header tint (360/768/1024/1440)",
       "trunk continuous-dark + elbow-only on 1st-4th actives (post Antigravity+z-lift)",
@@ -163,7 +163,7 @@
       "follow_ups": []
     },
     {
-      "id": "TL-DASH-N4",
+      "id": "TL-DASH-NT4",
       "title": "Command palette: actions, recents, kbd nav, hint chip",
       "status": "done",
       "owner": "agent",
@@ -277,13 +277,44 @@
       ]
     },
     {
+      "id": "TL-DASH-G2",
+      "title": "Rule 06 hardened: protected modals, forbidden commits, merge refusal gate",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:6a00935 (sections 5-7: protected inventory, hard stops, 7 refusal conditions)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-G1",
+      "title": "Rule 06: branch and modal strategy documented",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:212ca3d (rules/06-branch-modals.md: branch/modal inventory, workflows, revert paths, safeguards)",
+      "design_match": "yes",
+      "key_decisions": [
+        "flag-based modal coexistence chosen over revert-only: instant lossless switch, loser deleted once",
+        "origin/v2 now in sync; feat/search-modal pushed upstream by human"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
       "id": "TL-DASH-S1",
       "title": "Branch hygiene: feat/search-modal + rule 05 (spotlight isolated)",
       "status": "done",
       "owner": "agent",
       "started": "2026-10-06",
       "finished": "2026-10-06",
-      "log": "v2:d166ae1 (rules/05-branch-hygiene.md); branch fast-forwarded to rule commit",
+      "log": "v2:d166ae1 (rules/05-branch-hygiene.md); S2-S7 live exclusively on feat/search-modal",
       "design_match": "yes",
       "key_decisions": [
         "spotlight commits exclusive to feat/search-modal; v2 takes reverts/trackers/rule only until merge approval"
@@ -307,7 +338,7 @@
       "follow_ups": []
     },
     {
-      "id": "TL-DASH-N0",
+      "id": "TL-DASH-NT0",
       "title": "Shared ui FilterPills (rail + pills variants)",
       "status": "done",
       "owner": "agent",
@@ -323,7 +354,7 @@
       "follow_ups": []
     },
     {
-      "id": "TL-DASH-N1",
+      "id": "TL-DASH-NT1",
       "title": "Notification ops feed + repository contract + session hook",
       "status": "done",
       "owner": "agent",
@@ -340,7 +371,7 @@
       "follow_ups": []
     },
     {
-      "id": "TL-DASH-N2",
+      "id": "TL-DASH-NT2",
       "title": "NotificationItem + NotificationPanel (tone washes, rail tabs)",
       "status": "done",
       "owner": "agent",
@@ -358,7 +389,7 @@
       "follow_ups": []
     },
     {
-      "id": "TL-DASH-N3",
+      "id": "TL-DASH-NT3",
       "title": "Header notification center rewired to live animated panel",
       "status": "done",
       "owner": "agent",
