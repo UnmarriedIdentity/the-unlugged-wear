@@ -8,15 +8,15 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 36,
-    "done": 22,
+    "total": 37,
+    "done": 23,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "v2",
-    "tip": "30b432e",
-    "unpushed": ["8e2319d", "ffe23aa", "2fb743a", "7943a07", "cc65338", "63e1cd3", "8f8ffaf", "7412752", "1f8821f", "d5de54e", "986e3c8", "26782eb", "8d55159", "00d43c9", "54adc41", "aaf2557", "049c4e1", "32d4381", "30b432e"],
+    "tip": "b0d4f52",
+    "unpushed": ["8e2319d", "ffe23aa", "2fb743a", "7943a07", "cc65338", "63e1cd3", "8f8ffaf", "7412752", "1f8821f", "d5de54e", "986e3c8", "26782eb", "8d55159", "00d43c9", "54adc41", "aaf2557", "049c4e1", "32d4381", "30b432e", "e735a97", "b0d4f52"],
     "next_up": "human browser verify dashboard (360/768/1024/1440, ranges, sort, calendar) then push v2",
     "pending_verifications": [
       "dashboard D-series: KPI tiers, range/sort menus, badge mapping, calendar pills, header tint (360/768/1024/1440)",
@@ -161,6 +161,25 @@
       "verified": true,
       "pushed": true,
       "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-GAP1",
+      "title": "Sales header gap: subheader slot pins stat row to header",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:b0d4f52 (DashboardCard subheader slot + SalesTrendCard stat row moved, extra wrapper removed)",
+      "design_match": "yes",
+      "key_decisions": [
+        "root cause: space-between card went from 2 to 3 flex items in D4, stretching header-stat gap",
+        "fix restores 2-item structure; zero CSS changes; other cards neutral (plain flex-column, no space-between)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser confirm header-stat gap matches reference"
+      ]
     },
     {
       "id": "TL-DASH-D8",
