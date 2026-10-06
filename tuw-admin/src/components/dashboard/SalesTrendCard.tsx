@@ -62,21 +62,6 @@ export function SalesTrendCard({
   onRangeChange,
 }: SalesTrendCardProps) {
   const slots = padSlots(points);
-  const [badgeLanded, setBadgeLanded] = React.useState(false);
-  const landTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  React.useEffect(
-    () => () => {
-      if (landTimer.current !== null) clearTimeout(landTimer.current);
-    },
-    [],
-  );
-
-  const handleLanded = () => {
-    setBadgeLanded(true);
-    if (landTimer.current !== null) clearTimeout(landTimer.current);
-    landTimer.current = setTimeout(() => setBadgeLanded(false), 220);
-  };
   return (
     <DashboardCard
       variant="sales"
@@ -101,10 +86,8 @@ export function SalesTrendCard({
             format={formatINRWhole}
             upClassName={styles.salesTotalUp}
             downClassName={styles.salesTotalDown}
-            landClassName={styles.numberLanded}
-            onLanded={handleLanded}
           />
-          <TrendBadge value={`${delta.toFixed(1)}%`} iconSize={13} iconStrokeWidth={2.5} landed={badgeLanded} />
+          <TrendBadge value={`${delta.toFixed(1)}%`} iconSize={13} iconStrokeWidth={2.5} />
           <span className={styles.trendSubtext}>{compareLabel}</span>
         </div>
       }
