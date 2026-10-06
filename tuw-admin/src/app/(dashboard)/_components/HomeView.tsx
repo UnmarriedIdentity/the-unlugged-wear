@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowUp, Calendar, ChevronDown } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
+import { MetricCard } from '@/components/dashboard';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { Calendar as DateRangeCalendar } from '@/components/calendar';
 import type { DateRange } from '@/hooks/useCalendarRange';
@@ -85,133 +86,32 @@ export default function HomeView() {
           4 METRIC KPI CARDS
           ---------------------------------------------------------------- */}
       <section className={styles.kpiGrid} aria-label="Key Performance Indicators">
-        {/* KPI 1: Revenue Today */}
-        <div className={styles.kpiCard}>
-          <span className={styles.kpiLabel}>Revenue today</span>
-          <div className={styles.kpiMiddleRow}>
-            <span className={`${styles.kpiValue} tuw-tabular-nums`}>
-              ₹{kpis.revenueToday.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </span>
-            <svg className={styles.kpiSparkline} viewBox="0 0 90 40" fill="none">
-              <defs>
-                <linearGradient id="sparkGreenGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#C6EAA0" stopOpacity="0.7" />
-                  <stop offset="100%" stopColor="#C6EAA0" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-              <path
-                d="M 0 26 C 12 26, 18 10, 28 16 C 38 22, 44 26, 52 14 C 60 4, 68 8, 76 2 C 82 -2, 86 4, 90 2 L 90 40 L 0 40 Z"
-                fill="url(#sparkGreenGrad)"
-              />
-              <path
-                d="M 0 26 C 12 26, 18 10, 28 16 C 38 22, 44 26, 52 14 C 60 4, 68 8, 76 2 C 82 -2, 86 4, 90 2"
-                stroke="#00CB75"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
-          <div className={styles.kpiBottomRow}>
-            <span className={styles.trendBadgeGreen}>
-              <ArrowUp size={14} />
-              {kpis.revenueDelta.toFixed(1)}%
-            </span>
-            <span className={styles.trendVs}>vs yesterday</span>
-          </div>
-        </div>
-
-        {/* KPI 2: Orders Today */}
-        <div className={styles.kpiCard}>
-          <span className={styles.kpiLabel}>Orders today</span>
-          <div className={styles.kpiMiddleRow}>
-            <span className={styles.kpiValue}>{kpis.ordersToday}</span>
-            <svg className={styles.kpiSparkline} viewBox="0 0 90 40" fill="none">
-              <path
-                d="M 0 26 C 12 26, 18 10, 28 16 C 38 22, 44 26, 52 14 C 60 4, 68 8, 76 2 C 82 -2, 86 4, 90 2 L 90 40 L 0 40 Z"
-                fill="url(#sparkGreenGrad)"
-              />
-              <path
-                d="M 0 26 C 12 26, 18 10, 28 16 C 38 22, 44 26, 52 14 C 60 4, 68 8, 76 2 C 82 -2, 86 4, 90 2"
-                stroke="#00CB75"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
-          <div className={styles.kpiBottomRow}>
-            <span className={styles.trendBadgeGreen}>
-              <ArrowUp size={14} />
-              {kpis.ordersDelta}%
-            </span>
-            <span className={styles.trendVs}>vs yesterday</span>
-          </div>
-        </div>
-
-        {/* KPI 3: Average Order */}
-        <div className={styles.kpiCard}>
-          <span className={styles.kpiLabel}>Average order</span>
-          <div className={styles.kpiMiddleRow}>
-            <span className={`${styles.kpiValue} tuw-tabular-nums`}>
-              ₹{kpis.averageOrder.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </span>
-            <svg className={styles.kpiSparkline} viewBox="0 0 90 40" fill="none">
-              <path
-                d="M 0 26 C 12 26, 18 10, 28 16 C 38 22, 44 26, 52 14 C 60 4, 68 8, 76 2 C 82 -2, 86 4, 90 2 L 90 40 L 0 40 Z"
-                fill="url(#sparkGreenGrad)"
-              />
-              <path
-                d="M 0 26 C 12 26, 18 10, 28 16 C 38 22, 44 26, 52 14 C 60 4, 68 8, 76 2 C 82 -2, 86 4, 90 2"
-                stroke="#00CB75"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
-          <div className={styles.kpiBottomRow}>
-            <span className={styles.trendBadgeGreen}>
-              <ArrowUp size={14} />
-              {kpis.averageOrderDelta.toFixed(1)}%
-            </span>
-            <span className={styles.trendVs}>vs yesterday</span>
-          </div>
-        </div>
-
-        {/* KPI 4: Conversion Rate */}
-        <div className={styles.kpiCard}>
-          <span className={styles.kpiLabel}>Conversion rate</span>
-          <div className={styles.kpiMiddleRow}>
-            <span className={`${styles.kpiValue} tuw-tabular-nums`}>{kpis.conversionRate.toFixed(1)}%</span>
-            <svg className={styles.kpiSparkline} viewBox="0 0 90 40" fill="none">
-              <defs>
-                <linearGradient id="sparkRedGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#E94845" stopOpacity="0.4" />
-                  <stop offset="100%" stopColor="#E94845" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-              <path
-                d="M 0 10 C 12 10, 16 2, 24 4 C 32 6, 38 18, 48 14 C 58 10, 64 22, 74 18 C 80 15, 84 22, 90 20 L 90 40 L 0 40 Z"
-                fill="url(#sparkRedGrad)"
-              />
-              <path
-                d="M 0 10 C 12 10, 16 2, 24 4 C 32 6, 38 18, 48 14 C 58 10, 64 22, 74 18 C 80 15, 84 22, 90 20"
-                stroke="#E94845"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
-          <div className={styles.kpiBottomRow}>
-            <span className={styles.trendBadgeRed}>
-              <ArrowUp size={14} />
-              {Math.abs(kpis.conversionDelta).toFixed(1)}%
-            </span>
-            <span className={styles.trendVs}>vs yesterday</span>
-          </div>
-        </div>
+        <MetricCard
+          label="Revenue today"
+          value={`₹${kpis.revenueToday.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+          delta={`${kpis.revenueDelta.toFixed(1)}%`}
+          sparkTone="up"
+        />
+        <MetricCard
+          label="Orders today"
+          value={kpis.ordersToday}
+          tabular={false}
+          delta={`${kpis.ordersDelta}%`}
+          sparkTone="up"
+        />
+        <MetricCard
+          label="Average order"
+          value={`₹${kpis.averageOrder.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+          delta={`${kpis.averageOrderDelta.toFixed(1)}%`}
+          sparkTone="up"
+        />
+        <MetricCard
+          label="Conversion rate"
+          value={`${kpis.conversionRate.toFixed(1)}%`}
+          delta={`${Math.abs(kpis.conversionDelta).toFixed(1)}%`}
+          deltaTone="down"
+          sparkTone="down"
+        />
       </section>
 
       {/* ----------------------------------------------------------------
