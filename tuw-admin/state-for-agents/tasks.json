@@ -8,10 +8,10 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 20,
+    "total": 24,
     "done": 13,
-    "in_progress": 1,
-    "backlog": 6
+    "in_progress": 2,
+    "backlog": 9
   },
   "session": {
     "branch": "v2",
@@ -367,6 +367,65 @@
       "follow_ups": [
         "user devtools readouts: aside width, link box, aside count, scrollHeight/clientHeight"
       ]
+    },
+    {
+      "id": "TL-SIDEBAR-ALIGN",
+      "title": "Collapsed hover calm + 80px header + task-discipline rule",
+      "status": "in_progress",
+      "owner": "agent",
+      "started": "2026-10-05",
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-ALIGN-A",
+      "title": "collapsed hover without white flash",
+      "status": "backlog",
+      "owner": null,
+      "parent": "TL-SIDEBAR-ALIGN",
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-ALIGN-B",
+      "title": "sidebar header 80px both states",
+      "status": "backlog",
+      "owner": null,
+      "parent": "TL-SIDEBAR-ALIGN",
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-ALIGN-C",
+      "title": "rule 04 task discipline",
+      "status": "backlog",
+      "owner": null,
+      "parent": "TL-SIDEBAR-ALIGN",
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
     }
   ],
   "workflow": {
