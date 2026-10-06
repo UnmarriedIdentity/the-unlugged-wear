@@ -8,15 +8,15 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 43,
-    "done": 29,
+    "total": 49,
+    "done": 35,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "v2",
-    "tip": "b5d1df6",
-    "unpushed": ["8e2319d", "ffe23aa", "2fb743a", "7943a07", "cc65338", "63e1cd3", "8f8ffaf", "7412752", "1f8821f", "d5de54e", "986e3c8", "26782eb", "8d55159", "00d43c9", "54adc41", "aaf2557", "049c4e1", "32d4381", "30b432e", "e735a97", "b0d4f52", "774efcc", "9e81c07", "43a3ee6", "31925fe", "2042371", "ef9ea22", "eb620ec", "b5d1df6"],
+    "tip": "09f1f33",
+    "unpushed": ["8e2319d", "ffe23aa", "2fb743a", "7943a07", "cc65338", "63e1cd3", "8f8ffaf", "7412752", "1f8821f", "d5de54e", "986e3c8", "26782eb", "8d55159", "00d43c9", "54adc41", "aaf2557", "049c4e1", "32d4381", "30b432e", "e735a97", "b0d4f52", "774efcc", "9e81c07", "43a3ee6", "31925fe", "2042371", "ef9ea22", "eb620ec", "b5d1df6", "dfbf5cf", "195b8aa", "3f9b5d3", "c2398af", "d65fe51", "cce6092", "09f1f33"],
     "next_up": "human browser verify dashboard (360/768/1024/1440, ranges, sort, calendar) then push v2",
     "pending_verifications": [
       "dashboard D-series: KPI tiers, range/sort menus, badge mapping, calendar pills, header tint (360/768/1024/1440)",
@@ -161,6 +161,97 @@
       "verified": true,
       "pushed": true,
       "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-B1",
+      "title": "Motion skill: data-change, hover-language, exit rules",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:195b8aa (SKILL.md additions + legacy lift line qualified)",
+      "design_match": "yes",
+      "key_decisions": [
+        "marching-ants rejected for cards (false affordance + infinite motion); reserved for progress/drop targets"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-B2",
+      "title": "Slot-pool bars: all range switches animate incl. to/from zero",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:3f9b5d3 (7 index-keyed slots, zero-fill, blank labels, tooltip suppressed on zeros)",
+      "design_match": "yes",
+      "key_decisions": [
+        "empty check stays on raw points so EmptyState remains reachable",
+        "normalization max unaffected by zero padding"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-B3",
+      "title": "KPI hover tint/wash replaces float lift",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:c2398af (CSS only)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-B4",
+      "title": "Sales axis-emphasis hover; bar lifts removed",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:d65fe51 (CSS only; gridline brighten + Y-label darken on card hover)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-B5",
+      "title": "Product thumb zoom + tint replaces row lift",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:cce6092 (CSS only; scale(1.05) inside clipped 72px frame)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-B6",
+      "title": "Alert dot-glow + order-id tint hovers; alert lift removed",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:09f1f33 (CSS only; fourth float found on alertItem also removed)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser feel-check: range switches incl. This month + all card hovers"
+      ]
     },
     {
       "id": "TL-DASH-M1",
