@@ -25,7 +25,7 @@ export default function SidebarDock({ isCollapsed, onToggleCollapse }: SidebarDo
       <div className="flex w-full justify-center mt-2">
         <button
           type="button"
-          className="flex h-9 w-11 items-center justify-center rounded-control border border-nav-dock-line bg-nav-dock-bg text-nav-dock-text cursor-pointer transition-all duration-150 focus-visible:outline-2 focus-visible:outline-action-primary focus-visible:outline-offset-2 hover:bg-nav-dock-hover-light hover:text-white hover:border-nav-dock-line-hover"
+          className="flex h-9 w-11 items-center justify-center rounded-control border border-nav-dock-line bg-nav-dock-bg text-nav-dock-text cursor-pointer transition-all duration-150 focus-visible:outline-2 focus-visible:outline-action-primary focus-visible:outline-offset-2 hover:text-white hover:border-nav-dock-line-hover"
           onClick={onToggleCollapse}
           title="Expand Sidebar"
           aria-label="Expand Sidebar"
