@@ -42,10 +42,30 @@ export interface SalesTrendFeed {
 export interface DashboardAdapter {
   getSalesTrend(range: string): SalesTrendFeed;
   getInventoryAlerts(): InventoryAlert[];
+  getTopProducts(sort: string): TopProduct[];
   getConversionRate(): { value: number; delta: number };
 }
 
 export const SALES_RANGES = ['This week', 'Last week', 'This month'] as const;
+export const PRODUCT_SORTS = ['By revenue', 'By units sold'] as const;
+
+export interface TopProduct {
+  name: string;
+  priceLabel: string;
+  sold: number;
+  soldTotal: number;
+  stockLabel: string;
+  progressPct: number;
+  image: string;
+  alt: string;
+}
+
+// Curated demo display order for the default 'By revenue' view (Figma Frame 1:20300).
+const curatedTopProducts: TopProduct[] = [
+  { name: 'Boyfriend Poplin Shirt', priceLabel: '₹3,490', sold: 492, soldTotal: 500, stockLabel: 'Stock: 8 units', progressPct: 92, image: '/products/1.jpeg', alt: 'Boyfriend Poplin Shirt' },
+  { name: 'Tailored Blazer Suit', priceLabel: '₹6,890', sold: 369, soldTotal: 450, stockLabel: 'Stock: 34 units', progressPct: 82, image: '/products/2.jpeg', alt: 'Tailored Blazer Suit' },
+  { name: 'Belted Safari Ensemble', priceLabel: '₹5,490', sold: 592, soldTotal: 800, stockLabel: 'Stock: 26 units', progressPct: 74, image: '/products/3.jpeg', alt: 'Belted Safari Ensemble' },
+];
 
 // Mock adapter: deterministic demo feeds (Figma Frame 1:20300 values for This week).
 export const mockDashboardAdapter: DashboardAdapter = {
@@ -105,6 +125,10 @@ export const mockDashboardAdapter: DashboardAdapter = {
     { id: 2, severity: 'Low', unitsLeft: '8 units left', itemName: 'Tailored Blazer Suit', velocity: 'Sells: 2 pcs/day', filledSegments: 2 },
     { id: 3, severity: 'Low', unitsLeft: '10 units left', itemName: 'Floral dress', velocity: 'Sells: 4 pcs/day', filledSegments: 2 },
   ],
+  getTopProducts: (sort: string) =>
+    sort === 'By units sold'
+      ? [...curatedTopProducts].sort((a, b) => b.sold - a.sold)
+      : curatedTopProducts,
   getConversionRate: () => ({ value: 3.2, delta: -0.3 }),
 };
 
@@ -129,6 +153,7 @@ export interface DashboardData {
   salesCompareLabel: string;
   inventoryAlerts: InventoryAlert[];
   recentOrders: OrderItem[];
+  topProducts: TopProduct[];
   timeRange: string;
   setTimeRange: (range: string) => void;
   productSort: string;
@@ -166,6 +191,7 @@ export function useDashboardData(adapter: DashboardAdapter = mockDashboardAdapte
       salesCompareLabel: trend.compareLabel,
       inventoryAlerts: adapter.getInventoryAlerts(),
       recentOrders: orders.slice(0, 6),
+      topProducts: adapter.getTopProducts(productSort),
       timeRange,
       setTimeRange,
       productSort,
