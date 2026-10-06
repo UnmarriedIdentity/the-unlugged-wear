@@ -8,23 +8,24 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 35,
-    "done": 21,
+    "total": 36,
+    "done": 22,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "v2",
-    "tip": "049c4e1",
-    "unpushed": ["7943a07", "cc65338", "63e1cd3", "8f8ffaf", "7412752", "1f8821f", "d5de54e", "986e3c8", "26782eb", "8d55159", "00d43c9", "54adc41", "aaf2557", "049c4e1"],
-    "next_up": "await user computed readouts for collapsed clip; then targeted fix",
+    "tip": "32d4381",
+    "unpushed": ["8e2319d", "ffe23aa", "2fb743a", "7943a07", "cc65338", "63e1cd3", "8f8ffaf", "7412752", "1f8821f", "d5de54e", "986e3c8", "26782eb", "8d55159", "00d43c9", "54adc41", "aaf2557", "049c4e1", "32d4381"],
+    "next_up": "human browser verify dashboard (360/768/1024/1440, ranges, sort, calendar) then push v2",
     "pending_verifications": [
+      "dashboard D-series: KPI tiers, range/sort menus, badge mapping, calendar pills, header tint (360/768/1024/1440)",
       "trunk continuous-dark + elbow-only on 1st-4th actives (post Antigravity+z-lift)",
       "R-series parent icons + iconless rows + collapsed icons",
       "settings/help purple hover + black cards",
       "responsive widths 767/768/1023/1024/1440/1920"
     ],
-    "last_updated": "2026-10-05",
+    "last_updated": "2026-10-06",
     "updated_by": "agent"
   },
   "tasks": [
@@ -160,6 +161,26 @@
       "verified": true,
       "pushed": true,
       "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-D8",
+      "title": "Dashboard sweep: hex/bracket audit, full gates, tracker, report",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "sweep-only, no code commit (typecheck + test 4/4 + build 37/37 re-verified on final stack)",
+      "design_match": "yes",
+      "key_decisions": [
+        "Sparkline SVG hex kept as chart-art (same class as heroOverlay exception)",
+        "no Tailwind arbitrary values in dashboard components (brackets are useState generics/array literals only)",
+        "HomeView 565 to 99 lines: layout + data wiring only"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser verify at 360/768/1024/1440 + push v2"
+      ]
     },
     {
       "id": "TL-DASH-D7",
