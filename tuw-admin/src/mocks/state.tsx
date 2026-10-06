@@ -733,6 +733,8 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
   const resetDemoData = () => {
     try {
       localStorage.removeItem(STORAGE_KEY);
+      // search frequent counts live outside the demo snapshot (see search/useFrequentQueries)
+      localStorage.removeItem('tuw_search_frequent');
     } catch {
       // storage clear
     }

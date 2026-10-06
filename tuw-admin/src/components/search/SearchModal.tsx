@@ -4,8 +4,10 @@ import React from 'react';
 import { X } from 'lucide-react';
 import EmptyState from '@/components/ui/EmptyState';
 import { localSearch } from './localSearch';
+import { getPopularTargets } from './localSearch';
 import { ShortcutChips } from './ShortcutChips';
 import { SpotlightRow } from './SpotlightRow';
+import { useFrequentQueries } from './useFrequentQueries';
 import { SEARCH_PREFIXES, type ResultSection, type SpotlightResult } from './types';
 import type { CustomerItem, OrderItem, ProductItem, ShipmentItem } from '@/mocks/fixtures';
 
@@ -36,8 +38,13 @@ export function SearchModal({ orders, products, customers, shipments, onNavigate
     () => localSearch({ orders, products, customers, shipments }, query),
     [orders, products, customers, shipments, query],
   );
+  const frequent = useFrequentQueries();
+  const popular = React.useMemo(() => getPopularTargets(), []);
+  const showingHome = query.trim() === '';
+  const hasFrequent = frequent.topQueries.length > 0 || frequent.frequentJumps.length > 0;
 
   const handleJump = (result: SpotlightResult) => {
+    frequent.record(query, result);
     onNavigate(result.href);
     onClose();
   };
@@ -162,7 +169,90 @@ export function SearchModal({ orders, products, customers, shipments, onNavigate
       <ShortcutChips prefixes={SEARCH_PREFIXES} onPick={(token) => setQuery(token)} />
 
       <div ref={resultsRef} style={{ flex: 1, overflowY: 'auto', padding: '12px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-        {sections.length === 0 ? (
+        {showingHome ? (
+          <>
+            {hasFrequent ? (
+              <>
+                {frequent.topQueries.length > 0 && (
+                  <div>
+                    <div
+                      style={{
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        letterSpacing: '0.04em',
+                        color: 'var(--tuw-text-secondary, #5D6772)',
+                        padding: '0 12px 6px',
+                      }}
+                    >
+                      Frequent Searches
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', padding: '0 12px' }}>
+                      {frequent.topQueries.map((q) => (
+                        <button
+                          key={q}
+                          type="button"
+                          onClick={() => setQuery(q)}
+                          style={{
+                            backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)',
+                            border: '1px solid var(--tuw-border-subtle, #E5E7EB)',
+                            borderRadius: '9999px',
+                            padding: '6px 12px',
+                            fontSize: '13px',
+                            fontWeight: 500,
+                            fontFamily: 'var(--font-main)',
+                            color: 'var(--tuw-text-primary, #262626)',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          {q}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {frequent.frequentJumps.length > 0 && (
+                  <div>
+                    <div
+                      style={{
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        letterSpacing: '0.04em',
+                        color: 'var(--tuw-text-secondary, #5D6772)',
+                        padding: '0 12px 6px',
+                      }}
+                    >
+                      Jump Back To
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                      {frequent.frequentJumps.map((jump) => (
+                        <SpotlightRow key={jump.id} result={jump} onJump={handleJump} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div>
+                <div
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    letterSpacing: '0.04em',
+                    color: 'var(--tuw-text-secondary, #5D6772)',
+                    padding: '0 12px 6px',
+                  }}
+                >
+                  Jump To
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  {popular.map((item) => (
+                    <SpotlightRow key={item.id} result={item} onJump={handleJump} />
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        ) : sections.length === 0 ? (
           <EmptyState
             title="No matches found"
             description={
