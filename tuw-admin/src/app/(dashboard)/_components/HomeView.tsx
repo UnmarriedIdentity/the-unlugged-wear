@@ -1,12 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Calendar } from 'lucide-react';
+import React from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { MetricCard, SalesTrendCard, ProductListCard, InventoryAlertsCard, RecentOrdersCard } from '@/components/dashboard';
+import { MetricCard, SalesTrendCard, ProductListCard, InventoryAlertsCard, RecentOrdersCard, DashboardHeader } from '@/components/dashboard';
 import { useDashboardData } from '@/hooks/useDashboardData';
-import { Calendar as DateRangeCalendar } from '@/components/calendar';
-import type { DateRange } from '@/hooks/useCalendarRange';
 // Class map - selectors live in src/app/globals.css (single app.css, home- prefix).
 // Verbatim port of HomePage.module.css; JSX untouched for zero pixel drift.
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'home-' + String(p) });
@@ -31,58 +28,14 @@ export default function HomeView() {
     productSort,
     setProductSort,
   } = useDashboardData();
-  // Date-range popover state (label + open).
-  const [rangeLabel, setRangeLabel] = useState('Today');
-  const [pickerOpen, setPickerOpen] = useState(false);
 
   return (
     <DashboardShell pageTitle="Dashboard" activeNav="home">
 
-      {/* Welcome Header */}
-      <div className={styles.welcomeRow}>
-        <div className={styles.welcomeTextGroup}>
-          <h2 className={styles.welcomeHeading}>Welcome back, Urvil!</h2>
-          <p className={styles.welcomeSubtext}>Monday, 16 April 2026. Get weekend summary!</p>
-        </div>
-
-        <div className={styles.welcomeControls}>
-          <div className={styles.onlineBadge}>
-            <span className={styles.pulseDot} />
-            <span>2 online customers</span>
-          </div>
-
-          <div className="relative">
-            <button
-              type="button"
-              className={styles.dateFilterBtn}
-              onClick={() => setPickerOpen((v) => !v)}
-              aria-expanded={pickerOpen}
-              aria-haspopup="dialog"
-            >
-              <Calendar size={18} />
-              <span>{rangeLabel}</span>
-            </button>
-            {pickerOpen && (
-              <>
-                <div
-                  aria-hidden="true"
-                  onClick={() => setPickerOpen(false)}
-                  className="fixed inset-0 z-40 cursor-default"
-                />
-                <div className="absolute right-0 top-full z-50 mt-2">
-                  <DateRangeCalendar
-                    onApply={(range: DateRange, label: string) => {
-                      setRangeLabel(label);
-                      setPickerOpen(false);
-                    }}
-                    onClose={() => setPickerOpen(false)}
-                  />
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
+      <DashboardHeader
+        title="Welcome back, Urvil!"
+        subtitle="Monday, 16 April 2026. Get weekend summary!"
+      />
 
       {/* ----------------------------------------------------------------
           4 METRIC KPI CARDS

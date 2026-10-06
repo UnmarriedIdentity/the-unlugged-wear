@@ -1,4 +1,5 @@
 export { DashboardCard, type DashboardCardVariant } from './DashboardCard';
+export { DashboardHeader } from './DashboardHeader';
 export { InventoryAlertsCard } from './InventoryAlertsCard';
 export { MetricCard } from './MetricCard';
 export { ProductListCard } from './ProductListCard';

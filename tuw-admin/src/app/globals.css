@@ -1841,8 +1841,16 @@
 }
 
 .home-dateFilterBtn:hover {
-  background-color: #F8FAF9;
-  border-color: #E2E8E8;
+  border-color: var(--tuw-action-primary, #7539FF);
+  color: var(--tuw-action-primary, #7539FF);
+  background-color: var(--tuw-bg-selected, #F8F5FF);
+}
+
+/* Applied-range tint (D7): signals a non-default date filter is active. */
+.home-dateFilterBtnActive {
+  background-color: var(--tuw-bg-selected, #F8F5FF);
+  border-color: var(--tuw-action-primary, #7539FF);
+  color: var(--tuw-action-primary, #7539FF);
 }
 
 /* --------------------------------------------------------------------------
