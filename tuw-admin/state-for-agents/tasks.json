@@ -8,15 +8,15 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 30,
-    "done": 16,
+    "total": 31,
+    "done": 17,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "v2",
-    "tip": "8f8ffaf",
-    "unpushed": ["7943a07", "cc65338", "63e1cd3", "8f8ffaf"],
+    "tip": "1f8821f",
+    "unpushed": ["7943a07", "cc65338", "63e1cd3", "8f8ffaf", "7412752", "1f8821f"],
     "next_up": "await user computed readouts for collapsed clip; then targeted fix",
     "pending_verifications": [
       "trunk continuous-dark + elbow-only on 1st-4th actives (post Antigravity+z-lift)",
@@ -159,6 +159,22 @@
       ],
       "verified": true,
       "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-D3",
+      "title": "KPI grid explicit 4-2-1 responsive tiers",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:1f8821f (home-kpiGrid repeat(4) + 2-col at <=1100px; 1-col at <=680px retained; live values already wired D1/D2)",
+      "design_match": "yes",
+      "key_decisions": [
+        "replaced auto-fit minmax(220px,1fr) with explicit tiers; 1440/768/360 paint unchanged, 1024 now 2-col by design"
+      ],
+      "verified": true,
+      "pushed": false,
       "follow_ups": []
     },
     {
