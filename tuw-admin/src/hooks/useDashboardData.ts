@@ -32,11 +32,17 @@ export interface InventoryAlert {
 
 export interface SalesTrendFeed {
   points: SalesTrendPoint[];
-  total: string;
+  totalValue: number;
   delta: number;
   legendPast: string;
   legendCurrent: string;
   compareLabel: string;
+}
+
+// Whole-rupee en-IN formatting shared by every revenue readout
+// (reproduces Figma strings: 39190 -> ₹39,190; 131000 -> ₹1,31,000).
+export function formatINRWhole(value: number): string {
+  return `₹${Math.round(value).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
 }
 
 export interface DashboardAdapter {
@@ -81,7 +87,7 @@ export const mockDashboardAdapter: DashboardAdapter = {
           { day: 'Sat', lastWeek: 63, thisWeek: 67, lastVal: '₹5,000', thisVal: '₹5,400' },
           { day: 'Sun', lastWeek: 58, thisWeek: 62, lastVal: '₹4,600', thisVal: '₹5,000' },
         ],
-        total: '₹36,180',
+        totalValue: 36180,
         delta: 6.1,
         legendPast: '2 weeks ago',
         legendCurrent: 'Last week',
@@ -96,7 +102,7 @@ export const mockDashboardAdapter: DashboardAdapter = {
           { day: 'W3', lastWeek: 76, thisWeek: 88, lastVal: '₹34,000', thisVal: '₹39,400' },
           { day: 'W4', lastWeek: 64, thisWeek: 79, lastVal: '₹28,800', thisVal: '₹35,200' },
         ],
-        total: '₹1,31,000',
+        totalValue: 131000,
         delta: 11.2,
         legendPast: 'Last month',
         legendCurrent: 'This month',
@@ -113,7 +119,7 @@ export const mockDashboardAdapter: DashboardAdapter = {
         { day: 'Sat', lastWeek: 67, thisWeek: 80, lastVal: '₹5,400', thisVal: '₹6,400' },
         { day: 'Sun', lastWeek: 62, thisWeek: 68, lastVal: '₹5,000', thisVal: '₹6,000' },
       ],
-      total: '₹39,190',
+      totalValue: 39190,
       delta: 8.4,
       legendPast: 'Last week',
       legendCurrent: 'This week',
@@ -146,7 +152,7 @@ export interface DashboardKpis {
 export interface DashboardData {
   kpis: DashboardKpis;
   salesTrend: SalesTrendPoint[];
-  salesTotal: string;
+  salesTotalValue: number;
   salesDelta: number;
   salesLegendPast: string;
   salesLegendCurrent: string;
@@ -184,7 +190,7 @@ export function useDashboardData(adapter: DashboardAdapter = mockDashboardAdapte
         conversionDelta: conversion.delta,
       },
       salesTrend: trend.points,
-      salesTotal: trend.total,
+      salesTotalValue: trend.totalValue,
       salesDelta: trend.delta,
       salesLegendPast: trend.legendPast,
       salesLegendCurrent: trend.legendCurrent,

@@ -10,7 +10,7 @@ import { DashboardCard } from './DashboardCard';
 import { FilterMenu } from './FilterMenu';
 import { TrendBadge } from './TrendBadge';
 import EmptyState from '@/components/ui/EmptyState';
-import { SALES_RANGES, type SalesTrendPoint } from '@/hooks/useDashboardData';
+import { SALES_RANGES, formatINRWhole, type SalesTrendPoint } from '@/hooks/useDashboardData';
 
 // Class map - selectors live in src/app/globals.css (single app.css, home- prefix).
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'home-' + String(p) });
@@ -34,7 +34,7 @@ function padSlots(points: SalesTrendPoint[]): SalesTrendPoint[] {
 
 interface SalesTrendCardProps {
   points: SalesTrendPoint[];
-  total: string;
+  totalValue: number;
   delta: number;
   legendPast: string;
   legendCurrent: string;
@@ -52,7 +52,7 @@ function barHeight(value: number, points: SalesTrendPoint[]): string {
 
 export function SalesTrendCard({
   points,
-  total,
+  totalValue,
   delta,
   legendPast,
   legendCurrent,
@@ -79,7 +79,7 @@ export function SalesTrendCard({
       }
       subheader={
         <div className={styles.salesStatRow}>
-          <span className={`${styles.salesLargeNumber} tuw-tabular-nums`}>{total}</span>
+          <span className={`${styles.salesLargeNumber} tuw-tabular-nums`}>{formatINRWhole(totalValue)}</span>
           <TrendBadge value={`${delta.toFixed(1)}%`} iconSize={13} iconStrokeWidth={2.5} />
           <span className={styles.trendSubtext}>{compareLabel}</span>
         </div>

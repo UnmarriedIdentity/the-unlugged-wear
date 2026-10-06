@@ -15,7 +15,7 @@ export default function HomeView() {
   const {
     kpis,
     salesTrend,
-    salesTotal,
+    salesTotalValue,
     salesDelta,
     salesLegendPast,
     salesLegendCurrent,
@@ -75,7 +75,7 @@ export default function HomeView() {
       <section className={styles.middleGrid}>
         <SalesTrendCard
           points={salesTrend}
-          total={salesTotal}
+          totalValue={salesTotalValue}
           delta={salesDelta}
           legendPast={salesLegendPast}
           legendCurrent={salesLegendCurrent}
