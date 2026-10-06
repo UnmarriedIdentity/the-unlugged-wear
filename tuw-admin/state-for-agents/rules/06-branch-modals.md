@@ -65,6 +65,56 @@ and how work flows between branches without losing anything.
   needed twice is extracted to `ui/` or `lib/` BEFORE either track
   duplicates it.
 
+## 5. Protected inventory — what must never be lost
+
+Each modal lives in exactly one branch, permanently, until the team
+approves a merge AND the flag coexistence (F1–F3) is in place:
+
+- `v2` must always contain a working **legacy modal** (`commandPalette*`
+  dialog in `Header.tsx`). It is the fallback the team can return to
+  with a setting flip.
+- `feat/search-modal` must always contain a working **spotlight modal**
+  (`src/components/search/*` island). It is the work under review.
+- Losing either one (deleting its code, breaking its render, or
+  overwriting it via a bad merge direction) is treated as data loss —
+  stop work immediately and restore before anything else.
+
+## 6. Forbidden commits (hard stops, no exceptions)
+
+On `v2`, NEVER commit:
+- Spotlight code (`src/components/search/*`, island dialog wiring,
+  spotlight-only tokens/classes consumed only by the island).
+- Anything that deletes, breaks, or bypasses the legacy modal.
+
+On `feat/search-modal`, NEVER commit directly (as opposed to receiving
+via merge from `v2`):
+- Common features, fixes, or refactors belonging to the main line.
+- Edits to the legacy modal region (it does not exist on this branch;
+  if legacy work is ever needed here, it arrives via the F1–F3 flag
+  plan, never by hand-copying).
+- Tracker entries describing `v2`-only work (branch tracker entries
+  cover S-track work; merge carries `v2` entries downward).
+
+## 7. Merge gate — when to STOP and refuse a merge
+
+The agent must refuse (or explicitly pause for human override) any
+`feat/search-modal` → `v2` merge when ANY of these hold:
+
+1. No explicit human "merge" instruction for this specific merge.
+2. Browser review of the branch preview has not happened (or new
+   branch commits landed after the last review).
+3. `git diff v2...feat/search-modal --stat` shows anything beyond
+   spotlight files + spotlight trackers (footprint violation).
+4. Any gate fails on either side (`typecheck`, `test`, `build`).
+5. Working tree is dirty (tracked files) on the checkout being merged.
+6. The team has not decided spotlight wins (no decision = no merge;
+   the flag plan F1–F3 exists precisely so "not yet" costs nothing).
+7. A push is requested as part of the merge (rule 03: humans push;
+   the agent stops at the local merge commit).
+
+Refusing a merge is always the safe default. State which condition
+failed and what would clear it — never merge "to see what happens".
+
 ## 4. Safeguards checklist (every sync and every merge)
 
 1. `git status` clean (tracked files) before switching branches.
