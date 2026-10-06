@@ -8,15 +8,15 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 64,
-    "done": 50,
+    "total": 65,
+    "done": 51,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "v2",
-    "tip": "b29d8fc",
-    "unpushed": ["5962ddf", "c90db70", "f798685", "b29d8fc"],
+    "tip": "5a7c3e3",
+    "unpushed": ["5962ddf", "c90db70", "f798685", "b29d8fc", "7b645d3", "5a7c3e3"],
     "next_up": "human feel-check three-beat count + header read, then push v2",
     "pending_verifications": [
       "dashboard D-series: KPI tiers, range/sort menus, badge mapping, calendar pills, header tint (360/768/1024/1440)",
@@ -161,6 +161,26 @@
       "verified": true,
       "pushed": true,
       "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-N4",
+      "title": "Command palette: actions, recents, kbd nav, hint chip",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:5a7c3e3 (Header-only: commands config + recents + focus-based arrows/Enter + ⌘K chip)",
+      "design_match": "yes",
+      "key_decisions": [
+        "actions reuse store mutations via same guards; executors swap to API calls later",
+        "kbd nav moves DOM focus so existing focus-visible treatment marks rows — zero new CSS",
+        "palette container UI overhaul explicitly deferred by user"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser check: Ctrl+K, arrows/Enter, retry-syncs toast, recents"
+      ]
     },
     {
       "id": "TL-DASH-N0",
