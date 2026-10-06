@@ -8,15 +8,15 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 31,
-    "done": 17,
+    "total": 32,
+    "done": 18,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "v2",
-    "tip": "1f8821f",
-    "unpushed": ["7943a07", "cc65338", "63e1cd3", "8f8ffaf", "7412752", "1f8821f"],
+    "tip": "986e3c8",
+    "unpushed": ["7943a07", "cc65338", "63e1cd3", "8f8ffaf", "7412752", "1f8821f", "d5de54e", "986e3c8"],
     "next_up": "await user computed readouts for collapsed clip; then targeted fix",
     "pending_verifications": [
       "trunk continuous-dark + elbow-only on 1st-4th actives (post Antigravity+z-lift)",
@@ -159,6 +159,24 @@
       ],
       "verified": true,
       "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-D4",
+      "title": "SalesTrendCard: range menu, normalized bars, empty state",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:986e3c8 (new SalesTrendCard + adapter SalesTrendFeed per-range + home-rangeMenu CSS + HomeView swap)",
+      "design_match": "yes",
+      "key_decisions": [
+        "adapter returns per-range feed (total/delta/legends/compare) — range button now live, kills dead control",
+        "barHeight normalizes vs max(100,...) — default feed heights string-identical to Figma percentages",
+        "empty feed renders ui/EmptyState with working reset action"
+      ],
+      "verified": true,
+      "pushed": false,
       "follow_ups": []
     },
     {
