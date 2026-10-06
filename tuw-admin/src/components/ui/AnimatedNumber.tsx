@@ -39,12 +39,17 @@ export default function AnimatedNumber({
   const [tint, setTint] = React.useState<0 | 1 | -1>(0);
   const displayRef = React.useRef(value);
   const raf = React.useRef<number | null>(null);
+  const linger = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   React.useEffect(
     () => () => {
       if (raf.current !== null) {
         cancelAnimationFrame(raf.current);
         raf.current = null;
+      }
+      if (linger.current !== null) {
+        clearTimeout(linger.current);
+        linger.current = null;
       }
     },
     [],
@@ -66,6 +71,10 @@ export default function AnimatedNumber({
       cancelAnimationFrame(raf.current);
       raf.current = null;
     }
+    if (linger.current !== null) {
+      clearTimeout(linger.current);
+      linger.current = null;
+    }
     const span = maxDurationMs - minDurationMs;
     const relative = Math.abs(value - from) / Math.max(Math.abs(from), 1);
     const duration = minDurationMs + span * Math.min(1, relative / fullScaleAt);
@@ -74,7 +83,6 @@ export default function AnimatedNumber({
       typeof performance !== 'undefined' && typeof performance.now === 'function'
         ? performance.now()
         : Date.now();
-    let tintReleased = false;
     const tick = (now: number) => {
       const progress = Math.min(1, (now - startedAt) / duration);
       // easeInOutCubic: slow start, slow arrival, steady middle.
@@ -83,15 +91,16 @@ export default function AnimatedNumber({
       const current = Math.round(from + (value - from) * eased);
       displayRef.current = current;
       setDisplay(current);
-      if (progress >= 0.7 && !tintReleased) {
-        tintReleased = true;
-        setTint(0);
-      }
       if (progress < 1) {
         raf.current = requestAnimationFrame(tick);
       } else {
         raf.current = null;
-        setTint(0);
+        // Tint lands with the final digit, lingers, then the CSS color
+        // transition melts it back to primary — no mid-run snap.
+        linger.current = setTimeout(() => {
+          linger.current = null;
+          setTint(0);
+        }, 150);
       }
     };
     raf.current = requestAnimationFrame(tick);

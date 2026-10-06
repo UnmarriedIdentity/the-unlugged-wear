@@ -2113,7 +2113,7 @@
   font-weight: 700;
   color: var(--tuw-text-primary, #262626);
   letter-spacing: -0.03em;
-  transition: color 0.2s ease;
+  transition: color 0.35s ease;
 }
 
 /* Count-tween direction tints (N2): applied while AnimatedNumber climbs
