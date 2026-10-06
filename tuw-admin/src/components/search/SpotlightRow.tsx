@@ -27,13 +27,42 @@ const TILE_STYLES: Record<TileTone, { wash: string; ink: string }> = {
 interface SpotlightRowProps {
   result: SpotlightResult;
   onJump: (result: SpotlightResult) => void;
+  highlight?: string;
+}
+
+// Query-match highlighter (P3): matched substring in action-purple
+// semibold, no background wash. Regex-escaped, case-insensitive.
+function highlightMatch(text: string, term: string): React.ReactNode {
+  const needle = term.trim();
+  if (!needle) return text;
+  const lower = text.toLowerCase();
+  const query = needle.toLowerCase();
+  const parts: React.ReactNode[] = [];
+  let cursor = 0;
+  let hit = lower.indexOf(query, cursor);
+  let key = 0;
+  while (hit !== -1) {
+    if (hit > cursor) parts.push(text.slice(cursor, hit));
+    parts.push(
+      <span
+        key={`m-${key++}`}
+        style={{ color: 'var(--tuw-action-primary, #7539FF)', fontWeight: 700 }}
+      >
+        {text.slice(hit, hit + query.length)}
+      </span>,
+    );
+    cursor = hit + query.length;
+    hit = lower.indexOf(query, cursor);
+  }
+  if (cursor < text.length) parts.push(text.slice(cursor));
+  return parts.length > 0 ? parts : text;
 }
 
 // One spotlight result row (S4): tinted icon tile + title/sub + Jump pill.
 // Whole-row click jumps (pill is a visual affordance of the same action).
 // Jump-pill reuse verdict: ui Button outline/sm renders 36px tall — too
 // heavy for this pill, so the row owns a token-driven 28px pill instead.
-export function SpotlightRow({ result, onJump }: SpotlightRowProps) {
+export function SpotlightRow({ result, onJump, highlight = '' }: SpotlightRowProps) {
   const tile = TILE_STYLES[result.tileTone];
   return (
     <button
@@ -86,7 +115,7 @@ export function SpotlightRow({ result, onJump }: SpotlightRowProps) {
             textOverflow: 'ellipsis',
           }}
         >
-          {result.title}
+          {highlightMatch(result.title, highlight)}
         </span>
         <span
           style={{
@@ -100,7 +129,7 @@ export function SpotlightRow({ result, onJump }: SpotlightRowProps) {
             marginTop: '2px',
           }}
         >
-          {result.subtitle}
+          {highlightMatch(result.subtitle, highlight)}
         </span>
       </span>
       <span

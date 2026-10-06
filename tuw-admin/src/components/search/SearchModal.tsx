@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import EmptyState from '@/components/ui/EmptyState';
 import { localSearch } from './localSearch';
 import { getPopularTargets } from './localSearch';
+import { parseScopedQuery } from './types';
 import { ShortcutChips } from './ShortcutChips';
 import { SpotlightRow } from './SpotlightRow';
 import { useFrequentQueries } from './useFrequentQueries';
@@ -41,6 +42,7 @@ export function SearchModal({ orders, products, customers, shipments, onNavigate
   const frequent = useFrequentQueries();
   const popular = React.useMemo(() => getPopularTargets(), []);
   const showingHome = query.trim() === '';
+  const matchTerm = parseScopedQuery(query).term;
   const hasFrequent = frequent.topQueries.length > 0 || frequent.frequentJumps.length > 0;
 
   // Shared section heading: sticky over the scroll list with surface blur.
@@ -260,7 +262,7 @@ export function SearchModal({ orders, products, customers, shipments, onNavigate
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                 {section.items.map((item) => (
-                  <SpotlightRow key={item.id} result={item} onJump={handleJump} />
+                  <SpotlightRow key={item.id} result={item} onJump={handleJump} highlight={matchTerm} />
                 ))}
               </div>
             </div>
