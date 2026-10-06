@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowUp, Calendar, ChevronDown } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { useAdminState } from '@/mocks/state';
+import { useDashboardData } from '@/hooks/useDashboardData';
 import { Calendar as DateRangeCalendar } from '@/components/calendar';
 import type { DateRange } from '@/hooks/useCalendarRange';
 // Class map - selectors live in src/app/globals.css (single app.css, home- prefix).
@@ -13,79 +13,24 @@ import type { DateRange } from '@/hooks/useCalendarRange';
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'home-' + String(p) });
 
 
-// Chart Data matching Figma Frame 1:20300
-const salesData = [
-  { day: 'Mon', lastWeek: 38, thisWeek: 44, lastVal: '₹2,800', thisVal: '₹3,200' },
-  { day: 'Tue', lastWeek: 49, thisWeek: 62, lastVal: '₹4,000', thisVal: '₹5,600' },
-  { day: 'Wed', lastWeek: 82, thisWeek: 72, lastVal: '₹6,800', thisVal: '₹6,000' },
-  { day: 'Thu', lastWeek: 48, thisWeek: 61, lastVal: '₹4,000', thisVal: '₹5,200' },
-  { day: 'Fri', lastWeek: 87, thisWeek: 99, lastVal: '₹7,200', thisVal: '₹8,500' },
-  { day: 'Sat', lastWeek: 67, thisWeek: 80, lastVal: '₹5,400', thisVal: '₹6,400' },
-  { day: 'Sun', lastWeek: 62, thisWeek: 68, lastVal: '₹5,000', thisVal: '₹6,000' },
-];
-
-// Inventory Alerts Data
-const inventoryAlerts = [
-  {
-    id: 1,
-    severity: 'Critical',
-    dotClass: styles.alertDotRed,
-    textClass: styles.alertStatusCritical,
-    segmentClass: styles.segmentFilledRed,
-    filledSegments: 2,
-    unitsLeft: '5 units left',
-    itemName: 'Boyfriend Poplin Shirt',
-    velocity: 'Sells: 3 pcs/day',
-  },
-  {
-    id: 2,
-    severity: 'Low',
-    dotClass: styles.alertDotOrange,
-    textClass: styles.alertStatusLow,
-    segmentClass: styles.segmentFilledOrange,
-    filledSegments: 2,
-    unitsLeft: '8 units left',
-    itemName: 'Tailored Blazer Suit',
-    velocity: 'Sells: 2 pcs/day',
-  },
-  {
-    id: 3,
-    severity: 'Low',
-    dotClass: styles.alertDotOrange,
-    textClass: styles.alertStatusLow,
-    segmentClass: styles.segmentFilledOrange,
-    filledSegments: 2,
-    unitsLeft: '10 units left',
-    itemName: 'Floral dress',
-    velocity: 'Sells: 4 pcs/day',
-  },
-];
-
-// Recent Orders Data matching Figma Frame 1:20300
-const recentOrders = [
-  { id: '#1247', time: '2 min ago', total: '₹24.50', status: 'Shipped', statusClass: styles.badgeShipped },
-  { id: '#1246', time: '5 mins ago', total: '₹18.00', status: 'Process', statusClass: styles.badgeProcess },
-  { id: '#1245', time: '8 min ago', total: '₹31.25', status: 'Deliver', statusClass: styles.badgeDeliver },
-  { id: '#1244', time: '12 min ago', total: '₹15.50', status: 'Shipped', statusClass: styles.badgeShipped },
-  { id: '#1243', time: '15 min ago', total: '₹28.00', status: 'Pending', statusClass: styles.badgePending },
-  { id: '#1242', time: '19 min ago', total: '₹13.00', status: 'Shipped', statusClass: styles.badgeShipped },
-  { id: '#1241', time: '23 min ago', total: '₹13.00', status: 'Process', statusClass: styles.badgeProcess },
-];
+// Dashboard data (D1): live KPIs from demo store, static feeds via mock adapter.
 
 export default function HomeView() {
-  const { orders, products } = useAdminState();
-  const [timeRange, setTimeRange] = useState('This week');
-  const [productSort, setProductSort] = useState('By revenue');
-  // C0 review: date-range popover state (label + open). Data wiring lands in D1.
+  const {
+    kpis,
+    salesTrend,
+    salesTotal,
+    salesDelta,
+    inventoryAlerts,
+    recentOrders,
+    timeRange,
+    setTimeRange,
+    productSort,
+    setProductSort,
+  } = useDashboardData();
+  // Date-range popover state (label + open).
   const [rangeLabel, setRangeLabel] = useState('Today');
   const [pickerOpen, setPickerOpen] = useState(false);
-
-  // Derive live KPIs and recent orders from live state
-  const liveRecentOrders = orders.slice(0, 6);
-  const livePaidOrders = orders.filter((o) => o.paymentStatus === 'paid');
-  const liveTotalRevenue = livePaidOrders.reduce((sum, o) => sum + (o.paidAmount || o.total), 0);
-  const liveOrdersCount = orders.length;
-  const liveAOV = livePaidOrders.length > 0 ? liveTotalRevenue / livePaidOrders.length : 0;
 
   return (
     <DashboardShell pageTitle="Dashboard" activeNav="home">
@@ -145,7 +90,7 @@ export default function HomeView() {
           <span className={styles.kpiLabel}>Revenue today</span>
           <div className={styles.kpiMiddleRow}>
             <span className={`${styles.kpiValue} tuw-tabular-nums`}>
-              ₹{liveTotalRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              ₹{kpis.revenueToday.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
             <svg className={styles.kpiSparkline} viewBox="0 0 90 40" fill="none">
               <defs>
@@ -170,7 +115,7 @@ export default function HomeView() {
           <div className={styles.kpiBottomRow}>
             <span className={styles.trendBadgeGreen}>
               <ArrowUp size={14} />
-              12.3%
+              {kpis.revenueDelta.toFixed(1)}%
             </span>
             <span className={styles.trendVs}>vs yesterday</span>
           </div>
@@ -180,7 +125,7 @@ export default function HomeView() {
         <div className={styles.kpiCard}>
           <span className={styles.kpiLabel}>Orders today</span>
           <div className={styles.kpiMiddleRow}>
-            <span className={styles.kpiValue}>{liveOrdersCount}</span>
+            <span className={styles.kpiValue}>{kpis.ordersToday}</span>
             <svg className={styles.kpiSparkline} viewBox="0 0 90 40" fill="none">
               <path
                 d="M 0 26 C 12 26, 18 10, 28 16 C 38 22, 44 26, 52 14 C 60 4, 68 8, 76 2 C 82 -2, 86 4, 90 2 L 90 40 L 0 40 Z"
@@ -198,7 +143,7 @@ export default function HomeView() {
           <div className={styles.kpiBottomRow}>
             <span className={styles.trendBadgeGreen}>
               <ArrowUp size={14} />
-              5%
+              {kpis.ordersDelta}%
             </span>
             <span className={styles.trendVs}>vs yesterday</span>
           </div>
@@ -209,7 +154,7 @@ export default function HomeView() {
           <span className={styles.kpiLabel}>Average order</span>
           <div className={styles.kpiMiddleRow}>
             <span className={`${styles.kpiValue} tuw-tabular-nums`}>
-              ₹{liveAOV.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              ₹{kpis.averageOrder.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
             <svg className={styles.kpiSparkline} viewBox="0 0 90 40" fill="none">
               <path
@@ -228,7 +173,7 @@ export default function HomeView() {
           <div className={styles.kpiBottomRow}>
             <span className={styles.trendBadgeGreen}>
               <ArrowUp size={14} />
-              7.1%
+              {kpis.averageOrderDelta.toFixed(1)}%
             </span>
             <span className={styles.trendVs}>vs yesterday</span>
           </div>
@@ -238,7 +183,7 @@ export default function HomeView() {
         <div className={styles.kpiCard}>
           <span className={styles.kpiLabel}>Conversion rate</span>
           <div className={styles.kpiMiddleRow}>
-            <span className={`${styles.kpiValue} tuw-tabular-nums`}>3.2%</span>
+            <span className={`${styles.kpiValue} tuw-tabular-nums`}>{kpis.conversionRate.toFixed(1)}%</span>
             <svg className={styles.kpiSparkline} viewBox="0 0 90 40" fill="none">
               <defs>
                 <linearGradient id="sparkRedGrad" x1="0" y1="0" x2="0" y2="1">
@@ -262,7 +207,7 @@ export default function HomeView() {
           <div className={styles.kpiBottomRow}>
             <span className={styles.trendBadgeRed}>
               <ArrowUp size={14} />
-              0.3%
+              {Math.abs(kpis.conversionDelta).toFixed(1)}%
             </span>
             <span className={styles.trendVs}>vs yesterday</span>
           </div>
@@ -298,10 +243,10 @@ export default function HomeView() {
             </div>
 
             <div className={styles.salesStatRow}>
-              <span className={`${styles.salesLargeNumber} tuw-tabular-nums`}>₹39,190</span>
+              <span className={`${styles.salesLargeNumber} tuw-tabular-nums`}>{salesTotal}</span>
               <span className={styles.trendBadgeGreen}>
                 <ArrowUp size={13} strokeWidth={2.5} />
-                8.4%
+                {salesDelta.toFixed(1)}%
               </span>
               <span className={styles.trendSubtext}>vs last week</span>
             </div>
@@ -332,7 +277,7 @@ export default function HomeView() {
 
               {/* Dual Bars */}
               <div className={styles.barsArea}>
-                {salesData.map((item) => (
+                {salesTrend.map((item) => (
                   <div key={item.day} className={styles.barGroup}>
                     <div
                       className={`${styles.barColumn} ${styles.barColumnLastWeek}`}
@@ -362,7 +307,7 @@ export default function HomeView() {
 
               {/* X-Axis Days */}
               <div className={styles.xAxisLabels}>
-                {salesData.map((item) => (
+                {salesTrend.map((item) => (
                   <span key={item.day} className={styles.xAxisDay}>
                     {item.day}
                   </span>
@@ -494,8 +439,8 @@ export default function HomeView() {
               <div key={alert.id} className={styles.alertItem}>
                 <div className={styles.alertTopRow}>
                   <div className={styles.alertStatusGroup}>
-                    <span className={alert.dotClass} />
-                    <span className={alert.textClass}>{alert.severity}</span>
+                    <span className={alert.severity === 'Critical' ? styles.alertDotRed : styles.alertDotOrange} />
+                    <span className={alert.severity === 'Critical' ? styles.alertStatusCritical : styles.alertStatusLow}>{alert.severity}</span>
                   </div>
                   <span className={styles.alertUnitsLeft}>{alert.unitsLeft}</span>
                 </div>
@@ -511,7 +456,11 @@ export default function HomeView() {
                     <div
                       key={idx}
                       className={`${styles.barSegment} ${
-                        idx <= alert.filledSegments ? alert.segmentClass : styles.segmentEmpty
+                        idx <= alert.filledSegments
+                          ? alert.severity === 'Critical'
+                            ? styles.segmentFilledRed
+                            : styles.segmentFilledOrange
+                          : styles.segmentEmpty
                       }`}
                     />
                   ))}
@@ -541,7 +490,7 @@ export default function HomeView() {
                 </tr>
               </thead>
               <tbody>
-                {liveRecentOrders.map((order) => (
+                {recentOrders.map((order) => (
                   <tr key={order.id} className={styles.orderDataRow}>
                     <td className={styles.orderIdCell}>
                       <Link href="/orders" style={{ color: 'inherit', textDecoration: 'none' }}>
