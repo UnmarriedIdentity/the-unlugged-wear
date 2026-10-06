@@ -10,12 +10,16 @@ interface DashboardCardProps {
   title: string;
   subtitle?: string;
   action?: React.ReactNode;
+  subheader?: React.ReactNode;
   children: React.ReactNode;
 }
 
 // Shared card shell for dashboard panels. Variant selects the Figma card
 // treatment; header/title/action slots stay identical across panels.
-export function DashboardCard({ variant, title, subtitle, action, children }: DashboardCardProps) {
+// `subheader` renders inside the same wrapper as the header row (mirrors the
+// original sales card: header + stat row pinned together as one flex item,
+// so space-between cards never stretch the gap between them).
+export function DashboardCard({ variant, title, subtitle, action, subheader, children }: DashboardCardProps) {
   const cardClass =
     variant === 'sales'
       ? styles.salesTrendCard
@@ -26,12 +30,15 @@ export function DashboardCard({ variant, title, subtitle, action, children }: Da
           : styles.recentOrdersCard;
   return (
     <div className={cardClass}>
-      <div className={styles.cardHeaderRow}>
-        <div>
-          <h3 className={styles.cardTitle}>{title}</h3>
-          {subtitle ? <p className={styles.subHeading}>{subtitle}</p> : null}
+      <div>
+        <div className={styles.cardHeaderRow}>
+          <div>
+            <h3 className={styles.cardTitle}>{title}</h3>
+            {subtitle ? <p className={styles.subHeading}>{subtitle}</p> : null}
+          </div>
+          {action ?? null}
         </div>
-        {action ?? null}
+        {subheader ?? null}
       </div>
       {children}
     </div>

@@ -96,8 +96,7 @@ export function SalesTrendCard({
           </div>
         </div>
       }
-    >
-      <div>
+      subheader={
         <div className={styles.salesStatRow}>
           <span className={`${styles.salesLargeNumber} tuw-tabular-nums`}>{total}</span>
           <span className={styles.trendBadgeGreen}>
@@ -106,8 +105,8 @@ export function SalesTrendCard({
           </span>
           <span className={styles.trendSubtext}>{compareLabel}</span>
         </div>
-      </div>
-
+      }
+    >
       {points.length === 0 ? (
         <EmptyState
           icon={<BarChart3 size={22} />}
