@@ -1,4 +1,8 @@
 export { DashboardCard, type DashboardCardVariant } from './DashboardCard';
+export { BarGroup } from './BarGroup';
+export { ChartFrame } from './ChartFrame';
+export { ChartLegend } from './ChartLegend';
+export { ChartTooltip, type ChartTooltipRow } from './ChartTooltip';
 export { DashboardHeader } from './DashboardHeader';
 export { FilterMenu, type FilterMenuOption } from './FilterMenu';
 export { InventoryAlertsCard } from './InventoryAlertsCard';

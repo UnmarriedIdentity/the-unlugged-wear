@@ -2,6 +2,10 @@
 
 import React from 'react';
 import { BarChart3 } from 'lucide-react';
+import { BarGroup } from './BarGroup';
+import { ChartFrame } from './ChartFrame';
+import { ChartLegend } from './ChartLegend';
+import { ChartTooltip } from './ChartTooltip';
 import { DashboardCard } from './DashboardCard';
 import { FilterMenu } from './FilterMenu';
 import { TrendBadge } from './TrendBadge';
@@ -10,6 +14,8 @@ import { SALES_RANGES, type SalesTrendPoint } from '@/hooks/useDashboardData';
 
 // Class map - selectors live in src/app/globals.css (single app.css, home- prefix).
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'home-' + String(p) });
+
+const SALES_Y_TICKS = ['₹10K', '₹8K', '₹6K', '₹4K', '₹2K', '₹0'];
 
 interface SalesTrendCardProps {
   points: SalesTrendPoint[];
@@ -45,16 +51,7 @@ export function SalesTrendCard({
       title="Sales trend"
       action={
         <div className={styles.salesHeaderRight}>
-          <div className={styles.chartLegend}>
-            <span className={styles.legendItem}>
-              <span className={styles.legendDotLastWeek} />
-              {legendPast}
-            </span>
-            <span className={styles.legendItem}>
-              <span className={styles.legendDotThisWeek} />
-              {legendCurrent}
-            </span>
-          </div>
+          <ChartLegend past={legendPast} current={legendCurrent} />
 
           <FilterMenu
             options={SALES_RANGES.map((range) => ({ value: range, label: range }))}
@@ -81,63 +78,24 @@ export function SalesTrendCard({
           onAction={() => onRangeChange('This week')}
         />
       ) : (
-        <div className={styles.chartContainer}>
-          <div className={`${styles.yAxisLabels} tuw-tabular-nums`}>
-            <span>₹10K</span>
-            <span>₹8K</span>
-            <span>₹6K</span>
-            <span>₹4K</span>
-            <span>₹2K</span>
-            <span>₹0</span>
-          </div>
-
-          <div className={styles.chartPlotArea}>
-            <div className={styles.gridLinesWrapper}>
-              <div className={styles.gridLine} />
-              <div className={styles.gridLine} />
-              <div className={styles.gridLine} />
-              <div className={styles.gridLine} />
-              <div className={styles.gridLine} />
-              <div className={styles.gridLine} />
-            </div>
-
-            <div className={styles.barsArea}>
-              {points.map((item) => (
-                <div key={item.day} className={styles.barGroup}>
-                  <div
-                    className={`${styles.barColumn} ${styles.barColumnLastWeek}`}
-                    style={{ height: barHeight(item.lastWeek, points) }}
-                  />
-                  <div
-                    className={`${styles.barColumn} ${styles.barColumnThisWeek}`}
-                    style={{ height: barHeight(item.thisWeek, points) }}
-                  />
-                  <div className={styles.barTooltip}>
-                    <span className={styles.tooltipDay}>{item.day}</span>
-                    <div className={styles.tooltipRow}>
-                      <span className={styles.tooltipDotThisWeek} />
-                      <span className={styles.tooltipLabel}>{legendCurrent}:</span>
-                      <strong className="tuw-tabular-nums">{item.thisVal}</strong>
-                    </div>
-                    <div className={styles.tooltipRow}>
-                      <span className={styles.tooltipDotLastWeek} />
-                      <span className={styles.tooltipLabel}>{legendPast}:</span>
-                      <strong className="tuw-tabular-nums">{item.lastVal}</strong>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className={styles.xAxisLabels}>
-              {points.map((item) => (
-                <span key={item.day} className={styles.xAxisDay}>
-                  {item.day}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
+        <ChartFrame ticks={SALES_Y_TICKS} labels={points.map((item) => item.day)}>
+          {points.map((item) => (
+            <BarGroup
+              key={item.day}
+              pastHeight={barHeight(item.lastWeek, points)}
+              currentHeight={barHeight(item.thisWeek, points)}
+              tooltip={
+                <ChartTooltip
+                  title={item.day}
+                  rows={[
+                    { series: 'current', label: legendCurrent, value: item.thisVal },
+                    { series: 'past', label: legendPast, value: item.lastVal },
+                  ]}
+                />
+              }
+            />
+          ))}
+        </ChartFrame>
       )}
     </DashboardCard>
   );
