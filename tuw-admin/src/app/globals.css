@@ -2155,6 +2155,7 @@
   min-width: 38px;
   text-align: right;
   user-select: none;
+  transition: color 0.2s ease;
 }
 
 .home-chartPlotArea {
@@ -2181,6 +2182,7 @@
   width: 100%;
   height: 1px;
   border-bottom: 1px dashed var(--tuw-border-subtle, #EEF0F2);
+  transition: border-color 0.2s ease;
 }
 
 .home-gridLine:last-child {
@@ -2219,7 +2221,7 @@
 .home-barColumn {
   width: clamp(8px, 1.4vw, 12px);
   border-radius: 6px 6px 2px 2px;
-  transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s ease, box-shadow 0.2s ease;
+  transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
   position: relative;
 }
 
@@ -2236,12 +2238,24 @@
 .home-barGroup:hover .home-barColumnThisWeek {
   background: linear-gradient(180deg, #874FFF 0%, #7539FF 100%);
   box-shadow: 0 4px 12px rgba(117, 57, 255, 0.35);
-  transform: translateY(-2px);
 }
 
 .home-barGroup:hover .home-barColumnLastWeek {
   background-color: #D6C8F2;
-  transform: translateY(-2px);
+}
+
+/* Card-level axis emphasis (B4): hovering the sales card brightens the
+   gridlines and darkens the Y labels — attention without displacement. */
+.home-salesTrendCard:hover .home-gridLine {
+  border-bottom-color: #D8DDE3;
+}
+
+.home-salesTrendCard:hover .home-gridLine:last-child {
+  border-bottom-color: #C9CED6;
+}
+
+.home-salesTrendCard:hover .home-yAxisLabels {
+  color: var(--tuw-text-secondary, #5D6772);
 }
 
 .home-barTooltip {
