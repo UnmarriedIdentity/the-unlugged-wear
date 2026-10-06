@@ -3,9 +3,9 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowUp, Calendar, ChevronDown } from 'lucide-react';
+import { Calendar, ChevronDown } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { MetricCard } from '@/components/dashboard';
+import { MetricCard, SalesTrendCard } from '@/components/dashboard';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { Calendar as DateRangeCalendar } from '@/components/calendar';
 import type { DateRange } from '@/hooks/useCalendarRange';
@@ -22,6 +22,9 @@ export default function HomeView() {
     salesTrend,
     salesTotal,
     salesDelta,
+    salesLegendPast,
+    salesLegendCurrent,
+    salesCompareLabel,
     inventoryAlerts,
     recentOrders,
     timeRange,
@@ -118,104 +121,16 @@ export default function HomeView() {
           MIDDLE SECTION: SALES TREND & TOP PRODUCT
           ---------------------------------------------------------------- */}
       <section className={styles.middleGrid}>
-        {/* Sales Trend Chart Card */}
-        <div className={styles.salesTrendCard}>
-          <div>
-            <div className={styles.cardHeaderRow}>
-              <h3 className={styles.cardTitle}>Sales trend</h3>
-              <div className={styles.salesHeaderRight}>
-                <div className={styles.chartLegend}>
-                  <span className={styles.legendItem}>
-                    <span className={styles.legendDotLastWeek} />
-                    Last week
-                  </span>
-                  <span className={styles.legendItem}>
-                    <span className={styles.legendDotThisWeek} />
-                    This week
-                  </span>
-                </div>
-
-                <button type="button" className={styles.filterSelectBtn}>
-                  <span>{timeRange}</span>
-                  <ChevronDown size={14} />
-                </button>
-              </div>
-            </div>
-
-            <div className={styles.salesStatRow}>
-              <span className={`${styles.salesLargeNumber} tuw-tabular-nums`}>{salesTotal}</span>
-              <span className={styles.trendBadgeGreen}>
-                <ArrowUp size={13} strokeWidth={2.5} />
-                {salesDelta.toFixed(1)}%
-              </span>
-              <span className={styles.trendSubtext}>vs last week</span>
-            </div>
-          </div>
-
-          {/* Chart Plot Area */}
-          <div className={styles.chartContainer}>
-            {/* Y-Axis Labels */}
-            <div className={`${styles.yAxisLabels} tuw-tabular-nums`}>
-              <span>₹10K</span>
-              <span>₹8K</span>
-              <span>₹6K</span>
-              <span>₹4K</span>
-              <span>₹2K</span>
-              <span>₹0</span>
-            </div>
-
-            {/* Plot Area with Grid Lines and Bars */}
-            <div className={styles.chartPlotArea}>
-              <div className={styles.gridLinesWrapper}>
-                <div className={styles.gridLine} />
-                <div className={styles.gridLine} />
-                <div className={styles.gridLine} />
-                <div className={styles.gridLine} />
-                <div className={styles.gridLine} />
-                <div className={styles.gridLine} />
-              </div>
-
-              {/* Dual Bars */}
-              <div className={styles.barsArea}>
-                {salesTrend.map((item) => (
-                  <div key={item.day} className={styles.barGroup}>
-                    <div
-                      className={`${styles.barColumn} ${styles.barColumnLastWeek}`}
-                      style={{ height: `${item.lastWeek}%` }}
-                    />
-                    <div
-                      className={`${styles.barColumn} ${styles.barColumnThisWeek}`}
-                      style={{ height: `${item.thisWeek}%` }}
-                    />
-                    {/* Rich Floating Tooltip */}
-                    <div className={styles.barTooltip}>
-                      <span className={styles.tooltipDay}>{item.day}</span>
-                      <div className={styles.tooltipRow}>
-                        <span className={styles.tooltipDotThisWeek} />
-                        <span className={styles.tooltipLabel}>This week:</span>
-                        <strong className="tuw-tabular-nums">{item.thisVal}</strong>
-                      </div>
-                      <div className={styles.tooltipRow}>
-                        <span className={styles.tooltipDotLastWeek} />
-                        <span className={styles.tooltipLabel}>Last week:</span>
-                        <strong className="tuw-tabular-nums">{item.lastVal}</strong>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* X-Axis Days */}
-              <div className={styles.xAxisLabels}>
-                {salesTrend.map((item) => (
-                  <span key={item.day} className={styles.xAxisDay}>
-                    {item.day}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
+        <SalesTrendCard
+          points={salesTrend}
+          total={salesTotal}
+          delta={salesDelta}
+          legendPast={salesLegendPast}
+          legendCurrent={salesLegendCurrent}
+          compareLabel={salesCompareLabel}
+          timeRange={timeRange}
+          onRangeChange={setTimeRange}
+        />
 
         {/* Top Product Card (100% Pure Code Vector Illustrations) */}
         <div className={styles.topProductCard}>

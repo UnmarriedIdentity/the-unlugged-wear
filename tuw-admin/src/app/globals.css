@@ -2039,6 +2039,47 @@
   background-color: var(--tuw-bg-selected, #F8F5FF);
 }
 
+/* Sales range dropdown menu (D4) — opens from the filter select button. */
+.home-rangeMenu {
+  background-color: var(--tuw-bg-surface, #FFFFFF);
+  border: 1px solid var(--tuw-border-subtle, #E9E9E9);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(38, 38, 38, 0.1);
+  padding: 4px;
+  min-width: 148px;
+  display: flex;
+  flex-direction: column;
+}
+
+.home-rangeMenuItem {
+  background: transparent;
+  border: 0;
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tuw-text-primary, #262626);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.home-rangeMenuItem:hover {
+  background-color: var(--tuw-bg-selected, #F8F5FF);
+  color: var(--tuw-action-primary, #7539FF);
+}
+
+.home-rangeMenuItemSelected {
+  background-color: var(--tuw-bg-selected, #F8F5FF);
+  border: 0;
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tuw-action-primary, #7539FF);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
 .home-salesStatRow {
   display: flex;
   align-items: center;
