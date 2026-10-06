@@ -1885,13 +1885,14 @@
   flex-direction: column;
   gap: 8px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
   min-width: 0;
   box-sizing: border-box;
 }
 
 .home-kpiCard:hover {
-  transform: translateY(-1px);
+  border-color: rgba(117, 57, 255, 0.35);
+  background-color: #FBFAFF;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
