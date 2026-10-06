@@ -18,6 +18,8 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
+import { buildNotifications, useNotifications, NotificationPanel } from '@/components/notifications';
+import { usePopoverAnimation } from '@/hooks/usePopoverAnimation';
 
 interface HeaderProps {
   pageTitle?: string;
@@ -55,6 +57,7 @@ export default function Header({
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
+  const notifAnim = usePopoverAnimation(showNotifications, () => setShowNotifications(false));
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Keyboard shortcut Ctrl+K / Cmd+K and Escape
@@ -91,6 +94,14 @@ export default function Header({
   const pendingIssuesCount =
     orders.filter((o) => o.fulfillmentStatus === 'submission_failed').length +
     supportTickets.filter((t) => t.status === 'open').length;
+
+  // Live ops notification feed (N3): store state in, repository out.
+  // Mock items today; a database feed replaces the builder later.
+  const notificationItems = React.useMemo(
+    () => buildNotifications({ orders, products, supportTickets }),
+    [orders, products, supportTickets],
+  );
+  const notifications = useNotifications(notificationItems);
 
   const filteredOrders = searchQuery.trim()
     ? orders
@@ -208,53 +219,41 @@ export default function Header({
                 type="button"
                 className="notificationBtn"
                 aria-label="Notifications"
-                title={`${pendingIssuesCount} Actionable Notifications`}
+                aria-expanded={notifAnim.visible}
+                aria-haspopup="dialog"
+                title={`${notifications.unreadCount} unread notifications`}
                 onClick={() => setShowNotifications(!showNotifications)}
               >
                 <Bell size={20} />
-                {pendingIssuesCount > 0 && <span className="notificationBadge">{pendingIssuesCount}</span>}
+                {notifications.unreadCount > 0 && (
+                  <span className="notificationBadge">{notifications.unreadCount}</span>
+                )}
               </button>
 
-              {showNotifications && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: '100%',
-                    right: 0,
-                    marginTop: '8px',
-                    width: '320px',
-                    backgroundColor: '#FFFFFF',
-                    border: '1px solid var(--tuw-border-subtle, #E5E7EB)',
-                    borderRadius: 'var(--tuw-radius-card, 12px)',
-                    boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
-                    zIndex: 100,
-                    padding: '16px',
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                    <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-                      Store Notifications
-                    </span>
-                    <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                      {pendingIssuesCount} new
-                    </span>
+              {notifAnim.visible && (
+                <>
+                  <div
+                    aria-hidden="true"
+                    onClick={() => setShowNotifications(false)}
+                    className="fixed inset-0 z-40 cursor-default"
+                  />
+                  <div
+                    style={{ position: 'absolute', top: '100%', right: 0, marginTop: '8px', width: '400px', maxWidth: 'calc(100vw - 32px)', zIndex: 50 }}
+                    className={
+                      notifAnim.phase === 'closing'
+                        ? 'animate-[popoverOut_0.15s_ease-in]'
+                        : 'animate-[popoverIn_0.18s_ease-out]'
+                    }
+                  >
+                    <NotificationPanel
+                      repo={notifications}
+                      onNavigate={(href) => {
+                        setShowNotifications(false);
+                        router.push(href);
+                      }}
+                    />
                   </div>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    <div style={{ padding: '8px', borderRadius: '6px', backgroundColor: 'var(--tuw-bg-error, #FEF4F4)', fontSize: 12 }}>
-                      <strong style={{ color: 'var(--tuw-text-error, #C91818)' }}>1 Partner Sync Error</strong>
-                      <p style={{ margin: '2px 0 0', color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                        #ORD-8817 print webhook timed out. Needs retry.
-                      </p>
-                    </div>
-                    <div style={{ padding: '8px', borderRadius: '6px', backgroundColor: 'var(--tuw-bg-warning, #FEFBF5)', fontSize: 12 }}>
-                      <strong style={{ color: 'var(--tuw-text-warning, #856300)' }}>1 RMA Return Dispute</strong>
-                      <p style={{ margin: '2px 0 0', color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                        RET-1089 missing factory garment tags.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                </>
               )}
             </div>
           </div>
