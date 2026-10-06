@@ -54,6 +54,7 @@ export function DashboardHeader({ title, subtitle, onlineLabel = '2 online custo
                 className="fixed inset-0 z-40 cursor-default"
               />
               <div
+                onClick={(e) => e.stopPropagation()}
                 className={`absolute right-0 top-full z-50 mt-2 ${
                   pickerAnim.phase === 'closing'
                     ? 'animate-[popoverOut_0.15s_ease-in]'

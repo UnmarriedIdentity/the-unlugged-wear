@@ -31,6 +31,7 @@ export function NotificationPanel({ repo, onNavigate }: NotificationPanelProps) 
     <div
       role="dialog"
       aria-label="Notifications"
+      onClick={(e) => e.stopPropagation()}
       style={{
         width: '100%',
         backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',

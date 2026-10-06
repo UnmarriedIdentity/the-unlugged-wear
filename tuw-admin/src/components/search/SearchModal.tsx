@@ -93,6 +93,7 @@ export function SearchModal({ orders, products, customers, shipments, onNavigate
       aria-modal="true"
       aria-label="Spotlight search"
       onKeyDown={handleResultsKeyDown}
+      onClick={(e) => e.stopPropagation()}
       style={{
         backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
         borderRadius: 'var(--tuw-radius-modal-lg, 24px)',
