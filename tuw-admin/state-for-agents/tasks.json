@@ -15,9 +15,9 @@
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "2dc810e",
-    "unpushed": ["5962ddf", "c90db70", "f798685", "b29d8fc", "7b645d3", "5a7c3e3", "6a00935", "2dc810e"],
-    "next_up": "verify merged branch gates + footprint, then human pushes both branches",
+    "tip": "a60fa4f",
+    "unpushed": ["6668cfd", "212ca3d", "c8a2f40", "6a00935", "2dc810e", "a60fa4f"],
+    "next_up": "human pushes origin/v2 (2 commits) then origin/feat/search-modal (6 commits); browser review of spotlight",
     "pending_verifications": [
       "dashboard D-series: KPI tiers, range/sort menus, badge mapping, calendar pills, header tint (360/768/1024/1440)",
       "trunk continuous-dark + elbow-only on 1st-4th actives (post Antigravity+z-lift)",
