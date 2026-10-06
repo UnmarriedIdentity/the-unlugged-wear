@@ -2113,6 +2113,17 @@
   font-weight: 700;
   color: var(--tuw-text-primary, #262626);
   letter-spacing: -0.03em;
+  transition: color 0.2s ease;
+}
+
+/* Count-tween direction tints (N2): applied while AnimatedNumber climbs
+   or falls, cleared on settle. Token colors, no layout impact. */
+.home-salesTotalUp {
+  color: var(--tuw-text-success, #187343);
+}
+
+.home-salesTotalDown {
+  color: var(--tuw-text-error, #C91818);
 }
 
 .home-trendBadgeGreen {

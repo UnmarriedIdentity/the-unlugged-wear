@@ -9,6 +9,7 @@ import { ChartTooltip } from './ChartTooltip';
 import { DashboardCard } from './DashboardCard';
 import { FilterMenu } from './FilterMenu';
 import { TrendBadge } from './TrendBadge';
+import AnimatedNumber from '@/components/ui/AnimatedNumber';
 import EmptyState from '@/components/ui/EmptyState';
 import { SALES_RANGES, formatINRWhole, type SalesTrendPoint } from '@/hooks/useDashboardData';
 
@@ -79,7 +80,13 @@ export function SalesTrendCard({
       }
       subheader={
         <div className={styles.salesStatRow}>
-          <span className={`${styles.salesLargeNumber} tuw-tabular-nums`}>{formatINRWhole(totalValue)}</span>
+          <AnimatedNumber
+            className={`${styles.salesLargeNumber} tuw-tabular-nums`}
+            value={totalValue}
+            format={formatINRWhole}
+            upClassName={styles.salesTotalUp}
+            downClassName={styles.salesTotalDown}
+          />
           <TrendBadge value={`${delta.toFixed(1)}%`} iconSize={13} iconStrokeWidth={2.5} />
           <span className={styles.trendSubtext}>{compareLabel}</span>
         </div>
