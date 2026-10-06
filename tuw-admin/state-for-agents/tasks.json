@@ -8,8 +8,8 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 67,
-    "done": 53,
+    "total": 73,
+    "done": 59,
     "in_progress": 3,
     "backlog": 11
   },
@@ -180,6 +180,100 @@
       "pushed": false,
       "follow_ups": [
         "REVERTED for spotlight overhaul track (S0); kbd/prefix/nav return rebuilt in S5/S6"
+      ]
+    },
+    {
+      "id": "TL-DASH-S2",
+      "title": "Spotlight tokens: modal-lg radius + glow shadow (branch)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:48d659e (tokens with used-by comments; tile washes already existed)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-S3",
+      "title": "SearchAdapter + prefix parser + local impl (branch)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:d8ea856 (types + localSearch + barrel; #/@/! extended set)",
+      "design_match": "yes",
+      "key_decisions": [
+        "prefix scopes are config entries; !ret/!pay map to nav keyword filters",
+        "tile tones assigned per scope in the adapter output"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-S4",
+      "title": "ShortcutChips + SpotlightRow with Jump pill (branch)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:3c85675 (chips seed prefix tokens; whole-row jump)",
+      "design_match": "yes",
+      "key_decisions": [
+        "Jump pill reuse verdict: ui Button outline/sm is 36px — too heavy; dedicated token pill instead"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-S5",
+      "title": "Island SearchModal rebuild wired into Header (branch)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:28ce909 (new modal + old 286-line palette deleted from Header)",
+      "design_match": "yes",
+      "key_decisions": [
+        "overlay CSS + Ctrl+K shortcut untouched; badge shows honest Ctrl+K",
+        "query state lives in modal (unmounts clean); scope icons mapped per result scope"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-S6",
+      "title": "Spotlight kbd nav + focus treatment + reduced-motion (branch)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:1c47ccd (focus-moving arrows/Enter + spotlightRow wash/focus rules)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-S7",
+      "title": "Branch verification: spotlight-only diff, full gates green (branch)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "branch diff vs v2: 9 files, all spotlight/Header/tokens/tracker; typecheck + test 4/4 + build 37/37",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser review on feat/search-modal; merge to v2 only on explicit approval (rule 05)"
       ]
     },
     {
