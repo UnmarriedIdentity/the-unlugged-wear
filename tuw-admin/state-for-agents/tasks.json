@@ -8,16 +8,16 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 66,
-    "done": 52,
+    "total": 67,
+    "done": 53,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "v2",
-    "tip": "5a7c3e3",
-    "unpushed": ["5962ddf", "c90db70", "f798685", "b29d8fc", "7b645d3", "5a7c3e3"],
-    "next_up": "human feel-check three-beat count + header read, then push v2",
+    "tip": "d166ae1",
+    "topic_branch": "feat/search-modal at 05d67ef (S0-S7 complete, human review pending; rule 05 forbids spotlight commits on v2)",
+    "next_up": "human browser review of spotlight on feat/search-modal; merge only on explicit approval",
     "pending_verifications": [
       "dashboard D-series: KPI tiers, range/sort menus, badge mapping, calendar pills, header tint (360/768/1024/1440)",
       "trunk continuous-dark + elbow-only on 1st-4th actives (post Antigravity+z-lift)",
@@ -181,6 +181,22 @@
       "follow_ups": [
         "REVERTED for spotlight overhaul track (S0); kbd/prefix/nav return rebuilt in S5/S6"
       ]
+    },
+    {
+      "id": "TL-DASH-S1",
+      "title": "Branch hygiene: feat/search-modal + rule 05 (spotlight isolated)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:d166ae1 (rules/05-branch-hygiene.md); S2-S7 live exclusively on feat/search-modal through 05d67ef",
+      "design_match": "yes",
+      "key_decisions": [
+        "spotlight commits exclusive to feat/search-modal; v2 takes reverts/trackers/rule only until merge approval"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
     },
     {
       "id": "TL-DASH-S0",
