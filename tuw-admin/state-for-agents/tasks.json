@@ -15,8 +15,8 @@
   },
   "session": {
     "branch": "v2",
-    "tip": "32d4381",
-    "unpushed": ["8e2319d", "ffe23aa", "2fb743a", "7943a07", "cc65338", "63e1cd3", "8f8ffaf", "7412752", "1f8821f", "d5de54e", "986e3c8", "26782eb", "8d55159", "00d43c9", "54adc41", "aaf2557", "049c4e1", "32d4381"],
+    "tip": "30b432e",
+    "unpushed": ["8e2319d", "ffe23aa", "2fb743a", "7943a07", "cc65338", "63e1cd3", "8f8ffaf", "7412752", "1f8821f", "d5de54e", "986e3c8", "26782eb", "8d55159", "00d43c9", "54adc41", "aaf2557", "049c4e1", "32d4381", "30b432e"],
     "next_up": "human browser verify dashboard (360/768/1024/1440, ranges, sort, calendar) then push v2",
     "pending_verifications": [
       "dashboard D-series: KPI tiers, range/sort menus, badge mapping, calendar pills, header tint (360/768/1024/1440)",
