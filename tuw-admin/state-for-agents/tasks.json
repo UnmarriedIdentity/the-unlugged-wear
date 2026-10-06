@@ -8,15 +8,15 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 59,
-    "done": 45,
+    "total": 60,
+    "done": 46,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "v2",
-    "tip": "695d9c6",
-    "unpushed": ["8e2319d", "ffe23aa", "2fb743a", "7943a07", "cc65338", "63e1cd3", "8f8ffaf", "7412752", "1f8821f", "d5de54e", "986e3c8", "26782eb", "8d55159", "00d43c9", "54adc41", "aaf2557", "049c4e1", "32d4381", "30b432e", "e735a97", "b0d4f52", "774efcc", "9e81c07", "43a3ee6", "31925fe", "2042371", "ef9ea22", "eb620ec", "b5d1df6", "dfbf5cf", "195b8aa", "3f9b5d3", "c2398af", "d65fe51", "cce6092", "09f1f33", "3375ed0", "87541ce", "2125586", "822c153", "14089ec", "2dcd71e", "f5f0657", "41503d6", "b3ee1f5", "18f6a8a", "ec447d6", "bd0d476", "f6ecd93", "c3d94c2", "81dd9da", "695d9c6"],
+    "tip": "fc9ae6f",
+    "unpushed": ["8e2319d", "ffe23aa", "2fb743a", "7943a07", "cc65338", "63e1cd3", "8f8ffaf", "7412752", "1f8821f", "d5de54e", "986e3c8", "26782eb", "8d55159", "00d43c9", "54adc41", "aaf2557", "049c4e1", "32d4381", "30b432e", "e735a97", "b0d4f52", "774efcc", "9e81c07", "43a3ee6", "31925fe", "2042371", "ef9ea22", "eb620ec", "b5d1df6", "dfbf5cf", "195b8aa", "3f9b5d3", "c2398af", "d65fe51", "cce6092", "09f1f33", "3375ed0", "87541ce", "2125586", "822c153", "14089ec", "2dcd71e", "f5f0657", "41503d6", "b3ee1f5", "18f6a8a", "ec447d6", "bd0d476", "f6ecd93", "c3d94c2", "81dd9da", "695d9c6", "6004bd7", "fc9ae6f"],
     "next_up": "human feel-check three-beat count + header read, then push v2",
     "pending_verifications": [
       "dashboard D-series: KPI tiers, range/sort menus, badge mapping, calendar pills, header tint (360/768/1024/1440)",
@@ -160,6 +160,20 @@
       ],
       "verified": true,
       "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-W1",
+      "title": "Tint rides to finish, lingers 150ms, melts back over 350ms",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:fc9ae6f (70% early-release deleted; linger timer; color transition 0.2 to 0.35s)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
       "follow_ups": []
     },
     {
