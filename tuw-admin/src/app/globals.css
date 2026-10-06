@@ -2126,6 +2126,34 @@
   color: var(--tuw-text-error, #C91818);
 }
 
+/* Three-beat landing accents (N3): momentary scale emphasis, not floats.
+   Under prefers-reduced-motion both collapse to instant via the global rule. */
+@keyframes numberLand {
+  from {
+    transform: scale(1.03);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.home-numberLanded {
+  animation: numberLand 0.18s ease-out;
+}
+
+@keyframes trendLand {
+  from {
+    transform: scale(1.12);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.home-trendLanded {
+  animation: trendLand 0.18s ease-out;
+}
+
 .home-trendBadgeGreen {
   display: inline-flex;
   align-items: center;
