@@ -1002,6 +1002,15 @@
   background-color: var(--tuw-bg-selected, #F8F5FF);
 }
 
+/* Spotlight result rows (S6): hover/focus wash + visible keyboard focus.
+   Entrance/exit motion inherits the global reduced-motion collapse. */
+.spotlightRow:hover,
+.spotlightRow:focus-visible {
+  background-color: var(--tuw-bg-selected, #F8F5FF);
+  border-color: rgba(117, 57, 255, 0.25);
+  outline: none;
+}
+
 .commandPaletteItemLeft {
   display: flex;
   align-items: center;

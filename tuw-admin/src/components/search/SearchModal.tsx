@@ -25,6 +25,7 @@ interface SearchModalProps {
 export function SearchModal({ orders, products, customers, shipments, onNavigate, onClose }: SearchModalProps) {
   const [query, setQuery] = React.useState('');
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const resultsRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     const t = setTimeout(() => inputRef.current?.focus(), 50);
@@ -41,11 +42,35 @@ export function SearchModal({ orders, products, customers, shipments, onNavigate
     onClose();
   };
 
+  // Arrow-key navigation across result rows (S6): moves DOM focus so the
+  // focus-visible wash marks the active row; Enter jumps. Escape is
+  // handled by the global header shortcut.
+  const handleResultsKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp' && e.key !== 'Enter') return;
+    const root = resultsRef.current;
+    if (!root) return;
+    const rows = Array.from(root.querySelectorAll<HTMLButtonElement>('.spotlightRow'));
+    if (rows.length === 0) return;
+    const active = document.activeElement as HTMLElement | null;
+    const at = rows.findIndex((el) => el === active);
+    if (e.key === 'Enter') {
+      if (at >= 0) {
+        e.preventDefault();
+        rows[at].click();
+      }
+      return;
+    }
+    e.preventDefault();
+    const next = e.key === 'ArrowDown' ? (at + 1) % rows.length : (at - 1 + rows.length) % rows.length;
+    rows[next].focus();
+  };
+
   return (
     <div
       role="dialog"
       aria-modal="true"
       aria-label="Spotlight search"
+      onKeyDown={handleResultsKeyDown}
       style={{
         backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
         borderRadius: 'var(--tuw-radius-modal-lg, 24px)',
@@ -136,7 +161,7 @@ export function SearchModal({ orders, products, customers, shipments, onNavigate
 
       <ShortcutChips prefixes={SEARCH_PREFIXES} onPick={(token) => setQuery(token)} />
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '12px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      <div ref={resultsRef} style={{ flex: 1, overflowY: 'auto', padding: '12px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
         {sections.length === 0 ? (
           <EmptyState
             title="No matches found"
