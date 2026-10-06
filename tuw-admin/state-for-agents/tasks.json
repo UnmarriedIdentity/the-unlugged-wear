@@ -9,9 +9,9 @@
   },
   "summary": {
     "total": 28,
-    "done": 13,
+    "done": 14,
     "in_progress": 3,
-    "backlog": 12
+    "backlog": 11
   },
   "session": {
     "branch": "v2",
@@ -474,15 +474,17 @@
     {
       "id": "TL-SIDEBAR-EDGE-C",
       "title": "remove max-w-1400 page cap",
-      "status": "backlog",
+      "status": "done",
       "owner": null,
       "parent": "TL-SIDEBAR-EDGE",
       "started": null,
-      "finished": null,
-      "log": null,
-      "design_match": null,
-      "key_decisions": [],
-      "verified": false,
+      "finished": "2026-10-05",
+      "log": "reapplied post-reset",
+      "design_match": "yes",
+      "key_decisions": [
+        "single max-w occurrence repo-wide; mx-auto retained as no-op"
+      ],
+      "verified": true,
       "pushed": false,
       "follow_ups": []
     }
