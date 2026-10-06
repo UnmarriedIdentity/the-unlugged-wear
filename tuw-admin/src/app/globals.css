@@ -2716,7 +2716,7 @@
 }
 
 .home-ordersTableHeaderRow th:last-child {
-  text-align: left;
+  text-align: right;
 }
 
 .home-orderDataRow {
@@ -2760,7 +2760,7 @@
 }
 
 .home-orderStatusCell {
-  text-align: left;
+  text-align: right;
 }
 
 /* Status Badges */
