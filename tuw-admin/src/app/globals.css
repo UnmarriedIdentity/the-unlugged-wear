@@ -278,6 +278,13 @@
   --tuw-radius-modal-lg: 24px; /* used by: spotlight search dialog (S2 demo source) */
   --tuw-radius-pill: 9999px;
 
+  /* Scrollbar system (P4) — minimal gray pills admin-wide. Change these
+     three values to restyle every scrollbar (modal lists, drawers, tables,
+    page scroll) at once. Sidebar/nav stay hidden via their own exceptions. */
+  --tuw-scroll-thumb: #C9CED6;
+  --tuw-scroll-thumb-hover: #AEB4BE;
+  --tuw-scroll-track: transparent;
+
   /* Spacing Scale per DESIGN_SYSTEM.md: 4, 8, 12, 16, 24, 32, 48, 64px */
   --tuw-space-4: 4px;
   --tuw-space-8: 8px;
@@ -621,6 +628,36 @@
 }
 .no-scrollbar {
   scrollbar-width: none;
+}
+
+/* Admin scrollbar language (P4): 8px overlay gutters, gray pill thumbs,
+   no arrow buttons, zero layout shift (transparent border + padding-box
+   clip). Hidden where the spec demands (.sidebar, .no-scrollbar win by
+   specificity). Firefox gets the thin native equivalent. */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-button {
+  display: none;
+}
+*::-webkit-scrollbar-track {
+  background: var(--tuw-scroll-track, transparent);
+}
+*::-webkit-scrollbar-thumb {
+  background-color: var(--tuw-scroll-thumb, #C9CED6);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--tuw-scroll-thumb-hover, #AEB4BE);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--tuw-scroll-thumb, #C9CED6) var(--tuw-scroll-track, transparent);
 }
 .clamp-2 {
   display: -webkit-box;

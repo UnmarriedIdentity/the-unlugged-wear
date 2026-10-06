@@ -12,6 +12,10 @@ Global authority for look-and-feel sources of truth in `tuw-admin`.
   (`12px` login / `10px` signup / `14px` social), OTP lime line.
 - Nav chrome: ink text `#111827`, guides `#dddddd`→`#c4c4c4`, active edge
   `inset 0 -2px 0 #d6d6d6`, dock `#0F0F12`.
+- Scrollbars: minimal gray pills everywhere (`--tuw-scroll-thumb` /
+  `-hover` / `-track` tokens, 8px overlay gutters, no arrow buttons,
+  zero layout shift). Sidebar/nav stay hidden via their documented
+  exceptions. Change the three tokens to restyle every scrollbar at once.
 
 ## Rules
 
