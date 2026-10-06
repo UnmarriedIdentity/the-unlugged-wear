@@ -70,18 +70,34 @@ export function sameDay(a: Date | null, b: Date | null): boolean {
  */
 export function useCalendarRange(today: Date = new Date()) {
   const now = useMemo(() => startOfDay(today), [today.getTime()]);
-  const [baseYear, setBaseYear] = useState(() => {
+  const [window, setWindow] = useState(() => {
     const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    return { year: prev.getFullYear(), month: prev.getMonth() };
+    const cur = new Date(now.getFullYear(), now.getMonth(), 1);
+    return {
+      left: { year: prev.getFullYear(), month: prev.getMonth() },
+      right: { year: cur.getFullYear(), month: cur.getMonth() },
+    };
   });
   const [draft, setDraft] = useState<DateRange>({ start: null, end: null });
   const [committed, setCommitted] = useState<DateRange>({ start: null, end: null });
   const [preset, setPreset] = useState<PresetKey | 'custom' | null>(null);
 
-  const shiftWindow = useCallback((dir: 1 | -1) => {
-    setBaseYear((b) => {
-      const d = new Date(b.year, b.month + dir, 1);
-      return { year: d.getFullYear(), month: d.getMonth() };
+  const keyOf = (m: { year: number; month: number }) => m.year * 12 + m.month;
+  const fromKey = (k: number) => ({ year: Math.floor(k / 12), month: k % 12 });
+
+  // Independent panels with push-along guard: the two months always differ.
+  // Pure updaters (no nested setters) so StrictMode double-invoke stays safe.
+  const shiftLeft = useCallback((dir: 1 | -1) => {
+    setWindow((w) => {
+      const next = fromKey(keyOf(w.left) + dir);
+      return { left: next, right: keyOf(next) >= keyOf(w.right) ? fromKey(keyOf(next) + 1) : w.right };
+    });
+  }, []);
+
+  const shiftRight = useCallback((dir: 1 | -1) => {
+    setWindow((w) => {
+      const next = fromKey(keyOf(w.right) + dir);
+      return { left: keyOf(next) <= keyOf(w.left) ? fromKey(keyOf(next) - 1) : w.left, right: next };
     });
   }, []);
 
@@ -127,12 +143,9 @@ export function useCalendarRange(today: Date = new Date()) {
   }, []);
 
   return {
-    baseYear,
-    months: [
-      { year: baseYear.year, month: baseYear.month },
-      { year: new Date(baseYear.year, baseYear.month + 1, 1).getFullYear(), month: new Date(baseYear.year, baseYear.month + 1, 1).getMonth() },
-    ],
-    shiftWindow,
+    months: [window.left, window.right],
+    shiftLeft,
+    shiftRight,
     draft,
     committed,
     preset,

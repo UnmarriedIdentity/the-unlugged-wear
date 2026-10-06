@@ -55,8 +55,8 @@ export default function Calendar({ onApply, onClose }: CalendarProps) {
           range={cal.draft}
           showPrev
           showNext={false}
-          onPrev={() => cal.shiftWindow(-1)}
-          onNext={() => cal.shiftWindow(1)}
+          onPrev={() => cal.shiftLeft(-1)}
+          onNext={() => cal.shiftLeft(1)}
           onPick={cal.pickDay}
         />
         <MonthCalendar
@@ -65,8 +65,8 @@ export default function Calendar({ onApply, onClose }: CalendarProps) {
           range={cal.draft}
           showPrev={false}
           showNext
-          onPrev={() => cal.shiftWindow(-1)}
-          onNext={() => cal.shiftWindow(1)}
+          onPrev={() => cal.shiftRight(-1)}
+          onNext={() => cal.shiftRight(1)}
           onPick={cal.pickDay}
         />
       </div>
