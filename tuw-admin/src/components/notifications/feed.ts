@@ -1,5 +1,5 @@
 import type { OrderItem, ProductItem, SupportTicket } from '@/mocks/fixtures';
-import type { NotificationItem } from './types';
+import type { Notification } from './types';
 
 interface OpsSignals {
   orders: OrderItem[];
@@ -10,8 +10,8 @@ interface OpsSignals {
 // Pure ops feed builder (N1): live store state in, notification items out.
 // Deterministic demo copy with stable ids; a database feed replaces this
 // function later without touching any component.
-export function buildNotifications({ orders, products, supportTickets }: OpsSignals): NotificationItem[] {
-  const items: NotificationItem[] = [];
+export function buildNotifications({ orders, products, supportTickets }: OpsSignals): Notification[] {
+  const items: Notification[] = [];
 
   orders
     .filter((o) => o.fulfillmentStatus === 'submission_failed')

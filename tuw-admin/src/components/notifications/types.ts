@@ -2,7 +2,7 @@ export type NotificationTone = 'info' | 'success' | 'warning' | 'error';
 
 export type NotificationCategory = 'orders' | 'inventory' | 'payment' | 'system' | 'marketing';
 
-export interface NotificationItem {
+export interface Notification {
   id: string;
   category: NotificationCategory;
   tone: NotificationTone;
@@ -25,7 +25,7 @@ export const NOTIFICATION_CATEGORIES: { value: NotificationCategory | 'all'; lab
 // backed by session-local read state over store-derived items; tomorrow a
 // database adapter implements the same interface and nothing upstream moves.
 export interface NotificationRepository {
-  all: NotificationItem[];
+  all: Notification[];
   unreadCount: number;
   isRead: (id: string) => boolean;
   markRead: (id: string) => void;
