@@ -8,15 +8,15 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 34,
-    "done": 20,
+    "total": 35,
+    "done": 21,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "v2",
-    "tip": "54adc41",
-    "unpushed": ["7943a07", "cc65338", "63e1cd3", "8f8ffaf", "7412752", "1f8821f", "d5de54e", "986e3c8", "26782eb", "8d55159", "00d43c9", "54adc41"],
+    "tip": "049c4e1",
+    "unpushed": ["7943a07", "cc65338", "63e1cd3", "8f8ffaf", "7412752", "1f8821f", "d5de54e", "986e3c8", "26782eb", "8d55159", "00d43c9", "54adc41", "aaf2557", "049c4e1"],
     "next_up": "await user computed readouts for collapsed clip; then targeted fix",
     "pending_verifications": [
       "trunk continuous-dark + elbow-only on 1st-4th actives (post Antigravity+z-lift)",
@@ -159,6 +159,24 @@
       ],
       "verified": true,
       "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-D7",
+      "title": "DashboardHeader: purple filter hover + applied tint + online badge",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:049c4e1 (new DashboardHeader owns label/popover state + dateFilterBtn purple hover + dateFilterBtnActive tint + HomeView slimmed)",
+      "design_match": "yes",
+      "key_decisions": [
+        "dateFilterBtn hover grey to purple (mirrors filterSelectBtn); default resting pixels unchanged",
+        "applied tint only when label != Today via className ternary",
+        "online badge kept verbatim (pulse + 2 online customers) inside header"
+      ],
+      "verified": true,
+      "pushed": false,
       "follow_ups": []
     },
     {
