@@ -275,6 +275,7 @@
   --tuw-radius-control: 8px;
   --tuw-radius-card: 12px;
   --tuw-radius-modal: 16px;
+  --tuw-radius-modal-lg: 24px; /* used by: spotlight search dialog (S2 demo source) */
   --tuw-radius-pill: 9999px;
 
   /* Spacing Scale per DESIGN_SYSTEM.md: 4, 8, 12, 16, 24, 32, 48, 64px */
@@ -392,6 +393,7 @@
   --tuw-radius-12: 12px;
   --tuw-radius-modal: 16px;
   --tuw-radius-16: 16px;
+  --tuw-radius-modal-lg: 24px;
   --tuw-radius-pill: 9999px;
   --tuw-radius-999: 9999px;
 
@@ -410,6 +412,7 @@
   --shadow-dropdown: 0 6px 18px rgba(0, 0, 0, 0.08);
   --shadow-focus: 0 0 0 3px rgba(117, 57, 255, 0.15);
   --shadow-error: 0 0 0 3px rgba(201, 24, 24, 0.15);
+  --shadow-spotlight: 0 25px 50px -12px rgba(18, 10, 36, 0.35), 0 0 0 1px rgba(117, 57, 255, 0.1), 0 0 44px rgba(117, 57, 255, 0.14); /* used by: spotlight search dialog (S2 demo source) */
 }
 
 /* ============================================================
@@ -997,6 +1000,15 @@
 .commandPaletteItem:hover,
 .commandPaletteItem:focus-visible {
   background-color: var(--tuw-bg-selected, #F8F5FF);
+}
+
+/* Spotlight result rows (S6): hover/focus wash + visible keyboard focus.
+   Entrance/exit motion inherits the global reduced-motion collapse. */
+.spotlightRow:hover,
+.spotlightRow:focus-visible {
+  background-color: var(--tuw-bg-selected, #F8F5FF);
+  border-color: rgba(117, 57, 255, 0.25);
+  outline: none;
 }
 
 .commandPaletteItemLeft {

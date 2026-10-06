@@ -1,40 +1,23 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Search,
   Bell,
   Menu,
   X,
-  Package,
-  ClipboardList,
-  Users,
-  Settings,
-  Compass,
-  ArrowRight,
-  Truck,
-  RotateCcw,
-  Sparkles,
 } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
+import { SearchModal } from '@/components/search';
+import { buildNotifications, useNotifications, NotificationPanel } from '@/components/notifications';
+import { usePopoverAnimation } from '@/hooks/usePopoverAnimation';
 
 interface HeaderProps {
   pageTitle?: string;
   mobileMenuOpen: boolean;
   onToggleMobileMenu: () => void;
 }
-
-const quickLinks = [
-  { title: 'Dashboard', subtitle: 'Store performance and operational KPIs', href: '/dashboard', icon: <Compass size={16} /> },
-  { title: 'Orders', subtitle: 'Fulfillment queue and sales logs', href: '/orders', icon: <ClipboardList size={16} /> },
-  { title: 'Products', subtitle: 'Catalog, variants, pricing, and stock', href: '/products', icon: <Package size={16} /> },
-  { title: 'Customers', subtitle: 'Accounts, lifetime value, and order history', href: '/customers', icon: <Users size={16} /> },
-  { title: 'Fulfillment', subtitle: 'Production print jobs and partner sync', href: '/fulfillment', icon: <Sparkles size={16} /> },
-  { title: 'Shipments', subtitle: 'Dispatch manifests and courier tracking', href: '/shipments', icon: <Truck size={16} /> },
-  { title: 'Returns & RMA', subtitle: 'Customer return requests and disputes', href: '/returns', icon: <RotateCcw size={16} /> },
-  { title: 'Store Settings', subtitle: 'Store details, currency, and notifications', href: '/settings', icon: <Settings size={16} /> },
-];
 
 export default function Header({
   pageTitle = 'Dashboard',
@@ -50,12 +33,12 @@ export default function Header({
     orders,
     products,
     customers,
+    shipments,
   } = useAdminState();
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
-  const searchInputRef = useRef<HTMLInputElement>(null);
+  const notifAnim = usePopoverAnimation(showNotifications, () => setShowNotifications(false));
 
   // Keyboard shortcut Ctrl+K / Cmd+K and Escape
   useEffect(() => {
@@ -72,66 +55,18 @@ export default function Header({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Auto focus input when opened
-  useEffect(() => {
-    if (isSearchOpen) {
-      setTimeout(() => {
-        searchInputRef.current?.focus();
-      }, 50);
-    } else {
-      setSearchQuery('');
-    }
-  }, [isSearchOpen]);
-
   const handleNavigate = (href: string) => {
     setIsSearchOpen(false);
     router.push(href);
   };
 
-  const pendingIssuesCount =
-    orders.filter((o) => o.fulfillmentStatus === 'submission_failed').length +
-    supportTickets.filter((t) => t.status === 'open').length;
-
-  const filteredOrders = searchQuery.trim()
-    ? orders
-        .filter(
-          (o) =>
-            o.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            o.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            o.paymentStatus.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            o.fulfillmentStatus.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-        .slice(0, 4)
-    : [];
-
-  const filteredProducts = searchQuery.trim()
-    ? products
-        .filter(
-          (p) =>
-            p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            p.category.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-        .slice(0, 4)
-    : [];
-
-  const filteredCustomers = searchQuery.trim()
-    ? customers
-        .filter(
-          (c) =>
-            c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            c.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            c.city.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-        .slice(0, 4)
-    : [];
-
-  const filteredNav = searchQuery.trim()
-    ? quickLinks.filter(
-        (n) =>
-          n.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          n.subtitle.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : [];
+  // Live ops notification feed (N3): store state in, repository out.
+  // Mock items today; a database feed replaces the builder later.
+  const notificationItems = React.useMemo(
+    () => buildNotifications({ orders, products, supportTickets }),
+    [orders, products, supportTickets],
+  );
+  const notifications = useNotifications(notificationItems);
 
   return (
     <>
@@ -208,53 +143,41 @@ export default function Header({
                 type="button"
                 className="notificationBtn"
                 aria-label="Notifications"
-                title={`${pendingIssuesCount} Actionable Notifications`}
+                aria-expanded={notifAnim.visible}
+                aria-haspopup="dialog"
+                title={`${notifications.unreadCount} unread notifications`}
                 onClick={() => setShowNotifications(!showNotifications)}
               >
                 <Bell size={20} />
-                {pendingIssuesCount > 0 && <span className="notificationBadge">{pendingIssuesCount}</span>}
+                {notifications.unreadCount > 0 && (
+                  <span className="notificationBadge">{notifications.unreadCount}</span>
+                )}
               </button>
 
-              {showNotifications && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: '100%',
-                    right: 0,
-                    marginTop: '8px',
-                    width: '320px',
-                    backgroundColor: '#FFFFFF',
-                    border: '1px solid var(--tuw-border-subtle, #E5E7EB)',
-                    borderRadius: 'var(--tuw-radius-card, 12px)',
-                    boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
-                    zIndex: 100,
-                    padding: '16px',
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                    <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-                      Store Notifications
-                    </span>
-                    <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                      {pendingIssuesCount} new
-                    </span>
+              {notifAnim.visible && (
+                <>
+                  <div
+                    aria-hidden="true"
+                    onClick={() => setShowNotifications(false)}
+                    className="fixed inset-0 z-40 cursor-default"
+                  />
+                  <div
+                    style={{ position: 'absolute', top: '100%', right: 0, marginTop: '8px', width: '400px', maxWidth: 'calc(100vw - 32px)', zIndex: 50 }}
+                    className={
+                      notifAnim.phase === 'closing'
+                        ? 'animate-[popoverOut_0.15s_ease-in]'
+                        : 'animate-[popoverIn_0.18s_ease-out]'
+                    }
+                  >
+                    <NotificationPanel
+                      repo={notifications}
+                      onNavigate={(href) => {
+                        setShowNotifications(false);
+                        router.push(href);
+                      }}
+                    />
                   </div>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    <div style={{ padding: '8px', borderRadius: '6px', backgroundColor: 'var(--tuw-bg-error, #FEF4F4)', fontSize: 12 }}>
-                      <strong style={{ color: 'var(--tuw-text-error, #C91818)' }}>1 Partner Sync Error</strong>
-                      <p style={{ margin: '2px 0 0', color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                        #ORD-8817 print webhook timed out. Needs retry.
-                      </p>
-                    </div>
-                    <div style={{ padding: '8px', borderRadius: '6px', backgroundColor: 'var(--tuw-bg-warning, #FEFBF5)', fontSize: 12 }}>
-                      <strong style={{ color: 'var(--tuw-text-warning, #856300)' }}>1 RMA Return Dispute</strong>
-                      <p style={{ margin: '2px 0 0', color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                        RET-1089 missing factory garment tags.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                </>
               )}
             </div>
           </div>
@@ -294,218 +217,20 @@ export default function Header({
         </div>
       </header>
 
-      {/* Global Command Palette / Search Modal */}
+      {/* Spotlight Search Modal (S5): island dialog, overlay untouched */}
       {isSearchOpen && (
         <div
           className="commandPaletteOverlay"
           onClick={() => setIsSearchOpen(false)}
         >
-          <div
-            className="commandPaletteDialog"
-            onClick={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Global search command palette"
-          >
-            <div className="commandPaletteHeader">
-              <Search className="commandPaletteSearchIcon" size={18} />
-              <input
-                ref={searchInputRef}
-                type="text"
-                placeholder="Search orders, products, customers, or quick jump..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="commandPaletteInput"
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery('')}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: 'var(--tuw-text-secondary, #5D6772)',
-                    cursor: 'pointer',
-                    padding: 4,
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}
-                  title="Clear input"
-                >
-                  <X size={16} />
-                </button>
-              )}
-              <button
-                type="button"
-                className="commandPaletteEscBadge"
-                onClick={() => setIsSearchOpen(false)}
-                title="Close (ESC)"
-              >
-                ESC
-              </button>
-            </div>
-
-            <div className="commandPaletteBody">
-              {searchQuery.trim() ? (
-                <>
-                  {filteredOrders.length === 0 &&
-                  filteredProducts.length === 0 &&
-                  filteredCustomers.length === 0 &&
-                  filteredNav.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '36px 16px', color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                      <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', margin: '0 0 6px' }}>
-                        No matches found
-                      </p>
-                      <p style={{ fontSize: 13, margin: 0 }}>
-                        No orders, products, or customers match &ldquo;{searchQuery}&rdquo;
-                      </p>
-                    </div>
-                  ) : (
-                    <>
-                      {/* Matching Orders */}
-                      {filteredOrders.length > 0 && (
-                        <div>
-                          <div className="commandPaletteSectionTitle">Orders ({filteredOrders.length})</div>
-                          {filteredOrders.map((ord) => (
-                            <button
-                              key={ord.id}
-                              type="button"
-                              className="commandPaletteItem"
-                              onClick={() => handleNavigate('/orders')}
-                            >
-                              <div className="commandPaletteItemLeft">
-                                <div className="commandPaletteItemIcon">
-                                  <ClipboardList size={16} />
-                                </div>
-                                <div className="commandPaletteItemText">
-                                  <span className="commandPaletteItemTitle">{ord.id} · {ord.customerName}</span>
-                                  <span className="commandPaletteItemSubtitle">
-                                    ₹{ord.total} · Payment: {ord.paymentStatus} · {ord.fulfillmentStatus}
-                                  </span>
-                                </div>
-                              </div>
-                              <ArrowRight size={14} color="#90979F" />
-                            </button>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Matching Products */}
-                      {filteredProducts.length > 0 && (
-                        <div>
-                          <div className="commandPaletteSectionTitle">Products ({filteredProducts.length})</div>
-                          {filteredProducts.map((p) => (
-                            <button
-                              key={p.id}
-                              type="button"
-                              className="commandPaletteItem"
-                              onClick={() => handleNavigate('/products')}
-                            >
-                              <div className="commandPaletteItemLeft">
-                                <div className="commandPaletteItemIcon">
-                                  <Package size={16} />
-                                </div>
-                                <div className="commandPaletteItemText">
-                                  <span className="commandPaletteItemTitle">{p.name}</span>
-                                  <span className="commandPaletteItemSubtitle">
-                                    {p.category} · ₹{p.price} · {p.stock} units in stock
-                                  </span>
-                                </div>
-                              </div>
-                              <ArrowRight size={14} color="#90979F" />
-                            </button>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Matching Customers */}
-                      {filteredCustomers.length > 0 && (
-                        <div>
-                          <div className="commandPaletteSectionTitle">Customers ({filteredCustomers.length})</div>
-                          {filteredCustomers.map((c) => (
-                            <button
-                              key={c.id}
-                              type="button"
-                              className="commandPaletteItem"
-                              onClick={() => handleNavigate('/customers')}
-                            >
-                              <div className="commandPaletteItemLeft">
-                                <div className="commandPaletteItemIcon">
-                                  <Users size={16} />
-                                </div>
-                                <div className="commandPaletteItemText">
-                                  <span className="commandPaletteItemTitle">{c.name}</span>
-                                  <span className="commandPaletteItemSubtitle">
-                                    {c.email} · {c.city} · {c.totalOrders} total orders
-                                  </span>
-                                </div>
-                              </div>
-                              <ArrowRight size={14} color="#90979F" />
-                            </button>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Matching Navigation Pages */}
-                      {filteredNav.length > 0 && (
-                        <div>
-                          <div className="commandPaletteSectionTitle">Navigation Pages</div>
-                          {filteredNav.map((n) => (
-                            <button
-                              key={n.href}
-                              type="button"
-                              className="commandPaletteItem"
-                              onClick={() => handleNavigate(n.href)}
-                            >
-                              <div className="commandPaletteItemLeft">
-                                <div className="commandPaletteItemIcon">
-                                  {n.icon}
-                                </div>
-                                <div className="commandPaletteItemText">
-                                  <span className="commandPaletteItemTitle">{n.title}</span>
-                                  <span className="commandPaletteItemSubtitle">{n.subtitle}</span>
-                                </div>
-                              </div>
-                              <ArrowRight size={14} color="#90979F" />
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </>
-                  )}
-                </>
-              ) : (
-                /* Empty state - Quick Jump Shortcuts */
-                <div>
-                  <div className="commandPaletteSectionTitle">Quick Navigation</div>
-                  {quickLinks.map((item) => (
-                    <button
-                      key={item.href}
-                      type="button"
-                      className="commandPaletteItem"
-                      onClick={() => handleNavigate(item.href)}
-                    >
-                      <div className="commandPaletteItemLeft">
-                        <div className="commandPaletteItemIcon">
-                          {item.icon}
-                        </div>
-                        <div className="commandPaletteItemText">
-                          <span className="commandPaletteItemTitle">{item.title}</span>
-                          <span className="commandPaletteItemSubtitle">{item.subtitle}</span>
-                        </div>
-                      </div>
-                      <ArrowRight size={14} color="#90979F" />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="commandPaletteFooter">
-              <span>Press <kbd style={{ padding: '2px 5px', borderRadius: 4, background: '#E5E7EB', fontSize: 11 }}>ESC</kbd> to close</span>
-              <span>Quick shortcut: <kbd style={{ padding: '2px 5px', borderRadius: 4, background: '#E5E7EB', fontSize: 11 }}>Ctrl+K</kbd></span>
-            </div>
-          </div>
+          <SearchModal
+            orders={orders}
+            products={products}
+            customers={customers}
+            shipments={shipments}
+            onNavigate={handleNavigate}
+            onClose={() => setIsSearchOpen(false)}
+          />
         </div>
       )}
     </>
