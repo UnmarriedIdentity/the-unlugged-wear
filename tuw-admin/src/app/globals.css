@@ -1600,11 +1600,10 @@
 
 .sub-tableHeaderRow th {
   padding: 14px 16px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  color: var(--tuw-text-secondary, #5D6772);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  color: var(--tuw-text-primary, #262626);
+  letter-spacing: normal;
   text-align: left;
   font-family: var(--font-main);
 }
@@ -2708,17 +2707,16 @@
 
 .home-ordersTableHeaderRow th {
   padding: 12px 14px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  color: var(--tuw-text-secondary, #5D6772);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  color: var(--tuw-text-primary, #262626);
+  letter-spacing: normal;
   text-align: left;
   font-family: var(--font-main);
 }
 
 .home-ordersTableHeaderRow th:last-child {
-  text-align: right;
+  text-align: left;
 }
 
 .home-orderDataRow {
@@ -2762,7 +2760,7 @@
 }
 
 .home-orderStatusCell {
-  text-align: right;
+  text-align: left;
 }
 
 /* Status Badges */
