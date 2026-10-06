@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { SidebarNavGroup, SidebarNavItem, SidebarDock } from './sidebar-nav';
+import type { SidebarNavItemDef } from './sidebar-nav';
 import type { LucideIcon } from 'lucide-react';
 
 interface SidebarProps {
@@ -77,24 +78,11 @@ function getActiveGroupForPath(pathname: string): string | null {
   return null;
 }
 
-interface NavBadgeDef {
-  text: string;
-  className: string;
-}
-
-interface NavItemDef {
-  href: string;
-  label: string;
-  icon: LucideIcon;
-  match: string[];
-  badge?: NavBadgeDef;
-}
-
 interface NavGroupDef {
   key: string;
   label: string;
   icon: LucideIcon;
-  items: NavItemDef[];
+  items: SidebarNavItemDef[];
 }
 
 // Single source of truth for sidebar navigation (pixel-identical rendering;
@@ -117,9 +105,9 @@ const NAV_GROUPS: NavGroupDef[] = [
     label: 'Operations',
     icon: Package,
     items: [
-      { href: '/fulfillment', label: 'Fulfillment', icon: PackageCheck, match: ['/fulfillment'], badge: { text: '4', className: 'inline-flex min-w-[18px] items-center justify-center rounded-full bg-nav-badge-purple-bg px-[7.5px] py-[2.5px] text-center text-[11.5px] font-bold leading-none text-action-primary' } },
+      { href: '/fulfillment', label: 'Fulfillment', icon: PackageCheck, match: ['/fulfillment'], badge: { text: '4', dotClassName: 'bg-action-primary', className: 'inline-flex min-w-[18px] items-center justify-center rounded-full bg-nav-badge-purple-bg px-[7.5px] py-[2.5px] text-center text-[11.5px] font-bold leading-none text-action-primary' } },
       { href: '/shipments', label: 'Shipments', icon: Truck, match: ['/shipments'] },
-      { href: '/returns', label: 'Returns & RMA', icon: Undo2, match: ['/returns'], badge: { text: '2', className: 'inline-flex min-w-[18px] items-center justify-center rounded-full bg-nav-badge-amber-bg px-[7.5px] py-[2.5px] text-center text-[11.5px] font-bold leading-none text-nav-badge-amber-text' } },
+      { href: '/returns', label: 'Returns & RMA', icon: Undo2, match: ['/returns'], badge: { text: '2', dotClassName: 'bg-nav-badge-amber-text', className: 'inline-flex min-w-[18px] items-center justify-center rounded-full bg-nav-badge-amber-bg px-[7.5px] py-[2.5px] text-center text-[11.5px] font-bold leading-none text-nav-badge-amber-text' } },
       { href: '/refunds', label: 'Refunds', icon: RotateCcw, match: ['/refunds'] },
       { href: '/payments', label: 'Payments', icon: CreditCard, match: ['/payments'] },
     ],
@@ -219,6 +207,9 @@ export default function Sidebar({
     }
   }, []);
 
+  // Fade-mask scroll indicators were removed: their flex items added phantom gaps
+  // and zoom-fragile overlap math. Nav scrolls clean without indicators.
+
   const toggleGroup = (key: string) => {
     setOpenGroups((prev) => {
       // Single-accordion: opening one section closes others; clicking open section collapses it
@@ -262,7 +253,7 @@ export default function Sidebar({
       onClick={handleSidebarClick}
     >
       {/* Brand Header */}
-      <div className={cn('flex w-full shrink-0 items-center bg-canvas border-b border-subtle mb-2 z-10', isCollapsed ? 'h-16 min-h-16 justify-center p-0' : 'h-15 min-h-15 justify-between px-1')}>
+      <div className={cn('flex w-full shrink-0 items-center bg-canvas border-b border-subtle mb-2 z-10 h-20 min-h-20', isCollapsed ? 'justify-center p-0' : 'justify-between px-1')}>
         <Link href="/" className="flex items-center gap-2.5 no-underline text-primary">
           <div className="flex size-8 shrink-0 items-center justify-center rounded-control bg-primary shadow-nav-logo">
             <Image
@@ -280,7 +271,7 @@ export default function Sidebar({
         {/* Mobile Close Button */}
         <button
           type="button"
-          className="hidden size-7.5 shrink-0 cursor-pointer items-center justify-center rounded-control border border-subtle bg-surface text-primary transition-all duration-[180ms] hover:border-action-primary hover:bg-selected hover:text-action-primary ml-auto max-md:flex"
+          className="hidden size-7.5 shrink-0 cursor-pointer items-center justify-center rounded-control border border-subtle bg-surface text-primary transition-all duration-[180ms] hover:border-action-primary hover:bg-selected hover:text-action-primary ml-auto max-md:flex focus-visible:outline-2 focus-visible:outline-action-primary focus-visible:outline-offset-2"
           onClick={onCloseMobileMenu}
           aria-label="Close menu"
           title="Close menu"
@@ -290,7 +281,7 @@ export default function Sidebar({
       </div>
 
       {/* Navigation Sections */}
-      <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto overflow-x-hidden mt-0.5 pb-6 pr-1 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
+      <div className={cn('flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden overscroll-y-contain mt-0.5 pb-6 pr-1 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden', isCollapsed ? 'gap-0' : 'gap-2.5')}>
         {NAV_GROUPS.map((group) => {
           const actives = group.items.map((item) => item.match.some((p) => getIsActive(p)));
           const stemIdx = actives.findIndex(Boolean);

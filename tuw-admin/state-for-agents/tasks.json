@@ -8,16 +8,16 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 14,
-    "done": 8,
-    "in_progress": 0,
-    "backlog": 6
+    "total": 28,
+    "done": 14,
+    "in_progress": 3,
+    "backlog": 11
   },
   "session": {
     "branch": "v2",
-    "tip": "8e0d12a",
+    "tip": "85dd2d4",
     "unpushed": [],
-    "next_up": "primitives 015-018 or reconciliation 006/007 (awaiting human direction); verify trunk + R-series visuals on fresh preview",
+    "next_up": "await user computed readouts for collapsed clip; then targeted fix",
     "pending_verifications": [
       "trunk continuous-dark + elbow-only on 1st-4th actives (post Antigravity+z-lift)",
       "R-series parent icons + iconless rows + collapsed icons",
@@ -263,6 +263,229 @@
       ],
       "verified": true,
       "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-POLISH",
+      "title": "Sidebar polish (collapsed gap, fade masks, badge-dot preview, focus rings)",
+      "status": "in_progress",
+      "owner": "agent",
+      "started": "2026-10-05",
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-POLISH-A",
+      "title": "collapsed gap zero + skip dead wrappers",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-SIDEBAR-POLISH",
+      "started": null,
+      "finished": "2026-10-05",
+      "log": "v2:f74316a",
+      "design_match": "yes",
+      "key_decisions": [
+        "collapsed gap-0 ternary; dead animation wrappers skipped when collapsed"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-POLISH-B",
+      "title": "fade masks with documented fallbacks",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-SIDEBAR-POLISH",
+      "started": null,
+      "finished": "2026-10-05",
+      "log": "v2:8402ab6",
+      "design_match": "yes",
+      "key_decisions": [
+        "sticky fade bars driven by scroll-edge state; thin-bar/both/chevron fallbacks documented, not built"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-POLISH-C",
+      "title": "badge-dot preview toggle in settings",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-SIDEBAR-POLISH",
+      "started": null,
+      "finished": "2026-10-05",
+      "log": "v2:dd984a5",
+      "design_match": "yes",
+      "key_decisions": [
+        "showCollapsedBadgeDots setting (default off) + Switch on general page; dots reuse badge colors"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-POLISH-D",
+      "title": "keyboard focus-visible rings",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-SIDEBAR-POLISH",
+      "started": null,
+      "finished": "2026-10-05",
+      "log": "v2:a10adab",
+      "design_match": "yes",
+      "key_decisions": [
+        "focus-visible 2px action-primary rings on all nav controls; mouse sees zero change"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-DIAG-CLIP",
+      "title": "Collapsed rail clip forensic (curl SSR + computed readouts)",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-SIDEBAR-POLISH",
+      "started": "2026-10-05",
+      "finished": "2026-10-05",
+      "log": "forensic-only, no code commit",
+      "design_match": "yes",
+      "key_decisions": [
+        "curl proves SSR markup only: single aside, full width classes incl. w-60/md:w-55, navStemTo0 correct on /dashboard",
+        "curl CANNOT prove computed layout (needs live browser) - collapsed clip still needs devtools readouts",
+        "no code change: nothing convicted"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "user devtools readouts: aside width, link box, aside count, scrollHeight/clientHeight"
+      ]
+    },
+    {
+      "id": "TL-SIDEBAR-ALIGN",
+      "title": "Collapsed hover calm + 80px header + task-discipline rule",
+      "status": "in_progress",
+      "owner": "agent",
+      "started": "2026-10-05",
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-ALIGN-A",
+      "title": "collapsed hover without white flash",
+      "status": "backlog",
+      "owner": null,
+      "parent": "TL-SIDEBAR-ALIGN",
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-ALIGN-B",
+      "title": "sidebar header 80px both states",
+      "status": "backlog",
+      "owner": null,
+      "parent": "TL-SIDEBAR-ALIGN",
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-ALIGN-C",
+      "title": "rule 04 task discipline",
+      "status": "backlog",
+      "owner": null,
+      "parent": "TL-SIDEBAR-ALIGN",
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-EDGE",
+      "title": "Full-bleed separators, collapsed centering, full-width pages",
+      "status": "in_progress",
+      "owner": "agent",
+      "started": "2026-10-05",
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-EDGE-A",
+      "title": "separators edge-to-edge (negative-margin bleed)",
+      "status": "backlog",
+      "owner": null,
+      "parent": "TL-SIDEBAR-EDGE",
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-EDGE-B",
+      "title": "collapsed icon centering forensic + fix",
+      "status": "backlog",
+      "owner": null,
+      "parent": "TL-SIDEBAR-EDGE",
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-EDGE-C",
+      "title": "remove max-w-1400 page cap",
+      "status": "done",
+      "owner": null,
+      "parent": "TL-SIDEBAR-EDGE",
+      "started": null,
+      "finished": "2026-10-05",
+      "log": "reapplied post-reset",
+      "design_match": "yes",
+      "key_decisions": [
+        "single max-w occurrence repo-wide; mx-auto retained as no-op"
+      ],
+      "verified": true,
+      "pushed": false,
       "follow_ups": []
     }
   ],

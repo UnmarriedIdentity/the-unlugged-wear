@@ -81,7 +81,7 @@ export default function DashboardShell({
         <main
           id="main-content"
           tabIndex={-1}
-          className="mx-auto flex w-full min-w-0 max-w-[1400px] flex-col gap-5 px-7 pb-10 pt-6 max-md:px-4 max-md:pb-8 max-md:pt-4"
+          className="mx-auto flex w-full min-w-0 flex-col gap-5 px-7 pb-10 pt-6 max-md:px-4 max-md:pb-8 max-md:pt-4"
         >
           {children}
         </main>
