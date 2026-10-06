@@ -5,11 +5,9 @@ import { X } from 'lucide-react';
 import EmptyState from '@/components/ui/EmptyState';
 import { localSearch } from './localSearch';
 import { getPopularTargets } from './localSearch';
-import { parseScopedQuery } from './types';
-import { ShortcutChips } from './ShortcutChips';
 import { SpotlightRow } from './SpotlightRow';
 import { useFrequentQueries } from './useFrequentQueries';
-import { SEARCH_PREFIXES, type ResultSection, type SpotlightResult } from './types';
+import { parseScopedQuery, type ResultSection, type SpotlightResult } from './types';
 import type { CustomerItem, OrderItem, ProductItem, ShipmentItem } from '@/mocks/fixtures';
 
 interface SearchModalProps {
@@ -183,8 +181,6 @@ export function SearchModal({ orders, products, customers, shipments, onNavigate
           <X size={16} />
         </button>
       </div>
-
-      <ShortcutChips prefixes={SEARCH_PREFIXES} onPick={(token) => setQuery(token)} />
 
       <div ref={resultsRef} style={{ flex: 1, overflowY: 'auto', padding: '12px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
         {showingHome ? (
