@@ -13,6 +13,12 @@ import {
   Modal,
   Pagination,
   FilterPills,
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
 } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { OrderItem, PaymentStatus, FulfillmentStatus } from '@/mocks/fixtures';
@@ -288,92 +294,89 @@ export default function OrdersView() {
         </div>
 
         {/* Table of Orders */}
-        <div style={{ overflowX: 'auto', width: '100%' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E5E7EB)' }}>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Order</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Customer</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Date</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Payment Status</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Fulfillment Status</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase', textAlign: 'right' }}>Total</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase', textAlign: 'right' }}>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredOrders.length === 0 ? (
-                <tr>
-                  <td colSpan={7} style={{ padding: '48px 16px', textAlign: 'center', color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                    No orders match your search criteria.
-                  </td>
-                </tr>
-              ) : (
-                paginatedOrders.map((order) => (
-                  <tr
-                    key={order.id}
-                    onClick={() => setSelectedOrder(order)}
-                    style={{
-                      borderBottom: '1px solid var(--tuw-border-subtle, #E5E7EB)',
-                      cursor: 'pointer',
-                      transition: 'background-color 0.15s',
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--tuw-bg-canvas, #F7F8F9)')}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                  >
-                    <td style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)' }}>
-                      {order.id}
-                    </td>
-                    <td style={{ padding: '14px 16px' }}>
-                      <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)' }}>
-                        {order.customerName}
-                      </div>
-                      <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                        {order.customerEmail}
-                      </div>
-                    </td>
-                    <td style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                      {order.date}
-                    </td>
-                    <td style={{ padding: '14px 16px' }}>
-                      {order.paymentStatus === 'paid' && <Badge variant="success">Paid</Badge>}
-                      {order.paymentStatus === 'pending' && <Badge variant="warning">Pending</Badge>}
-                      {order.paymentStatus === 'failed' && <Badge variant="danger">Failed</Badge>}
-                      {order.paymentStatus === 'refunded' && <Badge variant="neutral">Refunded</Badge>}
-                    </td>
-                    <td style={{ padding: '14px 16px' }}>
-                      {order.fulfillmentStatus === 'delivered' && <Badge variant="success">Delivered</Badge>}
-                      {order.fulfillmentStatus === 'shipped' && <Badge variant="info">Shipped</Badge>}
-                      {order.fulfillmentStatus === 'printing' && <Badge variant="warning">Printing</Badge>}
-                      {order.fulfillmentStatus === 'queued' && <Badge variant="neutral">Queued</Badge>}
-                      {order.fulfillmentStatus === 'submission_failed' && (
-                        <Badge variant="danger" icon={<AlertTriangle size={12} />}>
-                          Failed Sync
-                        </Badge>
-                      )}
-                    </td>
-                    <td className="tuw-tabular-nums" style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', textAlign: 'right' }}>
-                      ₹{order.total.toFixed(2)}
-                    </td>
-                    <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        icon={<Eye size={14} />}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedOrder(order);
-                        }}
-                      >
-                        Details
-                      </Button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+        <Table>
+          <TableHeader>
+            <TableRow hoverable={false}>
+              <TableHead style={{ padding: '12px 16px' }}>Order</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Customer</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Date</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Payment Status</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Fulfillment Status</TableHead>
+              <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Total</TableHead>
+              <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredOrders.length === 0 ? (
+              <TableRow hoverable={false}>
+                <TableCell colSpan={7} style={{ padding: '48px 16px', textAlign: 'center', color: 'var(--tuw-text-secondary, #5D6772)', fontSize: 16 }}>
+                  No orders match your search criteria.
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginatedOrders.map((order) => (
+                <TableRow
+                  key={order.id}
+                  onClick={() => setSelectedOrder(order)}
+                  style={{
+                    cursor: 'pointer',
+                    transition: 'background-color 0.15s',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--tuw-bg-canvas, #F7F8F9)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                >
+                  <TableCell style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)' }}>
+                    {order.id}
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px' }}>
+                    <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)' }}>
+                      {order.customerName}
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                      {order.customerEmail}
+                    </div>
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                    {order.date}
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px' }}>
+                    {order.paymentStatus === 'paid' && <Badge variant="success">Paid</Badge>}
+                    {order.paymentStatus === 'pending' && <Badge variant="warning">Pending</Badge>}
+                    {order.paymentStatus === 'failed' && <Badge variant="danger">Failed</Badge>}
+                    {order.paymentStatus === 'refunded' && <Badge variant="neutral">Refunded</Badge>}
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px' }}>
+                    {order.fulfillmentStatus === 'delivered' && <Badge variant="success">Delivered</Badge>}
+                    {order.fulfillmentStatus === 'shipped' && <Badge variant="info">Shipped</Badge>}
+                    {order.fulfillmentStatus === 'printing' && <Badge variant="warning">Printing</Badge>}
+                    {order.fulfillmentStatus === 'queued' && <Badge variant="neutral">Queued</Badge>}
+                    {order.fulfillmentStatus === 'submission_failed' && (
+                      <Badge variant="danger" icon={<AlertTriangle size={12} />}>
+                        Failed Sync
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="tuw-tabular-nums" style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', textAlign: 'right' }}>
+                    ₹{order.total.toFixed(2)}
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px', textAlign: 'right' }}>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      icon={<Eye size={14} />}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedOrder(order);
+                      }}
+                    >
+                      Details
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
 
         <Pagination
           currentPage={currentPage}
