@@ -27,14 +27,47 @@ const TILE_STYLES: Record<TileTone, { wash: string; ink: string }> = {
 interface SpotlightRowProps {
   result: SpotlightResult;
   onJump: (result: SpotlightResult) => void;
+  highlight?: string;
+  /** compact: no icon tile, tighter padding, optional use-count chip. */
+  variant?: 'full' | 'compact';
+  count?: number;
+}
+
+// Query-match highlighter (P3): matched substring in action-purple
+// semibold, no background wash. Regex-escaped, case-insensitive.
+function highlightMatch(text: string, term: string): React.ReactNode {
+  const needle = term.trim();
+  if (!needle) return text;
+  const lower = text.toLowerCase();
+  const query = needle.toLowerCase();
+  const parts: React.ReactNode[] = [];
+  let cursor = 0;
+  let hit = lower.indexOf(query, cursor);
+  let key = 0;
+  while (hit !== -1) {
+    if (hit > cursor) parts.push(text.slice(cursor, hit));
+    parts.push(
+      <span
+        key={`m-${key++}`}
+        style={{ color: 'var(--tuw-action-primary, #7539FF)', fontWeight: 700 }}
+      >
+        {text.slice(hit, hit + query.length)}
+      </span>,
+    );
+    cursor = hit + query.length;
+    hit = lower.indexOf(query, cursor);
+  }
+  if (cursor < text.length) parts.push(text.slice(cursor));
+  return parts.length > 0 ? parts : text;
 }
 
 // One spotlight result row (S4): tinted icon tile + title/sub + Jump pill.
 // Whole-row click jumps (pill is a visual affordance of the same action).
 // Jump-pill reuse verdict: ui Button outline/sm renders 36px tall — too
 // heavy for this pill, so the row owns a token-driven 28px pill instead.
-export function SpotlightRow({ result, onJump }: SpotlightRowProps) {
+export function SpotlightRow({ result, onJump, highlight = '', variant = 'full', count }: SpotlightRowProps) {
   const tile = TILE_STYLES[result.tileTone];
+  const compact = variant === 'compact';
   return (
     <button
       type="button"
@@ -43,10 +76,10 @@ export function SpotlightRow({ result, onJump }: SpotlightRowProps) {
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '12px',
+        gap: compact ? '10px' : '12px',
         width: '100%',
         textAlign: 'left',
-        padding: '10px 12px',
+        padding: compact ? '8px 12px' : '10px 12px',
         borderRadius: 'var(--tuw-radius-card, 12px)',
         backgroundColor: 'transparent',
         border: '1px solid transparent',
@@ -55,8 +88,10 @@ export function SpotlightRow({ result, onJump }: SpotlightRowProps) {
         transition: 'background-color 0.15s ease, border-color 0.15s ease',
       }}
     >
+      {compact ? null : (
       <span
         aria-hidden="true"
+        className="spot-tile"
         style={{
           width: '40px',
           height: '40px',
@@ -67,10 +102,13 @@ export function SpotlightRow({ result, onJump }: SpotlightRowProps) {
           flexShrink: 0,
           backgroundColor: tile.wash,
           color: tile.ink,
+          border: '1px solid transparent',
+          transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
         }}
       >
         {SCOPE_ICONS[result.scope]}
       </span>
+      )}
       <span style={{ flex: 1, minWidth: 0 }}>
         <span
           style={{
@@ -83,7 +121,7 @@ export function SpotlightRow({ result, onJump }: SpotlightRowProps) {
             textOverflow: 'ellipsis',
           }}
         >
-          {result.title}
+          {highlightMatch(result.title, highlight)}
         </span>
         <span
           style={{
@@ -97,11 +135,31 @@ export function SpotlightRow({ result, onJump }: SpotlightRowProps) {
             marginTop: '2px',
           }}
         >
-          {result.subtitle}
+          {highlightMatch(result.subtitle, highlight)}
         </span>
       </span>
+      {compact && typeof count === 'number' && (
+        <span
+          aria-label={`Used ${count} times`}
+          title={`Used ${count} times`}
+          style={{
+            fontSize: '12px',
+            fontWeight: 600,
+            fontFamily: 'var(--font-main)',
+            color: 'var(--tuw-action-primary, #7539FF)',
+            backgroundColor: 'var(--tuw-bg-selected, #F8F5FF)',
+            borderRadius: '9999px',
+            padding: '2px 8px',
+            flexShrink: 0,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          ×{count}
+        </span>
+      )}
       <span
         aria-hidden="true"
+        className="spot-jump"
         style={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -114,6 +172,7 @@ export function SpotlightRow({ result, onJump }: SpotlightRowProps) {
           borderRadius: '9999px',
           padding: '4px 10px',
           flexShrink: 0,
+          transition: 'background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease',
         }}
       >
         Jump

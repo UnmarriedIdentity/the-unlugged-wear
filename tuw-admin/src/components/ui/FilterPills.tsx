@@ -33,7 +33,7 @@ export default function FilterPills({
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: isRail ? '4px' : '6px',
+        gap: '4px',
         padding: isRail ? '4px' : 0,
         borderRadius: isRail ? 'var(--tuw-radius-card, 12px)' : 0,
         backgroundColor: isRail ? 'var(--tuw-bg-canvas, #F7F8F9)' : 'transparent',

@@ -49,6 +49,7 @@ export function FilterMenu({ options, value, onChange, ariaLabel = 'Filter optio
           />
           <div
             role="menu"
+            onClick={(e) => e.stopPropagation()}
             className={`${styles.rangeMenu} absolute right-0 top-full z-50 mt-2 ${
               anim.phase === 'closing' ? 'animate-[popoverOut_0.15s_ease-in]' : 'animate-[popoverIn_0.18s_ease-out]'
             }`}

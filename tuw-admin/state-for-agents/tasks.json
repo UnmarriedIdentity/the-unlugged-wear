@@ -8,14 +8,14 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 75,
-    "done": 61,
+    "total": 92,
+    "done": 78,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "d7b2b31",
+    "tip": "836513a",
     "unpushed": ["6668cfd", "212ca3d", "c8a2f40", "6a00935", "2dc810e", "a60fa4f", "d7b2b31"],
     "next_up": "human pushes origin/v2 (2 commits) then origin/feat/search-modal (6 commits); browser review of spotlight",
     "pending_verifications": [
@@ -259,6 +259,278 @@
       "verified": true,
       "pushed": false,
       "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-TBL1",
+      "title": "Universal table spec: 16px bold headers, 13px rows",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:c9b4b1a (TableHead/TableCell/Table base + sub-rule aligned; no new tokens)",
+      "design_match": "yes",
+      "key_decisions": [
+        "unstyled consumers inherit the spec automatically (data-display tables, demo table)",
+        "dashboard home table untouched (own frozen home-* classes, already 16/700 via H1)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-OP0",
+      "title": "FilterPills pills-variant gap aligned to page chips",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "part of feat/search-modal:3ce7856 (6 to 4px; pills variant had zero consumers)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-OP1",
+      "title": "Orders payment + fulfillment pills use shared FilterPills",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:3ce7856 (Failed Sync label preserved; filters untouched)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-OT1",
+      "title": "Orders table uses shared ui Table primitives",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:b4078c6 (style-preserved swap; row border inherited from TableRow default; empty text pinned 16px)",
+      "design_match": "yes",
+      "key_decisions": [
+        "hover handlers pass through (TableRow hoverable is a confirmed no-op)",
+        "outer scroll div replaced by Table wrapper (no nested scrollers)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-ODOC",
+      "title": "Pending component work inventory (Orders audited)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:30c86ab (pending-component-work.md + per-page template)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-FB1",
+      "title": "Stop popover inner clicks bubbling to overlay close",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:8987045 (stopPropagation on SearchModal, NotificationPanel, FilterMenu, calendar wrapper)",
+      "design_match": "yes",
+      "key_decisions": [
+        "audit found zero popover roots stopping propagation; row clicks had masked the bug everywhere"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-FC1",
+      "title": "SpotlightRow compact variant with use-count for frequent jumps",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:253008c (no-tile compact rows + count chip, frequent section only)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-F3",
+      "title": "Remove shortcut strip from spotlight modal",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:bf3843d (strip deleted; component + parser retained; empty hint documents prefixes)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser check: chips stay open, compact rows, typed prefixes"
+      ]
+    },
+    {
+      "id": "TL-DASH-OID3",
+      "title": "Fix Order ID inline purple semibold (class lost to TableCell inline base)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:836513a (weight+color inlined; orphaned orderIdCell rule deleted)",
+      "design_match": "yes",
+      "key_decisions": [
+        "lesson: TableCell inline base (color/weight) always beats stylesheet classes — treatment must ride in style prop"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-OID2",
+      "title": "Dashboard Order ID always purple semibold (Orders-page match)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:0504882 (orderIdCell to action-primary; dead hover rule deleted; CSS-only)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-OID1",
+      "title": "Order ID dark at rest, purple on row hover (shared tuw-idCell)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:b7f2d02 (global opt-in rule; Orders cell trimmed to padding+size) + REVERTED 3d3c7bc per user request",
+      "design_match": "yes",
+      "key_decisions": [
+        "tr:hover-scoped selector: only opted-in cells ever tint, all other tables unaffected"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "same always-purple treatment remains on payments/fulfillment/shipments/refunds/designs IDs — per-page rollout on request"
+      ]
+    },
+    {
+      "id": "TL-DASH-DDEL1",
+      "title": "RecentOrdersCard on ui Table; 7 home table rules deleted",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:a6fae1d (single-consumer verified; margin/minWidth via Table style; last row borderless by index)",
+      "design_match": "yes",
+      "key_decisions": [
+        "header TableRow carries no orderDataRow class (avoids hover wash on the header)",
+        "row wash + id tint stay as home-* (TableRow has no hover wash; adding one globally rejected)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DDEL2",
+      "title": "Status pills on ui Badge; 7 badge/cell rules deleted",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:1a18490 (Figma 26px via shared style object, no new size variant; cells inlined)",
+      "design_match": "yes",
+      "key_decisions": [
+        "orderIdCell class + hover rule kept (pseudo-classes cannot inline)",
+        "zero dangling references verified by grep"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser check: dashboard table, pills, row hover, id tint"
+      ]
+    },
+    {
+      "id": "TL-DASH-SP1",
+      "title": "Frequent searches engine with jump-back and curated defaults",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:dd70dc7 (useFrequentQueries + popular targets + modal wiring + reset clear)",
+      "design_match": "yes",
+      "key_decisions": [
+        "localStorage counts ranked top-5 + top-3 jumps; injectable seam for server counts later",
+        "return shape frozen so a DB adapter swaps internals unchanged"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-SP2",
+      "title": "Spotlight micro-interactions: border light-up, counts, sticky, footer",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:537ffbc (tile border tint + Jump fill + focus tint + sticky/counts/footer)",
+      "design_match": "yes",
+      "key_decisions": [
+        "tile-scale idea rejected: KPI-card border language instead, zero scale in system"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-SP3",
+      "title": "Query-match highlighting in spotlight rows",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:4f98d6c (action-purple semibold, regex-escaped, prefix-aware term)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-SP4",
+      "title": "Admin scrollbar language with gray pill tokens",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:7646bb0 (3 tokens + global overlay-gutter rules + skill codified)",
+      "design_match": "yes",
+      "key_decisions": [
+        "8px overlay gutters + padding-box clip = zero layout shift; arrows explicitly none",
+        "sidebar/nav hidden exceptions win by specificity and stay documented"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser review: frequent ranking, hovers, highlights, scrollbars everywhere"
+      ]
     },
     {
       "id": "TL-DASH-S7",

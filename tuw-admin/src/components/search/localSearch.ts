@@ -26,6 +26,23 @@ const NAV_TARGETS: NavTarget[] = [
   { title: 'Payments & Settlements', subtitle: 'Captured payments, failures, and refunds', href: '/payments', keys: ['payment', 'pay', 'settlement', 'refund'] },
 ];
 
+const TILE_BY_INDEX = ['green', 'purple', 'amber', 'blue', 'cyan'] as const;
+
+// Curated Jump-to defaults (P1): shown when there is no frequent history
+// yet. Data-only list — reorder or extend without touching components.
+export function getPopularTargets(): SpotlightResult[] {
+  return NAV_TARGETS.slice(0, 5).map(
+    (n, i): SpotlightResult => ({
+      id: `page-${n.href}`,
+      scope: 'pages',
+      title: n.title,
+      subtitle: n.subtitle,
+      href: n.href,
+      tileTone: TILE_BY_INDEX[i % TILE_BY_INDEX.length],
+    }),
+  );
+}
+
 const PREFIX_NAV_KEYS: Record<string, string[]> = {
   '!ret': ['return', 'refund'],
   '!pay': ['payment'],
