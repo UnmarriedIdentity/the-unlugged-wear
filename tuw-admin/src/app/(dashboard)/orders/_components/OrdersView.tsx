@@ -325,7 +325,7 @@ export default function OrdersView() {
                   onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--tuw-bg-canvas, #F7F8F9)')}
                   onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                 >
-                  <TableCell className="tuw-idCell" style={{ padding: '14px 16px', fontSize: 14 }}>
+                  <TableCell style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)' }}>
                     {order.id}
                   </TableCell>
                   <TableCell style={{ padding: '14px 16px' }}>
