@@ -616,14 +616,8 @@
    Single app.css, no CSS Modules. Class names unchanged so JSX is identical.
    ========================================================================== */
 /* Dashboard Layout Shell - Natural Page Scroll, Zero Cutoffs, Sidebar Matches Full Page Height */
-/* Dashboard shell (root, backdrop, main wrapper/content) migrated to Tailwind utilities
-   in DashboardShell.tsx (pixel-identical; root carries font-sans — single dashboard font).
-   Removed: .dashboardLayoutRoot, .dashboardMobileBackdrop, .dashboardMainWrapper,
-   .dashboardMainWrapperCollapsed, .dashboardMainContent. */
 
-/* Sidebar - fixed to viewport with pinned footer (migrated to Tailwind utilities in
-   Sidebar.tsx + DashboardShell.tsx margin offsets; frame is fully ternary-swapped).
-   Retained custom: 100vh/100dvh fallback order + hidden outer scrollbars. */
+/* Sidebar viewport height (100vh/100dvh fallback order) + hidden outer scrollbars. */
 .sidebar {
   height: 100vh;
   height: 100dvh;
@@ -637,12 +631,7 @@
   height: 0;
 }
 
-/* Mobile close button migrated to Tailwind (hidden → max-md:flex) in Sidebar.tsx.
-   Removed: .sidebarMobileCloseBtn (+hover). Dead: .desktopOnlyToggle. */
-
 @media (max-width: 768px) {
-  /* Mobile heights retained custom (fallback order); layout/translate/shadow
-     migrated to max-md: variants in Sidebar.tsx. Dead: .desktopOnlyToggle. */
   .sidebar {
     height: 100vh;
     height: 100dvh;
@@ -652,35 +641,7 @@
   }
 }
 
-/* Sidebar header + brand migrated to Tailwind utilities in Sidebar.tsx
-   (pixel-identical; collapsed 64px/centered preserved; close hidden→max-md:flex).
-   Removed: .sidebarHeader, .brandLink, .logoIconWrapper, .brandName.
-   Dead (zero JSX refs, verified): .sidebarToggleBtn. */
-
-/* Nav scroll layout migrated to Tailwind in Sidebar.tsx (scrollbar hidden via
-   [scrollbar-width:none] + webkit-hidden — no visible scrollbar per spec, scroll intact).
-   Removed: .navSections (+ all ::-webkit-scrollbar parts). */
-
-/* Footer items + logout migrated to Tailwind utilities in Sidebar.tsx (pixel-identical;
-   active uses inset-edge treatment; logout keeps error hover).
-   Removed: .sidebarFooter, .navList, .navItem, .navItemActive, .navParentBtn,
-   .navParentItem, .navParentBtnActive, .navParentItemActive, .navParentLeft,
-   .navLabel, .navChevron, .navChevronOpen, .logOutItem, collapsed hide block.
-   Kept: .navIcon (branch items, S5), .navItemCollapsed (branch links, S5). */
-.navIcon {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #5D6772;
-}
-
-/* (navLabel/navChevron dead — zero JSX refs; footer labels use truncate utilities) */
-
-/* Branched Navigation Tree Hierarchy — container migrated to Tailwind in Sidebar.tsx.
-   Guide stem + curves stay custom (S5 converts widths/colors to 1px/#dddddd). */
+/* Branched Navigation Tree Hierarchy — guide stem + curves stay custom. */
 /* Continuous vertical guide line, light full-length (dark path overlaid per segment below) */
 .navTree::before {
   content: '';
@@ -727,10 +688,7 @@
   z-index: 2;
 }
 
-/* Branch child item layout migrated to Tailwind utilities in Sidebar.tsx. */
-
-/* Smooth curved branch line connecting vertical stem to this item (container-indexed;
-   layout lives in Tailwind utilities on the JSX element) */
+/* Branch child item curve (container-indexed; layout lives in Tailwind utilities). */
 .navTree > *::before {
   content: '';
   position: absolute;
@@ -744,29 +702,6 @@
   pointer-events: none;
   z-index: 1;
 }
-
-/* Branch links migrated to Tailwind utilities in Sidebar.tsx (pixel-identical; active is
-   a wash, not a card — shadow/border removed per 3D spec).
-   Removed: .navBranchLink, .navBranchLinkActive, .navItemCollapsed, .navBranchLabel,
-   collapsed tree rules. */
-
-/* Nav badges migrated to Tailwind utilities in Sidebar.tsx (pixel-identical; only live
-   purple/amber converted). Dead: .navBadgeOrange, .navBadgeGreen (zero refs). */
-
-/* (logOutItem migrated to Tailwind error-hover utilities in Sidebar.tsx) */
-
-/* (collapsed hide rules dead — JSX unmounts labels/trees when collapsed) */
-
-/* Stag brand art + copyright migrated to Tailwind utilities in Sidebar.tsx (pixel-identical;
-   hover lift kept, seamless transparent treatment preserved).
-   Removed: .sidebarStagDirect, .sidebarStagArtCard, .stagIllustrationContainer,
-   .stagImageWrapper, .stagArtImage, .stagCopyrightRow, .stagCopyrightText,
-   .stagCollapsedDirect, .stagCollapsedCard, .stagCollapsedImgWrap, .stagCollapsedImg. */
-
-/* Bottom dock toolbar migrated to Tailwind utilities in Sidebar.tsx (pixel-identical;
-   active state via ternary, no !important needed).
-   Removed: .sidebarDockToolbar, .dockToolbarBtn, .dockToolbarBtnActive,
-   .sidebarDockToolbarCollapsed, .dockToolbarBtnCollapsed, collapsed footer rule. */
 
 /* Header */
 .topBar {
@@ -1088,16 +1023,6 @@
   background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.4) 35%, rgba(0, 0, 0, 0.95) 100%);
   z-index: 1;
   pointer-events: none;
-}
-
-@media (max-width: 900px) {
-  /* Wrapper/hero/content stacking migrated to max-[900px]: variants (kept: formSection, socialRow). */
-
-  /* Shell stacking migrated to max-[900px]: variants (kept: formSection, socialRow). */
-
-  .signup-socialRow {
-    gap: 12px;
-  }
 }
 
 .sub-pageHeader {
@@ -2192,7 +2117,6 @@
 }
 
 @media (max-width: 680px) {
-  /* (dead home-topBar/searchContainer/dashboardBody rules removed S8) */
   .home-welcomeRow {
     flex-direction: column;
     align-items: flex-start;
