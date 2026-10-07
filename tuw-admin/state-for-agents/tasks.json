@@ -8,14 +8,14 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 92,
-    "done": 78,
+    "total": 98,
+    "done": 84,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "836513a",
+    "tip": "f005165",
     "unpushed": ["6668cfd", "212ca3d", "c8a2f40", "6a00935", "2dc810e", "a60fa4f", "d7b2b31"],
     "next_up": "human pushes origin/v2 (2 commits) then origin/feat/search-modal (6 commits); browser review of spotlight",
     "pending_verifications": [
@@ -464,6 +464,101 @@
       "pushed": false,
       "follow_ups": [
         "human browser check: dashboard table, pills, row hover, id tint"
+      ]
+    },
+    {
+      "id": "TL-DASH-HC1",
+      "title": "StatCard hoverable opt-in with shared tint treatment (Orders on)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:8473e3b (tuw-stat-hover CSS + hoverable prop default false + Orders 4 cards)",
+      "design_match": "yes",
+      "key_decisions": [
+        "!important justified: wins over primitive inline base, opt-in only (codebase precedent: reduced-motion rule)",
+        "inline transition extended to border/background so the hover animates instead of snapping"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DC1",
+      "title": "Delete dead home-pageWrapper rule",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:6e080af (sole dead home-* class of 96 audited)",
+      "design_match": "yes",
+      "key_decisions": [
+        "95/96 home-* classes live via dashboard components — family stays, no tokenization in this track"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DC2",
+      "title": "Delete dead commandPalette rules; define missing tuwFadeIn",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:ff1ab69 (14 selectors removed; overlay + both keyframes kept)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DC3",
+      "title": "Delete dead sub button/stat/table/badge rules",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:f2cc96b (196 lines; every selector re-verified zero-ref before delete)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DC4",
+      "title": "Delete dead compat tokens, dup scales, dead shadows",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:17330f6 (54 lines; audit corrections: header-gap live, tuw-space kept for docs, tuw-status-* never defined)",
+      "design_match": "yes",
+      "key_decisions": [
+        "audit is advisory only: --spacing-auth-header-gap is live via mb- utility (kept); --tuw-space-* kept (design-system page documents it)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DC5",
+      "title": "Prune dead migration comments + dead navIcon/signup-socialRow",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:f005165 (80 lines; bonus dead rules found during prune)",
+      "design_match": "yes",
+      "key_decisions": [
+        "live trunk/curve/scalability docs kept; only pure-history notes removed"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser check: Orders stat hover, mobile backdrop fade, dashboard intact"
       ]
     },
     {

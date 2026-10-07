@@ -213,7 +213,6 @@
      One font across the dashboard; font-sans is the utility spelling. */
   --font-urbanist: "Urbanist", ui-sans-serif, system-ui, sans-serif;
   --font-main: "Urbanist", ui-sans-serif, system-ui, sans-serif;
-  --font-brand: "Urbanist", ui-sans-serif, system-ui, sans-serif;
 
   /* TUW Semantic Colour Roles (18 roles) - Standard & Figma Web Code Syntax */
   --tuw-bg-canvas: #F7F8F9;
@@ -339,86 +338,34 @@
 
   /* Backward Compatible Tokens */
   --color-primary: #262626;
-  --color-primary-hover: #141414;
-  --brand-teal: #7539FF;
-  --brand-teal-hover: #6025DB;
-  --brand-teal-light: #F8F5FF;
   --brand-lime: #C6EAA0;
 
-  --neutral-white: #FFFFFF;
-  --neutral-canvas: #F7F8F9;
-  --color-text-dark: #262626;
-  --color-text-muted: #5D6772;
-  --color-placeholder: #9CA3AF;
   --color-border: #E9E9E9;
   --color-border-subtle: #E9E9E9;
-  --color-border-dark: #E9E9E9;
-
-  /* Status Colors */
-  --status-success: #187343;
-  --status-success-bg: #F4FBF7;
-  --status-warning: #856300;
-  --status-warning-bg: #FEFBF5;
-  --status-info: #175CD3;
-  --status-info-bg: #F4F9FE;
-  --status-danger: #C91818;
-  --status-danger-bg: #FEF4F4;
 
   --color-error: #C91818;
-  --color-error-border: #F87171;
   --color-error-bg: #FEF4F4;
   --color-success: #187343;
-  --color-success-border: #BBF7D0;
   --color-success-bg: #F4FBF7;
-  --color-teal: #7539FF;
-  --color-teal-hover: #6025DB;
 
-  /* Spacing Grid: 4 · 8 · 12 · 16 · 24 · 32 · 48 · 64px */
-  --tuw-space-4: 4px;
-  --tuw-spacing-4: 4px;
-  --tuw-space-8: 8px;
-  --tuw-spacing-8: 8px;
-  --tuw-space-12: 12px;
-  --tuw-spacing-12: 12px;
-  --tuw-space-16: 16px;
-  --tuw-spacing-16: 16px;
-  --tuw-space-24: 24px;
-  --tuw-spacing-24: 24px;
-  --tuw-space-32: 32px;
-  --tuw-spacing-32: 32px;
-  --tuw-space-48: 48px;
-  --tuw-spacing-48: 48px;
-  --tuw-space-64: 64px;
-  --tuw-spacing-64: 64px;
+  /* Spacing Grid: 4 · 8 · 12 · 16 · 24 · 32 · 48 · 64px (canonical set lives above; documented on the design-system page) */
 
   /* Radii: 4 · 8 · 12 · 16 · 9999px */
   --tuw-radius-sm: 4px;
-  --tuw-radius-4: 4px;
   --tuw-radius-control: 8px;
-  --tuw-radius-8: 8px;
   --tuw-radius-card: 12px;
-  --tuw-radius-12: 12px;
   --tuw-radius-modal: 16px;
-  --tuw-radius-16: 16px;
   --tuw-radius-modal-lg: 24px;
   --tuw-radius-pill: 9999px;
-  --tuw-radius-999: 9999px;
 
   --radius-sm: 4px;
-  --radius-badge: 16px;
-  --radius-input: 8px;
-  --radius-button: 8px;
   --radius-card: 12px;
   --radius-modal: 16px;
   --radius-pill: 9999px;
 
   /* Shadows */
   --shadow-subtle: 0 1px 4px rgba(0, 0, 0, 0.02);
-  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.04);
   --shadow-button: 0 2px 6px rgba(117, 57, 255, 0.2);
-  --shadow-dropdown: 0 6px 18px rgba(0, 0, 0, 0.08);
-  --shadow-focus: 0 0 0 3px rgba(117, 57, 255, 0.15);
-  --shadow-error: 0 0 0 3px rgba(201, 24, 24, 0.15);
   --shadow-spotlight: 0 25px 50px -12px rgba(18, 10, 36, 0.35), 0 0 0 1px rgba(117, 57, 255, 0.1), 0 0 44px rgba(117, 57, 255, 0.14); /* used by: spotlight search dialog (S2 demo source) */
 }
 
@@ -669,14 +616,8 @@
    Single app.css, no CSS Modules. Class names unchanged so JSX is identical.
    ========================================================================== */
 /* Dashboard Layout Shell - Natural Page Scroll, Zero Cutoffs, Sidebar Matches Full Page Height */
-/* Dashboard shell (root, backdrop, main wrapper/content) migrated to Tailwind utilities
-   in DashboardShell.tsx (pixel-identical; root carries font-sans — single dashboard font).
-   Removed: .dashboardLayoutRoot, .dashboardMobileBackdrop, .dashboardMainWrapper,
-   .dashboardMainWrapperCollapsed, .dashboardMainContent. */
 
-/* Sidebar - fixed to viewport with pinned footer (migrated to Tailwind utilities in
-   Sidebar.tsx + DashboardShell.tsx margin offsets; frame is fully ternary-swapped).
-   Retained custom: 100vh/100dvh fallback order + hidden outer scrollbars. */
+/* Sidebar viewport height (100vh/100dvh fallback order) + hidden outer scrollbars. */
 .sidebar {
   height: 100vh;
   height: 100dvh;
@@ -690,12 +631,7 @@
   height: 0;
 }
 
-/* Mobile close button migrated to Tailwind (hidden → max-md:flex) in Sidebar.tsx.
-   Removed: .sidebarMobileCloseBtn (+hover). Dead: .desktopOnlyToggle. */
-
 @media (max-width: 768px) {
-  /* Mobile heights retained custom (fallback order); layout/translate/shadow
-     migrated to max-md: variants in Sidebar.tsx. Dead: .desktopOnlyToggle. */
   .sidebar {
     height: 100vh;
     height: 100dvh;
@@ -705,35 +641,7 @@
   }
 }
 
-/* Sidebar header + brand migrated to Tailwind utilities in Sidebar.tsx
-   (pixel-identical; collapsed 64px/centered preserved; close hidden→max-md:flex).
-   Removed: .sidebarHeader, .brandLink, .logoIconWrapper, .brandName.
-   Dead (zero JSX refs, verified): .sidebarToggleBtn. */
-
-/* Nav scroll layout migrated to Tailwind in Sidebar.tsx (scrollbar hidden via
-   [scrollbar-width:none] + webkit-hidden — no visible scrollbar per spec, scroll intact).
-   Removed: .navSections (+ all ::-webkit-scrollbar parts). */
-
-/* Footer items + logout migrated to Tailwind utilities in Sidebar.tsx (pixel-identical;
-   active uses inset-edge treatment; logout keeps error hover).
-   Removed: .sidebarFooter, .navList, .navItem, .navItemActive, .navParentBtn,
-   .navParentItem, .navParentBtnActive, .navParentItemActive, .navParentLeft,
-   .navLabel, .navChevron, .navChevronOpen, .logOutItem, collapsed hide block.
-   Kept: .navIcon (branch items, S5), .navItemCollapsed (branch links, S5). */
-.navIcon {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #5D6772;
-}
-
-/* (navLabel/navChevron dead — zero JSX refs; footer labels use truncate utilities) */
-
-/* Branched Navigation Tree Hierarchy — container migrated to Tailwind in Sidebar.tsx.
-   Guide stem + curves stay custom (S5 converts widths/colors to 1px/#dddddd). */
+/* Branched Navigation Tree Hierarchy — guide stem + curves stay custom. */
 /* Continuous vertical guide line, light full-length (dark path overlaid per segment below) */
 .navTree::before {
   content: '';
@@ -780,10 +688,7 @@
   z-index: 2;
 }
 
-/* Branch child item layout migrated to Tailwind utilities in Sidebar.tsx. */
-
-/* Smooth curved branch line connecting vertical stem to this item (container-indexed;
-   layout lives in Tailwind utilities on the JSX element) */
+/* Branch child item curve (container-indexed; layout lives in Tailwind utilities). */
 .navTree > *::before {
   content: '';
   position: absolute;
@@ -797,29 +702,6 @@
   pointer-events: none;
   z-index: 1;
 }
-
-/* Branch links migrated to Tailwind utilities in Sidebar.tsx (pixel-identical; active is
-   a wash, not a card — shadow/border removed per 3D spec).
-   Removed: .navBranchLink, .navBranchLinkActive, .navItemCollapsed, .navBranchLabel,
-   collapsed tree rules. */
-
-/* Nav badges migrated to Tailwind utilities in Sidebar.tsx (pixel-identical; only live
-   purple/amber converted). Dead: .navBadgeOrange, .navBadgeGreen (zero refs). */
-
-/* (logOutItem migrated to Tailwind error-hover utilities in Sidebar.tsx) */
-
-/* (collapsed hide rules dead — JSX unmounts labels/trees when collapsed) */
-
-/* Stag brand art + copyright migrated to Tailwind utilities in Sidebar.tsx (pixel-identical;
-   hover lift kept, seamless transparent treatment preserved).
-   Removed: .sidebarStagDirect, .sidebarStagArtCard, .stagIllustrationContainer,
-   .stagImageWrapper, .stagArtImage, .stagCopyrightRow, .stagCopyrightText,
-   .stagCollapsedDirect, .stagCollapsedCard, .stagCollapsedImgWrap, .stagCollapsedImg. */
-
-/* Bottom dock toolbar migrated to Tailwind utilities in Sidebar.tsx (pixel-identical;
-   active state via ternary, no !important needed).
-   Removed: .sidebarDockToolbar, .dockToolbarBtn, .dockToolbarBtnActive,
-   .sidebarDockToolbarCollapsed, .dockToolbarBtnCollapsed, collapsed footer rule. */
 
 /* Header */
 .topBar {
@@ -910,17 +792,16 @@
   }
 }
 
-.commandPaletteDialog {
-  background-color: var(--tuw-bg-surface, #FFFFFF);
-  border-radius: var(--tuw-radius-card, 14px);
-  width: 640px;
-  max-width: 100%;
-  max-height: 82vh;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.06);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  animation: commandSlideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+/* Mobile backdrop fade (DC2): DashboardShell references animate-[tuwFadeIn]
+   but the keyframe was never defined (silent no-op) — defined here to
+   restore the intended motion, collapsible under reduced-motion like the rest. */
+@keyframes tuwFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes commandSlideDown {
@@ -958,85 +839,6 @@
   }
 }
 
-.commandPaletteHeader {
-  display: flex;
-  align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--tuw-border-subtle, #E5E7EB);
-  gap: 12px;
-}
-
-.commandPaletteSearchIcon {
-  color: var(--tuw-action-primary, #7539FF);
-  flex-shrink: 0;
-}
-
-.commandPaletteInput {
-  flex: 1;
-  border: none;
-  outline: none;
-  font-size: 15px;
-  font-family: inherit;
-  color: var(--tuw-text-primary, #262626);
-  background: transparent;
-}
-
-.commandPaletteInput::placeholder {
-  color: var(--tuw-text-secondary, #5D6772);
-}
-
-.commandPaletteEscBadge {
-  font-size: 11px;
-  font-weight: 600;
-  padding: 3px 7px;
-  border-radius: 4px;
-  background-color: var(--tuw-bg-canvas, #F7F8F9);
-  border: 1px solid var(--tuw-border-subtle, #E5E7EB);
-  color: var(--tuw-text-secondary, #5D6772);
-  cursor: pointer;
-  border: none;
-}
-
-.commandPaletteBody {
-  flex: 1;
-  overflow-y: auto;
-  padding: 12px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  max-height: 55vh;
-}
-
-.commandPaletteSectionTitle {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--tuw-text-secondary, #5D6772);
-  padding: 4px 10px;
-  margin-bottom: 4px;
-}
-
-.commandPaletteItem {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 12px;
-  border-radius: var(--tuw-radius-control, 8px);
-  cursor: pointer;
-  transition: all 0.12s ease;
-  text-decoration: none;
-  background: transparent;
-  border: none;
-  width: 100%;
-  text-align: left;
-}
-
-.commandPaletteItem:hover,
-.commandPaletteItem:focus-visible {
-  background-color: var(--tuw-bg-selected, #F8F5FF);
-}
-
 /* Spotlight result rows (S6): hover/focus wash + visible keyboard focus.
    Entrance/exit motion inherits the global reduced-motion collapse. */
 .spotlightRow:hover,
@@ -1061,59 +863,6 @@
 
 .spot-inputrow:focus-within {
   border-bottom-color: var(--tuw-action-primary, #7539FF);
-}
-
-.commandPaletteItemLeft {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-
-.commandPaletteItemIcon {
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  background-color: var(--tuw-bg-canvas, #F7F8F9);
-  color: var(--tuw-action-primary, #7539FF);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.commandPaletteItemText {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.commandPaletteItemTitle {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--tuw-text-primary, #262626);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.commandPaletteItemSubtitle {
-  font-size: 12px;
-  color: var(--tuw-text-secondary, #5D6772);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.commandPaletteFooter {
-  padding: 12px 20px;
-  background-color: var(--tuw-bg-canvas, #F7F8F9);
-  border-top: 1px solid var(--tuw-border-subtle, #E5E7EB);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 12px;
-  color: var(--tuw-text-secondary, #5D6772);
 }
 
 .topBarRight {
@@ -1276,16 +1025,6 @@
   pointer-events: none;
 }
 
-@media (max-width: 900px) {
-  /* Wrapper/hero/content stacking migrated to max-[900px]: variants (kept: formSection, socialRow). */
-
-  /* Shell stacking migrated to max-[900px]: variants (kept: formSection, socialRow). */
-
-  .signup-socialRow {
-    gap: 12px;
-  }
-}
-
 .sub-pageHeader {
   display: flex;
   align-items: center;
@@ -1320,101 +1059,12 @@
   gap: 12px;
 }
 
-.sub-primaryBtn {
-  background-color: var(--tuw-action-primary, #7539FF);
-  color: var(--tuw-text-on-primary, #FFFFFF);
-  border-radius: var(--tuw-radius-control, 8px);
-  padding: 0 20px;
-  height: 44px;
-  font-size: 13px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  box-shadow: 0 2px 6px rgba(117, 57, 255, 0.2);
-  border: none;
-  font-family: var(--font-main);
-}
-
-.sub-primaryBtn:hover {
-  background-color: var(--tuw-action-hover, #6025DB);
-  transform: translateY(-1px);
-}
-
-.sub-secondaryBtn {
-  background-color: var(--tuw-bg-surface, #FFFFFF);
-  border: 1px solid var(--tuw-border-control, #D1D5DB);
-  border-radius: var(--tuw-radius-control, 8px);
-  padding: 0 18px;
-  height: 44px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--tuw-text-primary, #262626);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  font-family: var(--font-main);
-}
-
-.sub-secondaryBtn:hover {
-  background-color: var(--tuw-bg-selected, #F8F5FF);
-  border-color: var(--tuw-action-primary, #7539FF);
-}
-
 /* Stat Grid */
 .sub-statGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   width: 100%;
-}
-
-.sub-statCard {
-  background-color: var(--tuw-bg-surface, #FFFFFF);
-  border: 1px solid var(--tuw-border-subtle, #E5E7EB);
-  border-radius: var(--tuw-radius-card, 12px);
-  padding: 20px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-  box-sizing: border-box;
-}
-
-.sub-statCard:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-}
-
-.sub-statLabel {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--tuw-text-secondary, #5D6772);
-  font-family: var(--font-main);
-}
-
-.sub-statValue {
-  font-size: 32px;
-  font-weight: 600;
-  color: var(--tuw-text-primary, #262626);
-  letter-spacing: -0.02em;
-  font-family: var(--font-main);
-  line-height: 40px;
-}
-
-.sub-statTrend {
-  font-size: 12px;
-  color: var(--tuw-text-success, #187343);
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-family: var(--font-main);
 }
 
 /* Content Container Card */
@@ -1471,113 +1121,6 @@
   font-weight: 600;
 }
 
-/* Table */
-.sub-tableWrapper {
-  width: 100%;
-  overflow-x: auto;
-}
-
-.sub-customTable {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 700px;
-}
-
-.sub-tableHeaderRow {
-  border-bottom: 1px solid var(--tuw-border-subtle, #E5E7EB);
-}
-
-.sub-tableHeaderRow th {
-  padding: 14px 16px;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--tuw-text-primary, #262626);
-  letter-spacing: normal;
-  text-align: left;
-  font-family: var(--font-main);
-}
-
-.sub-tableHeaderRow th:last-child {
-  text-align: right;
-}
-
-.sub-tableDataRow td {
-  padding: 16px;
-  font-size: 14px;
-  border-bottom: 1px solid var(--tuw-border-subtle, #E5E7EB);
-  color: var(--tuw-text-primary, #262626);
-  font-family: var(--font-main);
-}
-
-.sub-tableDataRow:hover {
-  background-color: var(--tuw-bg-canvas, #F7F8F9);
-}
-
-.sub-tableDataRow:last-child td {
-  border-bottom: none;
-}
-
-.sub-alignRight {
-  text-align: right;
-}
-
-/* Status Badges */
-.sub-badgeGreen {
-  display: inline-flex;
-  align-items: center;
-  background-color: var(--tuw-bg-success, #F4FBF7);
-  color: var(--tuw-text-success, #187343);
-  border: 1px solid rgba(24, 115, 67, 0.12);
-  border-radius: var(--tuw-radius-pill, 16px);
-  padding: 0 14px;
-  height: 32px;
-  font-size: 12px;
-  font-weight: 600;
-  font-family: var(--font-main);
-}
-
-.sub-badgeOrange {
-  display: inline-flex;
-  align-items: center;
-  background-color: var(--tuw-bg-warning, #FEFBF5);
-  color: var(--tuw-text-warning, #856300);
-  border: 1px solid rgba(133, 99, 0, 0.12);
-  border-radius: var(--tuw-radius-pill, 16px);
-  padding: 0 14px;
-  height: 32px;
-  font-size: 12px;
-  font-weight: 600;
-  font-family: var(--font-main);
-}
-
-.sub-badgeBlue {
-  display: inline-flex;
-  align-items: center;
-  background-color: var(--tuw-bg-info, #F4F9FE);
-  color: var(--tuw-text-info, #175CD3);
-  border: 1px solid rgba(23, 92, 211, 0.12);
-  border-radius: var(--tuw-radius-pill, 16px);
-  padding: 0 14px;
-  height: 32px;
-  font-size: 12px;
-  font-weight: 600;
-  font-family: var(--font-main);
-}
-
-.sub-badgeRed {
-  display: inline-flex;
-  align-items: center;
-  background-color: var(--tuw-bg-error, #FEF4F4);
-  color: var(--tuw-text-error, #C91818);
-  border: 1px solid rgba(201, 24, 24, 0.12);
-  border-radius: var(--tuw-radius-pill, 16px);
-  padding: 0 14px;
-  height: 32px;
-  font-size: 12px;
-  font-weight: 600;
-  font-family: var(--font-main);
-}
-
 /* Grid for Products / Cards */
 .sub-cardGrid {
   display: grid;
@@ -1631,17 +1174,6 @@
   .sub-cardGrid {
     grid-template-columns: 1fr;
   }
-}
-
-.home-pageWrapper {
-  display: flex;
-  width: 100%;
-  min-height: 100vh;
-  background-color: #F5F5F5;
-  color: #242424;
-  font-family: var(--font-main);
-  overflow-x: hidden;
-  position: relative;
 }
 
 /* Welcome Row */
@@ -2585,7 +2117,6 @@
 }
 
 @media (max-width: 680px) {
-  /* (dead home-topBar/searchContainer/dashboardBody rules removed S8) */
   .home-welcomeRow {
     flex-direction: column;
     align-items: flex-start;
@@ -2639,4 +2170,15 @@
   top: 16px;
   outline: 2px solid #FFFFFF;
   outline-offset: 2px;
+}
+
+/* Shared stat hover treatment (HC1): border tint + wash + shadow.
+   Opt-in via StatCard `hoverable` (default off) — mirrors the dashboard
+   KPI hover tokens, non-displacing per the motion skill. !important wins
+   over the primitive's inline base (same codebase precedent as the
+   reduced-motion rule); applies only when explicitly opted in. */
+.tuw-stat-hover:hover {
+  border-color: rgba(117, 57, 255, 0.35) !important;
+  background-color: #FBFAFF !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }

@@ -42,6 +42,8 @@ export interface StatCardProps extends React.HTMLAttributes<HTMLDivElement> {
   subtitle?: string;
   trend?: string;
   trendType?: 'up' | 'down' | 'neutral';
+  /** Opt-in hover treatment (border tint + wash). Default false: no page changes unless enabled. */
+  hoverable?: boolean;
 }
 
 export function StatCard({
@@ -50,6 +52,7 @@ export function StatCard({
   subtitle,
   trend,
   trendType = 'up',
+  hoverable = false,
   style = {},
   className = '',
   ...props
@@ -72,11 +75,11 @@ export function StatCard({
         gap: '6px',
         boxShadow: 'var(--shadow-subtle, 0 1px 4px rgba(0, 0, 0, 0.02))',
         border: '1px solid var(--tuw-border-subtle, #E5E7EB)',
-        transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+        transition: 'transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background-color 0.15s ease',
         boxSizing: 'border-box',
         ...style,
       }}
-      className={className}
+      className={`${hoverable ? 'tuw-stat-hover' : ''} ${className}`.trim()}
       {...props}
     >
       <span
