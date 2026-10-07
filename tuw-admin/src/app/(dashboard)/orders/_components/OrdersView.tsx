@@ -12,6 +12,7 @@ import {
   Drawer,
   Modal,
   Pagination,
+  FilterPills,
 } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { OrderItem, PaymentStatus, FulfillmentStatus } from '@/mocks/fixtures';
@@ -248,28 +249,19 @@ export default function OrdersView() {
               <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>
                 Payment:
               </span>
-              <div style={{ display: 'flex', gap: 4 }}>
-                {(['all', 'paid', 'pending', 'failed', 'refunded'] as const).map((status) => (
-                  <button
-                    key={status}
-                    type="button"
-                    onClick={() => setPaymentFilter(status)}
-                    style={{
-                      padding: '4px 10px',
-                      borderRadius: '6px',
-                      fontSize: '12px',
-                      fontWeight: paymentFilter === status ? 600 : 500,
-                      cursor: 'pointer',
-                      border: '1px solid',
-                      borderColor: paymentFilter === status ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-border-subtle, #E5E7EB)',
-                      backgroundColor: paymentFilter === status ? 'var(--tuw-bg-selected, #F8F5FF)' : 'transparent',
-                      color: paymentFilter === status ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-text-secondary, #5D6772)',
-                    }}
-                  >
-                    {status.charAt(0).toUpperCase() + status.slice(1)}
-                  </button>
-                ))}
-              </div>
+              <FilterPills
+                variant="pills"
+                ariaLabel="Payment status filter"
+                options={[
+                  { value: 'all', label: 'All' },
+                  { value: 'paid', label: 'Paid' },
+                  { value: 'pending', label: 'Pending' },
+                  { value: 'failed', label: 'Failed' },
+                  { value: 'refunded', label: 'Refunded' },
+                ]}
+                value={paymentFilter}
+                onChange={(v) => setPaymentFilter(v as typeof paymentFilter)}
+              />
             </div>
 
             {/* Fulfillment Filter */}
@@ -277,28 +269,20 @@ export default function OrdersView() {
               <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>
                 Fulfillment:
               </span>
-              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                {(['all', 'queued', 'printing', 'shipped', 'delivered', 'submission_failed'] as const).map((status) => (
-                  <button
-                    key={status}
-                    type="button"
-                    onClick={() => setFulfillmentFilter(status)}
-                    style={{
-                      padding: '4px 10px',
-                      borderRadius: '6px',
-                      fontSize: '12px',
-                      fontWeight: fulfillmentFilter === status ? 600 : 500,
-                      cursor: 'pointer',
-                      border: '1px solid',
-                      borderColor: fulfillmentFilter === status ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-border-subtle, #E5E7EB)',
-                      backgroundColor: fulfillmentFilter === status ? 'var(--tuw-bg-selected, #F8F5FF)' : 'transparent',
-                      color: fulfillmentFilter === status ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-text-secondary, #5D6772)',
-                    }}
-                  >
-                    {status === 'submission_failed' ? 'Failed Sync' : status.charAt(0).toUpperCase() + status.slice(1)}
-                  </button>
-                ))}
-              </div>
+              <FilterPills
+                variant="pills"
+                ariaLabel="Fulfillment status filter"
+                options={[
+                  { value: 'all', label: 'All' },
+                  { value: 'queued', label: 'Queued' },
+                  { value: 'printing', label: 'Printing' },
+                  { value: 'shipped', label: 'Shipped' },
+                  { value: 'delivered', label: 'Delivered' },
+                  { value: 'submission_failed', label: 'Failed Sync' },
+                ]}
+                value={fulfillmentFilter}
+                onChange={(v) => setFulfillmentFilter(v as typeof fulfillmentFilter)}
+              />
             </div>
           </div>
         </div>
