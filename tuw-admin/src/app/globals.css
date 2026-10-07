@@ -1497,6 +1497,18 @@
   font-family: var(--font-main);
 }
 
+/* Row-identity cell (shared): dark at rest, action-purple on row hover.
+   Opt-in per cell via className — no other table is affected. */
+.tuw-idCell {
+  font-weight: 600;
+  color: var(--tuw-text-primary, #262626);
+  transition: color 0.15s ease;
+}
+
+tr:hover > .tuw-idCell {
+  color: var(--tuw-action-primary, #7539FF);
+}
+
 .sub-tableHeaderRow th:last-child {
   text-align: right;
 }
