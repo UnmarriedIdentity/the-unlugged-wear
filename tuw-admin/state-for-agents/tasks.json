@@ -8,8 +8,8 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 82,
-    "done": 68,
+    "total": 87,
+    "done": 73,
     "in_progress": 3,
     "backlog": 11
   },
@@ -254,6 +254,82 @@
       "started": "2026-10-06",
       "finished": "2026-10-06",
       "log": "feat/search-modal:1c47ccd (focus-moving arrows/Enter + spotlightRow wash/focus rules)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-TBL1",
+      "title": "Universal table spec: 16px bold headers, 13px rows",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:c9b4b1a (TableHead/TableCell/Table base + sub-rule aligned; no new tokens)",
+      "design_match": "yes",
+      "key_decisions": [
+        "unstyled consumers inherit the spec automatically (data-display tables, demo table)",
+        "dashboard home table untouched (own frozen home-* classes, already 16/700 via H1)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-OP0",
+      "title": "FilterPills pills-variant gap aligned to page chips",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "part of feat/search-modal:3ce7856 (6 to 4px; pills variant had zero consumers)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-OP1",
+      "title": "Orders payment + fulfillment pills use shared FilterPills",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:3ce7856 (Failed Sync label preserved; filters untouched)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-OT1",
+      "title": "Orders table uses shared ui Table primitives",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:b4078c6 (style-preserved swap; row border inherited from TableRow default; empty text pinned 16px)",
+      "design_match": "yes",
+      "key_decisions": [
+        "hover handlers pass through (TableRow hoverable is a confirmed no-op)",
+        "outer scroll div replaced by Table wrapper (no nested scrollers)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-ODOC",
+      "title": "Pending component work inventory (Orders audited)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:30c86ab (pending-component-work.md + per-page template)",
       "design_match": "yes",
       "key_decisions": [],
       "verified": true,
