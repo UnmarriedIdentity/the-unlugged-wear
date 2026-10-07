@@ -2571,12 +2571,6 @@
 
 .home-orderIdCell {
   font-weight: 600;
-  color: var(--tuw-text-primary, #262626);
-  transition: color 0.15s ease;
-}
-
-/* Order id tints purple on row hover (B6) — pairs with the existing row wash. */
-.home-orderDataRow:hover .home-orderIdCell {
   color: var(--tuw-action-primary, #7539FF);
 }
 
