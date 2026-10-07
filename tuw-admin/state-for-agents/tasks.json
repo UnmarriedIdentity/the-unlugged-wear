@@ -15,7 +15,7 @@
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "d7b2b31",
+    "tip": "09098f5",
     "unpushed": ["6668cfd", "212ca3d", "c8a2f40", "6a00935", "2dc810e", "a60fa4f", "d7b2b31"],
     "next_up": "human pushes origin/v2 (2 commits) then origin/feat/search-modal (6 commits); browser review of spotlight",
     "pending_verifications": [
