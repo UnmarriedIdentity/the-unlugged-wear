@@ -207,24 +207,28 @@ export default function OrdersView() {
           value={`₹${totalRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
           trend={`${orders.length} orders recorded`}
           trendType="up"
+          hoverable
         />
         <StatCard
           label="Active Queue"
           value={String(processingCount)}
           subtitle="Queued & printing on floor"
           trendType="neutral"
+          hoverable
         />
         <StatCard
           label="Delivered"
           value={String(deliveredCount)}
           trend="Successful completions"
           trendType="up"
+          hoverable
         />
         <StatCard
           label="Operational Issues"
           value={String(issueCount)}
           subtitle={issueCount > 0 ? 'Requires attention / retry' : 'No sync errors'}
           trendType={issueCount > 0 ? 'down' : 'up'}
+          hoverable
         />
       </div>
 
