@@ -213,7 +213,6 @@
      One font across the dashboard; font-sans is the utility spelling. */
   --font-urbanist: "Urbanist", ui-sans-serif, system-ui, sans-serif;
   --font-main: "Urbanist", ui-sans-serif, system-ui, sans-serif;
-  --font-brand: "Urbanist", ui-sans-serif, system-ui, sans-serif;
 
   /* TUW Semantic Colour Roles (18 roles) - Standard & Figma Web Code Syntax */
   --tuw-bg-canvas: #F7F8F9;
@@ -339,86 +338,34 @@
 
   /* Backward Compatible Tokens */
   --color-primary: #262626;
-  --color-primary-hover: #141414;
-  --brand-teal: #7539FF;
-  --brand-teal-hover: #6025DB;
-  --brand-teal-light: #F8F5FF;
   --brand-lime: #C6EAA0;
 
-  --neutral-white: #FFFFFF;
-  --neutral-canvas: #F7F8F9;
-  --color-text-dark: #262626;
-  --color-text-muted: #5D6772;
-  --color-placeholder: #9CA3AF;
   --color-border: #E9E9E9;
   --color-border-subtle: #E9E9E9;
-  --color-border-dark: #E9E9E9;
-
-  /* Status Colors */
-  --status-success: #187343;
-  --status-success-bg: #F4FBF7;
-  --status-warning: #856300;
-  --status-warning-bg: #FEFBF5;
-  --status-info: #175CD3;
-  --status-info-bg: #F4F9FE;
-  --status-danger: #C91818;
-  --status-danger-bg: #FEF4F4;
 
   --color-error: #C91818;
-  --color-error-border: #F87171;
   --color-error-bg: #FEF4F4;
   --color-success: #187343;
-  --color-success-border: #BBF7D0;
   --color-success-bg: #F4FBF7;
-  --color-teal: #7539FF;
-  --color-teal-hover: #6025DB;
 
-  /* Spacing Grid: 4 · 8 · 12 · 16 · 24 · 32 · 48 · 64px */
-  --tuw-space-4: 4px;
-  --tuw-spacing-4: 4px;
-  --tuw-space-8: 8px;
-  --tuw-spacing-8: 8px;
-  --tuw-space-12: 12px;
-  --tuw-spacing-12: 12px;
-  --tuw-space-16: 16px;
-  --tuw-spacing-16: 16px;
-  --tuw-space-24: 24px;
-  --tuw-spacing-24: 24px;
-  --tuw-space-32: 32px;
-  --tuw-spacing-32: 32px;
-  --tuw-space-48: 48px;
-  --tuw-spacing-48: 48px;
-  --tuw-space-64: 64px;
-  --tuw-spacing-64: 64px;
+  /* Spacing Grid: 4 · 8 · 12 · 16 · 24 · 32 · 48 · 64px (canonical set lives above; documented on the design-system page) */
 
   /* Radii: 4 · 8 · 12 · 16 · 9999px */
   --tuw-radius-sm: 4px;
-  --tuw-radius-4: 4px;
   --tuw-radius-control: 8px;
-  --tuw-radius-8: 8px;
   --tuw-radius-card: 12px;
-  --tuw-radius-12: 12px;
   --tuw-radius-modal: 16px;
-  --tuw-radius-16: 16px;
   --tuw-radius-modal-lg: 24px;
   --tuw-radius-pill: 9999px;
-  --tuw-radius-999: 9999px;
 
   --radius-sm: 4px;
-  --radius-badge: 16px;
-  --radius-input: 8px;
-  --radius-button: 8px;
   --radius-card: 12px;
   --radius-modal: 16px;
   --radius-pill: 9999px;
 
   /* Shadows */
   --shadow-subtle: 0 1px 4px rgba(0, 0, 0, 0.02);
-  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.04);
   --shadow-button: 0 2px 6px rgba(117, 57, 255, 0.2);
-  --shadow-dropdown: 0 6px 18px rgba(0, 0, 0, 0.08);
-  --shadow-focus: 0 0 0 3px rgba(117, 57, 255, 0.15);
-  --shadow-error: 0 0 0 3px rgba(201, 24, 24, 0.15);
   --shadow-spotlight: 0 25px 50px -12px rgba(18, 10, 36, 0.35), 0 0 0 1px rgba(117, 57, 255, 0.1), 0 0 44px rgba(117, 57, 255, 0.14); /* used by: spotlight search dialog (S2 demo source) */
 }
 
