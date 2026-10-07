@@ -8,14 +8,14 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 87,
-    "done": 73,
+    "total": 89,
+    "done": 75,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "09098f5",
+    "tip": "1a18490",
     "unpushed": ["6668cfd", "212ca3d", "c8a2f40", "6a00935", "2dc810e", "a60fa4f", "d7b2b31"],
     "next_up": "human pushes origin/v2 (2 commits) then origin/feat/search-modal (6 commits); browser review of spotlight",
     "pending_verifications": [
@@ -380,6 +380,42 @@
       "pushed": false,
       "follow_ups": [
         "human browser check: chips stay open, compact rows, typed prefixes"
+      ]
+    },
+    {
+      "id": "TL-DASH-DDEL1",
+      "title": "RecentOrdersCard on ui Table; 7 home table rules deleted",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:a6fae1d (single-consumer verified; margin/minWidth via Table style; last row borderless by index)",
+      "design_match": "yes",
+      "key_decisions": [
+        "header TableRow carries no orderDataRow class (avoids hover wash on the header)",
+        "row wash + id tint stay as home-* (TableRow has no hover wash; adding one globally rejected)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DDEL2",
+      "title": "Status pills on ui Badge; 7 badge/cell rules deleted",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:1a18490 (Figma 26px via shared style object, no new size variant; cells inlined)",
+      "design_match": "yes",
+      "key_decisions": [
+        "orderIdCell class + hover rule kept (pseudo-classes cannot inline)",
+        "zero dangling references verified by grep"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser check: dashboard table, pills, row hover, id tint"
       ]
     },
     {
