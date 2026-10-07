@@ -422,9 +422,7 @@
   --shadow-spotlight: 0 25px 50px -12px rgba(18, 10, 36, 0.35), 0 0 0 1px rgba(117, 57, 255, 0.1), 0 0 44px rgba(117, 57, 255, 0.14); /* used by: spotlight search dialog (S2 demo source) */
 }
 
-/* ============================================================
-   Urbanist V2 Typography Scale Classes (DESIGN_SYSTEM.md)
-   ============================================================ */
+
 .tuw-type-display {
   font-family: var(--font-urbanist), sans-serif;
   font-size: var(--tuw-type-display-size, 44px);
@@ -1248,19 +1246,6 @@
 }
 
 
-/* ==========================================================================
-   AUTH - LOGIN (verbatim port of LoginPage.module.css, login- prefix).
-   Single app.css, no CSS Modules. JSX in components/forms/LoginPage.tsx untouched.
-   ========================================================================== */
-/* Login shell (wrapper, hero layout, form section) migrated to Tailwind utilities in
-   LoginPage.tsx (pixel-identical; 49.444%/50.556% Figma canvas fractions retained as
-   arbitrary flex basis). Removed: .login-pageWrapper, .login-heroSection, .login-heroImage,
-   .login-heroContent, .login-formSection, .login-formContainer. */
-
-/* LEFT HERO BANNER — section layout migrated to Tailwind; overlay gradient below is
-   retained custom CSS (5-stop 511px fade has no utility equivalent). */
-
-/* Rectangle 96 in Figma: 712x511 at y=513 (bottom 50%) */
 .login-heroOverlay {
   position: absolute;
   bottom: 0;
@@ -1278,101 +1263,8 @@
   pointer-events: none;
 }
 
-/* Frame 60511 content spacing migrated to Tailwind (px-14 pb-17 gap-4, max-lg variants inline). */
-
-/* Login hero type + header migrated to Tailwind auth-* utilities in LoginPage.tsx
-   (pixel-identical; headline clamp + wrap-guards preserved).
-   Removed: .login-brandTitle, .login-heroHeadline, .login-heroSubtitle,
-   .login-headerBlock, .login-logoBadge, .login-logoMonogram, .login-formSubtitle.
-   Kept: .login-formTitle (recovery-sent view still uses it — migrates in Pass E). */
-
-/* RIGHT AUTH SECTION — layout migrated to Tailwind in LoginPage.tsx (flex fractions,
-   clamp rhythm, radial washes as bg arbitrary). Removed: .login-formSection,
-   .login-formContainer. */
-
-/* (header block + logo + formSubtitle removed — see migration comment above) */
-
-/* (formTitle removed — last consumer migrated in recovery view; see comment above) */
-
-/* (formSubtitle removed — see migration comment above; formTitle kept for recovery view) */
-
-/* Frame 139: Social row (width 100%, max-width 568px, gap 24px) */
-/* Login social row + divider migrated to Tailwind utilities in LoginPage.tsx
-   (pixel-identical). Removed: .login-socialRow, .login-dividerRow,
-   .login-dividerLine, .login-dividerText. */
-
-/* Login social/auth buttons migrated to Tailwind utilities in LoginPage.tsx (pixel-identical). Removed: .login-socialButton, .login-socialIconBadge, .login-appleIcon, .login-googleIcon, .login-socialText. */
-
-/* (divider classes removed — see migration comment above) */
-
-/* Form block */
-/* Login form + inputs migrated to Tailwind auth-* utilities in LoginPage.tsx (pixel-identical).
-   Removed: .login-form, .login-fieldGroup, .login-fieldLabel, .login-inputWrapper,
-   .login-inputWrapperActive, .login-inputWrapperError, .login-inputField,
-   .login-inputFieldFilled, .login-inputField::placeholder, .login-inputIcon,
-   .login-togglePasswordBtn, .login-errorMessage, .login-errorIcon. */
-
-/* Login controls migrated to Tailwind auth-* utilities in LoginPage.tsx (pixel-identical).
-   Removed: .login-rememberRow, .login-checkboxBox, .login-checkboxBoxChecked,
-   .login-rememberText, .login-forgotPasswordRow, .login-resetLink. */
-
-/* Primary_button 568x48 radius 12px fill #242424 — migrated to Tailwind in LoginPage.tsx (see .login-primaryButton removal). */
-
-/* (forgot-password row + reset link removed — see migration comment above) */
-
-/* Sign up for free 568x48 radius 10px — migrated to Tailwind in LoginPage.tsx (see .login-signupButton removal). */
-
-/* ==========================================================================
-   RESET PASSWORD VIEW (Frame 1:20710)
-   Exact Figma: Card width 552px, radius 20px, stroke #E9E9E9,
-   padding: 40px 32px, box-shadow: -1px 1px 40px rgba(0,0,0,0.06)
-   ========================================================================== */
-/* Login reset view migrated to Tailwind auth-* utilities in LoginPage.tsx (pixel-identical;
-   wrapper border resolved to auth-line via var(), placeholder inherits 16px).
-   Removed: .login-resetCard, .login-resetInputWrapper, .login-resetInput,
-   .login-resetInput::placeholder, .login-backLink. */
-
-/* .login-resetButton migrated to Tailwind in LoginPage.tsx (pixel-identical). */
-
-/* Login recovery view migrated to Tailwind auth-* utilities in LoginPage.tsx (pixel-identical).
-   Removed: .login-recoveryCard, .login-recoveryPill, .login-recoveryTextBlock,
-   .login-recoveryHeading, .login-recoveryDescription, .login-formTitle.
-   Zero login-* selectors remain except the heroOverlay art exception. */
-
-/* .login-recoveryButton migrated to Tailwind in LoginPage.tsx (pixel-identical). */
-
-/* (backLink removed — see reset-view migration comment above) */
-
-/* Subtle corner simulator pill (allows easy simulation of all 5 Figma screens) */
-/* ==========================================================================
-   RESPONSIVENESS (Downscaling for tablet & mobile)
-   ========================================================================== */
-
-
-/* ==========================================================================
-   RESPONSIVENESS (Downscaling for tablet & mobile)
-   ========================================================================== */
-/* (≤1024px login rules removed — heroHeadline/Subtitle now use max-lg: variants inline;
-   shell rules migrated earlier. No login @media block remains.) */
-
-
-/* ==========================================================================
-   AUTH - SIGNUP (verbatim port of SignUpPage.module.css, signup- prefix).
-   Single app.css, no CSS Modules. JSX in components/forms/SignUpPage.tsx untouched.
-   ========================================================================== */
-/* ==========================================================================
-   Storeflow - Sign Up Page Styles (Figma Frames 1:20984, 1:20920, 1:20890, 1:20856)
-   Exact Figma specs, zero horizontal overflow, perfectly fitting vertical viewport
-   ========================================================================== */
-
-/* Signup shell wrapper + hero media migrated to Tailwind utilities in SignUpPage.tsx
-   (pixel-identical; fractions/washes mirror login). Removed: .signup-pageWrapper,
-   .signup-heroSection, .signup-heroImage, .signup-heroContent.
-   Kept: .signup-heroOverlay (distinct 55%/3-stop gradient — art exception). */
-
-/* (hero layout removed — see migration comment above) */
-
-/* Rectangle 96: Linear gradient overlay on bottom half */
+/* Rectangle 96: signup hero gradient overlay — distinct 55%/3-stop
+   gradient, retained as an art exception (SignUpPage heroOverlay). */
 .signup-heroOverlay {
   position: absolute;
   left: 0;
@@ -1384,65 +1276,6 @@
   pointer-events: none;
 }
 
-/* (heroContent removed — see migration comment above) */
-
-/* Signup hero copy migrated to Tailwind auth-* utilities in SignUpPage.tsx (pixel-identical;
-   fluid clamps + 520px wrap-guards preserved).
-   Removed: .signup-brandTitle, .signup-heroHeadline, .signup-heroSubtitle. */
-
-/* Signup form section migrated to Tailwind utilities in SignUpPage.tsx (h-screen kept —
-   login uses min-h-screen; washes reuse the login bg arbitrary).
-   Removed: .signup-formSection, .signup-formContainer. */
-
-/* Signup header migrated to Tailwind utilities in SignUpPage.tsx (pixel-identical; badge
-   deliberately shadow-/margin-less unlike login).
-   Removed: .signup-headerBlock, .signup-logoBadge, .signup-logoMonogram,
-   .signup-formTitle, .signup-formSubtitleRow, .signup-loginLink. */
-
-/* Signup form shells migrated to Tailwind utilities in SignUpPage.tsx (pixel-identical;
-   gap-based rhythm with distinct clamps preserved per block).
-   Removed: .signup-formBody, .signup-formInputsWrapper, .signup-fieldGroup,
-   .signup-fieldLabel. */
-
-/* Signup social + divider migrated to Tailwind utilities in SignUpPage.tsx (pixel-identical;
-   centered h-12 buttons, F8F9FA/D6D6D6 hover pair, badge h-7.5, divider uses auth-line).
-   Removed: .signup-socialRow, .signup-socialButton, .signup-socialIconBadge,
-   .signup-socialText, .signup-dividerRow, .signup-dividerLine, .signup-dividerText. */
-
-/* (inputs wrapper + field shells removed — see migration comment above) */
-
-/* Signup inputs migrated to Tailwind utilities in SignUpPage.tsx (pixel-identical; border
-   carried by inputs, focus ring .12 alpha distinct from OTP .15).
-   Removed: .signup-inputWrapper, .signup-inputField, .signup-inputField::placeholder,
-   .signup-inputIcon, .signup-inputIconButton, .signup-helperText. */
-
-/* Signup terms migrated to Tailwind utilities in SignUpPage.tsx (pixel-identical;
-   5px/E7EEEE outliers kept verbatim, teal-checked, SVG via props + currentColor).
-   Removed: .signup-footerActionsBlock, .signup-termsRow, .signup-checkbox,
-   .signup-checkboxChecked, .signup-checkboxIcon, .signup-termsText, .signup-termsLink. */
-
-/* Signup submit migrated to Tailwind utilities in SignUpPage.tsx (pixel-identical;
-   hover auth-pure, active scale-99). Removed: .signup-submitButton. */
-
-/* Signup verify shell + header migrated to Tailwind utilities in SignUpPage.tsx
-   (pixel-identical; title fluid, subrow token shared with C6).
-   Removed: .signup-verifyContainer, .signup-verifyHeaderBlock, .signup-verifyTitle,
-   .signup-verifySubtitle. (logoBadge/logoMonogram shared with C5 — already removed.) */
-
-/* (verify header removed — see migration comment above) */
-
-/* OTP boxes migrated to Tailwind utilities in SignUpPage.tsx (pixel-identical; 24px
-   size-only, .15 ring, ternary + focus: share teal state).
-   Removed: .signup-otpRow, .signup-otpInput, .signup-otpInputActive. */
-
-/* Signup verify actions migrated to Tailwind utilities in SignUpPage.tsx (pixel-identical;
-   verifyButton reuses submit pattern without :active; resend link inherits row lh).
-   Removed: .signup-verifyActions, .signup-verifyPrimaryGroup, .signup-verifyButton,
-   .signup-resendRow, .signup-resendLink, .signup-backToLoginButton. */
-
-/* ==========================================================================
-   RESPONSIVE DESIGN (Zero horizontal overflow, fluid stacking)
-   ========================================================================== */
 @media (max-width: 900px) {
   /* Wrapper/hero/content stacking migrated to max-[900px]: variants (kept: formSection, socialRow). */
 
@@ -1452,16 +1285,6 @@
     gap: 12px;
   }
 }
-
-
-/* ==========================================================================
-   SUBPAGES (verbatim port of SubPages.module.css, sub- prefix). Shared by all
-   dashboard Views in app/(dashboard)/*\/_components/.
-   ========================================================================== */
-/* ==========================================================================
-   SUBPAGES MODULE (ORDERS, PRODUCTS, CUSTOMERS, ANALYTICS, SETTINGS, HELP)
-   TUW V2 URBANIST DESIGN SYSTEM
-   ========================================================================== */
 
 .sub-pageHeader {
   display: flex;
@@ -1810,15 +1633,6 @@
   }
 }
 
-
-/* ==========================================================================
-   HOME (verbatim port of HomePage.module.css, home- prefix). Used by
-   app/(dashboard)/_components/HomeView.tsx.
-   ========================================================================== */
-/* ==========================================================================
-   HOMESCREEN DASHBOARD (FIGMA FRAME 1:20300) - 100% PURE CODE (NO IMAGES)
-   ========================================================================== */
-
 .home-pageWrapper {
   display: flex;
   width: 100%;
@@ -1829,8 +1643,6 @@
   overflow-x: hidden;
   position: relative;
 }
-
-/* Dead home chrome removed (S8): home-sidebar/topBar/mainContainer/dashboardBody family had zero JSX refs (HomeView renders in DashboardShell). Live home content classes (kpi/charts/tables/badges) untouched. */
 
 /* Welcome Row */
 .home-welcomeRow {
@@ -1930,9 +1742,6 @@
   color: var(--tuw-action-primary, #7539FF);
 }
 
-/* --------------------------------------------------------------------------
-   4. METRIC KPI CARDS ROW (4 CARDS)
-   -------------------------------------------------------------------------- */
 .home-kpiGrid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -2026,9 +1835,6 @@
   color: #9A9A9A;
 }
 
-/* --------------------------------------------------------------------------
-   5. MIDDLE SECTION: SALES TREND & TOP PRODUCT
-   -------------------------------------------------------------------------- */
 .home-middleGrid {
   display: grid;
   grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr);
@@ -2036,7 +1842,6 @@
   width: 100%;
 }
 
-/* Sales Trend Card */
 .home-salesTrendCard {
   background-color: var(--tuw-bg-surface, #FFFFFF);
   border: 1px solid var(--tuw-border-subtle, #E9E9E9);
@@ -2182,8 +1987,6 @@
   transition: color 0.35s ease;
 }
 
-/* Count-tween direction tints (N2): applied while AnimatedNumber climbs
-   or falls, cleared on settle. Token colors, no layout impact. */
 .home-salesTotalUp {
   color: var(--tuw-text-success, #187343);
 }
@@ -2294,9 +2097,6 @@
   background-color: rgba(117, 57, 255, 0.04);
 }
 
-/* Empty slot (F1): keeps its grid column for layout rhythm, ignores hover,
-   and hides its bars AFTER the sink transition (visibility flips on a
-   delay, so the animate-to-zero still plays; growing back is instant). */
 .home-barGroupEmpty {
   pointer-events: none;
   cursor: default;
@@ -2440,9 +2240,6 @@
   user-select: none;
 }
 
-/* --------------------------------------------------------------------------
-   Top Product Card (100% Pure Code Illustrations)
-   -------------------------------------------------------------------------- */
 .home-topProductCard {
   background-color: var(--tuw-bg-surface, #FFFFFF);
   border: 1px solid var(--tuw-border-subtle, #E9E9E9);
@@ -2491,8 +2288,6 @@
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.04);
 }
 
-/* In-place thumbnail zoom (B5): image scales inside the clipped frame —
-   attention without displacing the row. */
 .home-productIllustrationWrapper img {
   transition: transform 0.25s ease;
 }
