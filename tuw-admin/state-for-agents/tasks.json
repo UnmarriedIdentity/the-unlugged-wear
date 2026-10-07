@@ -8,14 +8,14 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 98,
-    "done": 84,
+    "total": 99,
+    "done": 85,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "f005165",
+    "tip": "4729b53",
     "unpushed": ["6668cfd", "212ca3d", "c8a2f40", "6a00935", "2dc810e", "a60fa4f", "d7b2b31"],
     "next_up": "human pushes origin/v2 (2 commits) then origin/feat/search-modal (6 commits); browser review of spotlight",
     "pending_verifications": [
@@ -397,6 +397,26 @@
       "verified": true,
       "pushed": false,
       "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-C1",
+      "title": "Single SurfaceCard base; all cards delegate; dup CSS removed",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:4729b53 (new ui/SurfaceCard + ContentCard/StatCard/DashboardCard/MetricCard delegate; 5 variant shells stripped to layout)",
+      "design_match": "yes",
+      "key_decisions": [
+        "values move, never change: padding/gap/width preserved per caller via props",
+        "MetricCard hover now via shared tuw-stat-hover (home-kpiCard:hover deleted); shadow given !important so the lift actually applies over inline base",
+        "hover stays opt-in everywhere except MetricCard (which always had it)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser check: dashboard cards, Orders/ContentCard pages, Settings cards"
+      ]
     },
     {
       "id": "TL-DASH-OID2",
