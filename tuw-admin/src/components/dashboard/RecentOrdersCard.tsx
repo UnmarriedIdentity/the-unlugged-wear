@@ -58,7 +58,7 @@ export function RecentOrdersCard({ orders }: RecentOrdersCardProps) {
                 className={styles.orderDataRow}
                 style={last ? { borderBottom: 'none' } : {}}
               >
-                <TableCell className={styles.orderIdCell} style={{ padding: '14px 14px' }}>
+                <TableCell style={{ padding: '14px 14px', fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)' }}>
                   <Link href="/orders" style={{ color: 'inherit', textDecoration: 'none' }}>
                     {order.id}
                   </Link>

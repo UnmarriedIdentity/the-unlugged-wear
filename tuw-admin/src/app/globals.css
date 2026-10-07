@@ -2569,11 +2569,6 @@
   background-color: var(--tuw-bg-canvas, #F7F8F9);
 }
 
-.home-orderIdCell {
-  font-weight: 600;
-  color: var(--tuw-action-primary, #7539FF);
-}
-
 /* --------------------------------------------------------------------------
    7. RESPONSIVE DESIGN - STRICT ZERO OVERFLOW
    -------------------------------------------------------------------------- */
