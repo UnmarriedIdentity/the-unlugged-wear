@@ -8,14 +8,14 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 89,
-    "done": 75,
+    "total": 90,
+    "done": 76,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "1a18490",
+    "tip": "b7f2d02",
     "unpushed": ["6668cfd", "212ca3d", "c8a2f40", "6a00935", "2dc810e", "a60fa4f", "d7b2b31"],
     "next_up": "human pushes origin/v2 (2 commits) then origin/feat/search-modal (6 commits); browser review of spotlight",
     "pending_verifications": [
@@ -380,6 +380,24 @@
       "pushed": false,
       "follow_ups": [
         "human browser check: chips stay open, compact rows, typed prefixes"
+      ]
+    },
+    {
+      "id": "TL-DASH-OID1",
+      "title": "Order ID dark at rest, purple on row hover (shared tuw-idCell)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:b7f2d02 (global opt-in rule; Orders cell trimmed to padding+size)",
+      "design_match": "yes",
+      "key_decisions": [
+        "tr:hover-scoped selector: only opted-in cells ever tint, all other tables unaffected"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "same always-purple treatment remains on payments/fulfillment/shipments/refunds/designs IDs — per-page rollout on request"
       ]
     },
     {
