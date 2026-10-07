@@ -2561,54 +2561,12 @@
   box-sizing: border-box;
 }
 
-.home-ordersTableWrapper {
-  width: 100%;
-  overflow-x: auto;
-  margin-top: 16px;
-}
-
-.home-ordersTable {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 600px;
-}
-
-.home-ordersTableHeaderRow {
-  border-bottom: 1px solid var(--tuw-border-subtle, #E9E9E9);
-}
-
-.home-ordersTableHeaderRow th {
-  padding: 12px 14px;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--tuw-text-primary, #262626);
-  letter-spacing: normal;
-  text-align: left;
-  font-family: var(--font-main);
-}
-
-.home-ordersTableHeaderRow th:last-child {
-  text-align: right;
-}
-
 .home-orderDataRow {
   transition: background-color 0.15s ease;
 }
 
 .home-orderDataRow:hover {
   background-color: var(--tuw-bg-canvas, #F7F8F9);
-}
-
-.home-orderDataRow td {
-  padding: 14px 14px;
-  font-size: 13px;
-  border-bottom: 1px solid var(--tuw-border-subtle, #E9E9E9);
-  color: var(--tuw-text-primary, #262626);
-  font-family: var(--font-main);
-}
-
-.home-orderDataRow:last-child td {
-  border-bottom: none;
 }
 
 .home-orderIdCell {

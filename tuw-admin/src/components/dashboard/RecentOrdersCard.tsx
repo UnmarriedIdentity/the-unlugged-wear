@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { DashboardCard } from './DashboardCard';
 import { SeeAllLink } from './SeeAllLink';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui';
 import type { FulfillmentStatus, OrderItem } from '@/mocks/fixtures';
 
 // Class map - selectors live in src/app/globals.css (single app.css, home- prefix).
@@ -29,37 +30,40 @@ export function RecentOrdersCard({ orders }: RecentOrdersCardProps) {
         <SeeAllLink href="/orders" />
       }
     >
-      <div className={styles.ordersTableWrapper}>
-        <table className={styles.ordersTable}>
-          <thead>
-            <tr className={styles.ordersTableHeaderRow}>
-              <th>Order</th>
-              <th>Customer</th>
-              <th>Total</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map((order) => {
-              const badge = statusBadge(order.fulfillmentStatus);
-              return (
-                <tr key={order.id} className={styles.orderDataRow}>
-                  <td className={styles.orderIdCell}>
-                    <Link href="/orders" style={{ color: 'inherit', textDecoration: 'none' }}>
-                      {order.id}
-                    </Link>
-                  </td>
-                  <td className={styles.orderTimeCell}>{order.customerName}</td>
-                  <td className={`${styles.orderTotalCell} tuw-tabular-nums`}>₹{order.total.toFixed(2)}</td>
-                  <td className={styles.orderStatusCell}>
-                    <span className={badge.badgeClass}>{badge.label}</span>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+      <Table style={{ marginTop: '16px', minWidth: '600px' }}>
+        <TableHeader>
+          <TableRow hoverable={false}>
+            <TableHead style={{ padding: '12px 14px' }}>Order</TableHead>
+            <TableHead style={{ padding: '12px 14px' }}>Customer</TableHead>
+            <TableHead style={{ padding: '12px 14px' }}>Total</TableHead>
+            <TableHead style={{ padding: '12px 14px', textAlign: 'right' }}>Status</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {orders.map((order, i) => {
+            const badge = statusBadge(order.fulfillmentStatus);
+            const last = i === orders.length - 1;
+            return (
+              <TableRow
+                key={order.id}
+                className={styles.orderDataRow}
+                style={last ? { borderBottom: 'none' } : {}}
+              >
+                <TableCell className={styles.orderIdCell} style={{ padding: '14px 14px' }}>
+                  <Link href="/orders" style={{ color: 'inherit', textDecoration: 'none' }}>
+                    {order.id}
+                  </Link>
+                </TableCell>
+                <TableCell className={styles.orderTimeCell} style={{ padding: '14px 14px' }}>{order.customerName}</TableCell>
+                <TableCell className={`${styles.orderTotalCell} tuw-tabular-nums`} style={{ padding: '14px 14px' }}>₹{order.total.toFixed(2)}</TableCell>
+                <TableCell className={styles.orderStatusCell} style={{ padding: '14px 14px' }}>
+                  <span className={badge.badgeClass}>{badge.label}</span>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
     </DashboardCard>
   );
 }
