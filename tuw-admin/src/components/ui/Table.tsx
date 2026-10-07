@@ -10,15 +10,15 @@ export function Table({ children, style = {}, className = '', ...props }: TableP
   return (
     <div style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
       <table
-        style={{
-          width: '100%',
-          borderCollapse: 'collapse',
-          textAlign: 'left',
-          fontFamily: 'var(--font-main)',
-          fontSize: '14px',
-          color: 'var(--tuw-text-primary, #262626)',
-          ...style,
-        }}
+      style={{
+        width: '100%',
+        borderCollapse: 'collapse',
+        textAlign: 'left',
+        fontFamily: 'var(--font-main)',
+        fontSize: '13px',
+        color: 'var(--tuw-text-primary, #262626)',
+        ...style,
+      }}
         className={className}
         {...props}
       >
@@ -75,8 +75,8 @@ export function TableHead({ children, style = {}, ...props }: React.ThHTMLAttrib
     <th
       style={{
         padding: '14px 16px',
-        fontSize: '12px',
-        fontWeight: 600,
+        fontSize: '16px',
+        fontWeight: 700,
         color: 'var(--tuw-text-primary, #262626)',
         letterSpacing: 'normal',
         fontFamily: 'var(--font-main)',
@@ -95,7 +95,7 @@ export function TableCell({ children, style = {}, ...props }: React.TdHTMLAttrib
     <td
       style={{
         padding: '16px',
-        fontSize: '14px',
+        fontSize: '13px',
         fontWeight: 400,
         color: 'var(--tuw-text-primary, #262626)',
         verticalAlign: 'middle',
