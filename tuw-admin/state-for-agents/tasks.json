@@ -389,7 +389,7 @@
       "owner": "agent",
       "started": "2026-10-06",
       "finished": "2026-10-06",
-      "log": "feat/search-modal:b7f2d02 (global opt-in rule; Orders cell trimmed to padding+size)",
+      "log": "feat/search-modal:b7f2d02 (global opt-in rule; Orders cell trimmed to padding+size) + REVERTED 3d3c7bc per user request",
       "design_match": "yes",
       "key_decisions": [
         "tr:hover-scoped selector: only opted-in cells ever tint, all other tables unaffected"
