@@ -99,24 +99,28 @@ export default function AnalyticsView() {
           value={`₹${totalRevenue.toLocaleString()}`}
           trend="Derived from paid order records"
           trendType="up"
+          hoverable
         />
         <StatCard
           label="Total Orders"
           value={String(totalOrdersCount)}
           trend="Active store order volume"
           trendType="up"
+          hoverable
         />
         <StatCard
           label="Average Order Value"
           value={`₹${Math.round(aov).toLocaleString()}`}
           trend="Per settled transaction"
           trendType="up"
+          hoverable
         />
         <StatCard
           label="Refund Volume"
           value={`₹${totalRefundsSum.toLocaleString()}`}
           subtitle={`${refunds.length} processed adjustments`}
           trendType="neutral"
+          hoverable
         />
       </div>
 

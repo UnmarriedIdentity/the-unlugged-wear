@@ -270,24 +270,28 @@ export default function PagesManagementPage() {
           value={`${pages.filter((p) => p.status === 'published').length} Pages`}
           subtitle="Indexed by search engines"
           trendType="up"
+          hoverable
         />
         <StatCard
           label="Draft Pages"
           value={`${pages.filter((p) => p.status === 'draft').length} Pages`}
           subtitle="Pending content sign-off"
           trendType="neutral"
+          hoverable
         />
         <StatCard
           label="Total 30d Pageviews"
           value={`${pages.reduce((acc, p) => acc + p.views30d, 0).toLocaleString()} Views`}
           subtitle="Direct and organic traffic"
           trendType="up"
+          hoverable
         />
         <StatCard
           label="Avg. TTFB"
           value="0.24s"
           subtitle="Edge CDN pre-rendered"
           trendType="up"
+          hoverable
         />
       </div>
 

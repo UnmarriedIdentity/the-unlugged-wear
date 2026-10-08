@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import SurfaceCard from './SurfaceCard';
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   padding?: string;
@@ -14,25 +15,9 @@ export function ContentCard({
   ...props
 }: CardProps) {
   return (
-    <div
-      style={{
-        backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
-        borderRadius: 'var(--tuw-radius-card, 12px)',
-        padding,
-        boxShadow: 'var(--shadow-subtle, 0 1px 4px rgba(0, 0, 0, 0.02))',
-        border: '1px solid var(--tuw-border-subtle, #E5E7EB)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '16px',
-        width: '100%',
-        boxSizing: 'border-box',
-        ...style,
-      }}
-      className={className}
-      {...props}
-    >
+    <SurfaceCard padding="24px" gap="16px" fullWidth className={className} style={style} {...props}>
       {children}
-    </div>
+    </SurfaceCard>
   );
 }
 
@@ -65,21 +50,12 @@ export function StatCard({
       : 'var(--tuw-text-secondary, #5D6772)';
 
   return (
-    <div
-      style={{
-        backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
-        borderRadius: 'var(--tuw-radius-card, 12px)',
-        padding: '20px 24px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '6px',
-        boxShadow: 'var(--shadow-subtle, 0 1px 4px rgba(0, 0, 0, 0.02))',
-        border: '1px solid var(--tuw-border-subtle, #E5E7EB)',
-        transition: 'transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background-color 0.15s ease',
-        boxSizing: 'border-box',
-        ...style,
-      }}
-      className={`${hoverable ? 'tuw-stat-hover' : ''} ${className}`.trim()}
+    <SurfaceCard
+      padding="20px 24px"
+      gap="6px"
+      hoverable={hoverable}
+      className={className}
+      style={style}
       {...props}
     >
       <span
@@ -133,6 +109,6 @@ export function StatCard({
           )}
         </div>
       )}
-    </div>
+    </SurfaceCard>
   );
 }

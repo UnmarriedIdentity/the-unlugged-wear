@@ -1,4 +1,5 @@
 import React from 'react';
+import SurfaceCard from '@/components/ui/SurfaceCard';
 
 // Class map - selectors live in src/app/globals.css (single app.css, home- prefix).
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'home-' + String(p) });
@@ -29,7 +30,7 @@ export function DashboardCard({ variant, title, subtitle, action, subheader, chi
           ? styles.inventoryCard
           : styles.recentOrdersCard;
   return (
-    <div className={cardClass}>
+    <SurfaceCard padding="20px 24px" className={cardClass}>
       <div>
         <div className={styles.cardHeaderRow}>
           <div>
@@ -41,6 +42,6 @@ export function DashboardCard({ variant, title, subtitle, action, subheader, chi
         {subheader ?? null}
       </div>
       {children}
-    </div>
+    </SurfaceCard>
   );
 }

@@ -71,10 +71,10 @@ export default function PaymentsPage() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
-        <StatCard label="Settled Volume" value={`₹${totalSettled.toLocaleString()}`} trend="Captured merchant volume" trendType="up" />
-        <StatCard label="Pending Settlements" value={`₹${totalPending.toLocaleString()}`} subtitle={`${pendingOrders.length} orders awaiting auth`} trendType="neutral" />
-        <StatCard label="Dispute Ratio" value="0.00%" trend="Zero chargebacks recorded" trendType="up" />
-        <StatCard label="Total Refunded" value={`₹${totalRefunded.toLocaleString()}`} subtitle="Disbursed return adjustments" trendType="neutral" />
+        <StatCard label="Settled Volume" value={`₹${totalSettled.toLocaleString()}`} trend="Captured merchant volume" trendType="up" hoverable />
+        <StatCard label="Pending Settlements" value={`₹${totalPending.toLocaleString()}`} subtitle={`${pendingOrders.length} orders awaiting auth`} trendType="neutral" hoverable />
+        <StatCard label="Dispute Ratio" value="0.00%" trend="Zero chargebacks recorded" trendType="up" hoverable />
+        <StatCard label="Total Refunded" value={`₹${totalRefunded.toLocaleString()}`} subtitle="Disbursed return adjustments" trendType="neutral" hoverable />
       </div>
 
       {/* Gateway Status Cards */}

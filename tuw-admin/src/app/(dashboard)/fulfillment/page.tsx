@@ -63,24 +63,28 @@ export default function FulfillmentPage() {
           value={String(failedOrders.length)}
           subtitle={failedOrders.length > 0 ? 'Requires partner retry' : 'Zero sync errors'}
           trendType={failedOrders.length > 0 ? 'down' : 'up'}
+          hoverable
         />
         <StatCard
           label="Printing on Floor"
           value={String(printingOrders.length)}
           subtitle="Screenprint / DTG active"
           trendType="neutral"
+          hoverable
         />
         <StatCard
           label="Queued in Warehouse"
           value={String(queuedOrders.length)}
           subtitle="Awaiting allocation"
           trendType="neutral"
+          hoverable
         />
         <StatCard
           label="Dispatched (Delivered)"
           value={String(shippedOrders.length)}
           trend="Successful handoffs"
           trendType="up"
+          hoverable
         />
       </div>
 

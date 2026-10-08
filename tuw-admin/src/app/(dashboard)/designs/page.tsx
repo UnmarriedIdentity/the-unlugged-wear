@@ -108,10 +108,10 @@ export default function DesignsPage() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
-        <StatCard label="Approved Artworks" value={String(designs.filter((d) => d.status === 'approved').length)} subtitle="Ready for factory print" trendType="up" />
-        <StatCard label="In Sampling Review" value={String(designs.filter((d) => d.status === 'in_review').length)} subtitle="Strike-offs pending" trendType="neutral" />
-        <StatCard label="Total Vector Files" value={`${designs.length} Assets`} trend="High-fidelity 300+ DPI" trendType="neutral" />
-        <StatCard label="Digitized Specs" value="100% Validated" subtitle="Direct print compatible" trendType="up" />
+        <StatCard label="Approved Artworks" value={String(designs.filter((d) => d.status === 'approved').length)} subtitle="Ready for factory print" trendType="up" hoverable />
+        <StatCard label="In Sampling Review" value={String(designs.filter((d) => d.status === 'in_review').length)} subtitle="Strike-offs pending" trendType="neutral" hoverable />
+        <StatCard label="Total Vector Files" value={`${designs.length} Assets`} trend="High-fidelity 300+ DPI" trendType="neutral" hoverable />
+        <StatCard label="Digitized Specs" value="100% Validated" subtitle="Direct print compatible" trendType="up" hoverable />
       </div>
 
       <ContentCard>

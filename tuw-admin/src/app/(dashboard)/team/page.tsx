@@ -81,10 +81,10 @@ export default function TeamPage() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
-        <StatCard label="Total Staff" value={`${team.length} Members`} subtitle="Across 4 operational roles" trendType="neutral" />
-        <StatCard label="Active Sessions" value={String(team.filter((m) => m.status === 'active').length)} trend="Online locally" trendType="up" />
-        <StatCard label="Pending Invites" value={String(team.filter((m) => m.status === 'invited').length)} subtitle="Awaiting acceptance" trendType="neutral" />
-        <StatCard label="RBAC Policy" value="Enforced" trend="Demo role isolation" trendType="up" />
+        <StatCard label="Total Staff" value={`${team.length} Members`} subtitle="Across 4 operational roles" trendType="neutral" hoverable />
+        <StatCard label="Active Sessions" value={String(team.filter((m) => m.status === 'active').length)} trend="Online locally" trendType="up" hoverable />
+        <StatCard label="Pending Invites" value={String(team.filter((m) => m.status === 'invited').length)} subtitle="Awaiting acceptance" trendType="neutral" hoverable />
+        <StatCard label="RBAC Policy" value="Enforced" trend="Demo role isolation" trendType="up" hoverable />
       </div>
 
       <ContentCard>

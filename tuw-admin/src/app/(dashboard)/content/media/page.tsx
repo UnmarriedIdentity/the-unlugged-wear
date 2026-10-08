@@ -276,24 +276,28 @@ export default function MediaLibraryPage() {
           value={`${mediaList.length} Assets`}
           subtitle="Images, vectors & video"
           trendType="neutral"
+          hoverable
         />
         <StatCard
           label="CDN Storage Used"
           value="4.2 GB"
           subtitle="Out of 50 GB quota (8.4%)"
           trendType="up"
+          hoverable
         />
         <StatCard
           label="Optimization Rate"
           value="99.4% WebP"
           subtitle="Next.js image pipeline"
           trendType="up"
+          hoverable
         />
         <StatCard
           label="Bandwidth (30d)"
           value="128 GB"
           subtitle="High speed edge delivery"
           trendType="up"
+          hoverable
         />
       </div>
 

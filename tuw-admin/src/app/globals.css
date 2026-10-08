@@ -1283,23 +1283,9 @@
 }
 
 .home-kpiCard {
-  background-color: var(--tuw-bg-surface, #FFFFFF);
-  border: 1px solid var(--tuw-border-subtle, #E9E9E9);
-  border-radius: var(--tuw-radius-card, 12px);
-  padding: 20px 24px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
-  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
   min-width: 0;
-  box-sizing: border-box;
-}
-
-.home-kpiCard:hover {
-  border-color: rgba(117, 57, 255, 0.35);
-  background-color: #FBFAFF;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
 .home-kpiLabel {
@@ -1375,16 +1361,10 @@
 }
 
 .home-salesTrendCard {
-  background-color: var(--tuw-bg-surface, #FFFFFF);
-  border: 1px solid var(--tuw-border-subtle, #E9E9E9);
-  border-radius: var(--tuw-radius-card, 12px);
-  padding: 20px 24px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
   min-width: 0;
-  box-sizing: border-box;
 }
 
 .home-cardHeaderRow {
@@ -1773,15 +1753,9 @@
 }
 
 .home-topProductCard {
-  background-color: var(--tuw-bg-surface, #FFFFFF);
-  border: 1px solid var(--tuw-border-subtle, #E9E9E9);
-  border-radius: var(--tuw-radius-card, 12px);
-  padding: 20px 24px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
   min-width: 0;
-  box-sizing: border-box;
 }
 
 .home-productList {
@@ -1920,15 +1894,9 @@
 
 /* Inventory Alerts Card */
 .home-inventoryCard {
-  background-color: var(--tuw-bg-surface, #FFFFFF);
-  border: 1px solid var(--tuw-border-subtle, #E9E9E9);
-  border-radius: var(--tuw-radius-card, 12px);
-  padding: 20px 24px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
   min-width: 0;
-  box-sizing: border-box;
 }
 
 .home-subHeading {
@@ -2082,15 +2050,9 @@
 
 /* Recent Orders Card */
 .home-recentOrdersCard {
-  background-color: var(--tuw-bg-surface, #FFFFFF);
-  border: 1px solid var(--tuw-border-subtle, #E9E9E9);
-  border-radius: var(--tuw-radius-card, 12px);
-  padding: 20px 24px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
   min-width: 0;
-  box-sizing: border-box;
 }
 
 .home-orderDataRow {
@@ -2180,5 +2142,5 @@
 .tuw-stat-hover:hover {
   border-color: rgba(117, 57, 255, 0.35) !important;
   background-color: #FBFAFF !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04) !important;
 }

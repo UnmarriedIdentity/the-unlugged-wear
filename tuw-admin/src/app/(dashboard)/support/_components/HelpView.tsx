@@ -74,10 +74,10 @@ export default function HelpView() {
       </div>
 
       <div className={styles.statGrid}>
-        <StatCard label="Total Tickets" value={String(supportTickets.length)} subtitle="Customer inquiries" trendType="neutral" />
-        <StatCard label="Open / Actionable" value={String(openTicketsCount)} subtitle="Awaiting reply" trendType={openTicketsCount > 0 ? 'down' : 'up'} />
-        <StatCard label="Resolved Tickets" value={String(resolvedCount)} trend="High satisfaction SLA" trendType="up" />
-        <StatCard label="Avg. Response Time" value="18 mins" trend="Instant simulated triage" trendType="up" />
+        <StatCard label="Total Tickets" value={String(supportTickets.length)} subtitle="Customer inquiries" trendType="neutral" hoverable />
+        <StatCard label="Open / Actionable" value={String(openTicketsCount)} subtitle="Awaiting reply" trendType={openTicketsCount > 0 ? 'down' : 'up'} hoverable />
+        <StatCard label="Resolved Tickets" value={String(resolvedCount)} trend="High satisfaction SLA" trendType="up" hoverable />
+        <StatCard label="Avg. Response Time" value="18 mins" trend="Instant simulated triage" trendType="up" hoverable />
       </div>
 
       {/* Ticket Queue Card */}

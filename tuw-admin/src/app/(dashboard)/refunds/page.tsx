@@ -130,24 +130,28 @@ export default function RefundsPage() {
           value={`₹${totalRefundedSum.toLocaleString()}`}
           trend={`${refunds.length} transactions`}
           trendType="neutral"
+          hoverable
         />
         <StatCard
           label="Completed Refunds"
           value={String(refunds.filter((r) => r.status === 'completed').length)}
           subtitle="Disbursed to customers"
           trendType="up"
+          hoverable
         />
         <StatCard
           label="Processing / Pending"
           value={String(refunds.filter((r) => r.status === 'processing').length)}
           subtitle="Bank ACH transit"
           trendType="neutral"
+          hoverable
         />
         <StatCard
           label="Average Turnaround"
           value="1.2 days"
           trend="Well within 3-day SLA"
           trendType="up"
+          hoverable
         />
       </div>
 

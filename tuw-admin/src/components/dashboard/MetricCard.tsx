@@ -1,4 +1,5 @@
 import React from 'react';
+import SurfaceCard from '@/components/ui/SurfaceCard';
 import { Sparkline, type SparklineTone } from './Sparkline';
 import { TrendBadge } from './TrendBadge';
 
@@ -26,7 +27,7 @@ export function MetricCard({
   sparkTone,
 }: MetricCardProps) {
   return (
-    <div className={styles.kpiCard}>
+    <SurfaceCard padding="20px 24px" gap="8px" hoverable className={styles.kpiCard}>
       <span className={styles.kpiLabel}>{label}</span>
       <div className={styles.kpiMiddleRow}>
         <span className={tabular ? `${styles.kpiValue} tuw-tabular-nums` : styles.kpiValue}>
@@ -38,6 +39,6 @@ export function MetricCard({
         <TrendBadge value={delta} tone={deltaTone} />
         <span className={styles.trendVs}>{vsText}</span>
       </div>
-    </div>
+    </SurfaceCard>
   );
 }
