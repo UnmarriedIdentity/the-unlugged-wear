@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui';
 import { RotateCcw, Search, Filter, Download, ArrowUpRight, CheckCircle2, Clock, AlertTriangle, Eye } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { RefundItem } from '@/mocks/fixtures';
@@ -190,60 +190,58 @@ export default function RefundsPage() {
           </div>
         </div>
 
-        <div style={{ overflowX: 'auto', width: '100%' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Refund ID</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Order</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Customer</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Reason</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase', textAlign: 'right' }}>Amount</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Method</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Status</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase', textAlign: 'right' }}>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedRefunds.map((refund) => (
-                <tr
-                  key={refund.id}
-                  onClick={() => setSelectedRefund(refund)}
-                  style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', cursor: 'pointer' }}
-                >
-                  <td style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-                    {refund.id}
-                  </td>
-                  <td style={{ padding: '14px 16px', fontSize: 14, color: 'var(--tuw-action-primary, #7539FF)', fontWeight: 500 }}>
-                    {refund.orderId}
-                  </td>
-                  <td style={{ padding: '14px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
-                    {refund.customer}
-                  </td>
-                  <td style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                    {refund.reason}
-                  </td>
-                  <td className="tuw-tabular-nums" style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', textAlign: 'right' }}>
-                    ₹{refund.amount.toLocaleString()}
-                  </td>
-                  <td style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                    {refund.method}
-                  </td>
-                  <td style={{ padding: '14px 16px' }}>
-                    {refund.status === 'completed' && <Badge variant="success">Completed</Badge>}
-                    {refund.status === 'processing' && <Badge variant="warning">Processing</Badge>}
-                    {refund.status === 'rejected' && <Badge variant="danger">Rejected</Badge>}
-                  </td>
-                  <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                    <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedRefund(refund); }}>
-                      View
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table>
+          <TableHeader style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
+            <TableRow hoverable={false}>
+              <TableHead style={{ padding: '12px 16px' }}>Refund ID</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Order</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Customer</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Reason</TableHead>
+              <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Amount</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Method</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Status</TableHead>
+              <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedRefunds.map((refund) => (
+              <TableRow
+                key={refund.id}
+                onClick={() => setSelectedRefund(refund)}
+                style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', cursor: 'pointer' }}
+              >
+                <TableCell style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                  {refund.id}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px', fontSize: 14, color: 'var(--tuw-action-primary, #7539FF)', fontWeight: 500 }}>
+                  {refund.orderId}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
+                  {refund.customer}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                  {refund.reason}
+                </TableCell>
+                <TableCell className="tuw-tabular-nums" style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', textAlign: 'right' }}>
+                  ₹{refund.amount.toLocaleString()}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                  {refund.method}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px' }}>
+                  {refund.status === 'completed' && <Badge variant="success">Completed</Badge>}
+                  {refund.status === 'processing' && <Badge variant="warning">Processing</Badge>}
+                  {refund.status === 'rejected' && <Badge variant="danger">Rejected</Badge>}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px', textAlign: 'right' }}>
+                  <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedRefund(refund); }}>
+                    View
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
 
         <Pagination
           currentPage={currentPage}
