@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills } from '@/components/ui';
 import { Undo2, Search, Filter, CheckCircle2, XCircle, ArrowRight, RotateCcw } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { ReturnItem } from '@/mocks/fixtures';
@@ -82,28 +82,19 @@ export default function ReturnsPage() {
             />
           </div>
 
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {(['all', 'in_transit', 'inspected', 'restocked', 'disputed'] as const).map((st) => (
-              <button
-                key={st}
-                type="button"
-                onClick={() => setStageFilter(st)}
-                style={{
-                  padding: '4px 10px',
-                  borderRadius: '6px',
-                  fontSize: '12px',
-                  fontWeight: stageFilter === st ? 600 : 500,
-                  cursor: 'pointer',
-                  border: '1px solid',
-                  borderColor: stageFilter === st ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-border-subtle, #E2E4E6)',
-                  backgroundColor: stageFilter === st ? 'var(--tuw-bg-selected, #F8F5FF)' : 'transparent',
-                  color: stageFilter === st ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-text-secondary, #5D6772)',
-                }}
-              >
-                {st === 'in_transit' ? 'In Transit' : st.charAt(0).toUpperCase() + st.slice(1)}
-              </button>
-            ))}
-          </div>
+          <FilterPills
+            variant="pills"
+            ariaLabel="Return stage filter"
+            options={[
+              { value: 'all', label: 'All' },
+              { value: 'in_transit', label: 'In Transit' },
+              { value: 'inspected', label: 'Inspected' },
+              { value: 'restocked', label: 'Restocked' },
+              { value: 'disputed', label: 'Disputed' },
+            ]}
+            value={stageFilter}
+            onChange={(v) => setStageFilter(v as typeof stageFilter)}
+          />
         </div>
 
         <Table>
