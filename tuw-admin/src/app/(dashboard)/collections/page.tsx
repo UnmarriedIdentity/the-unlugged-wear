@@ -88,10 +88,10 @@ export default function CollectionsPage() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
-        <StatCard label="Active Collections" value={`${collections.length} Series`} subtitle="Organized lookbooks" trendType="neutral" />
-        <StatCard label="Live on Storefront" value={String(collections.filter((c) => c.visibility === 'published').length)} trend="Published & visible" trendType="up" />
-        <StatCard label="Scheduled Releases" value={String(collections.filter((c) => c.visibility === 'scheduled').length)} subtitle="Upcoming drops" trendType="neutral" />
-        <StatCard label="Draft Formats" value={String(collections.filter((c) => c.visibility === 'draft').length)} subtitle="In curation" trendType="neutral" />
+        <StatCard label="Active Collections" value={`${collections.length} Series`} subtitle="Organized lookbooks" trendType="neutral" hoverable />
+        <StatCard label="Live on Storefront" value={String(collections.filter((c) => c.visibility === 'published').length)} trend="Published & visible" trendType="up" hoverable />
+        <StatCard label="Scheduled Releases" value={String(collections.filter((c) => c.visibility === 'scheduled').length)} subtitle="Upcoming drops" trendType="neutral" hoverable />
+        <StatCard label="Draft Formats" value={String(collections.filter((c) => c.visibility === 'draft').length)} subtitle="In curation" trendType="neutral" hoverable />
       </div>
 
       <ContentCard>
