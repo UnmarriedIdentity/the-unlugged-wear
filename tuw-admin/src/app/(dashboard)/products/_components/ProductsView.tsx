@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer, Pagination } from '@/components/ui';
+import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer, Pagination, FilterPills } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 
@@ -231,28 +231,19 @@ export default function ProductsView() {
               <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>
                 Status:
               </span>
-              {(['all', 'published', 'draft', 'archived'] as const).map((st) => (
-                <button
-                  key={st}
-                  type="button"
-                  onClick={() => setPublicationFilter(st)}
-                  style={{
-                    padding: '4px 10px',
-                    borderRadius: '6px',
-                    fontSize: '12px',
-                    fontWeight: publicationFilter === st ? 600 : 500,
-                    cursor: 'pointer',
-                    border: '1px solid',
-                    borderColor: publicationFilter === st ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-border-subtle, #E2E4E6)',
-                    backgroundColor: publicationFilter === st ? 'var(--tuw-bg-selected, #F8F5FF)' : 'transparent',
-                    color: publicationFilter === st ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-text-secondary, #5D6772)',
-                  }}
-                >
-                  {st.charAt(0).toUpperCase() + st.slice(1)}
-                </button>
-              ))}
+              <FilterPills
+                variant="pills"
+                ariaLabel="Publication status filter"
+                options={[
+                  { value: 'all', label: 'All' },
+                  { value: 'published', label: 'Published' },
+                  { value: 'draft', label: 'Draft' },
+                  { value: 'archived', label: 'Archived' },
+                ]}
+                value={publicationFilter}
+                onChange={(v) => setPublicationFilter(v as typeof publicationFilter)}
+              />
             </div>
-          </div>
 
           {/* Department Categories */}
           <div className={styles.filterBar}>
@@ -268,6 +259,7 @@ export default function ProductsView() {
               ))}
             </ul>
           </div>
+        </div>
         </div>
 
         {/* Card Grid */}
