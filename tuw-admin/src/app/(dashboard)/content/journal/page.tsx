@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui';
 import { BookOpen, Plus, ArrowLeft, Search, Eye, Edit3 } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 
@@ -180,57 +180,55 @@ export default function JournalPage() {
           </div>
         </div>
 
-        <div style={{ overflowX: 'auto', width: '100%' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Article</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Category</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Author</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Views</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Status</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase', textAlign: 'right' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedStories.map((story) => (
-                <tr
-                  key={story.id}
-                  onClick={() => setSelectedStory(story)}
-                  style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', cursor: 'pointer' }}
-                >
-                  <td style={{ padding: '14px 16px' }}>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-                      {story.title}
-                    </div>
-                    <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                      /{story.slug} · {story.readTime} read
-                    </div>
-                  </td>
-                  <td style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                    {story.category}
-                  </td>
-                  <td style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
-                    {story.author}
-                  </td>
-                  <td style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                    {story.views.toLocaleString()}
-                  </td>
-                  <td style={{ padding: '14px 16px' }}>
-                    <Badge variant={story.status === 'published' ? 'success' : 'neutral'}>
-                      {story.status}
-                    </Badge>
-                  </td>
-                  <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                    <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedStory(story); }}>
-                      Edit
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table>
+          <TableHeader style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
+            <TableRow hoverable={false}>
+              <TableHead style={{ padding: '12px 16px' }}>Article</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Category</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Author</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Views</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Status</TableHead>
+              <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedStories.map((story) => (
+              <TableRow
+                key={story.id}
+                onClick={() => setSelectedStory(story)}
+                style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', cursor: 'pointer' }}
+              >
+                <TableCell style={{ padding: '14px 16px' }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                    {story.title}
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                    /{story.slug} · {story.readTime} read
+                  </div>
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                  {story.category}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
+                  {story.author}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                  {story.views.toLocaleString()}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px' }}>
+                  <Badge variant={story.status === 'published' ? 'success' : 'neutral'}>
+                    {story.status}
+                  </Badge>
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px', textAlign: 'right' }}>
+                  <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedStory(story); }}>
+                    Edit
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
 
         <Pagination
           currentPage={currentPage}
