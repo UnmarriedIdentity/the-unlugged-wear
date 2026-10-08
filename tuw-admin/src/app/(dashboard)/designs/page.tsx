@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui';
 import { Palette, Plus, Search, Filter, Image as ImageIcon, UploadCloud, AlertCircle } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { DesignAsset } from '@/mocks/fixtures';
@@ -126,56 +126,54 @@ export default function DesignsPage() {
           </div>
         </div>
 
-        <div style={{ overflowX: 'auto', width: '100%' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Asset ID</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Name</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Category</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Placement Spec</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Designer</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Status</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase', textAlign: 'right' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginated.map((design) => (
-                <tr
-                  key={design.id}
-                  onClick={() => setSelectedAsset(design)}
-                  style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', cursor: 'pointer' }}
-                >
-                  <td style={{ padding: '14px 16px', fontSize: 13, fontFamily: 'monospace', fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)' }}>
-                    {design.id}
-                  </td>
-                  <td style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-                    {design.name}
-                  </td>
-                  <td style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                    {design.category}
-                  </td>
-                  <td style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
-                    {design.placement}
-                  </td>
-                  <td style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                    {design.designer}
-                  </td>
-                  <td style={{ padding: '14px 16px' }}>
-                    {design.status === 'approved' && <Badge variant="success">Approved</Badge>}
-                    {design.status === 'in_review' && <Badge variant="warning">In Review</Badge>}
-                    {design.status === 'archived' && <Badge variant="neutral">Archived</Badge>}
-                  </td>
-                  <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                    <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedAsset(design); }}>
-                      Inspect Spec
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table>
+          <TableHeader style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
+            <TableRow hoverable={false}>
+              <TableHead style={{ padding: '12px 16px' }}>Asset ID</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Name</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Category</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Placement Spec</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Designer</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Status</TableHead>
+              <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginated.map((design) => (
+              <TableRow
+                key={design.id}
+                onClick={() => setSelectedAsset(design)}
+                style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', cursor: 'pointer' }}
+              >
+                <TableCell style={{ padding: '14px 16px', fontSize: 13, fontFamily: 'monospace', fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)' }}>
+                  {design.id}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                  {design.name}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                  {design.category}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
+                  {design.placement}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                  {design.designer}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px' }}>
+                  {design.status === 'approved' && <Badge variant="success">Approved</Badge>}
+                  {design.status === 'in_review' && <Badge variant="warning">In Review</Badge>}
+                  {design.status === 'archived' && <Badge variant="neutral">Archived</Badge>}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px', textAlign: 'right' }}>
+                  <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedAsset(design); }}>
+                    Inspect Spec
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
 
         <Pagination
           currentPage={currentPage}
