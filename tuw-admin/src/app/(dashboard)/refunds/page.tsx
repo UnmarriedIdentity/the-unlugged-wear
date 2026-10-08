@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills } from '@/components/ui';
 import { RotateCcw, Search, Filter, Download, ArrowUpRight, CheckCircle2, Clock, AlertTriangle, Eye } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { RefundItem } from '@/mocks/fixtures';
@@ -166,28 +166,18 @@ export default function RefundsPage() {
             />
           </div>
 
-          <div style={{ display: 'flex', gap: 6 }}>
-            {(['all', 'completed', 'processing', 'rejected'] as const).map((st) => (
-              <button
-                key={st}
-                type="button"
-                onClick={() => setStatusFilter(st)}
-                style={{
-                  padding: '4px 10px',
-                  borderRadius: '6px',
-                  fontSize: '12px',
-                  fontWeight: statusFilter === st ? 600 : 500,
-                  cursor: 'pointer',
-                  border: '1px solid',
-                  borderColor: statusFilter === st ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-border-subtle, #E2E4E6)',
-                  backgroundColor: statusFilter === st ? 'var(--tuw-bg-selected, #F8F5FF)' : 'transparent',
-                  color: statusFilter === st ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-text-secondary, #5D6772)',
-                }}
-              >
-                {st.charAt(0).toUpperCase() + st.slice(1)}
-              </button>
-            ))}
-          </div>
+          <FilterPills
+            variant="pills"
+            ariaLabel="Refund status filter"
+            options={[
+              { value: 'all', label: 'All' },
+              { value: 'completed', label: 'Completed' },
+              { value: 'processing', label: 'Processing' },
+              { value: 'rejected', label: 'Rejected' },
+            ]}
+            value={statusFilter}
+            onChange={(v) => setStatusFilter(v as typeof statusFilter)}
+          />
         </div>
 
         <Table>
