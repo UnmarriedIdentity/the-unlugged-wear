@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui';
 import { CreditCard, Download, Search, Filter, ShieldCheck, CheckCircle2, ArrowUpRight } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { OrderItem } from '@/mocks/fixtures';
@@ -115,53 +115,51 @@ export default function PaymentsPage() {
           </div>
         </div>
 
-        <div style={{ overflowX: 'auto', width: '100%' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Tx Ref</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Customer</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Payment Method</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase', textAlign: 'right' }}>Amount</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Status</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase', textAlign: 'right' }}>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedOrders.map((order) => (
-                <tr
-                  key={order.id}
-                  onClick={() => setSelectedTx(order)}
-                  style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', cursor: 'pointer' }}
-                >
-                  <td style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)' }}>
-                    {order.id}
-                  </td>
-                  <td style={{ padding: '14px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
-                    {order.customerName}
-                  </td>
-                  <td style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                    {order.paymentMethod}
-                  </td>
-                  <td className="tuw-tabular-nums" style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', textAlign: 'right' }}>
-                    ₹{order.total.toLocaleString()}
-                  </td>
-                  <td style={{ padding: '14px 16px' }}>
-                    {order.paymentStatus === 'paid' && <Badge variant="success">Paid</Badge>}
-                    {order.paymentStatus === 'pending' && <Badge variant="warning">Pending</Badge>}
-                    {order.paymentStatus === 'failed' && <Badge variant="danger">Failed</Badge>}
-                    {order.paymentStatus === 'refunded' && <Badge variant="neutral">Refunded</Badge>}
-                  </td>
-                  <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                    <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedTx(order); }}>
-                      View Receipt
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table>
+          <TableHeader style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
+            <TableRow hoverable={false}>
+              <TableHead style={{ padding: '12px 16px' }}>Tx Ref</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Customer</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Payment Method</TableHead>
+              <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Amount</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Status</TableHead>
+              <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedOrders.map((order) => (
+              <TableRow
+                key={order.id}
+                onClick={() => setSelectedTx(order)}
+                style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', cursor: 'pointer' }}
+              >
+                <TableCell style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)' }}>
+                  {order.id}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
+                  {order.customerName}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                  {order.paymentMethod}
+                </TableCell>
+                <TableCell className="tuw-tabular-nums" style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', textAlign: 'right' }}>
+                  ₹{order.total.toLocaleString()}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px' }}>
+                  {order.paymentStatus === 'paid' && <Badge variant="success">Paid</Badge>}
+                  {order.paymentStatus === 'pending' && <Badge variant="warning">Pending</Badge>}
+                  {order.paymentStatus === 'failed' && <Badge variant="danger">Failed</Badge>}
+                  {order.paymentStatus === 'refunded' && <Badge variant="neutral">Refunded</Badge>}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px', textAlign: 'right' }}>
+                  <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedTx(order); }}>
+                    View Receipt
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
 
         <Pagination
           currentPage={currentPage}
