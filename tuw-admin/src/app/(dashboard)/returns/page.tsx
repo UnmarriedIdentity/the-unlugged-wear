@@ -65,10 +65,10 @@ export default function ReturnsPage() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
-        <StatCard label="Active Returns" value={String(returns.length)} subtitle="Inbound RMAs" trendType="neutral" />
-        <StatCard label="In Transit (Inbound)" value={String(returns.filter((r) => r.stage === 'in_transit').length)} subtitle="Tracking en route" trendType="neutral" />
-        <StatCard label="Restocked" value={String(returns.filter((r) => r.stage === 'restocked').length)} subtitle="Inventory adjusted" trendType="up" />
-        <StatCard label="Disputed Cases" value={String(returns.filter((r) => r.stage === 'disputed').length)} subtitle="Damaged / missing tags" trendType="down" />
+        <StatCard label="Active Returns" value={String(returns.length)} subtitle="Inbound RMAs" trendType="neutral" hoverable />
+        <StatCard label="In Transit (Inbound)" value={String(returns.filter((r) => r.stage === 'in_transit').length)} subtitle="Tracking en route" trendType="neutral" hoverable />
+        <StatCard label="Restocked" value={String(returns.filter((r) => r.stage === 'restocked').length)} subtitle="Inventory adjusted" trendType="up" hoverable />
+        <StatCard label="Disputed Cases" value={String(returns.filter((r) => r.stage === 'disputed').length)} subtitle="Damaged / missing tags" trendType="down" hoverable />
       </div>
 
       <ContentCard>
