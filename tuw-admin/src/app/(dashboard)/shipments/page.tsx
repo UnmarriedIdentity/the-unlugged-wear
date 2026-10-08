@@ -108,10 +108,10 @@ export default function ShipmentsPage() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
-        <StatCard label="Dispatched Parcels" value={`${shipments.length} pkgs`} trend="Active manifests" trendType="up" />
-        <StatCard label="In Transit" value={String(shipments.filter((s) => s.status === 'in_transit').length)} subtitle="En route to hubs" trendType="neutral" />
-        <StatCard label="Out for Delivery" value={String(shipments.filter((s) => s.status === 'out_for_delivery').length)} subtitle="Final mile delivery" trendType="up" />
-        <StatCard label="Delivered" value={String(shipments.filter((s) => s.status === 'delivered').length)} subtitle="Signed & confirmed" trendType="up" />
+        <StatCard label="Dispatched Parcels" value={`${shipments.length} pkgs`} trend="Active manifests" trendType="up" hoverable />
+        <StatCard label="In Transit" value={String(shipments.filter((s) => s.status === 'in_transit').length)} subtitle="En route to hubs" trendType="neutral" hoverable />
+        <StatCard label="Out for Delivery" value={String(shipments.filter((s) => s.status === 'out_for_delivery').length)} subtitle="Final mile delivery" trendType="up" hoverable />
+        <StatCard label="Delivered" value={String(shipments.filter((s) => s.status === 'delivered').length)} subtitle="Signed & confirmed" trendType="up" hoverable />
       </div>
 
       <ContentCard>
