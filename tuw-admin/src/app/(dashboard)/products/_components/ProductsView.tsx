@@ -188,24 +188,28 @@ export default function ProductsView() {
           value={String(products.length)}
           trend="Managed in local memory"
           trendType="up"
+          hoverable
         />
         <StatCard
           label="Low Stock Alerts"
           value={String(lowStockCount)}
           subtitle="Stock ≤ 10 units"
           trendType={lowStockCount > 0 ? 'down' : 'up'}
+          hoverable
         />
         <StatCard
           label="Drafts in Review"
           value={String(draftCount)}
           subtitle="Unpublished items"
           trendType="neutral"
+          hoverable
         />
         <StatCard
           label="Out of Stock"
           value={String(outOfStockCount)}
           subtitle={outOfStockCount > 0 ? 'Backorder only' : 'Fully stocked'}
           trendType={outOfStockCount > 0 ? 'down' : 'up'}
+          hoverable
         />
       </div>
 
