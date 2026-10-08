@@ -227,24 +227,28 @@ export default function NavigationPage() {
           value="3 Sets"
           subtitle="Main Header, Footer Shop, Legal"
           trendType="neutral"
+          hoverable
         />
         <StatCard
           label="Total Links"
           value={`${menuItems.length} Links`}
           subtitle="Zero 404 links detected"
           trendType="up"
+          hoverable
         />
         <StatCard
           label="Hierarchy Depth"
           value="1 Level"
           subtitle="Touch-friendly flat navigation"
           trendType="up"
+          hoverable
         />
         <StatCard
           label="Menu Edge Cache"
           value="TTL 3600s"
           subtitle="Purged automatically on save"
           trendType="neutral"
+          hoverable
         />
       </div>
 

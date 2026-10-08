@@ -162,10 +162,10 @@ export default function JournalPage() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
-        <StatCard label="Published Articles" value={`${stories.filter((s) => s.status === 'published').length} Posts`} subtitle="Live on blog" trendType="up" />
-        <StatCard label="Draft Stories" value={`${stories.filter((s) => s.status === 'draft').length} Drafts`} subtitle="In editorial review" trendType="neutral" />
-        <StatCard label="Total Story Views" value="48,200" trend="↑ 24% vs last month" trendType="up" />
-        <StatCard label="Avg. Reading Time" value="4m 15s" subtitle="High reader retention" trendType="up" />
+        <StatCard label="Published Articles" value={`${stories.filter((s) => s.status === 'published').length} Posts`} subtitle="Live on blog" trendType="up" hoverable />
+        <StatCard label="Draft Stories" value={`${stories.filter((s) => s.status === 'draft').length} Drafts`} subtitle="In editorial review" trendType="neutral" hoverable />
+        <StatCard label="Total Story Views" value="48,200" trend="↑ 24% vs last month" trendType="up" hoverable />
+        <StatCard label="Avg. Reading Time" value="4m 15s" subtitle="High reader retention" trendType="up" hoverable />
       </div>
 
       <ContentCard>
