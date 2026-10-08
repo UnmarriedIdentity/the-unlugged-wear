@@ -138,10 +138,10 @@ export default function CustomersView() {
       </div>
 
       <div className={styles.statGrid}>
-        <StatCard label="Total Clients" value={String(customers.length)} trend="Active buyer profiles" trendType="up" />
-        <StatCard label="VIP Clientele" value={String(vipCount)} subtitle="Tier 1 high-value" trendType="up" />
-        <StatCard label="Total Customer LTV" value={`₹${totalSpentAll.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} trend="Combined lifetime spend" trendType="up" />
-        <StatCard label="Average Order Count" value={(orders.length / Math.max(1, customers.length)).toFixed(1)} subtitle="Orders per account" trendType="neutral" />
+        <StatCard label="Total Clients" value={String(customers.length)} trend="Active buyer profiles" trendType="up" hoverable />
+        <StatCard label="VIP Clientele" value={String(vipCount)} subtitle="Tier 1 high-value" trendType="up" hoverable />
+        <StatCard label="Total Customer LTV" value={`₹${totalSpentAll.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} trend="Combined lifetime spend" trendType="up" hoverable />
+        <StatCard label="Average Order Count" value={(orders.length / Math.max(1, customers.length)).toFixed(1)} subtitle="Orders per account" trendType="neutral" hoverable />
       </div>
 
       <ContentCard>
