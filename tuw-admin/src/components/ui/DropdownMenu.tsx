@@ -78,7 +78,9 @@ export default function DropdownMenu({
                   setMenuOpen(false);
                 }}
                 onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = 'var(--tuw-bg-canvas, #F7F8F9)')
+                  (e.currentTarget.style.backgroundColor = item.danger
+                    ? 'var(--tuw-bg-error, #FEF4F4)'
+                    : 'var(--tuw-bg-canvas, #F7F8F9)')
                 }
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                 style={{
