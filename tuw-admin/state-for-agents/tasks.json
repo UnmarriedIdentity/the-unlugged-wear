@@ -8,14 +8,14 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 118,
-    "done": 104,
+    "total": 119,
+    "done": 105,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "2048b7d",
+    "tip": "9ba0668",
     "unpushed": ["6668cfd", "212ca3d", "c8a2f40", "6a00935", "2dc810e", "a60fa4f", "d7b2b31"],
     "next_up": "human pushes origin/v2 (2 commits) then origin/feat/search-modal (6 commits); browser review of spotlight",
     "pending_verifications": [
@@ -547,6 +547,23 @@
       "follow_ups": [
         "human browser check: every migrated table, row clicks, empty states"
       ]
+    },
+    {
+      "id": "TL-DASH-IMG1",
+      "title": "ImageWithFallback info tone + upload preview swap",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:9ba0668 (fallbackTone neutral/info; preview uses info + Image not found)",
+      "design_match": "yes",
+      "key_decisions": [
+        "default neutral untouched: existing media consumers render byte-identical",
+        "product next/image usages deliberately left (optimization tradeoff recorded)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
     },
     {
       "id": "TL-DASH-HOV5",
