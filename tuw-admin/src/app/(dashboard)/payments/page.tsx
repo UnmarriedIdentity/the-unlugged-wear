@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader } from '@/components/ui';
 import { CreditCard, Download, Search, Filter, ShieldCheck, CheckCircle2, ArrowUpRight } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { OrderItem } from '@/mocks/fixtures';
@@ -56,19 +56,14 @@ export default function PaymentsPage() {
 
   return (
     <DashboardShell pageTitle="Payments">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <h2 style={{ fontSize: 28, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-            Payment Transactions & Gateways
-          </h2>
-          <p style={{ fontSize: 14, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-            Review merchant settlement logs, payment gateway captures (Stripe/PayPal), and fee schedules.
-          </p>
-        </div>
-        <Button variant="secondary" size="md" icon={<Download size={16} />} onClick={handleExportCSV}>
-          <span>Export Payouts CSV</span>
-        </Button>
-      </div>
+      <PageHeader
+        title="Payment Transactions & Gateways"
+        actions={
+          <Button variant="secondary" size="md" icon={<Download size={16} />} onClick={handleExportCSV}>
+            <span>Export Payouts CSV</span>
+          </Button>
+        }
+      />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
         <StatCard label="Settled Volume" value={`₹${totalSettled.toLocaleString()}`} trend="Captured merchant volume" trendType="up" hoverable />
