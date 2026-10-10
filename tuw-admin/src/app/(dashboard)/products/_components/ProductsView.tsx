@@ -210,6 +210,14 @@ export default function ProductsView() {
           trend="Managed in local memory"
           trendType="up"
           hoverable
+          role="button"
+          tabIndex={0}
+          aria-pressed={filtersClear}
+          aria-label="Show all products"
+          className={!filtersClear ? 'tuw-stat-active' : ''}
+          style={{ cursor: 'pointer' }}
+          onClick={clearProductFilters}
+          onKeyDown={kpiKeyDown(clearProductFilters)}
         />
         <StatCard
           label="Low Stock Alerts"
@@ -217,6 +225,14 @@ export default function ProductsView() {
           subtitle="Stock ≤ 10 units"
           trendType={lowStockCount > 0 ? 'down' : 'up'}
           hoverable
+          role="button"
+          tabIndex={0}
+          aria-pressed={stockFilter === 'low'}
+          aria-label="Filter low-stock products"
+          className={stockFilter === 'low' ? 'tuw-stat-active' : ''}
+          style={{ cursor: 'pointer' }}
+          onClick={() => toggleStockFilter('low')}
+          onKeyDown={kpiKeyDown(() => toggleStockFilter('low'))}
         />
         <StatCard
           label="Drafts in Review"
@@ -224,6 +240,14 @@ export default function ProductsView() {
           subtitle="Unpublished items"
           trendType="neutral"
           hoverable
+          role="button"
+          tabIndex={0}
+          aria-pressed={publicationFilter === 'draft'}
+          aria-label="Filter draft products"
+          className={publicationFilter === 'draft' ? 'tuw-stat-active' : ''}
+          style={{ cursor: 'pointer' }}
+          onClick={() => togglePublicationFilter('draft')}
+          onKeyDown={kpiKeyDown(() => togglePublicationFilter('draft'))}
         />
         <StatCard
           label="Out of Stock"
@@ -231,6 +255,14 @@ export default function ProductsView() {
           subtitle={outOfStockCount > 0 ? 'Backorder only' : 'Fully stocked'}
           trendType={outOfStockCount > 0 ? 'down' : 'up'}
           hoverable
+          role="button"
+          tabIndex={0}
+          aria-pressed={stockFilter === 'out'}
+          aria-label="Filter out-of-stock products"
+          className={stockFilter === 'out' ? 'tuw-stat-active' : ''}
+          style={{ cursor: 'pointer' }}
+          onClick={() => toggleStockFilter('out')}
+          onKeyDown={kpiKeyDown(() => toggleStockFilter('out'))}
         />
       </div>
 
