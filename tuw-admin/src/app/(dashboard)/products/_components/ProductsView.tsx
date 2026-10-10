@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List } from 'lucide-react';
+import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui';
+import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 
@@ -298,6 +298,46 @@ export default function ProductsView() {
                   prefixIcon={<Search size={16} />}
                 />
               </div>
+              <DropdownMenu
+                ariaLabel="Product category filter"
+                trigger={
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Product category, currently ${selectedCat === 'All' ? 'All Categories' : selectedCat}`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      height: '44px',
+                      padding: '0 12px',
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      fontFamily: 'var(--font-main)',
+                      borderRadius: 'var(--tuw-radius-control, 8px)',
+                      border: '1px solid var(--tuw-border-control, #D1D5DB)',
+                      backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
+                      color: 'var(--tuw-text-primary, #262626)',
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    <Tag size={14} color="var(--tuw-text-secondary, #5D6772)" />
+                    {selectedCat === 'All' ? 'All Categories' : selectedCat}
+                    <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
+                  </span>
+                }
+                items={['All', 'T-Shirts', 'Hoodies', 'Jackets', 'Pants', 'Accessories'].map((cat) => ({
+                  value: cat,
+                  label: cat === 'All' ? 'All Categories' : cat,
+                }))}
+                selectedValue={selectedCat}
+                onSelect={(v) => setSelectedCat(v)}
+              />
               <div aria-hidden="true" style={{ width: 1, height: 24, backgroundColor: 'var(--tuw-border-subtle, #E5E7EB)' }} />
               <ViewToggle
                 ariaLabel="Product catalog view"
@@ -309,21 +349,6 @@ export default function ProductsView() {
                 onChange={(v) => setView(v as typeof view)}
               />
             </div>
-          </div>
-
-          {/* Department Categories */}
-          <div className={styles.filterBar} style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <ul className={styles.tabList}>
-              {['All', 'T-Shirts', 'Hoodies', 'Jackets', 'Pants', 'Accessories'].map((cat) => (
-                <li
-                  key={cat}
-                  className={`${styles.tabItem} ${selectedCat === cat ? styles.tabItemActive : ''}`}
-                  onClick={() => setSelectedCat(cat)}
-                >
-                  {cat}
-                </li>
-              ))}
-            </ul>
           </div>
         </div>
 
