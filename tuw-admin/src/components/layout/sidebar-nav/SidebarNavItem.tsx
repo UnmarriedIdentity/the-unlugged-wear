@@ -60,7 +60,7 @@ export default function SidebarNavItem({ item, active, isCollapsed, variant = 'b
     return (
       <Link
         href={item.href}
-        className={cn('group relative flex w-full cursor-pointer select-none rounded-nav border-0 bg-transparent text-left text-[14px] transition-all duration-150 focus-visible:outline-2 focus-visible:outline-action-primary focus-visible:outline-offset-2', isCollapsed ? 'justify-center p-2' : 'items-center gap-3 px-3 py-2', active ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 hover:bg-white hover:text-nav-active-text' : 'font-medium text-primary hover:bg-nav-hover-wash hover:text-action-primary')}
+        className={cn('group relative flex w-full cursor-pointer select-none rounded-nav border-0 bg-transparent text-left text-[14px] transition-all duration-150 focus-visible:outline-2 focus-visible:outline-action-primary focus-visible:outline-offset-2', isCollapsed ? 'justify-center p-2' : 'items-center gap-3 px-3 py-2', active ? 'tuw-3d-active font-semibold text-nav-active-text z-1 hover:bg-white hover:text-nav-active-text' : 'font-medium text-primary hover:bg-nav-hover-wash hover:text-action-primary')}
         title={isCollapsed ? item.label : undefined}
       >
         {isCollapsed && (<span className={cn('flex size-4.5 shrink-0 items-center justify-center', active ? 'text-nav-active-text' : 'text-secondary')}><ItemIcon size={iconSize} /></span>)}
