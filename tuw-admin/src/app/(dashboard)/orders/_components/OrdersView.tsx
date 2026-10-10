@@ -19,6 +19,7 @@ import {
   TableRow,
   TableHead,
   TableCell,
+  PageHeader,
 } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { OrderItem, PaymentStatus, FulfillmentStatus } from '@/mocks/fixtures';
@@ -170,35 +171,31 @@ export default function OrdersView() {
 
   return (
     <DashboardShell pageTitle="Orders" activeNav="orders">
-      <div className={styles.pageHeader}>
-        <div className={styles.headingGroup}>
-          <h2 className={styles.pageTitle}>Order Management</h2>
-          <p className={styles.pageSubtitle}>
-            Monitor, inspect, and fulfill store orders with independent payment and fulfillment tracking.
-          </p>
-        </div>
-
-        <div className={styles.headerActions}>
-          <Button
-            variant="secondary"
-            size="md"
-            icon={<Download size={16} />}
-            onClick={handleExportCSV}
-          >
-            <span>Export CSV</span>
-          </Button>
-          <Button
-            variant="primary"
-            size="md"
-            icon={<Plus size={16} />}
-            onClick={() => {
-              if (canPerformAction('orders')) setIsCreateOpen(true);
-            }}
-          >
-            <span>Create Order</span>
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Order Management"
+        actions={
+          <>
+            <Button
+              variant="secondary"
+              size="md"
+              icon={<Download size={16} />}
+              onClick={handleExportCSV}
+            >
+              <span>Export CSV</span>
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
+              icon={<Plus size={16} />}
+              onClick={() => {
+                if (canPerformAction('orders')) setIsCreateOpen(true);
+              }}
+            >
+              <span>Create Order</span>
+            </Button>
+          </>
+        }
+      />
 
       {/* Stats Row */}
       <div className={styles.statGrid}>
