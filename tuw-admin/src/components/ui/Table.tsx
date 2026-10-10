@@ -33,6 +33,7 @@ export function TableHeader({ children, style = {}, ...props }: React.HTMLAttrib
     <thead
       style={{
         borderBottom: '1px solid var(--tuw-border-subtle, #E5E7EB)',
+        backgroundColor: 'var(--tuw-bg-selected, #F8F5FF)',
         ...style,
       }}
       {...props}

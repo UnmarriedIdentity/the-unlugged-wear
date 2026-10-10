@@ -2060,9 +2060,10 @@
    Opt-in via StatCard `hoverable` (default off) — mirrors the dashboard
    KPI hover tokens, non-displacing per the motion skill. !important wins
    over the primitive's inline base (same codebase precedent as the
-   reduced-motion rule); applies only when explicitly opted in. */
+   reduced-motion rule); applies only when explicitly opted in.
+   Wash single-sourced from --tuw-bg-selected (same token TableHeader uses). */
 .tuw-stat-hover:hover {
   border-color: rgba(117, 57, 255, 0.35) !important;
-  background-color: #FBFAFF !important;
+  background-color: var(--tuw-bg-selected, #F8F5FF) !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04) !important;
 }

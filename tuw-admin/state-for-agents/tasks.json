@@ -8,14 +8,14 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 121,
-    "done": 107,
+    "total": 132,
+    "done": 118,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "1d395af",
+    "tip": "86192d2",
     "unpushed": ["6668cfd", "212ca3d", "c8a2f40", "6a00935", "2dc810e", "a60fa4f", "d7b2b31"],
     "next_up": "human pushes origin/v2 (2 commits) then origin/feat/search-modal (6 commits); browser review of spotlight",
     "pending_verifications": [
@@ -596,6 +596,180 @@
         "dashboard unified to 28/600 (authorized restyle)",
         "design-system title row only, pixel-identical"
       ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-CB1",
+      "title": "Checkbox bare + indeterminate + single mode",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:6dd3581",
+      "design_match": "yes",
+      "key_decisions": [
+        "bare stops propagation (row-click safe); double-toggle guarded",
+        "single = radio-like no-toggle-off; exclusivity caller-owned"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-ORDT1",
+      "title": "Orders single tab row + search right",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:f97ed17 (two-axis filters folded into 5 presets; count line dropped, footer covers it)",
+      "design_match": "yes",
+      "key_decisions": [
+        "Draft = pending+queued derived predicate, no mock-model change",
+        "two-axis combo filtering retired (stated tradeoff)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-ORDT2",
+      "title": "Orders columns + multi-select (Item, Shipping, checkbox)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:b0946ab (Table family untouched — composition sufficed; hoverable confirmed dead prop)",
+      "design_match": "yes",
+      "key_decisions": [
+        "payment/fulfillment plain text; badges moved to Shipping",
+        "shipping derived from payment+fulfillment; item count = summed quantities",
+        "Action column kept per instruction; rupee stays"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-CB2",
+      "title": "Checkbox bare baseline-immunity (0.4px header shift)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:c830c85 (user-measured: header -0.4px, body ride-up; cause = baseline synthesis under th baseline default)",
+      "design_match": "yes",
+      "key_decisions": [
+        "verticalAlign middle on bare span only; label mode untouched",
+        "no Table changes; proof left to user re-run of measurement snippet"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-ORDT3",
+      "title": "Orders default pageSize 6->5 (Rows options mismatch)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:b935130 (pre-existing: state 6 vs options 5/10/20; select displayed first option)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-TH1",
+      "title": "Permanent thead tint (tuw-bg-selected, stat-hover repoint)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:cbb25ed (reused bg-selected #F8F5FF, no new token; wash-only, paint-safe)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DM1",
+      "title": "ui/DropdownMenu action-menu primitive",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:0be93a9 (popover contract, danger items; proof via BB1 usage)",
+      "design_match": "pending",
+      "key_decisions": [
+        "ui/Select is native form control — wrong control for menus",
+        "dashboard FilterMenu is value-picker in wrong layer — pattern reused, not the component"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-BB1",
+      "title": "Orders bulk-action bar (export, print demo, mark-as)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:4458012 (silent flag on updateOrderStatus + type; header Export event-arg fix)",
+      "design_match": "pending",
+      "key_decisions": [
+        "cancel = payment failed; refund = status-only",
+        "clear + summary toast after every bulk action",
+        "print = truthful demo toast, no window.print"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-BB2",
+      "title": "Bulk bar height-match heads (4px jump + slide illusion)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:3608eab (user-measured +4px; 36px sm buttons + popoverIn translate; padding 6 + animation dropped)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DM2",
+      "title": "DropdownMenu danger-item hover wash (bg-error)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:7503639 (matches Button danger wash; flutter hunt closed unproven)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PG1",
+      "title": "Pagination Next chevron trailing (label left, arrow right)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:86192d2 (children-chevron precedent; Previous untouched)",
+      "design_match": "yes",
+      "key_decisions": [],
       "verified": true,
       "pushed": false,
       "follow_ups": []

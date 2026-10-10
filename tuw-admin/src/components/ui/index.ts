@@ -73,3 +73,6 @@ export type { ImageWithFallbackProps } from './ImageWithFallback';
 export { default as PageHeader } from './PageHeader';
 export type { PageHeaderProps } from './PageHeader';
 
+export { default as DropdownMenu } from './DropdownMenu';
+export type { DropdownMenuProps, DropdownMenuItem } from './DropdownMenu';
+
