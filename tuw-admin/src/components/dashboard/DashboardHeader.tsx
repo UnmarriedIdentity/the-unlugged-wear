@@ -8,9 +8,6 @@ import { PageHeader } from '@/components/ui';
 import { usePopoverAnimation } from '@/hooks/usePopoverAnimation';
 import type { DateRange } from '@/hooks/useCalendarRange';
 
-// Class map - selectors live in src/app/globals.css (single app.css, home- prefix).
-const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'home-' + String(p) });
-
 interface DashboardHeaderProps {
   title: string;
   subtitle: string;
@@ -37,7 +34,7 @@ export function DashboardHeader({ title, subtitle, onlineLabel = '2 online custo
           <div className="relative">
           <button
             type="button"
-            className={isFiltered ? `${styles.dateFilterBtn} ${styles.dateFilterBtnActive}` : styles.dateFilterBtn}
+            className={isFiltered ? 'home-dateFilterBtn home-dateFilterBtnActive' : 'home-dateFilterBtn'}
             onClick={() => setPickerOpen((v) => !v)}
             aria-expanded={pickerAnim.visible}
             aria-haspopup="dialog"
