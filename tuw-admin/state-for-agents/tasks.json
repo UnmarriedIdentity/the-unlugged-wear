@@ -8,14 +8,14 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 121,
-    "done": 107,
+    "total": 122,
+    "done": 108,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "1d395af",
+    "tip": "6dd3581",
     "unpushed": ["6668cfd", "212ca3d", "c8a2f40", "6a00935", "2dc810e", "a60fa4f", "d7b2b31"],
     "next_up": "human pushes origin/v2 (2 commits) then origin/feat/search-modal (6 commits); browser review of spotlight",
     "pending_verifications": [
@@ -595,6 +595,23 @@
       "key_decisions": [
         "dashboard unified to 28/600 (authorized restyle)",
         "design-system title row only, pixel-identical"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-CB1",
+      "title": "Checkbox bare + indeterminate + single mode",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:6dd3581",
+      "design_match": "yes",
+      "key_decisions": [
+        "bare stops propagation (row-click safe); double-toggle guarded",
+        "single = radio-like no-toggle-off; exclusivity caller-owned"
       ],
       "verified": true,
       "pushed": false,
