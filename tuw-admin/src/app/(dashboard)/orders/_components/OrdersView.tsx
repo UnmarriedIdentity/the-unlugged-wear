@@ -381,8 +381,8 @@ export default function OrdersView() {
         <Table>
           <TableHeader>
             {selectedIds.size > 0 ? (
-              <TableRow hoverable={false} style={{ animation: 'popoverIn 0.18s ease-out' }}>
-                <TableCell colSpan={10} style={{ padding: '8px 16px' }}>
+              <TableRow hoverable={false}>
+                <TableCell colSpan={10} style={{ padding: '6px 16px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                     <Checkbox
                       bare
