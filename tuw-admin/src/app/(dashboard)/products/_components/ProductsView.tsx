@@ -264,7 +264,7 @@ export default function ProductsView() {
             </div>
           ) : (
             paginatedProducts.map((p) => (
-              <div key={p.id} className={styles.productCatalogCard}>
+              <div key={p.id} className={`${styles.productCatalogCard} tuw-stat-hover`}>
                 <div
                   className={styles.productThumbFrame}
                   style={{
