@@ -8,14 +8,14 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 138,
-    "done": 124,
+    "total": 142,
+    "done": 128,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "d708f08",
+    "tip": "705c267",
     "unpushed": ["6668cfd", "212ca3d", "c8a2f40", "6a00935", "2dc810e", "a60fa4f", "d7b2b31"],
     "next_up": "human pushes origin/v2 (2 commits) then origin/feat/search-modal (6 commits); browser review of spotlight",
     "pending_verifications": [
@@ -862,6 +862,68 @@
       "key_decisions": [
         "canned resolve notice, named in summary toast",
         "pageSize 6->5 (same latent mismatch)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PC1",
+      "title": "Product cards lift-up to stat tint",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:1e0ac5e (reused tuw-stat-hover; lift violated motion skill)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-VT1",
+      "title": "ui/ViewToggle segmented view switch",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:6425beb (rail aesthetics; reusable for media grid)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PT1",
+      "title": "Products toolbar restructure + KPI filtering",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal: 02343f3 toolbar + 799e7ea stat-active + 1cda4d6 stockFilter + 920ac9d KPI wiring (toggle, keyboard, aria-pressed)",
+      "design_match": "yes",
+      "key_decisions": [
+        "no Card.tsx change — active via className passthrough",
+        "Total resets filters, keeps search; active card re-click clears"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PT2",
+      "title": "Products table view (6 cols, stock/sold merged)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal: 2358654 import + 705c267 table (no checkbox — bulk deferred; pageSize 6/12/24 already consistent)",
+      "design_match": "yes",
+      "key_decisions": [
+        "rating/partner stay drawer-only per trim call",
+        "row click opens edit drawer (orders pattern)"
       ],
       "verified": true,
       "pushed": false,
