@@ -70,3 +70,6 @@ export type { IconButtonProps } from './IconButton';
 export { default as ImageWithFallback } from './ImageWithFallback';
 export type { ImageWithFallbackProps } from './ImageWithFallback';
 
+export { default as PageHeader } from './PageHeader';
+export type { PageHeaderProps } from './PageHeader';
+
