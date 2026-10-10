@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Modal, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Modal, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader } from '@/components/ui';
 import { UserPlus, Search, Filter, ShieldCheck, Mail, Trash2, AlertTriangle } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { TeamMember, StaffRole } from '@/mocks/fixtures';
@@ -57,16 +57,9 @@ export default function TeamPage() {
 
   return (
     <DashboardShell pageTitle="Team & Permissions">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <h2 style={{ fontSize: 28, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-            Team & Permissions
-          </h2>
-          <p style={{ fontSize: 14, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-            Manage staff accounts, assign granular role-based access control, and review invitations.
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: 12 }}>
+      <PageHeader
+        title="Team & Permissions"
+        actions={
           <Button
             variant="primary"
             size="md"
@@ -77,8 +70,8 @@ export default function TeamPage() {
           >
             Invite Member
           </Button>
-        </div>
-      </div>
+        }
+      />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
         <StatCard label="Total Staff" value={`${team.length} Members`} subtitle="Across 4 operational roles" trendType="neutral" hoverable />
