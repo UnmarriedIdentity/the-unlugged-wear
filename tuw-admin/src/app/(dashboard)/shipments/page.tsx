@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader } from '@/components/ui';
 import { Truck, Search, Filter, Download, ExternalLink, Calendar, MapPin, Clock, Plus } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { ShipmentItem } from '@/mocks/fixtures';
@@ -81,31 +81,26 @@ export default function ShipmentsPage() {
 
   return (
     <DashboardShell pageTitle="Shipments">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <h2 style={{ fontSize: 28, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-            Carrier Logistics & Shipments
-          </h2>
-          <p style={{ fontSize: 14, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-            Real-time multi-carrier transit manifests, SLA timelines, and package tracking previews.
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: 12 }}>
-          <Button variant="secondary" size="md" icon={<Download size={16} />} onClick={handleExportManifest}>
-            Export Manifest
-          </Button>
-          <Button
-            variant="primary"
-            size="md"
-            icon={<Plus size={16} />}
-            onClick={() => {
-              if (canPerformAction('fulfillment')) setIsCreateOpen(true);
-            }}
-          >
-            Create Shipment
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Carrier Logistics & Shipments"
+        actions={
+          <>
+            <Button variant="secondary" size="md" icon={<Download size={16} />} onClick={handleExportManifest}>
+              Export Manifest
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
+              icon={<Plus size={16} />}
+              onClick={() => {
+                if (canPerformAction('fulfillment')) setIsCreateOpen(true);
+              }}
+            >
+              Create Shipment
+            </Button>
+          </>
+        }
+      />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
         <StatCard label="Dispatched Parcels" value={`${shipments.length} pkgs`} trend="Active manifests" trendType="up" hoverable />
