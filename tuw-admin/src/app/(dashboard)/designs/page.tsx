@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader } from '@/components/ui';
 import { Palette, Plus, Search, Filter, Image as ImageIcon, UploadCloud, AlertCircle } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { DesignAsset } from '@/mocks/fixtures';
@@ -81,16 +81,9 @@ export default function DesignsPage() {
 
   return (
     <DashboardShell pageTitle="Design Assets">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <h2 style={{ fontSize: 28, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-            Apparel Artwork & Design Library
-          </h2>
-          <p style={{ fontSize: 14, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-            Vector production files, screenprint separations, embroidery digitizations, and placement metadata.
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: 12 }}>
+      <PageHeader
+        title="Apparel Artwork & Design Library"
+        actions={
           <Button
             variant="primary"
             size="md"
@@ -104,8 +97,8 @@ export default function DesignsPage() {
           >
             Upload Asset
           </Button>
-        </div>
-      </div>
+        }
+      />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
         <StatCard label="Approved Artworks" value={String(designs.filter((d) => d.status === 'approved').length)} subtitle="Ready for factory print" trendType="up" hoverable />
