@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { HelpCircle, MessageSquare, Send, CheckCircle2, Clock, AlertCircle, Sparkles, ChevronRight, User } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { SupportTicket } from '@/mocks/fixtures';
 
@@ -64,14 +64,7 @@ export default function HelpView() {
 
   return (
     <DashboardShell pageTitle="Support" activeNav="help">
-      <div className={styles.pageHeader}>
-        <div className={styles.headingGroup}>
-          <h2 className={styles.pageTitle}>Support Ticket Desk</h2>
-          <p className={styles.pageSubtitle}>
-            Manage inbound customer inquiries, resolve fulfillment disputes, and draft simulated responses.
-          </p>
-        </div>
-      </div>
+      <PageHeader title="Support Ticket Desk" />
 
       <div className={styles.statGrid}>
         <StatCard label="Total Tickets" value={String(supportTickets.length)} subtitle="Customer inquiries" trendType="neutral" hoverable />
