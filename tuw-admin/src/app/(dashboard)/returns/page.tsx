@@ -3,20 +3,22 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader, Checkbox } from '@/components/ui';
 import { Undo2, Search, Filter, CheckCircle2, XCircle, ArrowRight, RotateCcw } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { ReturnItem } from '@/mocks/fixtures';
 
 export default function ReturnsPage() {
-  const { returns, updateReturnStatus, canPerformAction } = useAdminState();
+  const { returns, updateReturnStatus, canPerformAction, showToast } = useAdminState();
   const [searchTerm, setSearchTerm] = useState('');
   const [stageFilter, setStageFilter] = useState<'all' | ReturnItem['stage']>('all');
   const [selectedReturn, setSelectedReturn] = useState<ReturnItem | null>(null);
+  // Row selection (multi-select; header checkbox tri-states over the page)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(6);
+  const [pageSize, setPageSize] = useState(5);
 
   const filteredReturns = returns.filter((item) => {
     const matchesSearch =
