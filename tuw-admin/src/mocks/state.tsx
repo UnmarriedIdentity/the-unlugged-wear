@@ -68,7 +68,7 @@ interface AdminStateContextType {
   deleteProduct: (id: string) => boolean;
 
   createOrder: (order: Omit<OrderItem, 'id' | 'date' | 'timeline' | 'paidAmount' | 'refundedAmount'>) => boolean;
-  updateOrderStatus: (orderId: string, paymentStatus?: OrderItem['paymentStatus'], fulfillmentStatus?: OrderItem['fulfillmentStatus']) => boolean;
+  updateOrderStatus: (orderId: string, paymentStatus?: OrderItem['paymentStatus'], fulfillmentStatus?: OrderItem['fulfillmentStatus'], silent?: boolean) => boolean;
   retryFulfillment: (orderId: string) => Promise<boolean>;
 
   createShipment: (shipment: Omit<ShipmentItem, 'dispatchDate' | 'events'>) => boolean;
@@ -316,7 +316,8 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
   const updateOrderStatus = (
     orderId: string,
     paymentStatus?: OrderItem['paymentStatus'],
-    fulfillmentStatus?: OrderItem['fulfillmentStatus']
+    fulfillmentStatus?: OrderItem['fulfillmentStatus'],
+    silent = false
   ) => {
     if (!canPerformAction('orders')) return false;
     const next = orders.map((o) => {
@@ -343,11 +344,13 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     });
     setOrders(next);
     persistState({ orders: next });
-    showToast({
-      type: 'success',
-      title: 'Order Status Updated',
-      description: `Order ${orderId} record updated locally.`,
-    });
+    if (!silent) {
+      showToast({
+        type: 'success',
+        title: 'Order Status Updated',
+        description: `Order ${orderId} record updated locally.`,
+      });
+    }
     return true;
   };
 

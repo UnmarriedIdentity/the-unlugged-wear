@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Download, Filter, Plus, Search, Eye, CheckCircle2, RotateCcw, AlertTriangle, Truck, Clock, X } from 'lucide-react';
+import { Download, Filter, Plus, Search, Eye, CheckCircle2, RotateCcw, AlertTriangle, Truck, Clock, X, Printer, ChevronDown } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
 import {
   StatCard,
@@ -21,6 +21,7 @@ import {
   TableHead,
   TableCell,
   PageHeader,
+  DropdownMenu,
 } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { OrderItem, PaymentStatus, FulfillmentStatus } from '@/mocks/fixtures';
@@ -28,7 +29,7 @@ import { OrderItem, PaymentStatus, FulfillmentStatus } from '@/mocks/fixtures';
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
 
 export default function OrdersView() {
-  const { orders, products, updateOrderStatus, createOrder, issueRefund, retryFulfillment, canPerformAction, activeRole } = useAdminState();
+  const { orders, products, updateOrderStatus, createOrder, issueRefund, retryFulfillment, canPerformAction, activeRole, showToast } = useAdminState();
 
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
@@ -136,10 +137,10 @@ export default function OrdersView() {
   const deliveredCount = orders.filter((o) => o.fulfillmentStatus === 'delivered').length;
   const issueCount = orders.filter((o) => o.fulfillmentStatus === 'submission_failed').length;
 
-  // Handle Export CSV
-  const handleExportCSV = () => {
+  // Handle Export CSV (defaults to the filtered set; bulk passes the selection)
+  const handleExportCSV = (rowsToExport = filteredOrders) => {
     const headers = ['Order ID', 'Customer', 'Email', 'Payment Status', 'Fulfillment Status', 'Total', 'Paid', 'Refunded', 'Date'];
-    const rows = filteredOrders.map((o) => [
+    const rows = rowsToExport.map((o) => [
       o.id,
       `"${o.customerName}"`,
       o.customerEmail,
@@ -158,6 +159,68 @@ export default function OrdersView() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  // Bulk actions (bar appears when rows are selected)
+  const clearSelection = () => setSelectedIds(new Set());
+
+  const handleExportSelected = () => {
+    const selected = orders.filter((o) => selectedIds.has(o.id));
+    if (selected.length === 0) return;
+    handleExportCSV(selected);
+    showToast({
+      type: 'success',
+      title: 'Selected Orders Exported',
+      description: `${selected.length} order${selected.length === 1 ? '' : 's'} exported to CSV.`,
+    });
+    clearSelection();
+  };
+
+  const handlePrintSelected = () => {
+    const count = selectedIds.size;
+    if (count === 0) return;
+    showToast({
+      type: 'info',
+      title: 'Demo Print Queue',
+      description: `${count} invoice${count === 1 ? '' : 's'} staged — no printer connected in demo.`,
+    });
+    clearSelection();
+  };
+
+  const handleBulkMark = (value: string) => {
+    const ids = [...selectedIds];
+    if (ids.length === 0) return;
+    if (!canPerformAction('orders')) {
+      showToast({
+        type: 'warning',
+        title: 'Action Restricted',
+        description: 'Your demo role cannot update orders.',
+      });
+      return;
+    }
+    const label =
+      value === 'processing'
+        ? 'Processing'
+        : value === 'shipped'
+          ? 'Shipped'
+          : value === 'delivered'
+            ? 'Delivered'
+            : value === 'cancel'
+              ? 'Cancelled'
+              : 'Refunded';
+    ids.forEach((id) => {
+      if (value === 'processing') updateOrderStatus(id, undefined, 'printing', true);
+      else if (value === 'shipped') updateOrderStatus(id, undefined, 'shipped', true);
+      else if (value === 'delivered') updateOrderStatus(id, undefined, 'delivered', true);
+      else if (value === 'cancel') updateOrderStatus(id, 'failed', undefined, true);
+      else updateOrderStatus(id, 'refunded', undefined, true);
+    });
+    showToast({
+      type: 'success',
+      title: 'Bulk Update Applied',
+      description: `${ids.length} order${ids.length === 1 ? '' : 's'} marked ${label}.`,
+    });
+    clearSelection();
   };
 
   // Handle Create Order Submit
@@ -235,7 +298,7 @@ export default function OrdersView() {
               variant="secondary"
               size="md"
               icon={<Download size={16} />}
-              onClick={handleExportCSV}
+              onClick={() => handleExportCSV()}
             >
               <span>Export CSV</span>
             </Button>
@@ -317,6 +380,47 @@ export default function OrdersView() {
         {/* Table of Orders */}
         <Table>
           <TableHeader>
+            {selectedIds.size > 0 ? (
+              <TableRow hoverable={false} style={{ animation: 'popoverIn 0.18s ease-out' }}>
+                <TableCell colSpan={10} style={{ padding: '8px 16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                    <Checkbox
+                      bare
+                      aria-label="Select all orders on this page"
+                      checked={allPageSelected}
+                      indeterminate={!allPageSelected && somePageSelected}
+                      onChange={togglePage}
+                    />
+                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                      {selectedIds.size} selected
+                    </span>
+                    <Button variant="secondary" size="sm" icon={<Download size={14} />} onClick={handleExportSelected}>
+                      Export selected
+                    </Button>
+                    <Button variant="secondary" size="sm" icon={<Printer size={14} />} onClick={handlePrintSelected}>
+                      Print invoices
+                    </Button>
+                    <DropdownMenu
+                      ariaLabel="Mark selected orders as"
+                      trigger={
+                        <Button variant="secondary" size="sm" onClick={() => {}}>
+                          <span>Mark as</span>
+                          <ChevronDown size={14} style={{ marginLeft: 4 }} />
+                        </Button>
+                      }
+                      items={[
+                        { value: 'processing', label: 'Processing' },
+                        { value: 'shipped', label: 'Shipped' },
+                        { value: 'delivered', label: 'Delivered' },
+                        { value: 'cancel', label: 'Cancel orders', danger: true },
+                        { value: 'refund', label: 'Refund orders', danger: true },
+                      ]}
+                      onSelect={handleBulkMark}
+                    />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : (
             <TableRow hoverable={false}>
               <TableHead style={{ padding: '12px 16px', width: 44 }}>
                 <Checkbox
@@ -337,6 +441,7 @@ export default function OrdersView() {
               <TableHead style={{ padding: '12px 16px' }}>Shipping</TableHead>
               <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Action</TableHead>
             </TableRow>
+            )}
           </TableHeader>
           <TableBody>
             {filteredOrders.length === 0 ? (
