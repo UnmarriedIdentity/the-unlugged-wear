@@ -168,6 +168,33 @@ export default function ReturnsPage() {
 
         <Table>
           <TableHeader style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
+            {selectedIds.size > 0 ? (
+            <TableRow hoverable={false}>
+              <TableCell colSpan={8} style={{ padding: '6px 16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                  <Checkbox
+                    bare
+                    aria-label="Select all returns on this page"
+                    checked={allPageSelected}
+                    indeterminate={!allPageSelected && somePageSelected}
+                    onChange={togglePage}
+                  />
+                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                    {selectedIds.size} selected
+                  </span>
+                  <Button variant="secondary" size="sm" icon={<Download size={14} />} onClick={handleExportSelected}>
+                    Export selected
+                  </Button>
+                  <Button variant="primary" size="sm" icon={<CheckCircle2 size={14} />} onClick={() => handleBulkStage('restocked', 'Restocked')}>
+                    Approve & Restock
+                  </Button>
+                  <Button variant="danger" size="sm" icon={<XCircle size={14} />} onClick={() => handleBulkStage('disputed', 'Disputed')}>
+                    Decline / Dispute
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+            ) : (
             <TableRow hoverable={false}>
               <TableHead style={{ padding: '12px 16px', width: 44 }}>
                 <Checkbox
@@ -186,6 +213,7 @@ export default function ReturnsPage() {
               <TableHead style={{ padding: '12px 16px' }}>Stage</TableHead>
               <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Actions</TableHead>
             </TableRow>
+            )}
           </TableHeader>
           <TableBody>
             {paginatedReturns.map((item) => (
