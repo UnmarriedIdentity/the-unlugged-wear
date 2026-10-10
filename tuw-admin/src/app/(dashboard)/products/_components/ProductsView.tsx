@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer, Pagination, FilterPills } from '@/components/ui';
+import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer, Pagination, FilterPills, PageHeader } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 
@@ -161,15 +161,9 @@ export default function ProductsView() {
 
   return (
     <DashboardShell pageTitle="Products" activeNav="products">
-      <div className={styles.pageHeader}>
-        <div className={styles.headingGroup}>
-          <h2 className={styles.pageTitle}>Product Catalog</h2>
-          <p className={styles.pageSubtitle}>
-            Organize garments, live inventory levels, print partner mapping, and publication states.
-          </p>
-        </div>
-
-        <div className={styles.headerActions}>
+      <PageHeader
+        title="Product Catalog"
+        actions={
           <Button
             variant="primary"
             size="md"
@@ -178,8 +172,8 @@ export default function ProductsView() {
           >
             <span>Add New Product</span>
           </Button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Stats Row */}
       <div className={styles.statGrid}>
