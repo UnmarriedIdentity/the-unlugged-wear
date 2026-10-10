@@ -83,7 +83,7 @@ export default function SidebarNavItem({ item, active, isCollapsed, variant = 'b
         className={cn(
           'relative flex w-full rounded-nav text-nav-child no-underline transition-all duration-150 focus-visible:outline-2 focus-visible:outline-action-primary focus-visible:outline-offset-2',
           isCollapsed ? 'h-9.5 justify-center p-2' : 'h-9.5 items-center gap-2.5 px-3',
-          active ? 'bg-white font-semibold text-nav-active-text shadow-nav-edge z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
+          active ? 'tuw-3d-active font-semibold text-nav-active-text z-1 isolate hover:bg-white hover:text-nav-active-text' : 'font-medium text-secondary hover:bg-nav-branch-hover hover:text-nav-active-text'
         )}
         title={isCollapsed ? item.label : undefined}
       >
