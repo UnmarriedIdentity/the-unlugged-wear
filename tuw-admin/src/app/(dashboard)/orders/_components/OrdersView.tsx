@@ -31,8 +31,8 @@ export default function OrdersView() {
 
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
-  const [paymentFilter, setPaymentFilter] = useState<'all' | PaymentStatus>('all');
-  const [fulfillmentFilter, setFulfillmentFilter] = useState<'all' | FulfillmentStatus>('all');
+  type OrderTab = 'all' | 'unfulfilled' | 'unpaid' | 'draft' | 'finished';
+  const [orderTab, setOrderTab] = useState<OrderTab>('all');
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -53,21 +53,36 @@ export default function OrdersView() {
   const [selectedProductId, setSelectedProductId] = useState(products[0]?.id || '');
   const [newOrderPayment, setNewOrderPayment] = useState<PaymentStatus>('paid');
 
-  // Filtered Orders
+  // Filtered Orders (single tab preset)
   const filteredOrders = orders.filter((o) => {
     const matchesSearch =
       o.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       o.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       o.customerEmail.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesPayment = paymentFilter === 'all' || o.paymentStatus === paymentFilter;
-    const matchesFulfillment = fulfillmentFilter === 'all' || o.fulfillmentStatus === fulfillmentFilter;
-    return matchesSearch && matchesPayment && matchesFulfillment;
+    const isUnfulfilled =
+      o.fulfillmentStatus === 'queued' ||
+      o.fulfillmentStatus === 'printing' ||
+      o.fulfillmentStatus === 'submission_failed';
+    const isUnpaid = o.paymentStatus === 'pending' || o.paymentStatus === 'failed';
+    const isFinished = o.paymentStatus === 'paid' && o.fulfillmentStatus === 'delivered';
+    const isDraft = o.paymentStatus === 'pending' && o.fulfillmentStatus === 'queued';
+    const matchesTab =
+      orderTab === 'all'
+        ? true
+        : orderTab === 'unfulfilled'
+          ? isUnfulfilled
+          : orderTab === 'unpaid'
+            ? isUnpaid
+            : orderTab === 'draft'
+              ? isDraft
+              : isFinished;
+    return matchesSearch && matchesTab;
   });
 
   // Reset page when filters change
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, paymentFilter, fulfillmentFilter]);
+  }, [searchTerm, orderTab]);
 
   const totalPages = Math.max(1, Math.ceil(filteredOrders.length / pageSize));
   const paginatedOrders = filteredOrders.slice((currentPage - 1) * pageSize, currentPage * pageSize);
@@ -231,64 +246,28 @@ export default function OrdersView() {
 
       {/* Filter and Table Card */}
       <ContentCard>
-        {/* Search & Dual Independent Filters */}
+        {/* Tabs + Search */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 20 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+            <FilterPills
+              variant="pills"
+              ariaLabel="Order status tabs"
+              options={[
+                { value: 'all', label: 'All' },
+                { value: 'unfulfilled', label: 'Unfulfilled' },
+                { value: 'unpaid', label: 'Unpaid' },
+                { value: 'draft', label: 'Draft' },
+                { value: 'finished', label: 'Finished' },
+              ]}
+              value={orderTab}
+              onChange={(v) => setOrderTab(v as typeof orderTab)}
+            />
             <div style={{ maxWidth: 360, width: '100%' }}>
               <Input
                 placeholder="Search by order #, customer, or email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 prefixIcon={<Search size={16} />}
-              />
-            </div>
-
-            {/* Quick Status Count Indicator */}
-            <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-              Showing <strong>{filteredOrders.length}</strong> of {orders.length} orders
-            </div>
-          </div>
-
-          {/* Independent Filter Tabs */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20, paddingTop: 8, borderTop: '1px solid var(--tuw-border-subtle, #E5E7EB)' }}>
-            {/* Payment Filter */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>
-                Payment:
-              </span>
-              <FilterPills
-                variant="pills"
-                ariaLabel="Payment status filter"
-                options={[
-                  { value: 'all', label: 'All' },
-                  { value: 'paid', label: 'Paid' },
-                  { value: 'pending', label: 'Pending' },
-                  { value: 'failed', label: 'Failed' },
-                  { value: 'refunded', label: 'Refunded' },
-                ]}
-                value={paymentFilter}
-                onChange={(v) => setPaymentFilter(v as typeof paymentFilter)}
-              />
-            </div>
-
-            {/* Fulfillment Filter */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>
-                Fulfillment:
-              </span>
-              <FilterPills
-                variant="pills"
-                ariaLabel="Fulfillment status filter"
-                options={[
-                  { value: 'all', label: 'All' },
-                  { value: 'queued', label: 'Queued' },
-                  { value: 'printing', label: 'Printing' },
-                  { value: 'shipped', label: 'Shipped' },
-                  { value: 'delivered', label: 'Delivered' },
-                  { value: 'submission_failed', label: 'Failed Sync' },
-                ]}
-                value={fulfillmentFilter}
-                onChange={(v) => setFulfillmentFilter(v as typeof fulfillmentFilter)}
               />
             </div>
           </div>
