@@ -839,6 +839,31 @@
   }
 }
 
+/* Upward variant (DM4): mirrored slide for menus opening above their
+   trigger (pagination Rows). Same durations, easings, reduced-motion
+   collapse as the M1 contract — direction only. */
+@keyframes popoverInUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes popoverOutUp {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(6px) scale(0.99);
+  }
+}
+
 /* Spotlight result rows (S6): hover/focus wash + visible keyboard focus.
    Entrance/exit motion inherits the global reduced-motion collapse. */
 .spotlightRow:hover,

@@ -18,6 +18,17 @@ export interface DropdownMenuProps {
   ariaLabel?: string;
   /** Menu alignment relative to the trigger. */
   align?: 'left' | 'right';
+  /**
+   * Open direction. 'down' drops below the trigger (default — Mark-as).
+   * 'up' rises above it (pagination Rows, which sits at the page bottom).
+   */
+  direction?: 'down' | 'up';
+  /**
+   * Value-picker mode (e.g. page-size): the matching item renders the
+   * FilterMenu selected treatment (selected wash + primary ink + 600) with
+   * menuitemradio semantics. Omitted for pure action menus (Mark-as).
+   */
+  selectedValue?: string;
 }
 
 // Shared action menu (DM1): dumb, props-fed, mock/live agnostic. Follows the
@@ -30,9 +41,12 @@ export default function DropdownMenu({
   onSelect,
   ariaLabel = 'Actions',
   align = 'left',
+  selectedValue,
+  direction = 'down',
 }: DropdownMenuProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const anim = usePopoverAnimation(menuOpen, () => setMenuOpen(false));
+  const opensUp = direction === 'up';
 
   return (
     <div style={{ position: 'relative', display: 'inline-flex' }}>
@@ -52,8 +66,9 @@ export default function DropdownMenu({
             onClick={(e) => e.stopPropagation()}
             style={{
               position: 'absolute',
-              top: '100%',
-              marginTop: 8,
+              ...(opensUp
+                ? { bottom: '100%', marginBottom: 8 }
+                : { top: '100%', marginTop: 8 }),
               ...(align === 'right' ? { right: 0 } : { left: 0 }),
               zIndex: 50,
               minWidth: 180,
@@ -64,25 +79,37 @@ export default function DropdownMenu({
               boxShadow: '0 12px 32px rgba(23, 28, 51, 0.16), 0 2px 6px rgba(23, 28, 51, 0.08)',
               animation:
                 anim.phase === 'closing'
-                  ? 'popoverOut 0.15s ease-in'
-                  : 'popoverIn 0.18s ease-out',
+                  ? opensUp
+                    ? 'popoverOutUp 0.15s ease-in'
+                    : 'popoverOut 0.15s ease-in'
+                  : opensUp
+                    ? 'popoverInUp 0.18s ease-out'
+                    : 'popoverIn 0.18s ease-out',
             }}
           >
-            {items.map((item) => (
+            {items.map((item) => {
+              const selected = selectedValue !== undefined && item.value === selectedValue;
+              const restingBg = selected
+                ? 'var(--tuw-bg-selected, #F8F5FF)'
+                : 'transparent';
+              return (
               <button
                 key={item.value}
                 type="button"
-                role="menuitem"
+                role={selectedValue !== undefined ? 'menuitemradio' : 'menuitem'}
+                aria-checked={selectedValue !== undefined ? selected : undefined}
                 onClick={() => {
                   onSelect(item.value);
                   setMenuOpen(false);
                 }}
                 onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = item.danger
-                    ? 'var(--tuw-bg-error, #FEF4F4)'
-                    : 'var(--tuw-bg-canvas, #F7F8F9)')
+                  (e.currentTarget.style.backgroundColor = selected
+                    ? restingBg
+                    : item.danger
+                      ? 'var(--tuw-bg-error, #FEF4F4)'
+                      : 'var(--tuw-bg-canvas, #F7F8F9)')
                 }
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = restingBg)}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -90,13 +117,15 @@ export default function DropdownMenu({
                   padding: '8px 12px',
                   borderRadius: 8,
                   border: 'none',
-                  background: 'transparent',
+                  background: restingBg,
                   fontSize: 13,
-                  fontWeight: 500,
+                  fontWeight: selected ? 600 : 500,
                   fontFamily: 'var(--font-main)',
-                  color: item.danger
-                    ? 'var(--tuw-text-error, #C91818)'
-                    : 'var(--tuw-text-primary, #262626)',
+                  color: selected
+                    ? 'var(--tuw-action-primary, #7539FF)'
+                    : item.danger
+                      ? 'var(--tuw-text-error, #C91818)'
+                      : 'var(--tuw-text-primary, #262626)',
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',
                   transition: 'background-color 0.1s ease',
@@ -104,7 +133,8 @@ export default function DropdownMenu({
               >
                 {item.label}
               </button>
-            ))}
+              );
+            })}
           </div>
         </>
       )}

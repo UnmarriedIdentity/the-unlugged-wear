@@ -1,8 +1,9 @@
 'use client';
 
 import React from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import Button from './Button';
+import DropdownMenu from './DropdownMenu';
 
 export interface PaginationProps {
   currentPage: number;
@@ -53,28 +54,42 @@ export default function Pagination({
         {pageSizeOptions && onPageSizeChange && pageSize && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span style={{ fontSize: '12px', color: 'var(--tuw-text-secondary, #5D6772)' }}>Rows:</span>
-            <select
-              value={pageSize}
-              onChange={(e) => onPageSizeChange(Number(e.target.value))}
-              aria-label="Rows per page"
-              style={{
-                height: '28px',
-                padding: '0 8px',
-                fontSize: '12px',
-                fontWeight: 600,
-                borderRadius: '6px',
-                border: '1px solid var(--tuw-border-control, #D1D5DB)',
-                backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
-                color: 'var(--tuw-text-primary, #262626)',
-                cursor: 'pointer',
-              }}
-            >
-              {pageSizeOptions.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
-                </option>
-              ))}
-            </select>
+            <DropdownMenu
+              ariaLabel="Rows per page"
+              direction="up"
+              trigger={
+                <span
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Rows per page, currently ${pageSize}`}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+                  }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    height: '28px',
+                    padding: '0 8px',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    fontFamily: 'var(--font-main)',
+                    borderRadius: '6px',
+                    border: '1px solid var(--tuw-border-control, #D1D5DB)',
+                    backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
+                    color: 'var(--tuw-text-primary, #262626)',
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                  }}
+                >
+                  {pageSize}
+                  <ChevronDown size={12} />
+                </span>
+              }
+              items={pageSizeOptions.map((opt) => ({ value: String(opt), label: String(opt) }))}
+              selectedValue={String(pageSize)}
+              onSelect={(v) => onPageSizeChange(Number(v))}
+            />
           </div>
         )}
       </div>
