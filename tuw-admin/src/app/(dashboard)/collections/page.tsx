@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader } from '@/components/ui';
 import { Layers, Plus, Search, Filter, Sparkles, FolderTree, Edit3 } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { CollectionItem } from '@/mocks/fixtures';
@@ -64,16 +64,9 @@ export default function CollectionsPage() {
 
   return (
     <DashboardShell pageTitle="Collections">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <h2 style={{ fontSize: 28, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-            Apparel Collections
-          </h2>
-          <p style={{ fontSize: 14, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-            Curate product groupings, seasonal lookbooks, and storefront merchandising categories.
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: 12 }}>
+      <PageHeader
+        title="Apparel Collections"
+        actions={
           <Button
             variant="primary"
             size="md"
@@ -84,8 +77,8 @@ export default function CollectionsPage() {
           >
             Create Collection
           </Button>
-        </div>
-      </div>
+        }
+      />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
         <StatCard label="Active Collections" value={`${collections.length} Series`} subtitle="Organized lookbooks" trendType="neutral" hoverable />
