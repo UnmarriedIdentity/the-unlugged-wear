@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader } from '@/components/ui';
 import { RotateCcw, Search, Filter, Download, ArrowUpRight, CheckCircle2, Clock, AlertTriangle, Eye } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { RefundItem } from '@/mocks/fixtures';
@@ -95,34 +95,29 @@ export default function RefundsPage() {
 
   return (
     <DashboardShell pageTitle="Refunds">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <h2 style={{ fontSize: 28, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-            Refund Management
-          </h2>
-          <p style={{ fontSize: 14, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-            Process customer refunds, gateway disbursements, and validated return compensations.
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: 12 }}>
-          <Button variant="secondary" size="md" icon={<Download size={16} />} onClick={handleExportCSV}>
-            Export Log
-          </Button>
-          <Button
-            variant="primary"
-            size="md"
-            icon={<RotateCcw size={16} />}
-            onClick={() => {
-              if (canPerformAction('refunds')) {
-                setRefundError(null);
-                setIsIssueOpen(true);
-              }
-            }}
-          >
-            Issue Refund
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Refund Management"
+        actions={
+          <>
+            <Button variant="secondary" size="md" icon={<Download size={16} />} onClick={handleExportCSV}>
+              Export Log
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
+              icon={<RotateCcw size={16} />}
+              onClick={() => {
+                if (canPerformAction('refunds')) {
+                  setRefundError(null);
+                  setIsIssueOpen(true);
+                }
+              }}
+            >
+              Issue Refund
+            </Button>
+          </>
+        }
+      />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
         <StatCard
