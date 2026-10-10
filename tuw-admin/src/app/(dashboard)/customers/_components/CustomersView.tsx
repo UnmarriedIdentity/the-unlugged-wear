@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { UserPlus, Download, Search, Eye, MapPin, Phone, Mail, Calendar, Plus, MessageSquare } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, Button, Badge, Input, Drawer, Pagination, Modal, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui';
+import { StatCard, ContentCard, Button, Badge, Input, Drawer, Pagination, Modal, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { CustomerItem } from '@/mocks/fixtures';
 
@@ -114,28 +114,24 @@ export default function CustomersView() {
 
   return (
     <DashboardShell pageTitle="Customers" activeNav="customers">
-      <div className={styles.pageHeader}>
-        <div className={styles.headingGroup}>
-          <h2 className={styles.pageTitle}>Customer Directory</h2>
-          <p className={styles.pageSubtitle}>
-            Manage client profiles, lifetime value, delivery addresses, and internal service notes.
-          </p>
-        </div>
-
-        <div className={styles.headerActions}>
-          <Button variant="secondary" size="md" icon={<Download size={16} />} onClick={handleExportCSV}>
-            <span>Export CSV</span>
-          </Button>
-          <Button
-            variant="primary"
-            size="md"
-            icon={<UserPlus size={16} />}
-            onClick={() => setIsAddModalOpen(true)}
-          >
-            <span>+ Add Customer</span>
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Customer Directory"
+        actions={
+          <>
+            <Button variant="secondary" size="md" icon={<Download size={16} />} onClick={handleExportCSV}>
+              <span>Export CSV</span>
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
+              icon={<UserPlus size={16} />}
+              onClick={() => setIsAddModalOpen(true)}
+            >
+              <span>+ Add Customer</span>
+            </Button>
+          </>
+        }
+      />
 
       <div className={styles.statGrid}>
         <StatCard label="Total Clients" value={String(customers.length)} trend="Active buyer profiles" trendType="up" hoverable />
