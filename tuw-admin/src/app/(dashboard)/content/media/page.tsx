@@ -449,7 +449,13 @@ export default function MediaLibraryPage() {
             />
             {localObjectUrl && (
               <div style={{ marginTop: 8, height: 110, borderRadius: 8, overflow: 'hidden', border: '1px solid #E2E4E6' }}>
-                <img src={localObjectUrl} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <ImageWithFallback
+                  src={localObjectUrl}
+                  alt="Preview"
+                  fallbackTone="info"
+                  fallbackText="Image not found"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', minHeight: 0, border: 'none', borderRadius: 0, padding: 0 }}
+                />
               </div>
             )}
           </div>
