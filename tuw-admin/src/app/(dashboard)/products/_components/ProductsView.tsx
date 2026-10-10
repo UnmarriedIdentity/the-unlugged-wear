@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle } from 'lucide-react';
+import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer, Pagination, FilterPills, PageHeader } from '@/components/ui';
+import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer, Pagination, FilterPills, PageHeader, ViewToggle } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 
@@ -16,6 +16,7 @@ export default function ProductsView() {
   const [selectedCat, setSelectedCat] = useState<string>('All');
   const [publicationFilter, setPublicationFilter] = useState<'all' | 'published' | 'draft' | 'archived'>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [view, setView] = useState<'grid' | 'table'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(6);
 
@@ -211,15 +212,6 @@ export default function ProductsView() {
       <ContentCard>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 20 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-            <div style={{ maxWidth: 360, width: '100%' }}>
-              <Input
-                placeholder="Search products by title, category, or slug..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                prefixIcon={<Search size={16} />}
-              />
-            </div>
-
             {/* Publication Filter Tabs */}
             <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
               <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>
@@ -239,8 +231,30 @@ export default function ProductsView() {
               />
             </div>
 
+            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+              <div style={{ maxWidth: 300, width: '100%' }}>
+                <Input
+                  placeholder="Search products by title, category, or slug..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  prefixIcon={<Search size={16} />}
+                />
+              </div>
+              <div aria-hidden="true" style={{ width: 1, height: 24, backgroundColor: 'var(--tuw-border-subtle, #E5E7EB)' }} />
+              <ViewToggle
+                ariaLabel="Product catalog view"
+                options={[
+                  { value: 'grid', label: 'Grid view', icon: <LayoutGrid size={16} /> },
+                  { value: 'table', label: 'Table view', icon: <List size={16} /> },
+                ]}
+                value={view}
+                onChange={(v) => setView(v as typeof view)}
+              />
+            </div>
+          </div>
+
           {/* Department Categories */}
-          <div className={styles.filterBar}>
+          <div className={styles.filterBar} style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <ul className={styles.tabList}>
               {['All', 'T-Shirts', 'Hoodies', 'Jackets', 'Pants', 'Accessories'].map((cat) => (
                 <li
@@ -253,7 +267,6 @@ export default function ProductsView() {
               ))}
             </ul>
           </div>
-        </div>
         </div>
 
         {/* Card Grid */}
