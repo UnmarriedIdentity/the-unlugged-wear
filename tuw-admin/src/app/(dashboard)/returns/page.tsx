@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader } from '@/components/ui';
 import { Undo2, Search, Filter, CheckCircle2, XCircle, ArrowRight, RotateCcw } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { ReturnItem } from '@/mocks/fixtures';
@@ -53,16 +53,7 @@ export default function ReturnsPage() {
 
   return (
     <DashboardShell pageTitle="Returns">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <h2 style={{ fontSize: 28, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-            Returns & RMA Management
-          </h2>
-          <p style={{ fontSize: 14, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-            Inspect inbound customer returns, verify garment condition, restock inventory, and authorize refunds.
-          </p>
-        </div>
-      </div>
+      <PageHeader title="Returns & RMA Management" />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
         <StatCard label="Active Returns" value={String(returns.length)} subtitle="Inbound RMAs" trendType="neutral" hoverable />
