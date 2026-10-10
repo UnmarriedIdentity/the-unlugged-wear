@@ -9,13 +9,13 @@
   },
   "summary": {
     "total": 121,
-    "done": 106,
+    "done": 107,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "860fa8d",
+    "tip": "1d395af",
     "unpushed": ["6668cfd", "212ca3d", "c8a2f40", "6a00935", "2dc810e", "a60fa4f", "d7b2b31"],
     "next_up": "human pushes origin/v2 (2 commits) then origin/feat/search-modal (6 commits); browser review of spotlight",
     "pending_verifications": [
@@ -585,18 +585,18 @@
     },
     {
       "id": "TL-DASH-PHMIG",
-      "title": "Per-file PageHeader migrations (~25 call sites, subtitles dropped)",
-      "status": "in_progress",
+      "title": "Per-file PageHeader migrations (25 call sites, subtitles dropped)",
+      "status": "done",
       "owner": "agent",
       "started": "2026-10-06",
-      "finished": null,
-      "log": "first file acts as visual proof before continuing",
-      "design_match": "pending",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal: 7 settings + 5 content + 6 A-pages + 8 B-pages + dashboard + design-system + CSS cleanup 1d395af",
+      "design_match": "yes (3 authorized deltas: subtitles dropped, dashboard unified 28/600, A-margin retired; + mobile-only dashboard controls wrap-pack)",
       "key_decisions": [
         "dashboard unified to 28/600 (authorized restyle)",
         "design-system title row only, pixel-identical"
       ],
-      "verified": false,
+      "verified": true,
       "pushed": false,
       "follow_ups": []
     },

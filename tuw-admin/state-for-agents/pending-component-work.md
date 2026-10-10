@@ -13,7 +13,7 @@ primitive + raw interior.
 
 | Block | Status | Why no existing component fits | Future component |
 |---|---|---|---|
-| Page header layout (title + subtitle + actions row) | raw | No shared page-header primitive exists; `Button`s inside are already primitives | `PageHeader(title, subtitle, actions[])` |
+| Page header layout (title + subtitle + actions row) | done | `ui/PageHeader(title, subtitle?, actions?, eyebrow?, page|doc)` — 25 call sites, subtitles dropped, dashboard unified, doc variant for design-system | PH1+PHMIG |
 | Order detail drawer sections (status pills, items, financial summary, address, timeline) | raw | Drawer shell is primitive; interior blocks are bespoke per workflow | `DrawerSection`, `KeyValueList`, `Timeline` |
 | Create-order form grid | partial | `Modal` + `Input` primitive; raw `<select>`s (40px vs `ui/Select` 42px — verified mismatch) | `FormSelect` (40px treatment) |
 | Refund form grid | partial | Same select mismatch + validated-amount box | `FormSelect` |
