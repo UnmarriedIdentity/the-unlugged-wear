@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import UpliftSurface from './UpliftSurface';
 
 export interface ViewToggleOption {
   value: string;
@@ -55,20 +56,27 @@ export default function ViewToggle({
               justifyContent: 'center',
               width: 32,
               height: 32,
+              padding: 0,
               borderRadius: 8,
               border: 'none',
-              backgroundColor: selected
-                ? 'var(--tuw-bg-surface, #FFFFFF)'
-                : 'transparent',
-              color: selected
-                ? 'var(--tuw-action-primary, #7539FF)'
-                : 'var(--tuw-text-secondary, #5D6772)',
+              backgroundColor: 'transparent',
               cursor: 'pointer',
-              boxShadow: selected ? '0 1px 4px rgba(0, 0, 0, 0.08)' : 'none',
-              transition: 'all 0.15s ease',
             }}
           >
-            {option.icon}
+            <UpliftSurface
+              active={selected}
+              width={32}
+              height={32}
+              radius={8}
+              style={{
+                color: selected
+                  ? 'var(--tuw-action-primary, #7539FF)'
+                  : 'var(--tuw-text-secondary, #5D6772)',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              {option.icon}
+            </UpliftSurface>
           </button>
         );
       })}
