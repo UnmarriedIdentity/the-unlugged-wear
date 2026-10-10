@@ -18,7 +18,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, Button, Badge, Pagination } from '@/components/ui';
+import { StatCard, ContentCard, Button, Badge, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
@@ -62,35 +62,31 @@ export default function AnalyticsView() {
   return (
     <DashboardShell pageTitle="Analytics" activeNav="analytics">
       {/* Page Header */}
-      <div className={styles.pageHeader}>
-        <div className={styles.headingGroup}>
-          <h2 className={styles.pageTitle}>Analytics & Operational Reports</h2>
-          <p className={styles.pageSubtitle}>
-            Comprehensive overview of store sales, conversion metrics, customer acquisition, and fulfillment SLA.
-          </p>
-        </div>
+      <PageHeader
+        title="Analytics & Operational Reports"
+        actions={
+          <>
+            <Button
+              variant="secondary"
+              size="md"
+              icon={<Calendar size={16} />}
+              onClick={() => setTimeRange(timeRange === '30d' ? '7d' : '30d')}
+            >
+              <span>{timeRange === '30d' ? 'Last 30 Days' : 'Last 7 Days'}</span>
+              <ChevronDown size={14} style={{ marginLeft: 4 }} />
+            </Button>
 
-        <div className={styles.headerActions}>
-          <Button
-            variant="secondary"
-            size="md"
-            icon={<Calendar size={16} />}
-            onClick={() => setTimeRange(timeRange === '30d' ? '7d' : '30d')}
-          >
-            <span>{timeRange === '30d' ? 'Last 30 Days' : 'Last 7 Days'}</span>
-            <ChevronDown size={14} style={{ marginLeft: 4 }} />
-          </Button>
-
-          <Button
-            variant="primary"
-            size="md"
-            icon={<Download size={16} />}
-            onClick={handleExportCSV}
-          >
-            <span>Export CSV Report</span>
-          </Button>
-        </div>
-      </div>
+            <Button
+              variant="primary"
+              size="md"
+              icon={<Download size={16} />}
+              onClick={handleExportCSV}
+            >
+              <span>Export CSV Report</span>
+            </Button>
+          </>
+        }
+      />
 
       {/* Top 4 KPI Metrics */}
       <div className={styles.statGrid}>
@@ -210,40 +206,38 @@ export default function AnalyticsView() {
         <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginBottom: 12 }}>
           Product Merchandising Sales Summary
         </h3>
-        <div style={{ overflowX: 'auto', width: '100%' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
-                <th style={{ padding: '10px 14px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Product</th>
-                <th style={{ padding: '10px 14px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Category</th>
-                <th style={{ padding: '10px 14px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Unit Price</th>
-                <th style={{ padding: '10px 14px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Units Sold</th>
-                <th style={{ padding: '10px 14px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase', textAlign: 'right' }}>Gross Revenue</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedProducts.map((p) => (
-                <tr key={p.id} style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
-                  <td style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-                    {p.name}
-                  </td>
-                  <td style={{ padding: '12px 14px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                    {p.category}
-                  </td>
-                  <td className="tuw-tabular-nums" style={{ padding: '12px 14px', fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
-                    ₹{p.price.toLocaleString()}
-                  </td>
-                  <td className="tuw-tabular-nums" style={{ padding: '12px 14px', fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
-                    {p.soldCount}
-                  </td>
-                  <td className="tuw-tabular-nums" style={{ padding: '12px 14px', fontSize: 13, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', textAlign: 'right' }}>
-                    ₹{(p.price * p.soldCount).toLocaleString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table>
+          <TableHeader style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
+            <TableRow hoverable={false}>
+              <TableHead style={{ padding: '10px 14px' }}>Product</TableHead>
+              <TableHead style={{ padding: '10px 14px' }}>Category</TableHead>
+              <TableHead style={{ padding: '10px 14px' }}>Unit Price</TableHead>
+              <TableHead style={{ padding: '10px 14px' }}>Units Sold</TableHead>
+              <TableHead style={{ padding: '10px 14px', textAlign: 'right' }}>Gross Revenue</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedProducts.map((p) => (
+              <TableRow key={p.id} hoverable={false} style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
+                <TableCell style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                  {p.name}
+                </TableCell>
+                <TableCell style={{ padding: '12px 14px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                  {p.category}
+                </TableCell>
+                <TableCell className="tuw-tabular-nums" style={{ padding: '12px 14px', fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
+                  ₹{p.price.toLocaleString()}
+                </TableCell>
+                <TableCell className="tuw-tabular-nums" style={{ padding: '12px 14px', fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
+                  {p.soldCount}
+                </TableCell>
+                <TableCell className="tuw-tabular-nums" style={{ padding: '12px 14px', fontSize: 13, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', textAlign: 'right' }}>
+                  ₹{(p.price * p.soldCount).toLocaleString()}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
 
         <Pagination
           currentPage={currentPage}

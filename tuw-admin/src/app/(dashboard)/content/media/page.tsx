@@ -14,6 +14,7 @@ import {
   Drawer,
   EmptyState,
   ImageWithFallback,
+  PageHeader,
 } from '@/components/ui';
 import {
   Image as ImageIcon,
@@ -236,39 +237,24 @@ export default function MediaLibraryPage() {
 
   return (
     <DashboardShell pageTitle="Media Library">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            <Link
-              href="/content"
-              style={{
-                color: 'var(--tuw-text-secondary, #5D6772)',
-                textDecoration: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 4,
-                fontSize: 13,
-              }}
-            >
-              <ArrowLeft size={14} /> Back to Content
-            </Link>
-          </div>
-          <h2 style={{ fontSize: 28, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-            Media & Asset Storage
-          </h2>
-          <p style={{ fontSize: 14, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-            High-resolution lookbook assets, campaign photoshoots, and product photography.
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          size="md"
-          icon={<Upload size={16} />}
-          onClick={() => setIsUploadModalOpen(true)}
-        >
-          Upload Files
-        </Button>
-      </div>
+      <PageHeader
+        title="Media & Asset Storage"
+        eyebrow={
+          <Link href="/content" style={{ color: 'var(--tuw-text-secondary, #5D6772)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4, fontSize: 13 }}>
+            <ArrowLeft size={14} /> Back to Content
+          </Link>
+        }
+        actions={
+          <Button
+            variant="primary"
+            size="md"
+            icon={<Upload size={16} />}
+            onClick={() => setIsUploadModalOpen(true)}
+          >
+            Upload Files
+          </Button>
+        }
+      />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
         <StatCard
@@ -449,7 +435,13 @@ export default function MediaLibraryPage() {
             />
             {localObjectUrl && (
               <div style={{ marginTop: 8, height: 110, borderRadius: 8, overflow: 'hidden', border: '1px solid #E2E4E6' }}>
-                <img src={localObjectUrl} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <ImageWithFallback
+                  src={localObjectUrl}
+                  alt="Preview"
+                  fallbackTone="info"
+                  fallbackText="Image not found"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', minHeight: 0, border: 'none', borderRadius: 0, padding: 0 }}
+                />
               </div>
             )}
           </div>

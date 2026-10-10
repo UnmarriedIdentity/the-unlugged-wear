@@ -4,11 +4,9 @@ import React, { useState } from 'react';
 import { Calendar } from 'lucide-react';
 import { Calendar as DateRangeCalendar } from '@/components/calendar';
 import { OnlineBadge } from './OnlineBadge';
+import { PageHeader } from '@/components/ui';
 import { usePopoverAnimation } from '@/hooks/usePopoverAnimation';
 import type { DateRange } from '@/hooks/useCalendarRange';
-
-// Class map - selectors live in src/app/globals.css (single app.css, home- prefix).
-const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'home-' + String(p) });
 
 interface DashboardHeaderProps {
   title: string;
@@ -26,19 +24,17 @@ export function DashboardHeader({ title, subtitle, onlineLabel = '2 online custo
   const isFiltered = rangeLabel !== 'Today';
 
   return (
-    <div className={styles.welcomeRow}>
-      <div className={styles.welcomeTextGroup}>
-        <h2 className={styles.welcomeHeading}>{title}</h2>
-        <p className={styles.welcomeSubtext}>{subtitle}</p>
-      </div>
+    <PageHeader
+      title={title}
+      subtitle={subtitle}
+      actions={
+        <>
+          <OnlineBadge label={onlineLabel} />
 
-      <div className={styles.welcomeControls}>
-        <OnlineBadge label={onlineLabel} />
-
-        <div className="relative">
+          <div className="relative">
           <button
             type="button"
-            className={isFiltered ? `${styles.dateFilterBtn} ${styles.dateFilterBtnActive}` : styles.dateFilterBtn}
+            className={isFiltered ? 'home-dateFilterBtn home-dateFilterBtnActive' : 'home-dateFilterBtn'}
             onClick={() => setPickerOpen((v) => !v)}
             aria-expanded={pickerAnim.visible}
             aria-haspopup="dialog"
@@ -72,7 +68,8 @@ export function DashboardHeader({ title, subtitle, onlineLabel = '2 online custo
             </>
           )}
           </div>
-        </div>
-      </div>
+        </>
+      }
+    />
   );
 }

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { HelpCircle, MessageSquare, Send, CheckCircle2, Clock, AlertCircle, Sparkles, ChevronRight, User } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { SupportTicket } from '@/mocks/fixtures';
 
@@ -64,14 +64,7 @@ export default function HelpView() {
 
   return (
     <DashboardShell pageTitle="Support" activeNav="help">
-      <div className={styles.pageHeader}>
-        <div className={styles.headingGroup}>
-          <h2 className={styles.pageTitle}>Support Ticket Desk</h2>
-          <p className={styles.pageSubtitle}>
-            Manage inbound customer inquiries, resolve fulfillment disputes, and draft simulated responses.
-          </p>
-        </div>
-      </div>
+      <PageHeader title="Support Ticket Desk" />
 
       <div className={styles.statGrid}>
         <StatCard label="Total Tickets" value={String(supportTickets.length)} subtitle="Customer inquiries" trendType="neutral" hoverable />
@@ -90,79 +83,67 @@ export default function HelpView() {
             </h3>
           </div>
 
-          <div style={{ display: 'flex', gap: 6 }}>
-            {(['all', 'open', 'pending', 'resolved'] as const).map((st) => (
-              <button
-                key={st}
-                type="button"
-                onClick={() => setStatusFilter(st)}
-                style={{
-                  padding: '4px 10px',
-                  borderRadius: '6px',
-                  fontSize: '12px',
-                  fontWeight: statusFilter === st ? 600 : 500,
-                  cursor: 'pointer',
-                  border: '1px solid',
-                  borderColor: statusFilter === st ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-border-subtle, #E2E4E6)',
-                  backgroundColor: statusFilter === st ? 'var(--tuw-bg-selected, #F8F5FF)' : 'transparent',
-                  color: statusFilter === st ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-text-secondary, #5D6772)',
-                }}
-              >
-                {st.charAt(0).toUpperCase() + st.slice(1)}
-              </button>
-            ))}
-          </div>
+          <FilterPills
+            variant="pills"
+            ariaLabel="Ticket status filter"
+            options={[
+              { value: 'all', label: 'All' },
+              { value: 'open', label: 'Open' },
+              { value: 'pending', label: 'Pending' },
+              { value: 'resolved', label: 'Resolved' },
+            ]}
+            value={statusFilter}
+            onChange={(v) => setStatusFilter(v as typeof statusFilter)}
+          />
         </div>
 
-        <div style={{ overflowX: 'auto', width: '100%' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Ticket</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Customer</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Subject</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Priority</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Status</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase', textAlign: 'right' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedTickets.map((ticket) => (
-                <tr
-                  key={ticket.id}
-                  onClick={() => setSelectedTicket(ticket)}
-                  style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', cursor: 'pointer' }}
-                >
-                  <td style={{ padding: '14px 16px', fontSize: 13, fontFamily: 'monospace', fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)' }}>
-                    {ticket.id}
-                  </td>
-                  <td style={{ padding: '14px 16px' }}>
-                    <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)' }}>{ticket.customerName}</div>
-                    <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>{ticket.customerEmail}</div>
-                  </td>
-                  <td style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
-                    {ticket.subject}
-                  </td>
-                  <td style={{ padding: '14px 16px' }}>
-                    <Badge variant={ticket.priority === 'high' ? 'danger' : ticket.priority === 'medium' ? 'warning' : 'neutral'}>
-                      {ticket.priority}
-                    </Badge>
-                  </td>
-                  <td style={{ padding: '14px 16px' }}>
-                    <Badge variant={ticket.status === 'open' ? 'danger' : ticket.status === 'pending' ? 'warning' : 'success'}>
-                      {ticket.status}
-                    </Badge>
-                  </td>
-                  <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                    <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedTicket(ticket); }}>
-                      Reply
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table>
+          <TableHeader style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
+            <TableRow hoverable={false}>
+              <TableHead style={{ padding: '12px 16px' }}>Ticket</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Customer</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Subject</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Priority</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Status</TableHead>
+              <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedTickets.map((ticket) => (
+              <TableRow
+                key={ticket.id}
+                onClick={() => setSelectedTicket(ticket)}
+                style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', cursor: 'pointer' }}
+              >
+                <TableCell style={{ padding: '14px 16px', fontSize: 13, fontFamily: 'monospace', fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)' }}>
+                  {ticket.id}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px' }}>
+                  <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)' }}>{ticket.customerName}</div>
+                  <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>{ticket.customerEmail}</div>
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
+                  {ticket.subject}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px' }}>
+                  <Badge variant={ticket.priority === 'high' ? 'danger' : ticket.priority === 'medium' ? 'warning' : 'neutral'}>
+                    {ticket.priority}
+                  </Badge>
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px' }}>
+                  <Badge variant={ticket.status === 'open' ? 'danger' : ticket.status === 'pending' ? 'warning' : 'success'}>
+                    {ticket.status}
+                  </Badge>
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px', textAlign: 'right' }}>
+                  <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedTicket(ticket); }}>
+                    Reply
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
 
         <Pagination
           currentPage={currentPage}

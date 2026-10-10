@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader } from '@/components/ui';
 import { Truck, Search, Filter, Download, ExternalLink, Calendar, MapPin, Clock, Plus } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { ShipmentItem } from '@/mocks/fixtures';
@@ -81,31 +81,26 @@ export default function ShipmentsPage() {
 
   return (
     <DashboardShell pageTitle="Shipments">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <h2 style={{ fontSize: 28, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-            Carrier Logistics & Shipments
-          </h2>
-          <p style={{ fontSize: 14, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-            Real-time multi-carrier transit manifests, SLA timelines, and package tracking previews.
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: 12 }}>
-          <Button variant="secondary" size="md" icon={<Download size={16} />} onClick={handleExportManifest}>
-            Export Manifest
-          </Button>
-          <Button
-            variant="primary"
-            size="md"
-            icon={<Plus size={16} />}
-            onClick={() => {
-              if (canPerformAction('fulfillment')) setIsCreateOpen(true);
-            }}
-          >
-            Create Shipment
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Carrier Logistics & Shipments"
+        actions={
+          <>
+            <Button variant="secondary" size="md" icon={<Download size={16} />} onClick={handleExportManifest}>
+              Export Manifest
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
+              icon={<Plus size={16} />}
+              onClick={() => {
+                if (canPerformAction('fulfillment')) setIsCreateOpen(true);
+              }}
+            >
+              Create Shipment
+            </Button>
+          </>
+        }
+      />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
         <StatCard label="Dispatched Parcels" value={`${shipments.length} pkgs`} trend="Active manifests" trendType="up" hoverable />
@@ -125,94 +120,83 @@ export default function ShipmentsPage() {
             />
           </div>
 
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {(['all', 'in_transit', 'out_for_delivery', 'delivered', 'exception'] as const).map((st) => (
-              <button
-                key={st}
-                type="button"
-                onClick={() => setStatusFilter(st)}
-                style={{
-                  padding: '4px 10px',
-                  borderRadius: '6px',
-                  fontSize: '12px',
-                  fontWeight: statusFilter === st ? 600 : 500,
-                  cursor: 'pointer',
-                  border: '1px solid',
-                  borderColor: statusFilter === st ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-border-subtle, #E2E4E6)',
-                  backgroundColor: statusFilter === st ? 'var(--tuw-bg-selected, #F8F5FF)' : 'transparent',
-                  color: statusFilter === st ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-text-secondary, #5D6772)',
-                }}
-              >
-                {st === 'in_transit' ? 'In Transit' : st === 'out_for_delivery' ? 'Out for Delivery' : st.charAt(0).toUpperCase() + st.slice(1)}
-              </button>
-            ))}
-          </div>
+          <FilterPills
+            variant="pills"
+            ariaLabel="Shipment status filter"
+            options={[
+              { value: 'all', label: 'All' },
+              { value: 'in_transit', label: 'In Transit' },
+              { value: 'out_for_delivery', label: 'Out for Delivery' },
+              { value: 'delivered', label: 'Delivered' },
+              { value: 'exception', label: 'Exception' },
+            ]}
+            value={statusFilter}
+            onChange={(v) => setStatusFilter(v as typeof statusFilter)}
+          />
         </div>
 
-        <div style={{ overflowX: 'auto', width: '100%' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Tracking #</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Order</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Carrier</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Destination</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Pieces</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Status</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase', textAlign: 'right' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedShipments.map((shipment) => (
-                <tr
-                  key={shipment.trackingId}
-                  onClick={() => setSelectedShipment(shipment)}
-                  style={{
-                    borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)',
-                    cursor: 'pointer',
-                    transition: 'background-color 0.15s',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--tuw-bg-canvas, #F7F8F9)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                >
-                  <td style={{ padding: '14px 16px', fontSize: 13, fontFamily: 'monospace', fontWeight: 600, color: 'var(--tuw-text-info, #175CD3)' }}>
-                    {shipment.trackingId}
-                  </td>
-                  <td style={{ padding: '14px 16px', fontSize: 14, color: 'var(--tuw-action-primary, #7539FF)', fontWeight: 500 }}>
-                    {shipment.orderId}
-                  </td>
-                  <td style={{ padding: '14px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
-                    {shipment.carrier}
-                  </td>
-                  <td style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                    {shipment.destination}
-                  </td>
-                  <td style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                    {shipment.pieces} pkgs
-                  </td>
-                  <td style={{ padding: '14px 16px' }}>
-                    {shipment.status === 'delivered' && <Badge variant="success">Delivered</Badge>}
-                    {shipment.status === 'in_transit' && <Badge variant="info">In Transit</Badge>}
-                    {shipment.status === 'out_for_delivery' && <Badge variant="warning">Out for Delivery</Badge>}
-                    {shipment.status === 'exception' && <Badge variant="danger">Exception</Badge>}
-                  </td>
-                  <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedShipment(shipment);
-                      }}
-                    >
-                      Track
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table>
+          <TableHeader style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
+            <TableRow hoverable={false}>
+              <TableHead style={{ padding: '12px 16px' }}>Tracking #</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Order</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Carrier</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Destination</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Pieces</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Status</TableHead>
+              <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedShipments.map((shipment) => (
+              <TableRow
+                key={shipment.trackingId}
+                onClick={() => setSelectedShipment(shipment)}
+                style={{
+                  borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.15s',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--tuw-bg-canvas, #F7F8F9)')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+              >
+                <TableCell style={{ padding: '14px 16px', fontSize: 13, fontFamily: 'monospace', fontWeight: 600, color: 'var(--tuw-text-info, #175CD3)' }}>
+                  {shipment.trackingId}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px', fontSize: 14, color: 'var(--tuw-action-primary, #7539FF)', fontWeight: 500 }}>
+                  {shipment.orderId}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
+                  {shipment.carrier}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                  {shipment.destination}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                  {shipment.pieces} pkgs
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px' }}>
+                  {shipment.status === 'delivered' && <Badge variant="success">Delivered</Badge>}
+                  {shipment.status === 'in_transit' && <Badge variant="info">In Transit</Badge>}
+                  {shipment.status === 'out_for_delivery' && <Badge variant="warning">Out for Delivery</Badge>}
+                  {shipment.status === 'exception' && <Badge variant="danger">Exception</Badge>}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px', textAlign: 'right' }}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedShipment(shipment);
+                    }}
+                  >
+                    Track
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
 
         <Pagination
           currentPage={currentPage}

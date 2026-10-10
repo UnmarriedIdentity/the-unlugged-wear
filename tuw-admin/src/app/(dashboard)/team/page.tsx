@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Modal, Pagination } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Modal, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader } from '@/components/ui';
 import { UserPlus, Search, Filter, ShieldCheck, Mail, Trash2, AlertTriangle } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { TeamMember, StaffRole } from '@/mocks/fixtures';
@@ -57,16 +57,9 @@ export default function TeamPage() {
 
   return (
     <DashboardShell pageTitle="Team & Permissions">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <h2 style={{ fontSize: 28, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-            Team & Permissions
-          </h2>
-          <p style={{ fontSize: 14, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-            Manage staff accounts, assign granular role-based access control, and review invitations.
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: 12 }}>
+      <PageHeader
+        title="Team & Permissions"
+        actions={
           <Button
             variant="primary"
             size="md"
@@ -77,8 +70,8 @@ export default function TeamPage() {
           >
             Invite Member
           </Button>
-        </div>
-      </div>
+        }
+      />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
         <StatCard label="Total Staff" value={`${team.length} Members`} subtitle="Across 4 operational roles" trendType="neutral" hoverable />
@@ -99,74 +92,72 @@ export default function TeamPage() {
           </div>
         </div>
 
-        <div style={{ overflowX: 'auto', width: '100%' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Member</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Role Scope</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Status</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Last Active</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase', textAlign: 'right' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedMembers.map((member) => (
-                <tr key={member.id} style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
-                  <td style={{ padding: '14px 16px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <div
-                        style={{
-                          width: 36,
-                          height: 36,
-                          borderRadius: '50%',
-                          backgroundColor: member.avatarBg,
-                          color: '#FFFFFF',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: 14,
-                          fontWeight: 600,
-                        }}
-                      >
-                        {member.name.charAt(0)}
-                      </div>
-                      <div>
-                        <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>{member.name}</div>
-                        <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>{member.email}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td style={{ padding: '14px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)', fontWeight: 500 }}>
-                    <Badge variant={member.role === 'Owner' ? 'success' : member.role === 'Operations' ? 'info' : 'neutral'}>
-                      {member.role}
-                    </Badge>
-                  </td>
-                  <td style={{ padding: '14px 16px' }}>
-                    {member.status === 'active' && <Badge variant="success">Active</Badge>}
-                    {member.status === 'invited' && <Badge variant="warning">Invited</Badge>}
-                    {member.status === 'inactive' && <Badge variant="neutral">Inactive</Badge>}
-                  </td>
-                  <td style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                    {member.lastActive}
-                  </td>
-                  <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      icon={<Trash2 size={14} color="var(--tuw-text-error, #C91818)" />}
-                      onClick={() => {
-                        if (canPerformAction('team')) setMemberToRemove(member);
+        <Table>
+          <TableHeader style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
+            <TableRow hoverable={false}>
+              <TableHead style={{ padding: '12px 16px' }}>Member</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Role Scope</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Status</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Last Active</TableHead>
+              <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedMembers.map((member) => (
+              <TableRow key={member.id} hoverable={false} style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
+                <TableCell style={{ padding: '14px 16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div
+                      style={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: '50%',
+                        backgroundColor: member.avatarBg,
+                        color: '#FFFFFF',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 14,
+                        fontWeight: 600,
                       }}
                     >
-                      Remove
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                      {member.name.charAt(0)}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>{member.name}</div>
+                      <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>{member.email}</div>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)', fontWeight: 500 }}>
+                  <Badge variant={member.role === 'Owner' ? 'success' : member.role === 'Operations' ? 'info' : 'neutral'}>
+                    {member.role}
+                  </Badge>
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px' }}>
+                  {member.status === 'active' && <Badge variant="success">Active</Badge>}
+                  {member.status === 'invited' && <Badge variant="warning">Invited</Badge>}
+                  {member.status === 'inactive' && <Badge variant="neutral">Inactive</Badge>}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                  {member.lastActive}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px', textAlign: 'right' }}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon={<Trash2 size={14} color="var(--tuw-text-error, #C91818)" />}
+                    onClick={() => {
+                      if (canPerformAction('team')) setMemberToRemove(member);
+                    }}
+                  >
+                    Remove
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
 
         <Pagination
           currentPage={currentPage}

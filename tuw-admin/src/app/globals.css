@@ -1025,40 +1025,6 @@
   pointer-events: none;
 }
 
-.sub-pageHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.sub-headingGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.sub-pageTitle {
-  font-size: 28px;
-  font-weight: 600;
-  color: var(--tuw-text-primary, #262626);
-  font-family: var(--font-main);
-}
-
-.sub-pageSubtitle {
-  font-size: 14px;
-  color: var(--tuw-text-secondary, #5D6772);
-  font-family: var(--font-main);
-}
-
-.sub-headerActions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
 /* Stat Grid */
 .sub-statGrid {
   display: grid;
@@ -1174,39 +1140,6 @@
   .sub-cardGrid {
     grid-template-columns: 1fr;
   }
-}
-
-/* Welcome Row */
-.home-welcomeRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 4px;
-}
-
-.home-welcomeTextGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.home-welcomeHeading {
-  font-size: 24px;
-  font-weight: 700;
-  color: #242424;
-  letter-spacing: -0.01em;
-}
-
-.home-welcomeSubtext {
-  font-size: 16px;
-  font-weight: 400;
-  color: #6C6C6C;
-}
-
-.home-welcomeControls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
 }
 
 .home-onlineBadge {
@@ -2079,19 +2012,8 @@
 }
 
 @media (max-width: 680px) {
-  .home-welcomeRow {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
   .home-kpiGrid {
     grid-template-columns: 1fr;
-  }
-
-  .home-welcomeControls {
-    width: 100%;
-    justify-content: space-between;
   }
 }
 

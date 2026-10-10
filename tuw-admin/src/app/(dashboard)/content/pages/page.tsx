@@ -15,6 +15,13 @@ import {
   Textarea,
   EmptyState,
   Pagination,
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+  PageHeader,
 } from '@/components/ui';
 import {
   FileText,
@@ -230,39 +237,24 @@ export default function PagesManagementPage() {
 
   return (
     <DashboardShell pageTitle="Static Pages">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            <Link
-              href="/content"
-              style={{
-                color: 'var(--tuw-text-secondary, #5D6772)',
-                textDecoration: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 4,
-                fontSize: 13,
-              }}
-            >
-              <ArrowLeft size={14} /> Back to Content
-            </Link>
-          </div>
-          <h2 style={{ fontSize: 28, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-            Static CMS Pages
-          </h2>
-          <p style={{ fontSize: 14, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-            Manage About Us, Sustainability Manifesto, Fit Guide, Terms of Service, and Policies.
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          size="md"
-          icon={<Plus size={16} />}
-          onClick={() => setIsCreateModalOpen(true)}
-        >
-          Create Page
-        </Button>
-      </div>
+      <PageHeader
+        title="Static CMS Pages"
+        eyebrow={
+          <Link href="/content" style={{ color: 'var(--tuw-text-secondary, #5D6772)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4, fontSize: 13 }}>
+            <ArrowLeft size={14} /> Back to Content
+          </Link>
+        }
+        actions={
+          <Button
+            variant="primary"
+            size="md"
+            icon={<Plus size={16} />}
+            onClick={() => setIsCreateModalOpen(true)}
+          >
+            Create Page
+          </Button>
+        }
+      />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
         <StatCard
@@ -359,30 +351,30 @@ export default function PagesManagementPage() {
             }}
           />
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 14 }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                  <th style={{ padding: '12px 16px', fontWeight: 600 }}>Page Title & Path</th>
-                  <th style={{ padding: '12px 16px', fontWeight: 600 }}>Status</th>
-                  <th style={{ padding: '12px 16px', fontWeight: 600 }}>Last Modified</th>
-                  <th style={{ padding: '12px 16px', fontWeight: 600 }}>30d Views</th>
-                  <th style={{ padding: '12px 16px', fontWeight: 600, textAlign: 'right' }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedPages.map((page) => (
-                  <tr
-                    key={page.id}
-                    style={{
-                      borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)',
-                      transition: 'background-color 0.15s ease',
-                    }}
-                  >
-                    <td style={{ padding: '14px 16px' }}>
-                      <div style={{ fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-                        {page.title}
-                      </div>
+          <Table>
+            <TableHeader style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
+              <TableRow hoverable={false}>
+                <TableHead style={{ padding: '12px 16px' }}>Page Title & Path</TableHead>
+                <TableHead style={{ padding: '12px 16px' }}>Status</TableHead>
+                <TableHead style={{ padding: '12px 16px' }}>Last Modified</TableHead>
+                <TableHead style={{ padding: '12px 16px' }}>30d Views</TableHead>
+                <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paginatedPages.map((page) => (
+                <TableRow
+                  key={page.id}
+                  hoverable={false}
+                  style={{
+                    borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)',
+                    transition: 'background-color 0.15s ease',
+                  }}
+                >
+                  <TableCell style={{ padding: '14px 16px' }}>
+                    <div style={{ fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                      {page.title}
+                    </div>
                       <div
                         style={{
                           fontSize: 12,
@@ -395,19 +387,19 @@ export default function PagesManagementPage() {
                       >
                         <code>{page.slug}</code>
                       </div>
-                    </td>
-                    <td style={{ padding: '14px 16px' }}>
-                      <Badge variant={page.status === 'published' ? 'success' : 'neutral'}>
-                        {page.status === 'published' ? 'Published' : 'Draft'}
-                      </Badge>
-                    </td>
-                    <td style={{ padding: '14px 16px', color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                      {page.lastModified}
-                    </td>
-                    <td style={{ padding: '14px 16px', color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                      {page.views30d.toLocaleString()}
-                    </td>
-                    <td style={{ padding: '14px 16px', textAlign: 'right' }}>
+                    </TableCell>
+                  <TableCell style={{ padding: '14px 16px' }}>
+                    <Badge variant={page.status === 'published' ? 'success' : 'neutral'}>
+                      {page.status === 'published' ? 'Published' : 'Draft'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px', color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                    {page.lastModified}
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px', color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                    {page.views30d.toLocaleString()}
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px', textAlign: 'right' }}>
                       <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                         <Button
                           variant="ghost"
@@ -428,12 +420,11 @@ export default function PagesManagementPage() {
                           <Trash2 size={14} />
                         </Button>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+            </Table>
         )}
 
         {filteredPages.length > 0 && (
