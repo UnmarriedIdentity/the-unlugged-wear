@@ -21,6 +21,7 @@ import {
   TableRow,
   TableHead,
   TableCell,
+  PageHeader,
 } from '@/components/ui';
 import {
   FileText,
@@ -236,39 +237,24 @@ export default function PagesManagementPage() {
 
   return (
     <DashboardShell pageTitle="Static Pages">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            <Link
-              href="/content"
-              style={{
-                color: 'var(--tuw-text-secondary, #5D6772)',
-                textDecoration: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 4,
-                fontSize: 13,
-              }}
-            >
-              <ArrowLeft size={14} /> Back to Content
-            </Link>
-          </div>
-          <h2 style={{ fontSize: 28, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-            Static CMS Pages
-          </h2>
-          <p style={{ fontSize: 14, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-            Manage About Us, Sustainability Manifesto, Fit Guide, Terms of Service, and Policies.
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          size="md"
-          icon={<Plus size={16} />}
-          onClick={() => setIsCreateModalOpen(true)}
-        >
-          Create Page
-        </Button>
-      </div>
+      <PageHeader
+        title="Static CMS Pages"
+        eyebrow={
+          <Link href="/content" style={{ color: 'var(--tuw-text-secondary, #5D6772)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4, fontSize: 13 }}>
+            <ArrowLeft size={14} /> Back to Content
+          </Link>
+        }
+        actions={
+          <Button
+            variant="primary"
+            size="md"
+            icon={<Plus size={16} />}
+            onClick={() => setIsCreateModalOpen(true)}
+          >
+            Create Page
+          </Button>
+        }
+      />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
         <StatCard
