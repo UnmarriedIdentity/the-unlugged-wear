@@ -102,6 +102,10 @@ export default function Checkbox({
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
+          // Immune to baseline-synthesis shifts (icon mount moves the synthesized
+          // baseline under vertical-align:baseline parents like TableHead).
+          // Margin box is a fixed 18px in all states, so this is rendering-identical.
+          verticalAlign: 'middle',
           cursor: disabled ? 'not-allowed' : 'pointer',
           userSelect: 'none',
           ...style,
