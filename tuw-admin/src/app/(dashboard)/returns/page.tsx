@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import DashboardShell from '@/components/layout/DashboardShell';
 import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader, Checkbox } from '@/components/ui';
-import { Undo2, Search, Filter, CheckCircle2, XCircle, ArrowRight, RotateCcw } from 'lucide-react';
+import { Undo2, Search, Filter, CheckCircle2, XCircle, ArrowRight, RotateCcw, Download } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { ReturnItem } from '@/mocks/fixtures';
 
@@ -72,6 +72,61 @@ export default function ReturnsPage() {
     if (selectedReturn?.id === id) {
       setSelectedReturn({ ...selectedReturn, stage: 'disputed' });
     }
+  };
+
+  // Bulk actions (bar appears when rows are selected)
+  const clearSelection = () => setSelectedIds(new Set());
+
+  const handleExportSelected = () => {
+    const selected = returns.filter((r) => selectedIds.has(r.id));
+    if (selected.length === 0) return;
+    const headers = ['RMA ID', 'Order ID', 'Customer', 'Items', 'Reason', 'Stage'];
+    const rows = selected.map((r) => [
+      r.id,
+      r.orderId,
+      `"${r.customer}"`,
+      `"${r.items}"`,
+      `"${r.reason}"`,
+      r.stage,
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
+    const link = document.createElement('a');
+    link.setAttribute('href', encodeURI(csvContent));
+    link.setAttribute('download', `tuw_returns_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast({
+      type: 'success',
+      title: 'Selected Returns Exported',
+      description: `${selected.length} return${selected.length === 1 ? '' : 's'} exported to CSV.`,
+    });
+    clearSelection();
+  };
+
+  const handleBulkStage = (stage: 'restocked' | 'disputed', label: string) => {
+    const ids = [...selectedIds];
+    if (ids.length === 0) return;
+    if (!canPerformAction('orders')) {
+      showToast({
+        type: 'warning',
+        title: 'Action Restricted',
+        description: 'Your demo role cannot update returns.',
+      });
+      return;
+    }
+    ids.forEach((id) => updateReturnStatus(id, stage, true));
+    if (selectedReturn && selectedIds.has(selectedReturn.id)) {
+      setSelectedReturn({ ...selectedReturn, stage });
+    }
+    setStageFilter('all');
+    setCurrentPage(1);
+    showToast({
+      type: 'success',
+      title: 'Bulk Update Applied',
+      description: `${ids.length} return${ids.length === 1 ? '' : 's'} marked ${label}.`,
+    });
+    clearSelection();
   };
 
   return (
