@@ -79,3 +79,6 @@ export type { DropdownMenuProps, DropdownMenuItem } from './DropdownMenu';
 export { default as ViewToggle } from './ViewToggle';
 export type { ViewToggleProps, ViewToggleOption } from './ViewToggle';
 
+export { default as UpliftSurface } from './UpliftSurface';
+export type { UpliftSurfaceProps } from './UpliftSurface';
+
