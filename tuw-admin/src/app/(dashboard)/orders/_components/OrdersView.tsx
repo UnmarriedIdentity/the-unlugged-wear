@@ -8,6 +8,7 @@ import {
   ContentCard,
   Button,
   Badge,
+  Checkbox,
   Input,
   Drawer,
   Modal,
@@ -40,6 +41,8 @@ export default function OrdersView() {
 
   // Drawer & Modal State
   const [selectedOrder, setSelectedOrder] = useState<OrderItem | null>(null);
+  // Row selection (multi-select; header checkbox tri-states over the page)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isRefundOpen, setIsRefundOpen] = useState(false);
   const [refundAmount, setRefundAmount] = useState<string>('');
@@ -86,6 +89,44 @@ export default function OrdersView() {
 
   const totalPages = Math.max(1, Math.ceil(filteredOrders.length / pageSize));
   const paginatedOrders = filteredOrders.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  // Row selection + reference label maps (derived — no mock-model change)
+  const pageIds = paginatedOrders.map((o) => o.id);
+  const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selectedIds.has(id));
+  const somePageSelected = pageIds.some((id) => selectedIds.has(id));
+  const toggleId = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+  const togglePage = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (pageIds.every((id) => next.has(id))) pageIds.forEach((id) => next.delete(id));
+      else pageIds.forEach((id) => next.add(id));
+      return next;
+    });
+  };
+  const paymentLabel = (s: PaymentStatus) =>
+    s === 'paid' ? 'Fully paid' : s === 'pending' ? 'Authorized' : s === 'failed' ? 'Voided' : 'Refund';
+  const fulfillmentLabel = (s: FulfillmentStatus) =>
+    s === 'delivered' || s === 'shipped' ? 'Fulfilled' : s === 'printing' ? 'Partially fulfilled' : 'Unfulfilled';
+  const shippingBadge = (o: OrderItem) =>
+    o.paymentStatus === 'refunded' ? (
+      <Badge variant="danger">Returned</Badge>
+    ) : o.fulfillmentStatus === 'delivered' ? (
+      <Badge variant="info">Delivered</Badge>
+    ) : o.fulfillmentStatus === 'shipped' ? (
+      <Badge variant="success">Shipped</Badge>
+    ) : o.fulfillmentStatus === 'submission_failed' ? (
+      <Badge variant="neutral">Cancelled</Badge>
+    ) : (
+      <Badge variant="warning">Processing</Badge>
+    );
+  const itemCount = (o: OrderItem) => o.items.reduce((n, li) => n + li.quantity, 0);
 
   // Calculate Metrics from Live Dataset
   const totalRevenue = orders
@@ -277,19 +318,30 @@ export default function OrdersView() {
         <Table>
           <TableHeader>
             <TableRow hoverable={false}>
+              <TableHead style={{ padding: '12px 16px', width: 44 }}>
+                <Checkbox
+                  bare
+                  aria-label="Select all orders on this page"
+                  checked={allPageSelected}
+                  indeterminate={!allPageSelected && somePageSelected}
+                  onChange={togglePage}
+                />
+              </TableHead>
               <TableHead style={{ padding: '12px 16px' }}>Order</TableHead>
-              <TableHead style={{ padding: '12px 16px' }}>Customer</TableHead>
               <TableHead style={{ padding: '12px 16px' }}>Date</TableHead>
-              <TableHead style={{ padding: '12px 16px' }}>Payment Status</TableHead>
-              <TableHead style={{ padding: '12px 16px' }}>Fulfillment Status</TableHead>
-              <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Total</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Customer</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Payment</TableHead>
+              <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Amount</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Fulfillment</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Item</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Shipping</TableHead>
               <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredOrders.length === 0 ? (
               <TableRow hoverable={false}>
-                <TableCell colSpan={7} style={{ padding: '48px 16px', textAlign: 'center', color: 'var(--tuw-text-secondary, #5D6772)', fontSize: 16 }}>
+                <TableCell colSpan={10} style={{ padding: '48px 16px', textAlign: 'center', color: 'var(--tuw-text-secondary, #5D6772)', fontSize: 16 }}>
                   No orders match your search criteria.
                 </TableCell>
               </TableRow>
@@ -301,12 +353,24 @@ export default function OrdersView() {
                   style={{
                     cursor: 'pointer',
                     transition: 'background-color 0.15s',
+                    backgroundColor: selectedIds.has(order.id) ? 'var(--tuw-bg-canvas, #F7F8F9)' : 'transparent',
                   }}
                   onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--tuw-bg-canvas, #F7F8F9)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = selectedIds.has(order.id) ? 'var(--tuw-bg-canvas, #F7F8F9)' : 'transparent')}
                 >
+                  <TableCell style={{ padding: '14px 16px' }}>
+                    <Checkbox
+                      bare
+                      aria-label={`Select order ${order.id}`}
+                      checked={selectedIds.has(order.id)}
+                      onChange={() => toggleId(order.id)}
+                    />
+                  </TableCell>
                   <TableCell style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)' }}>
                     {order.id}
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                    {order.date}
                   </TableCell>
                   <TableCell style={{ padding: '14px 16px' }}>
                     <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)' }}>
@@ -316,28 +380,20 @@ export default function OrdersView() {
                       {order.customerEmail}
                     </div>
                   </TableCell>
-                  <TableCell style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                    {order.date}
-                  </TableCell>
-                  <TableCell style={{ padding: '14px 16px' }}>
-                    {order.paymentStatus === 'paid' && <Badge variant="success">Paid</Badge>}
-                    {order.paymentStatus === 'pending' && <Badge variant="warning">Pending</Badge>}
-                    {order.paymentStatus === 'failed' && <Badge variant="danger">Failed</Badge>}
-                    {order.paymentStatus === 'refunded' && <Badge variant="neutral">Refunded</Badge>}
-                  </TableCell>
-                  <TableCell style={{ padding: '14px 16px' }}>
-                    {order.fulfillmentStatus === 'delivered' && <Badge variant="success">Delivered</Badge>}
-                    {order.fulfillmentStatus === 'shipped' && <Badge variant="info">Shipped</Badge>}
-                    {order.fulfillmentStatus === 'printing' && <Badge variant="warning">Printing</Badge>}
-                    {order.fulfillmentStatus === 'queued' && <Badge variant="neutral">Queued</Badge>}
-                    {order.fulfillmentStatus === 'submission_failed' && (
-                      <Badge variant="danger" icon={<AlertTriangle size={12} />}>
-                        Failed Sync
-                      </Badge>
-                    )}
+                  <TableCell style={{ padding: '14px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
+                    {paymentLabel(order.paymentStatus)}
                   </TableCell>
                   <TableCell className="tuw-tabular-nums" style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', textAlign: 'right' }}>
                     ₹{order.total.toFixed(2)}
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
+                    {fulfillmentLabel(order.fulfillmentStatus)}
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
+                    {itemCount(order)} item
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px' }}>
+                    {shippingBadge(order)}
                   </TableCell>
                   <TableCell style={{ padding: '14px 16px', textAlign: 'right' }}>
                     <Button
