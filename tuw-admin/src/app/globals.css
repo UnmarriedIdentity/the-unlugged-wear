@@ -2090,3 +2090,11 @@
   background-color: var(--tuw-bg-selected, #F8F5FF) !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04) !important;
 }
+
+/* Permanent selected wash (PT1b): same treatment as the hover above, for
+   KPI cards acting as active filters. Toggled via className, not hover. */
+.tuw-stat-active {
+  border-color: rgba(117, 57, 255, 0.35) !important;
+  background-color: var(--tuw-bg-selected, #F8F5FF) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04) !important;
+}
