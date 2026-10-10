@@ -18,7 +18,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, Button, Badge, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui';
+import { StatCard, ContentCard, Button, Badge, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
@@ -62,35 +62,31 @@ export default function AnalyticsView() {
   return (
     <DashboardShell pageTitle="Analytics" activeNav="analytics">
       {/* Page Header */}
-      <div className={styles.pageHeader}>
-        <div className={styles.headingGroup}>
-          <h2 className={styles.pageTitle}>Analytics & Operational Reports</h2>
-          <p className={styles.pageSubtitle}>
-            Comprehensive overview of store sales, conversion metrics, customer acquisition, and fulfillment SLA.
-          </p>
-        </div>
+      <PageHeader
+        title="Analytics & Operational Reports"
+        actions={
+          <>
+            <Button
+              variant="secondary"
+              size="md"
+              icon={<Calendar size={16} />}
+              onClick={() => setTimeRange(timeRange === '30d' ? '7d' : '30d')}
+            >
+              <span>{timeRange === '30d' ? 'Last 30 Days' : 'Last 7 Days'}</span>
+              <ChevronDown size={14} style={{ marginLeft: 4 }} />
+            </Button>
 
-        <div className={styles.headerActions}>
-          <Button
-            variant="secondary"
-            size="md"
-            icon={<Calendar size={16} />}
-            onClick={() => setTimeRange(timeRange === '30d' ? '7d' : '30d')}
-          >
-            <span>{timeRange === '30d' ? 'Last 30 Days' : 'Last 7 Days'}</span>
-            <ChevronDown size={14} style={{ marginLeft: 4 }} />
-          </Button>
-
-          <Button
-            variant="primary"
-            size="md"
-            icon={<Download size={16} />}
-            onClick={handleExportCSV}
-          >
-            <span>Export CSV Report</span>
-          </Button>
-        </div>
-      </div>
+            <Button
+              variant="primary"
+              size="md"
+              icon={<Download size={16} />}
+              onClick={handleExportCSV}
+            >
+              <span>Export CSV Report</span>
+            </Button>
+          </>
+        }
+      />
 
       {/* Top 4 KPI Metrics */}
       <div className={styles.statGrid}>
