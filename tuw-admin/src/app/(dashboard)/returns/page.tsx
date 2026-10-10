@@ -37,6 +37,27 @@ export default function ReturnsPage() {
   const totalPages = Math.max(1, Math.ceil(filteredReturns.length / pageSize));
   const paginatedReturns = filteredReturns.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
+  // Row selection helpers (header checkbox tri-states over the page)
+  const pageIds = paginatedReturns.map((r) => r.id);
+  const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selectedIds.has(id));
+  const somePageSelected = pageIds.some((id) => selectedIds.has(id));
+  const toggleId = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+  const togglePage = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (pageIds.every((id) => next.has(id))) pageIds.forEach((id) => next.delete(id));
+      else pageIds.forEach((id) => next.add(id));
+      return next;
+    });
+  };
+
   const handleApprove = (id: string) => {
     if (!canPerformAction('orders')) return;
     updateReturnStatus(id, 'restocked');
@@ -93,6 +114,15 @@ export default function ReturnsPage() {
         <Table>
           <TableHeader style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
             <TableRow hoverable={false}>
+              <TableHead style={{ padding: '12px 16px', width: 44 }}>
+                <Checkbox
+                  bare
+                  aria-label="Select all returns on this page"
+                  checked={allPageSelected}
+                  indeterminate={!allPageSelected && somePageSelected}
+                  onChange={togglePage}
+                />
+              </TableHead>
               <TableHead style={{ padding: '12px 16px' }}>RMA ID</TableHead>
               <TableHead style={{ padding: '12px 16px' }}>Order</TableHead>
               <TableHead style={{ padding: '12px 16px' }}>Customer</TableHead>
@@ -107,8 +137,16 @@ export default function ReturnsPage() {
               <TableRow
                 key={item.id}
                 onClick={() => setSelectedReturn(item)}
-                style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', cursor: 'pointer' }}
+                style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', cursor: 'pointer', backgroundColor: selectedIds.has(item.id) ? 'var(--tuw-bg-canvas, #F7F8F9)' : 'transparent' }}
               >
+                <TableCell style={{ padding: '14px 16px' }}>
+                  <Checkbox
+                    bare
+                    aria-label={`Select return ${item.id}`}
+                    checked={selectedIds.has(item.id)}
+                    onChange={() => toggleId(item.id)}
+                  />
+                </TableCell>
                 <TableCell style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
                   {item.id}
                 </TableCell>
