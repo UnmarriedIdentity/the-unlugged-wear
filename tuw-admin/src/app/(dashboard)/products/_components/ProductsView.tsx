@@ -15,6 +15,7 @@ export default function ProductsView() {
 
   const [selectedCat, setSelectedCat] = useState<string>('All');
   const [publicationFilter, setPublicationFilter] = useState<'all' | 'published' | 'draft' | 'archived'>('all');
+  const [stockFilter, setStockFilter] = useState<'all' | 'low' | 'out'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [view, setView] = useState<'grid' | 'table'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
@@ -141,7 +142,7 @@ export default function ProductsView() {
 
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, selectedCat, publicationFilter]);
+  }, [searchTerm, selectedCat, publicationFilter, stockFilter]);
 
   const filteredProducts = products.filter((p) => {
     const matchesSearch =
@@ -150,7 +151,13 @@ export default function ProductsView() {
       p.slug.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCat = selectedCat === 'All' || p.category === selectedCat;
     const matchesPub = publicationFilter === 'all' || p.publicationStatus === publicationFilter;
-    return matchesSearch && matchesCat && matchesPub;
+    const matchesStock =
+      stockFilter === 'all'
+        ? true
+        : stockFilter === 'low'
+          ? p.stock > 0 && p.stock <= 10
+          : p.stock === 0;
+    return matchesSearch && matchesCat && matchesPub && matchesStock;
   });
 
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize));
@@ -159,6 +166,25 @@ export default function ProductsView() {
   const lowStockCount = products.filter((p) => p.stock > 0 && p.stock <= 10).length;
   const outOfStockCount = products.filter((p) => p.stock === 0).length;
   const draftCount = products.filter((p) => p.publicationStatus === 'draft').length;
+
+  // KPI cards double as filters (shared by grid + table views)
+  const filtersClear = selectedCat === 'All' && publicationFilter === 'all' && stockFilter === 'all';
+  const clearProductFilters = () => {
+    setSelectedCat('All');
+    setPublicationFilter('all');
+    setStockFilter('all');
+  };
+  const toggleStockFilter = (v: 'low' | 'out') =>
+    setStockFilter((cur) => (cur === v ? 'all' : v));
+  const togglePublicationFilter = (v: typeof publicationFilter) =>
+    setPublicationFilter((cur) => (cur === v ? 'all' : v));
+  const kpiKeyDown =
+    (handler: () => void) => (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handler();
+      }
+    };
 
   return (
     <DashboardShell pageTitle="Products" activeNav="products">
