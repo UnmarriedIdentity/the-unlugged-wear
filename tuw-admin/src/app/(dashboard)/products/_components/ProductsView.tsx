@@ -214,7 +214,7 @@ export default function ProductsView() {
           tabIndex={0}
           aria-pressed={filtersClear}
           aria-label="Show all products"
-          className={!filtersClear ? 'tuw-stat-active' : ''}
+          className={filtersClear ? 'tuw-stat-active' : ''}
           style={{ cursor: 'pointer' }}
           onClick={clearProductFilters}
           onKeyDown={kpiKeyDown(clearProductFilters)}
@@ -289,7 +289,7 @@ export default function ProductsView() {
               />
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap', flexShrink: 0, gap: 12 }}>
               <div style={{ maxWidth: 300, width: '100%' }}>
                 <Input
                   placeholder="Search products by title, category, or slug..."
