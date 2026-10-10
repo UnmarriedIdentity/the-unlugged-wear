@@ -8,14 +8,14 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 144,
-    "done": 130,
+    "total": 145,
+    "done": 131,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "eb89482",
+    "tip": "d6d0c71",
     "unpushed": ["6668cfd", "212ca3d", "c8a2f40", "6a00935", "2dc810e", "a60fa4f", "d7b2b31"],
     "next_up": "human pushes origin/v2 (2 commits) then origin/feat/search-modal (6 commits); browser review of spotlight",
     "pending_verifications": [
@@ -956,6 +956,26 @@
       "verified": true,
       "pushed": false,
       "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-US1",
+      "title": "UpliftSurface shared 3D component + ViewToggle wiring",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal: c6c8abf class + 460390b component + 2e758f8 barrel + d6d0c71 toggle wiring (button shell kept for keyboard/radio)",
+      "design_match": "yes",
+      "key_decisions": [
+        "component over class-only per instruction; class remains the single source",
+        "geometry identical (32x32/radius8) — only shadow paint changed",
+        "sidebar migration explicitly deferred, untouched"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "Migrate SidebarNavItem active treatment onto UpliftSurface/.tuw-3d-active"
+      ]
     },
     {
       "id": "TL-DASH-HOV5",
