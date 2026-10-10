@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { HelpCircle, MessageSquare, Send, CheckCircle2, Clock, AlertCircle, Sparkles, ChevronRight, User } from 'lucide-react';
+import { HelpCircle, MessageSquare, Send, CheckCircle2, Clock, AlertCircle, Sparkles, ChevronRight, User, Download } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader, Checkbox } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { SupportTicket } from '@/mocks/fixtures';
 
@@ -25,12 +25,14 @@ const cannedResponses = [
 ];
 
 export default function HelpView() {
-  const { supportTickets, sendSupportReply, canPerformAction } = useAdminState();
+  const { supportTickets, sendSupportReply, canPerformAction, showToast } = useAdminState();
   const [statusFilter, setStatusFilter] = useState<'all' | SupportTicket['status']>('all');
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
   const [draftReply, setDraftReply] = useState('');
+  // Row selection (multi-select; header checkbox tri-states over the page)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(6);
+  const [pageSize, setPageSize] = useState(5);
 
   React.useEffect(() => {
     setCurrentPage(1);
@@ -39,6 +41,27 @@ export default function HelpView() {
   const filteredTickets = supportTickets.filter((t) => statusFilter === 'all' || t.status === statusFilter);
   const totalPages = Math.max(1, Math.ceil(filteredTickets.length / pageSize));
   const paginatedTickets = filteredTickets.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  // Row selection helpers (header checkbox tri-states over the page)
+  const pageIds = paginatedTickets.map((t) => t.id);
+  const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selectedIds.has(id));
+  const somePageSelected = pageIds.some((id) => selectedIds.has(id));
+  const toggleId = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+  const togglePage = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (pageIds.every((id) => next.has(id))) pageIds.forEach((id) => next.delete(id));
+      else pageIds.forEach((id) => next.add(id));
+      return next;
+    });
+  };
 
   const openTicketsCount = supportTickets.filter((t) => t.status === 'open').length;
   const resolvedCount = supportTickets.filter((t) => t.status === 'resolved').length;
