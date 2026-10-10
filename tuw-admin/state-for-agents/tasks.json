@@ -8,14 +8,14 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 143,
-    "done": 129,
+    "total": 144,
+    "done": 130,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "b770b09",
+    "tip": "eb89482",
     "unpushed": ["6668cfd", "212ca3d", "c8a2f40", "6a00935", "2dc810e", "a60fa4f", "d7b2b31"],
     "next_up": "human pushes origin/v2 (2 commits) then origin/feat/search-modal (6 commits); browser review of spotlight",
     "pending_verifications": [
@@ -937,6 +937,20 @@
       "started": "2026-10-06",
       "finished": "2026-10-06",
       "log": "feat/search-modal:b770b09 (44px trigger matches Input; tab strip deleted, CSS left untouched)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PT1D",
+      "title": "Products Total wash fix + nowrap toolbar cluster",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:eb89482 (inverted filtersClearBang; cluster wraps as unit now)",
       "design_match": "yes",
       "key_decisions": [],
       "verified": true,
