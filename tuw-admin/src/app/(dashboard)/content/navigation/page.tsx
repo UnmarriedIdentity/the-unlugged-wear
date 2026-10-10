@@ -13,6 +13,7 @@ import {
   Modal,
   Drawer,
   EmptyState,
+  PageHeader,
 } from '@/components/ui';
 import {
   Menu,
@@ -184,42 +185,27 @@ export default function NavigationPage() {
 
   return (
     <DashboardShell pageTitle="Storefront Navigation">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            <Link
-              href="/content"
-              style={{
-                color: 'var(--tuw-text-secondary, #5D6772)',
-                textDecoration: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 4,
-                fontSize: 13,
-              }}
-            >
-              <ArrowLeft size={14} /> Back to Content
-            </Link>
-          </div>
-          <h2 style={{ fontSize: 28, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-            Store Navigation Menus
-          </h2>
-          <p style={{ fontSize: 14, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-            Configure main header navigation, category links, and footer site maps.
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          size="md"
-          icon={<Plus size={16} />}
-          onClick={() => {
-            setNewGroup(selectedGroup);
-            setIsAddModalOpen(true);
-          }}
-        >
-          Add Menu Item
-        </Button>
-      </div>
+      <PageHeader
+        title="Store Navigation Menus"
+        eyebrow={
+          <Link href="/content" style={{ color: 'var(--tuw-text-secondary, #5D6772)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4, fontSize: 13 }}>
+            <ArrowLeft size={14} /> Back to Content
+          </Link>
+        }
+        actions={
+          <Button
+            variant="primary"
+            size="md"
+            icon={<Plus size={16} />}
+            onClick={() => {
+              setNewGroup(selectedGroup);
+              setIsAddModalOpen(true);
+            }}
+          >
+            Add Menu Item
+          </Button>
+        }
+      />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
         <StatCard
