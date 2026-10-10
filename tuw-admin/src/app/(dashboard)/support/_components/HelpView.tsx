@@ -85,6 +85,70 @@ export default function HelpView() {
     setDraftReply('');
   };
 
+  // Bulk actions (bar appears when rows are selected)
+  const BULK_RESOLVE_NOTICE =
+    'Hello, our support team has reviewed your request and applied a resolution. Please reply to this thread if you need anything further.';
+  const clearSelection = () => setSelectedIds(new Set());
+
+  const handleExportSelected = () => {
+    const selected = supportTickets.filter((t) => selectedIds.has(t.id));
+    if (selected.length === 0) return;
+    const headers = ['Ticket ID', 'Customer', 'Email', 'Subject', 'Priority', 'Status'];
+    const rows = selected.map((t) => [
+      t.id,
+      `"${t.customerName}"`,
+      t.customerEmail,
+      `"${t.subject}"`,
+      t.priority,
+      t.status,
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
+    const link = document.createElement('a');
+    link.setAttribute('href', encodeURI(csvContent));
+    link.setAttribute('download', `tuw_support_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast({
+      type: 'success',
+      title: 'Selected Tickets Exported',
+      description: `${selected.length} ticket${selected.length === 1 ? '' : 's'} exported to CSV.`,
+    });
+    clearSelection();
+  };
+
+  const handleBulkResolve = () => {
+    const ids = [...selectedIds];
+    if (ids.length === 0) return;
+    if (!canPerformAction('orders')) {
+      showToast({
+        type: 'warning',
+        title: 'Action Restricted',
+        description: 'Your demo role cannot resolve tickets.',
+      });
+      return;
+    }
+    ids.forEach((id) => sendSupportReply(id, BULK_RESOLVE_NOTICE, true));
+    if (selectedTicket && selectedIds.has(selectedTicket.id)) {
+      setSelectedTicket({
+        ...selectedTicket,
+        status: 'resolved',
+        messages: [
+          ...selectedTicket.messages,
+          { sender: 'staff', text: BULK_RESOLVE_NOTICE, time: 'Just now' },
+        ],
+      });
+    }
+    setStatusFilter('all');
+    setCurrentPage(1);
+    showToast({
+      type: 'success',
+      title: 'Bulk Resolve Applied',
+      description: `${ids.length} ticket${ids.length === 1 ? '' : 's'} resolved with canned notice.`,
+    });
+    clearSelection();
+  };
+
   return (
     <DashboardShell pageTitle="Support" activeNav="help">
       <PageHeader title="Support Ticket Desk" />
@@ -123,6 +187,15 @@ export default function HelpView() {
         <Table>
           <TableHeader style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
             <TableRow hoverable={false}>
+              <TableHead style={{ padding: '12px 16px', width: 44 }}>
+                <Checkbox
+                  bare
+                  aria-label="Select all tickets on this page"
+                  checked={allPageSelected}
+                  indeterminate={!allPageSelected && somePageSelected}
+                  onChange={togglePage}
+                />
+              </TableHead>
               <TableHead style={{ padding: '12px 16px' }}>Ticket</TableHead>
               <TableHead style={{ padding: '12px 16px' }}>Customer</TableHead>
               <TableHead style={{ padding: '12px 16px' }}>Subject</TableHead>
@@ -136,8 +209,16 @@ export default function HelpView() {
               <TableRow
                 key={ticket.id}
                 onClick={() => setSelectedTicket(ticket)}
-                style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', cursor: 'pointer' }}
+                style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', cursor: 'pointer', backgroundColor: selectedIds.has(ticket.id) ? 'var(--tuw-bg-canvas, #F7F8F9)' : 'transparent' }}
               >
+                <TableCell style={{ padding: '14px 16px' }}>
+                  <Checkbox
+                    bare
+                    aria-label={`Select ticket ${ticket.id}`}
+                    checked={selectedIds.has(ticket.id)}
+                    onChange={() => toggleId(ticket.id)}
+                  />
+                </TableCell>
                 <TableCell style={{ padding: '14px 16px', fontSize: 13, fontFamily: 'monospace', fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)' }}>
                   {ticket.id}
                 </TableCell>
