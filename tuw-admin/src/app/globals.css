@@ -2098,3 +2098,12 @@
   background-color: var(--tuw-bg-selected, #F8F5FF) !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04) !important;
 }
+
+/* Shared 3D uplift surface (US1): white face + inset bottom edge, the same
+   relief the sidebar gives its active nav item (shadow-nav-edge token).
+   Sized entirely by the caller (width/height/radius props on UpliftSurface)
+   so it fits anywhere with zero geometry of its own. */
+.tuw-3d-active {
+  background-color: var(--tuw-bg-surface, #FFFFFF) !important;
+  box-shadow: var(--shadow-nav-edge, inset 0 -2px 0 #d6d6d6) !important;
+}
