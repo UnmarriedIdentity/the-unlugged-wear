@@ -56,6 +56,7 @@ export default function Pagination({
             <span style={{ fontSize: '12px', color: 'var(--tuw-text-secondary, #5D6772)' }}>Rows:</span>
             <DropdownMenu
               ariaLabel="Rows per page"
+              direction="up"
               trigger={
                 <span
                   role="button"
