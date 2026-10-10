@@ -327,7 +327,8 @@ export default function ProductsView() {
           </div>
         </div>
 
-        {/* Card Grid */}
+        {view === 'grid' ? (
+        /* Card Grid */
         <div className={styles.cardGrid}>
           {filteredProducts.length === 0 ? (
             <div style={{ padding: '60px 16px', textAlign: 'center', color: 'var(--tuw-text-secondary, #5D6772)', gridColumn: '1 / -1' }}>
@@ -439,6 +440,97 @@ export default function ProductsView() {
             ))
           )}
         </div>
+        ) : (
+        /* Table View */
+        <Table>
+          <TableHeader>
+            <TableRow hoverable={false}>
+              <TableHead style={{ padding: '12px 16px' }}>Product</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Category</TableHead>
+              <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Price</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Stock / Sold</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Status</TableHead>
+              <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredProducts.length === 0 ? (
+              <TableRow hoverable={false}>
+                <TableCell colSpan={6} style={{ padding: '48px 16px', textAlign: 'center', color: 'var(--tuw-text-secondary, #5D6772)', fontSize: 16 }}>
+                  No products found matching the selected filters.
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginatedProducts.map((p) => (
+                <TableRow
+                  key={p.id}
+                  onClick={() => openEditDrawer(p)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <TableCell style={{ padding: '14px 16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div style={{ width: 40, height: 40, borderRadius: 8, overflow: 'hidden', position: 'relative', flexShrink: 0, background: p.imageBg, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--tuw-border-subtle, #E5E7EB)' }}>
+                        {p.image ? (
+                          <Image src={p.image} alt={p.name} fill sizes="80px" style={{ objectFit: 'cover' }} />
+                        ) : (
+                          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                            {p.name.slice(0, 2).toUpperCase()}
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)' }}>
+                          {p.name}
+                        </div>
+                        <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                          {p.slug}
+                        </div>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
+                    {p.category}
+                  </TableCell>
+                  <TableCell className="tuw-tabular-nums" style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', textAlign: 'right' }}>
+                    ₹{p.price.toFixed(2)}
+                    {p.compareAtPrice && (
+                      <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', textDecoration: 'line-through', marginLeft: 6, fontWeight: 400 }}>
+                        ₹{p.compareAtPrice.toFixed(2)}
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px' }}>
+                    <div style={{ fontSize: 14, fontWeight: 500, color: p.stock === 0 ? 'var(--tuw-text-error, #C91818)' : p.stock <= 10 ? 'var(--tuw-text-warning, #856300)' : 'var(--tuw-text-primary, #262626)' }}>
+                      {p.stock} in stock
+                    </div>
+                    <div className="tuw-tabular-nums" style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                      {p.soldCount} sold
+                    </div>
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px' }}>
+                    <Badge
+                      variant={
+                        p.publicationStatus === 'published'
+                          ? 'success'
+                          : p.publicationStatus === 'draft'
+                          ? 'warning'
+                          : 'neutral'
+                      }
+                    >
+                      {p.publicationStatus}
+                    </Badge>
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px', textAlign: 'right' }}>
+                    <Button variant="secondary" size="sm" icon={<Edit3 size={14} />} onClick={(e) => { e.stopPropagation(); openEditDrawer(p); }}>
+                      Manage
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+        )}
 
         {filteredProducts.length > 0 && (
           <Pagination
