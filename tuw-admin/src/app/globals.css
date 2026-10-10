@@ -1128,14 +1128,12 @@
   flex-direction: column;
   gap: 12px;
   background-color: var(--tuw-bg-surface, #FFFFFF);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
 }
 
-.sub-productCatalogCard:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
-}
+/* Hover treatment rides .tuw-stat-hover (tint/wash/glow, non-displacing per
+   the motion skill) — no lift-up on any axis. */
 
 .sub-productThumbFrame {
   width: 100%;
@@ -2088,6 +2086,14 @@
    reduced-motion rule); applies only when explicitly opted in.
    Wash single-sourced from --tuw-bg-selected (same token TableHeader uses). */
 .tuw-stat-hover:hover {
+  border-color: rgba(117, 57, 255, 0.35) !important;
+  background-color: var(--tuw-bg-selected, #F8F5FF) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Permanent selected wash (PT1b): same treatment as the hover above, for
+   KPI cards acting as active filters. Toggled via className, not hover. */
+.tuw-stat-active {
   border-color: rgba(117, 57, 255, 0.35) !important;
   background-color: var(--tuw-bg-selected, #F8F5FF) !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04) !important;

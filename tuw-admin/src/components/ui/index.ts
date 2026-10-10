@@ -76,3 +76,6 @@ export type { PageHeaderProps } from './PageHeader';
 export { default as DropdownMenu } from './DropdownMenu';
 export type { DropdownMenuProps, DropdownMenuItem } from './DropdownMenu';
 
+export { default as ViewToggle } from './ViewToggle';
+export type { ViewToggleProps, ViewToggleOption } from './ViewToggle';
+

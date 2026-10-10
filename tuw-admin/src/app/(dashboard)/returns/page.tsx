@@ -3,20 +3,22 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader } from '@/components/ui';
-import { Undo2, Search, Filter, CheckCircle2, XCircle, ArrowRight, RotateCcw } from 'lucide-react';
+import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader, Checkbox } from '@/components/ui';
+import { Undo2, Search, Filter, CheckCircle2, XCircle, ArrowRight, RotateCcw, Download } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { ReturnItem } from '@/mocks/fixtures';
 
 export default function ReturnsPage() {
-  const { returns, updateReturnStatus, canPerformAction } = useAdminState();
+  const { returns, updateReturnStatus, canPerformAction, showToast } = useAdminState();
   const [searchTerm, setSearchTerm] = useState('');
   const [stageFilter, setStageFilter] = useState<'all' | ReturnItem['stage']>('all');
   const [selectedReturn, setSelectedReturn] = useState<ReturnItem | null>(null);
+  // Row selection (multi-select; header checkbox tri-states over the page)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(6);
+  const [pageSize, setPageSize] = useState(5);
 
   const filteredReturns = returns.filter((item) => {
     const matchesSearch =
@@ -35,6 +37,27 @@ export default function ReturnsPage() {
   const totalPages = Math.max(1, Math.ceil(filteredReturns.length / pageSize));
   const paginatedReturns = filteredReturns.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
+  // Row selection helpers (header checkbox tri-states over the page)
+  const pageIds = paginatedReturns.map((r) => r.id);
+  const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selectedIds.has(id));
+  const somePageSelected = pageIds.some((id) => selectedIds.has(id));
+  const toggleId = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+  const togglePage = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (pageIds.every((id) => next.has(id))) pageIds.forEach((id) => next.delete(id));
+      else pageIds.forEach((id) => next.add(id));
+      return next;
+    });
+  };
+
   const handleApprove = (id: string) => {
     if (!canPerformAction('orders')) return;
     updateReturnStatus(id, 'restocked');
@@ -49,6 +72,61 @@ export default function ReturnsPage() {
     if (selectedReturn?.id === id) {
       setSelectedReturn({ ...selectedReturn, stage: 'disputed' });
     }
+  };
+
+  // Bulk actions (bar appears when rows are selected)
+  const clearSelection = () => setSelectedIds(new Set());
+
+  const handleExportSelected = () => {
+    const selected = returns.filter((r) => selectedIds.has(r.id));
+    if (selected.length === 0) return;
+    const headers = ['RMA ID', 'Order ID', 'Customer', 'Items', 'Reason', 'Stage'];
+    const rows = selected.map((r) => [
+      r.id,
+      r.orderId,
+      `"${r.customer}"`,
+      `"${r.items}"`,
+      `"${r.reason}"`,
+      r.stage,
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
+    const link = document.createElement('a');
+    link.setAttribute('href', encodeURI(csvContent));
+    link.setAttribute('download', `tuw_returns_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast({
+      type: 'success',
+      title: 'Selected Returns Exported',
+      description: `${selected.length} return${selected.length === 1 ? '' : 's'} exported to CSV.`,
+    });
+    clearSelection();
+  };
+
+  const handleBulkStage = (stage: 'restocked' | 'disputed', label: string) => {
+    const ids = [...selectedIds];
+    if (ids.length === 0) return;
+    if (!canPerformAction('orders')) {
+      showToast({
+        type: 'warning',
+        title: 'Action Restricted',
+        description: 'Your demo role cannot update returns.',
+      });
+      return;
+    }
+    ids.forEach((id) => updateReturnStatus(id, stage, true));
+    if (selectedReturn && selectedIds.has(selectedReturn.id)) {
+      setSelectedReturn({ ...selectedReturn, stage });
+    }
+    setStageFilter('all');
+    setCurrentPage(1);
+    showToast({
+      type: 'success',
+      title: 'Bulk Update Applied',
+      description: `${ids.length} return${ids.length === 1 ? '' : 's'} marked ${label}.`,
+    });
+    clearSelection();
   };
 
   return (
@@ -90,7 +168,43 @@ export default function ReturnsPage() {
 
         <Table>
           <TableHeader style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
+            {selectedIds.size > 0 ? (
             <TableRow hoverable={false}>
+              <TableCell colSpan={8} style={{ padding: '6px 16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                  <Checkbox
+                    bare
+                    aria-label="Select all returns on this page"
+                    checked={allPageSelected}
+                    indeterminate={!allPageSelected && somePageSelected}
+                    onChange={togglePage}
+                  />
+                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                    {selectedIds.size} selected
+                  </span>
+                  <Button variant="secondary" size="sm" icon={<Download size={14} />} onClick={handleExportSelected}>
+                    Export selected
+                  </Button>
+                  <Button variant="primary" size="sm" icon={<CheckCircle2 size={14} />} onClick={() => handleBulkStage('restocked', 'Restocked')}>
+                    Approve & Restock
+                  </Button>
+                  <Button variant="danger" size="sm" icon={<XCircle size={14} />} onClick={() => handleBulkStage('disputed', 'Disputed')}>
+                    Decline / Dispute
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+            ) : (
+            <TableRow hoverable={false}>
+              <TableHead style={{ padding: '12px 16px', width: 44 }}>
+                <Checkbox
+                  bare
+                  aria-label="Select all returns on this page"
+                  checked={allPageSelected}
+                  indeterminate={!allPageSelected && somePageSelected}
+                  onChange={togglePage}
+                />
+              </TableHead>
               <TableHead style={{ padding: '12px 16px' }}>RMA ID</TableHead>
               <TableHead style={{ padding: '12px 16px' }}>Order</TableHead>
               <TableHead style={{ padding: '12px 16px' }}>Customer</TableHead>
@@ -99,14 +213,23 @@ export default function ReturnsPage() {
               <TableHead style={{ padding: '12px 16px' }}>Stage</TableHead>
               <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Actions</TableHead>
             </TableRow>
+            )}
           </TableHeader>
           <TableBody>
             {paginatedReturns.map((item) => (
               <TableRow
                 key={item.id}
                 onClick={() => setSelectedReturn(item)}
-                style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', cursor: 'pointer' }}
+                style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', cursor: 'pointer', backgroundColor: selectedIds.has(item.id) ? 'var(--tuw-bg-canvas, #F7F8F9)' : 'transparent' }}
               >
+                <TableCell style={{ padding: '14px 16px' }}>
+                  <Checkbox
+                    bare
+                    aria-label={`Select return ${item.id}`}
+                    checked={selectedIds.has(item.id)}
+                    onChange={() => toggleId(item.id)}
+                  />
+                </TableCell>
                 <TableCell style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
                   {item.id}
                 </TableCell>

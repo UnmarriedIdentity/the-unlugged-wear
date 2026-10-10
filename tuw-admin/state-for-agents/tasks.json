@@ -8,14 +8,14 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 136,
-    "done": 122,
+    "total": 144,
+    "done": 130,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "37f32e8",
+    "tip": "eb89482",
     "unpushed": ["6668cfd", "212ca3d", "c8a2f40", "6a00935", "2dc810e", "a60fa4f", "d7b2b31"],
     "next_up": "human pushes origin/v2 (2 commits) then origin/feat/search-modal (6 commits); browser review of spotlight",
     "pending_verifications": [
@@ -826,6 +826,131 @@
       "started": "2026-10-06",
       "finished": "2026-10-06",
       "log": "feat/search-modal:37f32e8 (native select auto-flip behavior restored)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-RT1",
+      "title": "Returns bulk mode (checkbox, export, approve/dispute)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal: bc3ac71 seam + fe0bff5 state + 05ece94 column + 66297d4 handlers + 4a7efa5 bar",
+      "design_match": "yes",
+      "key_decisions": [
+        "direct Approve/Dispute buttons (only 2 actions, no menu needed)",
+        "tab-to-All + drawer sync + clear + summary toast",
+        "pageSize 6->5 (same latent mismatch as orders)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-SUP1",
+      "title": "Support bulk mode (checkbox, export, resolve canned)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal: 2a3b2f0 state + 55e67a2 column/handlers + d708f08 bar (silent seam in bc3ac71)",
+      "design_match": "yes",
+      "key_decisions": [
+        "canned resolve notice, named in summary toast",
+        "pageSize 6->5 (same latent mismatch)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PC1",
+      "title": "Product cards lift-up to stat tint",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:1e0ac5e (reused tuw-stat-hover; lift violated motion skill)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-VT1",
+      "title": "ui/ViewToggle segmented view switch",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:6425beb (rail aesthetics; reusable for media grid)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PT1",
+      "title": "Products toolbar restructure + KPI filtering",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal: 02343f3 toolbar + 799e7ea stat-active + 1cda4d6 stockFilter + 920ac9d KPI wiring (toggle, keyboard, aria-pressed)",
+      "design_match": "yes",
+      "key_decisions": [
+        "no Card.tsx change — active via className passthrough",
+        "Total resets filters, keeps search; active card re-click clears"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PT2",
+      "title": "Products table view (6 cols, stock/sold merged)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal: 2358654 import + 705c267 table (no checkbox — bulk deferred; pageSize 6/12/24 already consistent)",
+      "design_match": "yes",
+      "key_decisions": [
+        "rating/partner stay drawer-only per trim call",
+        "row click opens edit drawer (orders pattern)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PT1C",
+      "title": "Products single-row toolbar (category dropdown)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:b770b09 (44px trigger matches Input; tab strip deleted, CSS left untouched)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PT1D",
+      "title": "Products Total wash fix + nowrap toolbar cluster",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:eb89482 (inverted filtersClearBang; cluster wraps as unit now)",
       "design_match": "yes",
       "key_decisions": [],
       "verified": true,

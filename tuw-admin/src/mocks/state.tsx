@@ -75,7 +75,7 @@ interface AdminStateContextType {
 
   issueRefund: (params: { orderId: string; amount: number; reason: string; method: string }) => { success: boolean; error?: string };
 
-  updateReturnStatus: (returnId: string, stage: ReturnItem['stage']) => boolean;
+  updateReturnStatus: (returnId: string, stage: ReturnItem['stage'], silent?: boolean) => boolean;
 
   addCustomerNote: (customerId: string, note: string) => boolean;
   createCustomer: (customer: {
@@ -88,7 +88,7 @@ interface AdminStateContextType {
     tier?: 'VIP Customer' | 'Active' | 'New';
     notes?: string[];
   }) => boolean;
-  sendSupportReply: (ticketId: string, replyText: string) => boolean;
+  sendSupportReply: (ticketId: string, replyText: string, silent?: boolean) => boolean;
 
   createCollection: (col: Omit<CollectionItem, 'id' | 'updatedAt'>) => boolean;
   uploadDesignAsset: (asset: Omit<DesignAsset, 'id' | 'updatedAt'>) => boolean;
@@ -488,16 +488,18 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     return { success: true };
   };
 
-  const updateReturnStatus = (returnId: string, stage: ReturnItem['stage']) => {
+  const updateReturnStatus = (returnId: string, stage: ReturnItem['stage'], silent = false) => {
     if (!canPerformAction('orders')) return false;
     const next = returns.map((r) => (r.id === returnId ? { ...r, stage } : r));
     setReturns(next);
     persistState({ returns: next });
-    showToast({
-      type: 'success',
-      title: 'RMA Stage Updated',
-      description: `Return ${returnId} marked as ${stage}.`,
-    });
+    if (!silent) {
+      showToast({
+        type: 'success',
+        title: 'RMA Stage Updated',
+        description: `Return ${returnId} marked as ${stage}.`,
+      });
+    }
     return true;
   };
 
@@ -550,7 +552,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     return true;
   };
 
-  const sendSupportReply = (ticketId: string, replyText: string) => {
+  const sendSupportReply = (ticketId: string, replyText: string, silent = false) => {
     if (!canPerformAction('orders')) return false;
     const next = supportTickets.map((t) => {
       if (t.id === ticketId) {
@@ -571,11 +573,13 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     });
     setSupportTickets(next);
     persistState({ supportTickets: next });
-    showToast({
-      type: 'success',
-      title: 'Support Response Sent',
-      description: `Ticket ${ticketId} resolved and email dispatched.`,
-    });
+    if (!silent) {
+      showToast({
+        type: 'success',
+        title: 'Support Response Sent',
+        description: `Ticket ${ticketId} resolved and email dispatched.`,
+      });
+    }
     return true;
   };
 

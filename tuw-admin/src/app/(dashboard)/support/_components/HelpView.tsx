@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { HelpCircle, MessageSquare, Send, CheckCircle2, Clock, AlertCircle, Sparkles, ChevronRight, User } from 'lucide-react';
+import { HelpCircle, MessageSquare, Send, CheckCircle2, Clock, AlertCircle, Sparkles, ChevronRight, User, Download } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader, Checkbox } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { SupportTicket } from '@/mocks/fixtures';
 
@@ -25,12 +25,14 @@ const cannedResponses = [
 ];
 
 export default function HelpView() {
-  const { supportTickets, sendSupportReply, canPerformAction } = useAdminState();
+  const { supportTickets, sendSupportReply, canPerformAction, showToast } = useAdminState();
   const [statusFilter, setStatusFilter] = useState<'all' | SupportTicket['status']>('all');
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
   const [draftReply, setDraftReply] = useState('');
+  // Row selection (multi-select; header checkbox tri-states over the page)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(6);
+  const [pageSize, setPageSize] = useState(5);
 
   React.useEffect(() => {
     setCurrentPage(1);
@@ -39,6 +41,27 @@ export default function HelpView() {
   const filteredTickets = supportTickets.filter((t) => statusFilter === 'all' || t.status === statusFilter);
   const totalPages = Math.max(1, Math.ceil(filteredTickets.length / pageSize));
   const paginatedTickets = filteredTickets.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  // Row selection helpers (header checkbox tri-states over the page)
+  const pageIds = paginatedTickets.map((t) => t.id);
+  const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selectedIds.has(id));
+  const somePageSelected = pageIds.some((id) => selectedIds.has(id));
+  const toggleId = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+  const togglePage = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (pageIds.every((id) => next.has(id))) pageIds.forEach((id) => next.delete(id));
+      else pageIds.forEach((id) => next.add(id));
+      return next;
+    });
+  };
 
   const openTicketsCount = supportTickets.filter((t) => t.status === 'open').length;
   const resolvedCount = supportTickets.filter((t) => t.status === 'resolved').length;
@@ -60,6 +83,70 @@ export default function HelpView() {
       ],
     });
     setDraftReply('');
+  };
+
+  // Bulk actions (bar appears when rows are selected)
+  const BULK_RESOLVE_NOTICE =
+    'Hello, our support team has reviewed your request and applied a resolution. Please reply to this thread if you need anything further.';
+  const clearSelection = () => setSelectedIds(new Set());
+
+  const handleExportSelected = () => {
+    const selected = supportTickets.filter((t) => selectedIds.has(t.id));
+    if (selected.length === 0) return;
+    const headers = ['Ticket ID', 'Customer', 'Email', 'Subject', 'Priority', 'Status'];
+    const rows = selected.map((t) => [
+      t.id,
+      `"${t.customerName}"`,
+      t.customerEmail,
+      `"${t.subject}"`,
+      t.priority,
+      t.status,
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
+    const link = document.createElement('a');
+    link.setAttribute('href', encodeURI(csvContent));
+    link.setAttribute('download', `tuw_support_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast({
+      type: 'success',
+      title: 'Selected Tickets Exported',
+      description: `${selected.length} ticket${selected.length === 1 ? '' : 's'} exported to CSV.`,
+    });
+    clearSelection();
+  };
+
+  const handleBulkResolve = () => {
+    const ids = [...selectedIds];
+    if (ids.length === 0) return;
+    if (!canPerformAction('orders')) {
+      showToast({
+        type: 'warning',
+        title: 'Action Restricted',
+        description: 'Your demo role cannot resolve tickets.',
+      });
+      return;
+    }
+    ids.forEach((id) => sendSupportReply(id, BULK_RESOLVE_NOTICE, true));
+    if (selectedTicket && selectedIds.has(selectedTicket.id)) {
+      setSelectedTicket({
+        ...selectedTicket,
+        status: 'resolved',
+        messages: [
+          ...selectedTicket.messages,
+          { sender: 'staff', text: BULK_RESOLVE_NOTICE, time: 'Just now' },
+        ],
+      });
+    }
+    setStatusFilter('all');
+    setCurrentPage(1);
+    showToast({
+      type: 'success',
+      title: 'Bulk Resolve Applied',
+      description: `${ids.length} ticket${ids.length === 1 ? '' : 's'} resolved with canned notice.`,
+    });
+    clearSelection();
   };
 
   return (
@@ -99,7 +186,40 @@ export default function HelpView() {
 
         <Table>
           <TableHeader style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
+            {selectedIds.size > 0 ? (
             <TableRow hoverable={false}>
+              <TableCell colSpan={7} style={{ padding: '6px 16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                  <Checkbox
+                    bare
+                    aria-label="Select all tickets on this page"
+                    checked={allPageSelected}
+                    indeterminate={!allPageSelected && somePageSelected}
+                    onChange={togglePage}
+                  />
+                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                    {selectedIds.size} selected
+                  </span>
+                  <Button variant="secondary" size="sm" icon={<Download size={14} />} onClick={handleExportSelected}>
+                    Export selected
+                  </Button>
+                  <Button variant="primary" size="sm" icon={<CheckCircle2 size={14} />} onClick={handleBulkResolve}>
+                    Resolve selected
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+            ) : (
+            <TableRow hoverable={false}>
+              <TableHead style={{ padding: '12px 16px', width: 44 }}>
+                <Checkbox
+                  bare
+                  aria-label="Select all tickets on this page"
+                  checked={allPageSelected}
+                  indeterminate={!allPageSelected && somePageSelected}
+                  onChange={togglePage}
+                />
+              </TableHead>
               <TableHead style={{ padding: '12px 16px' }}>Ticket</TableHead>
               <TableHead style={{ padding: '12px 16px' }}>Customer</TableHead>
               <TableHead style={{ padding: '12px 16px' }}>Subject</TableHead>
@@ -107,14 +227,23 @@ export default function HelpView() {
               <TableHead style={{ padding: '12px 16px' }}>Status</TableHead>
               <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Actions</TableHead>
             </TableRow>
+            )}
           </TableHeader>
           <TableBody>
             {paginatedTickets.map((ticket) => (
               <TableRow
                 key={ticket.id}
                 onClick={() => setSelectedTicket(ticket)}
-                style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', cursor: 'pointer' }}
+                style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', cursor: 'pointer', backgroundColor: selectedIds.has(ticket.id) ? 'var(--tuw-bg-canvas, #F7F8F9)' : 'transparent' }}
               >
+                <TableCell style={{ padding: '14px 16px' }}>
+                  <Checkbox
+                    bare
+                    aria-label={`Select ticket ${ticket.id}`}
+                    checked={selectedIds.has(ticket.id)}
+                    onChange={() => toggleId(ticket.id)}
+                  />
+                </TableCell>
                 <TableCell style={{ padding: '14px 16px', fontSize: 13, fontFamily: 'monospace', fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)' }}>
                   {ticket.id}
                 </TableCell>

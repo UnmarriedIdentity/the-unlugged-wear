@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle } from 'lucide-react';
+import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer, Pagination, FilterPills, PageHeader } from '@/components/ui';
+import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 
@@ -15,7 +15,9 @@ export default function ProductsView() {
 
   const [selectedCat, setSelectedCat] = useState<string>('All');
   const [publicationFilter, setPublicationFilter] = useState<'all' | 'published' | 'draft' | 'archived'>('all');
+  const [stockFilter, setStockFilter] = useState<'all' | 'low' | 'out'>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [view, setView] = useState<'grid' | 'table'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(6);
 
@@ -140,7 +142,7 @@ export default function ProductsView() {
 
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, selectedCat, publicationFilter]);
+  }, [searchTerm, selectedCat, publicationFilter, stockFilter]);
 
   const filteredProducts = products.filter((p) => {
     const matchesSearch =
@@ -149,7 +151,13 @@ export default function ProductsView() {
       p.slug.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCat = selectedCat === 'All' || p.category === selectedCat;
     const matchesPub = publicationFilter === 'all' || p.publicationStatus === publicationFilter;
-    return matchesSearch && matchesCat && matchesPub;
+    const matchesStock =
+      stockFilter === 'all'
+        ? true
+        : stockFilter === 'low'
+          ? p.stock > 0 && p.stock <= 10
+          : p.stock === 0;
+    return matchesSearch && matchesCat && matchesPub && matchesStock;
   });
 
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize));
@@ -158,6 +166,25 @@ export default function ProductsView() {
   const lowStockCount = products.filter((p) => p.stock > 0 && p.stock <= 10).length;
   const outOfStockCount = products.filter((p) => p.stock === 0).length;
   const draftCount = products.filter((p) => p.publicationStatus === 'draft').length;
+
+  // KPI cards double as filters (shared by grid + table views)
+  const filtersClear = selectedCat === 'All' && publicationFilter === 'all' && stockFilter === 'all';
+  const clearProductFilters = () => {
+    setSelectedCat('All');
+    setPublicationFilter('all');
+    setStockFilter('all');
+  };
+  const toggleStockFilter = (v: 'low' | 'out') =>
+    setStockFilter((cur) => (cur === v ? 'all' : v));
+  const togglePublicationFilter = (v: typeof publicationFilter) =>
+    setPublicationFilter((cur) => (cur === v ? 'all' : v));
+  const kpiKeyDown =
+    (handler: () => void) => (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handler();
+      }
+    };
 
   return (
     <DashboardShell pageTitle="Products" activeNav="products">
@@ -183,6 +210,14 @@ export default function ProductsView() {
           trend="Managed in local memory"
           trendType="up"
           hoverable
+          role="button"
+          tabIndex={0}
+          aria-pressed={filtersClear}
+          aria-label="Show all products"
+          className={filtersClear ? 'tuw-stat-active' : ''}
+          style={{ cursor: 'pointer' }}
+          onClick={clearProductFilters}
+          onKeyDown={kpiKeyDown(clearProductFilters)}
         />
         <StatCard
           label="Low Stock Alerts"
@@ -190,6 +225,14 @@ export default function ProductsView() {
           subtitle="Stock ≤ 10 units"
           trendType={lowStockCount > 0 ? 'down' : 'up'}
           hoverable
+          role="button"
+          tabIndex={0}
+          aria-pressed={stockFilter === 'low'}
+          aria-label="Filter low-stock products"
+          className={stockFilter === 'low' ? 'tuw-stat-active' : ''}
+          style={{ cursor: 'pointer' }}
+          onClick={() => toggleStockFilter('low')}
+          onKeyDown={kpiKeyDown(() => toggleStockFilter('low'))}
         />
         <StatCard
           label="Drafts in Review"
@@ -197,6 +240,14 @@ export default function ProductsView() {
           subtitle="Unpublished items"
           trendType="neutral"
           hoverable
+          role="button"
+          tabIndex={0}
+          aria-pressed={publicationFilter === 'draft'}
+          aria-label="Filter draft products"
+          className={publicationFilter === 'draft' ? 'tuw-stat-active' : ''}
+          style={{ cursor: 'pointer' }}
+          onClick={() => togglePublicationFilter('draft')}
+          onKeyDown={kpiKeyDown(() => togglePublicationFilter('draft'))}
         />
         <StatCard
           label="Out of Stock"
@@ -204,6 +255,14 @@ export default function ProductsView() {
           subtitle={outOfStockCount > 0 ? 'Backorder only' : 'Fully stocked'}
           trendType={outOfStockCount > 0 ? 'down' : 'up'}
           hoverable
+          role="button"
+          tabIndex={0}
+          aria-pressed={stockFilter === 'out'}
+          aria-label="Filter out-of-stock products"
+          className={stockFilter === 'out' ? 'tuw-stat-active' : ''}
+          style={{ cursor: 'pointer' }}
+          onClick={() => toggleStockFilter('out')}
+          onKeyDown={kpiKeyDown(() => toggleStockFilter('out'))}
         />
       </div>
 
@@ -211,15 +270,6 @@ export default function ProductsView() {
       <ContentCard>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 20 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-            <div style={{ maxWidth: 360, width: '100%' }}>
-              <Input
-                placeholder="Search products by title, category, or slug..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                prefixIcon={<Search size={16} />}
-              />
-            </div>
-
             {/* Publication Filter Tabs */}
             <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
               <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>
@@ -239,24 +289,71 @@ export default function ProductsView() {
               />
             </div>
 
-          {/* Department Categories */}
-          <div className={styles.filterBar}>
-            <ul className={styles.tabList}>
-              {['All', 'T-Shirts', 'Hoodies', 'Jackets', 'Pants', 'Accessories'].map((cat) => (
-                <li
-                  key={cat}
-                  className={`${styles.tabItem} ${selectedCat === cat ? styles.tabItemActive : ''}`}
-                  onClick={() => setSelectedCat(cat)}
-                >
-                  {cat}
-                </li>
-              ))}
-            </ul>
+            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap', flexShrink: 0, gap: 12 }}>
+              <div style={{ maxWidth: 300, width: '100%' }}>
+                <Input
+                  placeholder="Search products by title, category, or slug..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  prefixIcon={<Search size={16} />}
+                />
+              </div>
+              <DropdownMenu
+                ariaLabel="Product category filter"
+                trigger={
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Product category, currently ${selectedCat === 'All' ? 'All Categories' : selectedCat}`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      height: '44px',
+                      padding: '0 12px',
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      fontFamily: 'var(--font-main)',
+                      borderRadius: 'var(--tuw-radius-control, 8px)',
+                      border: '1px solid var(--tuw-border-control, #D1D5DB)',
+                      backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
+                      color: 'var(--tuw-text-primary, #262626)',
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    <Tag size={14} color="var(--tuw-text-secondary, #5D6772)" />
+                    {selectedCat === 'All' ? 'All Categories' : selectedCat}
+                    <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
+                  </span>
+                }
+                items={['All', 'T-Shirts', 'Hoodies', 'Jackets', 'Pants', 'Accessories'].map((cat) => ({
+                  value: cat,
+                  label: cat === 'All' ? 'All Categories' : cat,
+                }))}
+                selectedValue={selectedCat}
+                onSelect={(v) => setSelectedCat(v)}
+              />
+              <div aria-hidden="true" style={{ width: 1, height: 24, backgroundColor: 'var(--tuw-border-subtle, #E5E7EB)' }} />
+              <ViewToggle
+                ariaLabel="Product catalog view"
+                options={[
+                  { value: 'grid', label: 'Grid view', icon: <LayoutGrid size={16} /> },
+                  { value: 'table', label: 'Table view', icon: <List size={16} /> },
+                ]}
+                value={view}
+                onChange={(v) => setView(v as typeof view)}
+              />
+            </div>
           </div>
         </div>
-        </div>
 
-        {/* Card Grid */}
+        {view === 'grid' ? (
+        /* Card Grid */
         <div className={styles.cardGrid}>
           {filteredProducts.length === 0 ? (
             <div style={{ padding: '60px 16px', textAlign: 'center', color: 'var(--tuw-text-secondary, #5D6772)', gridColumn: '1 / -1' }}>
@@ -264,7 +361,7 @@ export default function ProductsView() {
             </div>
           ) : (
             paginatedProducts.map((p) => (
-              <div key={p.id} className={styles.productCatalogCard}>
+              <div key={p.id} className={`${styles.productCatalogCard} tuw-stat-hover`}>
                 <div
                   className={styles.productThumbFrame}
                   style={{
@@ -368,6 +465,97 @@ export default function ProductsView() {
             ))
           )}
         </div>
+        ) : (
+        /* Table View */
+        <Table>
+          <TableHeader>
+            <TableRow hoverable={false}>
+              <TableHead style={{ padding: '12px 16px' }}>Product</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Category</TableHead>
+              <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Price</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Stock / Sold</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Status</TableHead>
+              <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredProducts.length === 0 ? (
+              <TableRow hoverable={false}>
+                <TableCell colSpan={6} style={{ padding: '48px 16px', textAlign: 'center', color: 'var(--tuw-text-secondary, #5D6772)', fontSize: 16 }}>
+                  No products found matching the selected filters.
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginatedProducts.map((p) => (
+                <TableRow
+                  key={p.id}
+                  onClick={() => openEditDrawer(p)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <TableCell style={{ padding: '14px 16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div style={{ width: 40, height: 40, borderRadius: 8, overflow: 'hidden', position: 'relative', flexShrink: 0, background: p.imageBg, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--tuw-border-subtle, #E5E7EB)' }}>
+                        {p.image ? (
+                          <Image src={p.image} alt={p.name} fill sizes="80px" style={{ objectFit: 'cover' }} />
+                        ) : (
+                          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                            {p.name.slice(0, 2).toUpperCase()}
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)' }}>
+                          {p.name}
+                        </div>
+                        <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                          {p.slug}
+                        </div>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
+                    {p.category}
+                  </TableCell>
+                  <TableCell className="tuw-tabular-nums" style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', textAlign: 'right' }}>
+                    ₹{p.price.toFixed(2)}
+                    {p.compareAtPrice && (
+                      <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', textDecoration: 'line-through', marginLeft: 6, fontWeight: 400 }}>
+                        ₹{p.compareAtPrice.toFixed(2)}
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px' }}>
+                    <div style={{ fontSize: 14, fontWeight: 500, color: p.stock === 0 ? 'var(--tuw-text-error, #C91818)' : p.stock <= 10 ? 'var(--tuw-text-warning, #856300)' : 'var(--tuw-text-primary, #262626)' }}>
+                      {p.stock} in stock
+                    </div>
+                    <div className="tuw-tabular-nums" style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                      {p.soldCount} sold
+                    </div>
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px' }}>
+                    <Badge
+                      variant={
+                        p.publicationStatus === 'published'
+                          ? 'success'
+                          : p.publicationStatus === 'draft'
+                          ? 'warning'
+                          : 'neutral'
+                      }
+                    >
+                      {p.publicationStatus}
+                    </Badge>
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px', textAlign: 'right' }}>
+                    <Button variant="secondary" size="sm" icon={<Edit3 size={14} />} onClick={(e) => { e.stopPropagation(); openEditDrawer(p); }}>
+                      Manage
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+        )}
 
         {filteredProducts.length > 0 && (
           <Pagination
