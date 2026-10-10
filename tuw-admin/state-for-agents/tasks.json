@@ -8,14 +8,14 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 119,
-    "done": 105,
+    "total": 121,
+    "done": 106,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "9ba0668",
+    "tip": "860fa8d",
     "unpushed": ["6668cfd", "212ca3d", "c8a2f40", "6a00935", "2dc810e", "a60fa4f", "d7b2b31"],
     "next_up": "human pushes origin/v2 (2 commits) then origin/feat/search-modal (6 commits); browser review of spotlight",
     "pending_verifications": [
@@ -562,6 +562,41 @@
         "product next/image usages deliberately left (optimization tradeoff recorded)"
       ],
       "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PH1",
+      "title": "ui/PageHeader primitive (title, subtitle?, actions?, eyebrow?, page|doc)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:860fa8d",
+      "design_match": "yes",
+      "key_decisions": [
+        "margin 0 (shell-gap rhythm); .sub 8px margin retired on migration",
+        "subtitle optional, omitted everywhere except dashboard date line",
+        "doc variant = h1 + tuw-type-heading-page token class (design-system only)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PHMIG",
+      "title": "Per-file PageHeader migrations (~25 call sites, subtitles dropped)",
+      "status": "in_progress",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": null,
+      "log": "first file acts as visual proof before continuing",
+      "design_match": "pending",
+      "key_decisions": [
+        "dashboard unified to 28/600 (authorized restyle)",
+        "design-system title row only, pixel-identical"
+      ],
+      "verified": false,
       "pushed": false,
       "follow_ups": []
     },
