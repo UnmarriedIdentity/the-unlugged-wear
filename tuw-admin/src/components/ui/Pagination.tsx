@@ -171,9 +171,9 @@ export default function Pagination({
           size="sm"
           disabled={safeCurrentPage >= validTotalPages}
           onClick={() => onPageChange(safeCurrentPage + 1)}
-          icon={<ChevronRight size={14} />}
         >
-          Next
+          <span>Next</span>
+          <ChevronRight size={14} style={{ marginLeft: 4 }} />
         </Button>
       </div>
     </div>
