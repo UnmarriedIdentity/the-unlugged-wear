@@ -112,3 +112,6 @@ export type { FormSelectProps } from './FormSelect';
 export { default as MediaFrame } from './MediaFrame';
 export type { MediaFrameProps } from './MediaFrame';
 
+export { default as FormTextarea } from './FormTextarea';
+export type { FormTextareaProps } from './FormTextarea';
+
