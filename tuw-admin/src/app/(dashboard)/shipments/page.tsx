@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader, HeroCard, DrawerSection } from '@/components/ui';
 import { Truck, Search, Filter, Download, ExternalLink, Calendar, MapPin, Clock, Plus } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { ShipmentItem } from '@/mocks/fixtures';
@@ -228,21 +228,21 @@ export default function ShipmentsPage() {
       >
         {selectedShipment && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-            <div style={{ padding: 16, backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)', borderRadius: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <HeroCard
+              badge={
+                <Badge variant={selectedShipment.status === 'delivered' ? 'success' : selectedShipment.status === 'in_transit' ? 'info' : 'warning'}>
+                  {selectedShipment.status}
+                </Badge>
+              }
+            >
               <div>
                 <div style={{ fontSize: 11, textTransform: 'uppercase', color: 'var(--tuw-text-secondary, #5D6772)' }}>Destination</div>
                 <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginTop: 2 }}>{selectedShipment.destination}</div>
               </div>
-              <Badge variant={selectedShipment.status === 'delivered' ? 'success' : selectedShipment.status === 'in_transit' ? 'info' : 'warning'}>
-                {selectedShipment.status}
-              </Badge>
-            </div>
+            </HeroCard>
 
             {/* Carrier Transit Timeline */}
-            <div>
-              <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16, color: 'var(--tuw-text-primary, #262626)' }}>
-                Carrier Transit Events
-              </h4>
+            <DrawerSection title="Carrier Transit Events" titleGap={16}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16, borderLeft: '2px solid var(--tuw-border-subtle, #E2E4E6)', paddingLeft: 16, marginLeft: 6 }}>
                 {selectedShipment.events.map((evt, idx) => (
                   <div key={idx} style={{ position: 'relative' }}>
@@ -267,7 +267,7 @@ export default function ShipmentsPage() {
                   </div>
                 ))}
               </div>
-            </div>
+            </DrawerSection>
           </div>
         )}
       </Drawer>
