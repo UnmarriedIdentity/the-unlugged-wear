@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { UserPlus, Download, Search, Eye, MapPin, Phone, Mail, Calendar, Plus, MessageSquare } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, Button, Badge, Input, Drawer, Pagination, Modal, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader } from '@/components/ui';
+import { StatCard, ContentCard, Button, Badge, Input, Drawer, Pagination, Modal, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader, DrawerSection, ItemsRow } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { CustomerItem } from '@/mocks/fixtures';
 
@@ -263,10 +263,7 @@ export default function CustomersView() {
             </div>
 
             {/* Contact & Address */}
-            <div>
-              <h4 style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginBottom: 10 }}>
-                Contact & Shipping Details
-              </h4>
+            <DrawerSection title="Contact & Shipping Details" titleGap={10}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <Mail size={14} color="var(--tuw-action-primary, #7539FF)" />
@@ -281,13 +278,10 @@ export default function CustomersView() {
                   <span>{selectedCustomer.address}, {selectedCustomer.city}, {selectedCustomer.country}</span>
                 </div>
               </div>
-            </div>
+            </DrawerSection>
 
             {/* Purchase History */}
-            <div>
-              <h4 style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginBottom: 10 }}>
-                Recent Order History ({customerOrders.length})
-              </h4>
+            <DrawerSection title={`Recent Order History (${customerOrders.length})`} titleGap={10}>
               {customerOrders.length === 0 ? (
                 <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', padding: '12px 0' }}>
                   No recent orders found under email {selectedCustomer.email}.
@@ -295,41 +289,33 @@ export default function CustomersView() {
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {customerOrders.map((ord) => (
-                    <div
+                    <ItemsRow
                       key={ord.id}
-                      style={{
-                        padding: 10,
-                        backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)',
-                        borderRadius: 8,
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        fontSize: 13,
-                      }}
-                    >
-                      <div>
-                        <strong>{ord.id}</strong> — {ord.date}
-                        <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                          {ord.items.map((i) => i.productName).join(', ')}
+                      pad={10}
+                      left={
+                        <div>
+                          <strong>{ord.id}</strong> — {ord.date}
+                          <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                            {ord.items.map((i) => i.productName).join(', ')}
+                          </div>
                         </div>
-                      </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontWeight: 600 }}>${ord.total.toFixed(2)}</div>
-                        <Badge variant={ord.paymentStatus === 'paid' ? 'success' : 'warning'}>
-                          {ord.paymentStatus}
-                        </Badge>
-                      </div>
-                    </div>
+                      }
+                      right={
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontWeight: 600 }}>${ord.total.toFixed(2)}</div>
+                          <Badge variant={ord.paymentStatus === 'paid' ? 'success' : 'warning'}>
+                            {ord.paymentStatus}
+                          </Badge>
+                        </div>
+                      }
+                    />
                   ))}
                 </div>
               )}
-            </div>
+            </DrawerSection>
 
             {/* Internal Staff Notes */}
-            <div>
-              <h4 style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginBottom: 10 }}>
-                Internal Service Notes
-              </h4>
+            <DrawerSection title="Internal Service Notes" titleGap={10}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
                 {selectedCustomer.notes.map((note, idx) => (
                   <div
@@ -358,7 +344,7 @@ export default function CustomersView() {
                   Save
                 </Button>
               </form>
-            </div>
+            </DrawerSection>
           </div>
         )}
       </Drawer>
