@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
+import PanelLayout from './PanelLayout';
 
 export interface DrawerProps {
   isOpen: boolean;
@@ -67,13 +68,12 @@ export default function Drawer({
           height: '100%',
           backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
           boxShadow: '-10px 0 25px -5px rgba(0, 0, 0, 0.1)',
-          display: 'flex',
-          flexDirection: 'column',
           borderLeft: '1px solid var(--tuw-border-subtle, #E5E7EB)',
           animation: 'slideInRight 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       >
-        {/* Header */}
+        <PanelLayout
+          header={
         <div
           style={{
             padding: '20px 24px',
@@ -128,36 +128,35 @@ export default function Drawer({
             <X size={20} />
           </button>
         </div>
-
-        {/* Scrollable Body */}
+          }
+          footer={
+            footer ? (
         <div
           style={{
-            padding: '24px',
-            overflowY: 'auto',
-            flex: 1,
-            color: 'var(--tuw-text-primary, #262626)',
-            fontSize: '14px',
+            padding: '16px 24px',
+            borderTop: '1px solid var(--tuw-border-subtle, #E5E7EB)',
+            backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            gap: '12px',
           }}
         >
-          {children}
+          {footer}
         </div>
-
-        {/* Footer */}
-        {footer && (
+            ) : undefined
+          }
+        >
           <div
             style={{
-              padding: '16px 24px',
-              borderTop: '1px solid var(--tuw-border-subtle, #E5E7EB)',
-              backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-end',
-              gap: '12px',
+              padding: '24px',
+              color: 'var(--tuw-text-primary, #262626)',
+              fontSize: '14px',
             }}
           >
-            {footer}
+            {children}
           </div>
-        )}
+        </PanelLayout>
       </div>
     </div>
   );
