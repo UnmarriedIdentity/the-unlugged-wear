@@ -8,15 +8,15 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 152,
-    "done": 138,
+    "total": 153,
+    "done": 139,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "8fad108",
-    "unpushed": ["8fad108", "e533db4", "bc4808e", "b947977", "cf68bdb", "fa750ca"],
+    "tip": "96067e3",
+    "unpushed": ["96067e3", "8fad108", "e533db4", "bc4808e", "b947977", "cf68bdb", "fa750ca"],
     "next_up": "Fulfillment Phase 2 per-card bulk bars; anim-probe re-run expecting end-Out events; browser verification backlog",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
@@ -1079,6 +1079,23 @@
       "log": "feat/search-modal:8fad108 (reset-page effect picks up tab change; export/print untouched)",
       "design_match": "yes",
       "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-MN3",
+      "title": "DropdownMenu fixed positioning (escape container clipping)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-11",
+      "finished": "2026-10-11",
+      "log": "feat/search-modal:96067e3 (user-measured CLIPPED=true 56px; anchor coords at open; close on scroll/resize; viewport maxHeight safety)",
+      "design_match": "yes",
+      "key_decisions": [
+        "no portal needed — no transformed ancestors, fixed stays viewport-true",
+        "z-index bump rejected by measurement (clip ignores z-index)"
+      ],
       "verified": true,
       "pushed": false,
       "follow_ups": []
