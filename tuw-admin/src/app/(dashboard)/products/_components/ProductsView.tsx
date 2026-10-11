@@ -2,22 +2,28 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown } from 'lucide-react';
+import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui';
+import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
 
 export default function ProductsView() {
-  const { products, createProduct, updateProduct, deleteProduct, canPerformAction } = useAdminState();
+  const { products, createProduct, updateProduct, deleteProduct, canPerformAction, showToast } = useAdminState();
 
   const [selectedCat, setSelectedCat] = useState<string>('All');
   const [publicationFilter, setPublicationFilter] = useState<'all' | 'published' | 'draft' | 'archived'>('all');
   const [stockFilter, setStockFilter] = useState<'all' | 'low' | 'out'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [view, setView] = useState<'grid' | 'table'>('grid');
+  // Row selection (table view only; cleared on view switch)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const changeView = (v: 'grid' | 'table') => {
+    setView(v);
+    setSelectedIds(new Set());
+  };
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(6);
 
@@ -162,6 +168,27 @@ export default function ProductsView() {
 
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize));
   const paginatedProducts = filteredProducts.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  // Row selection helpers (header checkbox tri-states over the page)
+  const pageIds = paginatedProducts.map((p) => p.id);
+  const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selectedIds.has(id));
+  const somePageSelected = pageIds.some((id) => selectedIds.has(id));
+  const toggleId = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+  const togglePage = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (pageIds.every((id) => next.has(id))) pageIds.forEach((id) => next.delete(id));
+      else pageIds.forEach((id) => next.add(id));
+      return next;
+    });
+  };
 
   const lowStockCount = products.filter((p) => p.stock > 0 && p.stock <= 10).length;
   const outOfStockCount = products.filter((p) => p.stock === 0).length;
@@ -346,7 +373,7 @@ export default function ProductsView() {
                   { value: 'table', label: 'Table view', icon: <List size={16} /> },
                 ]}
                 value={view}
-                onChange={(v) => setView(v as typeof view)}
+                onChange={(v) => changeView(v as typeof view)}
               />
             </div>
           </div>
