@@ -856,29 +856,26 @@
   }
 }
 
-/* Drawer panel motion (DF0): spatial slide, not fade — drawers are large
-   navigational surfaces (unlike menus, where positional motion juddered).
-   Enter 220ms as referenced by Drawer; exit 180ms (faster-out per motion
-   skill). Reduced-motion collapse is inherited system-wide. */
+/* Drawer panel motion (DF0/DF1): full spatial travel, no fade — drawers are
+   large navigational surfaces that dock from off-screen right (unlike small
+   popovers, which stay fade-only per MN1/MN2). Enter 220ms as referenced;
+   exit 180ms (faster-out per motion skill). Reduced-motion collapse is
+   inherited system-wide. */
 @keyframes slideInRight {
   from {
-    opacity: 0;
-    transform: translateX(32px);
+    transform: translateX(100%);
   }
   to {
-    opacity: 1;
     transform: translateX(0);
   }
 }
 
 @keyframes slideOutRight {
   from {
-    opacity: 1;
     transform: translateX(0);
   }
   to {
-    opacity: 0;
-    transform: translateX(32px);
+    transform: translateX(100%);
   }
 }
 
