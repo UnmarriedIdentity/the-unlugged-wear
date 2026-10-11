@@ -497,6 +497,15 @@ export default function ProductsView() {
         <Table>
           <TableHeader>
             <TableRow hoverable={false}>
+              <TableHead style={{ padding: '12px 16px', width: 44 }}>
+                <Checkbox
+                  bare
+                  aria-label="Select all products on this page"
+                  checked={allPageSelected}
+                  indeterminate={!allPageSelected && somePageSelected}
+                  onChange={togglePage}
+                />
+              </TableHead>
               <TableHead style={{ padding: '12px 16px' }}>Product</TableHead>
               <TableHead style={{ padding: '12px 16px' }}>Category</TableHead>
               <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Price</TableHead>
@@ -508,7 +517,7 @@ export default function ProductsView() {
           <TableBody>
             {filteredProducts.length === 0 ? (
               <TableRow hoverable={false}>
-                <TableCell colSpan={6} style={{ padding: '48px 16px', textAlign: 'center', color: 'var(--tuw-text-secondary, #5D6772)', fontSize: 16 }}>
+                <TableCell colSpan={7} style={{ padding: '48px 16px', textAlign: 'center', color: 'var(--tuw-text-secondary, #5D6772)', fontSize: 16 }}>
                   No products found matching the selected filters.
                 </TableCell>
               </TableRow>
@@ -517,8 +526,16 @@ export default function ProductsView() {
                 <TableRow
                   key={p.id}
                   onClick={() => openEditDrawer(p)}
-                  style={{ cursor: 'pointer' }}
+                  style={{ cursor: 'pointer', backgroundColor: selectedIds.has(p.id) ? 'var(--tuw-bg-canvas, #F7F8F9)' : 'transparent' }}
                 >
+                  <TableCell style={{ padding: '14px 16px' }}>
+                    <Checkbox
+                      bare
+                      aria-label={`Select product ${p.name}`}
+                      checked={selectedIds.has(p.id)}
+                      onChange={() => toggleId(p.id)}
+                    />
+                  </TableCell>
                   <TableCell style={{ padding: '14px 16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                       <div style={{ width: 40, height: 40, borderRadius: 8, overflow: 'hidden', position: 'relative', flexShrink: 0, background: p.imageBg, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--tuw-border-subtle, #E5E7EB)' }}>
