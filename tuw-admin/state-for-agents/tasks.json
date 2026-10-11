@@ -8,14 +8,14 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 148,
-    "done": 134,
+    "total": 149,
+    "done": 135,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "071df12",
+    "tip": "fa750ca",
     "unpushed": ["6668cfd", "212ca3d", "c8a2f40", "6a00935", "2dc810e", "a60fa4f", "d7b2b31"],
     "next_up": "human pushes origin/v2 (2 commits) then origin/feat/search-modal (6 commits); browser review of spotlight",
     "pending_verifications": [
@@ -1022,6 +1022,20 @@
         "per-table fixed layout, not base — other tables untouched",
         "proportional widths stay responsive; orders flagged as follow-up"
       ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-MN1",
+      "title": "Fade-only popoverOut/OutUp (exit judder)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:fa750ca (anim probe proved clean toggle, missing end-Out = unmount race; enters untouched)",
+      "design_match": "yes",
+      "key_decisions": [],
       "verified": true,
       "pushed": false,
       "follow_ups": []
