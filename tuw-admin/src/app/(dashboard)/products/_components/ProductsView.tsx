@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui';
+import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FormSelect } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 
@@ -990,20 +990,15 @@ export default function ProductsView() {
                 required
               />
             </div>
-            <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
-                Publication Status
-              </label>
-              <select
-                value={formStatus}
-                onChange={(e) => setFormStatus(e.target.value as ProductItem['publicationStatus'])}
-                style={{ width: '100%', height: 40, borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '0 10px', fontSize: 13 }}
-              >
-                <option value="published">Published (Live on website)</option>
-                <option value="draft">Draft (Hidden)</option>
-                <option value="archived">Archived</option>
-              </select>
-            </div>
+            <FormSelect
+              label="Publication Status"
+              value={formStatus}
+              onChange={(e) => setFormStatus(e.target.value as ProductItem['publicationStatus'])}
+            >
+              <option value="published">Published (Live on website)</option>
+              <option value="draft">Draft (Hidden)</option>
+              <option value="archived">Archived</option>
+            </FormSelect>
             <Input
               label="Color Variations"
               value={formColors}
