@@ -22,6 +22,7 @@ import {
   TableCell,
   PageHeader,
   DropdownMenu,
+  PanelLayout,
 } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { OrderItem, PaymentStatus, FulfillmentStatus } from '@/mocks/fixtures';
@@ -353,7 +354,9 @@ export default function OrdersView() {
 
       {/* Filter and Table Card */}
       <ContentCard>
-        {/* Tabs + Search */}
+        <PanelLayout
+          scrollable={false}
+          header={
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 20 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
             <FilterPills
@@ -379,6 +382,8 @@ export default function OrdersView() {
             </div>
           </div>
         </div>
+          }
+        >
 
         {/* Table of Orders */}
         <Table>
@@ -522,6 +527,7 @@ export default function OrdersView() {
           </TableBody>
         </Table>
 
+          footer={
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
@@ -534,6 +540,8 @@ export default function OrdersView() {
             setCurrentPage(1);
           }}
         />
+          }
+        </PanelLayout>
       </ContentCard>
 
       {/* Order Detail Drawer */}
