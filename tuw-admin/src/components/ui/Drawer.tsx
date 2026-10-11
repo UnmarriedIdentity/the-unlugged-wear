@@ -12,6 +12,8 @@ export interface DrawerProps {
   subtitle?: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
+  /** Panel width. Per-content variance is deliberate: 480px media preview,
+   * 520px default, 540px page forms, 560px support threads. */
   width?: string | number;
 }
 
@@ -28,6 +30,40 @@ export default function Drawer({
   // Exit plays through the shared popover contract (180ms drawer rhythm);
   // render follows visibility so the slide-out completes before unmount.
   const anim = usePopoverAnimation(isOpen, undefined, 180);
+
+  // Focus trap: focus the panel on open, cycle Tab within it, and return
+  // focus to the invoker on close. Paint-free (programmatic focus never
+  // matches :focus-visible, so no ring appears).
+  const invokerRef = useRef<Element | null>(null);
+  useEffect(() => {
+    if (!anim.visible) return;
+    invokerRef.current = document.activeElement;
+    drawerRef.current?.focus();
+    const trap = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return;
+      const root = drawerRef.current;
+      if (!root) return;
+      const items = [...root.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )].filter((el) => el.offsetParent !== null);
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener('keydown', trap);
+    return () => {
+      window.removeEventListener('keydown', trap);
+      const invoker = invokerRef.current as HTMLElement | null;
+      invoker?.focus?.();
+    };
+  }, [anim.visible]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -66,6 +102,7 @@ export default function Drawer({
     >
       <div
         ref={drawerRef}
+        tabIndex={-1}
         style={{
           width: '100%',
           maxWidth: width,
