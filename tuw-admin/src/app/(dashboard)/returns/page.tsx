@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader, Checkbox } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader, Checkbox, HeroCard, KeyValueList } from '@/components/ui';
 import { Undo2, Search, Filter, CheckCircle2, XCircle, ArrowRight, RotateCcw, Download } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { ReturnItem } from '@/mocks/fixtures';
@@ -314,46 +314,39 @@ export default function ReturnsPage() {
       >
         {selectedReturn && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            <div style={{ padding: 16, backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)', borderRadius: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>Status</span>
-                <div style={{ marginTop: 4 }}>
-                  {selectedReturn.stage === 'restocked' && <Badge variant="success">Restocked</Badge>}
-                  {selectedReturn.stage === 'inspected' && <Badge variant="info">Inspected</Badge>}
-                  {selectedReturn.stage === 'in_transit' && <Badge variant="warning">In Transit</Badge>}
-                  {selectedReturn.stage === 'disputed' && <Badge variant="danger">Disputed</Badge>}
+            <HeroCard
+              label="Status"
+              badge={
+                <div style={{ textAlign: 'right' }}>
+                  <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>Tracking #</span>
+                  <div style={{ fontSize: 13, fontFamily: 'monospace', fontWeight: 600, color: 'var(--tuw-text-info, #175CD3)' }}>
+                    {selectedReturn.trackingNumber}
+                  </div>
                 </div>
+              }
+            >
+              <div style={{ marginTop: 4 }}>
+                {selectedReturn.stage === 'restocked' && <Badge variant="success">Restocked</Badge>}
+                {selectedReturn.stage === 'inspected' && <Badge variant="info">Inspected</Badge>}
+                {selectedReturn.stage === 'in_transit' && <Badge variant="warning">In Transit</Badge>}
+                {selectedReturn.stage === 'disputed' && <Badge variant="danger">Disputed</Badge>}
               </div>
-              <div style={{ textAlign: 'right' }}>
-                <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>Tracking #</span>
-                <div style={{ fontSize: 13, fontFamily: 'monospace', fontWeight: 600, color: 'var(--tuw-text-info, #175CD3)' }}>
-                  {selectedReturn.trackingNumber}
-                </div>
-              </div>
-            </div>
+            </HeroCard>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: 13 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>Customer:</span>
-                <strong>{selectedReturn.customer}</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>Order Reference:</span>
-                <span style={{ color: 'var(--tuw-action-primary, #7539FF)', fontWeight: 600 }}>{selectedReturn.orderId}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>Garment Item(s):</span>
-                <span>{selectedReturn.items}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>Carrier:</span>
-                <span>{selectedReturn.carrier}</span>
-              </div>
-              <div style={{ padding: 12, backgroundColor: '#FAF0EB', borderRadius: 8, color: '#9C4D78', marginTop: 8 }}>
-                <strong>Return Reason Provided:</strong>
-                <p style={{ margin: '4px 0 0', fontSize: 13 }}>{selectedReturn.reason}</p>
-              </div>
-            </div>
+            <KeyValueList
+              items={[
+                { label: 'Customer:', value: <strong>{selectedReturn.customer}</strong> },
+                { label: 'Order Reference:', value: <span style={{ color: 'var(--tuw-action-primary, #7539FF)', fontWeight: 600 }}>{selectedReturn.orderId}</span> },
+                { label: 'Garment Item(s):', value: <span>{selectedReturn.items}</span> },
+                { label: 'Carrier:', value: <span>{selectedReturn.carrier}</span> },
+              ]}
+              after={
+                <div style={{ padding: 12, backgroundColor: '#FAF0EB', borderRadius: 8, color: '#9C4D78', marginTop: 8 }}>
+                  <strong>Return Reason Provided:</strong>
+                  <p style={{ margin: '4px 0 0', fontSize: 13 }}>{selectedReturn.reason}</p>
+                </div>
+              }
+            />
           </div>
         )}
       </Drawer>
