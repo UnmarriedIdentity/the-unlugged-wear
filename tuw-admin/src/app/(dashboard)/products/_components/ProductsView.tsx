@@ -576,7 +576,16 @@ export default function ProductsView() {
         </div>
         ) : (
         /* Table View */
-        <Table>
+        <Table style={{ tableLayout: 'fixed' }}>
+          <colgroup>
+            <col style={{ width: 44 }} />
+            <col style={{ width: '34%' }} />
+            <col style={{ width: '11%' }} />
+            <col style={{ width: '14.5%' }} />
+            <col style={{ width: '13%' }} />
+            <col style={{ width: '12.5%' }} />
+            <col style={{ width: '15%' }} />
+          </colgroup>
           <TableHeader>
             {selectedIds.size > 0 ? (
             <TableRow hoverable={false}>
