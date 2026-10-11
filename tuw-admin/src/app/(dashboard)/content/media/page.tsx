@@ -15,6 +15,7 @@ import {
   EmptyState,
   ImageWithFallback,
   PageHeader,
+  KeyValueList,
 } from '@/components/ui';
 import {
   Image as ImageIcon,
@@ -506,24 +507,16 @@ export default function MediaLibraryPage() {
               />
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', paddingBottom: 8 }}>
-                <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>MIME Type:</span>
-                <span style={{ fontWeight: 500 }}>{selectedAsset.mimeType}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', paddingBottom: 8 }}>
-                <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>Dimensions:</span>
-                <span style={{ fontWeight: 500 }}>{selectedAsset.dimensions}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', paddingBottom: 8 }}>
-                <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>File Size:</span>
-                <span style={{ fontWeight: 500 }}>{selectedAsset.size}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', paddingBottom: 8 }}>
-                <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>Uploaded Date:</span>
-                <span style={{ fontWeight: 500 }}>{selectedAsset.uploadedAt}</span>
-              </div>
-            </div>
+            <KeyValueList
+              divided
+              gap={12}
+              items={[
+                { label: 'MIME Type:', value: selectedAsset.mimeType },
+                { label: 'Dimensions:', value: selectedAsset.dimensions },
+                { label: 'File Size:', value: selectedAsset.size },
+                { label: 'Uploaded Date:', value: selectedAsset.uploadedAt },
+              ]}
+            />
 
             <div>
               <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', marginBottom: 6, display: 'block' }}>
