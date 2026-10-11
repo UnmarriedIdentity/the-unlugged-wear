@@ -106,3 +106,6 @@ export type { HeroCardProps } from './HeroCard';
 export { default as ItemsRow } from './ItemsRow';
 export type { ItemsRowProps } from './ItemsRow';
 
+export { default as FormSelect } from './FormSelect';
+export type { FormSelectProps } from './FormSelect';
+
