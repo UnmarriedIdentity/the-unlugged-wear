@@ -8,14 +8,14 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 149,
-    "done": 135,
+    "total": 150,
+    "done": 136,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "fa750ca",
+    "tip": "b947977",
     "unpushed": ["6668cfd", "212ca3d", "c8a2f40", "6a00935", "2dc810e", "a60fa4f", "d7b2b31"],
     "next_up": "human pushes origin/v2 (2 commits) then origin/feat/search-modal (6 commits); browser review of spotlight",
     "pending_verifications": [
@@ -1034,6 +1034,20 @@
       "started": "2026-10-06",
       "finished": "2026-10-06",
       "log": "feat/search-modal:fa750ca (anim probe proved clean toggle, missing end-Out = unmount race; enters untouched)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-MN2",
+      "title": "Fade-only popoverIn/InUp (enter cut-mid-slide chop)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:b947977 (cancel+Out-7ms = correct close-during-enter; popover system now fade-only both directions)",
       "design_match": "yes",
       "key_decisions": [],
       "verified": true,
