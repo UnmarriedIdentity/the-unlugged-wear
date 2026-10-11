@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import PanelLayout from './PanelLayout';
+import { usePopoverAnimation } from '@/hooks/usePopoverAnimation';
 
 export interface DrawerProps {
   isOpen: boolean;
@@ -24,6 +25,9 @@ export default function Drawer({
   width = '520px',
 }: DrawerProps) {
   const drawerRef = useRef<HTMLDivElement>(null);
+  // Exit plays through the shared popover contract (180ms drawer rhythm);
+  // render follows visibility so the slide-out completes before unmount.
+  const anim = usePopoverAnimation(isOpen, undefined, 180);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -41,7 +45,7 @@ export default function Drawer({
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!anim.visible) return null;
 
   return (
     <div
@@ -69,7 +73,10 @@ export default function Drawer({
           backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
           boxShadow: '-10px 0 25px -5px rgba(0, 0, 0, 0.1)',
           borderLeft: '1px solid var(--tuw-border-subtle, #E5E7EB)',
-          animation: 'slideInRight 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
+          animation:
+            anim.phase === 'closing'
+              ? 'slideOutRight 0.18s ease-in'
+              : 'slideInRight 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       >
         <PanelLayout
