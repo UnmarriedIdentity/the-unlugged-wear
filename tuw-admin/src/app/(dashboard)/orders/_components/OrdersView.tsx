@@ -221,6 +221,9 @@ export default function OrdersView() {
       description: `${ids.length} order${ids.length === 1 ? '' : 's'} marked ${label}.`,
     });
     clearSelection();
+    // Mutated rows may no longer match the active tab — jump to All so
+    // results stay visible (reset-page effect picks up the tab change).
+    setOrderTab('all');
   };
 
   // Handle Create Order Submit
