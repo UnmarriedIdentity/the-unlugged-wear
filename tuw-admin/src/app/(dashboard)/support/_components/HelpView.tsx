@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { HelpCircle, MessageSquare, Send, CheckCircle2, Clock, AlertCircle, Sparkles, ChevronRight, User, Download } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader, Checkbox, HeroCard, DrawerSection } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader, Checkbox, HeroCard, DrawerSection, FormTextarea } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { SupportTicket } from '@/mocks/fixtures';
 
@@ -372,20 +372,13 @@ export default function HelpView() {
                 ))}
               </div>
 
-              <textarea
+              <FormTextarea
                 rows={4}
                 placeholder="Type your response to the customer..."
                 value={draftReply}
                 onChange={(e) => setDraftReply(e.target.value)}
-                style={{
-                  width: '100%',
-                  borderRadius: 8,
-                  border: '1px solid var(--tuw-border-control, #90979F)',
-                  padding: '10px 12px',
-                  fontSize: 13,
-                  fontFamily: 'inherit',
-                  marginBottom: 12,
-                }}
+                pad="10px 12px"
+                style={{ marginBottom: 12 }}
               />
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
