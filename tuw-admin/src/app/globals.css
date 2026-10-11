@@ -856,6 +856,32 @@
   }
 }
 
+/* Drawer panel motion (DF0): spatial slide, not fade — drawers are large
+   navigational surfaces (unlike menus, where positional motion juddered).
+   Enter 220ms as referenced by Drawer; exit 180ms (faster-out per motion
+   skill). Reduced-motion collapse is inherited system-wide. */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+}
+
 /* Spotlight result rows (S6): hover/focus wash + visible keyboard focus.
    Entrance/exit motion inherits the global reduced-motion collapse. */
 .spotlightRow:hover,
