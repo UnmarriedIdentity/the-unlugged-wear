@@ -779,22 +779,17 @@ export default function ProductsView() {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
-            <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
-                Category
-              </label>
-              <select
-                value={formCategory}
-                onChange={(e) => setFormCategory(e.target.value as ProductItem['category'])}
-                style={{ width: '100%', height: 40, borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '0 10px', fontSize: 13 }}
-              >
-                <option value="T-Shirts">T-Shirts</option>
-                <option value="Hoodies">Hoodies</option>
-                <option value="Jackets">Jackets</option>
-                <option value="Pants">Pants</option>
-                <option value="Accessories">Accessories</option>
-              </select>
-            </div>
+            <FormSelect
+              label="Category"
+              value={formCategory}
+              onChange={(e) => setFormCategory(e.target.value as ProductItem['category'])}
+            >
+              <option value="T-Shirts">T-Shirts</option>
+              <option value="Hoodies">Hoodies</option>
+              <option value="Jackets">Jackets</option>
+              <option value="Pants">Pants</option>
+              <option value="Accessories">Accessories</option>
+            </FormSelect>
 
             <Input
               label="Price ($ USD)"
@@ -815,36 +810,26 @@ export default function ProductsView() {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
-                Fulfillment Partner
-              </label>
-              <select
-                value={formPartner}
-                onChange={(e) => setFormPartner(e.target.value as ProductItem['partner'])}
-                style={{ width: '100%', height: 40, borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '0 10px', fontSize: 13 }}
-              >
-                <option value="Qikink Direct API">Qikink Direct API</option>
-                <option value="Printrove Hub">Printrove Hub</option>
-                <option value="Custom Atelier">Custom Atelier</option>
-              </select>
-            </div>
+            <FormSelect
+              label="Fulfillment Partner"
+              value={formPartner}
+              onChange={(e) => setFormPartner(e.target.value as ProductItem['partner'])}
+            >
+              <option value="Qikink Direct API">Qikink Direct API</option>
+              <option value="Printrove Hub">Printrove Hub</option>
+              <option value="Custom Atelier">Custom Atelier</option>
+            </FormSelect>
 
-            <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
-                Artwork Placement Spec
-              </label>
-              <select
-                value={formPlacement}
-                onChange={(e) => setFormPlacement(e.target.value as ProductItem['placement'])}
-                style={{ width: '100%', height: 40, borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '0 10px', fontSize: 13 }}
-              >
-                <option value="Chest (45mm)">Chest (45mm)</option>
-                <option value="Back Oversized">Back Oversized</option>
-                <option value="Sleeve Length">Sleeve Length</option>
-                <option value="Interior Hem">Interior Hem</option>
-              </select>
-            </div>
+            <FormSelect
+              label="Artwork Placement Spec"
+              value={formPlacement}
+              onChange={(e) => setFormPlacement(e.target.value as ProductItem['placement'])}
+            >
+              <option value="Chest (45mm)">Chest (45mm)</option>
+              <option value="Back Oversized">Back Oversized</option>
+              <option value="Sleeve Length">Sleeve Length</option>
+              <option value="Interior Hem">Interior Hem</option>
+            </FormSelect>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -860,39 +845,22 @@ export default function ProductsView() {
             />
           </div>
 
-          <div>
-            <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
-              Garment Description & Care
-            </label>
-            <textarea
+            <FormTextarea
+              label="Garment Description & Care"
               rows={3}
               value={formDescription}
               onChange={(e) => setFormDescription(e.target.value)}
-              style={{
-                width: '100%',
-                borderRadius: 8,
-                border: '1px solid var(--tuw-border-control, #90979F)',
-                padding: '8px 12px',
-                fontSize: 13,
-                fontFamily: 'inherit',
-              }}
             />
-          </div>
 
-          <div>
-            <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
-              Publication State
-            </label>
-            <select
+            <FormSelect
+              label="Publication State"
               value={formStatus}
               onChange={(e) => setFormStatus(e.target.value as ProductItem['publicationStatus'])}
-              style={{ width: '100%', height: 40, borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '0 10px', fontSize: 13 }}
             >
               <option value="published">Published (Visible in Storefront)</option>
               <option value="draft">Draft (Editorial review only)</option>
               <option value="archived">Archived (Hidden from catalog)</option>
-            </select>
-          </div>
+            </FormSelect>
         </form>
       </Modal>
 
