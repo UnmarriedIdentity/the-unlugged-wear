@@ -109,3 +109,6 @@ export type { ItemsRowProps } from './ItemsRow';
 export { default as FormSelect } from './FormSelect';
 export type { FormSelectProps } from './FormSelect';
 
+export { default as MediaFrame } from './MediaFrame';
+export type { MediaFrameProps } from './MediaFrame';
+
