@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download } from 'lucide-react';
+import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
 import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
@@ -578,6 +578,36 @@ export default function ProductsView() {
         /* Table View */
         <Table>
           <TableHeader>
+            {selectedIds.size > 0 ? (
+            <TableRow hoverable={false}>
+              <TableCell colSpan={7} style={{ padding: '6px 16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                  <Checkbox
+                    bare
+                    aria-label="Select all products on this page"
+                    checked={allPageSelected}
+                    indeterminate={!allPageSelected && somePageSelected}
+                    onChange={togglePage}
+                  />
+                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                    {selectedIds.size} selected
+                  </span>
+                  <Button variant="secondary" size="sm" icon={<Download size={14} />} onClick={handleExportSelected}>
+                    Export selected
+                  </Button>
+                  <Button variant="primary" size="sm" icon={<CheckCircle2 size={14} />} onClick={() => handleBulkStatus('published', 'Published')}>
+                    Publish
+                  </Button>
+                  <Button variant="secondary" size="sm" icon={<Archive size={14} />} onClick={() => handleBulkStatus('archived', 'Archived')}>
+                    Archive
+                  </Button>
+                  <Button variant="danger" size="sm" icon={<Trash2 size={14} />} onClick={handleBulkDelete}>
+                    Delete
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+            ) : (
             <TableRow hoverable={false}>
               <TableHead style={{ padding: '12px 16px', width: 44 }}>
                 <Checkbox
@@ -595,6 +625,7 @@ export default function ProductsView() {
               <TableHead style={{ padding: '12px 16px' }}>Status</TableHead>
               <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Action</TableHead>
             </TableRow>
+            )}
           </TableHeader>
           <TableBody>
             {filteredProducts.length === 0 ? (
