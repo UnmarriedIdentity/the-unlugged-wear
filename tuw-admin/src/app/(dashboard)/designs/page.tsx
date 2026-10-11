@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader, HeroCard, KeyValueList } from '@/components/ui';
 import { Palette, Plus, Search, Filter, Image as ImageIcon, UploadCloud, AlertCircle } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { DesignAsset } from '@/mocks/fixtures';
@@ -191,36 +191,29 @@ export default function DesignsPage() {
       >
         {selectedAsset && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            <div style={{ padding: 16, backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)', borderRadius: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <HeroCard
+              badge={
+                <Badge variant={selectedAsset.status === 'approved' ? 'success' : 'warning'}>
+                  {selectedAsset.status}
+                </Badge>
+              }
+            >
               <div>
                 <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>Format & Dimensions</span>
                 <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginTop: 2 }}>
                   {selectedAsset.dimensions} ({selectedAsset.fileFormat})
                 </div>
               </div>
-              <Badge variant={selectedAsset.status === 'approved' ? 'success' : 'warning'}>
-                {selectedAsset.status}
-              </Badge>
-            </div>
+            </HeroCard>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: 13 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>Placement Position:</span>
-                <strong>{selectedAsset.placement}</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>Designer / Lead:</span>
-                <span>{selectedAsset.designer}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>File Size:</span>
-                <span>{selectedAsset.fileSize}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>Last Validated:</span>
-                <span>{selectedAsset.updatedAt}</span>
-              </div>
-            </div>
+            <KeyValueList
+              items={[
+                { label: 'Placement Position:', value: <strong>{selectedAsset.placement}</strong> },
+                { label: 'Designer / Lead:', value: <span>{selectedAsset.designer}</span> },
+                { label: 'File Size:', value: <span>{selectedAsset.fileSize}</span> },
+                { label: 'Last Validated:', value: <span>{selectedAsset.updatedAt}</span> },
+              ]}
+            />
           </div>
         )}
       </Drawer>
