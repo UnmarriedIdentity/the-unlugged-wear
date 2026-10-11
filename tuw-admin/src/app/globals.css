@@ -1400,6 +1400,8 @@
   min-width: 148px;
   display: flex;
   flex-direction: column;
+  will-change: opacity, transform;
+  transform: translateZ(0);
 }
 
 .home-rangeMenuItem {

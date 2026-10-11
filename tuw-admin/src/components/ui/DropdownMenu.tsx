@@ -77,14 +77,16 @@ export default function DropdownMenu({
               border: '1px solid var(--tuw-border-subtle, #E5E7EB)',
               backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
               boxShadow: '0 12px 32px rgba(23, 28, 51, 0.16), 0 2px 6px rgba(23, 28, 51, 0.08)',
+              willChange: 'opacity, transform',
+              transform: 'translateZ(0)',
               animation:
                 anim.phase === 'closing'
                   ? opensUp
-                    ? 'popoverOutUp 0.15s ease-in'
-                    : 'popoverOut 0.15s ease-in'
+                    ? 'popoverOutUp 0.15s ease-in both'
+                    : 'popoverOut 0.15s ease-in both'
                   : opensUp
-                    ? 'popoverInUp 0.18s ease-out'
-                    : 'popoverIn 0.18s ease-out',
+                    ? 'popoverInUp 0.18s ease-out both'
+                    : 'popoverIn 0.18s ease-out both',
             }}
           >
             {items.map((item) => {

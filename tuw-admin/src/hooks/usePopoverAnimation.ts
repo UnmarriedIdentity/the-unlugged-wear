@@ -2,8 +2,8 @@
 
 import React from 'react';
 
-// Exit duration (ms) — must match the popoverOut animation in globals.css.
-export const POPOVER_EXIT_MS = 150;
+// Exit duration (ms) — buffered so 150ms popoverOut reaches opacity 0 before unmount.
+export const POPOVER_EXIT_MS = 180;
 
 type PopoverPhase = 'open' | 'closing' | 'closed';
 
@@ -61,13 +61,23 @@ export function usePopoverAnimation(open: boolean, onClosed?: () => void): Popov
     timer.current = setTimeout(finishClose, POPOVER_EXIT_MS);
   }, [finishClose]);
 
+  // Synchronous phase elevation on open to prevent an asynchronous 1-frame mount delay
+  if (open && phase !== 'open') {
+    wasOpen.current = true;
+    clearTimer();
+    phaseRef.current = 'open';
+    setPhase('open');
+  }
+
   React.useEffect(() => clearTimer, []);
 
   React.useEffect(() => {
     if (open) {
       wasOpen.current = true;
       clearTimer();
-      setPhaseBoth('open');
+      if (phaseRef.current !== 'open') {
+        setPhaseBoth('open');
+      }
       return;
     }
     if (!wasOpen.current) return;
