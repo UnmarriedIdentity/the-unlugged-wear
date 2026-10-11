@@ -97,3 +97,6 @@ export type { PanelFooterProps } from './PanelFooter';
 export { default as DrawerSection } from './DrawerSection';
 export type { DrawerSectionProps } from './DrawerSection';
 
+export { default as KeyValueList } from './KeyValueList';
+export type { KeyValueListProps, KeyValueItem } from './KeyValueList';
+
