@@ -8,15 +8,15 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 158,
-    "done": 144,
+    "total": 159,
+    "done": 145,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "3f3bc5b",
-    "unpushed": ["3f3bc5b", "ca44d64", "b9a009c", "8c0cfc9", "c2a4c49", "1a3e512", "1545ebf", "68d17f6", "be9f529", "688d868", "66f4ad3", "e22c105", "cd7723e", "3a2c8f8", "316b767", "b8d7ada", "f80f089", "a22478a", "4ce4aac", "f5bfcfa", "585529f", "ba74b76", "203c970", "32d74a3", "8f6c386", "b211dd2", "96067e3", "2011ae2", "8fad108", "401b217", "e533db4", "bc4808e", "b947977", "cf68bdb", "fa750ca"],
+    "tip": "6c832f4",
+    "unpushed": ["6c832f4", "4167f92", "99d8f10", "3f3bc5b", "ca44d64", "b9a009c", "8c0cfc9", "c2a4c49", "1a3e512", "1545ebf", "68d17f6", "be9f529", "688d868", "66f4ad3", "e22c105", "cd7723e", "3a2c8f8", "316b767", "b8d7ada", "f80f089", "a22478a", "4ce4aac", "f5bfcfa", "585529f", "ba74b76", "203c970", "32d74a3", "8f6c386", "b211dd2", "96067e3", "2011ae2", "8fad108", "401b217", "e533db4", "bc4808e", "b947977", "cf68bdb", "fa750ca"],
     "next_up": "Fulfillment Phase 2 per-card bulk bars; anim-probe re-run expecting end-Out events; browser verification backlog",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
@@ -1174,6 +1174,20 @@
         "textareas stay raw everywhere (per-site metrics vs ui/Textarea 10/14)",
         "selects migrated only where FormSelect metrics match exactly"
       ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DF0",
+      "title": "Drawer foundation (keyframes, exit motion, focus trap)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-11",
+      "finished": "2026-10-11",
+      "log": "feat/search-modal: 99d8f10 keyframes + 4167f92 exit wiring (hook exitMs param, popovers byte-identical) + 6c832f4 focus trap/return/width docs (paint-free; role=dialog stays on overlay)",
+      "design_match": "yes",
+      "key_decisions": [],
       "verified": true,
       "pushed": false,
       "follow_ups": []
