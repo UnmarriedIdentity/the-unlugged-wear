@@ -82,3 +82,15 @@ export type { ViewToggleProps, ViewToggleOption } from './ViewToggle';
 export { default as UpliftSurface } from './UpliftSurface';
 export type { UpliftSurfaceProps } from './UpliftSurface';
 
+export { default as PanelLayout } from './PanelLayout';
+export type { PanelLayoutProps } from './PanelLayout';
+
+export { default as PanelHeader } from './PanelHeader';
+export type { PanelHeaderProps } from './PanelHeader';
+
+export { default as PanelBody } from './PanelBody';
+export type { PanelBodyProps } from './PanelBody';
+
+export { default as PanelFooter } from './PanelFooter';
+export type { PanelFooterProps } from './PanelFooter';
+
