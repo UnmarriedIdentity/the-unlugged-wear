@@ -13,6 +13,9 @@ export interface KeyValueListProps extends React.HTMLAttributes<HTMLDivElement> 
   gap?: number;
   /** Divided variant (media drawer): hairline rule under each row. */
   divided?: boolean;
+  /** Trailing node inside the list container (participates in gap) — e.g.
+   * callout blocks that must keep exact rhythm with the rows. */
+  after?: React.ReactNode;
 }
 
 // Drawer key-value list (DW0): label/value rows inside drawer bodies.
@@ -22,6 +25,7 @@ export default function KeyValueList({
   items,
   gap = 10,
   divided = false,
+  after,
   style = {},
   ...props
 }: KeyValueListProps) {
@@ -56,6 +60,7 @@ export default function KeyValueList({
           </span>
         </div>
       ))}
+      {after ? after : null}
     </div>
   );
 }
