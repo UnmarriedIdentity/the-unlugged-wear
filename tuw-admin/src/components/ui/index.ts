@@ -103,3 +103,6 @@ export type { KeyValueListProps, KeyValueItem } from './KeyValueList';
 export { default as HeroCard } from './HeroCard';
 export type { HeroCardProps } from './HeroCard';
 
+export { default as ItemsRow } from './ItemsRow';
+export type { ItemsRowProps } from './ItemsRow';
+
