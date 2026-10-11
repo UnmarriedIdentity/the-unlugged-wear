@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader, HeroCard, DrawerSection, ItemsRow } from '@/components/ui';
 import { Layers, Plus, Search, Filter, Sparkles, FolderTree, Edit3 } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { CollectionItem } from '@/mocks/fixtures';
@@ -167,28 +167,31 @@ export default function CollectionsPage() {
       >
         {selectedCol && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            <div style={{ padding: 16, backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)', borderRadius: 10 }}>
-              <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>Editorial Overview</div>
-              <p style={{ fontSize: 14, color: 'var(--tuw-text-primary, #262626)', marginTop: 4, lineHeight: 1.5 }}>
-                {selectedCol.description}
-              </p>
-            </div>
+            <HeroCard>
+              <div>
+                <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>Editorial Overview</div>
+                <p style={{ fontSize: 14, color: 'var(--tuw-text-primary, #262626)', marginTop: 4, lineHeight: 1.5 }}>
+                  {selectedCol.description}
+                </p>
+              </div>
+            </HeroCard>
 
-            <div>
-              <h4 style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginBottom: 10 }}>
-                Included Products ({selectedCol.productCount})
-              </h4>
+            <DrawerSection title={`Included Products (${selectedCol.productCount})`} titleGap={10}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {products.slice(0, 4).map((p) => (
-                  <div key={p.id} style={{ padding: 10, backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)', borderRadius: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 13 }}>
-                    <div>
-                      <strong>{p.name}</strong> · {p.category}
-                    </div>
-                    <div style={{ fontWeight: 600 }}>${p.price.toFixed(2)}</div>
-                  </div>
+                  <ItemsRow
+                    key={p.id}
+                    pad={10}
+                    left={
+                      <div>
+                        <strong>{p.name}</strong> · {p.category}
+                      </div>
+                    }
+                    right={<div style={{ fontWeight: 600 }}>${p.price.toFixed(2)}</div>}
+                  />
                 ))}
               </div>
-            </div>
+            </DrawerSection>
           </div>
         )}
       </Drawer>
