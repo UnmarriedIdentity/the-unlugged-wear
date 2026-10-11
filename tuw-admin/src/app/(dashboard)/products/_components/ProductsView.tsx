@@ -190,6 +190,88 @@ export default function ProductsView() {
     });
   };
 
+  // Bulk actions (table-view bar appears when rows are selected)
+  const clearSelection = () => setSelectedIds(new Set());
+
+  const handleExportSelected = () => {
+    const selected = products.filter((p) => selectedIds.has(p.id));
+    if (selected.length === 0) return;
+    const headers = ['Product ID', 'Name', 'Slug', 'Category', 'Price', 'Stock', 'Sold', 'Status'];
+    const rows = selected.map((p) => [
+      p.id,
+      `"${p.name}"`,
+      p.slug,
+      p.category,
+      p.price.toFixed(2),
+      String(p.stock),
+      String(p.soldCount),
+      p.publicationStatus,
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
+    const link = document.createElement('a');
+    link.setAttribute('href', encodeURI(csvContent));
+    link.setAttribute('download', `tuw_products_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast({
+      type: 'success',
+      title: 'Selected Products Exported',
+      description: `${selected.length} product${selected.length === 1 ? '' : 's'} exported to CSV.`,
+    });
+    clearSelection();
+  };
+
+  const handleBulkStatus = (status: 'published' | 'archived', label: string) => {
+    const ids = [...selectedIds];
+    if (ids.length === 0) return;
+    if (!canPerformAction('products')) {
+      showToast({
+        type: 'warning',
+        title: 'Action Restricted',
+        description: 'Your demo role cannot update products.',
+      });
+      return;
+    }
+    ids.forEach((id) => updateProduct(id, { publicationStatus: status }, true));
+    if (editingProduct && selectedIds.has(editingProduct.id)) {
+      setEditingProduct({ ...editingProduct, publicationStatus: status });
+    }
+    setPublicationFilter('all');
+    setCurrentPage(1);
+    showToast({
+      type: 'success',
+      title: 'Bulk Update Applied',
+      description: `${ids.length} product${ids.length === 1 ? '' : 's'} marked ${label}.`,
+    });
+    clearSelection();
+  };
+
+  const handleBulkDelete = () => {
+    const ids = [...selectedIds];
+    if (ids.length === 0) return;
+    if (!canPerformAction('products')) {
+      showToast({
+        type: 'warning',
+        title: 'Action Restricted',
+        description: 'Your demo role cannot delete products.',
+      });
+      return;
+    }
+    if (!window.confirm(`Permanently delete ${ids.length} product${ids.length === 1 ? '' : 's'} from catalog?`)) return;
+    ids.forEach((id) => deleteProduct(id, true));
+    if (editingProduct && selectedIds.has(editingProduct.id)) {
+      setEditingProduct(null);
+    }
+    setCurrentPage(1);
+    showToast({
+      type: 'success',
+      title: 'Bulk Delete Applied',
+      description: `${ids.length} product${ids.length === 1 ? '' : 's'} removed from catalog.`,
+    });
+    clearSelection();
+  };
+
   const lowStockCount = products.filter((p) => p.stock > 0 && p.stock <= 10).length;
   const outOfStockCount = products.filter((p) => p.stock === 0).length;
   const draftCount = products.filter((p) => p.publicationStatus === 'draft').length;
