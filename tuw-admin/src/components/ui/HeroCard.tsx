@@ -17,7 +17,9 @@ export interface HeroCardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 // Drawer hero summary card (DW0): tinted summary strip at the top of drawer
 // bodies. Shell-only (padding/canvas/radius/flex) — all value treatments
-// live with the caller.
+// live with the caller. The left stack carries no gap: custom value blocks
+// bring their own margins (marginTop 2/4), and the label prop pairs with a
+// caller-margined child — so label-to-value rhythm reproduces exactly.
 export default function HeroCard({ label, children, badge, pad = 16, style = {}, ...props }: HeroCardProps) {
   return (
     <div
@@ -33,7 +35,7 @@ export default function HeroCard({ label, children, badge, pad = 16, style = {},
       }}
       {...props}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
         {label ? (
           <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>{label}</span>
         ) : null}
