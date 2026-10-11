@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader, HeroCard, KeyValueList } from '@/components/ui';
 import { CreditCard, Download, Search, Filter, ShieldCheck, CheckCircle2, ArrowUpRight } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { OrderItem } from '@/mocks/fixtures';
@@ -179,36 +179,29 @@ export default function PaymentsPage() {
       >
         {selectedTx && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            <div style={{ padding: 16, backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)', borderRadius: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <HeroCard
+              badge={
+                <Badge variant={selectedTx.paymentStatus === 'paid' ? 'success' : 'warning'}>
+                  {selectedTx.paymentStatus}
+                </Badge>
+              }
+            >
               <div>
                 <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>Settled Value</span>
                 <div className="tuw-tabular-nums" style={{ fontSize: 24, fontWeight: 700, color: 'var(--tuw-text-primary, #262626)', marginTop: 2 }}>
                   ₹{selectedTx.total.toLocaleString()}
                 </div>
               </div>
-              <Badge variant={selectedTx.paymentStatus === 'paid' ? 'success' : 'warning'}>
-                {selectedTx.paymentStatus}
-              </Badge>
-            </div>
+            </HeroCard>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: 13 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>Customer:</span>
-                <strong>{selectedTx.customerName}</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>Method:</span>
-                <span>{selectedTx.paymentMethod}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>Gateway Reference:</span>
-                <span style={{ fontFamily: 'monospace' }}>ch_mock_3N9A8s12984</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>Fraud Risk Score:</span>
-                <span style={{ color: 'var(--tuw-text-success, #187343)', fontWeight: 600 }}>0.02 (Low Risk)</span>
-              </div>
-            </div>
+            <KeyValueList
+              items={[
+                { label: 'Customer:', value: <strong>{selectedTx.customerName}</strong> },
+                { label: 'Method:', value: <span>{selectedTx.paymentMethod}</span> },
+                { label: 'Gateway Reference:', value: <span style={{ fontFamily: 'monospace' }}>ch_mock_3N9A8s12984</span> },
+                { label: 'Fraud Risk Score:', value: <span style={{ color: 'var(--tuw-text-success, #187343)', fontWeight: 600 }}>0.02 (Low Risk)</span> },
+              ]}
+            />
           </div>
         )}
       </Drawer>
