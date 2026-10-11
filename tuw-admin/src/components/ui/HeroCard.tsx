@@ -11,16 +11,18 @@ export interface HeroCardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   /** Right-side node (usually a status Badge). */
   badge?: React.ReactNode;
+  /** Shell padding (sites use 14–16). Default 16. */
+  pad?: number;
 }
 
 // Drawer hero summary card (DW0): tinted summary strip at the top of drawer
 // bodies. Shell-only (padding/canvas/radius/flex) — all value treatments
 // live with the caller.
-export default function HeroCard({ label, children, badge, style = {}, ...props }: HeroCardProps) {
+export default function HeroCard({ label, children, badge, pad = 16, style = {}, ...props }: HeroCardProps) {
   return (
     <div
       style={{
-        padding: 16,
+        padding: pad,
         backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)',
         borderRadius: 10,
         display: 'flex',
