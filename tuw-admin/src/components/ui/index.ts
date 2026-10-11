@@ -94,3 +94,6 @@ export type { PanelBodyProps } from './PanelBody';
 export { default as PanelFooter } from './PanelFooter';
 export type { PanelFooterProps } from './PanelFooter';
 
+export { default as DrawerSection } from './DrawerSection';
+export type { DrawerSectionProps } from './DrawerSection';
+
