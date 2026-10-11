@@ -831,11 +831,9 @@
 @keyframes popoverOut {
   from {
     opacity: 1;
-    transform: translateY(0) scale(1);
   }
   to {
     opacity: 0;
-    transform: translateY(-6px) scale(0.99);
   }
 }
 
@@ -856,11 +854,9 @@
 @keyframes popoverOutUp {
   from {
     opacity: 1;
-    transform: translateY(0) scale(1);
   }
   to {
     opacity: 0;
-    transform: translateY(6px) scale(0.99);
   }
 }
 
