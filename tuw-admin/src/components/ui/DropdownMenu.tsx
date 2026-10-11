@@ -47,10 +47,46 @@ export default function DropdownMenu({
   const [menuOpen, setMenuOpen] = useState(false);
   const anim = usePopoverAnimation(menuOpen, () => setMenuOpen(false));
   const opensUp = direction === 'up';
+  const wrapRef = React.useRef<HTMLDivElement>(null);
+  const [anchor, setAnchor] = React.useState<{
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+    vw: number;
+    vh: number;
+  } | null>(null);
+
+  const toggle = () => {
+    if (!menuOpen && wrapRef.current) {
+      const r = wrapRef.current.getBoundingClientRect();
+      setAnchor({
+        top: r.top,
+        bottom: r.bottom,
+        left: r.left,
+        right: r.right,
+        vw: window.innerWidth,
+        vh: window.innerHeight,
+      });
+    }
+    setMenuOpen((v) => !v);
+  };
+
+  // Fixed menus can't ride scrolling — close on any scroll/resize while open.
+  React.useEffect(() => {
+    if (!anim.visible) return;
+    const close = () => setMenuOpen(false);
+    window.addEventListener('scroll', close, true);
+    window.addEventListener('resize', close);
+    return () => {
+      window.removeEventListener('scroll', close, true);
+      window.removeEventListener('resize', close);
+    };
+  }, [anim.visible]);
 
   return (
-    <div style={{ position: 'relative', display: 'inline-flex' }}>
-      <span onClick={() => setMenuOpen((v) => !v)} aria-haspopup="menu" aria-expanded={anim.visible}>
+    <div ref={wrapRef} style={{ position: 'relative', display: 'inline-flex' }}>
+      <span onClick={toggle} aria-haspopup="menu" aria-expanded={anim.visible}>
         {trigger}
       </span>
       {anim.visible && (
@@ -65,13 +101,28 @@ export default function DropdownMenu({
             aria-label={ariaLabel}
             onClick={(e) => e.stopPropagation()}
             style={{
-              position: 'absolute',
-              ...(opensUp
-                ? { bottom: '100%', marginBottom: 8 }
-                : { top: '100%', marginTop: 8 }),
-              ...(align === 'right' ? { right: 0 } : { left: 0 }),
+              // Fixed (not absolute): escapes overflow containers so the menu
+              // is never clipped and always paints above page content.
+              position: 'fixed',
+              ...(anchor
+                ? opensUp
+                  ? {
+                      bottom: Math.max(8, anchor.vh - anchor.top + 8),
+                      ...(align === 'right'
+                        ? { right: Math.max(8, anchor.vw - anchor.right) }
+                        : { left: anchor.left }),
+                    }
+                  : {
+                      top: anchor.bottom + 8,
+                      ...(align === 'right'
+                        ? { right: Math.max(8, anchor.vw - anchor.right) }
+                        : { left: anchor.left }),
+                    }
+                : { visibility: 'hidden' as const }),
               zIndex: 50,
               minWidth: 180,
+              maxHeight: 'min(320px, calc(100vh - 32px))',
+              overflowY: 'auto',
               padding: 6,
               borderRadius: 'var(--tuw-radius-card, 12px)',
               border: '1px solid var(--tuw-border-subtle, #E5E7EB)',
