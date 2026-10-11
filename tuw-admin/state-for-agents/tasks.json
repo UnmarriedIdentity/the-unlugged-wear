@@ -8,14 +8,14 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 146,
-    "done": 132,
+    "total": 147,
+    "done": 133,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "3b14a10",
+    "tip": "1debffa",
     "unpushed": ["6668cfd", "212ca3d", "c8a2f40", "6a00935", "2dc810e", "a60fa4f", "d7b2b31"],
     "next_up": "human pushes origin/v2 (2 commits) then origin/feat/search-modal (6 commits); browser review of spotlight",
     "pending_verifications": [
@@ -987,6 +987,24 @@
       "log": "feat/search-modal: a09eae9 footer + 3b14a10 branch (class-only; layout/keyboard/focus untouched; closes US1 follow-up)",
       "design_match": "yes",
       "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PR1",
+      "title": "Products table bulk mode (export, publish, archive, delete)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal: 751db97 seam + 7af618b state + d491fd7 column + 783ea30 handlers + 1debffa bar (table-only; grid untouched; Archive icon over Eye)",
+      "design_match": "yes",
+      "key_decisions": [
+        "bulk delete via window.confirm (per-row precedent)",
+        "view switch clears selection; publication jumps to All on status bulk",
+        "no Draft bulk action (locked set)"
+      ],
       "verified": true,
       "pushed": false,
       "follow_ups": []
