@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FormSelect } from '@/components/ui';
+import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FormSelect, MediaFrame, FormTextarea } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 
@@ -933,17 +933,7 @@ export default function ProductsView() {
         {editingProduct && (
           <form onSubmit={handleEditSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {editingProduct.image && (
-              <div
-                style={{
-                  position: 'relative',
-                  width: '100%',
-                  height: 220,
-                  borderRadius: 10,
-                  overflow: 'hidden',
-                  border: '1px solid var(--tuw-border-subtle, #E9E9E9)',
-                  background: 'var(--tuw-bg-canvas, #F7F8F9)',
-                }}
-              >
+              <MediaFrame height={220} radius={10}>
                 {editingProduct.video ? (
                   <video
                     src={editingProduct.video}
@@ -959,7 +949,7 @@ export default function ProductsView() {
                     style={{ objectFit: 'cover' }}
                   />
                 )}
-              </div>
+              </MediaFrame>
             )}
             <Input
               label="Product Title"
@@ -1009,17 +999,12 @@ export default function ProductsView() {
               value={formSizes}
               onChange={(e) => setFormSizes(e.target.value)}
             />
-            <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
-                Description
-              </label>
-              <textarea
-                rows={4}
-                value={formDescription}
-                onChange={(e) => setFormDescription(e.target.value)}
-                style={{ width: '100%', borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '8px 12px', fontSize: 13, fontFamily: 'inherit' }}
-              />
-            </div>
+            <FormTextarea
+              label="Description"
+              rows={4}
+              value={formDescription}
+              onChange={(e) => setFormDescription(e.target.value)}
+            />
           </form>
         )}
       </Drawer>
