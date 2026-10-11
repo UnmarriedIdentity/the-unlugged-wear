@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader, HeroCard, DrawerSection, KeyValueList } from '@/components/ui';
 import { RotateCcw, Search, Filter, Download, ArrowUpRight, CheckCircle2, Clock, AlertTriangle, Eye } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { RefundItem } from '@/mocks/fixtures';
@@ -358,41 +358,32 @@ export default function RefundsPage() {
       >
         {selectedRefund && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            <div style={{ padding: 16, backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)', borderRadius: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <HeroCard
+              badge={
+                <Badge variant={selectedRefund.status === 'completed' ? 'success' : 'warning'}>
+                  {selectedRefund.status}
+                </Badge>
+              }
+            >
               <div>
                 <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>Refund Amount</span>
                 <div className="tuw-tabular-nums" style={{ fontSize: 24, fontWeight: 700, color: 'var(--tuw-text-primary, #262626)', marginTop: 2 }}>
                   ₹{selectedRefund.amount.toLocaleString()}
                 </div>
               </div>
-              <Badge variant={selectedRefund.status === 'completed' ? 'success' : 'warning'}>
-                {selectedRefund.status}
-              </Badge>
-            </div>
+            </HeroCard>
 
-            <div>
-              <h4 style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginBottom: 10 }}>
-                Disbursement Metadata
-              </h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>Recipient:</span>
-                  <strong>{selectedRefund.customer}</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>Method:</span>
-                  <span>{selectedRefund.method}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>Reason:</span>
-                  <span>{selectedRefund.reason}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>Settled Date:</span>
-                  <span>{selectedRefund.date}</span>
-                </div>
-              </div>
-            </div>
+            <DrawerSection title="Disbursement Metadata" titleGap={10}>
+              <KeyValueList
+                gap={8}
+                items={[
+                  { label: 'Recipient:', value: <strong>{selectedRefund.customer}</strong> },
+                  { label: 'Method:', value: <span>{selectedRefund.method}</span> },
+                  { label: 'Reason:', value: <span>{selectedRefund.reason}</span> },
+                  { label: 'Settled Date:', value: <span>{selectedRefund.date}</span> },
+                ]}
+              />
+            </DrawerSection>
           </div>
         )}
       </Drawer>
