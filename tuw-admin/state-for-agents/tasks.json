@@ -8,15 +8,15 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 174,
-    "done": 160,
+    "total": 175,
+    "done": 161,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "bcb3786",
-    "unpushed": ["bcb3786", "660b89b", "2010981", "d1f8179", "7567c95", "a7de6b5", "b31c9b1", "254e214", "bb6b19f", "e8e3882", "cc84644", "2087447", "be2e49f", "bc6a90d", "7002594", "29d165b", "35e3fdf", "9a49435", "0638769", "b7f1e4c", "1a0e6dd"],
+    "tip": "b5141b7",
+    "unpushed": ["b5141b7", "0c831f4", "bcb3786", "660b89b", "2010981", "d1f8179", "7567c95", "a7de6b5", "b31c9b1", "254e214", "bb6b19f", "e8e3882", "cc84644", "2087447", "be2e49f", "bc6a90d", "7002594", "29d165b", "35e3fdf", "9a49435", "0638769", "b7f1e4c", "1a0e6dd"],
     "next_up": "Fulfillment Phase 2 per-card bulk bars; DW2 drawer verification pass; anim-probe re-run; browser verification backlog",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
@@ -1420,6 +1420,23 @@
         "no framework DnD exists — native HTML5 + chevron keyboard path, zero deps",
         "uploads session-only; cover = index 0 of persisted; hero follows",
         "stage/panel blocks defined once, arranged by ResizeObserver width"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-MX4",
+      "title": "Asset containment + 2-col cards at 1000px+",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal: 0c831f4 wrap + b5141b7 cards (width threshold in shared observer; row-semantics twin, no new primitive)",
+      "design_match": "yes",
+      "key_decisions": [
+        "cards at container >=1000px, not drawer-mode literal",
+        "stage minWidth:0 already present; duplication disclosed over extraction"
       ],
       "verified": true,
       "pushed": false,
