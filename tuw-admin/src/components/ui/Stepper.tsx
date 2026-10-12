@@ -61,6 +61,7 @@ export default function Stepper({
       <button
         type="button"
         aria-label={`Decrease ${ariaLabel}`}
+        className="tuw-danger-hover"
         disabled={disabled || value <= min}
         onClick={() => onChange(clamp(value - step))}
         style={btn}
@@ -84,6 +85,7 @@ export default function Stepper({
       <button
         type="button"
         aria-label={`Increase ${ariaLabel}`}
+        className="tuw-success-hover"
         disabled={disabled || (max !== undefined && value >= max)}
         onClick={() => onChange(clamp(value + step))}
         style={btn}

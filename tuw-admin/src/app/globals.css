@@ -2128,6 +2128,15 @@
   color: var(--tuw-text-error, #C91818) !important;
 }
 
+/* Shared constructive hover (ED1): green wash + green icon/border, the
+   mirror of .tuw-danger-hover for affirmative steppers (stock +, confirm).
+   Same shape / !important precedent; icon follows via currentColor. */
+.tuw-success-hover:hover {
+  background-color: var(--tuw-bg-success, #F4FBF7) !important;
+  border-color: var(--tuw-text-success, #187343) !important;
+  color: var(--tuw-text-success, #187343) !important;
+}
+
 /* Shared 3D uplift surface (US1): white face + inset bottom edge, the same
    relief the sidebar gives its active nav item (shadow-nav-edge token).
    Sized entirely by the caller (width/height/radius props on UpliftSurface)
