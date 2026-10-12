@@ -4,9 +4,11 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs } from '@/components/ui';
+import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
+import { resolveVariants, deriveColors, deriveSizes, variantStockTotal, buildVariantSku } from '@/mocks/variants';
+import type { ProductVariant } from '@/mocks/fixtures';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
 
@@ -79,9 +81,61 @@ export default function ProductsView() {
   };
 
   // Drawer tab + media draft state (elastic workspace; tabs grow per phase)
-  const [productTab, setProductTab] = useState<'general' | 'media'>('general');
+  const [productTab, setProductTab] = useState<'general' | 'media' | 'variants'>('general');
   const [formImage, setFormImage] = useState('');
   const [formVideo, setFormVideo] = useState('');
+  // Variant matrix draft (drawer only): General variant inputs mirror-write
+  // here so the matrix stays the single submit source; the create modal keeps
+  // legacy strings-built-at-submit and never reads this draft.
+  const [formVariants, setFormVariants] = useState<ProductVariant[]>([]);
+
+  const parseList = (s: string) => s.split(',').map((x) => x.trim()).filter(Boolean);
+
+  const writePriceAll = (priceStr: string) => {
+    setFormPrice(priceStr);
+    const n = parseFloat(priceStr);
+    if (isNaN(n)) return;
+    setFormVariants((prev) => prev.map((v) => ({ ...v, price: n })));
+  };
+
+  const writeStockTotal = (stockStr: string) => {
+    setFormStock(stockStr);
+    const total = parseInt(stockStr, 10);
+    if (isNaN(total) || total < 0) return;
+    setFormVariants((prev) => {
+      if (prev.length === 0) return prev;
+      const base = Math.floor(total / prev.length);
+      let remainder = total % prev.length;
+      return prev.map((v) => {
+        const add = remainder > 0 ? 1 : 0;
+        if (remainder > 0) remainder -= 1;
+        return { ...v, stock: base + add };
+      });
+    });
+  };
+
+  const rebuildMatrix = (colors: string[], sizes: string[], basePrice: number, productId: string) => {
+    setFormVariants((prev) => {
+      const byKey = new Map(prev.map((v) => [`${v.color}|${v.size}`, v]));
+      const out: ProductVariant[] = [];
+      colors.forEach((color, ci) => {
+        sizes.forEach((size) => {
+          const kept = byKey.get(`${color}|${size}`);
+          if (kept) out.push(kept);
+          else
+            out.push({
+              id: `tmp-${ci}-${size}`,
+              color,
+              size,
+              sku: buildVariantSku(productId, ci, size),
+              price: basePrice,
+              stock: 0,
+            });
+        });
+      });
+      return out;
+    });
+  };
 
   const openEditDrawer = (product: ProductItem) => {
     if (!canPerformAction('products')) return;
@@ -89,6 +143,7 @@ export default function ProductsView() {
     setProductTab('general');
     setFormImage(product.image || '');
     setFormVideo(product.video || '');
+    setFormVariants(resolveVariants(product));
     setFormName(product.name);
     setFormSlug(product.slug);
     setFormCategory(product.category);
@@ -133,24 +188,29 @@ export default function ProductsView() {
     if (!editingProduct) return;
 
     const priceNum = parseFloat(formPrice) || editingProduct.price;
-    const stockNum = parseInt(formStock, 10) || editingProduct.stock;
     const compareNum = parseFloat(formComparePrice) || undefined;
+
+    // The draft matrix is the submit source: colors/sizes/stock derive from
+    // it in the seam; price follows the lowest variant ("from $X" semantics).
+    const submitVariants = formVariants.length > 0 ? formVariants : resolveVariants(editingProduct);
+    const minPrice =
+      submitVariants.length > 0
+        ? Math.min(...submitVariants.map((v) => v.price))
+        : priceNum;
 
     updateProduct(editingProduct.id, {
       name: formName,
       slug: formSlug,
       category: formCategory,
-      price: priceNum,
+      price: minPrice,
       compareAtPrice: compareNum,
-      stock: stockNum,
-      colors: formColors.split(',').map((c) => c.trim()).filter(Boolean),
-      sizes: formSizes.split(',').map((s) => s.trim()).filter(Boolean),
       partner: formPartner,
       placement: formPlacement,
       publicationStatus: formStatus,
       description: formDescription,
       image: formImage || undefined,
       video: formVideo || undefined,
+      variants: submitVariants,
     });
 
     setEditingProduct(null);
@@ -198,6 +258,11 @@ export default function ProductsView() {
       else pageIds.forEach((id) => next.add(id));
       return next;
     });
+  };
+
+  // Matrix row patch (variants tab): single source stays the draft.
+  const updateVariant = (id: string, patch: Partial<ProductVariant>) => {
+    setFormVariants((prev) => prev.map((v) => (v.id === id ? { ...v, ...patch } : v)));
   };
 
   // Bulk actions (table-view bar appears when rows are selected)
@@ -1029,6 +1094,7 @@ export default function ProductsView() {
             tabs={[
               { id: 'general', label: 'General' },
               { id: 'media', label: 'Media' },
+              { id: 'variants', label: 'Variants & Stock', badge: formVariants.length },
             ]}
             activeTab={productTab}
             onChange={(id) => setProductTab(id as typeof productTab)}
@@ -1083,14 +1149,14 @@ export default function ProductsView() {
                 type="number"
                 step="0.01"
                 value={formPrice}
-                onChange={(e) => setFormPrice(e.target.value)}
+                onChange={(e) => writePriceAll(e.target.value)}
                 required
               />
               <Input
                 label="Stock Quantity"
                 type="number"
                 value={formStock}
-                onChange={(e) => setFormStock(e.target.value)}
+                onChange={(e) => writeStockTotal(e.target.value)}
                 required
               />
             </div>
@@ -1145,12 +1211,28 @@ export default function ProductsView() {
             <Input
               label="Color Variations"
               value={formColors}
-              onChange={(e) => setFormColors(e.target.value)}
+              onChange={(e) => {
+                setFormColors(e.target.value);
+                rebuildMatrix(
+                  parseList(e.target.value),
+                  parseList(formSizes),
+                  parseFloat(formPrice) || 0,
+                  editingProduct?.id ?? 'PRD'
+                );
+              }}
             />
             <Input
               label="Size Variations"
               value={formSizes}
-              onChange={(e) => setFormSizes(e.target.value)}
+              onChange={(e) => {
+                setFormSizes(e.target.value);
+                rebuildMatrix(
+                  parseList(formColors),
+                  parseList(e.target.value),
+                  parseFloat(formPrice) || 0,
+                  editingProduct?.id ?? 'PRD'
+                );
+              }}
             />
             <FormTextarea
               label="Description"
@@ -1159,7 +1241,7 @@ export default function ProductsView() {
               onChange={(e) => setFormDescription(e.target.value)}
             />
           </form>
-          ) : (
+          ) : productTab === 'media' ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {formImage ? (
               <MediaFrame height={220} radius={10}>
@@ -1192,6 +1274,63 @@ export default function ProductsView() {
               value={formVideo}
               onChange={(e) => setFormVideo(e.target.value)}
             />
+          </div>
+          ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+              {formVariants.length} variants · {variantStockTotal(formVariants)} units in stock
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow hoverable={false}>
+                  <TableHead style={{ padding: '12px 16px' }}>Color</TableHead>
+                  <TableHead style={{ padding: '12px 16px' }}>Size</TableHead>
+                  <TableHead style={{ padding: '12px 16px' }}>SKU</TableHead>
+                  <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Price</TableHead>
+                  <TableHead style={{ padding: '12px 16px' }}>Stock</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {formVariants.map((v) => (
+                  <TableRow key={v.id} hoverable={false}>
+                    <TableCell style={{ padding: '10px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
+                      {v.color}
+                    </TableCell>
+                    <TableCell style={{ padding: '10px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
+                      {v.size}
+                    </TableCell>
+                    <TableCell style={{ padding: '10px 16px' }}>
+                      <Input
+                        aria-label={`SKU for ${v.color} ${v.size}`}
+                        value={v.sku}
+                        onChange={(e) => updateVariant(v.id, { sku: e.target.value })}
+                        style={{ height: 36 }}
+                      />
+                    </TableCell>
+                    <TableCell style={{ padding: '10px 16px' }}>
+                      <Input
+                        aria-label={`Price for ${v.color} ${v.size}`}
+                        type="number"
+                        step="0.01"
+                        value={String(v.price)}
+                        onChange={(e) => {
+                          const n = parseFloat(e.target.value);
+                          if (!isNaN(n)) updateVariant(v.id, { price: n });
+                        }}
+                        style={{ height: 36, textAlign: 'right' }}
+                      />
+                    </TableCell>
+                    <TableCell style={{ padding: '10px 16px' }}>
+                      <Stepper
+                        ariaLabel={`Stock for ${v.color} ${v.size}`}
+                        value={v.stock}
+                        onChange={(n) => updateVariant(v.id, { stock: n })}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
           )
         )}
