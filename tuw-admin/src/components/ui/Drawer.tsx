@@ -10,7 +10,7 @@ export interface DrawerProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  subtitle?: string;
+  subtitle?: React.ReactNode;
   children: React.ReactNode;
   footer?: React.ReactNode;
   /** Panel width. Per-content variance is deliberate: 480px media preview,
@@ -160,7 +160,7 @@ export default function Drawer({
             >
               {title}
             </h3>
-            {subtitle && (
+            {subtitle && typeof subtitle === 'string' ? (
               <p
                 style={{
                   fontSize: '13px',
@@ -170,6 +170,8 @@ export default function Drawer({
               >
                 {subtitle}
               </p>
+            ) : (
+              subtitle
             )}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
