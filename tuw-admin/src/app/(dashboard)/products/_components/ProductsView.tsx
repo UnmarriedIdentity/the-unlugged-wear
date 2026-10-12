@@ -64,6 +64,40 @@ export default function ProductsView() {
   const [formStatus, setFormStatus] = useState<ProductItem['publicationStatus']>('published');
   const [formDescription, setFormDescription] = useState('Pre-shrunk premium heavyweight combed cotton with reinforced seams.');
 
+  // Drawer create mode (PE5): blank-draft editing; the modal retires next.
+  const [isCreating, setIsCreating] = useState(false);
+
+  const openCreateDrawer = () => {
+    if (!canPerformAction('products')) return;
+    setEditingProduct(null);
+    setIsCreating(true);
+    setProductTab('general');
+    setFormName('');
+    setFormSlug('');
+    setFormCategory('T-Shirts');
+    setFormPrice('48.00');
+    setFormComparePrice('58.00');
+    setFormStock('25');
+    setFormColors('Black, Chalk White, Olive');
+    setFormSizes('S, M, L, XL');
+    setFormPartner('Qikink Direct API');
+    setFormPlacement('Chest (45mm)');
+    setFormStatus('published');
+    setFormDescription('Pre-shrunk premium heavyweight combed cotton with reinforced seams.');
+    setFormImage('');
+    setFormVideo('');
+    setFormVariants([]);
+    setFormFabricGsm('');
+    setFormCut('');
+    setFormModelDims('');
+    setFormCare('');
+    setFormMonogramEnabled(false);
+    setFormMonogramChars('3');
+    setFormMonogramUpcharge('12.00');
+    setFormSeoTitle('');
+    setFormSeoDescription('');
+  };
+
   const openCreateModal = () => {
     if (!canPerformAction('products')) return;
     setFormName('');
@@ -167,6 +201,7 @@ export default function ProductsView() {
 
   const openEditDrawer = (product: ProductItem) => {
     if (!canPerformAction('products')) return;
+    setIsCreating(false);
     setEditingProduct(product);
     setProductTab('general');
     setFormImage(product.image || '');
@@ -222,6 +257,43 @@ export default function ProductsView() {
 
   const handleEditSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isCreating) {
+      const priceNum = parseFloat(formPrice) || 0;
+      const stockNum = parseInt(formStock, 10) || 0;
+      const compareNum = parseFloat(formComparePrice) || undefined;
+      createProduct({
+        name: formName || 'Untitled Garment',
+        slug: formSlug || formName.toLowerCase().replace(/\s+/g, '-'),
+        category: formCategory,
+        price: priceNum,
+        compareAtPrice: compareNum,
+        stock: stockNum,
+        colors: parseList(formColors),
+        sizes: parseList(formSizes),
+        partner: formPartner,
+        placement: formPlacement,
+        publicationStatus: formStatus,
+        description: formDescription,
+        image: formImage || undefined,
+        video: formVideo || undefined,
+        imageBg: 'linear-gradient(135deg, #FAF3F7 0%, #EFE1EB 100%)',
+        fabricGsm: formFabricGsm || undefined,
+        cut: formCut || undefined,
+        modelDims: formModelDims || undefined,
+        care: formCare || undefined,
+        monogram: formMonogramEnabled
+          ? {
+              enabled: true,
+              maxChars: parseInt(formMonogramChars, 10) || 3,
+              upcharge: parseFloat(formMonogramUpcharge) || 0,
+            }
+          : undefined,
+        seoTitle: formSeoTitle || undefined,
+        seoDescription: formSeoDescription || undefined,
+      });
+      setIsCreating(false);
+      return;
+    }
     if (!editingProduct) return;
 
     const priceNum = parseFloat(formPrice) || editingProduct.price;
@@ -429,7 +501,7 @@ export default function ProductsView() {
             variant="primary"
             size="md"
             icon={<Plus size={16} />}
-            onClick={openCreateModal}
+            onClick={openCreateDrawer}
           >
             <span>Add New Product</span>
           </Button>
@@ -1132,27 +1204,49 @@ export default function ProductsView() {
 
       {/* Edit Product Drawer */}
       <Drawer
-        isOpen={Boolean(editingProduct)}
-        onClose={() => setEditingProduct(null)}
-        title={editingProduct ? `Manage ${editingProduct.name}` : 'Edit Product'}
-        subtitle={`ID: ${editingProduct?.id} · ${editingProduct?.partner}`}
+        isOpen={Boolean(editingProduct) || isCreating}
+        onClose={() => {
+          setEditingProduct(null);
+          setIsCreating(false);
+        }}
+        title={editingProduct ? `Manage ${editingProduct.name}` : 'Add New Product'}
+        subtitle={
+          editingProduct ? `ID: ${editingProduct.id} · ${editingProduct.partner}` : 'New catalog entry'
+        }
         expandable
         headerExtra={
           <Tabs
             variant="underline"
             ariaLabel="Product editor sections"
-            tabs={[
-              { id: 'general', label: 'General' },
-              { id: 'media', label: 'Media' },
-              { id: 'variants', label: 'Variants & Stock', badge: formVariants.length },
-              { id: 'specs', label: 'Clothing Specs' },
-              { id: 'seo', label: 'SEO' },
-            ]}
+            tabs={
+              isCreating
+                ? [
+                    { id: 'general', label: 'General' },
+                    { id: 'media', label: 'Media' },
+                  ]
+                : [
+                    { id: 'general', label: 'General' },
+                    { id: 'media', label: 'Media' },
+                    { id: 'variants', label: 'Variants & Stock', badge: formVariants.length },
+                    { id: 'specs', label: 'Clothing Specs' },
+                    { id: 'seo', label: 'SEO' },
+                  ]
+            }
             activeTab={productTab}
             onChange={(id) => setProductTab(id as typeof productTab)}
           />
         }
         footer={
+          isCreating ? (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, width: '100%' }}>
+              <Button variant="secondary" size="sm" onClick={() => setIsCreating(false)}>
+                Cancel
+              </Button>
+              <Button variant="primary" size="sm" onClick={handleEditSubmit}>
+                Create Product
+              </Button>
+            </div>
+          ) : (
           editingProduct && (
             <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
               <Button
@@ -1178,9 +1272,10 @@ export default function ProductsView() {
               </div>
             </div>
           )
+          )
         }
       >
-        {editingProduct && (
+        {(editingProduct || isCreating) && (
           productTab === 'general' ? (
           <form onSubmit={handleEditSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <Input
