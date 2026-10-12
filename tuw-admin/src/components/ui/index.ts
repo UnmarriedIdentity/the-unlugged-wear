@@ -115,3 +115,6 @@ export type { MediaFrameProps } from './MediaFrame';
 export { default as FormTextarea } from './FormTextarea';
 export type { FormTextareaProps } from './FormTextarea';
 
+export { default as Stepper } from './Stepper';
+export type { StepperProps } from './Stepper';
+
