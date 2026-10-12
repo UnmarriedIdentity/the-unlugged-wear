@@ -948,15 +948,54 @@ export default function ProductsView() {
                 required
               />
             </div>
-            <FormSelect
-              label="Publication Status"
-              value={formStatus}
-              onChange={(e) => setFormStatus(e.target.value as ProductItem['publicationStatus'])}
-            >
-              <option value="published">Published (Live on website)</option>
-              <option value="draft">Draft (Hidden)</option>
-              <option value="archived">Archived</option>
-            </FormSelect>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', marginBottom: 6 }}>
+                Publication Status
+              </div>
+              <DropdownMenu
+                ariaLabel="Publication status"
+                trigger={
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Publication status, currently ${formStatus === 'published' ? 'Published (Live on website)' : formStatus === 'draft' ? 'Draft (Hidden)' : 'Archived'}`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 8,
+                      width: '100%',
+                      height: 40,
+                      padding: '0 12px',
+                      fontSize: 13,
+                      fontWeight: 500,
+                      fontFamily: 'var(--font-main)',
+                      borderRadius: 8,
+                      border: '1px solid var(--tuw-border-control, #D1D5DB)',
+                      backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
+                      color: 'var(--tuw-text-primary, #262626)',
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                    }}
+                  >
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {formStatus === 'published' ? 'Published (Live on website)' : formStatus === 'draft' ? 'Draft (Hidden)' : 'Archived'}
+                    </span>
+                    <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
+                  </span>
+                }
+                items={[
+                  { value: 'published', label: 'Published (Live on website)' },
+                  { value: 'draft', label: 'Draft (Hidden)' },
+                  { value: 'archived', label: 'Archived' },
+                ]}
+                selectedValue={formStatus}
+                onSelect={(v) => setFormStatus(v as ProductItem['publicationStatus'])}
+              />
+            </div>
             <Input
               label="Color Variations"
               value={formColors}
