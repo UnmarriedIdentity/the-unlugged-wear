@@ -16,7 +16,7 @@
   "session": {
     "branch": "feat/search-modal",
     "tip": "e8e3882",
-    "unpushed": ["bb6b19f", "e8e3882", "cc84644", "2087447", "be2e49f", "bc6a90d", "7002594", "29d165b", "35e3fdf", "9a49435", "0638769", "b7f1e4c", "1a0e6dd"],
+    "unpushed": ["254e214", "bb6b19f", "e8e3882", "cc84644", "2087447", "be2e49f", "bc6a90d", "7002594", "29d165b", "35e3fdf", "9a49435", "0638769", "b7f1e4c", "1a0e6dd"],
     "next_up": "Fulfillment Phase 2 per-card bulk bars; DW2 drawer verification pass; anim-probe re-run; browser verification backlog",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
