@@ -15,6 +15,8 @@ export interface CarouselProps {
   ariaLabel?: string;
   /** Frame aspect ratio. Default '4 / 3'. */
   aspect?: string;
+  /** Dots or thumbnail filmstrip navigation. Default 'dots'. */
+  variant?: 'dots' | 'filmstrip';
 }
 
 // Customer-view gallery (MD2): dots + chevron navigation over a fixed-aspect
@@ -23,7 +25,7 @@ export interface CarouselProps {
 // null when empty — the caller owns the empty text.
 // Plain <img> (not next/image): slides include blob: upload previews, which
 // the optimizer rejects — same constraint as ImageWithFallback.
-export default function Carousel({ slides, ariaLabel = 'Gallery', aspect = '4 / 3' }: CarouselProps) {
+export default function Carousel({ slides, ariaLabel = 'Gallery', aspect = '4 / 3', variant = 'dots' }: CarouselProps) {
   const [index, setIndex] = useState(0);
   if (slides.length === 0) return null;
   const safeIndex = ((index % slides.length) + slides.length) % slides.length;
@@ -96,6 +98,75 @@ export default function Carousel({ slides, ariaLabel = 'Gallery', aspect = '4 / 
         ) : null}
       </div>
       {slides.length > 1 ? (
+        variant === 'filmstrip' ? (
+          <div style={{ display: 'flex', gap: 8, marginTop: 10 }} role="tablist" aria-label={`${ariaLabel} slides`}>
+            {slides.map((s, i) => (
+              <button
+                key={`${s.type}-${s.src}-${i}`}
+                type="button"
+                role="tab"
+                aria-selected={i === safeIndex}
+                aria-label={`Go to slide ${i + 1} of ${slides.length}`}
+                onClick={() => setIndex(i)}
+                style={{
+                  position: 'relative',
+                  width: 56,
+                  height: 56,
+                  padding: 0,
+                  borderRadius: 8,
+                  overflow: 'hidden',
+                  border: i === safeIndex
+                    ? '2px solid var(--tuw-action-primary, #7539FF)'
+                    : '1px solid var(--tuw-border-subtle, #E5E7EB)',
+                  backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)',
+                  cursor: 'pointer',
+                  flexShrink: 0,
+                }}
+              >
+                {s.type === 'video' ? (
+                  <span
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '100%',
+                      height: '100%',
+                      fontSize: 10,
+                      fontWeight: 700,
+                      color: '#FFFFFF',
+                      backgroundColor: '#1A1A1A',
+                    }}
+                  >
+                    REEL
+                  </span>
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={s.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                )}
+                {i === 0 && s.type === 'image' ? (
+                  <span
+                    style={{
+                      position: 'absolute',
+                      bottom: 2,
+                      left: 2,
+                      right: 2,
+                      fontSize: 8,
+                      fontWeight: 700,
+                      letterSpacing: '0.04em',
+                      textAlign: 'center',
+                      color: '#FFFFFF',
+                      backgroundColor: 'var(--tuw-action-primary, #7539FF)',
+                      borderRadius: 3,
+                      padding: '1px 0',
+                    }}
+                  >
+                    COVER
+                  </span>
+                ) : null}
+              </button>
+            ))}
+          </div>
+        ) : (
         <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 8 }} role="tablist" aria-label={`${ariaLabel} slides`}>
           {slides.map((s, i) => (
             <button
@@ -121,6 +192,7 @@ export default function Carousel({ slides, ariaLabel = 'Gallery', aspect = '4 / 
             />
           ))}
         </div>
+        )
       ) : null}
     </div>
   );
