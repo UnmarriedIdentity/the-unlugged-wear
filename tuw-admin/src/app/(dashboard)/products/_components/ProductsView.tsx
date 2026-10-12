@@ -819,6 +819,7 @@ export default function ProductsView() {
       role="button"
       tabIndex={0}
       aria-label="Upload photos or video reel"
+      className="tuw-stat-hover"
       onClick={() => photoInputRef.current?.click()}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
