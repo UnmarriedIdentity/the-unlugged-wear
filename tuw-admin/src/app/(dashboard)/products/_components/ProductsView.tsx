@@ -718,16 +718,17 @@ export default function ProductsView() {
       </span>
     </SurfaceCard>
   ));
-  // Card twin of assetRows for wide containers (MX4): same semantics —
-  // drag anywhere on the card (no grip needed at this size), same cover /
-  // preview / reorder / delete paths. Primitives only, no new components.
+  // Card twin of assetRows for wide containers (MX4): the row's design DNA
+  // (1:1 thumb, name + URL, badge row, delete) in a 2-per-row grid. Drag
+  // anywhere on the card; same cover / preview / delete paths.
   const assetCards = (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
       {formImages.map((im, idx) => (
         <SurfaceCard
           key={im.id}
-          padding="12px"
-          gap="10px"
+          direction="row"
+          padding="10px"
+          gap="12px"
           hoverable
           className={`${idx === 0 ? 'tuw-stat-active' : ''} ${draggingId === im.id ? 'tuw-stat-active' : ''}`.trim()}
           draggable
@@ -746,52 +747,52 @@ export default function ProductsView() {
             }
             setDraggingId(null);
           }}
-          style={{ minWidth: 0 }}
+          style={{ alignItems: 'center', minWidth: 0 }}
         >
-          <MediaFrame height={90} radius={8}>
+          <MediaFrame height={72} width={72} radius={8} style={{ flexShrink: 0 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={im.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </MediaFrame>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {im.name}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {im.name}
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {im.src}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
+              {idx === 0 ? (
+                <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.04em', color: '#FFFFFF', backgroundColor: 'var(--tuw-action-primary, #7539FF)', borderRadius: 4, padding: '2px 6px' }}>
+                  COVER
+                </span>
+              ) : (
+                <>
+                  {!im.persisted ? (
+                    <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--tuw-text-warning, #856300)', backgroundColor: 'var(--tuw-bg-warning, #FEFBF5)', borderRadius: 4, padding: '2px 6px' }}>
+                      Preview only
+                    </span>
+                  ) : null}
+                  {im.persisted ? (
+                    <button
+                      type="button"
+                      onClick={() => setCoverImage(im.id)}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', padding: '4px 2px' }}
+                    >
+                      Set Cover
+                    </button>
+                  ) : null}
+                </>
+              )}
+            </div>
           </div>
-          <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {im.src}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-            {idx === 0 ? (
-              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.04em', color: '#FFFFFF', backgroundColor: 'var(--tuw-action-primary, #7539FF)', borderRadius: 4, padding: '2px 6px' }}>
-                COVER
-              </span>
-            ) : (
-              <>
-                {!im.persisted ? (
-                  <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--tuw-text-warning, #856300)', backgroundColor: 'var(--tuw-bg-warning, #FEFBF5)', borderRadius: 4, padding: '2px 6px' }}>
-                    Preview only
-                  </span>
-                ) : null}
-                {im.persisted ? (
-                  <button
-                    type="button"
-                    onClick={() => setCoverImage(im.id)}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', padding: '4px 2px' }}
-                  >
-                    Set Cover
-                  </button>
-                ) : null}
-              </>
-            )}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 2 }}>
-            <button
-              type="button"
-              aria-label={`Remove ${im.name}`}
-              onClick={() => removeImage(im.id)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tuw-text-secondary, #5D6772)', padding: 4, display: 'inline-flex' }}
-            >
-              <Trash2 size={14} />
-            </button>
-          </div>
+          <button
+            type="button"
+            aria-label={`Remove ${im.name}`}
+            onClick={() => removeImage(im.id)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tuw-text-secondary, #5D6772)', padding: 4, display: 'inline-flex', flexShrink: 0 }}
+          >
+            <Trash2 size={14} />
+          </button>
         </SurfaceCard>
       ))}
     </div>
@@ -1535,7 +1536,7 @@ export default function ProductsView() {
           ) : productTab === 'media' ? (
           <div ref={mediaWrapRef} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {mediaWide ? (
-            <div style={{ display: 'grid', gridTemplateColumns: '7fr 5fr', gap: 20, alignItems: 'start' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '9fr 11fr', gap: 20, alignItems: 'start' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0 }}>
                 {stageHeader}
                 <Carousel ariaLabel="Customer gallery preview" variant="filmstrip" slides={gallerySlides} index={stageIndexClamped} onIndexChange={setStageIndex} />
