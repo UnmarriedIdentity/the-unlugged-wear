@@ -170,6 +170,87 @@ export default function ProductsView() {
     setFormGallery((prev) => (prev.includes(url) ? prev : [...prev, url]));
     setAddImageUrl('');
   };
+
+  // Unified asset list (MX2): persisted gallery URLs + session upload
+  // previews in one orderable list. Reorder/cover operate on the list;
+  // save splits it back (URLs persist, uploads drop with a toast).
+  const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
+  const [formImages, setFormImages] = useState<
+    Array<{ id: string; src: string; name: string; persisted: boolean }>
+  >([]);
+  const [uploadReel, setUploadReel] = useState<{ id: string; url: string; name: string } | null>(null);
+
+  const baseName = (url: string) => {
+    const part = url.split('?')[0].split('/');
+    return part[part.length - 1] || url;
+  };
+
+  const moveImage = (id: string, dir: -1 | 1) => {
+    setFormImages((prev) => {
+      const idx = prev.findIndex((im) => im.id === id);
+      const j = idx + dir;
+      if (idx < 0 || j < 0 || j >= prev.length) return prev;
+      const next = [...prev];
+      [next[idx], next[j]] = [next[j], next[idx]];
+      return next;
+    });
+  };
+
+  const setCoverImage = (id: string) => {
+    setFormImages((prev) => {
+      const idx = prev.findIndex((im) => im.id === id);
+      if (idx <= 0) return prev;
+      const next = [...prev];
+      const [item] = next.splice(idx, 1);
+      return [item, ...next];
+    });
+  };
+
+  const removeImage = (id: string) => {
+    setFormImages((prev) => {
+      const target = prev.find((im) => im.id === id);
+      if (target && !target.persisted) revokeUploads([{ url: target.src }]);
+      return prev.filter((im) => im.id !== id);
+    });
+  };
+
+  const addImageUrlEntry = () => {
+    const url = addImageUrl.trim();
+    if (!url) return;
+    setFormImages((prev) =>
+      prev.some((im) => im.src === url) ? prev : [...prev, { id: `g-${Date.now()}`, src: url, name: baseName(url), persisted: true }]
+    );
+    setAddImageUrl('');
+  };
+
+  const handlePickedFiles = (files: FileList | null) => {
+    if (!files) return;
+    [...files].forEach((f) => {
+      if (f.size > MAX_UPLOAD_BYTES) {
+        showToast({
+          type: 'warning',
+          title: 'File Too Large',
+          description: `"${f.name}" exceeds the 25MB limit and was skipped.`,
+        });
+        return;
+      }
+      if (f.type.startsWith('image/')) {
+        const url = URL.createObjectURL(f);
+        setFormImages((prev) => [...prev, { id: `up-${Date.now()}-${f.name}`, src: url, name: f.name, persisted: false }]);
+      } else if (f.type.startsWith('video/')) {
+        const hasReel = formVideo !== '' || uploadReel !== null;
+        if (hasReel) {
+          showToast({
+            type: 'warning',
+            title: 'One Video Reel Only',
+            description: 'Remove the current reel before adding another.',
+          });
+          return;
+        }
+        setUploadReel({ id: `up-${Date.now()}`, url: URL.createObjectURL(f), name: f.name });
+      }
+    });
+  };
   // Apparel + SEO draft state (specs/SEO tabs; all optional — fixtures stay valid)
   const [formFabricGsm, setFormFabricGsm] = useState('');
   const [formCut, setFormCut] = useState('');
