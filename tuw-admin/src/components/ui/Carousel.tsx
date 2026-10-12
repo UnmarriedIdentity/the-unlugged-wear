@@ -104,7 +104,7 @@ export default function Carousel({ slides, ariaLabel = 'Gallery', aspect = '4 / 
       </div>
       {slides.length > 1 ? (
         variant === 'filmstrip' ? (
-          <div style={{ display: 'flex', gap: 8, marginTop: 10 }} role="tablist" aria-label={`${ariaLabel} slides`}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 10 }} role="tablist" aria-label={`${ariaLabel} slides`}>
             {slides.map((s, i) => (
               <button
                 key={`${s.type}-${s.src}-${i}`}
