@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper } from '@/components/ui';
+import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 import { resolveVariants, deriveColors, deriveSizes, variantStockTotal, buildVariantSku } from '@/mocks/variants';
@@ -81,7 +82,7 @@ export default function ProductsView() {
   };
 
   // Drawer tab + media draft state (elastic workspace; tabs grow per phase)
-  const [productTab, setProductTab] = useState<'general' | 'media' | 'variants'>('general');
+  const [productTab, setProductTab] = useState<'general' | 'media' | 'variants' | 'specs' | 'seo'>('general');
   const [formImage, setFormImage] = useState('');
   const [formVideo, setFormVideo] = useState('');
   // Apparel + SEO draft state (specs/SEO tabs; all optional — fixtures stay valid)
@@ -1144,6 +1145,8 @@ export default function ProductsView() {
               { id: 'general', label: 'General' },
               { id: 'media', label: 'Media' },
               { id: 'variants', label: 'Variants & Stock', badge: formVariants.length },
+              { id: 'specs', label: 'Clothing Specs' },
+              { id: 'seo', label: 'SEO' },
             ]}
             activeTab={productTab}
             onChange={(id) => setProductTab(id as typeof productTab)}
@@ -1294,7 +1297,7 @@ export default function ProductsView() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {formImage ? (
               <MediaFrame height={220} radius={10}>
-                {formVideo ? (
+                {visibleSections.video && formVideo ? (
                   <video
                     src={formVideo}
                     controls
@@ -1317,14 +1320,16 @@ export default function ProductsView() {
               value={formImage}
               onChange={(e) => setFormImage(e.target.value)}
             />
+            {visibleSections.video ? (
             <Input
               label="Video Reel URL (optional)"
               placeholder="/products/4.mp4"
               value={formVideo}
               onChange={(e) => setFormVideo(e.target.value)}
             />
+            ) : null}
           </div>
-          ) : (
+          ) : productTab === 'variants' ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
               {formVariants.length} variants · {variantStockTotal(formVariants)} units in stock
@@ -1380,6 +1385,113 @@ export default function ProductsView() {
                 ))}
               </TableBody>
             </Table>
+          </div>
+          ) : productTab === 'specs' ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <DrawerSection title="Display Options" titleGap={10}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <Switch
+                  label="Video Reel slot"
+                  description="Show the video block on the Media tab"
+                  checked={visibleSections.video}
+                  onChange={(v) => setVisibleSections((s) => ({ ...s, video: v }))}
+                />
+                <Switch
+                  label="Monogram & embroidery"
+                  description="Show the custom embroidery block below"
+                  checked={visibleSections.monogram}
+                  onChange={(v) => setVisibleSections((s) => ({ ...s, monogram: v }))}
+                />
+              </div>
+            </DrawerSection>
+            <DrawerSection title="Clothing Specifications" titleGap={10}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <Input
+                  label="Fabric Composition & GSM"
+                  placeholder="460 GSM Heavyweight French Terry Cotton"
+                  value={formFabricGsm}
+                  onChange={(e) => setFormFabricGsm(e.target.value)}
+                />
+                <Input
+                  label="Cut & Silhouette"
+                  placeholder="Boxy Drop-Shoulder"
+                  value={formCut}
+                  onChange={(e) => setFormCut(e.target.value)}
+                />
+                <Input
+                  label="Model Dimensions"
+                  placeholder="Model is 6'1&quot; wearing Size L"
+                  value={formModelDims}
+                  onChange={(e) => setFormModelDims(e.target.value)}
+                />
+                <FormTextarea
+                  label="Care & Wash Instructions"
+                  rows={3}
+                  placeholder="Cold wash inside out, lay flat to dry"
+                  value={formCare}
+                  onChange={(e) => setFormCare(e.target.value)}
+                />
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                  <span style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                    Associated Size Chart Template
+                  </span>
+                  <Link href="/content/pages" style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)', textDecoration: 'none' }}>
+                    Open Fit Guide
+                  </Link>
+                </div>
+              </div>
+            </DrawerSection>
+            {visibleSections.monogram ? (
+            <DrawerSection title="Monogram & Custom Embroidery" titleGap={10}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <Switch
+                  label="Offer monogramming"
+                  description="On-demand chest initials with upcharge"
+                  checked={formMonogramEnabled}
+                  onChange={setFormMonogramEnabled}
+                />
+                {formMonogramEnabled ? (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <Input
+                    label="Max Characters"
+                    type="number"
+                    value={formMonogramChars}
+                    onChange={(e) => setFormMonogramChars(e.target.value)}
+                  />
+                  <Input
+                    label="Upcharge ($ USD)"
+                    type="number"
+                    step="0.01"
+                    value={formMonogramUpcharge}
+                    onChange={(e) => setFormMonogramUpcharge(e.target.value)}
+                  />
+                </div>
+                ) : null}
+              </div>
+            </DrawerSection>
+            ) : null}
+          </div>
+          ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <Input
+              label="SEO Title"
+              placeholder={formName || 'Product name'}
+              value={formSeoTitle}
+              onChange={(e) => setFormSeoTitle(e.target.value)}
+            />
+            <FormTextarea
+              label="Meta Description"
+              rows={3}
+              placeholder="Search-result snippet for this product"
+              value={formSeoDescription}
+              onChange={(e) => setFormSeoDescription(e.target.value)}
+            />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+              <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>Canonical slug</span>
+              <span style={{ fontFamily: 'monospace', color: 'var(--tuw-text-primary, #262626)' }}>
+                /products/{formSlug || '…'}
+              </span>
+            </div>
           </div>
           )
         )}
