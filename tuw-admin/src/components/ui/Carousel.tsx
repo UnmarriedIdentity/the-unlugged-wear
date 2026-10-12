@@ -17,6 +17,9 @@ export interface CarouselProps {
   aspect?: string;
   /** Dots or thumbnail filmstrip navigation. Default 'dots'. */
   variant?: 'dots' | 'filmstrip';
+  /** Controlled slide index (uncontrolled internal state when omitted). */
+  index?: number;
+  onIndexChange?: (index: number) => void;
 }
 
 // Customer-view gallery (MD2): dots + chevron navigation over a fixed-aspect
@@ -25,10 +28,12 @@ export interface CarouselProps {
 // null when empty — the caller owns the empty text.
 // Plain <img> (not next/image): slides include blob: upload previews, which
 // the optimizer rejects — same constraint as ImageWithFallback.
-export default function Carousel({ slides, ariaLabel = 'Gallery', aspect = '4 / 3', variant = 'dots' }: CarouselProps) {
-  const [index, setIndex] = useState(0);
+export default function Carousel({ slides, ariaLabel = 'Gallery', aspect = '4 / 3', variant = 'dots', index, onIndexChange }: CarouselProps) {
+  const [innerIndex, setInnerIndex] = useState(0);
+  const setIndex = onIndexChange ?? setInnerIndex;
+  const rawIndex = index ?? innerIndex;
   if (slides.length === 0) return null;
-  const safeIndex = ((index % slides.length) + slides.length) % slides.length;
+  const safeIndex = ((rawIndex % slides.length) + slides.length) % slides.length;
   const slide = slides[safeIndex];
   const navBtn = {
     display: 'inline-flex',
