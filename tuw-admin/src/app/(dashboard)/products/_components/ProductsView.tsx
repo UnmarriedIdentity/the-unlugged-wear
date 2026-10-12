@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FormSelect, MediaFrame, FormTextarea } from '@/components/ui';
+import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 
@@ -779,17 +779,50 @@ export default function ProductsView() {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
-            <FormSelect
-              label="Category"
-              value={formCategory}
-              onChange={(e) => setFormCategory(e.target.value as ProductItem['category'])}
-            >
-              <option value="T-Shirts">T-Shirts</option>
-              <option value="Hoodies">Hoodies</option>
-              <option value="Jackets">Jackets</option>
-              <option value="Pants">Pants</option>
-              <option value="Accessories">Accessories</option>
-            </FormSelect>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', marginBottom: 6 }}>
+                Category
+              </div>
+              <DropdownMenu
+                ariaLabel="Category"
+                trigger={
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Category, currently ${formCategory}`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 8,
+                      width: '100%',
+                      height: 40,
+                      padding: '0 12px',
+                      fontSize: 13,
+                      fontWeight: 500,
+                      fontFamily: 'var(--font-main)',
+                      borderRadius: 8,
+                      border: '1px solid var(--tuw-border-control, #D1D5DB)',
+                      backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
+                      color: 'var(--tuw-text-primary, #262626)',
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                    }}
+                  >
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {formCategory}
+                    </span>
+                    <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
+                  </span>
+                }
+                items={['T-Shirts', 'Hoodies', 'Jackets', 'Pants', 'Accessories'].map((c) => ({ value: c, label: c }))}
+                selectedValue={formCategory}
+                onSelect={(v) => setFormCategory(v as ProductItem['category'])}
+              />
+            </div>
 
             <Input
               label="Price ($ USD)"
@@ -810,26 +843,95 @@ export default function ProductsView() {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <FormSelect
-              label="Fulfillment Partner"
-              value={formPartner}
-              onChange={(e) => setFormPartner(e.target.value as ProductItem['partner'])}
-            >
-              <option value="Qikink Direct API">Qikink Direct API</option>
-              <option value="Printrove Hub">Printrove Hub</option>
-              <option value="Custom Atelier">Custom Atelier</option>
-            </FormSelect>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', marginBottom: 6 }}>
+                Fulfillment Partner
+              </div>
+              <DropdownMenu
+                ariaLabel="Fulfillment partner"
+                trigger={
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Fulfillment partner, currently ${formPartner}`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 8,
+                      width: '100%',
+                      height: 40,
+                      padding: '0 12px',
+                      fontSize: 13,
+                      fontWeight: 500,
+                      fontFamily: 'var(--font-main)',
+                      borderRadius: 8,
+                      border: '1px solid var(--tuw-border-control, #D1D5DB)',
+                      backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
+                      color: 'var(--tuw-text-primary, #262626)',
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                    }}
+                  >
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {formPartner}
+                    </span>
+                    <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
+                  </span>
+                }
+                items={['Qikink Direct API', 'Printrove Hub', 'Custom Atelier'].map((p) => ({ value: p, label: p }))}
+                selectedValue={formPartner}
+                onSelect={(v) => setFormPartner(v as ProductItem['partner'])}
+              />
+            </div>
 
-            <FormSelect
-              label="Artwork Placement Spec"
-              value={formPlacement}
-              onChange={(e) => setFormPlacement(e.target.value as ProductItem['placement'])}
-            >
-              <option value="Chest (45mm)">Chest (45mm)</option>
-              <option value="Back Oversized">Back Oversized</option>
-              <option value="Sleeve Length">Sleeve Length</option>
-              <option value="Interior Hem">Interior Hem</option>
-            </FormSelect>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', marginBottom: 6 }}>
+                Artwork Placement Spec
+              </div>
+              <DropdownMenu
+                ariaLabel="Artwork placement spec"
+                trigger={
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Artwork placement spec, currently ${formPlacement}`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 8,
+                      width: '100%',
+                      height: 40,
+                      padding: '0 12px',
+                      fontSize: 13,
+                      fontWeight: 500,
+                      fontFamily: 'var(--font-main)',
+                      borderRadius: 8,
+                      border: '1px solid var(--tuw-border-control, #D1D5DB)',
+                      backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
+                      color: 'var(--tuw-text-primary, #262626)',
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                    }}
+                  >
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {formPlacement}
+                    </span>
+                    <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
+                  </span>
+                }
+                items={['Chest (45mm)', 'Back Oversized', 'Sleeve Length', 'Interior Hem'].map((pl) => ({ value: pl, label: pl }))}
+                selectedValue={formPlacement}
+                onSelect={(v) => setFormPlacement(v as ProductItem['placement'])}
+              />
+            </div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -852,15 +954,54 @@ export default function ProductsView() {
               onChange={(e) => setFormDescription(e.target.value)}
             />
 
-            <FormSelect
-              label="Publication State"
-              value={formStatus}
-              onChange={(e) => setFormStatus(e.target.value as ProductItem['publicationStatus'])}
-            >
-              <option value="published">Published (Visible in Storefront)</option>
-              <option value="draft">Draft (Editorial review only)</option>
-              <option value="archived">Archived (Hidden from catalog)</option>
-            </FormSelect>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', marginBottom: 6 }}>
+                Publication State
+              </div>
+              <DropdownMenu
+                ariaLabel="Publication state"
+                trigger={
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Publication state, currently ${formStatus === 'published' ? 'Published (Visible in Storefront)' : formStatus === 'draft' ? 'Draft (Editorial review only)' : 'Archived (Hidden from catalog)'}`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 8,
+                      width: '100%',
+                      height: 40,
+                      padding: '0 12px',
+                      fontSize: 13,
+                      fontWeight: 500,
+                      fontFamily: 'var(--font-main)',
+                      borderRadius: 8,
+                      border: '1px solid var(--tuw-border-control, #D1D5DB)',
+                      backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
+                      color: 'var(--tuw-text-primary, #262626)',
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                    }}
+                  >
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {formStatus === 'published' ? 'Published (Visible in Storefront)' : formStatus === 'draft' ? 'Draft (Editorial review only)' : 'Archived (Hidden from catalog)'}
+                    </span>
+                    <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
+                  </span>
+                }
+                items={[
+                  { value: 'published', label: 'Published (Visible in Storefront)' },
+                  { value: 'draft', label: 'Draft (Editorial review only)' },
+                  { value: 'archived', label: 'Archived (Hidden from catalog)' },
+                ]}
+                selectedValue={formStatus}
+                onSelect={(v) => setFormStatus(v as ProductItem['publicationStatus'])}
+              />
+            </div>
         </form>
       </Modal>
 
