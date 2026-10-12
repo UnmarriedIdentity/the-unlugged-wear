@@ -7,17 +7,18 @@
     "skill-index": "tuw-website/state-for-agents/skills",
     "reference": "Figma (pending — values in skills are provisional examples)"
   },
+  "_demo": "Seed file only — no storefront work has been built yet. Objects and arrays stay empty until real tracks land. The first real task starts at id TL-WEB-001. Known landmines (promo-code drift, tests not importing src) live in skills/backend-readiness, not here.",
   "summary": {
-    "total": 8,
-    "done": 1,
+    "total": 0,
+    "done": 0,
     "in_progress": 0,
-    "backlog": 7
+    "backlog": 0
   },
   "session": {
-    "branch": "feat/storefront-agent-state",
-    "tip": "2fa1ed52fe96a1bc450867a4fdb5b614100ee6d2",
+    "branch": "feat/storefront-meet",
+    "tip": "b6ac4bbc36d3fae64a9dd0ffd7c643c3f509c10a",
     "unpushed": [],
-    "next_up": "Partner kickoff: login/signup backend-ready (TL-WEB-AUTH1/AUTH2)",
+    "next_up": "Partner kickoff: first real track starts at TL-WEB-001",
     "pending_verifications": [],
     "last_updated": "2026-10-12",
     "updated_by": "agent"
@@ -26,123 +27,5 @@
     "how_to_close_a_task": "gates green → status done + log commit + design_match + verified + finished → recompute summary → refresh session → commit code + tracker together",
     "validation": "JSON parses; ids unique; parent ids exist; summary counts match tasks array; done implies log + verified"
   },
-  "tasks": [
-    {
-      "id": "TL-WEB-000",
-      "title": "Agent-state construction (skeleton, rules, 18 skills, tracker)",
-      "status": "done",
-      "owner": "agent",
-      "started": "2026-10-12",
-      "finished": "2026-10-12",
-      "log": "feat/storefront-agent-state:94ee435..2fa1ed5 (skeleton, 6 rules, 18 skills, tracker)",
-      "design_match": null,
-      "key_decisions": [
-        "Mirror admin shape 1:1; zero admin references (self-containment law)",
-        "Theme/motion/design provisional pending Figma; update-in-skill mandate",
-        "Slim single branch rule; no modal-line split on website",
-        "FormSelect-style 40px family intentionally absent — website forms use ui/Select + popover pickers per future tracks"
-      ],
-      "verified": true,
-      "pushed": false,
-      "follow_ups": []
-    },
-    {
-      "id": "TL-WEB-AUTH1",
-      "title": "Login backend-ready (mock seam, session hook shape)",
-      "status": "backlog",
-      "owner": "partner",
-      "started": null,
-      "finished": null,
-      "log": null,
-      "design_match": null,
-      "key_decisions": [],
-      "verified": false,
-      "pushed": false,
-      "follow_ups": []
-    },
-    {
-      "id": "TL-WEB-AUTH2",
-      "title": "Signup backend-ready (mock seam, session hook shape)",
-      "status": "backlog",
-      "owner": "partner",
-      "started": null,
-      "finished": null,
-      "log": null,
-      "design_match": null,
-      "key_decisions": [],
-      "verified": false,
-      "pushed": false,
-      "follow_ups": []
-    },
-    {
-      "id": "TL-WEB-FIX1",
-      "title": "Reconcile promo-code drift (test UNPLUG10 vs store UNPLUGGED10/MINIMAL10)",
-      "status": "backlog",
-      "owner": "partner",
-      "started": null,
-      "finished": null,
-      "log": null,
-      "design_match": null,
-      "key_decisions": [],
-      "verified": false,
-      "pushed": false,
-      "follow_ups": []
-    },
-    {
-      "id": "TL-WEB-FIX2",
-      "title": "Tests import src seams (stop re-implementing logic in tests)",
-      "status": "backlog",
-      "owner": "partner",
-      "started": null,
-      "finished": null,
-      "log": null,
-      "design_match": null,
-      "key_decisions": [],
-      "verified": false,
-      "pushed": false,
-      "follow_ups": []
-    },
-    {
-      "id": "TL-WEB-FIX3",
-      "title": "Wire cn() (clsx + tailwind-merge installed, stub not wired)",
-      "status": "backlog",
-      "owner": "partner",
-      "started": null,
-      "finished": null,
-      "log": null,
-      "design_match": null,
-      "key_decisions": [],
-      "verified": false,
-      "pushed": false,
-      "follow_ups": []
-    },
-    {
-      "id": "TL-WEB-COMP1",
-      "title": "Missing Card primitive (AGENTS lists it, absent from ui/)",
-      "status": "backlog",
-      "owner": "partner",
-      "started": null,
-      "finished": null,
-      "log": null,
-      "design_match": null,
-      "key_decisions": [],
-      "verified": false,
-      "pushed": false,
-      "follow_ups": []
-    },
-    {
-      "id": "TL-WEB-API1",
-      "title": "api/ seam design (route handler stubs for backend track)",
-      "status": "backlog",
-      "owner": "partner",
-      "started": null,
-      "finished": null,
-      "log": null,
-      "design_match": null,
-      "key_decisions": [],
-      "verified": false,
-      "pushed": false,
-      "follow_ups": []
-    }
-  ]
+  "tasks": []
 }
