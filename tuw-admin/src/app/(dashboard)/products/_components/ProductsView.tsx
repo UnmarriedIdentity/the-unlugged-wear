@@ -174,6 +174,7 @@ export default function ProductsView() {
   // >=700px container width, drag payload ref for HTML5 reorder.
   const [stageIndex, setStageIndex] = useState(0);
   const [mediaWide, setMediaWide] = useState(false);
+  const [mediaCards, setMediaCards] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const mediaWrapRef = useRef<HTMLDivElement>(null);
   const dragIdRef = useRef<string | null>(null);
@@ -181,7 +182,9 @@ export default function ProductsView() {
     const el = mediaWrapRef.current;
     if (!el || typeof ResizeObserver === 'undefined') return;
     const ro = new ResizeObserver((entries) => {
-      setMediaWide((entries[0]?.contentRect.width ?? 0) >= 700);
+      const w = entries[0]?.contentRect.width ?? 0;
+      setMediaWide(w >= 700);
+      setMediaCards(w >= 1000);
     });
     ro.observe(el);
     return () => ro.disconnect();
@@ -743,6 +746,104 @@ export default function ProductsView() {
       </span>
     </div>
   ));
+  // Card twin of assetRows for wide containers (MX4): same semantics —
+  // drag anywhere on the card (no grip needed at this size), same cover /
+  // preview / reorder / delete paths. Primitives only, no new components.
+  const assetCards = (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+      {formImages.map((im, idx) => (
+        <div
+          key={im.id}
+          draggable
+          onDragStart={(e) => {
+            dragIdRef.current = im.id;
+            e.dataTransfer.effectAllowed = 'move';
+          }}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault();
+            if (dragIdRef.current) {
+              moveImageTo(dragIdRef.current, im.id);
+              dragIdRef.current = null;
+            }
+          }}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+            padding: 12,
+            backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
+            border: '1px solid var(--tuw-border-subtle, #E5E7EB)',
+            borderRadius: 12,
+            minWidth: 0,
+          }}
+        >
+          <MediaFrame height={90} radius={8}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={im.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </MediaFrame>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {im.name}
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {im.src}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+            {idx === 0 ? (
+              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.04em', color: '#FFFFFF', backgroundColor: 'var(--tuw-action-primary, #7539FF)', borderRadius: 4, padding: '2px 6px' }}>
+                COVER
+              </span>
+            ) : (
+              <>
+                {!im.persisted ? (
+                  <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--tuw-text-warning, #856300)', backgroundColor: 'var(--tuw-bg-warning, #FEFBF5)', borderRadius: 4, padding: '2px 6px' }}>
+                    Preview only
+                  </span>
+                ) : null}
+                {im.persisted ? (
+                  <button
+                    type="button"
+                    onClick={() => setCoverImage(im.id)}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', padding: '4px 2px' }}
+                  >
+                    Set Cover
+                  </button>
+                ) : null}
+              </>
+            )}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 2 }}>
+            <button
+              type="button"
+              aria-label={`Move ${im.name} up`}
+              disabled={idx === 0}
+              onClick={() => moveImage(im.id, -1)}
+              style={{ background: 'none', border: 'none', cursor: idx === 0 ? 'default' : 'pointer', color: 'var(--tuw-text-secondary, #5D6772)', opacity: idx === 0 ? 0.35 : 1, padding: 4, display: 'inline-flex' }}
+            >
+              <ChevronUp size={14} />
+            </button>
+            <button
+              type="button"
+              aria-label={`Move ${im.name} down`}
+              disabled={idx === formImages.length - 1}
+              onClick={() => moveImage(im.id, 1)}
+              style={{ background: 'none', border: 'none', cursor: idx === formImages.length - 1 ? 'default' : 'pointer', color: 'var(--tuw-text-secondary, #5D6772)', opacity: idx === formImages.length - 1 ? 0.35 : 1, padding: 4, display: 'inline-flex' }}
+            >
+              <ChevronDown size={14} />
+            </button>
+            <button
+              type="button"
+              aria-label={`Remove ${im.name}`}
+              onClick={() => removeImage(im.id)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tuw-text-secondary, #5D6772)', padding: 4, display: 'inline-flex' }}
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
   const panelHeader = (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
@@ -1489,7 +1590,7 @@ export default function ProductsView() {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
                 {panelHeader}
-                {assetRows}
+                {mediaCards ? assetCards : assetRows}
                 {addUrlRow}
                 {dropzone}
                 {reelUrlField}
@@ -1500,7 +1601,7 @@ export default function ProductsView() {
               {stageHeader}
               <Carousel ariaLabel="Customer gallery preview" variant="filmstrip" slides={gallerySlides} index={stageIndexClamped} onIndexChange={setStageIndex} />
               {panelHeader}
-              {assetRows}
+              {mediaCards ? assetCards : assetRows}
               {addUrlRow}
               {dropzone}
               {reelUrlField}
