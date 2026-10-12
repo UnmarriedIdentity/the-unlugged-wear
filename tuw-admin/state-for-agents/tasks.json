@@ -8,15 +8,15 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 170,
-    "done": 156,
+    "total": 173,
+    "done": 159,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "e8e3882",
-    "unpushed": ["254e214", "bb6b19f", "e8e3882", "cc84644", "2087447", "be2e49f", "bc6a90d", "7002594", "29d165b", "35e3fdf", "9a49435", "0638769", "b7f1e4c", "1a0e6dd"],
+    "tip": "d1f8179",
+    "unpushed": ["d1f8179", "7567c95", "a7de6b5", "b31c9b1", "254e214", "bb6b19f", "e8e3882", "cc84644", "2087447", "be2e49f", "bc6a90d", "7002594", "29d165b", "35e3fdf", "9a49435", "0638769", "b7f1e4c", "1a0e6dd"],
     "next_up": "Fulfillment Phase 2 per-card bulk bars; DW2 drawer verification pass; anim-probe re-run; browser verification backlog",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
@@ -1357,6 +1357,51 @@
       "design_match": "yes",
       "key_decisions": [
         "create tabs gated to General+Media; legacy handleCreateSubmit deleted with modal"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-MD1",
+      "title": "Drawer 3-seg workspace control (ViewToggle + UpliftSurface)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal:b31c9b1 (exclusive value mapping; no dead expanded+full combo)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-MD2",
+      "title": "ui/Carousel customer-view gallery",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal:a7de6b5 (contain letterbox, dots, native video, plain-img for blob slides)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-MD3",
+      "title": "Products gallery model (URLs persist, uploads preview, carousel tab)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal: 7567c95 state + d1f8179 UI/submit (video-first; block-2nd-video toast; revoke discipline; formImage deleted dead)",
+      "design_match": "yes",
+      "key_decisions": [
+        "uploads session-only with demo-truth toast; URLs persist via formGallery",
+        "hero = gallery[0]; visibility toggle gates reel rows + slide"
       ],
       "verified": true,
       "pushed": false,
