@@ -84,6 +84,33 @@ export default function ProductsView() {
   const [productTab, setProductTab] = useState<'general' | 'media' | 'variants'>('general');
   const [formImage, setFormImage] = useState('');
   const [formVideo, setFormVideo] = useState('');
+  // Apparel + SEO draft state (specs/SEO tabs; all optional — fixtures stay valid)
+  const [formFabricGsm, setFormFabricGsm] = useState('');
+  const [formCut, setFormCut] = useState('');
+  const [formModelDims, setFormModelDims] = useState('');
+  const [formCare, setFormCare] = useState('');
+  const [formMonogramEnabled, setFormMonogramEnabled] = useState(false);
+  const [formMonogramChars, setFormMonogramChars] = useState('3');
+  const [formMonogramUpcharge, setFormMonogramUpcharge] = useState('12.00');
+  const [formSeoTitle, setFormSeoTitle] = useState('');
+  const [formSeoDescription, setFormSeoDescription] = useState('');
+  // Section visibility (persisted demo pref; all-visible default)
+  const [visibleSections, setVisibleSections] = useState({ video: true, monogram: true });
+  React.useEffect(() => {
+    try {
+      const raw = localStorage.getItem('tuw_admin_v2_product_editor');
+      if (raw) setVisibleSections((prev) => ({ ...prev, ...JSON.parse(raw) }));
+    } catch {
+      /* private mode — defaults stand */
+    }
+  }, []);
+  React.useEffect(() => {
+    try {
+      localStorage.setItem('tuw_admin_v2_product_editor', JSON.stringify(visibleSections));
+    } catch {
+      /* private mode — session-only */
+    }
+  }, [visibleSections]);
   // Variant matrix draft (drawer only): General variant inputs mirror-write
   // here so the matrix stays the single submit source; the create modal keeps
   // legacy strings-built-at-submit and never reads this draft.
@@ -143,6 +170,15 @@ export default function ProductsView() {
     setProductTab('general');
     setFormImage(product.image || '');
     setFormVideo(product.video || '');
+    setFormFabricGsm(product.fabricGsm || '');
+    setFormCut(product.cut || '');
+    setFormModelDims(product.modelDims || '');
+    setFormCare(product.care || '');
+    setFormMonogramEnabled(product.monogram?.enabled || false);
+    setFormMonogramChars(String(product.monogram?.maxChars ?? 3));
+    setFormMonogramUpcharge(product.monogram ? product.monogram.upcharge.toFixed(2) : '12.00');
+    setFormSeoTitle(product.seoTitle || '');
+    setFormSeoDescription(product.seoDescription || '');
     setFormVariants(resolveVariants(product));
     setFormName(product.name);
     setFormSlug(product.slug);
@@ -211,6 +247,19 @@ export default function ProductsView() {
       image: formImage || undefined,
       video: formVideo || undefined,
       variants: submitVariants,
+      fabricGsm: formFabricGsm || undefined,
+      cut: formCut || undefined,
+      modelDims: formModelDims || undefined,
+      care: formCare || undefined,
+      monogram: formMonogramEnabled
+        ? {
+            enabled: true,
+            maxChars: parseInt(formMonogramChars, 10) || 3,
+            upcharge: parseFloat(formMonogramUpcharge) || 0,
+          }
+        : undefined,
+      seoTitle: formSeoTitle || undefined,
+      seoDescription: formSeoDescription || undefined,
     });
 
     setEditingProduct(null);
