@@ -26,6 +26,12 @@ import {
   initialTeam,
   initialSettings,
 } from './fixtures';
+import {
+  synthesizeVariants,
+  deriveColors,
+  deriveSizes,
+  variantStockTotal,
+} from './variants';
 
 export interface ToastMessage {
   id: string;
@@ -246,11 +252,14 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
   // MUTATION IMPLEMENTATIONS
   // -------------------------------------------------------------
 
-  const createProduct = (p: Omit<ProductItem, 'id' | 'soldCount' | 'rating'>) => {
+  const createProduct = (p: Omit<ProductItem, 'id' | 'soldCount' | 'rating' | 'variants' | 'images'>) => {
     if (!canPerformAction('products')) return false;
+    const id = `PRD-${Math.floor(10 + Math.random() * 90)}`;
     const newProduct: ProductItem = {
       ...p,
-      id: `PRD-${Math.floor(10 + Math.random() * 90)}`,
+      id,
+      variants: synthesizeVariants({ id, price: p.price, stock: p.stock, colors: p.colors, sizes: p.sizes }),
+      images: [],
       soldCount: 0,
       rating: 5.0,
     };
@@ -267,7 +276,18 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
 
   const updateProduct = (id: string, updates: Partial<ProductItem>, silent = false) => {
     if (!canPerformAction('products')) return false;
-    const next = products.map((p) => (p.id === id ? { ...p, ...updates } : p));
+    const next = products.map((p) => {
+      if (p.id !== id) return p;
+      const merged = { ...p, ...updates };
+      // Variants are the source of truth: keep display lists derived so
+      // colors/sizes can never drift from the matrix.
+      if (updates.variants) {
+        merged.colors = deriveColors(updates.variants);
+        merged.sizes = deriveSizes(updates.variants);
+        merged.stock = variantStockTotal(updates.variants);
+      }
+      return merged;
+    });
     setProducts(next);
     persistState({ products: next });
     if (!silent) {
