@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, ChevronUp, Download, Archive, GripVertical, Upload } from 'lucide-react';
+import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive, GripVertical, Upload } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
 import { StatCard, ContentCard, SurfaceCard, Button, Badge, Input, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection, Carousel } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
@@ -135,17 +135,6 @@ export default function ProductsView() {
   const baseName = (url: string) => {
     const part = url.split('?')[0].split('/');
     return part[part.length - 1] || url;
-  };
-
-  const moveImage = (id: string, dir: -1 | 1) => {
-    setFormImages((prev) => {
-      const idx = prev.findIndex((im) => im.id === id);
-      const j = idx + dir;
-      if (idx < 0 || j < 0 || j >= prev.length) return prev;
-      const next = [...prev];
-      [next[idx], next[j]] = [next[j], next[idx]];
-      return next;
-    });
   };
 
   const setCoverImage = (id: string) => {
@@ -720,24 +709,6 @@ export default function ProductsView() {
       <span style={{ display: 'inline-flex', gap: 2, flexShrink: 0 }}>
         <button
           type="button"
-          aria-label={`Move ${im.name} up`}
-          disabled={idx === 0}
-          onClick={() => moveImage(im.id, -1)}
-          style={{ background: 'none', border: 'none', cursor: idx === 0 ? 'default' : 'pointer', color: 'var(--tuw-text-secondary, #5D6772)', opacity: idx === 0 ? 0.35 : 1, padding: 4, display: 'inline-flex' }}
-        >
-          <ChevronUp size={14} />
-        </button>
-        <button
-          type="button"
-          aria-label={`Move ${im.name} down`}
-          disabled={idx === formImages.length - 1}
-          onClick={() => moveImage(im.id, 1)}
-          style={{ background: 'none', border: 'none', cursor: idx === formImages.length - 1 ? 'default' : 'pointer', color: 'var(--tuw-text-secondary, #5D6772)', opacity: idx === formImages.length - 1 ? 0.35 : 1, padding: 4, display: 'inline-flex' }}
-        >
-          <ChevronDown size={14} />
-        </button>
-        <button
-          type="button"
           aria-label={`Remove ${im.name}`}
           onClick={() => removeImage(im.id)}
           style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tuw-text-secondary, #5D6772)', padding: 4, display: 'inline-flex' }}
@@ -812,24 +783,6 @@ export default function ProductsView() {
             )}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 2 }}>
-            <button
-              type="button"
-              aria-label={`Move ${im.name} up`}
-              disabled={idx === 0}
-              onClick={() => moveImage(im.id, -1)}
-              style={{ background: 'none', border: 'none', cursor: idx === 0 ? 'default' : 'pointer', color: 'var(--tuw-text-secondary, #5D6772)', opacity: idx === 0 ? 0.35 : 1, padding: 4, display: 'inline-flex' }}
-            >
-              <ChevronUp size={14} />
-            </button>
-            <button
-              type="button"
-              aria-label={`Move ${im.name} down`}
-              disabled={idx === formImages.length - 1}
-              onClick={() => moveImage(im.id, 1)}
-              style={{ background: 'none', border: 'none', cursor: idx === formImages.length - 1 ? 'default' : 'pointer', color: 'var(--tuw-text-secondary, #5D6772)', opacity: idx === formImages.length - 1 ? 0.35 : 1, padding: 4, display: 'inline-flex' }}
-            >
-              <ChevronDown size={14} />
-            </button>
             <button
               type="button"
               aria-label={`Remove ${im.name}`}
