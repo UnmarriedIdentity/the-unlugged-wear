@@ -8,15 +8,15 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 175,
-    "done": 161,
+    "total": 176,
+    "done": 162,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "b5141b7",
-    "unpushed": ["b5141b7", "0c831f4", "bcb3786", "660b89b", "2010981", "d1f8179", "7567c95", "a7de6b5", "b31c9b1", "254e214", "bb6b19f", "e8e3882", "cc84644", "2087447", "be2e49f", "bc6a90d", "7002594", "29d165b", "35e3fdf", "9a49435", "0638769", "b7f1e4c", "1a0e6dd"],
+    "tip": "96f675a",
+    "unpushed": ["96f675a", "dc319f3", "e27e7fd", "b5141b7", "0c831f4", "bcb3786", "660b89b", "2010981", "d1f8179", "7567c95", "a7de6b5", "b31c9b1", "254e214", "bb6b19f", "e8e3882", "cc84644", "2087447", "be2e49f", "bc6a90d", "7002594", "29d165b", "35e3fdf", "9a49435", "0638769", "b7f1e4c", "1a0e6dd"],
     "next_up": "Fulfillment Phase 2 per-card bulk bars; DW2 drawer verification pass; anim-probe re-run; browser verification backlog",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
@@ -1437,6 +1437,24 @@
       "key_decisions": [
         "cards at container >=1000px, not drawer-mode literal",
         "stage minWidth:0 already present; duplication disclosed over extraction"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DS1",
+      "title": "Design-system media surfaces (SurfaceCard rows/cards, 1:1 thumbs, cover wash)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal: e27e7fd primitives + dc319f3 rows + 96f675a cards (direction/width props, defaults keep existing consumers byte-identical; tuw-stat-active/hover verified in globals.css)",
+      "design_match": "yes",
+      "key_decisions": [
+        "cover = tuw-stat-active selected language, no invented accent",
+        "rows structural 1:1 via MediaFrame width=40; cards landscape cover unchanged",
+        "drag-held tint via draggingId (HTML5 DnD does not re-render source)"
       ],
       "verified": true,
       "pushed": false,
