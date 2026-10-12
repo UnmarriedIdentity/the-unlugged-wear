@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, ChevronUp, Download, Archive, GripVertical, Upload } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, Button, Badge, Input, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection, Carousel } from '@/components/ui';
+import { StatCard, ContentCard, SurfaceCard, Button, Badge, Input, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection, Carousel } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 import { resolveVariants, deriveColors, deriveSizes, variantStockTotal, buildVariantSku } from '@/mocks/variants';
@@ -654,8 +654,13 @@ export default function ProductsView() {
     </div>
   );
   const assetRows = formImages.map((im, idx) => (
-    <div
+    <SurfaceCard
       key={im.id}
+      direction="row"
+      padding="10px"
+      gap="12px"
+      hoverable
+      className={idx === 0 ? 'tuw-stat-active' : ''}
       draggable
       onDragStart={(e) => {
         dragIdRef.current = im.id;
@@ -669,20 +674,12 @@ export default function ProductsView() {
           dragIdRef.current = null;
         }
       }}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 12,
-        padding: 10,
-        backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
-        border: '1px solid var(--tuw-border-subtle, #E5E7EB)',
-        borderRadius: 10,
-      }}
+      style={{ alignItems: 'center' }}
     >
       <span style={{ cursor: 'grab', display: 'inline-flex', color: 'var(--tuw-text-secondary, #5D6772)' }} aria-hidden="true">
         <GripVertical size={14} />
       </span>
-      <MediaFrame height={40} radius={8}>
+      <MediaFrame height={40} width={40} radius={8} style={{ flexShrink: 0 }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={im.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       </MediaFrame>
@@ -744,7 +741,7 @@ export default function ProductsView() {
           <Trash2 size={14} />
         </button>
       </span>
-    </div>
+    </SurfaceCard>
   ));
   // Card twin of assetRows for wide containers (MX4): same semantics —
   // drag anywhere on the card (no grip needed at this size), same cover /
