@@ -41,7 +41,7 @@ verified.
 
 ## Worked example
 
-Closing "login buttons": convert → gates green → set task `001`
-`status:done, log:"feat/storefront-xyz:ef392b0", design_match:"yes", verified:true,
+Closing "login buttons": convert → gates green → set task `TL-WEB-001`
+`status:done, log:"feat/storefront-meet:ef392b0", design_match:"yes", verified:true,
 finished:<date>, pushed:false` → recompute summary → commit code + tracker
 together → report "ready for your push".
