@@ -2,6 +2,8 @@
 
 import React, { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
+import PanelLayout from './PanelLayout';
+import { usePopoverAnimation } from '@/hooks/usePopoverAnimation';
 
 export interface DrawerProps {
   isOpen: boolean;
@@ -10,6 +12,8 @@ export interface DrawerProps {
   subtitle?: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
+  /** Panel width. Per-content variance is deliberate: 480px media preview,
+   * 520px default, 540px page forms, 560px support threads. */
   width?: string | number;
 }
 
@@ -23,6 +27,43 @@ export default function Drawer({
   width = '520px',
 }: DrawerProps) {
   const drawerRef = useRef<HTMLDivElement>(null);
+  // Exit plays through the shared popover contract (180ms drawer rhythm);
+  // render follows visibility so the slide-out completes before unmount.
+  const anim = usePopoverAnimation(isOpen, undefined, 180);
+
+  // Focus trap: focus the panel on open, cycle Tab within it, and return
+  // focus to the invoker on close. Paint-free (programmatic focus never
+  // matches :focus-visible, so no ring appears).
+  const invokerRef = useRef<Element | null>(null);
+  useEffect(() => {
+    if (!anim.visible) return;
+    invokerRef.current = document.activeElement;
+    drawerRef.current?.focus();
+    const trap = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return;
+      const root = drawerRef.current;
+      if (!root) return;
+      const items = [...root.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )].filter((el) => el.offsetParent !== null);
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener('keydown', trap);
+    return () => {
+      window.removeEventListener('keydown', trap);
+      const invoker = invokerRef.current as HTMLElement | null;
+      invoker?.focus?.();
+    };
+  }, [anim.visible]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -40,7 +81,7 @@ export default function Drawer({
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!anim.visible) return null;
 
   return (
     <div
@@ -61,19 +102,22 @@ export default function Drawer({
     >
       <div
         ref={drawerRef}
+        tabIndex={-1}
         style={{
           width: '100%',
           maxWidth: width,
           height: '100%',
           backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
           boxShadow: '-10px 0 25px -5px rgba(0, 0, 0, 0.1)',
-          display: 'flex',
-          flexDirection: 'column',
           borderLeft: '1px solid var(--tuw-border-subtle, #E5E7EB)',
-          animation: 'slideInRight 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
+          animation:
+            anim.phase === 'closing'
+              ? 'slideOutRight 0.18s ease-in'
+              : 'slideInRight 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       >
-        {/* Header */}
+        <PanelLayout
+          header={
         <div
           style={{
             padding: '20px 24px',
@@ -128,36 +172,35 @@ export default function Drawer({
             <X size={20} />
           </button>
         </div>
-
-        {/* Scrollable Body */}
+          }
+          footer={
+            footer ? (
         <div
           style={{
-            padding: '24px',
-            overflowY: 'auto',
-            flex: 1,
-            color: 'var(--tuw-text-primary, #262626)',
-            fontSize: '14px',
+            padding: '16px 24px',
+            borderTop: '1px solid var(--tuw-border-subtle, #E5E7EB)',
+            backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            gap: '12px',
           }}
         >
-          {children}
+          {footer}
         </div>
-
-        {/* Footer */}
-        {footer && (
+            ) : undefined
+          }
+        >
           <div
             style={{
-              padding: '16px 24px',
-              borderTop: '1px solid var(--tuw-border-subtle, #E5E7EB)',
-              backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-end',
-              gap: '12px',
+              padding: '24px',
+              color: 'var(--tuw-text-primary, #262626)',
+              fontSize: '14px',
             }}
           >
-            {footer}
+            {children}
           </div>
-        )}
+        </PanelLayout>
       </div>
     </div>
   );

@@ -22,6 +22,9 @@ import {
   TableCell,
   PageHeader,
   DropdownMenu,
+  PanelLayout,
+  DrawerSection,
+  ItemsRow,
 } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { OrderItem, PaymentStatus, FulfillmentStatus } from '@/mocks/fixtures';
@@ -221,6 +224,9 @@ export default function OrdersView() {
       description: `${ids.length} order${ids.length === 1 ? '' : 's'} marked ${label}.`,
     });
     clearSelection();
+    // Mutated rows may no longer match the active tab — jump to All so
+    // results stay visible (reset-page effect picks up the tab change).
+    setOrderTab('all');
   };
 
   // Handle Create Order Submit
@@ -350,7 +356,9 @@ export default function OrdersView() {
 
       {/* Filter and Table Card */}
       <ContentCard>
-        {/* Tabs + Search */}
+        <PanelLayout
+          scrollable={false}
+          header={
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 20 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
             <FilterPills
@@ -376,6 +384,8 @@ export default function OrdersView() {
             </div>
           </div>
         </div>
+          }
+        >
 
         {/* Table of Orders */}
         <Table>
@@ -519,6 +529,7 @@ export default function OrdersView() {
           </TableBody>
         </Table>
 
+          footer={
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
@@ -531,6 +542,8 @@ export default function OrdersView() {
             setCurrentPage(1);
           }}
         />
+          }
+        </PanelLayout>
       </ContentCard>
 
       {/* Order Detail Drawer */}
@@ -613,38 +626,30 @@ export default function OrdersView() {
             </div>
 
             {/* Line Items */}
-            <div>
-              <h4 style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginBottom: 12 }}>
-                Items Purchased ({selectedOrder.items.length})
-              </h4>
+            <DrawerSection title={`Items Purchased (${selectedOrder.items.length})`} titleGap={12}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {selectedOrder.items.map((item) => (
-                  <div
+                  <ItemsRow
                     key={item.id}
-                    style={{
-                      padding: 12,
-                      backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)',
-                      borderRadius: 8,
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-                        {item.productName}
+                    left={
+                      <div>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                          {item.productName}
+                        </div>
+                        <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                          {item.variant} · Qty: {item.quantity}
+                        </div>
                       </div>
-                      <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                        {item.variant} · Qty: {item.quantity}
+                    }
+                    right={
+                      <div className="tuw-tabular-nums" style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                        ₹{(item.price * item.quantity).toFixed(2)}
                       </div>
-                    </div>
-                    <div className="tuw-tabular-nums" style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-                      ₹{(item.price * item.quantity).toFixed(2)}
-                    </div>
-                  </div>
+                    }
+                  />
                 ))}
               </div>
-            </div>
+            </DrawerSection>
 
             {/* Purchase Summary */}
             <div style={{ padding: 16, border: '1px solid var(--tuw-border-subtle, #E5E7EB)', borderRadius: 10 }}>

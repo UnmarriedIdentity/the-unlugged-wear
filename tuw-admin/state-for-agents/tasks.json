@@ -8,24 +8,25 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 144,
-    "done": 130,
+    "total": 164,
+    "done": 150,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "eb89482",
-    "unpushed": ["6668cfd", "212ca3d", "c8a2f40", "6a00935", "2dc810e", "a60fa4f", "d7b2b31"],
-    "next_up": "human pushes origin/v2 (2 commits) then origin/feat/search-modal (6 commits); browser review of spotlight",
+    "tip": "7dc9105",
+    "unpushed": ["7dc9105", "5fb3226", "18d2294", "21dd603", "678cd42", "577ee59", "b65ad39", "7514e44", "6c832f4", "4167f92", "99d8f10", "3f3bc5b", "ca44d64", "b9a009c", "8c0cfc9", "c2a4c49", "1a3e512", "1545ebf", "68d17f6", "be9f529", "688d868", "66f4ad3", "e22c105", "cd7723e", "3a2c8f8", "316b767", "b8d7ada", "f80f089", "a22478a", "4ce4aac", "f5bfcfa", "585529f", "ba74b76", "203c970", "32d74a3", "8f6c386", "b211dd2", "96067e3", "2011ae2", "8fad108", "401b217", "e533db4", "bc4808e", "b947977", "cf68bdb", "fa750ca"],
+    "next_up": "Fulfillment Phase 2 per-card bulk bars; anim-probe re-run expecting end-Out events; browser verification backlog",
     "pending_verifications": [
+      "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
       "dashboard D-series: KPI tiers, range/sort menus, badge mapping, calendar pills, header tint (360/768/1024/1440)",
       "trunk continuous-dark + elbow-only on 1st-4th actives (post Antigravity+z-lift)",
       "R-series parent icons + iconless rows + collapsed icons",
       "settings/help purple hover + black cards",
       "responsive widths 767/768/1023/1024/1440/1920"
     ],
-    "last_updated": "2026-10-06",
+    "last_updated": "2026-10-11",
     "updated_by": "agent"
   },
   "tasks": [
@@ -953,6 +954,315 @@
       "log": "feat/search-modal:eb89482 (inverted filtersClearBang; cluster wraps as unit now)",
       "design_match": "yes",
       "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-US1",
+      "title": "UpliftSurface shared 3D component + ViewToggle wiring",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal: c6c8abf class + 460390b component + 2e758f8 barrel + d6d0c71 toggle wiring (button shell kept for keyboard/radio)",
+      "design_match": "yes",
+      "key_decisions": [
+        "component over class-only per instruction; class remains the single source",
+        "geometry identical (32x32/radius8) — only shadow paint changed",
+        "sidebar migration explicitly deferred, untouched"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "Migrate SidebarNavItem active treatment onto UpliftSurface/.tuw-3d-active"
+      ]
+    },
+    {
+      "id": "TL-DASH-US2",
+      "title": "Sidebar active relief to tuw-3d-active (single source)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal: a09eae9 footer + 3b14a10 branch (class-only; layout/keyboard/focus untouched; closes US1 follow-up)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PR1",
+      "title": "Products table bulk mode (export, publish, archive, delete)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal: 751db97 seam + 7af618b state + d491fd7 column + 783ea30 handlers + 1debffa bar (table-only; grid untouched; Archive icon over Eye)",
+      "design_match": "yes",
+      "key_decisions": [
+        "bulk delete via window.confirm (per-row precedent)",
+        "view switch clears selection; publication jumps to All on status bulk",
+        "no Draft bulk action (locked set)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PR1F",
+      "title": "Products fixed layout + colgroup (bulk column shuffle)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:071df12 (user-measured: Category -20, Stock/Sold -24 zero-sum; nowrap floors lost on swap; widths from 1180 distribution)",
+      "design_match": "yes",
+      "key_decisions": [
+        "per-table fixed layout, not base — other tables untouched",
+        "proportional widths stay responsive; orders flagged as follow-up"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-MN1",
+      "title": "Fade-only popoverOut/OutUp (exit judder)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:fa750ca (anim probe proved clean toggle, missing end-Out = unmount race; enters untouched)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-MN2",
+      "title": "Fade-only popoverIn/InUp (enter cut-mid-slide chop)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:b947977 (cancel+Out-7ms = correct close-during-enter; popover system now fade-only both directions)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-GM1",
+      "title": "Dropdown stutter fix (Gemini plan, compositing + fill + sync phase + 180ms)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-11",
+      "finished": "2026-10-11",
+      "log": "e533db4 (verified here: gates green; POPOVER_EXIT_MS sole consumer is hook; base opacity-0 omitted, both-fill suffices; will-change:transform nit recorded, harmless)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-BB3",
+      "title": "Orders tab-to-All after bulk Mark-as",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-11",
+      "finished": "2026-10-11",
+      "log": "feat/search-modal:8fad108 (reset-page effect picks up tab change; export/print untouched)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-MN3",
+      "title": "DropdownMenu fixed positioning (escape container clipping)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-11",
+      "finished": "2026-10-11",
+      "log": "feat/search-modal:96067e3 (user-measured CLIPPED=true 56px; anchor coords at open; close on scroll/resize; viewport maxHeight safety)",
+      "design_match": "yes",
+      "key_decisions": [
+        "no portal needed — no transformed ancestors, fixed stays viewport-true",
+        "z-index bump rejected by measurement (clip ignores z-index)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PL0",
+      "title": "PanelLayout family (paint-free header/body/footer)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-11",
+      "finished": "2026-10-11",
+      "log": "feat/search-modal:8f6c386 (4 primitives + barrel in one gated commit — interdependent, ungateable separately)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PL1",
+      "title": "Drawer adopts PanelLayout (verbatim nodes)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-11",
+      "finished": "2026-10-11",
+      "log": "feat/search-modal:32d74a3 (overlay/Esc/widths/animation untouched)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PL2",
+      "title": "Orders card adopts PanelLayout (verbatim zones)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-11",
+      "finished": "2026-10-11",
+      "log": "feat/search-modal:203c970 (pin no-op in auto-height; two JSX nesting slips caught by typecheck)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DW0",
+      "title": "Drawer interior primitives (Section, KV, Hero, ItemsRow, FormSelect)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-11",
+      "finished": "2026-10-11",
+      "log": "feat/search-modal: 585529f section + f5bfcfa KV + 4ce4aac hero + a22478a itemsrow + f80f089 formselect + e22c105 KV-after + 8c0cfc9 hero-gapless (titleGap/pad/left/after props preserve variance)",
+      "design_match": "yes",
+      "key_decisions": [
+        "no wrapper gaps in section/hero — caller margins own rhythm",
+        "FormSelect 40px stays distinct from ui/Select 42px; variance via fontSize/padX",
+        "Timeline deferred (2 divergent uses); video stays native tags"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DW1",
+      "title": "All 13 drawer interiors migrated (pages verified already-primitive)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-11",
+      "finished": "2026-10-11",
+      "log": "feat/search-modal: b8d7ada designs + 316b767 payments + 3a2c8f8 refunds + cd7723e journal(+build-gate $$ typo retro-verified) + 66f4ad3 collections + 688d868 shipments + be9f529 orders + 68d17f6 customers + 1a3e512/1545ebf support + b9a009c returns + ca44d64 media + 3f3bc5b products",
+      "design_match": "pending",
+      "key_decisions": [
+        "bespoke kept: financial box, both timelines, bubbles, danger zone, notes wash, callout, stat grid, address blocks, video frames, copy mechanics, footers",
+        "textareas stay raw everywhere (per-site metrics vs ui/Textarea 10/14)",
+        "selects migrated only where FormSelect metrics match exactly"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DF0",
+      "title": "Drawer foundation (keyframes, exit motion, focus trap)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-11",
+      "finished": "2026-10-11",
+      "log": "feat/search-modal: 99d8f10 keyframes + 4167f92 exit wiring (hook exitMs param, popovers byte-identical) + 6c832f4 focus trap/return/width docs (paint-free; role=dialog stays on overlay)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DF1",
+      "title": "Drawer true off-screen slide (drop fade hybrid)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-11",
+      "finished": "2026-10-11",
+      "log": "feat/search-modal:7514e44 (translateX 100%, opacity removed; menus stay fade-only)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PD0",
+      "title": "MediaFrame + FormTextarea foundational primitives",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-11",
+      "finished": "2026-10-11",
+      "log": "feat/search-modal: b65ad39 mediaframe + 577ee59 formtextarea (shell-only + 40px-family sibling)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PD1",
+      "title": "Products drawer completion + conditional support reply",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-11",
+      "finished": "2026-10-11",
+      "log": "feat/search-modal: 678cd42 products (frame+textarea) + 21dd603 support reply (metrics mapped exactly, escape hatch unused)",
+      "design_match": "yes",
+      "key_decisions": [
+        "support included — re-read proved exact mapping; media frame migration stays follow-up (out of scope)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PD2",
+      "title": "Products create-modal to Form primitives (drawer was already done)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-11",
+      "finished": "2026-10-11",
+      "log": "feat/search-modal:18d2294 (3 selects + textarea, all defaults-matching; user was viewing modal, not drawer)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-FP1",
+      "title": "Products form popover pickers (drawer + modal via DropdownMenu)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-11",
+      "finished": "2026-10-11",
+      "log": "feat/search-modal: 5fb3226 drawer picker + 7dc9105 modal 4 pickers (40px triggers, keyboard operable; FormSelect zero-consumer now, kept + recorded)",
+      "design_match": "yes",
+      "key_decisions": [
+        "arrow-key menu nav is a pre-existing gap in all menus, not introduced here",
+        "required is vacuous — all five states init to valid defaults"
+      ],
       "verified": true,
       "pushed": false,
       "follow_ups": []

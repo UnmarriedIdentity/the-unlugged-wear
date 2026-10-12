@@ -14,7 +14,7 @@ primitive + raw interior.
 | Block | Status | Why no existing component fits | Future component |
 |---|---|---|---|
 | Page header layout (title + subtitle + actions row) | done | `ui/PageHeader(title, subtitle?, actions?, eyebrow?, page|doc)` — 25 call sites, subtitles dropped, dashboard unified, doc variant for design-system | PH1+PHMIG |
-| Order detail drawer sections (status pills, items, financial summary, address, timeline) | raw | Drawer shell is primitive; interior blocks are bespoke per workflow | `DrawerSection`, `KeyValueList`, `Timeline` |
+| Order detail drawer sections (status pills, items, financial summary, address, timeline) | partial | Items section migrated to `DrawerSection` + `ItemsRow`; pills, financial box, address, timeline bespoke-kept (pixel-perfect) | `Timeline` deferred (2 uses) |
 | Create-order form grid | partial | `Modal` + `Input` primitive; raw `<select>`s (40px vs `ui/Select` 42px — verified mismatch) | `FormSelect` (40px treatment) |
 | Refund form grid | partial | Same select mismatch + validated-amount box | `FormSelect` |
 | Empty table row text | raw (deliberate) | `EmptyState` would restyle it (48px pad + icon + CTA vs plain centered text); pinned at inherited 16px | Keep raw unless empty-state standardization is approved |

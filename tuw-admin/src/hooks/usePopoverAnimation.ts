@@ -2,8 +2,8 @@
 
 import React from 'react';
 
-// Exit duration (ms) — must match the popoverOut animation in globals.css.
-export const POPOVER_EXIT_MS = 150;
+// Exit duration (ms) — buffered so 150ms popoverOut reaches opacity 0 before unmount.
+export const POPOVER_EXIT_MS = 180;
 
 type PopoverPhase = 'open' | 'closing' | 'closed';
 
@@ -19,7 +19,13 @@ interface PopoverAnimation {
 // popoverOut plays, then the tree unmounts and `onClosed` fires so the
 // parent can sync its own state. Opening renders instantly with popoverIn.
 // Under prefers-reduced-motion the exit collapses to instant.
-export function usePopoverAnimation(open: boolean, onClosed?: () => void): PopoverAnimation {
+export function usePopoverAnimation(
+  open: boolean,
+  onClosed?: () => void,
+  // Exit duration override (ms). Defaults to the shared popover buffer so
+  // existing consumers behave byte-identically; drawers pass their own.
+  exitMs: number = POPOVER_EXIT_MS
+): PopoverAnimation {
   const [phase, setPhase] = React.useState<PopoverPhase>(open ? 'open' : 'closed');
   const phaseRef = React.useRef<PopoverPhase>(open ? 'open' : 'closed');
   const wasOpen = React.useRef(open);
@@ -58,8 +64,16 @@ export function usePopoverAnimation(open: boolean, onClosed?: () => void): Popov
     }
     setPhaseBoth('closing');
     clearTimer();
-    timer.current = setTimeout(finishClose, POPOVER_EXIT_MS);
-  }, [finishClose]);
+    timer.current = setTimeout(finishClose, exitMs);
+  }, [finishClose, exitMs]);
+
+  // Synchronous phase elevation on open to prevent an asynchronous 1-frame mount delay
+  if (open && phase !== 'open') {
+    wasOpen.current = true;
+    clearTimer();
+    phaseRef.current = 'open';
+    setPhase('open');
+  }
 
   React.useEffect(() => clearTimer, []);
 
@@ -67,7 +81,9 @@ export function usePopoverAnimation(open: boolean, onClosed?: () => void): Popov
     if (open) {
       wasOpen.current = true;
       clearTimer();
-      setPhaseBoth('open');
+      if (phaseRef.current !== 'open') {
+        setPhaseBoth('open');
+      }
       return;
     }
     if (!wasOpen.current) return;

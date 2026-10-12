@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { HelpCircle, MessageSquare, Send, CheckCircle2, Clock, AlertCircle, Sparkles, ChevronRight, User, Download } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader, Checkbox } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader, Checkbox, HeroCard, DrawerSection, FormTextarea } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { SupportTicket } from '@/mocks/fixtures';
 
@@ -298,20 +298,19 @@ export default function HelpView() {
       >
         {selectedTicket && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            <div style={{ padding: 14, backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)', borderRadius: 10 }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-                {selectedTicket.subject}
+            <HeroCard pad={14}>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                  {selectedTicket.subject}
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', marginTop: 4 }}>
+                  From: {selectedTicket.customerName} ({selectedTicket.customerEmail})
+                </div>
               </div>
-              <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', marginTop: 4 }}>
-                From: {selectedTicket.customerName} ({selectedTicket.customerEmail})
-              </div>
-            </div>
+            </HeroCard>
 
             {/* Conversation Thread */}
-            <div>
-              <h4 style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginBottom: 12 }}>
-                Conversation Thread
-              </h4>
+            <DrawerSection title="Conversation Thread" titleGap={12}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {selectedTicket.messages.map((msg, idx) => (
                   <div
@@ -338,7 +337,7 @@ export default function HelpView() {
                   </div>
                 ))}
               </div>
-            </div>
+            </DrawerSection>
 
             {/* Response Drafting */}
             <form onSubmit={handleSendReply} style={{ borderTop: '1px solid var(--tuw-border-subtle, #E2E4E6)', paddingTop: 16 }}>
@@ -373,20 +372,13 @@ export default function HelpView() {
                 ))}
               </div>
 
-              <textarea
+              <FormTextarea
                 rows={4}
                 placeholder="Type your response to the customer..."
                 value={draftReply}
                 onChange={(e) => setDraftReply(e.target.value)}
-                style={{
-                  width: '100%',
-                  borderRadius: 8,
-                  border: '1px solid var(--tuw-border-control, #90979F)',
-                  padding: '10px 12px',
-                  fontSize: 13,
-                  fontFamily: 'inherit',
-                  marginBottom: 12,
-                }}
+                pad="10px 12px"
+                style={{ marginBottom: 12 }}
               />
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>

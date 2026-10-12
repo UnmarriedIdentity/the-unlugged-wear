@@ -2,22 +2,28 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown } from 'lucide-react';
+import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui';
+import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
 
 export default function ProductsView() {
-  const { products, createProduct, updateProduct, deleteProduct, canPerformAction } = useAdminState();
+  const { products, createProduct, updateProduct, deleteProduct, canPerformAction, showToast } = useAdminState();
 
   const [selectedCat, setSelectedCat] = useState<string>('All');
   const [publicationFilter, setPublicationFilter] = useState<'all' | 'published' | 'draft' | 'archived'>('all');
   const [stockFilter, setStockFilter] = useState<'all' | 'low' | 'out'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [view, setView] = useState<'grid' | 'table'>('grid');
+  // Row selection (table view only; cleared on view switch)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const changeView = (v: 'grid' | 'table') => {
+    setView(v);
+    setSelectedIds(new Set());
+  };
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(6);
 
@@ -162,6 +168,109 @@ export default function ProductsView() {
 
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize));
   const paginatedProducts = filteredProducts.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  // Row selection helpers (header checkbox tri-states over the page)
+  const pageIds = paginatedProducts.map((p) => p.id);
+  const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selectedIds.has(id));
+  const somePageSelected = pageIds.some((id) => selectedIds.has(id));
+  const toggleId = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+  const togglePage = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (pageIds.every((id) => next.has(id))) pageIds.forEach((id) => next.delete(id));
+      else pageIds.forEach((id) => next.add(id));
+      return next;
+    });
+  };
+
+  // Bulk actions (table-view bar appears when rows are selected)
+  const clearSelection = () => setSelectedIds(new Set());
+
+  const handleExportSelected = () => {
+    const selected = products.filter((p) => selectedIds.has(p.id));
+    if (selected.length === 0) return;
+    const headers = ['Product ID', 'Name', 'Slug', 'Category', 'Price', 'Stock', 'Sold', 'Status'];
+    const rows = selected.map((p) => [
+      p.id,
+      `"${p.name}"`,
+      p.slug,
+      p.category,
+      p.price.toFixed(2),
+      String(p.stock),
+      String(p.soldCount),
+      p.publicationStatus,
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
+    const link = document.createElement('a');
+    link.setAttribute('href', encodeURI(csvContent));
+    link.setAttribute('download', `tuw_products_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast({
+      type: 'success',
+      title: 'Selected Products Exported',
+      description: `${selected.length} product${selected.length === 1 ? '' : 's'} exported to CSV.`,
+    });
+    clearSelection();
+  };
+
+  const handleBulkStatus = (status: 'published' | 'archived', label: string) => {
+    const ids = [...selectedIds];
+    if (ids.length === 0) return;
+    if (!canPerformAction('products')) {
+      showToast({
+        type: 'warning',
+        title: 'Action Restricted',
+        description: 'Your demo role cannot update products.',
+      });
+      return;
+    }
+    ids.forEach((id) => updateProduct(id, { publicationStatus: status }, true));
+    if (editingProduct && selectedIds.has(editingProduct.id)) {
+      setEditingProduct({ ...editingProduct, publicationStatus: status });
+    }
+    setPublicationFilter('all');
+    setCurrentPage(1);
+    showToast({
+      type: 'success',
+      title: 'Bulk Update Applied',
+      description: `${ids.length} product${ids.length === 1 ? '' : 's'} marked ${label}.`,
+    });
+    clearSelection();
+  };
+
+  const handleBulkDelete = () => {
+    const ids = [...selectedIds];
+    if (ids.length === 0) return;
+    if (!canPerformAction('products')) {
+      showToast({
+        type: 'warning',
+        title: 'Action Restricted',
+        description: 'Your demo role cannot delete products.',
+      });
+      return;
+    }
+    if (!window.confirm(`Permanently delete ${ids.length} product${ids.length === 1 ? '' : 's'} from catalog?`)) return;
+    ids.forEach((id) => deleteProduct(id, true));
+    if (editingProduct && selectedIds.has(editingProduct.id)) {
+      setEditingProduct(null);
+    }
+    setCurrentPage(1);
+    showToast({
+      type: 'success',
+      title: 'Bulk Delete Applied',
+      description: `${ids.length} product${ids.length === 1 ? '' : 's'} removed from catalog.`,
+    });
+    clearSelection();
+  };
 
   const lowStockCount = products.filter((p) => p.stock > 0 && p.stock <= 10).length;
   const outOfStockCount = products.filter((p) => p.stock === 0).length;
@@ -346,7 +455,7 @@ export default function ProductsView() {
                   { value: 'table', label: 'Table view', icon: <List size={16} /> },
                 ]}
                 value={view}
-                onChange={(v) => setView(v as typeof view)}
+                onChange={(v) => changeView(v as typeof view)}
               />
             </div>
           </div>
@@ -467,9 +576,57 @@ export default function ProductsView() {
         </div>
         ) : (
         /* Table View */
-        <Table>
+        <Table style={{ tableLayout: 'fixed' }}>
+          <colgroup>
+            <col style={{ width: 44 }} />
+            <col style={{ width: '34%' }} />
+            <col style={{ width: '11%' }} />
+            <col style={{ width: '14.5%' }} />
+            <col style={{ width: '13%' }} />
+            <col style={{ width: '12.5%' }} />
+            <col style={{ width: '15%' }} />
+          </colgroup>
           <TableHeader>
+            {selectedIds.size > 0 ? (
             <TableRow hoverable={false}>
+              <TableCell colSpan={7} style={{ padding: '6px 16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                  <Checkbox
+                    bare
+                    aria-label="Select all products on this page"
+                    checked={allPageSelected}
+                    indeterminate={!allPageSelected && somePageSelected}
+                    onChange={togglePage}
+                  />
+                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                    {selectedIds.size} selected
+                  </span>
+                  <Button variant="secondary" size="sm" icon={<Download size={14} />} onClick={handleExportSelected}>
+                    Export selected
+                  </Button>
+                  <Button variant="primary" size="sm" icon={<CheckCircle2 size={14} />} onClick={() => handleBulkStatus('published', 'Published')}>
+                    Publish
+                  </Button>
+                  <Button variant="secondary" size="sm" icon={<Archive size={14} />} onClick={() => handleBulkStatus('archived', 'Archived')}>
+                    Archive
+                  </Button>
+                  <Button variant="danger" size="sm" icon={<Trash2 size={14} />} onClick={handleBulkDelete}>
+                    Delete
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+            ) : (
+            <TableRow hoverable={false}>
+              <TableHead style={{ padding: '12px 16px', width: 44 }}>
+                <Checkbox
+                  bare
+                  aria-label="Select all products on this page"
+                  checked={allPageSelected}
+                  indeterminate={!allPageSelected && somePageSelected}
+                  onChange={togglePage}
+                />
+              </TableHead>
               <TableHead style={{ padding: '12px 16px' }}>Product</TableHead>
               <TableHead style={{ padding: '12px 16px' }}>Category</TableHead>
               <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Price</TableHead>
@@ -477,11 +634,12 @@ export default function ProductsView() {
               <TableHead style={{ padding: '12px 16px' }}>Status</TableHead>
               <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Action</TableHead>
             </TableRow>
+            )}
           </TableHeader>
           <TableBody>
             {filteredProducts.length === 0 ? (
               <TableRow hoverable={false}>
-                <TableCell colSpan={6} style={{ padding: '48px 16px', textAlign: 'center', color: 'var(--tuw-text-secondary, #5D6772)', fontSize: 16 }}>
+                <TableCell colSpan={7} style={{ padding: '48px 16px', textAlign: 'center', color: 'var(--tuw-text-secondary, #5D6772)', fontSize: 16 }}>
                   No products found matching the selected filters.
                 </TableCell>
               </TableRow>
@@ -490,8 +648,16 @@ export default function ProductsView() {
                 <TableRow
                   key={p.id}
                   onClick={() => openEditDrawer(p)}
-                  style={{ cursor: 'pointer' }}
+                  style={{ cursor: 'pointer', backgroundColor: selectedIds.has(p.id) ? 'var(--tuw-bg-canvas, #F7F8F9)' : 'transparent' }}
                 >
+                  <TableCell style={{ padding: '14px 16px' }}>
+                    <Checkbox
+                      bare
+                      aria-label={`Select product ${p.name}`}
+                      checked={selectedIds.has(p.id)}
+                      onChange={() => toggleId(p.id)}
+                    />
+                  </TableCell>
                   <TableCell style={{ padding: '14px 16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                       <div style={{ width: 40, height: 40, borderRadius: 8, overflow: 'hidden', position: 'relative', flexShrink: 0, background: p.imageBg, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--tuw-border-subtle, #E5E7EB)' }}>
@@ -614,20 +780,48 @@ export default function ProductsView() {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
             <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
+              <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', marginBottom: 6 }}>
                 Category
-              </label>
-              <select
-                value={formCategory}
-                onChange={(e) => setFormCategory(e.target.value as ProductItem['category'])}
-                style={{ width: '100%', height: 40, borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '0 10px', fontSize: 13 }}
-              >
-                <option value="T-Shirts">T-Shirts</option>
-                <option value="Hoodies">Hoodies</option>
-                <option value="Jackets">Jackets</option>
-                <option value="Pants">Pants</option>
-                <option value="Accessories">Accessories</option>
-              </select>
+              </div>
+              <DropdownMenu
+                ariaLabel="Category"
+                trigger={
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Category, currently ${formCategory}`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 8,
+                      width: '100%',
+                      height: 40,
+                      padding: '0 12px',
+                      fontSize: 13,
+                      fontWeight: 500,
+                      fontFamily: 'var(--font-main)',
+                      borderRadius: 8,
+                      border: '1px solid var(--tuw-border-control, #D1D5DB)',
+                      backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
+                      color: 'var(--tuw-text-primary, #262626)',
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                    }}
+                  >
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {formCategory}
+                    </span>
+                    <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
+                  </span>
+                }
+                items={['T-Shirts', 'Hoodies', 'Jackets', 'Pants', 'Accessories'].map((c) => ({ value: c, label: c }))}
+                selectedValue={formCategory}
+                onSelect={(v) => setFormCategory(v as ProductItem['category'])}
+              />
             </div>
 
             <Input
@@ -650,34 +844,93 @@ export default function ProductsView() {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
+              <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', marginBottom: 6 }}>
                 Fulfillment Partner
-              </label>
-              <select
-                value={formPartner}
-                onChange={(e) => setFormPartner(e.target.value as ProductItem['partner'])}
-                style={{ width: '100%', height: 40, borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '0 10px', fontSize: 13 }}
-              >
-                <option value="Qikink Direct API">Qikink Direct API</option>
-                <option value="Printrove Hub">Printrove Hub</option>
-                <option value="Custom Atelier">Custom Atelier</option>
-              </select>
+              </div>
+              <DropdownMenu
+                ariaLabel="Fulfillment partner"
+                trigger={
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Fulfillment partner, currently ${formPartner}`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 8,
+                      width: '100%',
+                      height: 40,
+                      padding: '0 12px',
+                      fontSize: 13,
+                      fontWeight: 500,
+                      fontFamily: 'var(--font-main)',
+                      borderRadius: 8,
+                      border: '1px solid var(--tuw-border-control, #D1D5DB)',
+                      backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
+                      color: 'var(--tuw-text-primary, #262626)',
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                    }}
+                  >
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {formPartner}
+                    </span>
+                    <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
+                  </span>
+                }
+                items={['Qikink Direct API', 'Printrove Hub', 'Custom Atelier'].map((p) => ({ value: p, label: p }))}
+                selectedValue={formPartner}
+                onSelect={(v) => setFormPartner(v as ProductItem['partner'])}
+              />
             </div>
 
             <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
+              <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', marginBottom: 6 }}>
                 Artwork Placement Spec
-              </label>
-              <select
-                value={formPlacement}
-                onChange={(e) => setFormPlacement(e.target.value as ProductItem['placement'])}
-                style={{ width: '100%', height: 40, borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '0 10px', fontSize: 13 }}
-              >
-                <option value="Chest (45mm)">Chest (45mm)</option>
-                <option value="Back Oversized">Back Oversized</option>
-                <option value="Sleeve Length">Sleeve Length</option>
-                <option value="Interior Hem">Interior Hem</option>
-              </select>
+              </div>
+              <DropdownMenu
+                ariaLabel="Artwork placement spec"
+                trigger={
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Artwork placement spec, currently ${formPlacement}`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 8,
+                      width: '100%',
+                      height: 40,
+                      padding: '0 12px',
+                      fontSize: 13,
+                      fontWeight: 500,
+                      fontFamily: 'var(--font-main)',
+                      borderRadius: 8,
+                      border: '1px solid var(--tuw-border-control, #D1D5DB)',
+                      backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
+                      color: 'var(--tuw-text-primary, #262626)',
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                    }}
+                  >
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {formPlacement}
+                    </span>
+                    <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
+                  </span>
+                }
+                items={['Chest (45mm)', 'Back Oversized', 'Sleeve Length', 'Interior Hem'].map((pl) => ({ value: pl, label: pl }))}
+                selectedValue={formPlacement}
+                onSelect={(v) => setFormPlacement(v as ProductItem['placement'])}
+              />
             </div>
           </div>
 
@@ -694,39 +947,61 @@ export default function ProductsView() {
             />
           </div>
 
-          <div>
-            <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
-              Garment Description & Care
-            </label>
-            <textarea
+            <FormTextarea
+              label="Garment Description & Care"
               rows={3}
               value={formDescription}
               onChange={(e) => setFormDescription(e.target.value)}
-              style={{
-                width: '100%',
-                borderRadius: 8,
-                border: '1px solid var(--tuw-border-control, #90979F)',
-                padding: '8px 12px',
-                fontSize: 13,
-                fontFamily: 'inherit',
-              }}
             />
-          </div>
 
-          <div>
-            <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
-              Publication State
-            </label>
-            <select
-              value={formStatus}
-              onChange={(e) => setFormStatus(e.target.value as ProductItem['publicationStatus'])}
-              style={{ width: '100%', height: 40, borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '0 10px', fontSize: 13 }}
-            >
-              <option value="published">Published (Visible in Storefront)</option>
-              <option value="draft">Draft (Editorial review only)</option>
-              <option value="archived">Archived (Hidden from catalog)</option>
-            </select>
-          </div>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', marginBottom: 6 }}>
+                Publication State
+              </div>
+              <DropdownMenu
+                ariaLabel="Publication state"
+                trigger={
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Publication state, currently ${formStatus === 'published' ? 'Published (Visible in Storefront)' : formStatus === 'draft' ? 'Draft (Editorial review only)' : 'Archived (Hidden from catalog)'}`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 8,
+                      width: '100%',
+                      height: 40,
+                      padding: '0 12px',
+                      fontSize: 13,
+                      fontWeight: 500,
+                      fontFamily: 'var(--font-main)',
+                      borderRadius: 8,
+                      border: '1px solid var(--tuw-border-control, #D1D5DB)',
+                      backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
+                      color: 'var(--tuw-text-primary, #262626)',
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                    }}
+                  >
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {formStatus === 'published' ? 'Published (Visible in Storefront)' : formStatus === 'draft' ? 'Draft (Editorial review only)' : 'Archived (Hidden from catalog)'}
+                    </span>
+                    <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
+                  </span>
+                }
+                items={[
+                  { value: 'published', label: 'Published (Visible in Storefront)' },
+                  { value: 'draft', label: 'Draft (Editorial review only)' },
+                  { value: 'archived', label: 'Archived (Hidden from catalog)' },
+                ]}
+                selectedValue={formStatus}
+                onSelect={(v) => setFormStatus(v as ProductItem['publicationStatus'])}
+              />
+            </div>
         </form>
       </Modal>
 
@@ -767,17 +1042,7 @@ export default function ProductsView() {
         {editingProduct && (
           <form onSubmit={handleEditSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {editingProduct.image && (
-              <div
-                style={{
-                  position: 'relative',
-                  width: '100%',
-                  height: 220,
-                  borderRadius: 10,
-                  overflow: 'hidden',
-                  border: '1px solid var(--tuw-border-subtle, #E9E9E9)',
-                  background: 'var(--tuw-bg-canvas, #F7F8F9)',
-                }}
-              >
+              <MediaFrame height={220} radius={10}>
                 {editingProduct.video ? (
                   <video
                     src={editingProduct.video}
@@ -793,7 +1058,7 @@ export default function ProductsView() {
                     style={{ objectFit: 'cover' }}
                   />
                 )}
-              </div>
+              </MediaFrame>
             )}
             <Input
               label="Product Title"
@@ -825,18 +1090,52 @@ export default function ProductsView() {
               />
             </div>
             <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
+              <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', marginBottom: 6 }}>
                 Publication Status
-              </label>
-              <select
-                value={formStatus}
-                onChange={(e) => setFormStatus(e.target.value as ProductItem['publicationStatus'])}
-                style={{ width: '100%', height: 40, borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '0 10px', fontSize: 13 }}
-              >
-                <option value="published">Published (Live on website)</option>
-                <option value="draft">Draft (Hidden)</option>
-                <option value="archived">Archived</option>
-              </select>
+              </div>
+              <DropdownMenu
+                ariaLabel="Publication status"
+                trigger={
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Publication status, currently ${formStatus === 'published' ? 'Published (Live on website)' : formStatus === 'draft' ? 'Draft (Hidden)' : 'Archived'}`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 8,
+                      width: '100%',
+                      height: 40,
+                      padding: '0 12px',
+                      fontSize: 13,
+                      fontWeight: 500,
+                      fontFamily: 'var(--font-main)',
+                      borderRadius: 8,
+                      border: '1px solid var(--tuw-border-control, #D1D5DB)',
+                      backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
+                      color: 'var(--tuw-text-primary, #262626)',
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                    }}
+                  >
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {formStatus === 'published' ? 'Published (Live on website)' : formStatus === 'draft' ? 'Draft (Hidden)' : 'Archived'}
+                    </span>
+                    <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
+                  </span>
+                }
+                items={[
+                  { value: 'published', label: 'Published (Live on website)' },
+                  { value: 'draft', label: 'Draft (Hidden)' },
+                  { value: 'archived', label: 'Archived' },
+                ]}
+                selectedValue={formStatus}
+                onSelect={(v) => setFormStatus(v as ProductItem['publicationStatus'])}
+              />
             </div>
             <Input
               label="Color Variations"
@@ -848,17 +1147,12 @@ export default function ProductsView() {
               value={formSizes}
               onChange={(e) => setFormSizes(e.target.value)}
             />
-            <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
-                Description
-              </label>
-              <textarea
-                rows={4}
-                value={formDescription}
-                onChange={(e) => setFormDescription(e.target.value)}
-                style={{ width: '100%', borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '8px 12px', fontSize: 13, fontFamily: 'inherit' }}
-              />
-            </div>
+            <FormTextarea
+              label="Description"
+              rows={4}
+              value={formDescription}
+              onChange={(e) => setFormDescription(e.target.value)}
+            />
           </form>
         )}
       </Drawer>

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader, HeroCard, DrawerSection } from '@/components/ui';
 import { BookOpen, Plus, ArrowLeft, Search, Eye, Edit3 } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 
@@ -248,24 +248,24 @@ export default function JournalPage() {
       >
         {selectedStory && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            <div style={{ padding: 16, backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)', borderRadius: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <HeroCard
+              badge={
+                <Badge variant={selectedStory.status === 'published' ? 'success' : 'neutral'}>
+                  {selectedStory.status}
+                </Badge>
+              }
+            >
               <div>
                 <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>Category</span>
                 <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginTop: 2 }}>{selectedStory.category}</div>
               </div>
-              <Badge variant={selectedStory.status === 'published' ? 'success' : 'neutral'}>
-                {selectedStory.status}
-              </Badge>
-            </div>
+            </HeroCard>
 
-            <div>
-              <h4 style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginBottom: 8 }}>
-                Article Lead Excerpt
-              </h4>
+            <DrawerSection title="Article Lead Excerpt" titleGap={8}>
               <p style={{ fontSize: 14, color: 'var(--tuw-text-secondary, #5D6772)', lineHeight: 1.6 }}>
                 {selectedStory.excerpt}
               </p>
-            </div>
+            </DrawerSection>
           </div>
         )}
       </Drawer>

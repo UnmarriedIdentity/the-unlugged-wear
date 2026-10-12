@@ -64,8 +64,8 @@ interface AdminStateContextType {
 
   // Mutations
   createProduct: (product: Omit<ProductItem, 'id' | 'soldCount' | 'rating'>) => boolean;
-  updateProduct: (id: string, updates: Partial<ProductItem>) => boolean;
-  deleteProduct: (id: string) => boolean;
+  updateProduct: (id: string, updates: Partial<ProductItem>, silent?: boolean) => boolean;
+  deleteProduct: (id: string, silent?: boolean) => boolean;
 
   createOrder: (order: Omit<OrderItem, 'id' | 'date' | 'timeline' | 'paidAmount' | 'refundedAmount'>) => boolean;
   updateOrderStatus: (orderId: string, paymentStatus?: OrderItem['paymentStatus'], fulfillmentStatus?: OrderItem['fulfillmentStatus'], silent?: boolean) => boolean;
@@ -265,30 +265,34 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     return true;
   };
 
-  const updateProduct = (id: string, updates: Partial<ProductItem>) => {
+  const updateProduct = (id: string, updates: Partial<ProductItem>, silent = false) => {
     if (!canPerformAction('products')) return false;
     const next = products.map((p) => (p.id === id ? { ...p, ...updates } : p));
     setProducts(next);
     persistState({ products: next });
-    showToast({
-      type: 'success',
-      title: 'Product Updated',
-      description: `Changes saved to local product record.`,
-    });
+    if (!silent) {
+      showToast({
+        type: 'success',
+        title: 'Product Updated',
+        description: `Changes saved to local product record.`,
+      });
+    }
     return true;
   };
 
-  const deleteProduct = (id: string) => {
+  const deleteProduct = (id: string, silent = false) => {
     if (!canPerformAction('products')) return false;
     const target = products.find((p) => p.id === id);
     const next = products.filter((p) => p.id !== id);
     setProducts(next);
     persistState({ products: next });
-    showToast({
-      type: 'info',
-      title: 'Product Deleted',
-      description: `Removed from active catalog dataset.`,
-    });
+    if (!silent) {
+      showToast({
+        type: 'info',
+        title: 'Product Deleted',
+        description: `Removed from active catalog dataset.`,
+      });
+    }
     return true;
   };
 
