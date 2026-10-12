@@ -84,7 +84,11 @@ export default function ProductsView() {
     setFormStatus('published');
     setFormDescription('Pre-shrunk premium heavyweight combed cotton with reinforced seams.');
     setFormVideo('');
-    setFormGallery([]);
+    setFormImages([]);
+    setUploadReel((prev) => {
+      if (prev) revokeUploads([{ url: prev.url }]);
+      return null;
+    });
     setFormUploads((prev) => {
       revokeUploads(prev);
       return [];
@@ -336,13 +340,18 @@ export default function ProductsView() {
     setEditingProduct(product);
     setProductTab('general');
     setFormVideo(product.video || '');
-    setFormGallery(
-      product.images && product.images.length > 0
-        ? [...product.images]
+    setFormImages(
+      (product.images && product.images.length > 0
+        ? product.images
         : product.image
           ? [product.image]
           : []
+      ).map((src, i) => ({ id: `g-${i}`, src, name: baseName(src), persisted: true }))
     );
+    setUploadReel((prev) => {
+      if (prev) revokeUploads([{ url: prev.url }]);
+      return null;
+    });
     setFormUploads((prev) => {
       revokeUploads(prev);
       return [];
@@ -524,19 +533,15 @@ export default function ProductsView() {
   };
 
   // Customer-view gallery slides: uploaded reel previews live, else the
-  // persisted reel URL; then persisted gallery URLs, then session previews.
+  // persisted reel URL; then the ordered image list (persisted + previews).
   // The reel obeys the visibility toggle; uploads never persist.
-  const galleryReelUpload = formUploads.find((u) => u.kind === 'video');
-  const galleryReelSrc = galleryReelUpload ? galleryReelUpload.url : formVideo !== '' ? formVideo : null;
+  const galleryReelSrc = uploadReel ? uploadReel.url : formVideo !== '' ? formVideo : null;
   const showReel = visibleSections.video && galleryReelSrc !== null;
   const gallerySlides: Array<{ type: 'image' | 'video'; src: string; alt: string; poster?: string }> = [
     ...(showReel && galleryReelSrc
-      ? [{ type: 'video' as const, src: galleryReelSrc, alt: `${formName || 'Product'} video reel`, poster: formGallery[0] }]
+      ? [{ type: 'video' as const, src: galleryReelSrc, alt: `${formName || 'Product'} video reel`, poster: formImages[0]?.src }]
       : []),
-    ...formGallery.map((url) => ({ type: 'image' as const, src: url, alt: formName || 'Product image' })),
-    ...formUploads
-      .filter((u) => u.kind === 'image')
-      .map((u) => ({ type: 'image' as const, src: u.url, alt: 'Uploaded preview' })),
+    ...formImages.map((im) => ({ type: 'image' as const, src: im.src, alt: formName || 'Product image' })),
   ];
 
   // Bulk actions (table-view bar appears when rows are selected)
