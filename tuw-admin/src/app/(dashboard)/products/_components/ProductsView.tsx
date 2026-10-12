@@ -1636,6 +1636,7 @@ export default function ProductsView() {
                       <Stepper
                         ariaLabel={`Stock for ${v.color} ${v.size}`}
                         value={v.stock}
+                        editableValue
                         onChange={(n) => updateVariant(v.id, { stock: n })}
                       />
                     </TableCell>
