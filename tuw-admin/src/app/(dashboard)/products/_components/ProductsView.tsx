@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea } from '@/components/ui';
+import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 
@@ -78,9 +78,17 @@ export default function ProductsView() {
     setIsCreateOpen(true);
   };
 
+  // Drawer tab + media draft state (elastic workspace; tabs grow per phase)
+  const [productTab, setProductTab] = useState<'general' | 'media'>('general');
+  const [formImage, setFormImage] = useState('');
+  const [formVideo, setFormVideo] = useState('');
+
   const openEditDrawer = (product: ProductItem) => {
     if (!canPerformAction('products')) return;
     setEditingProduct(product);
+    setProductTab('general');
+    setFormImage(product.image || '');
+    setFormVideo(product.video || '');
     setFormName(product.name);
     setFormSlug(product.slug);
     setFormCategory(product.category);
@@ -141,6 +149,8 @@ export default function ProductsView() {
       placement: formPlacement,
       publicationStatus: formStatus,
       description: formDescription,
+      image: formImage || undefined,
+      video: formVideo || undefined,
     });
 
     setEditingProduct(null);
