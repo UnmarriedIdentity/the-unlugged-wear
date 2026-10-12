@@ -8,15 +8,15 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 164,
-    "done": 150,
+    "total": 170,
+    "done": 156,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "7dc9105",
-    "unpushed": ["7dc9105", "5fb3226", "18d2294", "21dd603", "678cd42", "577ee59", "b65ad39", "7514e44", "6c832f4", "4167f92", "99d8f10", "3f3bc5b", "ca44d64", "b9a009c", "8c0cfc9", "c2a4c49", "1a3e512", "1545ebf", "68d17f6", "be9f529", "688d868", "66f4ad3", "e22c105", "cd7723e", "3a2c8f8", "316b767", "b8d7ada", "f80f089", "a22478a", "4ce4aac", "f5bfcfa", "585529f", "ba74b76", "203c970", "32d74a3", "8f6c386", "b211dd2", "96067e3", "2011ae2", "8fad108", "401b217", "e533db4", "bc4808e", "b947977", "cf68bdb", "fa750ca"],
+    "tip": "e8e3882",
+    "unpushed": ["e8e3882", "cc84644", "2087447", "be2e49f", "bc6a90d", "7002594", "29d165b", "35e3fdf", "9a49435", "0638769", "b7f1e4c", "1a0e6dd", "7dc9105", "5fb3226", "18d2294", "21dd603", "678cd42", "577ee59", "b65ad39", "7514e44", "6c832f4", "4167f92", "99d8f10", "3f3bc5b", "ca44d64", "b9a009c", "8c0cfc9", "c2a4c49", "1a3e512", "1545ebf", "68d17f6", "be9f529", "688d868", "66f4ad3", "e22c105", "cd7723e", "3a2c8f8", "316b767", "b8d7ada", "f80f089", "a22478a", "4ce4aac", "f5bfcfa", "585529f", "ba74b76", "203c970", "32d74a3", "8f6c386", "b211dd2", "96067e3", "2011ae2", "8fad108", "401b217", "e533db4", "bc4808e", "b947977", "cf68bdb", "fa750ca"],
     "next_up": "Fulfillment Phase 2 per-card bulk bars; anim-probe re-run expecting end-Out events; browser verification backlog",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
@@ -1262,6 +1262,101 @@
       "key_decisions": [
         "arrow-key menu nav is a pre-existing gap in all menus, not introduced here",
         "required is vacuous — all five states init to valid defaults"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PE0",
+      "title": "Product variant data model (types, synthesis, seams, tests)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal: 1a0e6dd types+helpers + b7f1e4c seams + 0638769 tests (suite now 7)",
+      "design_match": "yes",
+      "key_decisions": [
+        "optional variants[] + lazy synthesis — zero fixture edits",
+        "float prices match domain; minor-unit tension recorded, not converted",
+        "updateProduct derives colors/sizes/stock from matrix"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PE1",
+      "title": "Drawer elastic workspace shell",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal:9a49435 (expandable 880/full-canvas + headerExtra; 12 drawers byte-identical)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PE2",
+      "title": "Products drawer General/Media tabs",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal: 35e3fdf state + 29d165b tabs/media (live preview, URL fields, Tabs aria-label fix)",
+      "design_match": "yes",
+      "key_decisions": [
+        "tabs grow per phase (no dead controls); media URL-based, no upload flow"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PE3",
+      "title": "Variants matrix tab + Stepper (+ mirror writers)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal: 7002594 stepper + bc6a90d matrix (dual-editor mirror writes documented; caught unreachable-branch slip pre-gate)",
+      "design_match": "yes",
+      "key_decisions": [
+        "matrix is submit source; General inputs mirror-write; modal keeps legacy",
+        "price follows min variant (from-$X semantics)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PE4",
+      "title": "Specs/SEO tabs, monogram, visibility, size link",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal: be2e49f state + 2087447 UI (section toggles in Specs tab, not header popover — menu closes per select)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PE5",
+      "title": "Unify create into drawer, retire modal",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal: cc84644 create mode + e8e3882 modal retire (-313/+3; chunked demolition with reads)",
+      "design_match": "yes",
+      "key_decisions": [
+        "create tabs gated to General+Media; legacy handleCreateSubmit deleted with modal"
       ],
       "verified": true,
       "pushed": false,
