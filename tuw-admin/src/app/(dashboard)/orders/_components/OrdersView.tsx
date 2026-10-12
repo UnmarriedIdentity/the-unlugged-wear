@@ -1,17 +1,30 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Download, Filter, Plus, Search, Eye, CheckCircle2, RotateCcw, AlertTriangle, Truck, Clock, X } from 'lucide-react';
+import { Download, Filter, Plus, Search, Eye, CheckCircle2, RotateCcw, AlertTriangle, Truck, Clock, X, Printer, ChevronDown } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
 import {
   StatCard,
   ContentCard,
   Button,
   Badge,
+  Checkbox,
   Input,
   Drawer,
   Modal,
   Pagination,
+  FilterPills,
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+  PageHeader,
+  DropdownMenu,
+  PanelLayout,
+  DrawerSection,
+  ItemsRow,
 } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { OrderItem, PaymentStatus, FulfillmentStatus } from '@/mocks/fixtures';
@@ -19,19 +32,21 @@ import { OrderItem, PaymentStatus, FulfillmentStatus } from '@/mocks/fixtures';
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
 
 export default function OrdersView() {
-  const { orders, products, updateOrderStatus, createOrder, issueRefund, retryFulfillment, canPerformAction, activeRole } = useAdminState();
+  const { orders, products, updateOrderStatus, createOrder, issueRefund, retryFulfillment, canPerformAction, activeRole, showToast } = useAdminState();
 
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
-  const [paymentFilter, setPaymentFilter] = useState<'all' | PaymentStatus>('all');
-  const [fulfillmentFilter, setFulfillmentFilter] = useState<'all' | FulfillmentStatus>('all');
+  type OrderTab = 'all' | 'unfulfilled' | 'unpaid' | 'draft' | 'finished';
+  const [orderTab, setOrderTab] = useState<OrderTab>('all');
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(6);
+  const [pageSize, setPageSize] = useState(5);
 
   // Drawer & Modal State
   const [selectedOrder, setSelectedOrder] = useState<OrderItem | null>(null);
+  // Row selection (multi-select; header checkbox tri-states over the page)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isRefundOpen, setIsRefundOpen] = useState(false);
   const [refundAmount, setRefundAmount] = useState<string>('');
@@ -45,24 +60,77 @@ export default function OrdersView() {
   const [selectedProductId, setSelectedProductId] = useState(products[0]?.id || '');
   const [newOrderPayment, setNewOrderPayment] = useState<PaymentStatus>('paid');
 
-  // Filtered Orders
+  // Filtered Orders (single tab preset)
   const filteredOrders = orders.filter((o) => {
     const matchesSearch =
       o.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       o.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       o.customerEmail.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesPayment = paymentFilter === 'all' || o.paymentStatus === paymentFilter;
-    const matchesFulfillment = fulfillmentFilter === 'all' || o.fulfillmentStatus === fulfillmentFilter;
-    return matchesSearch && matchesPayment && matchesFulfillment;
+    const isUnfulfilled =
+      o.fulfillmentStatus === 'queued' ||
+      o.fulfillmentStatus === 'printing' ||
+      o.fulfillmentStatus === 'submission_failed';
+    const isUnpaid = o.paymentStatus === 'pending' || o.paymentStatus === 'failed';
+    const isFinished = o.paymentStatus === 'paid' && o.fulfillmentStatus === 'delivered';
+    const isDraft = o.paymentStatus === 'pending' && o.fulfillmentStatus === 'queued';
+    const matchesTab =
+      orderTab === 'all'
+        ? true
+        : orderTab === 'unfulfilled'
+          ? isUnfulfilled
+          : orderTab === 'unpaid'
+            ? isUnpaid
+            : orderTab === 'draft'
+              ? isDraft
+              : isFinished;
+    return matchesSearch && matchesTab;
   });
 
   // Reset page when filters change
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, paymentFilter, fulfillmentFilter]);
+  }, [searchTerm, orderTab]);
 
   const totalPages = Math.max(1, Math.ceil(filteredOrders.length / pageSize));
   const paginatedOrders = filteredOrders.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  // Row selection + reference label maps (derived — no mock-model change)
+  const pageIds = paginatedOrders.map((o) => o.id);
+  const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selectedIds.has(id));
+  const somePageSelected = pageIds.some((id) => selectedIds.has(id));
+  const toggleId = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+  const togglePage = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (pageIds.every((id) => next.has(id))) pageIds.forEach((id) => next.delete(id));
+      else pageIds.forEach((id) => next.add(id));
+      return next;
+    });
+  };
+  const paymentLabel = (s: PaymentStatus) =>
+    s === 'paid' ? 'Fully paid' : s === 'pending' ? 'Authorized' : s === 'failed' ? 'Voided' : 'Refund';
+  const fulfillmentLabel = (s: FulfillmentStatus) =>
+    s === 'delivered' || s === 'shipped' ? 'Fulfilled' : s === 'printing' ? 'Partially fulfilled' : 'Unfulfilled';
+  const shippingBadge = (o: OrderItem) =>
+    o.paymentStatus === 'refunded' ? (
+      <Badge variant="danger">Returned</Badge>
+    ) : o.fulfillmentStatus === 'delivered' ? (
+      <Badge variant="info">Delivered</Badge>
+    ) : o.fulfillmentStatus === 'shipped' ? (
+      <Badge variant="success">Shipped</Badge>
+    ) : o.fulfillmentStatus === 'submission_failed' ? (
+      <Badge variant="neutral">Cancelled</Badge>
+    ) : (
+      <Badge variant="warning">Processing</Badge>
+    );
+  const itemCount = (o: OrderItem) => o.items.reduce((n, li) => n + li.quantity, 0);
 
   // Calculate Metrics from Live Dataset
   const totalRevenue = orders
@@ -72,10 +140,10 @@ export default function OrdersView() {
   const deliveredCount = orders.filter((o) => o.fulfillmentStatus === 'delivered').length;
   const issueCount = orders.filter((o) => o.fulfillmentStatus === 'submission_failed').length;
 
-  // Handle Export CSV
-  const handleExportCSV = () => {
+  // Handle Export CSV (defaults to the filtered set; bulk passes the selection)
+  const handleExportCSV = (rowsToExport = filteredOrders) => {
     const headers = ['Order ID', 'Customer', 'Email', 'Payment Status', 'Fulfillment Status', 'Total', 'Paid', 'Refunded', 'Date'];
-    const rows = filteredOrders.map((o) => [
+    const rows = rowsToExport.map((o) => [
       o.id,
       `"${o.customerName}"`,
       o.customerEmail,
@@ -94,6 +162,71 @@ export default function OrdersView() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  // Bulk actions (bar appears when rows are selected)
+  const clearSelection = () => setSelectedIds(new Set());
+
+  const handleExportSelected = () => {
+    const selected = orders.filter((o) => selectedIds.has(o.id));
+    if (selected.length === 0) return;
+    handleExportCSV(selected);
+    showToast({
+      type: 'success',
+      title: 'Selected Orders Exported',
+      description: `${selected.length} order${selected.length === 1 ? '' : 's'} exported to CSV.`,
+    });
+    clearSelection();
+  };
+
+  const handlePrintSelected = () => {
+    const count = selectedIds.size;
+    if (count === 0) return;
+    showToast({
+      type: 'info',
+      title: 'Demo Print Queue',
+      description: `${count} invoice${count === 1 ? '' : 's'} staged — no printer connected in demo.`,
+    });
+    clearSelection();
+  };
+
+  const handleBulkMark = (value: string) => {
+    const ids = [...selectedIds];
+    if (ids.length === 0) return;
+    if (!canPerformAction('orders')) {
+      showToast({
+        type: 'warning',
+        title: 'Action Restricted',
+        description: 'Your demo role cannot update orders.',
+      });
+      return;
+    }
+    const label =
+      value === 'processing'
+        ? 'Processing'
+        : value === 'shipped'
+          ? 'Shipped'
+          : value === 'delivered'
+            ? 'Delivered'
+            : value === 'cancel'
+              ? 'Cancelled'
+              : 'Refunded';
+    ids.forEach((id) => {
+      if (value === 'processing') updateOrderStatus(id, undefined, 'printing', true);
+      else if (value === 'shipped') updateOrderStatus(id, undefined, 'shipped', true);
+      else if (value === 'delivered') updateOrderStatus(id, undefined, 'delivered', true);
+      else if (value === 'cancel') updateOrderStatus(id, 'failed', undefined, true);
+      else updateOrderStatus(id, 'refunded', undefined, true);
+    });
+    showToast({
+      type: 'success',
+      title: 'Bulk Update Applied',
+      description: `${ids.length} order${ids.length === 1 ? '' : 's'} marked ${label}.`,
+    });
+    clearSelection();
+    // Mutated rows may no longer match the active tab — jump to All so
+    // results stay visible (reset-page effect picks up the tab change).
+    setOrderTab('all');
   };
 
   // Handle Create Order Submit
@@ -163,35 +296,31 @@ export default function OrdersView() {
 
   return (
     <DashboardShell pageTitle="Orders" activeNav="orders">
-      <div className={styles.pageHeader}>
-        <div className={styles.headingGroup}>
-          <h2 className={styles.pageTitle}>Order Management</h2>
-          <p className={styles.pageSubtitle}>
-            Monitor, inspect, and fulfill store orders with independent payment and fulfillment tracking.
-          </p>
-        </div>
-
-        <div className={styles.headerActions}>
-          <Button
-            variant="secondary"
-            size="md"
-            icon={<Download size={16} />}
-            onClick={handleExportCSV}
-          >
-            <span>Export CSV</span>
-          </Button>
-          <Button
-            variant="primary"
-            size="md"
-            icon={<Plus size={16} />}
-            onClick={() => {
-              if (canPerformAction('orders')) setIsCreateOpen(true);
-            }}
-          >
-            <span>Create Order</span>
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Order Management"
+        actions={
+          <>
+            <Button
+              variant="secondary"
+              size="md"
+              icon={<Download size={16} />}
+              onClick={() => handleExportCSV()}
+            >
+              <span>Export CSV</span>
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
+              icon={<Plus size={16} />}
+              onClick={() => {
+                if (canPerformAction('orders')) setIsCreateOpen(true);
+              }}
+            >
+              <span>Create Order</span>
+            </Button>
+          </>
+        }
+      />
 
       {/* Stats Row */}
       <div className={styles.statGrid}>
@@ -200,32 +329,51 @@ export default function OrdersView() {
           value={`₹${totalRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
           trend={`${orders.length} orders recorded`}
           trendType="up"
+          hoverable
         />
         <StatCard
           label="Active Queue"
           value={String(processingCount)}
           subtitle="Queued & printing on floor"
           trendType="neutral"
+          hoverable
         />
         <StatCard
           label="Delivered"
           value={String(deliveredCount)}
           trend="Successful completions"
           trendType="up"
+          hoverable
         />
         <StatCard
           label="Operational Issues"
           value={String(issueCount)}
           subtitle={issueCount > 0 ? 'Requires attention / retry' : 'No sync errors'}
           trendType={issueCount > 0 ? 'down' : 'up'}
+          hoverable
         />
       </div>
 
       {/* Filter and Table Card */}
       <ContentCard>
-        {/* Search & Dual Independent Filters */}
+        <PanelLayout
+          scrollable={false}
+          header={
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 20 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+            <FilterPills
+              variant="pills"
+              ariaLabel="Order status tabs"
+              options={[
+                { value: 'all', label: 'All' },
+                { value: 'unfulfilled', label: 'Unfulfilled' },
+                { value: 'unpaid', label: 'Unpaid' },
+                { value: 'draft', label: 'Draft' },
+                { value: 'finished', label: 'Finished' },
+              ]}
+              value={orderTab}
+              onChange={(v) => setOrderTab(v as typeof orderTab)}
+            />
             <div style={{ maxWidth: 360, width: '100%' }}>
               <Input
                 placeholder="Search by order #, customer, or email..."
@@ -234,163 +382,154 @@ export default function OrdersView() {
                 prefixIcon={<Search size={16} />}
               />
             </div>
-
-            {/* Quick Status Count Indicator */}
-            <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-              Showing <strong>{filteredOrders.length}</strong> of {orders.length} orders
-            </div>
-          </div>
-
-          {/* Independent Filter Tabs */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20, paddingTop: 8, borderTop: '1px solid var(--tuw-border-subtle, #E5E7EB)' }}>
-            {/* Payment Filter */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>
-                Payment:
-              </span>
-              <div style={{ display: 'flex', gap: 4 }}>
-                {(['all', 'paid', 'pending', 'failed', 'refunded'] as const).map((status) => (
-                  <button
-                    key={status}
-                    type="button"
-                    onClick={() => setPaymentFilter(status)}
-                    style={{
-                      padding: '4px 10px',
-                      borderRadius: '6px',
-                      fontSize: '12px',
-                      fontWeight: paymentFilter === status ? 600 : 500,
-                      cursor: 'pointer',
-                      border: '1px solid',
-                      borderColor: paymentFilter === status ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-border-subtle, #E5E7EB)',
-                      backgroundColor: paymentFilter === status ? 'var(--tuw-bg-selected, #F8F5FF)' : 'transparent',
-                      color: paymentFilter === status ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-text-secondary, #5D6772)',
-                    }}
-                  >
-                    {status.charAt(0).toUpperCase() + status.slice(1)}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Fulfillment Filter */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>
-                Fulfillment:
-              </span>
-              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                {(['all', 'queued', 'printing', 'shipped', 'delivered', 'submission_failed'] as const).map((status) => (
-                  <button
-                    key={status}
-                    type="button"
-                    onClick={() => setFulfillmentFilter(status)}
-                    style={{
-                      padding: '4px 10px',
-                      borderRadius: '6px',
-                      fontSize: '12px',
-                      fontWeight: fulfillmentFilter === status ? 600 : 500,
-                      cursor: 'pointer',
-                      border: '1px solid',
-                      borderColor: fulfillmentFilter === status ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-border-subtle, #E5E7EB)',
-                      backgroundColor: fulfillmentFilter === status ? 'var(--tuw-bg-selected, #F8F5FF)' : 'transparent',
-                      color: fulfillmentFilter === status ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-text-secondary, #5D6772)',
-                    }}
-                  >
-                    {status === 'submission_failed' ? 'Failed Sync' : status.charAt(0).toUpperCase() + status.slice(1)}
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
+          }
+        >
 
         {/* Table of Orders */}
-        <div style={{ overflowX: 'auto', width: '100%' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E5E7EB)' }}>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Order</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Customer</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Date</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Payment Status</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Fulfillment Status</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase', textAlign: 'right' }}>Total</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase', textAlign: 'right' }}>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredOrders.length === 0 ? (
-                <tr>
-                  <td colSpan={7} style={{ padding: '48px 16px', textAlign: 'center', color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                    No orders match your search criteria.
-                  </td>
-                </tr>
-              ) : (
-                paginatedOrders.map((order) => (
-                  <tr
-                    key={order.id}
-                    onClick={() => setSelectedOrder(order)}
-                    style={{
-                      borderBottom: '1px solid var(--tuw-border-subtle, #E5E7EB)',
-                      cursor: 'pointer',
-                      transition: 'background-color 0.15s',
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--tuw-bg-canvas, #F7F8F9)')}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                  >
-                    <td style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)' }}>
-                      {order.id}
-                    </td>
-                    <td style={{ padding: '14px 16px' }}>
-                      <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)' }}>
-                        {order.customerName}
-                      </div>
-                      <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                        {order.customerEmail}
-                      </div>
-                    </td>
-                    <td style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                      {order.date}
-                    </td>
-                    <td style={{ padding: '14px 16px' }}>
-                      {order.paymentStatus === 'paid' && <Badge variant="success">Paid</Badge>}
-                      {order.paymentStatus === 'pending' && <Badge variant="warning">Pending</Badge>}
-                      {order.paymentStatus === 'failed' && <Badge variant="danger">Failed</Badge>}
-                      {order.paymentStatus === 'refunded' && <Badge variant="neutral">Refunded</Badge>}
-                    </td>
-                    <td style={{ padding: '14px 16px' }}>
-                      {order.fulfillmentStatus === 'delivered' && <Badge variant="success">Delivered</Badge>}
-                      {order.fulfillmentStatus === 'shipped' && <Badge variant="info">Shipped</Badge>}
-                      {order.fulfillmentStatus === 'printing' && <Badge variant="warning">Printing</Badge>}
-                      {order.fulfillmentStatus === 'queued' && <Badge variant="neutral">Queued</Badge>}
-                      {order.fulfillmentStatus === 'submission_failed' && (
-                        <Badge variant="danger" icon={<AlertTriangle size={12} />}>
-                          Failed Sync
-                        </Badge>
-                      )}
-                    </td>
-                    <td className="tuw-tabular-nums" style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', textAlign: 'right' }}>
-                      ₹{order.total.toFixed(2)}
-                    </td>
-                    <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        icon={<Eye size={14} />}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedOrder(order);
-                        }}
-                      >
-                        Details
-                      </Button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+        <Table>
+          <TableHeader>
+            {selectedIds.size > 0 ? (
+              <TableRow hoverable={false}>
+                <TableCell colSpan={10} style={{ padding: '6px 16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                    <Checkbox
+                      bare
+                      aria-label="Select all orders on this page"
+                      checked={allPageSelected}
+                      indeterminate={!allPageSelected && somePageSelected}
+                      onChange={togglePage}
+                    />
+                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                      {selectedIds.size} selected
+                    </span>
+                    <Button variant="secondary" size="sm" icon={<Download size={14} />} onClick={handleExportSelected}>
+                      Export selected
+                    </Button>
+                    <Button variant="secondary" size="sm" icon={<Printer size={14} />} onClick={handlePrintSelected}>
+                      Print invoices
+                    </Button>
+                    <DropdownMenu
+                      ariaLabel="Mark selected orders as"
+                      trigger={
+                        <Button variant="secondary" size="sm" onClick={() => {}}>
+                          <span>Mark as</span>
+                          <ChevronDown size={14} style={{ marginLeft: 4 }} />
+                        </Button>
+                      }
+                      items={[
+                        { value: 'processing', label: 'Processing' },
+                        { value: 'shipped', label: 'Shipped' },
+                        { value: 'delivered', label: 'Delivered' },
+                        { value: 'cancel', label: 'Cancel orders', danger: true },
+                        { value: 'refund', label: 'Refund orders', danger: true },
+                      ]}
+                      onSelect={handleBulkMark}
+                    />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : (
+            <TableRow hoverable={false}>
+              <TableHead style={{ padding: '12px 16px', width: 44 }}>
+                <Checkbox
+                  bare
+                  aria-label="Select all orders on this page"
+                  checked={allPageSelected}
+                  indeterminate={!allPageSelected && somePageSelected}
+                  onChange={togglePage}
+                />
+              </TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Order</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Date</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Customer</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Payment</TableHead>
+              <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Amount</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Fulfillment</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Item</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Shipping</TableHead>
+              <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Action</TableHead>
+            </TableRow>
+            )}
+          </TableHeader>
+          <TableBody>
+            {filteredOrders.length === 0 ? (
+              <TableRow hoverable={false}>
+                <TableCell colSpan={10} style={{ padding: '48px 16px', textAlign: 'center', color: 'var(--tuw-text-secondary, #5D6772)', fontSize: 16 }}>
+                  No orders match your search criteria.
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginatedOrders.map((order) => (
+                <TableRow
+                  key={order.id}
+                  onClick={() => setSelectedOrder(order)}
+                  style={{
+                    cursor: 'pointer',
+                    transition: 'background-color 0.15s',
+                    backgroundColor: selectedIds.has(order.id) ? 'var(--tuw-bg-canvas, #F7F8F9)' : 'transparent',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--tuw-bg-canvas, #F7F8F9)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = selectedIds.has(order.id) ? 'var(--tuw-bg-canvas, #F7F8F9)' : 'transparent')}
+                >
+                  <TableCell style={{ padding: '14px 16px' }}>
+                    <Checkbox
+                      bare
+                      aria-label={`Select order ${order.id}`}
+                      checked={selectedIds.has(order.id)}
+                      onChange={() => toggleId(order.id)}
+                    />
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)' }}>
+                    {order.id}
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                    {order.date}
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px' }}>
+                    <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)' }}>
+                      {order.customerName}
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                      {order.customerEmail}
+                    </div>
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
+                    {paymentLabel(order.paymentStatus)}
+                  </TableCell>
+                  <TableCell className="tuw-tabular-nums" style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', textAlign: 'right' }}>
+                    ₹{order.total.toFixed(2)}
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
+                    {fulfillmentLabel(order.fulfillmentStatus)}
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
+                    {itemCount(order)} item
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px' }}>
+                    {shippingBadge(order)}
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px', textAlign: 'right' }}>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      icon={<Eye size={14} />}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedOrder(order);
+                      }}
+                    >
+                      Details
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
 
+          footer={
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
@@ -403,6 +542,8 @@ export default function OrdersView() {
             setCurrentPage(1);
           }}
         />
+          }
+        </PanelLayout>
       </ContentCard>
 
       {/* Order Detail Drawer */}
@@ -485,38 +626,30 @@ export default function OrdersView() {
             </div>
 
             {/* Line Items */}
-            <div>
-              <h4 style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginBottom: 12 }}>
-                Items Purchased ({selectedOrder.items.length})
-              </h4>
+            <DrawerSection title={`Items Purchased (${selectedOrder.items.length})`} titleGap={12}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {selectedOrder.items.map((item) => (
-                  <div
+                  <ItemsRow
                     key={item.id}
-                    style={{
-                      padding: 12,
-                      backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)',
-                      borderRadius: 8,
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-                        {item.productName}
+                    left={
+                      <div>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                          {item.productName}
+                        </div>
+                        <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                          {item.variant} · Qty: {item.quantity}
+                        </div>
                       </div>
-                      <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                        {item.variant} · Qty: {item.quantity}
+                    }
+                    right={
+                      <div className="tuw-tabular-nums" style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                        ₹{(item.price * item.quantity).toFixed(2)}
                       </div>
-                    </div>
-                    <div className="tuw-tabular-nums" style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-                      ₹{(item.price * item.quantity).toFixed(2)}
-                    </div>
-                  </div>
+                    }
+                  />
                 ))}
               </div>
-            </div>
+            </DrawerSection>
 
             {/* Purchase Summary */}
             <div style={{ padding: 16, border: '1px solid var(--tuw-border-subtle, #E5E7EB)', borderRadius: 10 }}>

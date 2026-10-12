@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, PageHeader } from '@/components/ui';
 import { FileText, BookOpen, Image as ImageIcon, Menu, ArrowRight } from 'lucide-react';
 
 const sections = [
@@ -40,16 +40,7 @@ const sections = [
 export default function ContentOverviewPage() {
   return (
     <DashboardShell pageTitle="Content Management">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <h2 style={{ fontSize: 28, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-            Content & CMS
-          </h2>
-          <p style={{ fontSize: 14, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-            Manage editorial articles, lookbooks, static pages, navigation menus, and media assets.
-          </p>
-        </div>
-      </div>
+      <PageHeader title="Content & CMS" />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
         {sections.map((sec) => (

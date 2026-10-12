@@ -10,15 +10,15 @@ export function Table({ children, style = {}, className = '', ...props }: TableP
   return (
     <div style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
       <table
-        style={{
-          width: '100%',
-          borderCollapse: 'collapse',
-          textAlign: 'left',
-          fontFamily: 'var(--font-main)',
-          fontSize: '14px',
-          color: 'var(--tuw-text-primary, #262626)',
-          ...style,
-        }}
+      style={{
+        width: '100%',
+        borderCollapse: 'collapse',
+        textAlign: 'left',
+        fontFamily: 'var(--font-main)',
+        fontSize: '13px',
+        color: 'var(--tuw-text-primary, #262626)',
+        ...style,
+      }}
         className={className}
         {...props}
       >
@@ -33,6 +33,7 @@ export function TableHeader({ children, style = {}, ...props }: React.HTMLAttrib
     <thead
       style={{
         borderBottom: '1px solid var(--tuw-border-subtle, #E5E7EB)',
+        backgroundColor: 'var(--tuw-bg-selected, #F8F5FF)',
         ...style,
       }}
       {...props}
@@ -75,11 +76,10 @@ export function TableHead({ children, style = {}, ...props }: React.ThHTMLAttrib
     <th
       style={{
         padding: '14px 16px',
-        fontSize: '11px',
-        fontWeight: 600,
-        color: 'var(--tuw-text-secondary, #5D6772)',
-        textTransform: 'uppercase',
-        letterSpacing: '0.05em',
+        fontSize: '16px',
+        fontWeight: 700,
+        color: 'var(--tuw-text-primary, #262626)',
+        letterSpacing: 'normal',
         fontFamily: 'var(--font-main)',
         whiteSpace: 'nowrap',
         ...style,
@@ -96,7 +96,7 @@ export function TableCell({ children, style = {}, ...props }: React.TdHTMLAttrib
     <td
       style={{
         padding: '16px',
-        fontSize: '14px',
+        fontSize: '13px',
         fontWeight: 400,
         color: 'var(--tuw-text-primary, #262626)',
         verticalAlign: 'middle',

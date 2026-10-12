@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { UserPlus, Download, Search, Eye, MapPin, Phone, Mail, Calendar, Plus, MessageSquare } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, Button, Badge, Input, Drawer, Pagination, Modal } from '@/components/ui';
+import { StatCard, ContentCard, Button, Badge, Input, Drawer, Pagination, Modal, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader, DrawerSection, ItemsRow } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { CustomerItem } from '@/mocks/fixtures';
 
@@ -114,34 +114,30 @@ export default function CustomersView() {
 
   return (
     <DashboardShell pageTitle="Customers" activeNav="customers">
-      <div className={styles.pageHeader}>
-        <div className={styles.headingGroup}>
-          <h2 className={styles.pageTitle}>Customer Directory</h2>
-          <p className={styles.pageSubtitle}>
-            Manage client profiles, lifetime value, delivery addresses, and internal service notes.
-          </p>
-        </div>
-
-        <div className={styles.headerActions}>
-          <Button variant="secondary" size="md" icon={<Download size={16} />} onClick={handleExportCSV}>
-            <span>Export CSV</span>
-          </Button>
-          <Button
-            variant="primary"
-            size="md"
-            icon={<UserPlus size={16} />}
-            onClick={() => setIsAddModalOpen(true)}
-          >
-            <span>+ Add Customer</span>
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Customer Directory"
+        actions={
+          <>
+            <Button variant="secondary" size="md" icon={<Download size={16} />} onClick={handleExportCSV}>
+              <span>Export CSV</span>
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
+              icon={<UserPlus size={16} />}
+              onClick={() => setIsAddModalOpen(true)}
+            >
+              <span>+ Add Customer</span>
+            </Button>
+          </>
+        }
+      />
 
       <div className={styles.statGrid}>
-        <StatCard label="Total Clients" value={String(customers.length)} trend="Active buyer profiles" trendType="up" />
-        <StatCard label="VIP Clientele" value={String(vipCount)} subtitle="Tier 1 high-value" trendType="up" />
-        <StatCard label="Total Customer LTV" value={`₹${totalSpentAll.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} trend="Combined lifetime spend" trendType="up" />
-        <StatCard label="Average Order Count" value={(orders.length / Math.max(1, customers.length)).toFixed(1)} subtitle="Orders per account" trendType="neutral" />
+        <StatCard label="Total Clients" value={String(customers.length)} trend="Active buyer profiles" trendType="up" hoverable />
+        <StatCard label="VIP Clientele" value={String(vipCount)} subtitle="Tier 1 high-value" trendType="up" hoverable />
+        <StatCard label="Total Customer LTV" value={`₹${totalSpentAll.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} trend="Combined lifetime spend" trendType="up" hoverable />
+        <StatCard label="Average Order Count" value={(orders.length / Math.max(1, customers.length)).toFixed(1)} subtitle="Orders per account" trendType="neutral" hoverable />
       </div>
 
       <ContentCard>
@@ -159,75 +155,73 @@ export default function CustomersView() {
           </span>
         </div>
 
-        <div style={{ overflowX: 'auto', width: '100%' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E5E7EB)' }}>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Customer</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Tier</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Location</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase', textAlign: 'center' }}>Orders</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase', textAlign: 'right' }}>Total Spent</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase', textAlign: 'right' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredCustomers.length === 0 ? (
-                <tr>
-                  <td colSpan={6} style={{ textAlign: 'center', padding: '48px 16px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-                      <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', margin: 0 }}>
-                        No customer records found
-                      </p>
-                      <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
-                        {searchTerm ? `No customers matched "${searchTerm}"` : 'Your customer directory is currently empty.'}
-                      </p>
-                      <Button variant="primary" size="md" icon={<UserPlus size={16} />} onClick={() => setIsAddModalOpen(true)}>
-                        <span>+ Add Customer</span>
-                      </Button>
+        <Table>
+          <TableHeader>
+            <TableRow hoverable={false}>
+              <TableHead style={{ padding: '12px 16px' }}>Customer</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Tier</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Location</TableHead>
+              <TableHead style={{ padding: '12px 16px', textAlign: 'center' }}>Orders</TableHead>
+              <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Total Spent</TableHead>
+              <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredCustomers.length === 0 ? (
+              <TableRow hoverable={false}>
+                <TableCell colSpan={6} style={{ textAlign: 'center', padding: '48px 16px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+                    <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', margin: 0 }}>
+                      No customer records found
+                    </p>
+                    <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
+                      {searchTerm ? `No customers matched "${searchTerm}"` : 'Your customer directory is currently empty.'}
+                    </p>
+                    <Button variant="primary" size="md" icon={<UserPlus size={16} />} onClick={() => setIsAddModalOpen(true)}>
+                      <span>+ Add Customer</span>
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginatedCustomers.map((customer) => (
+                <TableRow
+                  key={customer.id}
+                  onClick={() => setSelectedCustomer(customer)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <TableCell style={{ padding: '14px 16px' }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                      {customer.name}
                     </div>
-                  </td>
-                </tr>
-              ) : (
-                paginatedCustomers.map((customer) => (
-                  <tr
-                    key={customer.id}
-                    onClick={() => setSelectedCustomer(customer)}
-                    style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E5E7EB)', cursor: 'pointer' }}
-                  >
-                    <td style={{ padding: '14px 16px' }}>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-                        {customer.name}
-                      </div>
-                      <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                        {customer.email}
-                      </div>
-                    </td>
-                    <td style={{ padding: '14px 16px' }}>
-                      <Badge variant={customer.tier === 'VIP Customer' ? 'success' : 'info'}>
-                        {customer.tier}
-                      </Badge>
-                    </td>
-                    <td style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                      {customer.city}, {customer.country}
-                    </td>
-                    <td style={{ padding: '14px 16px', fontSize: 14, textAlign: 'center', color: 'var(--tuw-text-primary, #262626)' }}>
-                      {customer.totalOrders}
-                    </td>
-                    <td className="tuw-tabular-nums" style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', textAlign: 'right' }}>
-                      ₹{customer.totalSpent.toFixed(2)}
-                    </td>
-                    <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                      <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedCustomer(customer); }}>
-                        View Profile
-                      </Button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                    <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                      {customer.email}
+                    </div>
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px' }}>
+                    <Badge variant={customer.tier === 'VIP Customer' ? 'success' : 'info'}>
+                      {customer.tier}
+                    </Badge>
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                    {customer.city}, {customer.country}
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px', fontSize: 14, textAlign: 'center', color: 'var(--tuw-text-primary, #262626)' }}>
+                    {customer.totalOrders}
+                  </TableCell>
+                  <TableCell className="tuw-tabular-nums" style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', textAlign: 'right' }}>
+                    ₹{customer.totalSpent.toFixed(2)}
+                  </TableCell>
+                  <TableCell style={{ padding: '14px 16px', textAlign: 'right' }}>
+                    <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedCustomer(customer); }}>
+                      View Profile
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
 
         <Pagination
           currentPage={currentPage}
@@ -269,10 +263,7 @@ export default function CustomersView() {
             </div>
 
             {/* Contact & Address */}
-            <div>
-              <h4 style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginBottom: 10 }}>
-                Contact & Shipping Details
-              </h4>
+            <DrawerSection title="Contact & Shipping Details" titleGap={10}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <Mail size={14} color="var(--tuw-action-primary, #7539FF)" />
@@ -287,13 +278,10 @@ export default function CustomersView() {
                   <span>{selectedCustomer.address}, {selectedCustomer.city}, {selectedCustomer.country}</span>
                 </div>
               </div>
-            </div>
+            </DrawerSection>
 
             {/* Purchase History */}
-            <div>
-              <h4 style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginBottom: 10 }}>
-                Recent Order History ({customerOrders.length})
-              </h4>
+            <DrawerSection title={`Recent Order History (${customerOrders.length})`} titleGap={10}>
               {customerOrders.length === 0 ? (
                 <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', padding: '12px 0' }}>
                   No recent orders found under email {selectedCustomer.email}.
@@ -301,41 +289,33 @@ export default function CustomersView() {
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {customerOrders.map((ord) => (
-                    <div
+                    <ItemsRow
                       key={ord.id}
-                      style={{
-                        padding: 10,
-                        backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)',
-                        borderRadius: 8,
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        fontSize: 13,
-                      }}
-                    >
-                      <div>
-                        <strong>{ord.id}</strong> — {ord.date}
-                        <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                          {ord.items.map((i) => i.productName).join(', ')}
+                      pad={10}
+                      left={
+                        <div>
+                          <strong>{ord.id}</strong> — {ord.date}
+                          <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                            {ord.items.map((i) => i.productName).join(', ')}
+                          </div>
                         </div>
-                      </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontWeight: 600 }}>${ord.total.toFixed(2)}</div>
-                        <Badge variant={ord.paymentStatus === 'paid' ? 'success' : 'warning'}>
-                          {ord.paymentStatus}
-                        </Badge>
-                      </div>
-                    </div>
+                      }
+                      right={
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontWeight: 600 }}>${ord.total.toFixed(2)}</div>
+                          <Badge variant={ord.paymentStatus === 'paid' ? 'success' : 'warning'}>
+                            {ord.paymentStatus}
+                          </Badge>
+                        </div>
+                      }
+                    />
                   ))}
                 </div>
               )}
-            </div>
+            </DrawerSection>
 
             {/* Internal Staff Notes */}
-            <div>
-              <h4 style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginBottom: 10 }}>
-                Internal Service Notes
-              </h4>
+            <DrawerSection title="Internal Service Notes" titleGap={10}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
                 {selectedCustomer.notes.map((note, idx) => (
                   <div
@@ -364,7 +344,7 @@ export default function CustomersView() {
                   Save
                 </Button>
               </form>
-            </div>
+            </DrawerSection>
           </div>
         )}
       </Drawer>

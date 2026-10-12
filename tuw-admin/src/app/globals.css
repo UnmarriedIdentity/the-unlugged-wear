@@ -33,19 +33,186 @@
   --color-error-text: #C91818;
   --color-error-bg: #FEF4F4;
 
+  /* Compatibility aliases (documented): short utility spellings for the three most
+     reused roles. text-primary/border-subtle/bg-primary etc. had zero generated
+     output before these existed (utilities derive from full token names). */
+  --color-primary: #262626;
+  --color-secondary: #5D6772;
+  --color-subtle: #E9E9E9;
+
   /* Admin Radii */
   --radius-sm: 4px;
   --radius-control: 8px;
   --radius-card: 12px;
   --radius-modal: 16px;
   --radius-pill: 9999px;
+  /* Sidebar role radii */
+  --radius-nav: 10px;
+  --radius-nav-sm: 6px;
+  /* Sidebar active + hover treatments (3D uplift: inset edge replaces drop shadow) */
+  --shadow-nav-edge: inset 0 -2px 0 #d6d6d6;
+  --color-nav-active-text: #111827;
+  --color-nav-hover-wash: rgba(117, 57, 255, 0.06);
+  /* Branch tree treatments */
+  --color-nav-branch-hover: rgba(0, 0, 0, 0.04);
+  --color-nav-guide: #dddddd;
+  --color-nav-guide-active: #c4c4c4;
+
+  /* Auth (login/signup) palette — Figma Storeflow frames, tokenized, no hardcodes in JSX.
+     Admin --color-* above untouched; auth uses its own namespace. */
+  --color-auth-ink: #242424;
+  /* Button fills: shared bg; login-family hover vs signup (auth-pure) hover */
+  --color-auth-button: #242424;
+  --color-auth-button-hover: #141414;
+  --color-auth-pure: #000000;
+  --color-auth-muted: #6C6C6C;
+  --color-auth-faint: #9A9A9A;
+  --color-auth-line: #E9E9E9;
+  --color-auth-line-hover: #D1D5DB;
+  --color-auth-check-line: #E7EFEF;
+  --color-auth-canvas: #FAFAFA;
+  --color-auth-teal: #115D5D;
+  --color-auth-error: #E94845;
+  --color-auth-error-bg: #FDEDEC;
+  --color-auth-success: #009E5C;
+  --color-auth-success-bg: #EDF8E2;
+  --color-auth-divider: #BBBBBB;
+  --color-auth-hero: #1A1A1A;
+  /* Signup social hover pair (distinct from login FAFAFA/D1D5DB); shared with backToLogin */
+  --color-auth-hover-canvas: #F8F9FA;
+  --color-auth-hover-line: #D6D6D6;
+
+  /* Auth radii */
+  --radius-auth-checkbox: 6px;
+  --radius-auth-btn: 10px;
+  --radius-auth-social: 14px;
+  --radius-auth-badge: 13.5px;
+
+  /* Auth type (size + line-height travel in one utility: text-auth-btn / text-auth-social) */
+  --text-auth-btn: 16px;
+  --text-auth-btn--line-height: 22.4px;
+  --text-auth-social: 14px;
+  --text-auth-social--line-height: 22.4px;
+  --tracking-auth-social: 0.14px;
+
+  /* Auth form widths */
+  --container-auth-form: 568px;
+  --container-auth-reset: 488px;
+  --container-auth-recovery: 392px;
+  --container-auth-card: 552px;
+  /* Auth cards */
+  --radius-auth-card: 20px;
+  --radius-auth-card-lg: 24px;
+  --shadow-auth-card: -1px 1px 40px rgba(0, 0, 0, 0.06);
+  /* Recovery heading */
+  --text-auth-recovery-head: 24px;
+  --text-auth-recovery-head--line-height: 28.8px;
+  --tracking-auth-recovery-head: 0.72px;
+  /* Back link: 14px/500 with NO line-height (computes normal) */
+  --text-auth-backlink: 14px;
+  --text-auth-backlink--line-height: normal;
+
+  /* Auth input type */
+  --text-auth-input: 14px;
+  --text-auth-input--line-height: 22.4px;
+  --text-auth-divider: 16px;
+  --text-auth-divider--line-height: 20.2px;
+  --leading-auth-link: 16.8px;
+  /* Auth hero + header type (Pass C; lead shared by heroSubtitle + formSubtitle) */
+  --text-auth-brand: 32px;
+  --text-auth-brand--line-height: 38.4px;
+  --text-auth-headline: clamp(38px, 4.4vw, 64px);
+  --leading-auth-headline: 1.2;
+  --text-auth-headline-md: 38px;
+  --text-auth-headline-md--line-height: 46px;
+  --text-auth-lead: 20px;
+  --text-auth-lead--line-height: 28px;
+  --text-auth-hero-sub-md: 15px;
+  --text-auth-title: 32px;
+  --text-auth-title--line-height: 40.3px;
+  --tracking-auth-title: -0.01em;
+  --tracking-auth-hero: -0.02em;
+  --tracking-auth-wide: 0.6px;
+  /* Signup input type + focus ring (.12 alpha — distinct from OTP .15) */
+  --text-auth-signup-input: 15px;
+  --text-auth-signup-input--line-height: 22px;
+  --tracking-auth-signup-input: 0.2px;
+  --shadow-auth-input: 0 0 0 3px rgba(17, 93, 93, 0.12);
+  /* OTP ring (.15 alpha — distinct from input .12) + idle border */
+  --shadow-auth-otp: 0 0 0 3px rgba(17, 93, 93, 0.15);
+  --color-auth-otp-line: #C6EAA0;
+  /* Signup terms (verbatim outliers: 5px check vs login 6px, E7EEEE vs E7EFEF) */
+  --color-auth-terms-line: #E7EEEE;
+  --radius-auth-terms-check: 5px;
+  --text-auth-terms: 13px;
+  --text-auth-terms--line-height: 18px;
+  --tracking-auth-terms: 0.15px;
+  /* Signup hero copy (fluid Figma specs; wrap-guards shared by headline+subtitle) */
+  --text-auth-signup-brand: clamp(20px, 2.22vw, 32px);
+  --text-auth-signup-headline: clamp(28px, 3.6vw, 64px);
+  --leading-auth-signup-headline: 1.15;
+  --text-auth-signup-sub: clamp(13px, 1.25vw, 20px);
+  --text-auth-signup-sub--line-height: 1.35;
+  --tracking-auth-signup-sub: 0.4px;
+  --container-auth-hero-copy: 520px;
+  --container-auth-verify: 350px;
+  /* Verify title (fluid) + resend row type (14/22 shared spec) */
+  --text-auth-verify-title: clamp(24px, 2.2vw, 32px);
+  --text-auth-verify-title--line-height: 1.25;
+  --text-auth-resend: 14px;
+  --text-auth-resend--line-height: 22px;
+  /* Signup header type (title fluid; subrow 15/22 shared with verifySubtitle) */
+  --text-auth-signup-title: clamp(24px, 2.2vw, 32px);
+  --text-auth-signup-title--line-height: 1.25;
+  --text-auth-subrow: 15px;
+  --text-auth-subrow--line-height: 22px;
+  --container-auth-hero-head: 490px;
+  --container-auth-hero-sub: 600px;
+  --spacing-auth-header-gap: clamp(20px, 3vh, 32px);
+  --shadow-auth-badge: 0 4px 14px rgba(36, 36, 36, 0.15);
+  /* Sidebar chrome shadows + type */
+  --shadow-nav-logo: 0 2px 6px rgba(0, 0, 0, 0.08);
+  /* Popover elevation (calendar, dropdowns) */
+  --shadow-popover: 0 8px 30px rgba(0, 0, 0, 0.12);
+  --text-nav-group: 11px;
+  --tracking-nav-group: 0.08em;
+  /* Parent/child nav labels: same 13.5px, separate tokens, no line-height declared */
+  --text-nav-parent: 13.5px;
+  --text-nav-child: 13.5px;
+  --color-nav-group-label: #7E8793;
+  --color-nav-chevron: #94A3B8;
+  --color-nav-group-hover: rgba(0, 0, 0, 0.03);
+  /* Live nav badges only (purple Fulfillment 4, amber Returns 2) */
+  --color-nav-badge-purple-bg: #F3E8FF;
+  --color-nav-badge-amber-bg: #FEF3C7;
+  --color-nav-badge-amber-text: #D97706;
+  /* Bottom dock (dark chrome) + stag caption tracking */
+  --color-nav-dock-bg: #0F0F12;
+  --color-nav-dock-line: rgba(255, 255, 255, 0.08);
+  --color-nav-dock-text: #8E95A2;
+  --color-nav-dock-hover: rgba(255, 255, 255, 0.08);
+  --color-nav-dock-active-bg: rgba(255, 255, 255, 0.12);
+  --color-nav-dock-hover-light: rgba(255, 255, 255, 0.1);
+  --color-nav-dock-line-hover: rgba(255, 255, 255, 0.2);
+  --tracking-nav-copy: 0.02em;
+  --text-auth-input-filled: 16px;
+  --text-auth-input-filled--line-height: 25.6px;
+  --tracking-auth-input: 0.28px;
+  --tracking-auth-input-filled: 0.32px;
+
+  /* Auth field rhythm */
+  --spacing-auth-field-gap: clamp(16px, 2.2vh, 24px);
+  /* forgotPasswordRow top+bottom only (2.4vh middle term) */
+  --spacing-auth-row-gap: clamp(16px, 2.4vh, 24px);
+  /* socialRow + dividerRow only (2.5vh middle term — do NOT unify with field-gap) */
+  --spacing-auth-social-gap: clamp(16px, 2.5vh, 24px);
 }
 
 :root {
-  /* Typography - Urbanist is the primary font family per DESIGN_SYSTEM.md */
-  --font-urbanist: 'Urbanist', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-main: var(--font-urbanist), sans-serif;
-  --font-brand: var(--font-urbanist), sans-serif;
+  /* Typography — single canonical Urbanist stack (matches @theme --font-sans exactly).
+     One font across the dashboard; font-sans is the utility spelling. */
+  --font-urbanist: "Urbanist", ui-sans-serif, system-ui, sans-serif;
+  --font-main: "Urbanist", ui-sans-serif, system-ui, sans-serif;
 
   /* TUW Semantic Colour Roles (18 roles) - Standard & Figma Web Code Syntax */
   --tuw-bg-canvas: #F7F8F9;
@@ -107,7 +274,15 @@
   --tuw-radius-control: 8px;
   --tuw-radius-card: 12px;
   --tuw-radius-modal: 16px;
+  --tuw-radius-modal-lg: 24px; /* used by: spotlight search dialog (S2 demo source) */
   --tuw-radius-pill: 9999px;
+
+  /* Scrollbar system (P4) — minimal gray pills admin-wide. Change these
+     three values to restyle every scrollbar (modal lists, drawers, tables,
+    page scroll) at once. Sidebar/nav stay hidden via their own exceptions. */
+  --tuw-scroll-thumb: #C9CED6;
+  --tuw-scroll-thumb-hover: #AEB4BE;
+  --tuw-scroll-track: transparent;
 
   /* Spacing Scale per DESIGN_SYSTEM.md: 4, 8, 12, 16, 24, 32, 48, 64px */
   --tuw-space-4: 4px;
@@ -163,90 +338,38 @@
 
   /* Backward Compatible Tokens */
   --color-primary: #262626;
-  --color-primary-hover: #141414;
-  --brand-teal: #7539FF;
-  --brand-teal-hover: #6025DB;
-  --brand-teal-light: #F8F5FF;
   --brand-lime: #C6EAA0;
 
-  --neutral-white: #FFFFFF;
-  --neutral-canvas: #F7F8F9;
-  --color-text-dark: #262626;
-  --color-text-muted: #5D6772;
-  --color-placeholder: #9CA3AF;
   --color-border: #E9E9E9;
   --color-border-subtle: #E9E9E9;
-  --color-border-dark: #E9E9E9;
-
-  /* Status Colors */
-  --status-success: #187343;
-  --status-success-bg: #F4FBF7;
-  --status-warning: #856300;
-  --status-warning-bg: #FEFBF5;
-  --status-info: #175CD3;
-  --status-info-bg: #F4F9FE;
-  --status-danger: #C91818;
-  --status-danger-bg: #FEF4F4;
 
   --color-error: #C91818;
-  --color-error-border: #F87171;
   --color-error-bg: #FEF4F4;
   --color-success: #187343;
-  --color-success-border: #BBF7D0;
   --color-success-bg: #F4FBF7;
-  --color-teal: #7539FF;
-  --color-teal-hover: #6025DB;
 
-  /* Spacing Grid: 4 · 8 · 12 · 16 · 24 · 32 · 48 · 64px */
-  --tuw-space-4: 4px;
-  --tuw-spacing-4: 4px;
-  --tuw-space-8: 8px;
-  --tuw-spacing-8: 8px;
-  --tuw-space-12: 12px;
-  --tuw-spacing-12: 12px;
-  --tuw-space-16: 16px;
-  --tuw-spacing-16: 16px;
-  --tuw-space-24: 24px;
-  --tuw-spacing-24: 24px;
-  --tuw-space-32: 32px;
-  --tuw-spacing-32: 32px;
-  --tuw-space-48: 48px;
-  --tuw-spacing-48: 48px;
-  --tuw-space-64: 64px;
-  --tuw-spacing-64: 64px;
+  /* Spacing Grid: 4 · 8 · 12 · 16 · 24 · 32 · 48 · 64px (canonical set lives above; documented on the design-system page) */
 
   /* Radii: 4 · 8 · 12 · 16 · 9999px */
   --tuw-radius-sm: 4px;
-  --tuw-radius-4: 4px;
   --tuw-radius-control: 8px;
-  --tuw-radius-8: 8px;
   --tuw-radius-card: 12px;
-  --tuw-radius-12: 12px;
   --tuw-radius-modal: 16px;
-  --tuw-radius-16: 16px;
+  --tuw-radius-modal-lg: 24px;
   --tuw-radius-pill: 9999px;
-  --tuw-radius-999: 9999px;
 
   --radius-sm: 4px;
-  --radius-badge: 16px;
-  --radius-input: 8px;
-  --radius-button: 8px;
   --radius-card: 12px;
   --radius-modal: 16px;
   --radius-pill: 9999px;
 
   /* Shadows */
   --shadow-subtle: 0 1px 4px rgba(0, 0, 0, 0.02);
-  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.04);
   --shadow-button: 0 2px 6px rgba(117, 57, 255, 0.2);
-  --shadow-dropdown: 0 6px 18px rgba(0, 0, 0, 0.08);
-  --shadow-focus: 0 0 0 3px rgba(117, 57, 255, 0.15);
-  --shadow-error: 0 0 0 3px rgba(201, 24, 24, 0.15);
+  --shadow-spotlight: 0 25px 50px -12px rgba(18, 10, 36, 0.35), 0 0 0 1px rgba(117, 57, 255, 0.1), 0 0 44px rgba(117, 57, 255, 0.14); /* used by: spotlight search dialog (S2 demo source) */
 }
 
-/* ============================================================
-   Urbanist V2 Typography Scale Classes (DESIGN_SYSTEM.md)
-   ============================================================ */
+
 .tuw-type-display {
   font-family: var(--font-urbanist), sans-serif;
   font-size: var(--tuw-type-display-size, 44px);
@@ -324,41 +447,42 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Base — verbatim from old globals.css */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+/* Base resets — layered so Tailwind utilities (@layer utilities) win over them.
+   Values unchanged for legacy unlayered components; utilities now apply bg/border/padding. */
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 
-html,
-body {
-  min-height: 100%;
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-  font-family: var(--font-main);
-  color: var(--tuw-text-primary);
-  background-color: var(--tuw-bg-canvas);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+  html,
+  body {
+    min-height: 100%;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    font-family: var(--font-main);
+    color: var(--tuw-text-primary);
+    background-color: var(--tuw-bg-canvas);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-button {
-  font-family: inherit;
-  border: none;
-  background: none;
-  cursor: pointer;
-}
+  button {
+    font-family: inherit;
+    cursor: pointer;
+  }
 
-input, select, textarea {
-  font-family: inherit;
-  outline: none;
-}
+  input, select, textarea {
+    font-family: inherit;
+    outline: none;
+  }
 
-a {
-  color: inherit;
-  text-decoration: none;
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 }
 
 .tabular-nums {
@@ -450,6 +574,36 @@ a {
 .no-scrollbar {
   scrollbar-width: none;
 }
+
+/* Admin scrollbar language (P4): 8px overlay gutters, gray pill thumbs,
+   no arrow buttons, zero layout shift (transparent border + padding-box
+   clip). Hidden where the spec demands (.sidebar, .no-scrollbar win by
+   specificity). Firefox gets the thin native equivalent. */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-button {
+  display: none;
+}
+*::-webkit-scrollbar-track {
+  background: var(--tuw-scroll-track, transparent);
+}
+*::-webkit-scrollbar-thumb {
+  background-color: var(--tuw-scroll-thumb, #C9CED6);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--tuw-scroll-thumb-hover, #AEB4BE);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--tuw-scroll-thumb, #C9CED6) var(--tuw-scroll-track, transparent);
+}
 .clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -462,79 +616,13 @@ a {
    Single app.css, no CSS Modules. Class names unchanged so JSX is identical.
    ========================================================================== */
 /* Dashboard Layout Shell - Natural Page Scroll, Zero Cutoffs, Sidebar Matches Full Page Height */
-.dashboardLayoutRoot {
-  display: flex;
-  width: 100%;
-  min-height: 100vh;
-  background-color: var(--tuw-bg-canvas, #F7F8F9);
-  color: var(--tuw-text-primary, #262626);
-  font-family: var(--font-main);
-  position: relative;
-  align-items: stretch;
-}
 
-.dashboardMobileBackdrop {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.45);
-  z-index: 95;
-  backdrop-filter: blur(2px);
-  cursor: pointer;
-  touch-action: manipulation;
-  animation: tuwFadeIn 0.2s ease-out;
-}
-
-.dashboardMainWrapper {
-  flex: 1;
-  min-width: 0;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background-color: var(--tuw-bg-canvas, #F7F8F9);
-}
-
-.dashboardMainWrapperCollapsed {
-  /* Flex automatically allocates space without margin-left */
-}
-
-.dashboardMainContent {
-  padding: 24px 28px 40px 28px;
-  max-width: 1400px;
-  width: 100%;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  box-sizing: border-box;
-  min-width: 0;
-}
-
-@media (max-width: 768px) {
-  .dashboardMainContent {
-    padding: 16px 16px 32px 16px;
-  }
-}
-
-/* Sidebar - Viewport-locked, sticky with pinned bottom footer */
+/* Sidebar viewport height (100vh/100dvh fallback order) + hidden outer scrollbars. */
 .sidebar {
-  width: 260px;
-  min-width: 260px;
-  background-color: var(--tuw-bg-canvas, #F7F8F9);
-  border-right: 1px solid var(--tuw-border-subtle, #E9E9E9);
-  display: flex;
-  flex-direction: column;
-  padding: 0 14px 10px 14px;
-  flex-shrink: 0;
-  position: sticky;
-  top: 0;
   height: 100vh;
   height: 100dvh;
   max-height: 100vh;
   max-height: 100dvh;
-  overflow: hidden; /* Outer sidebar is locked to viewport, never scrolls away */
-  box-sizing: border-box;
-  z-index: 50;
-  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar::-webkit-scrollbar {
@@ -543,738 +631,76 @@ a {
   height: 0;
 }
 
-.sidebarCollapsed {
-  width: 80px;
-  min-width: 80px;
-  padding: 0 10px 14px 10px;
-}
-
-/* Mobile close button (desktop hidden) */
-.sidebarMobileCloseBtn {
-  display: none;
-  width: 30px;
-  height: 30px;
-  background-color: var(--tuw-bg-surface, #FFFFFF);
-  border: 1px solid var(--tuw-border-subtle, #E9E9E9);
-  border-radius: 8px;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--tuw-text-primary, #262626);
-  transition: all 0.18s ease;
-  flex-shrink: 0;
-  margin-left: auto;
-}
-
-.sidebarMobileCloseBtn:hover,
-.sidebarMobileCloseBtn:active {
-  background-color: var(--tuw-bg-selected, #F8F5FF);
-  color: var(--tuw-action-primary, #7539FF);
-  border-color: var(--tuw-action-primary, #7539FF);
-}
-
 @media (max-width: 768px) {
   .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 290px;
-    max-width: 86vw;
-    min-width: unset;
     height: 100vh;
     height: 100dvh;
     max-height: 100vh;
     max-height: 100dvh;
-    transform: translateX(-100%);
-    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 100;
-    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
-    padding: 0 14px 16px 14px;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
   }
-
-  .sidebar.sidebarMobileOpen {
-    transform: translateX(0);
-  }
-
-  .desktopOnlyToggle {
-    display: none !important;
-  }
-
-  .sidebarMobileCloseBtn {
-    display: flex !important;
-  }
 }
 
-.sidebarHeader {
-  height: 60px;
-  min-height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: var(--tuw-bg-canvas, #F7F8F9);
-  padding: 0 4px;
-  width: 100%;
-  box-sizing: border-box;
-  z-index: 10;
-  border-bottom: 1px solid var(--tuw-border-subtle, #E9E9E9);
-  margin-bottom: 8px;
-  flex-shrink: 0;
-}
-
-.sidebarCollapsed .sidebarHeader {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 64px;
-  min-height: 64px;
-  padding: 0;
-}
-
-
-.brandLink {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none;
-  color: var(--tuw-text-primary, #262626);
-}
-
-.logoIconWrapper {
-  width: 32px;
-  height: 32px;
-  background-color: var(--tuw-text-primary, #262626);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-}
-
-.brandName {
-  font-family: var(--font-brand);
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--tuw-text-primary, #262626);
-  white-space: nowrap;
-}
-
-.sidebarToggleBtn {
-  width: 28px;
-  height: 28px;
-  background-color: var(--tuw-bg-surface, #FFFFFF);
-  border: 1px solid var(--tuw-border-subtle, #E9E9E9);
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--tuw-text-secondary, #5D6772);
-  transition: all 0.18s ease;
-  flex-shrink: 0;
-  margin-left: auto;
-}
-
-.sidebarToggleBtn:hover {
-  background-color: var(--tuw-bg-selected, #F8F5FF);
-  color: var(--tuw-action-primary, #7539FF);
-  border-color: var(--tuw-action-primary, #7539FF);
-}
-
-.sidebarCollapsed .sidebarToggleBtn {
-  margin: 0 auto;
-}
-
-.navSections {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 2px;
-  padding-bottom: 24px;
-  padding-right: 4px;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.12) transparent;
-}
-
-.navSections::-webkit-scrollbar {
-  width: 4px;
-}
-
-.navSections::-webkit-scrollbar-button {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-}
-
-.navSections::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.navSections::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.12);
-  border-radius: 4px;
-}
-
-.navSections::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.25);
-}
-
-.sidebarFooter {
-  flex-shrink: 0;
-  margin-top: auto;
-  padding-top: 8px;
-  padding-bottom: 0;
-  border-top: 1px solid var(--tuw-border-subtle, #E9E9E9);
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  background-color: var(--tuw-bg-canvas, #F7F8F9);
-  z-index: 10;
-}
-
-.navGroup {
-  display: flex;
-  flex-direction: column;
-}
-
-.groupHeaderBtn {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 6px 8px 6px 10px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  box-sizing: border-box;
-  border-radius: 6px;
-  transition: background-color 0.15s ease;
-  user-select: none;
-  text-align: left;
-}
-
-.groupHeaderBtn:hover {
-  background-color: rgba(0, 0, 0, 0.03);
-}
-
-.groupLabel {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: #7E8793;
-  text-transform: uppercase;
-  font-family: var(--font-main);
-}
-
-.groupChevron {
-  color: #94A3B8;
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.groupChevronOpen {
-  transform: rotate(180deg);
-}
-
-.navList {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.navItem {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 12px;
-  border-radius: 10px;
-  color: #262626;
-  font-size: 14px;
-  font-weight: 500;
-  text-decoration: none;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  user-select: none;
-  position: relative;
-  background: transparent;
-  width: 100%;
-  box-sizing: border-box;
-  border: none;
-  text-align: left;
-}
-
-.navItem:hover {
-  background-color: rgba(117, 57, 255, 0.06);
-  color: var(--tuw-action-primary, #7539FF);
-}
-
-.navItemActive {
-  background: #FFFFFF;
-  color: #111827;
-  font-weight: 600;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-}
-
-.navItemActive:hover {
-  background: #FFFFFF;
-  color: #111827;
-}
-
-.navItemActive .navIcon {
-  color: #7539FF;
-}
-
-/* Expandable Parent Items */
-.navParentBtn,
-.navParentItem {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  width: 100% !important;
-  padding: 9px 12px;
-  border-radius: 10px;
-  border: none;
-  background: transparent;
-  color: #262626;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  user-select: none;
-  box-sizing: border-box;
-  text-align: left;
-}
-
-.navParentBtn:hover,
-.navParentItem:hover {
-  background-color: rgba(117, 57, 255, 0.06);
-  color: var(--tuw-action-primary, #7539FF);
-}
-
-.navParentBtnActive,
-.navParentItemActive {
-  color: #111827;
-}
-
-.navParentLeft {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 1;
-  min-width: 0;
-}
-
-.navIcon {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #5D6772;
-}
-
-.navLabel {
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 14px;
-}
-
-.navChevron {
-  width: 16px;
-  height: 16px;
-  color: #8A94A6;
-  margin-left: auto;
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.navChevronOpen {
-  transform: rotate(180deg);
-}
-
-/* Branched Navigation Tree Hierarchy */
-.navBranchTree {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  margin-top: 3px;
-  margin-bottom: 6px;
-}
-
-/* Continuous vertical guide line */
-.navBranchTree::before {
+/* Branched Navigation Tree Hierarchy — guide stem + curves stay custom. */
+/* Continuous vertical guide line, light full-length (dark path overlaid per segment below) */
+.navTree::before {
   content: '';
   position: absolute;
   left: 21px;
   top: -6px;
-  bottom: 19px; /* stops exactly at vertical center of last child item */
-  width: 1.5px;
-  background-color: #CBD5E1;
+  bottom: 29px; /* stops exactly at tangent point of last child item curve (38px - 9px) */
+  width: 1px;
+  background-color: var(--color-nav-guide);
   border-radius: 1px;
   pointer-events: none;
-  z-index: 1;
+  z-index: 0;
 }
 
-/* Branch child item */
-.navBranchItem {
-  position: relative;
-  display: flex;
-  align-items: center;
-  padding-left: 36px;
-  width: 100%;
-  box-sizing: border-box;
+/* Continuous dark path to the active branch (seamless): preceding items paint the full
+   box (top:-6px to bottom:0) so gaps between cards are covered by overlap stacking.
+   The terminal (active) item carries NO straight overlay — only its curved elbow —
+   so no dark bar is ever painted over the active card face. Same color throughout.
+   SCALABILITY LIMIT: stem/overlay/curve selectors cover up to 5 children per group
+   (navStemTo0–navStemTo4). A 6th item renders correctly EXCEPT its dark stem and
+   dark curve states — extend these selector sets before adding one. */
+.navStemTo1 > :nth-child(-n+1)::after,
+.navStemTo2 > :nth-child(-n+2)::after,
+.navStemTo3 > :nth-child(-n+3)::after,
+.navStemTo4 > :nth-child(-n+4)::after {
+  content: '';
+  position: absolute;
+  left: 21px;
+  top: -6px;
+  bottom: 0;
+  width: 1px;
+  background-color: var(--color-nav-guide-active);
+  pointer-events: none;
+  z-index: 2;
+}
+/* Active item elbow (both vertical run and curved horizontal arm turn dark) */
+.navStemTo0 > :nth-child(1)::before,
+.navStemTo1 > :nth-child(2)::before,
+.navStemTo2 > :nth-child(3)::before,
+.navStemTo3 > :nth-child(4)::before,
+.navStemTo4 > :nth-child(5)::before {
+  border-left-color: var(--color-nav-guide-active);
+  border-bottom-color: var(--color-nav-guide-active);
+  z-index: 2;
 }
 
-/* Smooth curved branch line connecting vertical stem to this item */
-.navBranchItem::before {
+/* Branch child item curve (container-indexed; layout lives in Tailwind utilities). */
+.navTree > *::before {
   content: '';
   position: absolute;
   left: 21px;
   top: -6px;
   width: 14px;
   height: calc(50% + 6px);
-  border-left: 1.5px solid #CBD5E1;
-  border-bottom: 1.5px solid #CBD5E1;
-  border-bottom-left-radius: 10px;
+  border-left: 1px solid var(--color-nav-guide);
+  border-bottom: 1px solid var(--color-nav-guide);
+  border-bottom-left-radius: var(--radius-nav);
   pointer-events: none;
-  z-index: 2;
-}
-
-/* Branch child link button */
-.navBranchLink {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  height: 38px;
-  padding: 0 12px;
-  border-radius: 10px;
-  text-decoration: none;
-  font-size: 13.5px;
-  font-weight: 500;
-  color: #5D6772;
-  transition: all 0.15s ease;
-  position: relative;
-  box-sizing: border-box;
-  background: transparent;
-}
-
-.navBranchLink:hover {
-  color: #111827;
-  background-color: rgba(0, 0, 0, 0.04);
-}
-
-/* Active state - crisp floating card pill like in reference */
-.navBranchLinkActive {
-  background-color: #FFFFFF !important;
-  color: #111827 !important;
-  font-weight: 600 !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.02) !important;
-  border: 1px solid rgba(0, 0, 0, 0.04) !important;
-}
-
-.navBranchLinkActive .navIcon {
-  color: #7539FF !important;
-}
-
-.navBranchLinkActive:hover {
-  background-color: #FFFFFF !important;
-  color: #111827 !important;
-}
-
-.navItemCollapsed {
-  justify-content: center;
-  padding: 8px;
-}
-
-.sidebarCollapsed .navBranchTree::before,
-.sidebarCollapsed .navBranchItem::before {
-  display: none !important;
-}
-
-.sidebarCollapsed .navBranchItem {
-  padding-left: 0;
-}
-
-.navBranchLabel {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Badges */
-.navBadge {
-  font-size: 11.5px;
-  font-weight: 700;
-  line-height: 1;
-  padding: 2.5px 7.5px;
-  border-radius: 9999px;
-  min-width: 18px;
-  text-align: center;
-  box-sizing: border-box;
-}
-
-.navBadgeOrange {
-  background-color: #FED7AA;
-  color: #C2410C;
-}
-
-.navBadgeGreen {
-  background-color: #BBF7D0;
-  color: #15803D;
-}
-
-.navBadgePurple {
-  background-color: #F3E8FF;
-  color: #7539FF;
-}
-
-.navBadgeAmber {
-  background-color: #FEF3C7;
-  color: #D97706;
-}
-
-.logOutItem {
-  margin-top: 2px;
-  color: var(--tuw-text-secondary, #5D6772);
-}
-
-.logOutItem:hover {
-  background-color: var(--tuw-bg-error, #FEF4F4);
-  color: var(--tuw-text-error, #C91818);
-}
-
-.logOutItem:hover .navIcon {
-  color: var(--tuw-text-error, #C91818);
-}
-
-.sidebarCollapsed .brandName,
-.sidebarCollapsed .groupLabel,
-.sidebarCollapsed .navLabel,
-.sidebarCollapsed .navChevron,
-.sidebarCollapsed .navBranchTree {
-  display: none !important;
-}
-
-.sidebarCollapsed .navItem,
-.sidebarCollapsed .navParentItem {
-  justify-content: center;
-  padding: 8px;
-}
-
-/* ==========================================================================
-   SIDEBAR BRAND LOGO ANIMAL ARTWORK & COPYRIGHT (SEAMLESS - BIGDIRTY.AGENCY STYLE)
-   ========================================================================== */
-.sidebarStagDirect,
-.sidebarStagArtCard {
-  margin-top: 8px;
-  margin-bottom: 4px;
-  padding: 2px 0;
-  background: transparent !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  position: relative;
-  overflow: visible;
-}
-
-.sidebarStagDirect:hover,
-.sidebarStagArtCard:hover {
-  border: none !important;
-  box-shadow: none !important;
-  transform: none !important;
-}
-
-.stagIllustrationContainer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-}
-
-.stagImageWrapper {
-  position: relative;
-  width: 85px;
-  height: 62px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.stagArtImage {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  transition: transform 0.25s ease;
-}
-
-.sidebarStagDirect:hover .stagArtImage,
-.sidebarStagArtCard:hover .stagArtImage {
-  transform: translateY(-2px);
-}
-
-.stagCopyrightRow {
-  width: 100%;
-  margin-top: 4px;
-  padding-top: 0;
-  border-top: none !important;
-  text-align: center;
-}
-
-.stagCopyrightText {
-  margin-top: 6px;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  color: var(--tuw-text-secondary, #6B7280);
-  font-family: var(--font-urbanist), sans-serif;
-  user-select: none;
-  display: block;
-  text-align: center;
-  white-space: nowrap;
-}
-
-/* Collapsed Stag - Seamless */
-.stagCollapsedDirect,
-.stagCollapsedCard {
-  width: 36px;
-  height: 36px;
-  margin: 10px auto 4px auto;
-  border-radius: 0;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.stagCollapsedDirect:hover,
-.stagCollapsedCard:hover {
-  transform: scale(1.08);
-  border: none !important;
-}
-
-.stagCollapsedImgWrap {
-  position: relative;
-  width: 26px;
-  height: 26px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.stagCollapsedImg {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-/* ==========================================================================
-   3. BOTTOM DOCKING TOOLBAR (NIGHT / CONTRAST / SIDEBAR TOGGLE)
-   ========================================================================== */
-.sidebarDockToolbar {
-  margin-top: 6px;
-  margin-bottom: 2px;
-  height: 32px;
-  background-color: #0F0F12;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  overflow: hidden;
-  box-sizing: border-box;
-  flex-shrink: 0;
-}
-
-.dockToolbarBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  width: 100%;
-  background: transparent;
-  border: none;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
-  color: #8E95A2;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  padding: 0;
-}
-
-.dockToolbarBtn:last-child {
-  border-right: none;
-}
-
-.dockToolbarBtn:hover {
-  background-color: rgba(255, 255, 255, 0.08);
-  color: #FFFFFF;
-}
-
-.dockToolbarBtnActive {
-  color: #FFFFFF !important;
-  background-color: rgba(255, 255, 255, 0.12) !important;
-}
-
-.sidebarDockToolbarCollapsed {
-  margin-top: 8px;
-  display: flex;
-  justify-content: center;
-  width: 100%;
-}
-
-.dockToolbarBtnCollapsed {
-  width: 44px;
-  height: 36px;
-  border-radius: 8px;
-  background-color: #0F0F12;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #8E95A2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.dockToolbarBtnCollapsed:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #FFFFFF;
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.sidebarCollapsed .sidebarFooter {
-  align-items: center;
+  z-index: 1;
 }
 
 /* Header */
@@ -1366,17 +792,16 @@ a {
   }
 }
 
-.commandPaletteDialog {
-  background-color: var(--tuw-bg-surface, #FFFFFF);
-  border-radius: var(--tuw-radius-card, 14px);
-  width: 640px;
-  max-width: 100%;
-  max-height: 82vh;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.06);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  animation: commandSlideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+/* Mobile backdrop fade (DC2): DashboardShell references animate-[tuwFadeIn]
+   but the keyframe was never defined (silent no-op) — defined here to
+   restore the intended motion, collapsible under reduced-motion like the rest. */
+@keyframes tuwFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes commandSlideDown {
@@ -1390,136 +815,94 @@ a {
   }
 }
 
-.commandPaletteHeader {
-  display: flex;
-  align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--tuw-border-subtle, #E5E7EB);
-  gap: 12px;
+/* Shared popover motion (M1): enter 180ms ease-out, exit 150ms ease-in
+   (faster out). Under prefers-reduced-motion both collapse to instant. */
+@keyframes popoverIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-.commandPaletteSearchIcon {
-  color: var(--tuw-action-primary, #7539FF);
-  flex-shrink: 0;
+@keyframes popoverOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
-.commandPaletteInput {
-  flex: 1;
-  border: none;
-  outline: none;
-  font-size: 15px;
-  font-family: inherit;
-  color: var(--tuw-text-primary, #262626);
-  background: transparent;
+/* Upward variant (DM4): mirrored slide for menus opening above their
+   trigger (pagination Rows). Same durations, easings, reduced-motion
+   collapse as the M1 contract — direction only. */
+@keyframes popoverInUp {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-.commandPaletteInput::placeholder {
-  color: var(--tuw-text-secondary, #5D6772);
+@keyframes popoverOutUp {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
-.commandPaletteEscBadge {
-  font-size: 11px;
-  font-weight: 600;
-  padding: 3px 7px;
-  border-radius: 4px;
-  background-color: var(--tuw-bg-canvas, #F7F8F9);
-  border: 1px solid var(--tuw-border-subtle, #E5E7EB);
-  color: var(--tuw-text-secondary, #5D6772);
-  cursor: pointer;
-  border: none;
+/* Drawer panel motion (DF0/DF1): full spatial travel, no fade — drawers are
+   large navigational surfaces that dock from off-screen right (unlike small
+   popovers, which stay fade-only per MN1/MN2). Enter 220ms as referenced;
+   exit 180ms (faster-out per motion skill). Reduced-motion collapse is
+   inherited system-wide. */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
-.commandPaletteBody {
-  flex: 1;
-  overflow-y: auto;
-  padding: 12px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  max-height: 55vh;
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
 }
 
-.commandPaletteSectionTitle {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--tuw-text-secondary, #5D6772);
-  padding: 4px 10px;
-  margin-bottom: 4px;
-}
-
-.commandPaletteItem {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 12px;
-  border-radius: var(--tuw-radius-control, 8px);
-  cursor: pointer;
-  transition: all 0.12s ease;
-  text-decoration: none;
-  background: transparent;
-  border: none;
-  width: 100%;
-  text-align: left;
-}
-
-.commandPaletteItem:hover,
-.commandPaletteItem:focus-visible {
+/* Spotlight result rows (S6): hover/focus wash + visible keyboard focus.
+   Entrance/exit motion inherits the global reduced-motion collapse. */
+.spotlightRow:hover,
+.spotlightRow:focus-visible {
   background-color: var(--tuw-bg-selected, #F8F5FF);
+  border-color: rgba(117, 57, 255, 0.25);
+  outline: none;
 }
 
-.commandPaletteItemLeft {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
+/* Tile border light-up + Jump pill fill on row hover (P2): KPI-card
+   language — borders and washes only, no scale anywhere. */
+.spotlightRow:hover .spot-tile {
+  border-color: rgba(117, 57, 255, 0.35);
+  box-shadow: 0 1px 4px rgba(117, 57, 255, 0.12);
 }
 
-.commandPaletteItemIcon {
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  background-color: var(--tuw-bg-canvas, #F7F8F9);
-  color: var(--tuw-action-primary, #7539FF);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+.spotlightRow:hover .spot-jump {
+  background-color: var(--tuw-action-primary, #7539FF);
+  color: #FFFFFF;
+  border-color: transparent;
 }
 
-.commandPaletteItemText {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.commandPaletteItemTitle {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--tuw-text-primary, #262626);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.commandPaletteItemSubtitle {
-  font-size: 12px;
-  color: var(--tuw-text-secondary, #5D6772);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.commandPaletteFooter {
-  padding: 12px 20px;
-  background-color: var(--tuw-bg-canvas, #F7F8F9);
-  border-top: 1px solid var(--tuw-border-subtle, #E5E7EB);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 12px;
-  color: var(--tuw-text-secondary, #5D6772);
+.spot-inputrow:focus-within {
+  border-bottom-color: var(--tuw-action-primary, #7539FF);
 }
 
 .topBarRight {
@@ -1652,46 +1035,6 @@ a {
 }
 
 
-/* ==========================================================================
-   AUTH - LOGIN (verbatim port of LoginPage.module.css, login- prefix).
-   Single app.css, no CSS Modules. JSX in components/forms/LoginPage.tsx untouched.
-   ========================================================================== */
-.login-pageWrapper {
-  display: flex;
-  min-height: 100vh;
-  width: 100%;
-  max-width: 100%;
-  background-color: #FFFFFF;
-  overflow-x: hidden;
-}
-
-/* ==========================================================================
-   LEFT HERO BANNER
-   Exact Figma Canvas: 712px width on 1440px canvas (49.444%)
-   ========================================================================== */
-.login-heroSection {
-  position: relative;
-  flex: 0 0 49.444%;
-  width: 49.444%;
-  min-height: 100vh;
-  background-color: #1A1A1A;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-}
-
-.login-heroImage {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center top;
-}
-
-/* Rectangle 96 in Figma: 712x511 at y=513 (bottom 50%) */
 .login-heroOverlay {
   position: absolute;
   bottom: 0;
@@ -1709,704 +1052,8 @@ a {
   pointer-events: none;
 }
 
-/* Frame 60511 in Figma: AutoLayout VERTICAL, gap: 16px, padding: 0 56px 68px 56px */
-.login-heroContent {
-  position: relative;
-  z-index: 2;
-  padding: 0 56px 68px 56px;
-  color: #FFFFFF;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.login-brandTitle {
-  font-family: var(--font-brand), sans-serif;
-  font-size: 32px;
-  font-weight: 700;
-  line-height: 38.4px;
-  color: #FFFFFF;
-  letter-spacing: -0.01em;
-}
-
-/* Exact Figma: max-width 490px causes the 3-line wrap */
-.login-heroHeadline {
-  font-family: var(--font-main), sans-serif;
-  font-size: clamp(38px, 4.4vw, 64px);
-  font-weight: 700;
-  line-height: 1.2;
-  color: #FFFFFF;
-  white-space: pre-line;
-  letter-spacing: -0.02em;
-  max-width: 490px;
-}
-
-/* Exact Figma: max-width 600px */
-.login-heroSubtitle {
-  font-family: var(--font-main), sans-serif;
-  font-size: 20px;
-  font-weight: 500;
-  line-height: 28px;
-  letter-spacing: 0.6px;
-  color: #FFFFFF;
-  max-width: 600px;
-}
-
-/* ==========================================================================
-   RIGHT AUTH SECTION
-   Exact Figma Canvas: 728px width on 1440px canvas (50.556%)
-   ========================================================================== */
-.login-formSection {
-  flex: 0 0 50.556%;
-  width: 50.556%;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  padding: clamp(24px, 4vh, 48px) 24px;
-  background-color: #FFFFFF;
-  background-image: 
-    radial-gradient(circle 520px at 78% 5%, rgba(229, 245, 211, 0.6) 0%, rgba(255, 255, 255, 0) 100%),
-    radial-gradient(circle 420px at 98% 8%, rgba(246, 198, 54, 0.1) 0%, rgba(229, 245, 211, 0.05) 50%, rgba(255, 255, 255, 0) 100%);
-  background-repeat: no-repeat;
-  overflow-y: auto;
-}
-
-/* Content container max-width 568px */
-.login-formContainer {
-  width: 100%;
-  max-width: 568px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-/* Frame 128 / Frame 282: Header Block */
-.login-headerBlock {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: clamp(20px, 3vh, 32px);
-  text-align: center;
-}
-
-/* Frame 3: 48x48 rounded square, radius 13.5px, fill #242424 */
-.login-logoBadge {
-  width: 48px;
-  height: 48px;
-  border-radius: 13.5px;
-  background: #242424;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16px;
-  box-shadow: 0 4px 14px rgba(36, 36, 36, 0.15);
-}
-
-.login-logoMonogram {
-  width: 27px;
-  height: 27px;
-  object-fit: contain;
-}
-
-.login-formTitle {
-  font-family: var(--font-main), sans-serif;
-  font-size: 32px;
-  font-weight: 600;
-  color: #242424;
-  line-height: 40.3px;
-  letter-spacing: -0.01em;
-  margin-bottom: 8px;
-}
-
-.login-formSubtitle {
-  font-family: var(--font-main), sans-serif;
-  font-size: 20px;
-  font-weight: 400;
-  color: #6C6C6C;
-  line-height: 28px;
-  letter-spacing: 0.6px;
-}
-
-/* Frame 139: Social row (width 100%, max-width 568px, gap 24px) */
-.login-socialRow {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px;
-  width: 100%;
-  max-width: 568px;
-  margin-bottom: clamp(16px, 2.5vh, 24px);
-}
-
-.login-socialButton {
-  height: 52px;
-  width: 100%;
-  border-radius: 14px;
-  border: 1px solid #E9E9E9;
-  background: #FFFFFF;
-  display: flex;
-  align-items: center;
-  padding: 0 14px;
-  gap: 8px;
-  transition: all 0.2s ease;
-  user-select: none;
-}
-
-.login-socialButton:hover {
-  border-color: #D1D5DB;
-  background-color: #FAFAFA;
-}
-
-.login-socialIconBadge {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 1px solid #E7EFEF;
-  background: #FFFFFF;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.login-appleIcon {
-  width: 18px;
-  height: 18px;
-  object-fit: contain;
-}
-
-.login-googleIcon {
-  width: 16px;
-  height: 16px;
-  object-fit: contain;
-}
-
-.login-socialText {
-  font-family: var(--font-main), sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  color: #242424;
-  letter-spacing: 0.14px;
-  line-height: 22.4px;
-  white-space: nowrap;
-}
-
-/* Frame 136: Divider (width 100%, max-width 568px) */
-.login-dividerRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  max-width: 568px;
-  margin-bottom: clamp(16px, 2.5vh, 24px);
-  gap: 16px;
-}
-
-.login-dividerLine {
-  flex: 1;
-  height: 1px;
-  background-color: #BBBBBB;
-}
-
-.login-dividerText {
-  font-family: var(--font-main), sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  color: #6C6C6C;
-  line-height: 20.2px;
-  padding: 0 24px;
-  text-align: center;
-  flex-shrink: 0;
-}
-
-/* Form block */
-.login-form {
-  width: 100%;
-  max-width: 568px;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Frame 129: Field group */
-.login-fieldGroup {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: clamp(16px, 2.2vh, 24px);
-  width: 100%;
-}
-
-.login-fieldLabel {
-  font-family: var(--font-main), sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  color: #242424;
-  line-height: 22.4px;
-  letter-spacing: 0.14px;
-  margin-bottom: 8px;
-  text-align: left;
-}
-
-/* Frame 125: Input box (height 48px, radius 12px, border #E9E9E9) */
-.login-inputWrapper {
-  height: 48px;
-  width: 100%;
-  border-radius: 12px;
-  border: 1px solid #E9E9E9;
-  background: #FFFFFF;
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  gap: 10px;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
-}
-
-/* Active email border (Frame 1:20776 & 1:20725) */
-.login-inputWrapperActive {
-  border-color: #115D5D !important;
-}
-
-/* Wrong password error state (Frame 1:20725) */
-.login-inputWrapperError {
-  border-color: #E94845 !important;
-  background-color: #FDEDEC !important;
-}
-
-.login-inputField {
-  flex: 1;
-  border: none;
-  background: transparent;
-  font-family: var(--font-main), sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  color: #242424;
-  line-height: 22.4px;
-  letter-spacing: 0.28px;
-  height: 100%;
-  width: 100%;
-}
-
-.login-inputFieldFilled {
-  font-size: 16px;
-  line-height: 25.6px;
-  letter-spacing: 0.32px;
-}
-
-.login-inputField::placeholder {
-  color: #9A9A9A;
-  font-size: 14px;
-}
-
-.login-inputIcon {
-  color: #9A9A9A;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.login-togglePasswordBtn {
-  color: #9A9A9A;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2px;
-  transition: color 0.15s ease;
-}
-
-.login-togglePasswordBtn:hover {
-  color: #242424;
-}
-
-/* Frame 281 in 1:20725: Error notification */
-.login-errorMessage {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-main), sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 22.4px;
-  letter-spacing: 0.28px;
-  color: #E94845;
-  margin-top: 6px;
-}
-
-.login-errorIcon {
-  color: #E94845;
-  flex-shrink: 0;
-}
-
-/* Frame 132: Remember me row */
-.login-rememberRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 10px;
-  margin-bottom: clamp(16px, 2.2vh, 24px);
-  cursor: pointer;
-  user-select: none;
-  width: fit-content;
-}
-
-/* Rectangle 2: 20x20, radius 6px, stroke #E7EFEF */
-.login-checkboxBox {
-  width: 20px;
-  height: 20px;
-  border-radius: 6px;
-  border: 1px solid #E7EFEF;
-  background: #FFFFFF;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s ease;
-  flex-shrink: 0;
-}
-
-.login-checkboxBoxChecked {
-  background: #242424;
-  border-color: #242424;
-}
-
-.login-rememberText {
-  font-family: var(--font-main), sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  color: #242424;
-  line-height: 22.4px;
-  letter-spacing: 0.28px;
-}
-
-/* Primary_button: 568x48, radius 12px, fill #242424 */
-.login-primaryButton {
-  height: 48px;
-  width: 100%;
-  max-width: 568px;
-  border-radius: 12px;
-  background: #242424;
-  color: #FFFFFF;
-  font-family: var(--font-main), sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 22.4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s ease;
-  user-select: none;
-}
-
-.login-primaryButton:hover {
-  background: #141414;
-}
-
-/* Frame 133: Forgot password row */
-.login-forgotPasswordRow {
-  font-family: var(--font-main), sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  color: #242424;
-  line-height: 22.4px;
-  letter-spacing: 0.28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: clamp(16px, 2.4vh, 24px);
-  margin-bottom: clamp(16px, 2.4vh, 24px);
-  width: 100%;
-}
-
-.login-resetLink {
-  color: #115D5D;
-  font-weight: 600;
-  line-height: 16.8px;
-  letter-spacing: 0.28px;
-  cursor: pointer;
-}
-
-.login-resetLink:hover {
-  text-decoration: underline;
-}
-
-/* Sign up for free: 568x48, radius 10px, transparent fill, 16px 700 #242424 */
-.login-signupButton {
-  height: 48px;
-  width: 100%;
-  max-width: 568px;
-  border-radius: 10px;
-  font-family: var(--font-main), sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  color: #242424;
-  line-height: 22.4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: opacity 0.15s ease;
-  user-select: none;
-}
-
-.login-signupButton:hover {
-  opacity: 0.75;
-}
-
-/* ==========================================================================
-   RESET PASSWORD VIEW (Frame 1:20710)
-   Exact Figma: Card width 552px, radius 20px, stroke #E9E9E9,
-   padding: 40px 32px, box-shadow: -1px 1px 40px rgba(0,0,0,0.06)
-   ========================================================================== */
-.login-resetCard {
-  width: 100%;
-  max-width: 552px;
-  border-radius: 20px;
-  border: 1px solid #E9E9E9;
-  background: #FFFFFF;
-  box-shadow: -1px 1px 40px rgba(0, 0, 0, 0.06);
-  padding: 40px 32px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.login-resetInputWrapper {
-  height: 48px;
-  width: 100%;
-  max-width: 488px;
-  border-radius: 12px;
-  border: 1px solid var(--tuw-border-control, #D1D5DB);
-  background: #FAFAFA;
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  gap: 10px;
-}
-
-.login-resetInput {
-  flex: 1;
-  border: none;
-  background: transparent;
-  font-family: var(--font-main), sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  color: #242424;
-  line-height: 25.6px;
-  letter-spacing: 0.32px;
-  height: 100%;
-}
-
-.login-resetInput::placeholder {
-  color: #9A9A9A;
-}
-
-.login-resetButton {
-  height: 48px;
-  width: 100%;
-  max-width: 488px;
-  border-radius: 12px;
-  background: #242424;
-  color: #FFFFFF;
-  font-family: var(--font-main), sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 22.4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s ease;
-}
-
-.login-resetButton:hover {
-  background: #141414;
-}
-
-/* ==========================================================================
-   RECOVERY SENT VIEW (Frame 1:20690)
-   Exact Figma: Card width 552px, radius 24px, stroke #E9E9E9,
-   padding: 40px 80px, gap 32px
-   ========================================================================== */
-.login-recoveryCard {
-  width: 100%;
-  max-width: 552px;
-  border-radius: 24px;
-  border: 1px solid #E9E9E9;
-  background: #FFFFFF;
-  padding: clamp(24px, 4vh, 40px) clamp(20px, 5vw, 80px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 32px;
-}
-
-/* Frame 281 in 1:20690: radius 12px, fill #EDF8E2, padding 8px 16px */
-.login-recoveryPill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: #EDF8E2;
-  border-radius: 12px;
-  padding: 8px 16px;
-  color: #009E5C;
-  font-family: var(--font-main), sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 25.6px;
-  letter-spacing: 0.32px;
-  white-space: nowrap;
-}
-
-.login-recoveryTextBlock {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  text-align: center;
-  width: 100%;
-  max-width: 392px;
-}
-
-.login-recoveryHeading {
-  font-family: var(--font-main), sans-serif;
-  font-size: 24px;
-  font-weight: 600;
-  line-height: 28.8px;
-  letter-spacing: 0.72px;
-  color: #115D5D;
-}
-
-.login-recoveryDescription {
-  font-family: var(--font-main), sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 25.6px;
-  letter-spacing: 0.32px;
-  color: #6C6C6C;
-}
-
-.login-recoveryButton {
-  width: 100%;
-  max-width: 392px;
-  height: 48px;
-  border-radius: 12px;
-  background: #242424;
-  color: #FFFFFF;
-  font-family: var(--font-main), sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 22.4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s ease;
-}
-
-.login-recoveryButton:hover {
-  background: #141414;
-}
-
-/* Back link */
-.login-backLink {
-  margin-top: 16px;
-  font-family: var(--font-main), sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  color: #6C6C6C;
-  cursor: pointer;
-  text-align: center;
-}
-
-.login-backLink:hover {
-  color: #242424;
-  text-decoration: underline;
-}
-
-/* Subtle corner simulator pill (allows easy simulation of all 5 Figma screens) */
-/* ==========================================================================
-   RESPONSIVENESS (Downscaling for tablet & mobile)
-   ========================================================================== */
-
-
-/* ==========================================================================
-   RESPONSIVENESS (Downscaling for tablet & mobile)
-   ========================================================================== */
-@media (max-width: 1024px) {
-  .login-pageWrapper {
-    flex-direction: column;
-  }
-  .login-heroSection {
-    width: 100%;
-    flex: none;
-    min-height: 420px;
-    height: 420px;
-  }
-  .login-formSection {
-    width: 100%;
-    flex: none;
-    padding: 36px 20px;
-  }
-  .login-heroHeadline {
-    font-size: 38px;
-    line-height: 46px;
-  }
-  .login-heroSubtitle {
-    font-size: 15px;
-  }
-  .login-heroContent {
-    padding: 0 24px 32px 24px;
-  }
-}
-
-
-/* ==========================================================================
-   AUTH - SIGNUP (verbatim port of SignUpPage.module.css, signup- prefix).
-   Single app.css, no CSS Modules. JSX in components/forms/SignUpPage.tsx untouched.
-   ========================================================================== */
-/* ==========================================================================
-   Storeflow - Sign Up Page Styles (Figma Frames 1:20984, 1:20920, 1:20890, 1:20856)
-   Exact Figma specs, zero horizontal overflow, perfectly fitting vertical viewport
-   ========================================================================== */
-
-.signup-pageWrapper {
-  display: flex;
-  min-height: 100vh;
-  width: 100%;
-  max-width: 100%;
-  background-color: #FFFFFF;
-  font-family: var(--font-urbanist), 'Urbanist', sans-serif;
-  color: #242424;
-  overflow-x: hidden;
-  position: relative;
-}
-
-/* ==========================================================================
-   LEFT HERO SECTION (Frame 124 - Width 712px / 1440px = 49.444%)
-   ========================================================================== */
-.signup-heroSection {
-  position: relative;
-  flex: 0 0 49.444%;
-  width: 49.444%;
-  height: 100%;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  overflow: hidden;
-  background-color: #1A1A1A;
-}
-
-.signup-heroImage {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center top;
-}
-
-/* Rectangle 96: Linear gradient overlay on bottom half */
+/* Rectangle 96: signup hero gradient overlay — distinct 55%/3-stop
+   gradient, retained as an art exception (SignUpPage heroOverlay). */
 .signup-heroOverlay {
   position: absolute;
   left: 0;
@@ -2418,744 +1065,12 @@ a {
   pointer-events: none;
 }
 
-/* Frame 60511: Brand Mark, Headline, Subtitle (Exact Figma: bottom anchored) */
-.signup-heroContent {
-  position: relative;
-  z-index: 2;
-  padding: 0 clamp(24px, 3.88vw, 56px) clamp(24px, 4.5vh, 68px) clamp(24px, 3.88vw, 56px);
-  display: flex;
-  flex-direction: column;
-  gap: clamp(8px, 1.4vh, 16px);
-  max-width: 600px;
-}
-
-.signup-brandTitle {
-  font-family: var(--font-urbanist), 'Urbanist', sans-serif;
-  font-weight: 700;
-  font-size: clamp(20px, 2.22vw, 32px);
-  line-height: 1.2;
-  color: #FFFFFF;
-}
-
-.signup-heroHeadline {
-  font-family: var(--font-urbanist), 'Urbanist', sans-serif;
-  font-weight: 700;
-  font-size: clamp(28px, 3.6vw, 64px);
-  line-height: 1.15;
-  letter-spacing: -0.01em;
-  color: #FFFFFF;
-  margin: 0;
-  white-space: pre-line;
-  max-width: 520px;
-}
-
-.signup-heroSubtitle {
-  font-family: var(--font-urbanist), 'Urbanist', sans-serif;
-  font-weight: 500;
-  font-size: clamp(13px, 1.25vw, 20px);
-  line-height: 1.35;
-  letter-spacing: 0.4px;
-  color: #FFFFFF;
-  opacity: 0.9;
-  margin: 0;
-  max-width: 520px;
-}
-
-/* ==========================================================================
-   RIGHT AUTH SECTION (Frame 140 - Width 728px / 1440px = 50.556%)
-   Centered vertically with radial ambient gradients matching Figma
-   ========================================================================== */
-.signup-formSection {
-  flex: 0 0 50.556%;
-  width: 50.556%;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: clamp(16px, 2.5vh, 40px) clamp(20px, 3vw, 48px);
-  box-sizing: border-box;
-  background-color: #FFFFFF;
-  background-image: 
-    radial-gradient(circle 520px at 78% 5%, rgba(229, 245, 211, 0.6) 0%, rgba(255, 255, 255, 0) 100%),
-    radial-gradient(circle 420px at 98% 8%, rgba(246, 198, 54, 0.1) 0%, rgba(229, 245, 211, 0.05) 50%, rgba(255, 255, 255, 0) 100%);
-  background-repeat: no-repeat;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.signup-formContainer {
-  width: 100%;
-  max-width: 568px;
-  display: flex;
-  flex-direction: column;
-  margin: auto 0;
-}
-
-/* ==========================================================================
-   HEADER BLOCK: Frame 128 (Badge 48x48 -> Title -> Subtitle)
-   ========================================================================== */
-.signup-headerBlock {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: clamp(8px, 1.2vh, 14px);
-  margin-bottom: clamp(12px, 2vh, 24px);
-}
-
-.signup-logoBadge {
-  width: 44px;
-  height: 44px;
-  background-color: #242424;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.signup-logoMonogram {
-  width: 25px;
-  height: 25px;
-  object-fit: contain;
-}
-
-.signup-formTitle {
-  font-size: clamp(24px, 2.2vw, 32px);
-  font-weight: 600;
-  line-height: 1.25;
-  color: #242424;
-  margin: 0;
-  letter-spacing: -0.01em;
-}
-
-.signup-formSubtitleRow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  font-size: 15px;
-  line-height: 22px;
-  color: #6C6C6C;
-  margin: 0;
-}
-
-.signup-loginLink {
-  color: #115D5D;
-  font-weight: 600;
-  text-decoration: none;
-  cursor: pointer;
-  transition: opacity 0.15s ease;
-}
-
-.signup-loginLink:hover {
-  opacity: 0.8;
-  text-decoration: underline;
-}
-
-/* ==========================================================================
-   FORM BODY (Frame 135)
-   ========================================================================== */
-.signup-formBody {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(12px, 1.8vh, 20px);
-  width: 100%;
-}
-
-/* ==========================================================================
-   SOCIAL BUTTONS: Frame 139 (Apple & Google)
-   ========================================================================== */
-.signup-socialRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: clamp(12px, 1.5vw, 24px);
-}
-
-.signup-socialButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  height: 48px;
-  padding: 8px 14px;
-  border: 1px solid #E9E9E9;
-  border-radius: 14px;
-  background-color: #FFFFFF;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: inherit;
-  box-sizing: border-box;
-}
-
-.signup-socialButton:hover {
-  background-color: #F8F9FA;
-  border-color: #D6D6D6;
-}
-
-.signup-socialIconBadge {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  border: 1px solid #E9E9E9;
-  background-color: #FFFFFF;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.signup-socialText {
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0.14px;
-  line-height: 22.4px;
-  color: #242424;
-}
-
-/* ==========================================================================
-   DIVIDER ROW: Line 1 + "Or" + Line 2
-   ========================================================================== */
-.signup-dividerRow {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.signup-dividerLine {
-  flex: 1;
-  height: 1px;
-  background-color: #E9E9E9;
-}
-
-.signup-dividerText {
-  font-size: 14px;
-  font-weight: 500;
-  color: #BBBBBB;
-  line-height: 20px;
-}
-
-/* ==========================================================================
-   FORM INPUTS BLOCK (Frame 1410130422)
-   ========================================================================== */
-.signup-formInputsWrapper {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(8px, 1.2vh, 14px);
-}
-
-.signup-fieldGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.signup-fieldLabel {
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0.14px;
-  line-height: 20px;
-  color: #242424;
-}
-
-.signup-inputWrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 100%;
-}
-
-.signup-inputField {
-  width: 100%;
-  height: 46px;
-  padding: 10px 44px 10px 16px;
-  border: 1px solid #E9E9E9;
-  border-radius: 12px;
-  font-family: inherit;
-  font-size: 15px;
-  letter-spacing: 0.2px;
-  line-height: 22px;
-  color: #242424;
-  background-color: #FFFFFF;
-  outline: none;
-  box-sizing: border-box;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.signup-inputField::placeholder {
-  color: #9A9A9A;
-  font-weight: 400;
-}
-
-.signup-inputField:focus {
-  border-color: #115D5D;
-  box-shadow: 0 0 0 3px rgba(17, 93, 93, 0.12);
-}
-
-.signup-inputIcon {
-  position: absolute;
-  right: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #9A9A9A;
-  pointer-events: none;
-}
-
-.signup-inputIconButton {
-  position: absolute;
-  right: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #9A9A9A;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 6px;
-  transition: color 0.15s ease;
-}
-
-.signup-inputIconButton:hover {
-  color: #242424;
-}
-
-.signup-helperText {
-  font-size: 12px;
-  line-height: 16px;
-  color: #6C6C6C;
-  margin-top: 2px;
-}
-
-/* ==========================================================================
-   TERMS & PRIVACY CHECKBOX + BUTTON BLOCK (Frame 1410130423)
-   ========================================================================== */
-.signup-footerActionsBlock {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(8px, 1.2vh, 12px);
-  margin-top: clamp(6px, 1vh, 12px);
-}
-
-.signup-termsRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  user-select: none;
-}
-
-.signup-checkbox {
-  width: 18px;
-  height: 18px;
-  min-width: 18px;
-  border-radius: 5px;
-  border: 1px solid #E7EEEE;
-  background-color: #FFFFFF;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  padding: 0;
-}
-
-.signup-checkboxChecked {
-  background-color: #115D5D;
-  border-color: #115D5D;
-  color: #FFFFFF;
-}
-
-.signup-checkboxIcon {
-  width: 12px;
-  height: 12px;
-  stroke: #FFFFFF;
-  stroke-width: 2.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.signup-termsText {
-  font-size: 13px;
-  line-height: 18px;
-  letter-spacing: 0.15px;
-  color: #242424;
-}
-
-.signup-termsLink {
-  color: #115D5D;
-  font-weight: 600;
-  text-decoration: underline;
-  cursor: pointer;
-  transition: opacity 0.15s ease;
-}
-
-.signup-termsLink:hover {
-  opacity: 0.8;
-}
-
-/* ==========================================================================
-   PRIMARY SUBMIT BUTTON: Sign Up (Frame 1:21031)
-   ========================================================================== */
-.signup-submitButton {
-  width: 100%;
-  height: 48px;
-  background-color: #242424;
-  color: #FFFFFF;
-  border: none;
-  border-radius: 12px;
-  font-family: inherit;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 22.4px;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.signup-submitButton:hover {
-  background-color: #000000;
-}
-
-.signup-submitButton:active {
-  transform: scale(0.99);
-}
-
-/* ==========================================================================
-   EMAIL VERIFICATION VIEW (Frames 1:20890 & 1:20856)
-   Centered container width 350px, Gap 32px between header and body
-   ========================================================================== */
-.signup-verifyContainer {
-  width: 100%;
-  max-width: 350px;
-  margin: auto auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: clamp(20px, 3vh, 32px);
-}
-
-.signup-verifyHeaderBlock {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 14px;
-}
-
-.signup-verifyTitle {
-  font-size: clamp(24px, 2.2vw, 32px);
-  font-weight: 600;
-  line-height: 1.25;
-  color: #242424;
-  margin: 0;
-  letter-spacing: -0.01em;
-}
-
-.signup-verifySubtitle {
-  font-size: 15px;
-  font-weight: 400;
-  line-height: 22px;
-  color: #6C6C6C;
-  margin: 0;
-}
-
-/* 4 OTP Input Boxes: Frame 1410130425 (Total width 260px, 4x 56px boxes + 3x 12px gaps) */
-.signup-otpRow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  width: 260px;
-  margin: 0 auto;
-}
-
-.signup-otpInput {
-  width: 56px;
-  height: 56px;
-  border: 1px solid #C6EAA0;
-  border-radius: 8px;
-  background-color: #FFFFFF;
-  font-family: inherit;
-  font-size: 24px;
-  font-weight: 700;
-  color: #242424;
-  text-align: center;
-  outline: none;
-  transition: all 0.2s ease;
-  box-sizing: border-box;
-}
-
-.signup-otpInput:focus,
-.signup-otpInputActive {
-  border-color: #115D5D;
-  box-shadow: 0 0 0 3px rgba(17, 93, 93, 0.15);
-}
-
-/* Frame 1410130426: Verify actions block width: 350px, gap: 24px */
-.signup-verifyActions {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-}
-
-/* Frame 1410130427: button + resend text with gap 12px */
-.signup-verifyPrimaryGroup {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.signup-verifyButton {
-  width: 100%;
-  height: 48px;
-  background-color: #242424;
-  color: #FFFFFF;
-  border: none;
-  border-radius: 12px;
-  font-family: inherit;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 22.4px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.signup-verifyButton:hover {
-  background-color: #000000;
-}
-
-.signup-resendRow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  font-size: 14px;
-  line-height: 22px;
-  color: #242424;
-}
-
-.signup-resendLink {
-  color: #115D5D;
-  font-weight: 600;
-  text-decoration: underline;
-  background: none;
-  border: none;
-  padding: 0;
-  font-family: inherit;
-  font-size: 14px;
-  cursor: pointer;
-  transition: opacity 0.15s ease;
-}
-
-.signup-resendLink:hover {
-  opacity: 0.8;
-}
-
-.signup-backToLoginButton {
-  width: 100%;
-  height: 48px;
-  background-color: #FFFFFF;
-  border: 1px solid #E9E9E9;
-  border-radius: 12px;
-  color: #242424;
-  font-family: inherit;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 22.4px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  box-sizing: border-box;
-}
-
-.signup-backToLoginButton:hover {
-  background-color: #F8F9FA;
-  border-color: #D6D6D6;
-}
-
-/* ==========================================================================
-   RESPONSIVE DESIGN (Zero horizontal overflow, fluid stacking)
-   ========================================================================== */
-@media (max-width: 900px) {
-  .signup-pageWrapper {
-    flex-direction: column;
-    height: auto;
-    min-height: 100vh;
-    overflow-y: auto;
-  }
-
-  .signup-heroSection {
-    flex: none;
-    width: 100%;
-    height: 320px;
-    min-height: 320px;
-  }
-
-  .signup-heroContent {
-    padding: 0 24px 28px 24px;
-  }
-
-  .signup-formSection {
-    flex: none;
-    width: 100%;
-    height: auto;
-    min-height: auto;
-    padding: 36px 20px 60px 20px;
-  }
-
-  .signup-socialRow {
-    gap: 12px;
-  }
-}
-
-
-/* ==========================================================================
-   SUBPAGES (verbatim port of SubPages.module.css, sub- prefix). Shared by all
-   dashboard Views in app/(dashboard)/*\/_components/.
-   ========================================================================== */
-/* ==========================================================================
-   SUBPAGES MODULE (ORDERS, PRODUCTS, CUSTOMERS, ANALYTICS, SETTINGS, HELP)
-   TUW V2 URBANIST DESIGN SYSTEM
-   ========================================================================== */
-
-.sub-pageHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.sub-headingGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.sub-pageTitle {
-  font-size: 28px;
-  font-weight: 600;
-  color: var(--tuw-text-primary, #262626);
-  font-family: var(--font-main);
-}
-
-.sub-pageSubtitle {
-  font-size: 14px;
-  color: var(--tuw-text-secondary, #5D6772);
-  font-family: var(--font-main);
-}
-
-.sub-headerActions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.sub-primaryBtn {
-  background-color: var(--tuw-action-primary, #7539FF);
-  color: var(--tuw-text-on-primary, #FFFFFF);
-  border-radius: var(--tuw-radius-control, 8px);
-  padding: 0 20px;
-  height: 44px;
-  font-size: 13px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  box-shadow: 0 2px 6px rgba(117, 57, 255, 0.2);
-  border: none;
-  font-family: var(--font-main);
-}
-
-.sub-primaryBtn:hover {
-  background-color: var(--tuw-action-hover, #6025DB);
-  transform: translateY(-1px);
-}
-
-.sub-secondaryBtn {
-  background-color: var(--tuw-bg-surface, #FFFFFF);
-  border: 1px solid var(--tuw-border-control, #D1D5DB);
-  border-radius: var(--tuw-radius-control, 8px);
-  padding: 0 18px;
-  height: 44px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--tuw-text-primary, #262626);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  font-family: var(--font-main);
-}
-
-.sub-secondaryBtn:hover {
-  background-color: var(--tuw-bg-selected, #F8F5FF);
-  border-color: var(--tuw-action-primary, #7539FF);
-}
-
 /* Stat Grid */
 .sub-statGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   width: 100%;
-}
-
-.sub-statCard {
-  background-color: var(--tuw-bg-surface, #FFFFFF);
-  border: 1px solid var(--tuw-border-subtle, #E5E7EB);
-  border-radius: var(--tuw-radius-card, 12px);
-  padding: 20px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-  box-sizing: border-box;
-}
-
-.sub-statCard:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-}
-
-.sub-statLabel {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--tuw-text-secondary, #5D6772);
-  font-family: var(--font-main);
-}
-
-.sub-statValue {
-  font-size: 32px;
-  font-weight: 600;
-  color: var(--tuw-text-primary, #262626);
-  letter-spacing: -0.02em;
-  font-family: var(--font-main);
-  line-height: 40px;
-}
-
-.sub-statTrend {
-  font-size: 12px;
-  color: var(--tuw-text-success, #187343);
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-family: var(--font-main);
 }
 
 /* Content Container Card */
@@ -3212,114 +1127,6 @@ a {
   font-weight: 600;
 }
 
-/* Table */
-.sub-tableWrapper {
-  width: 100%;
-  overflow-x: auto;
-}
-
-.sub-customTable {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 700px;
-}
-
-.sub-tableHeaderRow {
-  border-bottom: 1px solid var(--tuw-border-subtle, #E5E7EB);
-}
-
-.sub-tableHeaderRow th {
-  padding: 14px 16px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--tuw-text-secondary, #5D6772);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  text-align: left;
-  font-family: var(--font-main);
-}
-
-.sub-tableHeaderRow th:last-child {
-  text-align: right;
-}
-
-.sub-tableDataRow td {
-  padding: 16px;
-  font-size: 14px;
-  border-bottom: 1px solid var(--tuw-border-subtle, #E5E7EB);
-  color: var(--tuw-text-primary, #262626);
-  font-family: var(--font-main);
-}
-
-.sub-tableDataRow:hover {
-  background-color: var(--tuw-bg-canvas, #F7F8F9);
-}
-
-.sub-tableDataRow:last-child td {
-  border-bottom: none;
-}
-
-.sub-alignRight {
-  text-align: right;
-}
-
-/* Status Badges */
-.sub-badgeGreen {
-  display: inline-flex;
-  align-items: center;
-  background-color: var(--tuw-bg-success, #F4FBF7);
-  color: var(--tuw-text-success, #187343);
-  border: 1px solid rgba(24, 115, 67, 0.12);
-  border-radius: var(--tuw-radius-pill, 16px);
-  padding: 0 14px;
-  height: 32px;
-  font-size: 12px;
-  font-weight: 600;
-  font-family: var(--font-main);
-}
-
-.sub-badgeOrange {
-  display: inline-flex;
-  align-items: center;
-  background-color: var(--tuw-bg-warning, #FEFBF5);
-  color: var(--tuw-text-warning, #856300);
-  border: 1px solid rgba(133, 99, 0, 0.12);
-  border-radius: var(--tuw-radius-pill, 16px);
-  padding: 0 14px;
-  height: 32px;
-  font-size: 12px;
-  font-weight: 600;
-  font-family: var(--font-main);
-}
-
-.sub-badgeBlue {
-  display: inline-flex;
-  align-items: center;
-  background-color: var(--tuw-bg-info, #F4F9FE);
-  color: var(--tuw-text-info, #175CD3);
-  border: 1px solid rgba(23, 92, 211, 0.12);
-  border-radius: var(--tuw-radius-pill, 16px);
-  padding: 0 14px;
-  height: 32px;
-  font-size: 12px;
-  font-weight: 600;
-  font-family: var(--font-main);
-}
-
-.sub-badgeRed {
-  display: inline-flex;
-  align-items: center;
-  background-color: var(--tuw-bg-error, #FEF4F4);
-  color: var(--tuw-text-error, #C91818);
-  border: 1px solid rgba(201, 24, 24, 0.12);
-  border-radius: var(--tuw-radius-pill, 16px);
-  padding: 0 14px;
-  height: 32px;
-  font-size: 12px;
-  font-weight: 600;
-  font-family: var(--font-main);
-}
-
 /* Grid for Products / Cards */
 .sub-cardGrid {
   display: grid;
@@ -3336,14 +1143,12 @@ a {
   flex-direction: column;
   gap: 12px;
   background-color: var(--tuw-bg-surface, #FFFFFF);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
 }
 
-.sub-productCatalogCard:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
-}
+/* Hover treatment rides .tuw-stat-hover (tint/wash/glow, non-displacing per
+   the motion skill) — no lift-up on any axis. */
 
 .sub-productThumbFrame {
   width: 100%;
@@ -3373,578 +1178,6 @@ a {
   .sub-cardGrid {
     grid-template-columns: 1fr;
   }
-}
-
-
-/* ==========================================================================
-   HOME (verbatim port of HomePage.module.css, home- prefix). Used by
-   app/(dashboard)/_components/HomeView.tsx.
-   ========================================================================== */
-/* ==========================================================================
-   HOMESCREEN DASHBOARD (FIGMA FRAME 1:20300) - 100% PURE CODE (NO IMAGES)
-   ========================================================================== */
-
-.home-pageWrapper {
-  display: flex;
-  width: 100%;
-  min-height: 100vh;
-  background-color: #F5F5F5;
-  color: #242424;
-  font-family: var(--font-main);
-  overflow-x: hidden;
-  position: relative;
-}
-
-/* --------------------------------------------------------------------------
-   1. SIDEBAR NAVIGATION
-   -------------------------------------------------------------------------- */
-.home-sidebar {
-  width: 240px;
-  min-width: 240px;
-  background-color: #FFFFFF;
-  border-right: 1px solid #ECECEC;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 0 20px 20px 20px;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow-y: auto;
-  overflow-x: visible;
-  z-index: 100;
-  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s ease;
-}
-
-.home-sidebar::-webkit-scrollbar {
-  width: 4px;
-}
-.home-sidebar::-webkit-scrollbar-thumb {
-  background: #E5E5E5;
-  border-radius: 4px;
-}
-
-.home-sidebarCollapsed {
-  width: 80px;
-  min-width: 80px;
-  padding: 0 12px 20px 12px;
-}
-
-.home-sidebarHeader {
-  height: 96px;
-  min-height: 96px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  position: relative;
-}
-
-.home-brandLink {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  text-decoration: none;
-  color: #242424;
-}
-
-/* Pure Code Logo Wrapper */
-.home-logoIconWrapper {
-  width: 32px;
-  height: 32px;
-  background-color: #242424;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-}
-
-.home-brandName {
-  font-family: var(--font-brand);
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: #242424;
-  white-space: nowrap;
-}
-
-/* Sidebar Toggle Pin centered exactly on the border line */
-.home-sidebarToggleBtn {
-  position: absolute;
-  right: -36px;
-  top: 32px;
-  width: 32px;
-  height: 32px;
-  background-color: #FEFEFE;
-  border: 1px solid #ECECEC;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #6C6C6C;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  z-index: 120;
-  transition: all 0.2s ease;
-}
-
-.home-sidebarToggleBtn:hover {
-  background-color: #F8F9FA;
-  color: #115D5D;
-  transform: scale(1.08);
-}
-
-.home-sidebarCollapsed .home-sidebarToggleBtn {
-  right: -28px;
-}
-
-.home-navSections {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-top: 4px;
-  flex: 1;
-}
-
-.home-navGroup {
-  display: flex;
-  flex-direction: column;
-}
-
-.home-groupLabel {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  color: #6C6C6C;
-  text-transform: uppercase;
-  padding: 0 10px 8px 10px;
-}
-
-.home-navList {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.home-navItem {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 9px 12px;
-  border-radius: 12px;
-  color: #242424;
-  font-size: 15px;
-  font-weight: 400;
-  text-decoration: none;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  user-select: none;
-  position: relative;
-  background: transparent;
-  width: 100%;
-}
-
-.home-navItem:hover {
-  background-color: #F8FAF9;
-  color: #115D5D;
-}
-
-.home-navItemActive {
-  background: linear-gradient(90deg, #EAF5E1 0%, #EEF7E6 100%);
-  color: #115D5D;
-  font-weight: 600;
-}
-
-.home-navItemActive:hover {
-  background: linear-gradient(90deg, #E2F0D8 0%, #E8F4DE 100%);
-  color: #115D5D;
-}
-
-.home-navIcon {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.home-navLabel {
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.home-navChevron {
-  width: 16px;
-  height: 16px;
-  color: #6C6C6C;
-  margin-left: auto;
-}
-
-.home-logOutItem {
-  margin-top: 4px;
-  color: #242424;
-}
-
-.home-logOutItem:hover {
-  background-color: #FDEDEC;
-  color: #E94845;
-}
-
-.home-logOutItem:hover .home-navIcon {
-  color: #E94845;
-}
-
-/* 100% Pure Code: Become Pro Card with Animated/Flowing SVG Waves */
-.home-becomeProCard {
-  width: 100%;
-  min-height: 205px;
-  background-color: #071714;
-  border-radius: 20px;
-  padding: 18px 16px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  position: relative;
-  overflow: hidden;
-  margin-top: 14px;
-  box-shadow: 0 6px 18px rgba(17, 93, 93, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.home-becomeProWaveBg {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-  overflow: hidden;
-}
-
-.home-waveSvg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.home-becomeProContent {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  z-index: 2;
-  position: relative;
-}
-
-.home-becomeProTitle {
-  font-size: 16px;
-  font-weight: 700;
-  color: #FFFFFF;
-}
-
-.home-becomeProDesc {
-  font-size: 12px;
-  font-weight: 500;
-  color: #E8ECEB;
-  line-height: 1.4;
-}
-
-.home-becomeProBtn {
-  background-color: #FFFFFF;
-  color: #242424;
-  border-radius: 12px;
-  height: 38px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-  z-index: 2;
-  position: relative;
-  text-decoration: none;
-  margin-top: 10px;
-}
-
-.home-becomeProBtn:hover {
-  background-color: #F0F4F4;
-  transform: translateY(-1px);
-}
-
-/* Collapsed Sidebar tweaks */
-.home-sidebarCollapsed .home-brandName,
-.home-sidebarCollapsed .home-groupLabel,
-.home-sidebarCollapsed .home-navLabel,
-.home-sidebarCollapsed .home-navChevron,
-.home-sidebarCollapsed .home-becomeProCard {
-  display: none;
-}
-
-.home-sidebarCollapsed .home-navItem {
-  justify-content: center;
-  padding: 10px;
-}
-
-/* --------------------------------------------------------------------------
-   2. MAIN CONTENT AREA & TOP BAR
-   -------------------------------------------------------------------------- */
-.home-mainContainer {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  background-color: #F5F5F5;
-  overflow-x: hidden;
-}
-
-/* Top Bar */
-.home-topBar {
-  height: 96px;
-  min-height: 96px;
-  background-color: #FFFFFF;
-  border-bottom: 1px solid #ECECEC;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 30px;
-  position: sticky;
-  top: 0;
-  z-index: 90;
-}
-
-.home-topBarLeft {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.home-mobileMenuBtn {
-  display: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background-color: #F5F5F5;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #242424;
-}
-
-.home-pageTitle {
-  font-size: 24px;
-  font-weight: 700;
-  color: #242424;
-  letter-spacing: -0.01em;
-}
-
-.home-searchContainer {
-  flex: 1;
-  max-width: 570px;
-  height: 48px;
-  background-color: #F5F5F5;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  gap: 12px;
-  margin: 0 30px;
-  border: 1px solid transparent;
-  transition: all 0.2s ease;
-}
-
-.home-searchContainer:focus-within {
-  border-color: #115D5D;
-  background-color: #FFFFFF;
-  box-shadow: 0 0 0 3px rgba(17, 93, 93, 0.08);
-}
-
-.home-searchIcon {
-  width: 20px;
-  height: 20px;
-  color: #9A9A9A;
-  flex-shrink: 0;
-}
-
-.home-searchInput {
-  border: none;
-  background: transparent;
-  outline: none;
-  width: 100%;
-  font-size: 14px;
-  color: #242424;
-  font-family: inherit;
-}
-
-.home-searchInput::placeholder {
-  color: #BBBBBB;
-}
-
-.home-searchPlusIcon {
-  width: 18px;
-  height: 18px;
-  color: #9A9A9A;
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-
-.home-searchPlusIcon:hover {
-  color: #115D5D;
-}
-
-.home-topBarRight {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.home-actionIcons {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.home-aiBotBtn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: #115D5D;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: transform 0.2s ease, background-color 0.2s ease;
-  box-shadow: 0 2px 8px rgba(17, 93, 93, 0.2);
-}
-
-.home-aiBotBtn:hover {
-  background-color: #0d4848;
-  transform: scale(1.05);
-}
-
-.home-notificationBtn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: #F5F5F5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  position: relative;
-  color: #242424;
-  transition: background-color 0.2s ease;
-}
-
-.home-notificationBtn:hover {
-  background-color: #EBEBEB;
-}
-
-.home-notificationBadge {
-  position: absolute;
-  top: -2px;
-  right: -2px;
-  width: 18px;
-  height: 18px;
-  background-color: #E94845;
-  color: #FFFFFF;
-  border-radius: 50%;
-  font-size: 11px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid #FFFFFF;
-}
-
-.home-userProfile {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding-left: 8px;
-  cursor: pointer;
-  user-select: none;
-}
-
-/* 100% Pure Code: Avatar Container */
-.home-avatarCodeWrapper {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #ECECEC;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-}
-
-.home-userInfo {
-  display: flex;
-  flex-direction: column;
-}
-
-.home-userName {
-  font-size: 16px;
-  font-weight: 700;
-  color: #242424;
-  line-height: 1.2;
-}
-
-.home-userRole {
-  font-size: 14px;
-  font-weight: 500;
-  color: #6C6C6C;
-}
-
-/* --------------------------------------------------------------------------
-   3. DASHBOARD MAIN BODY
-   -------------------------------------------------------------------------- */
-.home-dashboardBody {
-  padding: 30px;
-  max-width: 1200px;
-  width: 100%;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  box-sizing: border-box;
-}
-
-/* Welcome Row */
-.home-welcomeRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 4px;
-}
-
-.home-welcomeTextGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.home-welcomeHeading {
-  font-size: 24px;
-  font-weight: 700;
-  color: #242424;
-  letter-spacing: -0.01em;
-}
-
-.home-welcomeSubtext {
-  font-size: 16px;
-  font-weight: 400;
-  color: #6C6C6C;
-}
-
-.home-welcomeControls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
 }
 
 .home-onlineBadge {
@@ -4000,38 +1233,30 @@ a {
 }
 
 .home-dateFilterBtn:hover {
-  background-color: #F8FAF9;
-  border-color: #E2E8E8;
+  border-color: var(--tuw-action-primary, #7539FF);
+  color: var(--tuw-action-primary, #7539FF);
+  background-color: var(--tuw-bg-selected, #F8F5FF);
 }
 
-/* --------------------------------------------------------------------------
-   4. METRIC KPI CARDS ROW (4 CARDS)
-   -------------------------------------------------------------------------- */
+/* Applied-range tint (D7): signals a non-default date filter is active. */
+.home-dateFilterBtnActive {
+  background-color: var(--tuw-bg-selected, #F8F5FF);
+  border-color: var(--tuw-action-primary, #7539FF);
+  color: var(--tuw-action-primary, #7539FF);
+}
+
 .home-kpiGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
   width: 100%;
   min-width: 0;
 }
 
 .home-kpiCard {
-  background-color: var(--tuw-bg-surface, #FFFFFF);
-  border: 1px solid var(--tuw-border-subtle, #E9E9E9);
-  border-radius: var(--tuw-radius-card, 12px);
-  padding: 20px 24px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
   min-width: 0;
-  box-sizing: border-box;
-}
-
-.home-kpiCard:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
 .home-kpiLabel {
@@ -4099,9 +1324,6 @@ a {
   color: #9A9A9A;
 }
 
-/* --------------------------------------------------------------------------
-   5. MIDDLE SECTION: SALES TREND & TOP PRODUCT
-   -------------------------------------------------------------------------- */
 .home-middleGrid {
   display: grid;
   grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr);
@@ -4109,18 +1331,11 @@ a {
   width: 100%;
 }
 
-/* Sales Trend Card */
 .home-salesTrendCard {
-  background-color: var(--tuw-bg-surface, #FFFFFF);
-  border: 1px solid var(--tuw-border-subtle, #E9E9E9);
-  border-radius: var(--tuw-radius-card, 12px);
-  padding: 20px 24px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
   min-width: 0;
-  box-sizing: border-box;
 }
 
 .home-cardHeaderRow {
@@ -4198,6 +1413,49 @@ a {
   background-color: var(--tuw-bg-selected, #F8F5FF);
 }
 
+/* Sales range dropdown menu (D4) — opens from the filter select button. */
+.home-rangeMenu {
+  background-color: var(--tuw-bg-surface, #FFFFFF);
+  border: 1px solid var(--tuw-border-subtle, #E9E9E9);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(38, 38, 38, 0.1);
+  padding: 4px;
+  min-width: 148px;
+  display: flex;
+  flex-direction: column;
+  will-change: opacity, transform;
+  transform: translateZ(0);
+}
+
+.home-rangeMenuItem {
+  background: transparent;
+  border: 0;
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tuw-text-primary, #262626);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.home-rangeMenuItem:hover {
+  background-color: var(--tuw-bg-selected, #F8F5FF);
+  color: var(--tuw-action-primary, #7539FF);
+}
+
+.home-rangeMenuItemSelected {
+  background-color: var(--tuw-bg-selected, #F8F5FF);
+  border: 0;
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tuw-action-primary, #7539FF);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
 .home-salesStatRow {
   display: flex;
   align-items: center;
@@ -4211,6 +1469,15 @@ a {
   font-weight: 700;
   color: var(--tuw-text-primary, #262626);
   letter-spacing: -0.03em;
+  transition: color 0.35s ease;
+}
+
+.home-salesTotalUp {
+  color: var(--tuw-text-success, #187343);
+}
+
+.home-salesTotalDown {
+  color: var(--tuw-text-error, #C91818);
 }
 
 .home-trendBadgeGreen {
@@ -4252,6 +1519,7 @@ a {
   min-width: 38px;
   text-align: right;
   user-select: none;
+  transition: color 0.2s ease;
 }
 
 .home-chartPlotArea {
@@ -4278,6 +1546,7 @@ a {
   width: 100%;
   height: 1px;
   border-bottom: 1px dashed var(--tuw-border-subtle, #EEF0F2);
+  transition: border-color 0.2s ease;
 }
 
 .home-gridLine:last-child {
@@ -4293,7 +1562,7 @@ a {
   height: 100%;
   padding: 0 4px;
   z-index: 2;
-  margin-bottom: 6px;
+  margin-bottom: 2px;
 }
 
 .home-barGroup {
@@ -4304,7 +1573,7 @@ a {
   height: 100%;
   position: relative;
   cursor: pointer;
-  padding: 0 2px 2px 2px;
+  padding: 0 2px;
   border-radius: 8px;
   transition: background-color 0.2s ease;
 }
@@ -4313,10 +1582,24 @@ a {
   background-color: rgba(117, 57, 255, 0.04);
 }
 
+.home-barGroupEmpty {
+  pointer-events: none;
+  cursor: default;
+}
+
+.home-barGroupEmpty:hover {
+  background-color: transparent;
+}
+
+.home-barGroupEmpty .home-barColumn {
+  visibility: hidden;
+  transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease, visibility 0s linear 0.4s;
+}
+
 .home-barColumn {
   width: clamp(8px, 1.4vw, 12px);
   border-radius: 6px 6px 2px 2px;
-  transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s ease, box-shadow 0.2s ease;
+  transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
   position: relative;
 }
 
@@ -4333,12 +1616,24 @@ a {
 .home-barGroup:hover .home-barColumnThisWeek {
   background: linear-gradient(180deg, #874FFF 0%, #7539FF 100%);
   box-shadow: 0 4px 12px rgba(117, 57, 255, 0.35);
-  transform: translateY(-2px);
 }
 
 .home-barGroup:hover .home-barColumnLastWeek {
   background-color: #D6C8F2;
-  transform: translateY(-2px);
+}
+
+/* Card-level axis emphasis (B4): hovering the sales card brightens the
+   gridlines and darkens the Y labels — attention without displacement. */
+.home-salesTrendCard:hover .home-gridLine {
+  border-bottom-color: #D8DDE3;
+}
+
+.home-salesTrendCard:hover .home-gridLine:last-child {
+  border-bottom-color: #C9CED6;
+}
+
+.home-salesTrendCard:hover .home-yAxisLabels {
+  color: var(--tuw-text-secondary, #5D6772);
 }
 
 .home-barTooltip {
@@ -4430,19 +1725,10 @@ a {
   user-select: none;
 }
 
-/* --------------------------------------------------------------------------
-   Top Product Card (100% Pure Code Illustrations)
-   -------------------------------------------------------------------------- */
 .home-topProductCard {
-  background-color: var(--tuw-bg-surface, #FFFFFF);
-  border: 1px solid var(--tuw-border-subtle, #E9E9E9);
-  border-radius: var(--tuw-radius-card, 12px);
-  padding: 20px 24px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
   min-width: 0;
-  box-sizing: border-box;
 }
 
 .home-productList {
@@ -4460,11 +1746,11 @@ a {
   align-items: center;
   gap: 12px;
   background-color: #FFFFFF;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .home-productCardItem:hover {
-  transform: translateY(-1px);
+  border-color: rgba(117, 57, 255, 0.35);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
@@ -4479,6 +1765,14 @@ a {
   flex-shrink: 0;
   overflow: hidden;
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+
+.home-productIllustrationWrapper img {
+  transition: transform 0.25s ease;
+}
+
+.home-productCardItem:hover .home-productIllustrationWrapper img {
+  transform: scale(1.05);
 }
 
 .home-productInfo {
@@ -4573,15 +1867,9 @@ a {
 
 /* Inventory Alerts Card */
 .home-inventoryCard {
-  background-color: var(--tuw-bg-surface, #FFFFFF);
-  border: 1px solid var(--tuw-border-subtle, #E9E9E9);
-  border-radius: var(--tuw-radius-card, 12px);
-  padding: 20px 24px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
   min-width: 0;
-  box-sizing: border-box;
 }
 
 .home-subHeading {
@@ -4622,11 +1910,27 @@ a {
   flex-direction: column;
   gap: 8px;
   background-color: var(--tuw-bg-surface, #FFFFFF);
-  transition: transform 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
 .home-alertItem:hover {
-  transform: translateY(-1px);
+  border-color: #D8DDE3;
+  background-color: #FCFCFD;
+}
+
+/* Severity dot glow on row hover (B6): static halo, not a pulse —
+   attention without infinite motion. */
+.home-alertDotRed,
+.home-alertDotOrange {
+  transition: box-shadow 0.2s ease;
+}
+
+.home-alertItem:hover .home-alertDotRed {
+  box-shadow: 0 0 0 4px rgba(233, 72, 69, 0.15);
+}
+
+.home-alertItem:hover .home-alertDotOrange {
+  box-shadow: 0 0 0 4px rgba(248, 135, 52, 0.18);
 }
 
 .home-alertTopRow {
@@ -4719,46 +2023,9 @@ a {
 
 /* Recent Orders Card */
 .home-recentOrdersCard {
-  background-color: var(--tuw-bg-surface, #FFFFFF);
-  border: 1px solid var(--tuw-border-subtle, #E9E9E9);
-  border-radius: var(--tuw-radius-card, 12px);
-  padding: 20px 24px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
   min-width: 0;
-  box-sizing: border-box;
-}
-
-.home-ordersTableWrapper {
-  width: 100%;
-  overflow-x: auto;
-  margin-top: 16px;
-}
-
-.home-ordersTable {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 600px;
-}
-
-.home-ordersTableHeaderRow {
-  border-bottom: 1px solid var(--tuw-border-subtle, #E9E9E9);
-}
-
-.home-ordersTableHeaderRow th {
-  padding: 12px 14px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--tuw-text-secondary, #5D6772);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  text-align: left;
-  font-family: var(--font-main);
-}
-
-.home-ordersTableHeaderRow th:last-child {
-  text-align: right;
 }
 
 .home-orderDataRow {
@@ -4767,97 +2034,6 @@ a {
 
 .home-orderDataRow:hover {
   background-color: var(--tuw-bg-canvas, #F7F8F9);
-}
-
-.home-orderDataRow td {
-  padding: 14px 14px;
-  font-size: 13px;
-  border-bottom: 1px solid var(--tuw-border-subtle, #E9E9E9);
-  color: var(--tuw-text-primary, #262626);
-  font-family: var(--font-main);
-}
-
-.home-orderDataRow:last-child td {
-  border-bottom: none;
-}
-
-.home-orderIdCell {
-  font-weight: 600;
-  color: var(--tuw-text-primary, #262626);
-}
-
-.home-orderTimeCell {
-  color: var(--tuw-text-secondary, #5D6772);
-}
-
-.home-orderTotalCell {
-  font-weight: 600;
-  color: var(--tuw-text-primary, #262626);
-}
-
-.home-orderStatusCell {
-  text-align: right;
-}
-
-/* Status Badges */
-.home-badgeShipped {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--tuw-bg-success, #F4FBF7);
-  color: var(--tuw-text-success, #187343);
-  border: 1px solid rgba(24, 115, 67, 0.12);
-  border-radius: var(--tuw-radius-pill, 16px);
-  padding: 0 12px;
-  height: 26px;
-  font-size: 12px;
-  font-weight: 600;
-  font-family: var(--font-main);
-}
-
-.home-badgeProcess {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--tuw-bg-warning, #FEFBF5);
-  color: var(--tuw-text-warning, #856300);
-  border: 1px solid rgba(133, 99, 0, 0.12);
-  border-radius: var(--tuw-radius-pill, 16px);
-  padding: 0 12px;
-  height: 26px;
-  font-size: 12px;
-  font-weight: 600;
-  font-family: var(--font-main);
-}
-
-.home-badgeDeliver {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--tuw-bg-info, #F4F9FE);
-  color: var(--tuw-text-info, #175CD3);
-  border: 1px solid rgba(23, 92, 211, 0.12);
-  border-radius: var(--tuw-radius-pill, 16px);
-  padding: 0 12px;
-  height: 26px;
-  font-size: 12px;
-  font-weight: 600;
-  font-family: var(--font-main);
-}
-
-.home-badgePending {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--tuw-bg-error, #FEF4F4);
-  color: var(--tuw-text-error, #C91818);
-  border: 1px solid rgba(201, 24, 24, 0.12);
-  border-radius: var(--tuw-radius-pill, 16px);
-  padding: 0 12px;
-  height: 26px;
-  font-size: 12px;
-  font-weight: 600;
-  font-family: var(--font-main);
 }
 
 /* --------------------------------------------------------------------------
@@ -4870,34 +2046,14 @@ a {
   .home-bottomGrid {
     grid-template-columns: 1fr;
   }
+  .home-kpiGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 680px) {
-  .home-topBar {
-    padding: 0 16px;
-  }
-
-  .home-searchContainer {
-    display: none;
-  }
-
-  .home-dashboardBody {
-    padding: 16px;
-  }
-
-  .home-welcomeRow {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
   .home-kpiGrid {
     grid-template-columns: 1fr;
-  }
-
-  .home-welcomeControls {
-    width: 100%;
-    justify-content: space-between;
   }
 }
 
@@ -4938,4 +2094,33 @@ a {
   top: 16px;
   outline: 2px solid #FFFFFF;
   outline-offset: 2px;
+}
+
+/* Shared stat hover treatment (HC1): border tint + wash + shadow.
+   Opt-in via StatCard `hoverable` (default off) — mirrors the dashboard
+   KPI hover tokens, non-displacing per the motion skill. !important wins
+   over the primitive's inline base (same codebase precedent as the
+   reduced-motion rule); applies only when explicitly opted in.
+   Wash single-sourced from --tuw-bg-selected (same token TableHeader uses). */
+.tuw-stat-hover:hover {
+  border-color: rgba(117, 57, 255, 0.35) !important;
+  background-color: var(--tuw-bg-selected, #F8F5FF) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Permanent selected wash (PT1b): same treatment as the hover above, for
+   KPI cards acting as active filters. Toggled via className, not hover. */
+.tuw-stat-active {
+  border-color: rgba(117, 57, 255, 0.35) !important;
+  background-color: var(--tuw-bg-selected, #F8F5FF) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Shared 3D uplift surface (US1): white face + inset bottom edge, the same
+   relief the sidebar gives its active nav item (shadow-nav-edge token).
+   Sized entirely by the caller (width/height/radius props on UpliftSurface)
+   so it fits anywhere with zero geometry of its own. */
+.tuw-3d-active {
+  background-color: var(--tuw-bg-surface, #FFFFFF) !important;
+  box-shadow: var(--shadow-nav-edge, inset 0 -2px 0 #d6d6d6) !important;
 }

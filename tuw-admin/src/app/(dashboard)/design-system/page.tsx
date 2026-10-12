@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { Button, Badge, Input, ContentCard, StatCard, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui';
+import { Button, Badge, Input, ContentCard, StatCard, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader } from '@/components/ui';
 import { COLORS, SPACING, FIGMA_META } from '@/lib/tokens';
 import {
   Copy,
@@ -81,35 +81,34 @@ export default function DesignSystemPage() {
               <Badge variant="neutral">TUW V2 Urbanist</Badge>
               <span style={{ fontSize: '13px', color: 'var(--tuw-text-secondary)' }}>Light Mode Foundations</span>
             </div>
-            <h1 className="tuw-type-heading-page" style={{ color: 'var(--tuw-text-primary)', marginBottom: '8px' }}>
-              TUW Design System
-            </h1>
-            <p className="tuw-type-body-large" style={{ color: 'var(--tuw-text-secondary)', maxWidth: '680px' }}>
-              Synchronized design tokens, typography specifications, and UI components from the official TUW Figma design system.
-            </p>
-          </div>
-
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-            <a
-              href={`https://www.figma.com/design/${FIGMA_META.fileKey}/TUW?node-id=${FIGMA_META.nodeId}`}
-              target="_blank"
-              rel="noreferrer"
-              style={{ textDecoration: 'none' }}
-            >
-              <Button variant="secondary" icon={<ExternalLink size={16} />}>
-                Open in Figma
-              </Button>
-            </a>
-            <Button
-              variant="primary"
-              icon={<Sparkles size={16} />}
-              onClick={() => {
-                setButtonLoading(true);
-                setTimeout(() => setButtonLoading(false), 800);
-              }}
-            >
-              {buttonLoading ? 'Refreshing Tokens...' : 'Tokens Synced'}
-            </Button>
+            <PageHeader
+              variant="doc"
+              title="TUW Design System"
+              actions={
+                <>
+                  <a
+                    href={`https://www.figma.com/design/${FIGMA_META.fileKey}/TUW?node-id=${FIGMA_META.nodeId}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ textDecoration: 'none' }}
+                  >
+                    <Button variant="secondary" icon={<ExternalLink size={16} />}>
+                      Open in Figma
+                    </Button>
+                  </a>
+                  <Button
+                    variant="primary"
+                    icon={<Sparkles size={16} />}
+                    onClick={() => {
+                      setButtonLoading(true);
+                      setTimeout(() => setButtonLoading(false), 800);
+                    }}
+                  >
+                    {buttonLoading ? 'Refreshing Tokens...' : 'Tokens Synced'}
+                  </Button>
+                </>
+              }
+            />
           </div>
         </div>
 

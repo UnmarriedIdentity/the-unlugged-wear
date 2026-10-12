@@ -111,7 +111,6 @@ All 19 components are implemented with zero cross-app dependencies:
 * **`/reports`**: Financial and SLA metrics with dynamic CSV export
 * **`/analytics`**: Canonical redirect to `/reports`
 * **`/team`**: Staff roster and role assignments
-* **`/audit-log`**: Immutable security and mutation event log
 * **`/support`**: Ticket resolution inbox
 * **`/help`**: Canonical redirect to `/support`
 * **`/settings`**, **`/settings/*`**: General, Brand, Shipping, Payments, Fulfillment, Notifications, Taxes

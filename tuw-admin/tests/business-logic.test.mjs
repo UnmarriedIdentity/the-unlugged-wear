@@ -81,3 +81,62 @@ describe('Admin Operational Business Logic', () => {
     assert.equal(hasPermission('Read-only', 'canPublishProduct'), false);
   });
 });
+
+describe('Product Variant Matrix', () => {
+  // Mirror of mocks/variants.ts rules (self-contained per this file's convention)
+  const buildVariantSku = (productId, colorIdx, size) => `${productId}-${colorIdx}-${size}`;
+  const distributeStock = (stock, count) => {
+    if (count <= 0) return [];
+    const base = Math.floor(stock / count);
+    const remainder = stock % count;
+    return Array.from({ length: count }, (_, i) => base + (i < remainder ? 1 : 0));
+  };
+  const synthesize = (p) => {
+    const combos = [];
+    p.colors.forEach((color, colorIdx) => {
+      p.sizes.forEach((size) => combos.push({ color, colorIdx, size }));
+    });
+    const stocks = distributeStock(p.stock, combos.length);
+    return combos.map((c, i) => ({
+      id: `${p.id}-V${i + 1}`,
+      color: c.color,
+      size: c.size,
+      sku: buildVariantSku(p.id, c.colorIdx, c.size),
+      price: p.price,
+      stock: stocks[i],
+    }));
+  };
+
+  const sample = {
+    id: 'PRD-01',
+    price: 48.0,
+    stock: 42,
+    colors: ['Jet Black', 'Bone Chalk', 'Washed Olive'],
+    sizes: ['S', 'M', 'L', 'XL'],
+  };
+
+  test('synthesizes the full color×size matrix with unique SKUs', () => {
+    const variants = synthesize(sample);
+    assert.equal(variants.length, 12);
+    const skus = variants.map((v) => v.sku);
+    assert.equal(new Set(skus).size, 12);
+    assert.equal(skus[0], 'PRD-01-0-S');
+  });
+
+  test('distributes stock conserving the product total exactly', () => {
+    const variants = synthesize(sample);
+    const total = variants.reduce((n, v) => n + v.stock, 0);
+    assert.equal(total, 42);
+    assert.ok(variants.every((v) => v.stock >= 3 && v.stock <= 4));
+  });
+
+  test('per-variant price overrides leave siblings untouched', () => {
+    const variants = synthesize(sample);
+    const next = variants.map((v) =>
+      v.id === 'PRD-01-V1' ? { ...v, price: 52.0 } : v
+    );
+    assert.equal(next[0].price, 52.0);
+    assert.ok(next.slice(1).every((v) => v.price === 48.0));
+    assert.equal(next.reduce((n, v) => n + v.stock, 0), 42);
+  });
+});

@@ -37,7 +37,6 @@ tuw-admin/
         reports/page.tsx
         support/page.tsx
         team/page.tsx
-        audit-log/page.tsx
         content/journal/page.tsx
         content/pages/page.tsx
         content/media/page.tsx

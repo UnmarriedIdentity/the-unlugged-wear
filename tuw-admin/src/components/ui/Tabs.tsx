@@ -14,6 +14,7 @@ export interface TabsProps {
   activeTab: string;
   onChange: (id: string) => void;
   variant?: 'underline' | 'pill';
+  ariaLabel?: string;
 }
 
 export default function Tabs({
@@ -21,10 +22,12 @@ export default function Tabs({
   activeTab,
   onChange,
   variant = 'underline',
+  ariaLabel = 'Tabs',
 }: TabsProps) {
   return (
     <div
       role="tablist"
+      aria-label={ariaLabel}
       style={{
         display: 'flex',
         gap: variant === 'pill' ? '6px' : '16px',

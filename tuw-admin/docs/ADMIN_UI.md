@@ -27,7 +27,6 @@ Provide a labelled demo session and role selector for Owner, Operations, Content
 | Content | Page/article editor, navigation ordering, media picker and publish preview |
 | Reports | Date filters, labelled charts, summary tables and CSV export of mock data |
 | Team | Staff list, invitation, role selection and removal confirmation |
-| Audit log | Actor, action, entity and timestamp; records of local simulated mutations |
 | Settings | Editable mock forms grouped by general, brand, payments, fulfillment, shipping, taxes and notifications |
 
 ## Form conventions

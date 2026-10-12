@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader, HeroCard, KeyValueList } from '@/components/ui';
 import { CreditCard, Download, Search, Filter, ShieldCheck, CheckCircle2, ArrowUpRight } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { OrderItem } from '@/mocks/fixtures';
@@ -56,25 +56,20 @@ export default function PaymentsPage() {
 
   return (
     <DashboardShell pageTitle="Payments">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <h2 style={{ fontSize: 28, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-            Payment Transactions & Gateways
-          </h2>
-          <p style={{ fontSize: 14, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-            Review merchant settlement logs, payment gateway captures (Stripe/PayPal), and fee schedules.
-          </p>
-        </div>
-        <Button variant="secondary" size="md" icon={<Download size={16} />} onClick={handleExportCSV}>
-          <span>Export Payouts CSV</span>
-        </Button>
-      </div>
+      <PageHeader
+        title="Payment Transactions & Gateways"
+        actions={
+          <Button variant="secondary" size="md" icon={<Download size={16} />} onClick={handleExportCSV}>
+            <span>Export Payouts CSV</span>
+          </Button>
+        }
+      />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
-        <StatCard label="Settled Volume" value={`₹${totalSettled.toLocaleString()}`} trend="Captured merchant volume" trendType="up" />
-        <StatCard label="Pending Settlements" value={`₹${totalPending.toLocaleString()}`} subtitle={`${pendingOrders.length} orders awaiting auth`} trendType="neutral" />
-        <StatCard label="Dispute Ratio" value="0.00%" trend="Zero chargebacks recorded" trendType="up" />
-        <StatCard label="Total Refunded" value={`₹${totalRefunded.toLocaleString()}`} subtitle="Disbursed return adjustments" trendType="neutral" />
+        <StatCard label="Settled Volume" value={`₹${totalSettled.toLocaleString()}`} trend="Captured merchant volume" trendType="up" hoverable />
+        <StatCard label="Pending Settlements" value={`₹${totalPending.toLocaleString()}`} subtitle={`${pendingOrders.length} orders awaiting auth`} trendType="neutral" hoverable />
+        <StatCard label="Dispute Ratio" value="0.00%" trend="Zero chargebacks recorded" trendType="up" hoverable />
+        <StatCard label="Total Refunded" value={`₹${totalRefunded.toLocaleString()}`} subtitle="Disbursed return adjustments" trendType="neutral" hoverable />
       </div>
 
       {/* Gateway Status Cards */}
@@ -115,53 +110,51 @@ export default function PaymentsPage() {
           </div>
         </div>
 
-        <div style={{ overflowX: 'auto', width: '100%' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Tx Ref</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Customer</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Payment Method</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase', textAlign: 'right' }}>Amount</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase' }}>Status</th>
-                <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)', textTransform: 'uppercase', textAlign: 'right' }}>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedOrders.map((order) => (
-                <tr
-                  key={order.id}
-                  onClick={() => setSelectedTx(order)}
-                  style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', cursor: 'pointer' }}
-                >
-                  <td style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)' }}>
-                    {order.id}
-                  </td>
-                  <td style={{ padding: '14px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
-                    {order.customerName}
-                  </td>
-                  <td style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                    {order.paymentMethod}
-                  </td>
-                  <td className="tuw-tabular-nums" style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', textAlign: 'right' }}>
-                    ₹{order.total.toLocaleString()}
-                  </td>
-                  <td style={{ padding: '14px 16px' }}>
-                    {order.paymentStatus === 'paid' && <Badge variant="success">Paid</Badge>}
-                    {order.paymentStatus === 'pending' && <Badge variant="warning">Pending</Badge>}
-                    {order.paymentStatus === 'failed' && <Badge variant="danger">Failed</Badge>}
-                    {order.paymentStatus === 'refunded' && <Badge variant="neutral">Refunded</Badge>}
-                  </td>
-                  <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                    <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedTx(order); }}>
-                      View Receipt
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table>
+          <TableHeader style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
+            <TableRow hoverable={false}>
+              <TableHead style={{ padding: '12px 16px' }}>Tx Ref</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Customer</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Payment Method</TableHead>
+              <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Amount</TableHead>
+              <TableHead style={{ padding: '12px 16px' }}>Status</TableHead>
+              <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedOrders.map((order) => (
+              <TableRow
+                key={order.id}
+                onClick={() => setSelectedTx(order)}
+                style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', cursor: 'pointer' }}
+              >
+                <TableCell style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)' }}>
+                  {order.id}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
+                  {order.customerName}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                  {order.paymentMethod}
+                </TableCell>
+                <TableCell className="tuw-tabular-nums" style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', textAlign: 'right' }}>
+                  ₹{order.total.toLocaleString()}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px' }}>
+                  {order.paymentStatus === 'paid' && <Badge variant="success">Paid</Badge>}
+                  {order.paymentStatus === 'pending' && <Badge variant="warning">Pending</Badge>}
+                  {order.paymentStatus === 'failed' && <Badge variant="danger">Failed</Badge>}
+                  {order.paymentStatus === 'refunded' && <Badge variant="neutral">Refunded</Badge>}
+                </TableCell>
+                <TableCell style={{ padding: '14px 16px', textAlign: 'right' }}>
+                  <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedTx(order); }}>
+                    View Receipt
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
 
         <Pagination
           currentPage={currentPage}
@@ -186,36 +179,29 @@ export default function PaymentsPage() {
       >
         {selectedTx && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            <div style={{ padding: 16, backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)', borderRadius: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <HeroCard
+              badge={
+                <Badge variant={selectedTx.paymentStatus === 'paid' ? 'success' : 'warning'}>
+                  {selectedTx.paymentStatus}
+                </Badge>
+              }
+            >
               <div>
                 <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>Settled Value</span>
                 <div className="tuw-tabular-nums" style={{ fontSize: 24, fontWeight: 700, color: 'var(--tuw-text-primary, #262626)', marginTop: 2 }}>
                   ₹{selectedTx.total.toLocaleString()}
                 </div>
               </div>
-              <Badge variant={selectedTx.paymentStatus === 'paid' ? 'success' : 'warning'}>
-                {selectedTx.paymentStatus}
-              </Badge>
-            </div>
+            </HeroCard>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: 13 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>Customer:</span>
-                <strong>{selectedTx.customerName}</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>Method:</span>
-                <span>{selectedTx.paymentMethod}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>Gateway Reference:</span>
-                <span style={{ fontFamily: 'monospace' }}>ch_mock_3N9A8s12984</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>Fraud Risk Score:</span>
-                <span style={{ color: 'var(--tuw-text-success, #187343)', fontWeight: 600 }}>0.02 (Low Risk)</span>
-              </div>
-            </div>
+            <KeyValueList
+              items={[
+                { label: 'Customer:', value: <strong>{selectedTx.customerName}</strong> },
+                { label: 'Method:', value: <span>{selectedTx.paymentMethod}</span> },
+                { label: 'Gateway Reference:', value: <span style={{ fontFamily: 'monospace' }}>ch_mock_3N9A8s12984</span> },
+                { label: 'Fraud Risk Score:', value: <span style={{ color: 'var(--tuw-text-success, #187343)', fontWeight: 600 }}>0.02 (Low Risk)</span> },
+              ]}
+            />
           </div>
         )}
       </Drawer>

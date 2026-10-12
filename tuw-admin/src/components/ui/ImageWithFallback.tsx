@@ -6,6 +6,8 @@ import { ImageOff } from 'lucide-react';
 export interface ImageWithFallbackProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   fallbackSrc?: string;
   fallbackText?: string;
+  /** Failure-face treatment. neutral keeps the current grey wash; info uses a light-blue wash with error text. */
+  fallbackTone?: 'neutral' | 'info';
 }
 
 /**
@@ -16,6 +18,7 @@ export default function ImageWithFallback({
   alt = '',
   fallbackSrc,
   fallbackText = 'Image not available',
+  fallbackTone = 'neutral',
   className = '',
   style = {},
   ...props
@@ -36,6 +39,7 @@ export default function ImageWithFallback({
       );
     }
 
+    const info = fallbackTone === 'info';
     return (
       <div
         role="img"
@@ -47,8 +51,8 @@ export default function ImageWithFallback({
           alignItems: 'center',
           justifyContent: 'center',
           gap: '8px',
-          backgroundColor: 'var(--tuw-bg-surface-subtle, #F1F3F5)',
-          color: 'var(--tuw-text-tertiary, #9CA3AF)',
+          backgroundColor: info ? 'var(--tuw-bg-info, #F4F9FE)' : 'var(--tuw-bg-surface-subtle, #F1F3F5)',
+          color: info ? 'var(--tuw-text-info, #175CD3)' : 'var(--tuw-text-tertiary, #9CA3AF)',
           borderRadius: 'var(--tuw-radius-control, 8px)',
           border: '1px dashed var(--tuw-border-subtle, #E5E7EB)',
           padding: '16px',
@@ -60,7 +64,7 @@ export default function ImageWithFallback({
         }}
       >
         <ImageOff size={24} />
-        <span style={{ fontSize: '12px', textAlign: 'center', fontWeight: 500 }}>
+        <span style={{ fontSize: '12px', textAlign: 'center', fontWeight: 500, color: info ? 'var(--tuw-text-error, #C91818)' : undefined }}>
           {fallbackText}
         </span>
       </div>

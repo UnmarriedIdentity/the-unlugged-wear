@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Save, Store, Palette, CreditCard, Truck, Receipt, Bell, ShieldCheck, Check, AlertCircle, RefreshCw } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { Button, Input, ContentCard, Badge } from '@/components/ui';
+import { Button, Input, ContentCard, Badge, PageHeader } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
@@ -63,15 +63,9 @@ export default function SettingsView() {
 
   return (
     <DashboardShell pageTitle="Settings" activeNav="settings">
-      <div className={styles.pageHeader}>
-        <div className={styles.headingGroup}>
-          <h2 className={styles.pageTitle}>Store Settings & Governance</h2>
-          <p className={styles.pageSubtitle}>
-            Configure multi-region store details, partner API connections, taxes, and notification policies.
-          </p>
-        </div>
-
-        <div className={styles.headerActions}>
+      <PageHeader
+        title="Store Settings & Governance"
+        actions={
           <Button
             variant="primary"
             size="md"
@@ -80,8 +74,8 @@ export default function SettingsView() {
           >
             <span>{savedSuccess ? 'Saved to Memory' : 'Save Changes'}</span>
           </Button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Unsaved changes warning bar */}
       {isDirty && (

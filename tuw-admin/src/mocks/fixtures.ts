@@ -17,6 +17,32 @@ export interface ProductItem {
   image?: string;
   video?: string;
   rating: number;
+  /** Explicit per-variant inventory. Optional: absent means synthesize from
+   * colors/sizes/price/stock (see resolveVariants) — every existing fixture
+   * stays valid, and the future API returns explicit arrays. */
+  variants?: ProductVariant[];
+  /** Gallery image URLs beyond the hero image. Default []. */
+  images?: string[];
+  // Apparel metadata (all optional — existing fixtures stay valid)
+  fabricGsm?: string;
+  cut?: string;
+  modelDims?: string;
+  care?: string;
+  monogram?: { enabled: boolean; maxChars: number; upcharge: number };
+  seoTitle?: string;
+  seoDescription?: string;
+}
+
+/** Per-size/color inventory unit. Prices follow ProductItem.price convention
+ * (floats — matches the product domain; AGENTS minor-unit tension recorded
+ * for later reconciliation, not silently converted). */
+export interface ProductVariant {
+  id: string;
+  color: string;
+  size: string;
+  sku: string;
+  price: number;
+  stock: number;
 }
 
 export interface OrderItemLine {
@@ -148,16 +174,6 @@ export interface TeamMember {
   status: 'active' | 'invited' | 'inactive';
   lastActive: string;
   avatarBg: string;
-}
-
-export interface AuditEntry {
-  id: string;
-  actor: string;
-  action: string;
-  resource: string;
-  ipAddress: string;
-  timestamp: string;
-  severity: 'info' | 'warning' | 'security';
 }
 
 // -------------------------------------------------------------
@@ -1297,54 +1313,6 @@ export const initialTeam: TeamMember[] = [
     status: 'invited',
     lastActive: 'Pending invite',
     avatarBg: '#90979F',
-  },
-];
-
-export const initialAuditLogs: AuditEntry[] = [
-  {
-    id: 'AUD-9012',
-    actor: 'ronan@theunpluggedwear.com (Owner)',
-    action: 'Changed shipping rates for UK Region',
-    resource: 'Settings / Shipping',
-    ipAddress: '192.168.1.104',
-    timestamp: '16 Apr 2026, 12:44',
-    severity: 'info',
-  },
-  {
-    id: 'AUD-9011',
-    actor: 'system',
-    action: 'Print partner webhook timed out for #ORD-8817 (3 retries)',
-    resource: 'Integrations / Webhooks',
-    ipAddress: '10.0.4.12',
-    timestamp: '16 Apr 2026, 13:15',
-    severity: 'warning',
-  },
-  {
-    id: 'AUD-9010',
-    actor: 'tariq@theunpluggedwear.com (Operations)',
-    action: 'Dispatched #ORD-8820 via DHL Express (DHL-489102834)',
-    resource: 'Shipments / Dispatch',
-    ipAddress: '192.168.1.112',
-    timestamp: '16 Apr 2026, 16:10',
-    severity: 'info',
-  },
-  {
-    id: 'AUD-9009',
-    actor: 'tariq@theunpluggedwear.com (Operations)',
-    action: 'Processed refund REF-2041 (₹147.00) for #ORD-8815',
-    resource: 'Refunds / Payment',
-    ipAddress: '192.168.1.112',
-    timestamp: '16 Apr 2026, 12:45',
-    severity: 'info',
-  },
-  {
-    id: 'AUD-9008',
-    actor: 'elena.r@theunpluggedwear.com (Content)',
-    action: 'Published new editorial collection: Autumn/Winter Urban Minimal',
-    resource: 'Collections / Merchandising',
-    ipAddress: '82.165.197.1',
-    timestamp: '16 Apr 2026, 10:15',
-    severity: 'info',
   },
 ];
 

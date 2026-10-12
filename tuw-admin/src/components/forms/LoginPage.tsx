@@ -105,7 +105,7 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
   const isEmailActive = email.length > 0;
 
   return (
-    <main className={styles.pageWrapper}>
+    <main className="flex min-h-screen w-full max-w-full overflow-x-hidden bg-white max-lg:flex-col">
       {/* ==========================================================================
           LEFT HERO SECTION (Frame 124 - Width 712px, Height 1024px)
           ========================================================================== */}
@@ -113,25 +113,25 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
       {/* ==========================================================================
           LEFT HERO SECTION (Frame 124 - Width 712px, Height 1024px)
           ========================================================================== */}
-      <section className={styles.heroSection}>
+      <section className="relative flex min-h-screen w-[49.444%] flex-[0_0_49.444%] flex-col justify-end overflow-hidden bg-auth-hero max-lg:h-[420px] max-lg:min-h-[420px] max-lg:w-full max-lg:flex-none">
         <Image
           src="/images/login-hero.png"
           alt="Retail Storeflow Dashboard Owners"
           fill
           priority
           sizes="(max-width: 900px) 100vw, 50vw"
-          className={styles.heroImage}
+          className="absolute inset-0 h-full w-full object-cover object-top"
         />
         {/* Rectangle 96: Linear gradient overlay on bottom 50% */}
         <div className={styles.heroOverlay} />
 
         {/* Frame 60511: Brand, Headline, Subtitle */}
-        <div className={styles.heroContent}>
-          <div className={styles.brandTitle}>Storeflow</div>
-          <h1 className={styles.heroHeadline}>
+        <div className="relative z-2 flex flex-col gap-4 px-14 pb-17 text-white max-lg:px-6 max-lg:pb-8">
+          <div className="text-auth-brand font-bold text-white tracking-auth-title">Storeflow</div>
+          <h1 className="text-auth-headline font-bold leading-auth-headline text-white tracking-auth-hero whitespace-pre-line max-w-auth-hero-head max-lg:text-auth-headline-md">
             Command Your{'\n'}Business with{'\n'}Confidence.
           </h1>
-          <p className={styles.heroSubtitle}>
+          <p className="text-auth-lead font-medium text-white tracking-auth-wide max-w-auth-hero-sub max-lg:text-auth-hero-sub-md">
             Experience a new standard of efficiency through an intelligent, beautifully designed admin dashboard.
           </p>
         </div>
@@ -140,42 +140,36 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
       {/* ==========================================================================
           RIGHT AUTH SECTION (Frame 140 - Width 728px, Height 1024px)
           ========================================================================== */}
-      <section className={styles.formSection}>
-        <div className={styles.formContainer}>
+      <section className="relative flex min-h-screen w-[50.556%] flex-[0_0_50.556%] flex-col items-center justify-center overflow-y-auto bg-white bg-no-repeat py-[clamp(24px,4vh,48px)] px-6 max-lg:w-full max-lg:flex-none max-lg:px-5 max-lg:py-9 bg-[radial-gradient(circle_520px_at_78%_5%,rgba(229,245,211,0.6)_0%,rgba(255,255,255,0)_100%),radial-gradient(circle_420px_at_98%_8%,rgba(246,198,54,0.1)_0%,rgba(229,245,211,0.05)_50%,rgba(255,255,255,0)_100%)]">
+        <div className="flex w-full max-w-auth-form flex-col items-center">
           {/* Header Block: Frame 3 Logo Badge + Title */}
-          <header className={styles.headerBlock}>
-            <div className={styles.logoBadge}>
+          <header className="flex flex-col items-center mb-auth-header-gap text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-auth-badge bg-auth-button shadow-auth-badge mb-4">
               <Image
                 src="/logos/tuw-stag-white.png"
                 alt="The Unplugged Wear"
                 width={27}
                 height={27}
-                className={styles.logoMonogram}
+                className="h-[27px] w-[27px] object-contain"
               />
             </div>
 
             {view === 'login' && (
               <>
-                <h2 className={styles.formTitle}>Log in or Sign up</h2>
-                <p className={styles.formSubtitle}>Welcome to Storeflow</p>
+                <h2 className="text-auth-title font-semibold text-auth-ink tracking-auth-title mb-2">Log in or Sign up</h2>
+                <p className="text-auth-lead font-normal text-auth-muted tracking-auth-wide">Welcome to Storeflow</p>
               </>
             )}
 
             {view === 'reset-password' && (
-              <h2 className={styles.formTitle} style={{ color: '#000000' }}>
+              <h2 className="text-auth-title font-semibold tracking-auth-title mb-2 text-auth-pure">
                 Reset password
               </h2>
             )}
 
             {view === 'recovery-sent' && (
               <h2
-                className={styles.formTitle}
-                style={{
-                  fontSize: '24px',
-                  lineHeight: '28.8px',
-                  letterSpacing: '0.72px',
-                  color: '#000000',
-                }}
+                className="text-auth-recovery-head font-semibold tracking-auth-recovery-head text-auth-pure"
               >
                 Reset password
               </h2>
@@ -188,62 +182,60 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
           {view === 'login' && (
             <>
               {/* Frame 139: Social Login Buttons */}
-              <div className={styles.socialRow}>
+              <div className="grid w-full max-w-auth-form grid-cols-2 gap-6 mb-auth-social-gap">
                 <button
                   type="button"
-                  className={styles.socialButton}
+                  className="flex h-13 w-full items-center gap-2 rounded-auth-social border border-auth-line bg-white px-3.5 select-none transition-colors duration-200 hover:border-auth-line-hover hover:bg-auth-canvas"
                   onClick={() => applyState('filled')}
                   id="apple-login-btn"
                 >
-                  <div className={styles.socialIconBadge}>
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-auth-check-line bg-white">
                     <Image
                       src="/images/apple-logo.png"
                       alt="Apple"
                       width={18}
                       height={18}
-                      className={styles.appleIcon}
+                      className="h-4.5 w-4.5 object-contain"
                     />
                   </div>
-                  <span className={styles.socialText}>Use Apple</span>
+                  <span className="text-auth-social font-medium tracking-auth-social text-auth-ink whitespace-nowrap">Use Apple</span>
                 </button>
 
                 <button
                   type="button"
-                  className={styles.socialButton}
+                  className="flex h-13 w-full items-center gap-2 rounded-auth-social border border-auth-line bg-white px-3.5 select-none transition-colors duration-200 hover:border-auth-line-hover hover:bg-auth-canvas"
                   onClick={() => applyState('filled')}
                   id="google-login-btn"
                 >
-                  <div className={styles.socialIconBadge}>
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-auth-check-line bg-white">
                     <Image
                       src="/images/google-logo.png"
                       alt="Google"
                       width={16}
                       height={16}
-                      className={styles.googleIcon}
+                      className="h-4 w-4 object-contain"
                     />
                   </div>
-                  <span className={styles.socialText}>Use Google</span>
+                  <span className="text-auth-social font-medium tracking-auth-social text-auth-ink whitespace-nowrap">Use Google</span>
                 </button>
               </div>
 
               {/* Frame 136: Divider */}
-              <div className={styles.dividerRow}>
-                <div className={styles.dividerLine} />
-                <span className={styles.dividerText}>Or</span>
-                <div className={styles.dividerLine} />
+              <div className="flex w-full max-w-auth-form items-center justify-between gap-4 mb-auth-social-gap">
+                <div className="h-px flex-1 bg-auth-divider" />
+                <span className="shrink-0 px-6 text-center text-auth-divider font-normal text-auth-muted">Or</span>
+                <div className="h-px flex-1 bg-auth-divider" />
               </div>
 
               {/* Login Form */}
-              <form className={styles.form} onSubmit={handleLoginSubmit} noValidate>
+              <form className="flex w-full max-w-auth-form flex-col" onSubmit={handleLoginSubmit} noValidate>
                 {/* Frame 129: Email Field */}
-                <div className={styles.fieldGroup}>
-                  <label htmlFor="email-input" className={styles.fieldLabel}>
+                <div className="flex w-full flex-col mb-auth-field-gap">
+                  <label htmlFor="email-input" className="text-auth-social font-medium tracking-auth-social text-auth-ink mb-2 text-left">
                     Email
                   </label>
                   <div
-                    className={`${styles.inputWrapper} ${
-                      isEmailActive ? styles.inputWrapperActive : ''
-                    }`}
+                    className={`flex h-12 w-full items-center gap-2.5 rounded-xl border bg-white px-4 transition-colors duration-200 ${isEmailActive ? 'border-auth-teal' : 'border-auth-line'}`}
                   >
                     <input
                       id="email-input"
@@ -254,26 +246,22 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
                         if (hasError) setHasError(false);
                       }}
                       placeholder="Enter your email here"
-                      className={`${styles.inputField} ${
-                        email ? styles.inputFieldFilled : ''
-                      }`}
+                      className={`h-full w-full flex-1 border-none bg-transparent tracking-auth-input text-auth-ink placeholder:text-auth-faint placeholder:text-sm ${email ? 'text-auth-input-filled tracking-auth-input-filled' : 'text-auth-input'}`}
                       autoComplete="email"
                     />
-                    <div className={styles.inputIcon}>
+                    <div className="flex items-center justify-center shrink-0 text-auth-faint">
                       <Mail size={20} strokeWidth={1.5} />
                     </div>
                   </div>
                 </div>
 
                 {/* Frame 130: Password Field & Remember Me */}
-                <div className={styles.fieldGroup}>
-                  <label htmlFor="password-input" className={styles.fieldLabel}>
+                <div className="flex w-full flex-col mb-auth-field-gap">
+                  <label htmlFor="password-input" className="text-auth-social font-medium tracking-auth-social text-auth-ink mb-2 text-left">
                     Password
                   </label>
                   <div
-                    className={`${styles.inputWrapper} ${
-                      hasError ? styles.inputWrapperError : ''
-                    }`}
+                    className={`flex h-12 w-full items-center gap-2.5 rounded-xl border px-4 transition-colors duration-200 ${hasError ? 'border-auth-error bg-auth-error-bg' : 'border-auth-line bg-white'}`}
                   >
                     <input
                       id="password-input"
@@ -284,15 +272,13 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
                         if (hasError) setHasError(false);
                       }}
                       placeholder="Input your password"
-                      className={`${styles.inputField} ${
-                        password ? styles.inputFieldFilled : ''
-                      }`}
+                      className={`h-full w-full flex-1 border-none bg-transparent tracking-auth-input text-auth-ink placeholder:text-auth-faint placeholder:text-sm ${password ? 'text-auth-input-filled tracking-auth-input-filled' : 'text-auth-input'}`}
                       autoComplete="current-password"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className={styles.togglePasswordBtn}
+                      className="flex items-center justify-center p-0.5 text-auth-faint transition-colors duration-150 hover:text-auth-ink"
                       aria-label={showPassword ? 'Hide password' : 'Show password'}
                       id="toggle-password-btn"
                     >
@@ -306,8 +292,8 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
 
                   {/* Frame 281 in 1:20725: Password comparison error */}
                   {hasError && (
-                    <div className={styles.errorMessage} id="password-error">
-                      <CircleX size={16} strokeWidth={1.0} className={styles.errorIcon} />
+                    <div className="flex items-center gap-1.5 mt-1.5 text-auth-input tracking-auth-input text-auth-error" id="password-error">
+                      <CircleX size={16} strokeWidth={1.0} className="shrink-0 text-auth-error" />
                       <span>Password comparisson failed</span>
                     </div>
                   )}
@@ -315,31 +301,29 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
 
                 {/* Frame 132: Remember Me Checkbox */}
                 <div
-                  className={styles.rememberRow}
+                  className="flex items-center gap-2 mt-2.5 mb-auth-field-gap cursor-pointer select-none w-fit"
                   onClick={() => setRememberMe(!rememberMe)}
                   id="remember-me-toggle"
                 >
                   <div
-                    className={`${styles.checkboxBox} ${
-                      rememberMe ? styles.checkboxBoxChecked : ''
-                    }`}
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-auth-checkbox border transition-all duration-150 ${rememberMe ? 'bg-auth-button border-auth-button' : 'bg-white border-auth-check-line'}`}
                   >
-                    {rememberMe && <Check size={12} strokeWidth={3} color="#FFFFFF" />}
+                    {rememberMe && <Check size={12} strokeWidth={3} color="currentColor" className="text-white" />}
                   </div>
-                  <span className={styles.rememberText}>Remember me</span>
+                  <span className="text-auth-input tracking-auth-input font-normal text-auth-ink">Remember me</span>
                 </div>
 
-                {/* Primary_button in Figma: 568x48, radius 12px, fill #242424 */}
-                <button type="submit" className={styles.primaryButton} id="login-submit-btn">
+                {/* Primary_button in Figma: 568x48, radius 12px, fill auth-button token */}
+                <button type="submit" className="flex h-12 w-full max-w-auth-form items-center justify-center rounded-xl bg-auth-button text-auth-btn font-bold text-white select-none transition-colors duration-150 hover:bg-auth-button-hover" id="login-submit-btn">
                   Log in
                 </button>
               </form>
 
               {/* Frame 133: Forgot Password Link */}
-              <div className={styles.forgotPasswordRow}>
+              <div className="flex w-full items-center justify-center gap-2 my-auth-row-gap text-auth-input tracking-auth-input font-normal text-auth-ink">
                 Did you forget your password?{' '}
                 <span
-                  className={styles.resetLink}
+                  className="text-auth-teal font-semibold leading-auth-link tracking-auth-input cursor-pointer hover:underline"
                   onClick={() => applyState('reset')}
                   id="goto-reset-btn"
                 >
@@ -347,12 +331,11 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
                 </span>
               </div>
 
-              {/* Sign up for free: 568x48, radius 10px, 16px 700 */}
+              {/* Sign up for free: 568x48, radius auth-btn token, 16px 700 */}
               <Link
                 href="/signup"
-                className={styles.signupButton}
+                className="flex h-12 w-full max-w-auth-form cursor-pointer items-center justify-center rounded-auth-btn text-auth-btn font-bold text-auth-ink no-underline select-none transition-opacity duration-150 hover:opacity-75"
                 id="signup-link-btn"
-                style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
                 Sign up for free
               </Link>
@@ -361,30 +344,29 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
 
           {/* ==========================================================================
               STATE 4: RESET PASSWORD (Frame 1:20710)
-              Card width: 552px, radius: 20px, fill: #FFFFFF, stroke: #E9E9E9
+              Card width: 552px, radius: 20px, fill: surface token, stroke: auth-line token
               ========================================================================== */}
           {view === 'reset-password' && (
-            <div className={styles.resetCard}>
-              <form className={styles.form} onSubmit={handleResetSubmit}>
-                <div className={styles.fieldGroup} style={{ marginBottom: '24px' }}>
+            <div className="flex w-full max-w-auth-card flex-col gap-6 rounded-auth-card border border-auth-line bg-white shadow-auth-card p-10 px-8">
+              <form className="flex w-full max-w-auth-form flex-col" onSubmit={handleResetSubmit}>
+                <div className="flex w-full flex-col mb-6">
                   <label
                     htmlFor="reset-email-input"
-                    className={styles.fieldLabel}
-                    style={{ fontWeight: 600, letterSpacing: '0.28px' }}
+                    className="text-auth-input tracking-auth-input font-semibold text-auth-ink mb-2"
                   >
                     Email
                   </label>
-                  <div className={styles.resetInputWrapper}>
+                  <div className="flex h-12 w-full max-w-auth-reset items-center gap-2.5 rounded-xl border border-auth-line bg-auth-canvas px-4">
                     <input
                       id="reset-email-input"
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="Enter your email here"
-                      className={styles.resetInput}
+                      className="h-full w-full flex-1 border-none bg-transparent text-auth-input-filled tracking-auth-input-filled font-normal text-auth-ink placeholder:text-auth-faint"
                       required
                     />
-                    <div className={styles.inputIcon}>
+                    <div className="flex items-center justify-center shrink-0 text-auth-faint">
                       <Mail size={20} strokeWidth={1.5} />
                     </div>
                   </div>
@@ -392,7 +374,7 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
 
                 <button
                   type="submit"
-                  className={styles.resetButton}
+                  className="flex h-12 w-full max-w-auth-reset items-center justify-center rounded-xl bg-auth-button text-auth-btn font-bold text-white select-none transition-colors duration-150 hover:bg-auth-button-hover"
                   id="reset-submit-btn"
                 >
                   Reset password
@@ -400,7 +382,7 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
               </form>
 
               <div
-                className={styles.backLink}
+                className="mt-4 text-auth-backlink font-medium text-auth-muted cursor-pointer text-center hover:text-auth-ink hover:underline"
                 onClick={() => applyState('default')}
               >
                 Back to log in
@@ -410,22 +392,22 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
 
           {/* ==========================================================================
               STATE 5: RECOVERY EMAIL SENT (Frame 1:20690)
-              Card width: 552px, radius: 24px, fill: #FFFFFF, stroke: #E9E9E9
+              Card width: 552px, radius: 24px, fill: surface token, stroke: auth-line token
               ========================================================================== */}
           {view === 'recovery-sent' && (
-            <div className={styles.recoveryCard}>
+            <div className="flex w-full max-w-auth-card flex-col items-center gap-8 rounded-auth-card-lg border border-auth-line bg-white py-[clamp(24px,4vh,40px)] px-[clamp(20px,5vw,80px)]">
               {/* Frame 281: Success pill badge */}
-              <div className={styles.recoveryPill}>
-                <CircleCheck size={20} strokeWidth={1.5} color="#009E5C" />
+              <div className="inline-flex items-center gap-1.5 rounded-xl bg-auth-success-bg px-4 py-2 text-auth-input-filled tracking-auth-input-filled font-normal text-auth-success whitespace-nowrap">
+                <CircleCheck size={20} strokeWidth={1.5} color="currentColor" className="text-auth-success" />
                 <span>Sending password reset link was successful</span>
               </div>
 
               {/* Frame 283: Headline & Description */}
-              <div className={styles.recoveryTextBlock}>
-                <h3 className={styles.recoveryHeading}>
+              <div className="flex w-full max-w-auth-recovery flex-col items-center gap-4 text-center">
+                <h3 className="text-auth-recovery-head font-semibold tracking-auth-recovery-head text-auth-teal">
                   The recovery email was sent successfully!
                 </h3>
-                <p className={styles.recoveryDescription}>
+                <p className="text-auth-input-filled tracking-auth-input-filled font-normal text-auth-muted">
                   Check your e-mail and click on the link, where you will able to change your password.
                 </p>
               </div>
@@ -433,7 +415,7 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
               {/* Primary_button: Back to login */}
               <button
                 type="button"
-                className={styles.recoveryButton}
+                className="flex h-12 w-full max-w-auth-recovery items-center justify-center rounded-xl bg-auth-button text-auth-btn font-bold text-white select-none transition-colors duration-150 hover:bg-auth-button-hover"
                 onClick={() => applyState('default')}
                 id="back-to-login-btn"
               >
@@ -449,7 +431,7 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
 
 export default function LoginPage({ initialMode }: LoginPageProps) {
   return (
-    <Suspense fallback={<div style={{ minHeight: '100vh', background: '#FFFFFF' }} />}>
+      <Suspense fallback={<div style={{ minHeight: '100vh', background: 'var(--color-surface)' }} />}>
       <LoginPageContent initialMode={initialMode} />
     </Suspense>
   );

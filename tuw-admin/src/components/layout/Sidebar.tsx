@@ -10,12 +10,11 @@ import {
   Package,
   Users,
   TrendingUp,
+  LayoutGrid,
+  ShoppingBag,
   Settings,
   Headphones,
   LogOut,
-  ChevronRight,
-  ChevronLeft,
-  ChevronDown,
   PackageCheck,
   Truck,
   Undo2,
@@ -25,12 +24,12 @@ import {
   Palette,
   FileText,
   ShieldCheck,
-  MoonStar,
-  Contrast,
-  PanelLeft,
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
+import { SidebarNavGroup, SidebarNavItem, SidebarDock } from './sidebar-nav';
+import type { SidebarNavItemDef } from './sidebar-nav';
+import type { LucideIcon } from 'lucide-react';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -72,13 +71,80 @@ function getActiveGroupForPath(pathname: string): string | null {
     return 'merchandise';
   }
   if (
-    pathname.startsWith('/team') ||
-    pathname.startsWith('/audit-log')
+    pathname.startsWith('/team')
   ) {
     return 'system';
   }
   return null;
 }
+
+interface NavGroupDef {
+  key: string;
+  label: string;
+  icon: LucideIcon;
+  items: SidebarNavItemDef[];
+}
+
+// Single source of truth for sidebar navigation (pixel-identical rendering;
+// groups and items below map over this config — no hand-written repeats).
+const NAV_GROUPS: NavGroupDef[] = [
+  {
+    key: 'core',
+    label: 'Core',
+    icon: LayoutGrid,
+    items: [
+      { href: '/dashboard', label: 'Dashboard', icon: HomeIcon, match: ['/dashboard'] },
+      { href: '/orders', label: 'Orders', icon: ClipboardList, match: ['/orders'] },
+      { href: '/products', label: 'Products', icon: Package, match: ['/products'] },
+      { href: '/customers', label: 'Customers', icon: Users, match: ['/customers'] },
+      { href: '/reports', label: 'Analytics & Reports', icon: TrendingUp, match: ['/reports', '/analytics'] },
+    ],
+  },
+  {
+    key: 'operations',
+    label: 'Operations',
+    icon: Package,
+    items: [
+      { href: '/fulfillment', label: 'Fulfillment', icon: PackageCheck, match: ['/fulfillment'], badge: { text: '4', dotClassName: 'bg-action-primary', className: 'inline-flex min-w-[18px] items-center justify-center rounded-full bg-nav-badge-purple-bg px-[7.5px] py-[2.5px] text-center text-[11.5px] font-bold leading-none text-action-primary' } },
+      { href: '/shipments', label: 'Shipments', icon: Truck, match: ['/shipments'] },
+      { href: '/returns', label: 'Returns & RMA', icon: Undo2, match: ['/returns'], badge: { text: '2', dotClassName: 'bg-nav-badge-amber-text', className: 'inline-flex min-w-[18px] items-center justify-center rounded-full bg-nav-badge-amber-bg px-[7.5px] py-[2.5px] text-center text-[11.5px] font-bold leading-none text-nav-badge-amber-text' } },
+      { href: '/refunds', label: 'Refunds', icon: RotateCcw, match: ['/refunds'] },
+      { href: '/payments', label: 'Payments', icon: CreditCard, match: ['/payments'] },
+    ],
+  },
+  {
+    key: 'merchandise',
+    label: 'Merchandise',
+    icon: ShoppingBag,
+    items: [
+      { href: '/collections', label: 'Collections', icon: Layers, match: ['/collections'] },
+      { href: '/designs', label: 'Design Assets', icon: Palette, match: ['/designs'] },
+      { href: '/content', label: 'Content CMS', icon: FileText, match: ['/content'] },
+    ],
+  },
+  {
+    key: 'system',
+    label: 'System',
+    icon: ShieldCheck,
+    items: [
+      { href: '/team', label: 'Team', icon: Users, match: ['/team'] },
+    ],
+  },
+];
+
+interface FooterItemDef {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  match: string[];
+  variant: 'footer' | 'danger';
+}
+
+const FOOTER_ITEMS: FooterItemDef[] = [
+  { href: '/settings', label: 'Settings', icon: Settings, match: ['/settings'], variant: 'footer' },
+  { href: '/support', label: 'Help & Support', icon: Headphones, match: ['/support', '/help'], variant: 'footer' },
+  { href: '/login', label: 'Log out', icon: LogOut, match: [], variant: 'danger' },
+];
 
 export default function Sidebar({
   isCollapsed,
@@ -108,38 +174,41 @@ export default function Sidebar({
     }
   };
 
-  // Bottom dock toolbar theme state
-  const [activeThemeMode, setActiveThemeMode] = useState<'dark' | 'contrast' | 'default'>('dark');
-
-  const handleThemeToggle = (mode: 'dark' | 'contrast') => {
-    setActiveThemeMode((prev) => (prev === mode ? 'default' : mode));
-  };
-
-  // User-controlled accordion state: persists across route transitions & page loads
+  // User-controlled accordion state: persists across route transitions & page loads.
+  // Hydration-safe: the module cache is null on both server and first client render,
+  // so both derive ONLY from pathname (identical output → no SSR mismatch).
+  // Client-side navigations reuse the live cache with no flash; stored groups
+  // apply in the client-only effect below.
   const [openGroups, setOpenGroups] = useState<Set<string>>(() => {
     if (globalOpenGroups !== null) {
       return new Set(globalOpenGroups);
     }
-    if (typeof window !== 'undefined') {
-      try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (Array.isArray(parsed)) {
-            const set = new Set<string>(parsed);
-            globalOpenGroups = set;
-            return set;
-          }
-        }
-      } catch {
-        // fallback
-      }
-    }
     const activeGroup = getActiveGroupForPath(pathname) || 'core';
-    const initial = new Set<string>([activeGroup]);
-    globalOpenGroups = initial;
-    return initial;
+    return new Set<string>([activeGroup]);
   });
+
+  React.useEffect(() => {
+    try {
+      if (globalOpenGroups !== null) {
+        setOpenGroups(new Set(globalOpenGroups));
+        return;
+      }
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          const set = new Set<string>(parsed);
+          globalOpenGroups = set;
+          setOpenGroups(set);
+        }
+      }
+    } catch {
+      // fallback: keep pathname-derived default
+    }
+  }, []);
+
+  // Fade-mask scroll indicators were removed: their flex items added phantom gaps
+  // and zoom-fragile overlap math. Nav scrolls clean without indicators.
 
   const toggleGroup = (key: string) => {
     setOpenGroups((prev) => {
@@ -166,31 +235,43 @@ export default function Sidebar({
     return pathname.startsWith(path);
   };
 
+  // Index of the active child per group (-1 = none): drives the segmented dark stem.
+  const childActiveIndex = (activeFlags: boolean[]) => activeFlags.findIndex(Boolean);
+  // Route-based active parent group (independent of open state) for parent highlighting.
+  const activeGroup = getActiveGroupForPath(pathname);  const coreFlags = [getIsActive('/dashboard'), getIsActive('/orders'), getIsActive('/products'), getIsActive('/customers'), getIsActive('/reports') || getIsActive('/analytics')];
+  const opsFlags = [getIsActive('/fulfillment'), getIsActive('/shipments'), getIsActive('/returns'), getIsActive('/refunds'), getIsActive('/payments')];
+  const merchFlags = [getIsActive('/collections'), getIsActive('/designs'), getIsActive('/content')];
+  const sysFlags = [getIsActive('/team')];
+  const coreStem = childActiveIndex(coreFlags);
+  const opsStem = childActiveIndex(opsFlags);
+  const merchStem = childActiveIndex(merchFlags);
+  const sysStem = childActiveIndex(sysFlags);
+
   return (
     <aside
-      className={cn('sidebar', isCollapsed && 'sidebarCollapsed', mobileMenuOpen && 'sidebarMobileOpen')}
+      className={cn('sidebar', 'fixed left-0 top-0 z-50 flex shrink-0 flex-col overflow-hidden border-r border-subtle bg-canvas transition-[width] duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)]', isCollapsed ? 'w-20 min-w-20 px-[10px] pb-[14px]' : 'w-60 min-w-60 md:w-55 md:min-w-55 lg:w-60 lg:min-w-60 px-[14px] pb-[10px]', mobileMenuOpen ? 'max-md:translate-x-0' : 'max-md:-translate-x-full', 'max-md:bottom-0 max-md:z-[100] max-md:max-w-[86vw] max-md:w-[290px] max-md:min-w-auto max-md:overflow-y-auto max-md:overflow-x-hidden max-md:px-[14px] max-md:pb-4 max-md:shadow-[4px_0_24px_rgba(0,0,0,0.15)] max-md:transition-transform')}
       onClick={handleSidebarClick}
     >
       {/* Brand Header */}
-      <div className="sidebarHeader">
-        <Link href="/" className="brandLink">
-          <div className="logoIconWrapper">
+      <div className={cn('flex w-full shrink-0 items-center bg-canvas border-b border-subtle mb-2 z-10 h-20 min-h-20', isCollapsed ? 'justify-center p-0' : 'justify-between px-1')}>
+        <Link href="/" className="flex items-center gap-2.5 no-underline text-primary">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-control bg-primary shadow-nav-logo">
             <Image
               src="/logos/tuw-stag-white.png"
               alt="The Unplugged Wear"
               width={22}
               height={22}
-              style={{ objectFit: 'contain', width: 'auto', height: '22px' }}
+              className="h-[22px] w-auto object-contain"
               priority
             />
           </div>
-          {!isCollapsed && <span className="brandName">TUW Admin</span>}
+          {!isCollapsed && <span className="text-[20px] font-bold tracking-auth-hero text-primary whitespace-nowrap">TUW Admin</span>}
         </Link>
 
         {/* Mobile Close Button */}
         <button
           type="button"
-          className="sidebarMobileCloseBtn"
+          className="hidden size-7.5 shrink-0 cursor-pointer items-center justify-center rounded-control border border-subtle bg-surface text-primary transition-all duration-[180ms] hover:border-action-primary hover:bg-selected hover:text-action-primary ml-auto max-md:flex focus-visible:outline-2 focus-visible:outline-action-primary focus-visible:outline-offset-2"
           onClick={onCloseMobileMenu}
           aria-label="Close menu"
           title="Close menu"
@@ -200,496 +281,50 @@ export default function Sidebar({
       </div>
 
       {/* Navigation Sections */}
-      <div className="navSections">
-        {/* CORE Section */}
-        <div className="navGroup">
-          {!isCollapsed && (
-            <button
-              type="button"
-              className="groupHeaderBtn"
-              onClick={() => toggleGroup('core')}
+      <div className={cn('flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden overscroll-y-contain mt-0.5 pb-6 pr-1 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden', isCollapsed ? 'gap-0' : 'gap-2.5')}>
+        {NAV_GROUPS.map((group) => {
+          const actives = group.items.map((item) => item.match.some((p) => getIsActive(p)));
+          const stemIdx = actives.findIndex(Boolean);
+          const open = !isCollapsed ? isGroupOpen(group.key) : true;
+          return (
+            <SidebarNavGroup
+              key={group.key}
+              groupKey={group.key}
+              label={group.label}
+              icon={group.icon}
+              isCollapsed={isCollapsed}
+              open={open}
+              chevronOpen={isGroupOpen(group.key)}
+              groupActive={activeGroup === group.key}
+              stemIdx={stemIdx}
+              onToggle={toggleGroup}
             >
-              <span className="groupLabel">CORE</span>
-              <ChevronDown
-                size={13}
-                className={cn('groupChevron', isGroupOpen('core') && 'groupChevronOpen')}
-              />
-            </button>
-          )}
-
-          {(!isCollapsed ? isGroupOpen('core') : true) && (
-            <div className={cn(!isCollapsed && 'navBranchTree')}>
-              {/* Dashboard */}
-              <div className={cn(!isCollapsed && 'navBranchItem')}>
-                <Link
-                  href="/dashboard"
-                  className={cn(
-                    'navBranchLink',
-                    getIsActive('/dashboard') && 'navBranchLinkActive',
-                    isCollapsed && 'navItemCollapsed'
-                  )}
-                  title={isCollapsed ? 'Dashboard' : undefined}
-                >
-                  <span className="navIcon">
-                    <HomeIcon size={17} />
-                  </span>
-                  {!isCollapsed && <span className="navBranchLabel">Dashboard</span>}
-                </Link>
-              </div>
-
-              {/* Orders */}
-              <div className={cn(!isCollapsed && 'navBranchItem')}>
-                <Link
-                  href="/orders"
-                  className={cn(
-                    'navBranchLink',
-                    getIsActive('/orders') && 'navBranchLinkActive',
-                    isCollapsed && 'navItemCollapsed'
-                  )}
-                  title={isCollapsed ? 'Orders' : undefined}
-                >
-                  <span className="navIcon">
-                    <ClipboardList size={17} />
-                  </span>
-                  {!isCollapsed && <span className="navBranchLabel">Orders</span>}
-                </Link>
-              </div>
-
-              {/* Products */}
-              <div className={cn(!isCollapsed && 'navBranchItem')}>
-                <Link
-                  href="/products"
-                  className={cn(
-                    'navBranchLink',
-                    getIsActive('/products') && 'navBranchLinkActive',
-                    isCollapsed && 'navItemCollapsed'
-                  )}
-                  title={isCollapsed ? 'Products' : undefined}
-                >
-                  <span className="navIcon">
-                    <Package size={17} />
-                  </span>
-                  {!isCollapsed && <span className="navBranchLabel">Products</span>}
-                </Link>
-              </div>
-
-              {/* Customers */}
-              <div className={cn(!isCollapsed && 'navBranchItem')}>
-                <Link
-                  href="/customers"
-                  className={cn(
-                    'navBranchLink',
-                    getIsActive('/customers') && 'navBranchLinkActive',
-                    isCollapsed && 'navItemCollapsed'
-                  )}
-                  title={isCollapsed ? 'Customers' : undefined}
-                >
-                  <span className="navIcon">
-                    <Users size={17} />
-                  </span>
-                  {!isCollapsed && <span className="navBranchLabel">Customers</span>}
-                </Link>
-              </div>
-
-              {/* Analytics & Reports */}
-              <div className={cn(!isCollapsed && 'navBranchItem')}>
-                <Link
-                  href="/reports"
-                  className={cn(
-                    'navBranchLink',
-                    (getIsActive('/reports') || getIsActive('/analytics')) && 'navBranchLinkActive',
-                    isCollapsed && 'navItemCollapsed'
-                  )}
-                  title={isCollapsed ? 'Analytics & Reports' : undefined}
-                >
-                  <span className="navIcon">
-                    <TrendingUp size={17} />
-                  </span>
-                  {!isCollapsed && <span className="navBranchLabel">Analytics & Reports</span>}
-                </Link>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* OPERATIONS Section */}
-        <div className="navGroup">
-          {!isCollapsed && (
-            <button
-              type="button"
-              className="groupHeaderBtn"
-              onClick={() => toggleGroup('operations')}
-            >
-              <span className="groupLabel">OPERATIONS</span>
-              <ChevronDown
-                size={13}
-                className={cn('groupChevron', isGroupOpen('operations') && 'groupChevronOpen')}
-              />
-            </button>
-          )}
-
-          {(!isCollapsed ? isGroupOpen('operations') : true) && (
-            <div className={cn(!isCollapsed && 'navBranchTree')}>
-              {/* Fulfillment */}
-              <div className={cn(!isCollapsed && 'navBranchItem')}>
-                <Link
-                  href="/fulfillment"
-                  className={cn(
-                    'navBranchLink',
-                    getIsActive('/fulfillment') && 'navBranchLinkActive',
-                    isCollapsed && 'navItemCollapsed'
-                  )}
-                  title={isCollapsed ? 'Fulfillment' : undefined}
-                >
-                  <span className="navIcon">
-                    <PackageCheck size={17} />
-                  </span>
-                  {!isCollapsed && (
-                    <>
-                      <span className="navBranchLabel">Fulfillment</span>
-                      <span className="navBadge navBadgePurple">4</span>
-                    </>
-                  )}
-                </Link>
-              </div>
-
-              {/* Shipments */}
-              <div className={cn(!isCollapsed && 'navBranchItem')}>
-                <Link
-                  href="/shipments"
-                  className={cn(
-                    'navBranchLink',
-                    getIsActive('/shipments') && 'navBranchLinkActive',
-                    isCollapsed && 'navItemCollapsed'
-                  )}
-                  title={isCollapsed ? 'Shipments' : undefined}
-                >
-                  <span className="navIcon">
-                    <Truck size={17} />
-                  </span>
-                  {!isCollapsed && <span className="navBranchLabel">Shipments</span>}
-                </Link>
-              </div>
-
-              {/* Returns & RMA */}
-              <div className={cn(!isCollapsed && 'navBranchItem')}>
-                <Link
-                  href="/returns"
-                  className={cn(
-                    'navBranchLink',
-                    getIsActive('/returns') && 'navBranchLinkActive',
-                    isCollapsed && 'navItemCollapsed'
-                  )}
-                  title={isCollapsed ? 'Returns & RMA' : undefined}
-                >
-                  <span className="navIcon">
-                    <Undo2 size={17} />
-                  </span>
-                  {!isCollapsed && (
-                    <>
-                      <span className="navBranchLabel">Returns & RMA</span>
-                      <span className="navBadge navBadgeAmber">2</span>
-                    </>
-                  )}
-                </Link>
-              </div>
-
-              {/* Refunds */}
-              <div className={cn(!isCollapsed && 'navBranchItem')}>
-                <Link
-                  href="/refunds"
-                  className={cn(
-                    'navBranchLink',
-                    getIsActive('/refunds') && 'navBranchLinkActive',
-                    isCollapsed && 'navItemCollapsed'
-                  )}
-                  title={isCollapsed ? 'Refunds' : undefined}
-                >
-                  <span className="navIcon">
-                    <RotateCcw size={17} />
-                  </span>
-                  {!isCollapsed && <span className="navBranchLabel">Refunds</span>}
-                </Link>
-              </div>
-
-              {/* Payments */}
-              <div className={cn(!isCollapsed && 'navBranchItem')}>
-                <Link
-                  href="/payments"
-                  className={cn(
-                    'navBranchLink',
-                    getIsActive('/payments') && 'navBranchLinkActive',
-                    isCollapsed && 'navItemCollapsed'
-                  )}
-                  title={isCollapsed ? 'Payments' : undefined}
-                >
-                  <span className="navIcon">
-                    <CreditCard size={17} />
-                  </span>
-                  {!isCollapsed && <span className="navBranchLabel">Payments</span>}
-                </Link>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* MERCHANDISE Section */}
-        <div className="navGroup">
-          {!isCollapsed && (
-            <button
-              type="button"
-              className="groupHeaderBtn"
-              onClick={() => toggleGroup('merchandise')}
-            >
-              <span className="groupLabel">MERCHANDISE</span>
-              <ChevronDown
-                size={13}
-                className={cn('groupChevron', isGroupOpen('merchandise') && 'groupChevronOpen')}
-              />
-            </button>
-          )}
-
-          {(!isCollapsed ? isGroupOpen('merchandise') : true) && (
-            <div className={cn(!isCollapsed && 'navBranchTree')}>
-              {/* Collections */}
-              <div className={cn(!isCollapsed && 'navBranchItem')}>
-                <Link
-                  href="/collections"
-                  className={cn(
-                    'navBranchLink',
-                    getIsActive('/collections') && 'navBranchLinkActive',
-                    isCollapsed && 'navItemCollapsed'
-                  )}
-                  title={isCollapsed ? 'Collections' : undefined}
-                >
-                  <span className="navIcon">
-                    <Layers size={17} />
-                  </span>
-                  {!isCollapsed && <span className="navBranchLabel">Collections</span>}
-                </Link>
-              </div>
-
-              {/* Design Assets */}
-              <div className={cn(!isCollapsed && 'navBranchItem')}>
-                <Link
-                  href="/designs"
-                  className={cn(
-                    'navBranchLink',
-                    getIsActive('/designs') && 'navBranchLinkActive',
-                    isCollapsed && 'navItemCollapsed'
-                  )}
-                  title={isCollapsed ? 'Design Assets' : undefined}
-                >
-                  <span className="navIcon">
-                    <Palette size={17} />
-                  </span>
-                  {!isCollapsed && <span className="navBranchLabel">Design Assets</span>}
-                </Link>
-              </div>
-
-              {/* Content CMS */}
-              <div className={cn(!isCollapsed && 'navBranchItem')}>
-                <Link
-                  href="/content"
-                  className={cn(
-                    'navBranchLink',
-                    getIsActive('/content') && 'navBranchLinkActive',
-                    isCollapsed && 'navItemCollapsed'
-                  )}
-                  title={isCollapsed ? 'Content CMS' : undefined}
-                >
-                  <span className="navIcon">
-                    <FileText size={17} />
-                  </span>
-                  {!isCollapsed && <span className="navBranchLabel">Content CMS</span>}
-                </Link>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* SYSTEM Section */}
-        <div className="navGroup">
-          {!isCollapsed && (
-            <button
-              type="button"
-              className="groupHeaderBtn"
-              onClick={() => toggleGroup('system')}
-            >
-              <span className="groupLabel">SYSTEM</span>
-              <ChevronDown
-                size={13}
-                className={cn('groupChevron', isGroupOpen('system') && 'groupChevronOpen')}
-              />
-            </button>
-          )}
-
-          {(!isCollapsed ? isGroupOpen('system') : true) && (
-            <div className={cn(!isCollapsed && 'navBranchTree')}>
-              {/* Team */}
-              <div className={cn(!isCollapsed && 'navBranchItem')}>
-                <Link
-                  href="/team"
-                  className={cn(
-                    'navBranchLink',
-                    getIsActive('/team') && 'navBranchLinkActive',
-                    isCollapsed && 'navItemCollapsed'
-                  )}
-                  title={isCollapsed ? 'Team' : undefined}
-                >
-                  <span className="navIcon">
-                    <Users size={17} />
-                  </span>
-                  {!isCollapsed && <span className="navBranchLabel">Team</span>}
-                </Link>
-              </div>
-
-              {/* Audit Log */}
-              <div className={cn(!isCollapsed && 'navBranchItem')}>
-                <Link
-                  href="/audit-log"
-                  className={cn(
-                    'navBranchLink',
-                    getIsActive('/audit-log') && 'navBranchLinkActive',
-                    isCollapsed && 'navItemCollapsed'
-                  )}
-                  title={isCollapsed ? 'Audit Log' : undefined}
-                >
-                  <span className="navIcon">
-                    <ShieldCheck size={17} />
-                  </span>
-                  {!isCollapsed && <span className="navBranchLabel">Audit Log</span>}
-                </Link>
-              </div>
-            </div>
-          )}
-        </div>
+            {group.items.map((item, idx) => (
+              <SidebarNavItem key={item.href} item={item} active={actives[idx]} isCollapsed={isCollapsed} variant="branch" />
+            ))}
+            </SidebarNavGroup>
+          );
+        })}
       </div>
 
       {/* Footer Controls */}
-      <div className="sidebarFooter">
-        <ul className="navList">
-          <li>
-            <Link
-              href="/settings"
-              className={cn('navItem', getIsActive('/settings') && 'navItemActive')}
-              title={isCollapsed ? 'Settings' : undefined}
-            >
-              <span className="navIcon">
-                <Settings size={18} />
-              </span>
-              {!isCollapsed && <span className="navLabel">Settings</span>}
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/support"
-              className={cn('navItem', (getIsActive('/support') || getIsActive('/help')) && 'navItemActive')}
-              title={isCollapsed ? 'Help & Support' : undefined}
-            >
-              <span className="navIcon">
-                <Headphones size={18} />
-              </span>
-              {!isCollapsed && <span className="navLabel">Help & Support</span>}
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/login"
-              className="navItem logOutItem"
-              title={isCollapsed ? 'Log out' : undefined}
-            >
-              <span className="navIcon">
-                <LogOut size={18} />
-              </span>
-              {!isCollapsed && <span className="navLabel">Log out</span>}
-            </Link>
-          </li>
+      <div className="flex flex-col gap-0.5 border-t border-subtle bg-canvas pt-2 pb-0 mt-auto shrink-0 z-10">
+        <ul className="list-none flex flex-col gap-[3px]">
+          {FOOTER_ITEMS.map((item) => {
+            const active = item.match.some((p) => getIsActive(p));
+            return (
+            <li key={item.href}>
+              <SidebarNavItem item={item} active={active} isCollapsed={isCollapsed} variant={item.variant} />
+            </li>
+            );
+          })}
         </ul>
 
         {/* ================================================================
-            BRAND LOGO ANIMAL ARTWORK & COPYRIGHT (SEAMLESS - BIGDIRTY.AGENCY STYLE)
+            BOTTOM DOCKING TOOLBAR (NIGHT / THEME / SIDEBAR)
             ================================================================ */}
-        {!isCollapsed ? (
-          <div className="sidebarStagDirect">
-            <div className="stagImageWrapper">
-              <Image
-                src="/logos/tuw-stag-dark.png"
-                alt="The Unplugged Wear Stag"
-                width={105}
-                height={80}
-                className="stagArtImage"
-                priority
-              />
-            </div>
-            <span className="stagCopyrightText">© 2026 theunpluggedwear.com</span>
-          </div>
-        ) : (
-          <div className="stagCollapsedDirect" title="© 2026 theunpluggedwear.com">
-            <div className="stagCollapsedImgWrap">
-              <Image
-                src="/logos/tuw-stag-dark.png"
-                alt="TUW Stag"
-                width={26}
-                height={26}
-                className="stagCollapsedImg"
-              />
-            </div>
-          </div>
-        )}
-
-        {/* ================================================================
-            CREATIVE THING 3: BOTTOM DOCKING TOOLBAR (NIGHT / THEME / SIDEBAR)
-            ================================================================ */}
-        {!isCollapsed ? (
-          <div className="sidebarDockToolbar">
-            <button
-              type="button"
-              className={cn(
-                'dockToolbarBtn',
-                activeThemeMode === 'dark' && 'dockToolbarBtnActive'
-              )}
-              onClick={() => handleThemeToggle('dark')}
-              aria-label="Toggle Night Mode"
-              title="Night Mode"
-            >
-              <MoonStar size={15} />
-            </button>
-            <button
-              type="button"
-              className={cn(
-                'dockToolbarBtn',
-                activeThemeMode === 'contrast' && 'dockToolbarBtnActive'
-              )}
-              onClick={() => handleThemeToggle('contrast')}
-              aria-label="Toggle Theme Contrast"
-              title="Theme Contrast"
-            >
-              <Contrast size={15} />
-            </button>
-            <button
-              type="button"
-              className="dockToolbarBtn"
-              onClick={onToggleCollapse}
-              aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-              title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            >
-              {isCollapsed ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
-            </button>
-          </div>
-        ) : (
-          <div className="sidebarDockToolbarCollapsed">
-            <button
-              type="button"
-              className="dockToolbarBtnCollapsed"
-              onClick={onToggleCollapse}
-              title="Expand Sidebar"
-              aria-label="Expand Sidebar"
-            >
-              <ChevronRight size={16} />
-            </button>
-          </div>
-        )}
+        {/* Bottom docking toolbar (night / contrast / collapse) */}
+        <SidebarDock isCollapsed={isCollapsed} onToggleCollapse={onToggleCollapse} />
       </div>
     </aside>
   );

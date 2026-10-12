@@ -1,0 +1,2760 @@
+{
+  "project": "TUW Admin Tailwind v4 Token Rebuild",
+  "tracker_version": 1,
+  "source_of_truth": {
+    "code": "tuw-admin/src (branch v2)",
+    "tokens": "tuw-admin/src/app/globals.css @theme",
+    "skill_index": "tuw-admin/state-for-agents/AGENTS.md",
+    "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
+  },
+  "summary": {
+    "total": 170,
+    "done": 156,
+    "in_progress": 3,
+    "backlog": 11
+  },
+  "session": {
+    "branch": "feat/search-modal",
+    "tip": "e8e3882",
+    "unpushed": ["254e214", "bb6b19f", "e8e3882", "cc84644", "2087447", "be2e49f", "bc6a90d", "7002594", "29d165b", "35e3fdf", "9a49435", "0638769", "b7f1e4c", "1a0e6dd"],
+    "next_up": "Fulfillment Phase 2 per-card bulk bars; DW2 drawer verification pass; anim-probe re-run; browser verification backlog",
+    "pending_verifications": [
+      "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
+      "dashboard D-series: KPI tiers, range/sort menus, badge mapping, calendar pills, header tint (360/768/1024/1440)",
+      "trunk continuous-dark + elbow-only on 1st-4th actives (post Antigravity+z-lift)",
+      "R-series parent icons + iconless rows + collapsed icons",
+      "settings/help purple hover + black cards",
+      "responsive widths 767/768/1023/1024/1440/1920"
+    ],
+    "last_updated": "2026-10-11",
+    "updated_by": "agent"
+  },
+  "tasks": [
+    {
+      "id": "TL-LOGIN",
+      "title": "Login page tokenized (buttons/inputs/shell/social/controls/hero/reset/recovery)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-04",
+      "finished": "2026-10-04",
+      "log": "v2:ef392b0..v2:1ef3c82 + v2:41234d7 + v2:73ee02d + v2:fdaa637 + v2:fdaa637",
+      "design_match": "yes",
+      "key_decisions": [
+        "auth-* namespace; admin tokens untouched",
+        "@layer base reset fix (unlayered button reset hid all button fills)",
+        "ternary swaps own every state-varying property incl. bg",
+        "2.5vh vs 2.2vh vs 2.4vh clamps kept distinct (forensic catch)"
+      ],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIGNUP",
+      "title": "Signup page tokenized (shell/hero/header/social/inputs/terms/verify/OTP)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-04",
+      "finished": "2026-10-05",
+      "log": "v2:401c910..v2:7dd7b79",
+      "design_match": "yes",
+      "key_decisions": [
+        "70% login-token reuse; verbatim outliers kept (5px/E7EEEE/teal check, F8F9FA hover, 900px breakpoint, h-screen form)",
+        "no-lh type tokens emit font-size-only (proven in built CSS)",
+        "OTP keyboard/paste logic untouched"
+      ],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR",
+      "title": "Sidebar replicated in utilities + fixed + single font",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-05",
+      "finished": "2026-10-05",
+      "log": "v2:5a2e3f3, v2:7d00ef0, v2:9926932, v2:638f81f, v2:bd516d7, v2:6b6f4b2, v2:528b0c7",
+      "design_match": "yes",
+      "key_decisions": [
+        "sticky -> fixed + ml-65/20 offsets (footer can never scroll out)",
+        ":root font chains unified to @theme stack; font-sans on shell root",
+        "ternary-exclusive widths/margins per breakpoint (240/220/80/290)",
+        "530-line dead home-chrome purge after 99-ref audit"
+      ],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "trunk saga below"
+      ]
+    },
+    {
+      "id": "TL-TRUNK",
+      "title": "Tree trunk + active-card defect saga",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-05",
+      "finished": "2026-10-05",
+      "log": "v2:088d2d3, v2:adfbbdf, v2:f52edfd, v2:2f9deac, v2:2334217, v2:85ad12f, v2:dac0e4c, v2:a46d58a, v2:d1d8dcc + v2:efa65ac",
+      "design_match": "yes",
+      "key_decisions": [
+        "3 alias tokens fixed site-wide black borders/logo (substring proofs are invalid)",
+        "segmented dark path via nth-child overlays; terminal bar deleted (painted over card)",
+        "trunk/arm border-color split (light curve covered dark trunk at higher z)",
+        "white actives lifted above stem (z-1), elbow stays topmost (z-2)",
+        "branch actives unified to Settings-card treatment",
+        "Antigravity efa65ac: stem stops at bottom:29px tangent point; overlays to z-index 2; isolate on active cards; redundant with z-lift work, kept"
+      ],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "live-DOM confirmation of final leak fix on fresh preview"
+      ]
+    },
+    {
+      "id": "TL-RESTRUCT",
+      "title": "Sidebar restructure (parent icons, iconless rows, settings treatments)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-05",
+      "finished": "2026-10-05",
+      "log": "v2:f35a864, v2:013d8f2, v2:f1baec2, v2:d7ec34d",
+      "design_match": "yes",
+      "key_decisions": [
+        "parents: icon + Title-Case + route-based ink; children iconless with spacers-then-removed, labels at icon x",
+        "collapsed re-shows icons; text-nav-parent/child tokens share 13.5px"
+      ],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-FOOTER-TREAT",
+      "title": "Settings/Help/Logout treatments",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-05",
+      "finished": "2026-10-05",
+      "log": "v2:8f784ef, v2:405f876, v2:ef834b3, v2:e3c21c9",
+      "design_match": "yes",
+      "key_decisions": [
+        "logout stays red hover; settings/help purple hover; actives are black sidebar cards"
+      ],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-AGENTSYS",
+      "title": "state-for-agents system (rules/skills/tracker/guide)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-05",
+      "finished": "2026-10-05",
+      "log": "v2:3c74daa..v2:5d04980 (4 rules, 14 skills, guide, tasks.json, AGENTS.md, archive)",
+      "design_match": "yes",
+      "key_decisions": [
+        "global (not section) skill names",
+        "rules-vs-skills split doctrine",
+        "good/bad pairs in every skill",
+        "propose-then-approve self-improvement loop"
+      ],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-NT4",
+      "title": "Command palette: actions, recents, kbd nav, hint chip",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:5a7c3e3 (Header-only: commands config + recents + focus-based arrows/Enter + ⌘K chip) + REVERTED v2:ac0e13f for spotlight rebuild",
+      "design_match": "yes",
+      "key_decisions": [
+        "actions reuse store mutations via same guards; executors swap to API calls later",
+        "kbd nav moves DOM focus so existing focus-visible treatment marks rows — zero new CSS",
+        "palette container UI overhaul explicitly deferred by user"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "REVERTED for spotlight overhaul track (S0); kbd/prefix/nav return rebuilt in S5/S6"
+      ]
+    },
+    {
+      "id": "TL-DASH-S2",
+      "title": "Spotlight tokens: modal-lg radius + glow shadow (branch)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:48d659e (tokens with used-by comments; tile washes already existed)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-S3",
+      "title": "SearchAdapter + prefix parser + local impl (branch)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:d8ea856 (types + localSearch + barrel; #/@/! extended set)",
+      "design_match": "yes",
+      "key_decisions": [
+        "prefix scopes are config entries; !ret/!pay map to nav keyword filters",
+        "tile tones assigned per scope in the adapter output"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-S4",
+      "title": "ShortcutChips + SpotlightRow with Jump pill (branch)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:3c85675 (chips seed prefix tokens; whole-row jump)",
+      "design_match": "yes",
+      "key_decisions": [
+        "Jump pill reuse verdict: ui Button outline/sm is 36px — too heavy; dedicated token pill instead"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-S5",
+      "title": "Island SearchModal rebuild wired into Header (branch)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:28ce909 (new modal + old 286-line palette deleted from Header)",
+      "design_match": "yes",
+      "key_decisions": [
+        "overlay CSS + Ctrl+K shortcut untouched; badge shows honest Ctrl+K",
+        "query state lives in modal (unmounts clean); scope icons mapped per result scope"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-S6",
+      "title": "Spotlight kbd nav + focus treatment + reduced-motion (branch)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:1c47ccd (focus-moving arrows/Enter + spotlightRow wash/focus rules)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-TBL1",
+      "title": "Universal table spec: 16px bold headers, 13px rows",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:c9b4b1a (TableHead/TableCell/Table base + sub-rule aligned; no new tokens)",
+      "design_match": "yes",
+      "key_decisions": [
+        "unstyled consumers inherit the spec automatically (data-display tables, demo table)",
+        "dashboard home table untouched (own frozen home-* classes, already 16/700 via H1)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-OP0",
+      "title": "FilterPills pills-variant gap aligned to page chips",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "part of feat/search-modal:3ce7856 (6 to 4px; pills variant had zero consumers)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-OP1",
+      "title": "Orders payment + fulfillment pills use shared FilterPills",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:3ce7856 (Failed Sync label preserved; filters untouched)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-OT1",
+      "title": "Orders table uses shared ui Table primitives",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:b4078c6 (style-preserved swap; row border inherited from TableRow default; empty text pinned 16px)",
+      "design_match": "yes",
+      "key_decisions": [
+        "hover handlers pass through (TableRow hoverable is a confirmed no-op)",
+        "outer scroll div replaced by Table wrapper (no nested scrollers)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-ODOC",
+      "title": "Pending component work inventory (Orders audited)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:30c86ab (pending-component-work.md + per-page template)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-FB1",
+      "title": "Stop popover inner clicks bubbling to overlay close",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:8987045 (stopPropagation on SearchModal, NotificationPanel, FilterMenu, calendar wrapper)",
+      "design_match": "yes",
+      "key_decisions": [
+        "audit found zero popover roots stopping propagation; row clicks had masked the bug everywhere"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-FC1",
+      "title": "SpotlightRow compact variant with use-count for frequent jumps",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:253008c (no-tile compact rows + count chip, frequent section only)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-F3",
+      "title": "Remove shortcut strip from spotlight modal",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:bf3843d (strip deleted; component + parser retained; empty hint documents prefixes)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser check: chips stay open, compact rows, typed prefixes"
+      ]
+    },
+    {
+      "id": "TL-DASH-OID3",
+      "title": "Fix Order ID inline purple semibold (class lost to TableCell inline base)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:836513a (weight+color inlined; orphaned orderIdCell rule deleted)",
+      "design_match": "yes",
+      "key_decisions": [
+        "lesson: TableCell inline base (color/weight) always beats stylesheet classes — treatment must ride in style prop"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-HOV1",
+      "title": "Products KPI cards hoverable",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:b737b0a (4 props, display-only)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-HOV2",
+      "title": "Customers KPI cards hoverable",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:16d242e (4 props, display-only)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-HOV3",
+      "title": "Analytics KPI cards hoverable",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:c387d56 (4 props, display-only)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-HOV4",
+      "title": "Fulfillment KPI cards hoverable",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:3c19e86 (4 props, display-only)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser check: hover tint on all four pages; tables stay hover-free by restraint (no code)"
+      ]
+    },
+    {
+      "id": "TL-DASH-PA1",
+      "title": "Shipments status pills use shared FilterPills",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:ef25d88 (In Transit + Out for Delivery labels preserved)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PA2",
+      "title": "Refunds status pills use shared FilterPills",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:45a95b5",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PA3",
+      "title": "Products publication pills use shared FilterPills",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:d3ad534 (Status: label kept; stray div repaired, nesting verified)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PA4",
+      "title": "Returns stage pills use shared FilterPills",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:26cc472",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PA5",
+      "title": "Support status pills use shared FilterPills",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:2048b7d",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser check: all five pill groups filter + look identical"
+      ]
+    },
+    {
+      "id": "TL-DASH-TMIG",
+      "title": "All page tables migrated to ui Table; data-display retired",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "15 tables across 12 commits (customers, analytics, help, shipments, refunds, payments, returns, designs, collections, team, fulfillment x3, content pages, content journal) + data-display retirement a5160eb (351 lines, zero consumers)",
+      "design_match": "yes",
+      "key_decisions": [
+        "style-preserved recipe: per-cell paddings, per-file border tokens, handlers pass-through, empty copy verbatim",
+        "headers adopt universal 16px spec by construction; content-pages headers intentionally step up from subtle 14px",
+        "TableRow hoverable is a confirmed no-op; JS hover rides on passed handlers"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser check: every migrated table, row clicks, empty states"
+      ]
+    },
+    {
+      "id": "TL-DASH-IMG1",
+      "title": "ImageWithFallback info tone + upload preview swap",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:9ba0668 (fallbackTone neutral/info; preview uses info + Image not found)",
+      "design_match": "yes",
+      "key_decisions": [
+        "default neutral untouched: existing media consumers render byte-identical",
+        "product next/image usages deliberately left (optimization tradeoff recorded)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PH1",
+      "title": "ui/PageHeader primitive (title, subtitle?, actions?, eyebrow?, page|doc)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:860fa8d",
+      "design_match": "yes",
+      "key_decisions": [
+        "margin 0 (shell-gap rhythm); .sub 8px margin retired on migration",
+        "subtitle optional, omitted everywhere except dashboard date line",
+        "doc variant = h1 + tuw-type-heading-page token class (design-system only)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PHMIG",
+      "title": "Per-file PageHeader migrations (25 call sites, subtitles dropped)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal: 7 settings + 5 content + 6 A-pages + 8 B-pages + dashboard + design-system + CSS cleanup 1d395af",
+      "design_match": "yes (3 authorized deltas: subtitles dropped, dashboard unified 28/600, A-margin retired; + mobile-only dashboard controls wrap-pack)",
+      "key_decisions": [
+        "dashboard unified to 28/600 (authorized restyle)",
+        "design-system title row only, pixel-identical"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-CB1",
+      "title": "Checkbox bare + indeterminate + single mode",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:6dd3581",
+      "design_match": "yes",
+      "key_decisions": [
+        "bare stops propagation (row-click safe); double-toggle guarded",
+        "single = radio-like no-toggle-off; exclusivity caller-owned"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-ORDT1",
+      "title": "Orders single tab row + search right",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:f97ed17 (two-axis filters folded into 5 presets; count line dropped, footer covers it)",
+      "design_match": "yes",
+      "key_decisions": [
+        "Draft = pending+queued derived predicate, no mock-model change",
+        "two-axis combo filtering retired (stated tradeoff)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-ORDT2",
+      "title": "Orders columns + multi-select (Item, Shipping, checkbox)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:b0946ab (Table family untouched — composition sufficed; hoverable confirmed dead prop)",
+      "design_match": "yes",
+      "key_decisions": [
+        "payment/fulfillment plain text; badges moved to Shipping",
+        "shipping derived from payment+fulfillment; item count = summed quantities",
+        "Action column kept per instruction; rupee stays"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-CB2",
+      "title": "Checkbox bare baseline-immunity (0.4px header shift)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:c830c85 (user-measured: header -0.4px, body ride-up; cause = baseline synthesis under th baseline default)",
+      "design_match": "yes",
+      "key_decisions": [
+        "verticalAlign middle on bare span only; label mode untouched",
+        "no Table changes; proof left to user re-run of measurement snippet"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-ORDT3",
+      "title": "Orders default pageSize 6->5 (Rows options mismatch)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:b935130 (pre-existing: state 6 vs options 5/10/20; select displayed first option)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-TH1",
+      "title": "Permanent thead tint (tuw-bg-selected, stat-hover repoint)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:cbb25ed (reused bg-selected #F8F5FF, no new token; wash-only, paint-safe)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DM1",
+      "title": "ui/DropdownMenu action-menu primitive",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:0be93a9 (popover contract, danger items; proof via BB1 usage)",
+      "design_match": "pending",
+      "key_decisions": [
+        "ui/Select is native form control — wrong control for menus",
+        "dashboard FilterMenu is value-picker in wrong layer — pattern reused, not the component"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-BB1",
+      "title": "Orders bulk-action bar (export, print demo, mark-as)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:4458012 (silent flag on updateOrderStatus + type; header Export event-arg fix)",
+      "design_match": "pending",
+      "key_decisions": [
+        "cancel = payment failed; refund = status-only",
+        "clear + summary toast after every bulk action",
+        "print = truthful demo toast, no window.print"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-BB2",
+      "title": "Bulk bar height-match heads (4px jump + slide illusion)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:3608eab (user-measured +4px; 36px sm buttons + popoverIn translate; padding 6 + animation dropped)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DM2",
+      "title": "DropdownMenu danger-item hover wash (bg-error)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:7503639 (matches Button danger wash; flutter hunt closed unproven)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PG1",
+      "title": "Pagination Next chevron trailing (label left, arrow right)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:86192d2 (children-chevron precedent; Previous untouched)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DM3",
+      "title": "DropdownMenu selectedValue picker mode",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:01b9440 (FilterMenu wash+ink language; Mark-as byte-identical)",
+      "design_match": "yes",
+      "key_decisions": [
+        "ui/Select is native — rejected; dashboard FilterMenu wrong layer — language reused, not the component"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PG2",
+      "title": "Pagination Rows picker to DropdownMenu",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:a86bc18 (28px trigger metrics preserved; keyboard operable)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DM4",
+      "title": "DropdownMenu up direction + mirrored keyframes",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:379c509 (default down — Mark-as byte-identical)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PG3",
+      "title": "Pagination Rows menu opens upward",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:37f32e8 (native select auto-flip behavior restored)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-RT1",
+      "title": "Returns bulk mode (checkbox, export, approve/dispute)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal: bc3ac71 seam + fe0bff5 state + 05ece94 column + 66297d4 handlers + 4a7efa5 bar",
+      "design_match": "yes",
+      "key_decisions": [
+        "direct Approve/Dispute buttons (only 2 actions, no menu needed)",
+        "tab-to-All + drawer sync + clear + summary toast",
+        "pageSize 6->5 (same latent mismatch as orders)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-SUP1",
+      "title": "Support bulk mode (checkbox, export, resolve canned)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal: 2a3b2f0 state + 55e67a2 column/handlers + d708f08 bar (silent seam in bc3ac71)",
+      "design_match": "yes",
+      "key_decisions": [
+        "canned resolve notice, named in summary toast",
+        "pageSize 6->5 (same latent mismatch)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PC1",
+      "title": "Product cards lift-up to stat tint",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:1e0ac5e (reused tuw-stat-hover; lift violated motion skill)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-VT1",
+      "title": "ui/ViewToggle segmented view switch",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:6425beb (rail aesthetics; reusable for media grid)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PT1",
+      "title": "Products toolbar restructure + KPI filtering",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal: 02343f3 toolbar + 799e7ea stat-active + 1cda4d6 stockFilter + 920ac9d KPI wiring (toggle, keyboard, aria-pressed)",
+      "design_match": "yes",
+      "key_decisions": [
+        "no Card.tsx change — active via className passthrough",
+        "Total resets filters, keeps search; active card re-click clears"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PT2",
+      "title": "Products table view (6 cols, stock/sold merged)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal: 2358654 import + 705c267 table (no checkbox — bulk deferred; pageSize 6/12/24 already consistent)",
+      "design_match": "yes",
+      "key_decisions": [
+        "rating/partner stay drawer-only per trim call",
+        "row click opens edit drawer (orders pattern)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PT1C",
+      "title": "Products single-row toolbar (category dropdown)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:b770b09 (44px trigger matches Input; tab strip deleted, CSS left untouched)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PT1D",
+      "title": "Products Total wash fix + nowrap toolbar cluster",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:eb89482 (inverted filtersClearBang; cluster wraps as unit now)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-US1",
+      "title": "UpliftSurface shared 3D component + ViewToggle wiring",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal: c6c8abf class + 460390b component + 2e758f8 barrel + d6d0c71 toggle wiring (button shell kept for keyboard/radio)",
+      "design_match": "yes",
+      "key_decisions": [
+        "component over class-only per instruction; class remains the single source",
+        "geometry identical (32x32/radius8) — only shadow paint changed",
+        "sidebar migration explicitly deferred, untouched"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "Migrate SidebarNavItem active treatment onto UpliftSurface/.tuw-3d-active"
+      ]
+    },
+    {
+      "id": "TL-DASH-US2",
+      "title": "Sidebar active relief to tuw-3d-active (single source)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal: a09eae9 footer + 3b14a10 branch (class-only; layout/keyboard/focus untouched; closes US1 follow-up)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PR1",
+      "title": "Products table bulk mode (export, publish, archive, delete)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal: 751db97 seam + 7af618b state + d491fd7 column + 783ea30 handlers + 1debffa bar (table-only; grid untouched; Archive icon over Eye)",
+      "design_match": "yes",
+      "key_decisions": [
+        "bulk delete via window.confirm (per-row precedent)",
+        "view switch clears selection; publication jumps to All on status bulk",
+        "no Draft bulk action (locked set)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PR1F",
+      "title": "Products fixed layout + colgroup (bulk column shuffle)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:071df12 (user-measured: Category -20, Stock/Sold -24 zero-sum; nowrap floors lost on swap; widths from 1180 distribution)",
+      "design_match": "yes",
+      "key_decisions": [
+        "per-table fixed layout, not base — other tables untouched",
+        "proportional widths stay responsive; orders flagged as follow-up"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-MN1",
+      "title": "Fade-only popoverOut/OutUp (exit judder)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:fa750ca (anim probe proved clean toggle, missing end-Out = unmount race; enters untouched)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-MN2",
+      "title": "Fade-only popoverIn/InUp (enter cut-mid-slide chop)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:b947977 (cancel+Out-7ms = correct close-during-enter; popover system now fade-only both directions)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-GM1",
+      "title": "Dropdown stutter fix (Gemini plan, compositing + fill + sync phase + 180ms)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-11",
+      "finished": "2026-10-11",
+      "log": "e533db4 (verified here: gates green; POPOVER_EXIT_MS sole consumer is hook; base opacity-0 omitted, both-fill suffices; will-change:transform nit recorded, harmless)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-BB3",
+      "title": "Orders tab-to-All after bulk Mark-as",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-11",
+      "finished": "2026-10-11",
+      "log": "feat/search-modal:8fad108 (reset-page effect picks up tab change; export/print untouched)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-MN3",
+      "title": "DropdownMenu fixed positioning (escape container clipping)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-11",
+      "finished": "2026-10-11",
+      "log": "feat/search-modal:96067e3 (user-measured CLIPPED=true 56px; anchor coords at open; close on scroll/resize; viewport maxHeight safety)",
+      "design_match": "yes",
+      "key_decisions": [
+        "no portal needed — no transformed ancestors, fixed stays viewport-true",
+        "z-index bump rejected by measurement (clip ignores z-index)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PL0",
+      "title": "PanelLayout family (paint-free header/body/footer)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-11",
+      "finished": "2026-10-11",
+      "log": "feat/search-modal:8f6c386 (4 primitives + barrel in one gated commit — interdependent, ungateable separately)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PL1",
+      "title": "Drawer adopts PanelLayout (verbatim nodes)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-11",
+      "finished": "2026-10-11",
+      "log": "feat/search-modal:32d74a3 (overlay/Esc/widths/animation untouched)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PL2",
+      "title": "Orders card adopts PanelLayout (verbatim zones)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-11",
+      "finished": "2026-10-11",
+      "log": "feat/search-modal:203c970 (pin no-op in auto-height; two JSX nesting slips caught by typecheck)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DW0",
+      "title": "Drawer interior primitives (Section, KV, Hero, ItemsRow, FormSelect)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-11",
+      "finished": "2026-10-11",
+      "log": "feat/search-modal: 585529f section + f5bfcfa KV + 4ce4aac hero + a22478a itemsrow + f80f089 formselect + e22c105 KV-after + 8c0cfc9 hero-gapless (titleGap/pad/left/after props preserve variance)",
+      "design_match": "yes",
+      "key_decisions": [
+        "no wrapper gaps in section/hero — caller margins own rhythm",
+        "FormSelect 40px stays distinct from ui/Select 42px; variance via fontSize/padX",
+        "Timeline deferred (2 divergent uses); video stays native tags"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DW1",
+      "title": "All 13 drawer interiors migrated (pages verified already-primitive)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-11",
+      "finished": "2026-10-11",
+      "log": "feat/search-modal: b8d7ada designs + 316b767 payments + 3a2c8f8 refunds + cd7723e journal(+build-gate $$ typo retro-verified) + 66f4ad3 collections + 688d868 shipments + be9f529 orders + 68d17f6 customers + 1a3e512/1545ebf support + b9a009c returns + ca44d64 media + 3f3bc5b products",
+      "design_match": "pending",
+      "key_decisions": [
+        "bespoke kept: financial box, both timelines, bubbles, danger zone, notes wash, callout, stat grid, address blocks, video frames, copy mechanics, footers",
+        "textareas stay raw everywhere (per-site metrics vs ui/Textarea 10/14)",
+        "selects migrated only where FormSelect metrics match exactly"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DF0",
+      "title": "Drawer foundation (keyframes, exit motion, focus trap)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-11",
+      "finished": "2026-10-11",
+      "log": "feat/search-modal: 99d8f10 keyframes + 4167f92 exit wiring (hook exitMs param, popovers byte-identical) + 6c832f4 focus trap/return/width docs (paint-free; role=dialog stays on overlay)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DF1",
+      "title": "Drawer true off-screen slide (drop fade hybrid)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-11",
+      "finished": "2026-10-11",
+      "log": "feat/search-modal:7514e44 (translateX 100%, opacity removed; menus stay fade-only)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PD0",
+      "title": "MediaFrame + FormTextarea foundational primitives",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-11",
+      "finished": "2026-10-11",
+      "log": "feat/search-modal: b65ad39 mediaframe + 577ee59 formtextarea (shell-only + 40px-family sibling)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PD1",
+      "title": "Products drawer completion + conditional support reply",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-11",
+      "finished": "2026-10-11",
+      "log": "feat/search-modal: 678cd42 products (frame+textarea) + 21dd603 support reply (metrics mapped exactly, escape hatch unused)",
+      "design_match": "yes",
+      "key_decisions": [
+        "support included — re-read proved exact mapping; media frame migration stays follow-up (out of scope)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PD2",
+      "title": "Products create-modal to Form primitives (drawer was already done)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-11",
+      "finished": "2026-10-11",
+      "log": "feat/search-modal:18d2294 (3 selects + textarea, all defaults-matching; user was viewing modal, not drawer)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-FP1",
+      "title": "Products form popover pickers (drawer + modal via DropdownMenu)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-11",
+      "finished": "2026-10-11",
+      "log": "feat/search-modal: 5fb3226 drawer picker + 7dc9105 modal 4 pickers (40px triggers, keyboard operable; FormSelect zero-consumer now, kept + recorded)",
+      "design_match": "yes",
+      "key_decisions": [
+        "arrow-key menu nav is a pre-existing gap in all menus, not introduced here",
+        "required is vacuous — all five states init to valid defaults"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PE0",
+      "title": "Product variant data model (types, synthesis, seams, tests)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal: 1a0e6dd types+helpers + b7f1e4c seams + 0638769 tests (suite now 7)",
+      "design_match": "yes",
+      "key_decisions": [
+        "optional variants[] + lazy synthesis — zero fixture edits",
+        "float prices match domain; minor-unit tension recorded, not converted",
+        "updateProduct derives colors/sizes/stock from matrix"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PE1",
+      "title": "Drawer elastic workspace shell",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal:9a49435 (expandable 880/full-canvas + headerExtra; 12 drawers byte-identical)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PE2",
+      "title": "Products drawer General/Media tabs",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal: 35e3fdf state + 29d165b tabs/media (live preview, URL fields, Tabs aria-label fix)",
+      "design_match": "yes",
+      "key_decisions": [
+        "tabs grow per phase (no dead controls); media URL-based, no upload flow"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PE3",
+      "title": "Variants matrix tab + Stepper (+ mirror writers)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal: 7002594 stepper + bc6a90d matrix (dual-editor mirror writes documented; caught unreachable-branch slip pre-gate)",
+      "design_match": "yes",
+      "key_decisions": [
+        "matrix is submit source; General inputs mirror-write; modal keeps legacy",
+        "price follows min variant (from-$X semantics)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PE4",
+      "title": "Specs/SEO tabs, monogram, visibility, size link",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal: be2e49f state + 2087447 UI (section toggles in Specs tab, not header popover — menu closes per select)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PE5",
+      "title": "Unify create into drawer, retire modal",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal: cc84644 create mode + e8e3882 modal retire (-313/+3; chunked demolition with reads)",
+      "design_match": "yes",
+      "key_decisions": [
+        "create tabs gated to General+Media; legacy handleCreateSubmit deleted with modal"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-HOV5",
+      "title": "Shipments KPI cards hoverable",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:7dfe630 (4 props, display-only)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-HOV6",
+      "title": "Collections KPI cards hoverable",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:666ebbb (4 props, display-only)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-HOV7",
+      "title": "Returns KPI cards hoverable",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:177fd7e (4 props, display-only)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-HOV8",
+      "title": "Team KPI cards hoverable",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:030669d (4 props, display-only)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-HOV9",
+      "title": "Designs KPI cards hoverable",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:310173f (4 props, display-only)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-HOV10",
+      "title": "Refunds KPI cards hoverable",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:fb7fea7 (4 props, display-only)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-HOV11",
+      "title": "Payments KPI cards hoverable",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:3cfc922 (4 props, display-only)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-HOV12",
+      "title": "Support KPI cards hoverable",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:cc03a37 (4 props, display-only)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-HOV13",
+      "title": "Content KPI cards hoverable (journal, media, pages, navigation)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:75b4af4 (16 props across 4 files, one commit; display-only)",
+      "design_match": "yes",
+      "key_decisions": [
+        "design-system demo cards excluded (spec showcase); tables hover-free by restraint"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser check: hover tint on all pages"
+      ]
+    },
+    {
+      "id": "TL-DASH-C1",
+      "title": "Single SurfaceCard base; all cards delegate; dup CSS removed",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:4729b53 (new ui/SurfaceCard + ContentCard/StatCard/DashboardCard/MetricCard delegate; 5 variant shells stripped to layout)",
+      "design_match": "yes",
+      "key_decisions": [
+        "values move, never change: padding/gap/width preserved per caller via props",
+        "MetricCard hover now via shared tuw-stat-hover (home-kpiCard:hover deleted); shadow given !important so the lift actually applies over inline base",
+        "hover stays opt-in everywhere except MetricCard (which always had it)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser check: dashboard cards, Orders/ContentCard pages, Settings cards"
+      ]
+    },
+    {
+      "id": "TL-DASH-OID2",
+      "title": "Dashboard Order ID always purple semibold (Orders-page match)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:0504882 (orderIdCell to action-primary; dead hover rule deleted; CSS-only)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-OID1",
+      "title": "Order ID dark at rest, purple on row hover (shared tuw-idCell)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:b7f2d02 (global opt-in rule; Orders cell trimmed to padding+size) + REVERTED 3d3c7bc per user request",
+      "design_match": "yes",
+      "key_decisions": [
+        "tr:hover-scoped selector: only opted-in cells ever tint, all other tables unaffected"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "same always-purple treatment remains on payments/fulfillment/shipments/refunds/designs IDs — per-page rollout on request"
+      ]
+    },
+    {
+      "id": "TL-DASH-DDEL1",
+      "title": "RecentOrdersCard on ui Table; 7 home table rules deleted",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:a6fae1d (single-consumer verified; margin/minWidth via Table style; last row borderless by index)",
+      "design_match": "yes",
+      "key_decisions": [
+        "header TableRow carries no orderDataRow class (avoids hover wash on the header)",
+        "row wash + id tint stay as home-* (TableRow has no hover wash; adding one globally rejected)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DDEL2",
+      "title": "Status pills on ui Badge; 7 badge/cell rules deleted",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:1a18490 (Figma 26px via shared style object, no new size variant; cells inlined)",
+      "design_match": "yes",
+      "key_decisions": [
+        "orderIdCell class + hover rule kept (pseudo-classes cannot inline)",
+        "zero dangling references verified by grep"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser check: dashboard table, pills, row hover, id tint"
+      ]
+    },
+    {
+      "id": "TL-DASH-HC1",
+      "title": "StatCard hoverable opt-in with shared tint treatment (Orders on)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:8473e3b (tuw-stat-hover CSS + hoverable prop default false + Orders 4 cards)",
+      "design_match": "yes",
+      "key_decisions": [
+        "!important justified: wins over primitive inline base, opt-in only (codebase precedent: reduced-motion rule)",
+        "inline transition extended to border/background so the hover animates instead of snapping"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DC1",
+      "title": "Delete dead home-pageWrapper rule",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:6e080af (sole dead home-* class of 96 audited)",
+      "design_match": "yes",
+      "key_decisions": [
+        "95/96 home-* classes live via dashboard components — family stays, no tokenization in this track"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DC2",
+      "title": "Delete dead commandPalette rules; define missing tuwFadeIn",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:ff1ab69 (14 selectors removed; overlay + both keyframes kept)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DC3",
+      "title": "Delete dead sub button/stat/table/badge rules",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:f2cc96b (196 lines; every selector re-verified zero-ref before delete)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DC4",
+      "title": "Delete dead compat tokens, dup scales, dead shadows",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:17330f6 (54 lines; audit corrections: header-gap live, tuw-space kept for docs, tuw-status-* never defined)",
+      "design_match": "yes",
+      "key_decisions": [
+        "audit is advisory only: --spacing-auth-header-gap is live via mb- utility (kept); --tuw-space-* kept (design-system page documents it)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DC5",
+      "title": "Prune dead migration comments + dead navIcon/signup-socialRow",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:f005165 (80 lines; bonus dead rules found during prune)",
+      "design_match": "yes",
+      "key_decisions": [
+        "live trunk/curve/scalability docs kept; only pure-history notes removed"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser check: Orders stat hover, mobile backdrop fade, dashboard intact"
+      ]
+    },
+    {
+      "id": "TL-DASH-SP1",
+      "title": "Frequent searches engine with jump-back and curated defaults",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:dd70dc7 (useFrequentQueries + popular targets + modal wiring + reset clear)",
+      "design_match": "yes",
+      "key_decisions": [
+        "localStorage counts ranked top-5 + top-3 jumps; injectable seam for server counts later",
+        "return shape frozen so a DB adapter swaps internals unchanged"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-SP2",
+      "title": "Spotlight micro-interactions: border light-up, counts, sticky, footer",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:537ffbc (tile border tint + Jump fill + focus tint + sticky/counts/footer)",
+      "design_match": "yes",
+      "key_decisions": [
+        "tile-scale idea rejected: KPI-card border language instead, zero scale in system"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-SP3",
+      "title": "Query-match highlighting in spotlight rows",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:4f98d6c (action-purple semibold, regex-escaped, prefix-aware term)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-SP4",
+      "title": "Admin scrollbar language with gray pill tokens",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "feat/search-modal:7646bb0 (3 tokens + global overlay-gutter rules + skill codified)",
+      "design_match": "yes",
+      "key_decisions": [
+        "8px overlay gutters + padding-box clip = zero layout shift; arrows explicitly none",
+        "sidebar/nav hidden exceptions win by specificity and stay documented"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser review: frequent ranking, hovers, highlights, scrollbars everywhere"
+      ]
+    },
+    {
+      "id": "TL-DASH-S7",
+      "title": "Branch verification: spotlight-only diff, full gates green (branch)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "branch diff vs v2: 9 files, all spotlight/Header/tokens/tracker; typecheck + test 4/4 + build 37/37",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser review on feat/search-modal; merge to v2 only on explicit approval (rule 05)"
+      ]
+    },
+    {
+      "id": "TL-DASH-G2",
+      "title": "Rule 06 hardened: protected modals, forbidden commits, merge refusal gate",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:6a00935 (sections 5-7: protected inventory, hard stops, 7 refusal conditions)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-G1",
+      "title": "Rule 06: branch and modal strategy documented",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:212ca3d (rules/06-branch-modals.md: branch/modal inventory, workflows, revert paths, safeguards)",
+      "design_match": "yes",
+      "key_decisions": [
+        "flag-based modal coexistence chosen over revert-only: instant lossless switch, loser deleted once",
+        "origin/v2 now in sync; feat/search-modal pushed upstream by human"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-S1",
+      "title": "Branch hygiene: feat/search-modal + rule 05 (spotlight isolated)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:d166ae1 (rules/05-branch-hygiene.md); S2-S7 live exclusively on feat/search-modal",
+      "design_match": "yes",
+      "key_decisions": [
+        "spotlight commits exclusive to feat/search-modal; v2 takes reverts/trackers/rule only until merge approval"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-S0",
+      "title": "Revert N4 search improvements for spotlight rebuild",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:ac0e13f (git revert of 5a7c3e3; trigger back to icon-only)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-NT0",
+      "title": "Shared ui FilterPills (rail + pills variants)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:5962ddf (new ui/FilterPills + barrel)",
+      "design_match": "yes",
+      "key_decisions": [
+        "rail = tinted container + white active pill (panels); pills = existing page-filter chip treatment"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-NT1",
+      "title": "Notification ops feed + repository contract + session hook",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:c90db70 (notifications/types + feed + useNotifications + barrel)",
+      "design_match": "yes",
+      "key_decisions": [
+        "repository interface: components see props only; DB adapter slots in later unchanged",
+        "feed: failed syncs crash-red, paid-ready success, low stock warning, tickets info, failed payments error"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-NT2",
+      "title": "NotificationItem + NotificationPanel (tone washes, rail tabs)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:f798685 (components + Notification type rename to avoid clash)",
+      "design_match": "yes",
+      "key_decisions": [
+        "all four tone washes already existed as theme tokens — zero new tokens",
+        "read = white + border, no dot; crash = red wash + red title",
+        "defaults to first category holding unread; See-all-to-nowhere replaced by Mark-all-read (no dead controls)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-NT3",
+      "title": "Header notification center rewired to live animated panel",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:b29d8fc (feed memo + repo hook + popoverIn/Out wrapper + live badge)",
+      "design_match": "yes",
+      "key_decisions": [
+        "hardcoded 320px popover deleted; panel 400px with viewport guard",
+        "badge now counts repository unread, not the old pending-issues sum"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser check: bell, tabs, mark-read, navigation, motion"
+      ]
+    },
+    {
+      "id": "TL-DASH-W1",
+      "title": "Tint rides to finish, lingers 150ms, melts back over 350ms",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:fc9ae6f (70% early-release deleted; linger timer; color transition 0.2 to 0.35s)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-V1",
+      "title": "Count redesigned: single ease-in-out traverse 1000-1500ms, no pulse, no dock",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:695d9c6 (component rewrite + badge/card strip + land keyframes deleted; V1+V2 as one coherent commit)",
+      "design_match": "yes",
+      "key_decisions": [
+        "dock removed: natural flow restored, resting and mid-tween layout identical to before",
+        "easeInOutCubic replaces hold+expo+land; tint entry/70%-release kept",
+        "defaults now min 1000ms / max 1500ms at >=50% change"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-N3",
+      "title": "AnimatedNumber three-beat count (hold/traverse/land, transient dock, expo)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:bd0d476 (phase machine + dock + expo + numberLand/trendLand keyframes)",
+      "design_match": "yes",
+      "key_decisions": [
+        "hold 180ms with tint = anticipation; tint releases at 70%; land pulse 180ms",
+        "dock sized to wider endpoint, removed on settle — resting DOM byte-identical"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-N4",
+      "title": "Sales landing choreography (badge pops with number)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:f6ecd93 (onLanded drives 220ms TrendBadge landed pop)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-H1",
+      "title": "Dashboard table headers 16px bold",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:c3d94c2 (home headers only; universal 12px sites untouched)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human feel-check: three-beat count both directions + header read"
+      ]
+    },
+    {
+      "id": "TL-DASH-R1",
+      "title": "Revert dashboard status column to right alignment",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:41503d6 (th:last-child + orderStatusCell back to right; T1 typography kept)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-N1",
+      "title": "Numeric sales totals + formatINRWhole helper",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:b3ee1f5 (totalValue per feed; hook/data/card carry numbers, format at render)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-N2",
+      "title": "Global AnimatedNumber count-tween + direction tint on sales total",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:18f6a8a (new ui/AnimatedNumber + barrel + sales tint classes + stat wiring)",
+      "design_match": "yes",
+      "key_decisions": [
+        "800ms floor, 1200ms ceiling at >=50% relative change; ease-out cubic; integer rupees",
+        "tint via props (success/error tokens) so the global stays treatment-free; cleared on settle",
+        "reduced-motion swaps instantly with no tint; rAF cleaned on unmount/supersede"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human feel-check: range switches both directions + reduced-motion"
+      ]
+    },
+    {
+      "id": "TL-DASH-T1",
+      "title": "Universal 12px near-black Title-Case headers; dashboard status left",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:2dcd71e (ui TableHead + home + sub rules to text-primary token; dashboard status cells left)",
+      "design_match": "yes",
+      "key_decisions": [
+        "Title Case needed zero JSX edits (markup already Title Case; caps were CSS-only)",
+        "single TableHead edit propagates to Orders/Customers/design-system tables",
+        "near-black is --tuw-text-primary #262626, not pure #000"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-F2",
+      "title": "Bars seated on baseline (8px float gap removed)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:822c153 (barsArea margin 6 to 2px + barGroup bottom padding 2 to 0; geometry needs exactly 2px)",
+      "design_match": "yes",
+      "key_decisions": [
+        "label rotation has no mechanism in committed code (feed order verified, single slots array, index keys) — attributed to stale dev bundle pending clean-restart verdict"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "user clean-restart verdict on label rotation; runtime probe commit if it persists"
+      ]
+    },
+    {
+      "id": "TL-DASH-F1",
+      "title": "Chart keys unique + zero-bar slivers hidden after sink",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:87541ce (index keys in ChartFrame; BarGroup active flag; barGroupEmpty CSS with delayed visibility)",
+      "design_match": "yes",
+      "key_decisions": [
+        "console error was 3 blank slots sharing key '' (also misplacing X labels per React warning)",
+        "slivers were 1px border + box-shadow on 0-height bars, not data — month feed verified correct",
+        "visibility flips on 0.4s delay so sink plays, then hides; grow-back is instant"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-B1",
+      "title": "Motion skill: data-change, hover-language, exit rules",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:195b8aa (SKILL.md additions + legacy lift line qualified)",
+      "design_match": "yes",
+      "key_decisions": [
+        "marching-ants rejected for cards (false affordance + infinite motion); reserved for progress/drop targets"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-B2",
+      "title": "Slot-pool bars: all range switches animate incl. to/from zero",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:3f9b5d3 (7 index-keyed slots, zero-fill, blank labels, tooltip suppressed on zeros)",
+      "design_match": "yes",
+      "key_decisions": [
+        "empty check stays on raw points so EmptyState remains reachable",
+        "normalization max unaffected by zero padding"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-B3",
+      "title": "KPI hover tint/wash replaces float lift",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:c2398af (CSS only)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-B4",
+      "title": "Sales axis-emphasis hover; bar lifts removed",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:d65fe51 (CSS only; gridline brighten + Y-label darken on card hover)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-B5",
+      "title": "Product thumb zoom + tint replaces row lift",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:cce6092 (CSS only; scale(1.05) inside clipped 72px frame)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-B6",
+      "title": "Alert dot-glow + order-id tint hovers; alert lift removed",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:09f1f33 (CSS only; fourth float found on alertItem also removed)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser feel-check: range switches incl. This month + all card hovers"
+      ]
+    },
+    {
+      "id": "TL-DASH-M1",
+      "title": "Popover motion infra: popoverIn/Out + usePopoverAnimation",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:ef9ea22 (keyframes in globals.css + new src/hooks/usePopoverAnimation.ts)",
+      "design_match": "yes",
+      "key_decisions": [
+        "exit 150ms ease-in, enter 180ms ease-out; reduced-motion unmounts immediately",
+        "parent flips open false; hook plays exit, unmounts, fires onClosed for state sync"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-M2",
+      "title": "FilterMenu enter/exit motion + chevron rotation",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:eb620ec (FilterMenu wired to hook; both dropdowns fixed in one shared change)",
+      "design_match": "yes",
+      "key_decisions": [
+        "chevron rotate-180 with transition-transform per motion skill"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-M3",
+      "title": "Calendar popover enter/exit motion; calendarIn retired",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:b5d1df6 (DashboardHeader owns phase; Calendar root animation removed; calendarIn deleted)",
+      "design_match": "yes",
+      "key_decisions": [
+        "animation lives on parent wrapper (single phase source); fixes date-filter popover too"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser feel-check: menu/calendar open + close + Escape"
+      ]
+    },
+    {
+      "id": "TL-DASH-P1",
+      "title": "Controls: FilterMenu + SeeAllLink + TrendBadge; cards rewired",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:9e81c07 (3 new controls + 5 cards rewired, ~100 duplicated menu lines deleted)",
+      "design_match": "yes",
+      "key_decisions": [
+        "FilterMenu is options/value/onChange dumb; mock or live feeds behave the same",
+        "covers the dashboard button gap (ui/Button has no filter-select variant)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-P2",
+      "title": "Chart atoms: ChartFrame/BarGroup/Tooltip/Legend; sales rewired",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:43a3ee6 (4 new atoms + SalesTrendCard composes them; gridlines driven by ticks)",
+      "design_match": "yes",
+      "key_decisions": [
+        "ChartFrame fluid width, CSS-owned height; any point count renders",
+        "normalization stays in card (pre-normalized heights into BarGroup)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-P3",
+      "title": "Meters: ProgressBar/SegmentedBar/OnlineBadge; cards rewired",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:31925fe (3 new atoms + Product/Inventory/Header rewired)",
+      "design_match": "yes",
+      "key_decisions": [
+        "all meter props are raw data (pct, filled/tone, label) — live values drop in later",
+        "dashboard table stays frozen home-* per scope decision"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-GAP1",
+      "title": "Sales header gap: subheader slot pins stat row to header",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:b0d4f52 (DashboardCard subheader slot + SalesTrendCard stat row moved, extra wrapper removed)",
+      "design_match": "yes",
+      "key_decisions": [
+        "root cause: space-between card went from 2 to 3 flex items in D4, stretching header-stat gap",
+        "fix restores 2-item structure; zero CSS changes; other cards neutral (plain flex-column, no space-between)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser confirm header-stat gap matches reference"
+      ]
+    },
+    {
+      "id": "TL-DASH-D8",
+      "title": "Dashboard sweep: hex/bracket audit, full gates, tracker, report",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "sweep-only, no code commit (typecheck + test 4/4 + build 37/37 re-verified on final stack)",
+      "design_match": "yes",
+      "key_decisions": [
+        "Sparkline SVG hex kept as chart-art (same class as heroOverlay exception)",
+        "no Tailwind arbitrary values in dashboard components (brackets are useState generics/array literals only)",
+        "HomeView 565 to 99 lines: layout + data wiring only"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "human browser verify at 360/768/1024/1440 + push v2"
+      ]
+    },
+    {
+      "id": "TL-DASH-D7",
+      "title": "DashboardHeader: purple filter hover + applied tint + online badge",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:049c4e1 (new DashboardHeader owns label/popover state + dateFilterBtn purple hover + dateFilterBtnActive tint + HomeView slimmed)",
+      "design_match": "yes",
+      "key_decisions": [
+        "dateFilterBtn hover grey to purple (mirrors filterSelectBtn); default resting pixels unchanged",
+        "applied tint only when label != Today via className ternary",
+        "online badge kept verbatim (pulse + 2 online customers) inside header"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-D6",
+      "title": "Calendar C0 review feedback promoted (endpoint pill caps)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:54adc41 (MonthCalendar start/single/end rounded-full to rounded-lg)",
+      "design_match": "yes",
+      "key_decisions": [
+        "photo endpoints are rounded-square band caps, not circles; idle hover stays rounded-full (transient only)",
+        "earlier C0b verdicts stand: purple mapping, dual arrows with push-along"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-D5",
+      "title": "ProductList + InventoryAlerts + RecentOrders cards; status badge fix",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:8d55159 (3 new cards + TopProduct adapter feed + HomeView slimmed to layout + hook wiring)",
+      "design_match": "yes",
+      "key_decisions": [
+        "shipped-only bug fixed via statusBadge map (queued/printing amber, delivered blue, failed red, shipped green) + Title-Case labels",
+        "home-* table/badge classes kept (generic Table/Badge primitives would restyle) — deviation noted",
+        "sort menu: curated default order untouched; By-units-sold reorders desc",
+        "alerts subtitle derives count from data"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-D4",
+      "title": "SalesTrendCard: range menu, normalized bars, empty state",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:986e3c8 (new SalesTrendCard + adapter SalesTrendFeed per-range + home-rangeMenu CSS + HomeView swap)",
+      "design_match": "yes",
+      "key_decisions": [
+        "adapter returns per-range feed (total/delta/legends/compare) — range button now live, kills dead control",
+        "barHeight normalizes vs max(100,...) — default feed heights string-identical to Figma percentages",
+        "empty feed renders ui/EmptyState with working reset action"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-D3",
+      "title": "KPI grid explicit 4-2-1 responsive tiers",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:1f8821f (home-kpiGrid repeat(4) + 2-col at <=1100px; 1-col at <=680px retained; live values already wired D1/D2)",
+      "design_match": "yes",
+      "key_decisions": [
+        "replaced auto-fit minmax(220px,1fr) with explicit tiers; 1440/768/360 paint unchanged, 1024 now 2-col by design"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-D2",
+      "title": "DashboardCard shell + MetricCard + Sparkline; KPIs componentized",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:8f8ffaf (new src/components/dashboard/* + HomeView KPI section uses MetricCard)",
+      "design_match": "yes",
+      "key_decisions": [
+        "Sparkline uses useId gradient ids (removes 3x duplicate sparkGreenGrad ids, identical paint)",
+        "MetricCard tabular prop preserves orders-count non-tabular exception",
+        "DashboardCard variant shell ready for D4/D5 panels"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-D1",
+      "title": "Dashboard data layer: useDashboardData + mock adapter",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-06",
+      "finished": "2026-10-06",
+      "log": "v2:cc65338 (new src/hooks/useDashboardData.ts + HomeView consumes hook)",
+      "design_match": "yes",
+      "key_decisions": [
+        "DashboardAdapter interface (trend/alerts/conversion) swappable later; mock adapter holds Figma Frame 1:20300 values",
+        "live KPIs (revenue/orders/AOV) derive from demo store inside hook; HomeView renders identical JSX",
+        "severity-to-class mapping stays in JSX (ternary); adapter returns data only"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "006",
+      "title": "Legacy alias reconciliation",
+      "status": "backlog",
+      "owner": null,
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "007",
+      "title": "Ghost-var tokenization (22 TSX hits)",
+      "status": "backlog",
+      "owner": null,
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "015",
+      "title": "UI primitives (Button/Card/Badge/Input)",
+      "status": "backlog",
+      "owner": null,
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "016",
+      "title": "sub-* shared pages",
+      "status": "backlog",
+      "owner": null,
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "017",
+      "title": "Header/topBar + shell + home-* dedupe",
+      "status": "backlog",
+      "owner": null,
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "018",
+      "title": "Sidebar performance pass",
+      "status": "backlog",
+      "owner": null,
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-COMP",
+      "title": "Sidebar componentization (stag removal, loops, sidebar-nav components)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-05",
+      "finished": "2026-10-05",
+      "log": "v2:a47858f, v2:c0e04b8, v2:03b5102, v2:5b46330, v2:a1f0d70",
+      "design_match": "yes",
+      "key_decisions": [
+        "stag art removed from footer (JSX-only; CSS was already gone)",
+        "NAV_GROUPS/FOOTER_ITEMS configs + .map() replaced ~450 hand-written lines",
+        "sidebar-nav/ components own row treatments; Sidebar slimmed 771 to 319 lines",
+        "sidebar/ vs Sidebar.tsx case-collision forced sidebar-nav/ dirname",
+        "5-child stem selector limit documented at constraint site"
+      ],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-POLISH",
+      "title": "Sidebar polish (collapsed gap, fade masks, badge-dot preview, focus rings)",
+      "status": "in_progress",
+      "owner": "agent",
+      "started": "2026-10-05",
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-POLISH-A",
+      "title": "collapsed gap zero + skip dead wrappers",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-SIDEBAR-POLISH",
+      "started": null,
+      "finished": "2026-10-05",
+      "log": "v2:f74316a",
+      "design_match": "yes",
+      "key_decisions": [
+        "collapsed gap-0 ternary; dead animation wrappers skipped when collapsed"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-POLISH-B",
+      "title": "fade masks with documented fallbacks",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-SIDEBAR-POLISH",
+      "started": null,
+      "finished": "2026-10-05",
+      "log": "v2:8402ab6",
+      "design_match": "yes",
+      "key_decisions": [
+        "sticky fade bars driven by scroll-edge state; thin-bar/both/chevron fallbacks documented, not built"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-POLISH-C",
+      "title": "badge-dot preview toggle in settings",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-SIDEBAR-POLISH",
+      "started": null,
+      "finished": "2026-10-05",
+      "log": "v2:dd984a5",
+      "design_match": "yes",
+      "key_decisions": [
+        "showCollapsedBadgeDots setting (default off) + Switch on general page; dots reuse badge colors"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-POLISH-D",
+      "title": "keyboard focus-visible rings",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-SIDEBAR-POLISH",
+      "started": null,
+      "finished": "2026-10-05",
+      "log": "v2:a10adab",
+      "design_match": "yes",
+      "key_decisions": [
+        "focus-visible 2px action-primary rings on all nav controls; mouse sees zero change"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-DIAG-CLIP",
+      "title": "Collapsed rail clip forensic (curl SSR + computed readouts)",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-SIDEBAR-POLISH",
+      "started": "2026-10-05",
+      "finished": "2026-10-05",
+      "log": "forensic-only, no code commit",
+      "design_match": "yes",
+      "key_decisions": [
+        "curl proves SSR markup only: single aside, full width classes incl. w-60/md:w-55, navStemTo0 correct on /dashboard",
+        "curl CANNOT prove computed layout (needs live browser) - collapsed clip still needs devtools readouts",
+        "no code change: nothing convicted"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "user devtools readouts: aside width, link box, aside count, scrollHeight/clientHeight"
+      ]
+    },
+    {
+      "id": "TL-SIDEBAR-ALIGN",
+      "title": "Collapsed hover calm + 80px header + task-discipline rule",
+      "status": "in_progress",
+      "owner": "agent",
+      "started": "2026-10-05",
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-ALIGN-A",
+      "title": "collapsed hover without white flash",
+      "status": "backlog",
+      "owner": null,
+      "parent": "TL-SIDEBAR-ALIGN",
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-ALIGN-B",
+      "title": "sidebar header 80px both states",
+      "status": "backlog",
+      "owner": null,
+      "parent": "TL-SIDEBAR-ALIGN",
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-ALIGN-C",
+      "title": "rule 04 task discipline",
+      "status": "backlog",
+      "owner": null,
+      "parent": "TL-SIDEBAR-ALIGN",
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-EDGE",
+      "title": "Full-bleed separators, collapsed centering, full-width pages",
+      "status": "in_progress",
+      "owner": "agent",
+      "started": "2026-10-05",
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-EDGE-A",
+      "title": "separators edge-to-edge (negative-margin bleed)",
+      "status": "backlog",
+      "owner": null,
+      "parent": "TL-SIDEBAR-EDGE",
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-EDGE-B",
+      "title": "collapsed icon centering forensic + fix",
+      "status": "backlog",
+      "owner": null,
+      "parent": "TL-SIDEBAR-EDGE",
+      "started": null,
+      "finished": null,
+      "log": null,
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-SIDEBAR-EDGE-C",
+      "title": "remove max-w-1400 page cap",
+      "status": "done",
+      "owner": null,
+      "parent": "TL-SIDEBAR-EDGE",
+      "started": null,
+      "finished": "2026-10-05",
+      "log": "reapplied post-reset",
+      "design_match": "yes",
+      "key_decisions": [
+        "single max-w occurrence repo-wide; mx-auto retained as no-op"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    }
+  ],
+  "workflow": {
+    "how_to_close_a_task": "Convert -> gates (zero-hex/bracket grep, typecheck, test 4/4, build, selector-level built-CSS proof, screenshots 360/1024/1440 + states) -> commit exact paths -> update entry (status, log, design_match, key_decisions, verified, finished, pushed:false) + summary counts + session block. See TRACKER_GUIDE.md and rules/02-gates.md.",
+    "validation": "ids unique; parent ids exist where used; status done requires log + verified:true; summary counts match array; session.tip matches HEAD; no Bucket-B/C paths in any log commit."
+  }
+}
