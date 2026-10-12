@@ -17,6 +17,32 @@ export interface ProductItem {
   image?: string;
   video?: string;
   rating: number;
+  /** Explicit per-variant inventory. Optional: absent means synthesize from
+   * colors/sizes/price/stock (see resolveVariants) — every existing fixture
+   * stays valid, and the future API returns explicit arrays. */
+  variants?: ProductVariant[];
+  /** Gallery image URLs beyond the hero image. Default []. */
+  images?: string[];
+  // Apparel metadata (all optional — existing fixtures stay valid)
+  fabricGsm?: string;
+  cut?: string;
+  modelDims?: string;
+  care?: string;
+  monogram?: { enabled: boolean; maxChars: number; upcharge: number };
+  seoTitle?: string;
+  seoDescription?: string;
+}
+
+/** Per-size/color inventory unit. Prices follow ProductItem.price convention
+ * (floats — matches the product domain; AGENTS minor-unit tension recorded
+ * for later reconciliation, not silently converted). */
+export interface ProductVariant {
+  id: string;
+  color: string;
+  size: string;
+  sku: string;
+  price: number;
+  stock: number;
 }
 
 export interface OrderItemLine {
