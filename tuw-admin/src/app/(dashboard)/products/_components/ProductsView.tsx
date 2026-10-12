@@ -83,7 +83,6 @@ export default function ProductsView() {
     setFormPlacement('Chest (45mm)');
     setFormStatus('published');
     setFormDescription('Pre-shrunk premium heavyweight combed cotton with reinforced seams.');
-    setFormImage('');
     setFormVideo('');
     setFormGallery([]);
     setFormUploads((prev) => {
@@ -105,7 +104,6 @@ export default function ProductsView() {
 
   // Drawer tab + media draft state (elastic workspace; tabs grow per phase)
   const [productTab, setProductTab] = useState<'general' | 'media' | 'variants' | 'specs' | 'seo'>('general');
-  const [formImage, setFormImage] = useState('');
   const [formVideo, setFormVideo] = useState('');
   // Gallery draft: persisted URL list + session-only upload previews.
   // Uploads preview instantly but never persist (blob URLs die on reload) —
@@ -256,7 +254,6 @@ export default function ProductsView() {
     setIsCreating(false);
     setEditingProduct(product);
     setProductTab('general');
-    setFormImage(product.image || '');
     setFormVideo(product.video || '');
     setFormGallery(
       product.images && product.images.length > 0
@@ -313,8 +310,9 @@ export default function ProductsView() {
         placement: formPlacement,
         publicationStatus: formStatus,
         description: formDescription,
-        image: formImage || undefined,
+        image: formGallery[0] || undefined,
         video: formVideo || undefined,
+        images: formGallery,
         imageBg: 'linear-gradient(135deg, #FAF3F7 0%, #EFE1EB 100%)',
         fabricGsm: formFabricGsm || undefined,
         cut: formCut || undefined,
@@ -330,6 +328,14 @@ export default function ProductsView() {
         seoTitle: formSeoTitle || undefined,
         seoDescription: formSeoDescription || undefined,
       });
+      if (formUploads.length > 0) {
+        showToast({
+          type: 'info',
+          title: 'Session Previews Dropped',
+          description: `${formUploads.length} uploaded preview${formUploads.length === 1 ? '' : 's'} can't persist as files — add URLs to keep them.`,
+        });
+        clearUploads();
+      }
       setIsCreating(false);
       return;
     }
@@ -356,8 +362,9 @@ export default function ProductsView() {
       placement: formPlacement,
       publicationStatus: formStatus,
       description: formDescription,
-      image: formImage || undefined,
+      image: formGallery[0] || undefined,
       video: formVideo || undefined,
+      images: formGallery,
       variants: submitVariants,
       fabricGsm: formFabricGsm || undefined,
       cut: formCut || undefined,
@@ -373,6 +380,15 @@ export default function ProductsView() {
       seoTitle: formSeoTitle || undefined,
       seoDescription: formSeoDescription || undefined,
     });
+
+    if (formUploads.length > 0) {
+      showToast({
+        type: 'info',
+        title: 'Session Previews Dropped',
+        description: `${formUploads.length} uploaded preview${formUploads.length === 1 ? '' : 's'} can't persist as files — add URLs to keep them.`,
+      });
+      clearUploads();
+    }
 
     setEditingProduct(null);
   };
@@ -425,6 +441,22 @@ export default function ProductsView() {
   const updateVariant = (id: string, patch: Partial<ProductVariant>) => {
     setFormVariants((prev) => prev.map((v) => (v.id === id ? { ...v, ...patch } : v)));
   };
+
+  // Customer-view gallery slides: uploaded reel previews live, else the
+  // persisted reel URL; then persisted gallery URLs, then session previews.
+  // The reel obeys the visibility toggle; uploads never persist.
+  const galleryReelUpload = formUploads.find((u) => u.kind === 'video');
+  const galleryReelSrc = galleryReelUpload ? galleryReelUpload.url : formVideo !== '' ? formVideo : null;
+  const showReel = visibleSections.video && galleryReelSrc !== null;
+  const gallerySlides: Array<{ type: 'image' | 'video'; src: string; alt: string; poster?: string }> = [
+    ...(showReel && galleryReelSrc
+      ? [{ type: 'video' as const, src: galleryReelSrc, alt: `${formName || 'Product'} video reel`, poster: formGallery[0] }]
+      : []),
+    ...formGallery.map((url) => ({ type: 'image' as const, src: url, alt: formName || 'Product image' })),
+    ...formUploads
+      .filter((u) => u.kind === 'image')
+      .map((u) => ({ type: 'image' as const, src: u.url, alt: 'Uploaded preview' })),
+  ];
 
   // Bulk actions (table-view bar appears when rows are selected)
   const clearSelection = () => setSelectedIds(new Set());
@@ -1164,34 +1196,94 @@ export default function ProductsView() {
           </form>
           ) : productTab === 'media' ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {formImage ? (
-              <MediaFrame height={220} radius={10}>
-                {visibleSections.video && formVideo ? (
-                  <video
-                    src={formVideo}
-                    controls
-                    poster={formImage || undefined}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                ) : (
-                  <Image
-                    src={formImage}
-                    alt={formName || 'Product preview'}
-                    fill
-                    style={{ objectFit: 'cover' }}
-                  />
-                )}
-              </MediaFrame>
-            ) : null}
-            <Input
-              label="Hero Image URL"
-              placeholder="/products/4.jpeg"
-              value={formImage}
-              onChange={(e) => setFormImage(e.target.value)}
-            />
+            {gallerySlides.length > 0 ? (
+              <Carousel ariaLabel="Customer gallery preview" slides={gallerySlides} />
+            ) : (
+              <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', padding: '12px 0' }}>
+                No gallery images yet — add a URL below or upload photos.
+              </div>
+            )}
+            {formGallery.map((url) => (
+              <div key={url} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <MediaFrame height={40} radius={8}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </MediaFrame>
+                <span style={{ flex: 1, fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {url}
+                </span>
+                <Button variant="ghost" size="sm" onClick={() => removeGalleryUrl(url)}>
+                  Remove
+                </Button>
+              </div>
+            ))}
+            {formUploads.map((u) => (
+              <div key={u.id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <MediaFrame height={40} radius={8}>
+                  {u.kind === 'video' ? (
+                    <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)' }}>Reel</span>
+                  ) : (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={u.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  )}
+                </MediaFrame>
+                <span style={{ flex: 1, fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                  Preview only — add a URL to keep it
+                </span>
+                <Button variant="ghost" size="sm" onClick={() => removeUpload(u.id)}>
+                  Remove
+                </Button>
+              </div>
+            ))}
+            <div style={{ display: 'flex', gap: 8 }}>
+              <div style={{ flex: 1 }}>
+                <Input
+                  aria-label="Image URL to add"
+                  placeholder="Paste image URL, then Add"
+                  value={addImageUrl}
+                  onChange={(e) => setAddImageUrl(e.target.value)}
+                />
+              </div>
+              <Button variant="secondary" size="md" onClick={addGalleryUrl}>
+                Add
+              </Button>
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <Button variant="secondary" size="sm" onClick={() => photoInputRef.current?.click()}>
+                Upload Photos
+              </Button>
+              {visibleSections.video ? (
+              <Button variant="secondary" size="sm" onClick={() => videoInputRef.current?.click()}>
+                Upload Reel
+              </Button>
+              ) : null}
+              <input
+                ref={photoInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                aria-label="Upload photos"
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  handlePhotoUpload(e.target.files);
+                  e.target.value = '';
+                }}
+              />
+              <input
+                ref={videoInputRef}
+                type="file"
+                accept="video/*"
+                aria-label="Upload video reel"
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  handleVideoUpload(e.target.files);
+                  e.target.value = '';
+                }}
+              />
+            </div>
             {visibleSections.video ? (
             <Input
-              label="Video Reel URL (optional)"
+              label="Video Reel URL (persisted)"
               placeholder="/products/4.mp4"
               value={formVideo}
               onChange={(e) => setFormVideo(e.target.value)}
