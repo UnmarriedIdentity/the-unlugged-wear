@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive, GripVertical, Upload } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, SurfaceCard, Button, Badge, Input, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection, Carousel } from '@/components/ui';
+import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, Input, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection, Carousel } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 import { resolveVariants, deriveColors, deriveSizes, variantStockTotal, buildVariantSku } from '@/mocks/variants';
@@ -706,16 +706,16 @@ export default function ProductsView() {
           ) : null}
         </>
       )}
-      <span style={{ display: 'inline-flex', gap: 2, flexShrink: 0 }}>
+      <UpliftSurface active width={28} height={28} className="tuw-danger-hover" style={{ flexShrink: 0, color: 'var(--tuw-text-secondary, #5D6772)' }}>
         <button
           type="button"
           aria-label={`Remove ${im.name}`}
           onClick={() => removeImage(im.id)}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tuw-text-secondary, #5D6772)', padding: 4, display: 'inline-flex' }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, display: 'inline-flex' }}
         >
           <Trash2 size={14} />
         </button>
-      </span>
+      </UpliftSurface>
     </SurfaceCard>
   ));
   // Card twin of assetRows for wide containers (MX4): the row's design DNA
@@ -785,14 +785,16 @@ export default function ProductsView() {
               )}
             </div>
           </div>
-          <button
-            type="button"
-            aria-label={`Remove ${im.name}`}
-            onClick={() => removeImage(im.id)}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tuw-text-secondary, #5D6772)', padding: 4, display: 'inline-flex', flexShrink: 0 }}
-          >
-            <Trash2 size={14} />
-          </button>
+          <UpliftSurface active width={28} height={28} className="tuw-danger-hover" style={{ flexShrink: 0, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+            <button
+              type="button"
+              aria-label={`Remove ${im.name}`}
+              onClick={() => removeImage(im.id)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, display: 'inline-flex' }}
+            >
+              <Trash2 size={14} />
+            </button>
+          </UpliftSurface>
         </SurfaceCard>
       ))}
     </div>
