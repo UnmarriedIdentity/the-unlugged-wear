@@ -7,6 +7,8 @@ export interface MediaFrameProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   /** Frame height (products drawer 220, media drawer 260). No default — caller-owned. */
   height: number | string;
+  /** Frame width. Default '100%' — pass a number for fixed thumbs (e.g. 40). */
+  width?: number | string;
   /** Corner radius (products 10, media 8). Default 10. */
   radius?: number | string;
 }
@@ -18,6 +20,7 @@ export interface MediaFrameProps extends React.HTMLAttributes<HTMLDivElement> {
 export default function MediaFrame({
   children,
   height,
+  width = '100%',
   radius = 10,
   style = {},
   ...props
@@ -26,7 +29,7 @@ export default function MediaFrame({
     <div
       style={{
         position: 'relative',
-        width: '100%',
+        width,
         height,
         borderRadius: radius,
         overflow: 'hidden',
