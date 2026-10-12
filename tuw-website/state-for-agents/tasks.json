@@ -15,7 +15,7 @@
   },
   "session": {
     "branch": "feat/storefront-agent-state",
-    "tip": "d7ad0ce841e2e06a1c737510cf71f704fda0adc4",
+    "tip": "2fa1ed52fe96a1bc450867a4fdb5b614100ee6d2",
     "unpushed": [],
     "next_up": "Partner kickoff: login/signup backend-ready (TL-WEB-AUTH1/AUTH2)",
     "pending_verifications": [],
@@ -34,7 +34,7 @@
       "owner": "agent",
       "started": "2026-10-12",
       "finished": "2026-10-12",
-      "log": "pending-final",
+      "log": "feat/storefront-agent-state:94ee435..2fa1ed5 (skeleton, 6 rules, 18 skills, tracker)",
       "design_match": null,
       "key_decisions": [
         "Mirror admin shape 1:1; zero admin references (self-containment law)",
