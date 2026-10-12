@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, Button, Badge, Input, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection } from '@/components/ui';
+import { StatCard, ContentCard, Button, Badge, Input, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection, Carousel } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 import { resolveVariants, deriveColors, deriveSizes, variantStockTotal, buildVariantSku } from '@/mocks/variants';
@@ -85,6 +85,12 @@ export default function ProductsView() {
     setFormDescription('Pre-shrunk premium heavyweight combed cotton with reinforced seams.');
     setFormImage('');
     setFormVideo('');
+    setFormGallery([]);
+    setFormUploads((prev) => {
+      revokeUploads(prev);
+      return [];
+    });
+    setAddImageUrl('');
     setFormVariants([]);
     setFormFabricGsm('');
     setFormCut('');
@@ -101,6 +107,71 @@ export default function ProductsView() {
   const [productTab, setProductTab] = useState<'general' | 'media' | 'variants' | 'specs' | 'seo'>('general');
   const [formImage, setFormImage] = useState('');
   const [formVideo, setFormVideo] = useState('');
+  // Gallery draft: persisted URL list + session-only upload previews.
+  // Uploads preview instantly but never persist (blob URLs die on reload) —
+  // the save toast states this demo truth outright.
+  const [formGallery, setFormGallery] = useState<string[]>([]);
+  const [formUploads, setFormUploads] = useState<Array<{ id: string; url: string; kind: 'image' | 'video' }>>([]);
+  const [addImageUrl, setAddImageUrl] = useState('');
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+
+  const revokeUploads = (uploads: Array<{ url: string }>) => {
+    uploads.forEach((u) => {
+      try {
+        URL.revokeObjectURL(u.url);
+      } catch {
+        /* already revoked */
+      }
+    });
+  };
+  const clearUploads = () => {
+    setFormUploads((prev) => {
+      revokeUploads(prev);
+      return [];
+    });
+  };
+
+  const handlePhotoUpload = (files: FileList | null) => {
+    if (!files) return;
+    const next = [...files]
+      .filter((f) => f.type.startsWith('image/'))
+      .map((f, i) => ({ id: `up-${Date.now()}-${i}`, url: URL.createObjectURL(f), kind: 'image' as const }));
+    if (next.length > 0) setFormUploads((prev) => [...prev, ...next]);
+  };
+
+  const handleVideoUpload = (files: FileList | null) => {
+    const file = files?.[0];
+    if (!file) return;
+    const hasReel = formVideo !== '' || formUploads.some((u) => u.kind === 'video');
+    if (hasReel) {
+      showToast({
+        type: 'warning',
+        title: 'One Video Reel Only',
+        description: 'Remove the current reel before adding another.',
+      });
+      return;
+    }
+    setFormUploads((prev) => [...prev, { id: `up-${Date.now()}`, url: URL.createObjectURL(file), kind: 'video' as const }]);
+  };
+
+  const removeGalleryUrl = (url: string) =>
+    setFormGallery((prev) => prev.filter((u) => u !== url));
+
+  const removeUpload = (id: string) => {
+    setFormUploads((prev) => {
+      const target = prev.find((u) => u.id === id);
+      if (target) revokeUploads([target]);
+      return prev.filter((u) => u.id !== id);
+    });
+  };
+
+  const addGalleryUrl = () => {
+    const url = addImageUrl.trim();
+    if (!url) return;
+    setFormGallery((prev) => (prev.includes(url) ? prev : [...prev, url]));
+    setAddImageUrl('');
+  };
   // Apparel + SEO draft state (specs/SEO tabs; all optional — fixtures stay valid)
   const [formFabricGsm, setFormFabricGsm] = useState('');
   const [formCut, setFormCut] = useState('');
@@ -187,6 +258,18 @@ export default function ProductsView() {
     setProductTab('general');
     setFormImage(product.image || '');
     setFormVideo(product.video || '');
+    setFormGallery(
+      product.images && product.images.length > 0
+        ? [...product.images]
+        : product.image
+          ? [product.image]
+          : []
+    );
+    setFormUploads((prev) => {
+      revokeUploads(prev);
+      return [];
+    });
+    setAddImageUrl('');
     setFormFabricGsm(product.fabricGsm || '');
     setFormCut(product.cut || '');
     setFormModelDims(product.modelDims || '');
@@ -898,6 +981,7 @@ export default function ProductsView() {
         onClose={() => {
           setEditingProduct(null);
           setIsCreating(false);
+          clearUploads();
         }}
         title={editingProduct ? `Manage ${editingProduct.name}` : 'Add New Product'}
         subtitle={
