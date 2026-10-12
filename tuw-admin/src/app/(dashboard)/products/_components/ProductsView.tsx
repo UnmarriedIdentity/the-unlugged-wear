@@ -1021,6 +1021,19 @@ export default function ProductsView() {
         onClose={() => setEditingProduct(null)}
         title={editingProduct ? `Manage ${editingProduct.name}` : 'Edit Product'}
         subtitle={`ID: ${editingProduct?.id} · ${editingProduct?.partner}`}
+        expandable
+        headerExtra={
+          <Tabs
+            variant="underline"
+            ariaLabel="Product editor sections"
+            tabs={[
+              { id: 'general', label: 'General' },
+              { id: 'media', label: 'Media' },
+            ]}
+            activeTab={productTab}
+            onChange={(id) => setProductTab(id as typeof productTab)}
+          />
+        }
         footer={
           editingProduct && (
             <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
@@ -1050,26 +1063,8 @@ export default function ProductsView() {
         }
       >
         {editingProduct && (
+          productTab === 'general' ? (
           <form onSubmit={handleEditSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {editingProduct.image && (
-              <MediaFrame height={220} radius={10}>
-                {editingProduct.video ? (
-                  <video
-                    src={editingProduct.video}
-                    controls
-                    poster={editingProduct.image}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                ) : (
-                  <Image
-                    src={editingProduct.image}
-                    alt={editingProduct.name}
-                    fill
-                    style={{ objectFit: 'cover' }}
-                  />
-                )}
-              </MediaFrame>
-            )}
             <Input
               label="Product Title"
               value={formName}
@@ -1164,6 +1159,41 @@ export default function ProductsView() {
               onChange={(e) => setFormDescription(e.target.value)}
             />
           </form>
+          ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {formImage ? (
+              <MediaFrame height={220} radius={10}>
+                {formVideo ? (
+                  <video
+                    src={formVideo}
+                    controls
+                    poster={formImage || undefined}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                ) : (
+                  <Image
+                    src={formImage}
+                    alt={formName || 'Product preview'}
+                    fill
+                    style={{ objectFit: 'cover' }}
+                  />
+                )}
+              </MediaFrame>
+            ) : null}
+            <Input
+              label="Hero Image URL"
+              placeholder="/products/4.jpeg"
+              value={formImage}
+              onChange={(e) => setFormImage(e.target.value)}
+            />
+            <Input
+              label="Video Reel URL (optional)"
+              placeholder="/products/4.mp4"
+              value={formVideo}
+              onChange={(e) => setFormVideo(e.target.value)}
+            />
+          </div>
+          )
         )}
       </Drawer>
     </DashboardShell>
