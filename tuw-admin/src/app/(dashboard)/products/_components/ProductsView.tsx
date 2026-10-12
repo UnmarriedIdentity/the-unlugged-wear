@@ -176,6 +176,7 @@ export default function ProductsView() {
   const [mediaWide, setMediaWide] = useState(false);
   const [mediaCards, setMediaCards] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const [draggingId, setDraggingId] = useState<string | null>(null);
   const mediaWrapRef = useRef<HTMLDivElement>(null);
   const dragIdRef = useRef<string | null>(null);
   React.useEffect(() => {
@@ -660,12 +661,14 @@ export default function ProductsView() {
       padding="10px"
       gap="12px"
       hoverable
-      className={idx === 0 ? 'tuw-stat-active' : ''}
+      className={`${idx === 0 ? 'tuw-stat-active' : ''} ${draggingId === im.id ? 'tuw-stat-active' : ''}`.trim()}
       draggable
       onDragStart={(e) => {
         dragIdRef.current = im.id;
+        setDraggingId(im.id);
         e.dataTransfer.effectAllowed = 'move';
       }}
+      onDragEnd={() => setDraggingId(null)}
       onDragOver={(e) => e.preventDefault()}
       onDrop={(e) => {
         e.preventDefault();
@@ -673,6 +676,7 @@ export default function ProductsView() {
           moveImageTo(dragIdRef.current, im.id);
           dragIdRef.current = null;
         }
+        setDraggingId(null);
       }}
       style={{ alignItems: 'center' }}
     >
@@ -749,13 +753,19 @@ export default function ProductsView() {
   const assetCards = (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
       {formImages.map((im, idx) => (
-        <div
+        <SurfaceCard
           key={im.id}
+          padding="12px"
+          gap="10px"
+          hoverable
+          className={`${idx === 0 ? 'tuw-stat-active' : ''} ${draggingId === im.id ? 'tuw-stat-active' : ''}`.trim()}
           draggable
           onDragStart={(e) => {
             dragIdRef.current = im.id;
+            setDraggingId(im.id);
             e.dataTransfer.effectAllowed = 'move';
           }}
+          onDragEnd={() => setDraggingId(null)}
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => {
             e.preventDefault();
@@ -763,17 +773,9 @@ export default function ProductsView() {
               moveImageTo(dragIdRef.current, im.id);
               dragIdRef.current = null;
             }
+            setDraggingId(null);
           }}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 8,
-            padding: 12,
-            backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
-            border: '1px solid var(--tuw-border-subtle, #E5E7EB)',
-            borderRadius: 12,
-            minWidth: 0,
-          }}
+          style={{ minWidth: 0 }}
         >
           <MediaFrame height={90} radius={8}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -837,7 +839,7 @@ export default function ProductsView() {
               <Trash2 size={14} />
             </button>
           </div>
-        </div>
+        </SurfaceCard>
       ))}
     </div>
   );
