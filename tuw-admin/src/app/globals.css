@@ -2137,6 +2137,19 @@
   color: var(--tuw-text-success, #187343) !important;
 }
 
+/* Native number-spinner kill (ED2): hides the OS up/down arrows on numeric
+   inputs (e.g. the Stepper's click-to-type field) so the slot keeps its
+   exact geometry. Shared/reusable for every future numeric input. */
+.tuw-no-spinner::-webkit-outer-spin-button,
+.tuw-no-spinner::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.tuw-no-spinner {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
 /* Shared 3D uplift surface (US1): white face + inset bottom edge, the same
    relief the sidebar gives its active nav item (shadow-nav-edge token).
    Sized entirely by the caller (width/height/radius props on UpliftSurface)

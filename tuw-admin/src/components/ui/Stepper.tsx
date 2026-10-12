@@ -89,6 +89,7 @@ export default function Stepper({
         <input
           type="number"
           aria-label={`${ariaLabel} (type exact value, Enter to confirm, Escape to cancel)`}
+          className="tuw-tabular-nums tuw-no-spinner"
           // eslint-disable-next-line jsx-a11y/no-autofocus
           autoFocus
           value={draft}
@@ -107,8 +108,11 @@ export default function Stepper({
             }
           }}
           style={{
-            width: 56,
-            height: 28,
+            // Shared 44×24 slot with the resting span below (border-box both)
+            // so entering edit mode never moves the stepper buttons.
+            width: 44,
+            height: 24,
+            boxSizing: 'border-box',
             textAlign: 'center',
             fontSize: 14,
             fontWeight: 600,
@@ -147,7 +151,20 @@ export default function Stepper({
           color: 'var(--tuw-text-primary, #262626)',
           fontFamily: 'var(--font-main)',
           ...(editableValue
-            ? { cursor: 'text', borderBottom: '1px dotted var(--tuw-border-control, #D1D5DB)' }
+            ? {
+                cursor: 'text',
+                // Transparent border reserves the input's purple-edge space so
+                // the shared 44×24 slot never shifts between modes.
+                border: '1px solid transparent',
+                borderRadius: 6,
+                width: 44,
+                height: 24,
+                minWidth: 'unset',
+                boxSizing: 'border-box',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }
             : {}),
         }}
       >
