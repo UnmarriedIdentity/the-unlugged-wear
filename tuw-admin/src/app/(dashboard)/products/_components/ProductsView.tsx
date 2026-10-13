@@ -8,7 +8,7 @@ import DashboardShell from '@/components/layout/DashboardShell';
 import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, Input, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection, Carousel } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
-import { resolveVariants, deriveColors, deriveSizes, variantStockTotal, buildVariantSku } from '@/mocks/variants';
+import { resolveVariants, variantStockTotal, buildVariantSku } from '@/mocks/variants';
 import type { ProductVariant } from '@/mocks/fixtures';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
@@ -56,8 +56,14 @@ export default function ProductsView() {
   const [formPrice, setFormPrice] = useState('48.00');
   const [formComparePrice, setFormComparePrice] = useState('58.00');
   const [formStock, setFormStock] = useState('30');
-  const [formColors, setFormColors] = useState('Black, Chalk White, Olive');
-  const [formSizes, setFormSizes] = useState('S, M, L, XL');
+  // Per-product attributes (A1): the single source behind colors/sizes.
+  // REST: GET/PUT /products/:id/attributes → [{ name, values[], builtin }].
+  // Color + Size ship builtin (locked); custom attributes append here.
+  // The matrix still cross-products Color×Size until A2 generalizes it.
+  const [formAttributes, setFormAttributes] = useState<Array<{ name: string; values: string[]; builtin: boolean }>>([]);
+  const attrValues = (name: string) => formAttributes.find((a) => a.name === name)?.values ?? [];
+  const colorValues = attrValues('Color');
+  const sizeValues = attrValues('Size');
   const [formPartner, setFormPartner] = useState<ProductItem['partner']>('Qikink Direct API');
   const [formPlacement, setFormPlacement] = useState<ProductItem['placement']>('Chest (45mm)');
   const [formStatus, setFormStatus] = useState<ProductItem['publicationStatus']>('published');
@@ -80,8 +86,10 @@ export default function ProductsView() {
     setFormPrice('48.00');
     setFormComparePrice('58.00');
     setFormStock('25');
-    setFormColors('Black, Chalk White, Olive');
-    setFormSizes('S, M, L, XL');
+    setFormAttributes([
+      { name: 'Color', values: ['Black', 'Chalk White', 'Olive'], builtin: true },
+      { name: 'Size', values: ['S', 'M', 'L', 'XL'], builtin: true },
+    ]);
     setFormPartner('Qikink Direct API');
     setFormPlacement('Chest (45mm)');
     setFormStatus('published');
@@ -326,6 +334,19 @@ export default function ProductsView() {
     });
   };
 
+  // Comma-field bridge (A1a): keeps the General inputs behavior-identical
+  // until A1b swaps them for chip cards. Typing still rebuilds live.
+  const setColorText = (s: string) => {
+    const values = parseList(s);
+    setFormAttributes((prev) => prev.map((a) => (a.name === 'Color' ? { ...a, values } : a)));
+    rebuildMatrix(values, attrValues('Size'), parseFloat(formPrice) || 0, editingProduct?.id ?? 'PRD');
+  };
+  const setSizeText = (s: string) => {
+    const values = parseList(s);
+    setFormAttributes((prev) => prev.map((a) => (a.name === 'Size' ? { ...a, values } : a)));
+    rebuildMatrix(attrValues('Color'), values, parseFloat(formPrice) || 0, editingProduct?.id ?? 'PRD');
+  };
+
   const openEditDrawer = (product: ProductItem) => {
     if (!canPerformAction('products')) return;
     setIsCreating(false);
@@ -364,8 +385,10 @@ export default function ProductsView() {
     setFormPrice(product.price.toFixed(2));
     setFormComparePrice(product.compareAtPrice ? product.compareAtPrice.toFixed(2) : '');
     setFormStock(String(product.stock));
-    setFormColors(product.colors.join(', '));
-    setFormSizes(product.sizes.join(', '));
+    setFormAttributes([
+      { name: 'Color', values: [...product.colors], builtin: true },
+      { name: 'Size', values: [...product.sizes], builtin: true },
+    ]);
     setFormPartner(product.partner);
     setFormPlacement(product.placement);
     setFormStatus(product.publicationStatus);
@@ -385,8 +408,8 @@ export default function ProductsView() {
         price: priceNum,
         compareAtPrice: compareNum,
         stock: stockNum,
-        colors: parseList(formColors),
-        sizes: parseList(formSizes),
+        colors: colorValues,
+        sizes: sizeValues,
         partner: formPartner,
         placement: formPlacement,
         publicationStatus: formStatus,
@@ -1591,29 +1614,13 @@ export default function ProductsView() {
             </div>
             <Input
               label="Color Variations"
-              value={formColors}
-              onChange={(e) => {
-                setFormColors(e.target.value);
-                rebuildMatrix(
-                  parseList(e.target.value),
-                  parseList(formSizes),
-                  parseFloat(formPrice) || 0,
-                  editingProduct?.id ?? 'PRD'
-                );
-              }}
+              value={colorValues.join(', ')}
+              onChange={(e) => setColorText(e.target.value)}
             />
             <Input
               label="Size Variations"
-              value={formSizes}
-              onChange={(e) => {
-                setFormSizes(e.target.value);
-                rebuildMatrix(
-                  parseList(formColors),
-                  parseList(e.target.value),
-                  parseFloat(formPrice) || 0,
-                  editingProduct?.id ?? 'PRD'
-                );
-              }}
+              value={sizeValues.join(', ')}
+              onChange={(e) => setSizeText(e.target.value)}
             />
             <FormTextarea
               label="Description"
