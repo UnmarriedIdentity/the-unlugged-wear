@@ -1533,7 +1533,7 @@
       "follow_ups": ["A1 attribute library", "A2 attribute-driven matrix", "X1/X2 variant export/import"]
     },
     {
-      "id": "TL-DASH-DW1",
+      "id": "TL-DASH-DX1",
       "title": "Drawer controlled view + per-tab auto-expand (variants forces matrix)",
       "status": "done",
       "owner": "agent",
