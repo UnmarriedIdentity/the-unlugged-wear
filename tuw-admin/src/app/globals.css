@@ -2116,6 +2116,40 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04) !important;
 }
 
+/* Shared destructive hover (DS2): red wash + red icon/border for icon
+   buttons with destructive actions (delete, remove). Built only from the
+   error token pair (--tuw-bg-error / --tuw-text-error, the same values as
+   the Tailwind error-bg / error-text tokens the logout row uses), so it
+   collapses both dialects. !important wins over primitive inline bases,
+   same precedent as .tuw-stat-hover. Icon follows via currentColor. */
+.tuw-danger-hover:hover {
+  background-color: var(--tuw-bg-error, #FEF4F4) !important;
+  border-color: var(--tuw-text-error, #C91818) !important;
+  color: var(--tuw-text-error, #C91818) !important;
+}
+
+/* Shared constructive hover (ED1): green wash + green icon/border, the
+   mirror of .tuw-danger-hover for affirmative steppers (stock +, confirm).
+   Same shape / !important precedent; icon follows via currentColor. */
+.tuw-success-hover:hover {
+  background-color: var(--tuw-bg-success, #F4FBF7) !important;
+  border-color: var(--tuw-text-success, #187343) !important;
+  color: var(--tuw-text-success, #187343) !important;
+}
+
+/* Native number-spinner kill (ED2): hides the OS up/down arrows on numeric
+   inputs (e.g. the Stepper's click-to-type field) so the slot keeps its
+   exact geometry. Shared/reusable for every future numeric input. */
+.tuw-no-spinner::-webkit-outer-spin-button,
+.tuw-no-spinner::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.tuw-no-spinner {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
 /* Shared 3D uplift surface (US1): white face + inset bottom edge, the same
    relief the sidebar gives its active nav item (shadow-nav-edge token).
    Sized entirely by the caller (width/height/radius props on UpliftSurface)

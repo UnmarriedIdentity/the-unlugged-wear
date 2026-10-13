@@ -38,7 +38,7 @@ export { default as Modal } from './Modal';
 export type { ModalProps } from './Modal';
 
 export { default as Drawer } from './Drawer';
-export type { DrawerProps } from './Drawer';
+export type { DrawerProps, DrawerView } from './Drawer';
 
 export { default as Tabs } from './Tabs';
 export type { TabsProps, TabItem } from './Tabs';
@@ -114,4 +114,10 @@ export type { MediaFrameProps } from './MediaFrame';
 
 export { default as FormTextarea } from './FormTextarea';
 export type { FormTextareaProps } from './FormTextarea';
+
+export { default as Stepper } from './Stepper';
+export type { StepperProps } from './Stepper';
+
+export { default as Carousel } from './Carousel';
+export type { CarouselProps, CarouselSlide } from './Carousel';
 

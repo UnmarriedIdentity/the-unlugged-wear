@@ -1,12 +1,15 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive } from 'lucide-react';
+import Link from 'next/link';
+import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive, GripVertical, Upload } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, Button, Badge, Input, Modal, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea } from '@/components/ui';
+import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, Input, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection, Carousel } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
+import { resolveVariants, deriveColors, deriveSizes, variantStockTotal, buildVariantSku } from '@/mocks/variants';
+import type { ProductVariant } from '@/mocks/fixtures';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
 
@@ -43,8 +46,7 @@ export default function ProductsView() {
     }
   }, []);
 
-  // Modals & Drawers
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  // Drawers
   const [editingProduct, setEditingProduct] = useState<ProductItem | null>(null);
 
   // Form State for Create/Edit
@@ -61,8 +63,17 @@ export default function ProductsView() {
   const [formStatus, setFormStatus] = useState<ProductItem['publicationStatus']>('published');
   const [formDescription, setFormDescription] = useState('Pre-shrunk premium heavyweight combed cotton with reinforced seams.');
 
-  const openCreateModal = () => {
+  // Drawer create mode (PE5): blank-draft editing; the modal retires next.
+  const [isCreating, setIsCreating] = useState(false);
+
+  const openCreateDrawer = () => {
     if (!canPerformAction('products')) return;
+    setEditingProduct(null);
+    setIsCreating(true);
+    setProductTab('general');
+    setDrawerView('compact');
+    preTableView.current = null;
+    setStageIndex(0);
     setFormName('');
     setFormSlug('');
     setFormCategory('T-Shirts');
@@ -75,12 +86,278 @@ export default function ProductsView() {
     setFormPlacement('Chest (45mm)');
     setFormStatus('published');
     setFormDescription('Pre-shrunk premium heavyweight combed cotton with reinforced seams.');
-    setIsCreateOpen(true);
+    setFormVideo('');
+    setFormImages([]);
+    setUploadReel((prev) => {
+      if (prev) revokeUploads([{ url: prev.url }]);
+      return null;
+    });
+    setAddImageUrl('');
+    setFormVariants([]);
+    setFormFabricGsm('');
+    setFormCut('');
+    setFormModelDims('');
+    setFormCare('');
+    setFormMonogramEnabled(false);
+    setFormMonogramChars('3');
+    setFormMonogramUpcharge('12.00');
+    setFormSeoTitle('');
+    setFormSeoDescription('');
+  };
+
+  // Drawer tab + media draft state (elastic workspace; tabs grow per phase)
+  const [productTab, setProductTab] = useState<'general' | 'media' | 'variants' | 'specs' | 'seo'>('general');
+  const [formVideo, setFormVideo] = useState('');
+  // Gallery draft: persisted URL list + session-only upload previews.
+  // Uploads preview instantly but never persist (blob URLs die on reload) —
+  // the save toast states this demo truth outright.
+  const [addImageUrl, setAddImageUrl] = useState('');
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+
+  const revokeUploads = (uploads: Array<{ url: string }>) => {
+    uploads.forEach((u) => {
+      try {
+        URL.revokeObjectURL(u.url);
+      } catch {
+        /* already revoked */
+      }
+    });
+  };
+
+  // Unified asset list (MX2): persisted gallery URLs + session upload
+  // previews in one orderable list. Reorder/cover operate on the list;
+  // save splits it back (URLs persist, uploads drop with a toast).
+  const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
+  const [formImages, setFormImages] = useState<
+    Array<{ id: string; src: string; name: string; persisted: boolean }>
+  >([]);
+  const [uploadReel, setUploadReel] = useState<{ id: string; url: string; name: string } | null>(null);
+
+  const baseName = (url: string) => {
+    const part = url.split('?')[0].split('/');
+    return part[part.length - 1] || url;
+  };
+
+  const setCoverImage = (id: string) => {
+    setFormImages((prev) => {
+      const idx = prev.findIndex((im) => im.id === id);
+      if (idx <= 0) return prev;
+      const next = [...prev];
+      const [item] = next.splice(idx, 1);
+      return [item, ...next];
+    });
+  };
+
+  const moveImageTo = (dragId: string, targetId: string) => {
+    setFormImages((prev) => {
+      const from = prev.findIndex((im) => im.id === dragId);
+      const to = prev.findIndex((im) => im.id === targetId);
+      if (from < 0 || to < 0 || from === to) return prev;
+      const next = [...prev];
+      const [item] = next.splice(from, 1);
+      next.splice(to, 0, item);
+      return next;
+    });
+  };
+
+  // Stage + responsive dual-pane (MX2): carousel index, wide layout at
+  // >=700px container width, drag payload ref for HTML5 reorder.
+  const [stageIndex, setStageIndex] = useState(0);
+  const [mediaWide, setMediaWide] = useState(false);
+  const [mediaCards, setMediaCards] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const mediaWrapRef = useRef<HTMLDivElement>(null);
+  const dragIdRef = useRef<string | null>(null);
+  React.useEffect(() => {
+    const el = mediaWrapRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver((entries) => {
+      const w = entries[0]?.contentRect.width ?? 0;
+      setMediaWide(w >= 700);
+      setMediaCards(w >= 1000);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [productTab]);
+
+  // Elastic view ownership (W1): products drives the Drawer size per tab.
+  // Entering Variants from compact stashes the choice and forces matrix
+  // (never full); leaving restores the stash. Manual picks always win —
+  // forcing fires on tab-enter only, never fights the hand on the control.
+  const [drawerView, setDrawerView] = useState<'compact' | 'matrix' | 'full'>('compact');
+  const preTableView = useRef<'compact' | 'matrix' | 'full' | null>(null);
+  const prevTab = useRef<'general' | 'media' | 'variants' | 'specs' | 'seo'>('general');
+  React.useEffect(() => {
+    const entered = prevTab.current !== 'variants' && productTab === 'variants';
+    const left = prevTab.current === 'variants' && productTab !== 'variants';
+    prevTab.current = productTab;
+    if (entered && drawerView === 'compact') {
+      preTableView.current = 'compact';
+      setDrawerView('matrix');
+    } else if (left && preTableView.current !== null) {
+      setDrawerView(preTableView.current);
+      preTableView.current = null;
+    }
+  }, [productTab, drawerView]);
+
+  const removeImage = (id: string) => {
+    setFormImages((prev) => {
+      const target = prev.find((im) => im.id === id);
+      if (target && !target.persisted) revokeUploads([{ url: target.src }]);
+      return prev.filter((im) => im.id !== id);
+    });
+  };
+
+  const addImageUrlEntry = () => {
+    const url = addImageUrl.trim();
+    if (!url) return;
+    setFormImages((prev) =>
+      prev.some((im) => im.src === url) ? prev : [...prev, { id: `g-${Date.now()}`, src: url, name: baseName(url), persisted: true }]
+    );
+    setAddImageUrl('');
+  };
+
+  const handlePickedFiles = (files: FileList | null) => {
+    if (!files) return;
+    [...files].forEach((f) => {
+      if (f.size > MAX_UPLOAD_BYTES) {
+        showToast({
+          type: 'warning',
+          title: 'File Too Large',
+          description: `"${f.name}" exceeds the 25MB limit and was skipped.`,
+        });
+        return;
+      }
+      if (f.type.startsWith('image/')) {
+        const url = URL.createObjectURL(f);
+        setFormImages((prev) => [...prev, { id: `up-${Date.now()}-${f.name}`, src: url, name: f.name, persisted: false }]);
+      } else if (f.type.startsWith('video/')) {
+        const hasReel = formVideo !== '' || uploadReel !== null;
+        if (hasReel) {
+          showToast({
+            type: 'warning',
+            title: 'One Video Reel Only',
+            description: 'Remove the current reel before adding another.',
+          });
+          return;
+        }
+        setUploadReel({ id: `up-${Date.now()}`, url: URL.createObjectURL(f), name: f.name });
+      }
+    });
+  };
+  // Apparel + SEO draft state (specs/SEO tabs; all optional — fixtures stay valid)
+  const [formFabricGsm, setFormFabricGsm] = useState('');
+  const [formCut, setFormCut] = useState('');
+  const [formModelDims, setFormModelDims] = useState('');
+  const [formCare, setFormCare] = useState('');
+  const [formMonogramEnabled, setFormMonogramEnabled] = useState(false);
+  const [formMonogramChars, setFormMonogramChars] = useState('3');
+  const [formMonogramUpcharge, setFormMonogramUpcharge] = useState('12.00');
+  const [formSeoTitle, setFormSeoTitle] = useState('');
+  const [formSeoDescription, setFormSeoDescription] = useState('');
+  // Section visibility (persisted demo pref; all-visible default)
+  const [visibleSections, setVisibleSections] = useState({ video: true, monogram: true });
+  React.useEffect(() => {
+    try {
+      const raw = localStorage.getItem('tuw_admin_v2_product_editor');
+      if (raw) setVisibleSections((prev) => ({ ...prev, ...JSON.parse(raw) }));
+    } catch {
+      /* private mode — defaults stand */
+    }
+  }, []);
+  React.useEffect(() => {
+    try {
+      localStorage.setItem('tuw_admin_v2_product_editor', JSON.stringify(visibleSections));
+    } catch {
+      /* private mode — session-only */
+    }
+  }, [visibleSections]);
+  // Variant matrix draft (drawer only): General variant inputs mirror-write
+  // here so the matrix stays the single submit source.
+  const [formVariants, setFormVariants] = useState<ProductVariant[]>([]);
+
+  const parseList = (s: string) => s.split(',').map((x) => x.trim()).filter(Boolean);
+
+  const writePriceAll = (priceStr: string) => {
+    setFormPrice(priceStr);
+    const n = parseFloat(priceStr);
+    if (isNaN(n)) return;
+    setFormVariants((prev) => prev.map((v) => ({ ...v, price: n })));
+  };
+
+  const writeStockTotal = (stockStr: string) => {
+    setFormStock(stockStr);
+    const total = parseInt(stockStr, 10);
+    if (isNaN(total) || total < 0) return;
+    setFormVariants((prev) => {
+      if (prev.length === 0) return prev;
+      const base = Math.floor(total / prev.length);
+      let remainder = total % prev.length;
+      return prev.map((v) => {
+        const add = remainder > 0 ? 1 : 0;
+        if (remainder > 0) remainder -= 1;
+        return { ...v, stock: base + add };
+      });
+    });
+  };
+
+  const rebuildMatrix = (colors: string[], sizes: string[], basePrice: number, productId: string) => {
+    setFormVariants((prev) => {
+      const byKey = new Map(prev.map((v) => [`${v.color}|${v.size}`, v]));
+      const out: ProductVariant[] = [];
+      colors.forEach((color, ci) => {
+        sizes.forEach((size) => {
+          const kept = byKey.get(`${color}|${size}`);
+          if (kept) out.push(kept);
+          else
+            out.push({
+              id: `tmp-${ci}-${size}`,
+              color,
+              size,
+              sku: buildVariantSku(productId, ci, size),
+              price: basePrice,
+              stock: 0,
+            });
+        });
+      });
+      return out;
+    });
   };
 
   const openEditDrawer = (product: ProductItem) => {
     if (!canPerformAction('products')) return;
+    setIsCreating(false);
     setEditingProduct(product);
+    setProductTab('general');
+    setDrawerView('compact');
+    preTableView.current = null;
+    setStageIndex(0);
+    setFormVideo(product.video || '');
+    setFormImages(
+      (product.images && product.images.length > 0
+        ? product.images
+        : product.image
+          ? [product.image]
+          : []
+      ).map((src, i) => ({ id: `g-${i}`, src, name: baseName(src), persisted: true }))
+    );
+    setUploadReel((prev) => {
+      if (prev) revokeUploads([{ url: prev.url }]);
+      return null;
+    });
+    setAddImageUrl('');
+    setFormFabricGsm(product.fabricGsm || '');
+    setFormCut(product.cut || '');
+    setFormModelDims(product.modelDims || '');
+    setFormCare(product.care || '');
+    setFormMonogramEnabled(product.monogram?.enabled || false);
+    setFormMonogramChars(String(product.monogram?.maxChars ?? 3));
+    setFormMonogramUpcharge(product.monogram ? product.monogram.upcharge.toFixed(2) : '12.00');
+    setFormSeoTitle(product.seoTitle || '');
+    setFormSeoDescription(product.seoDescription || '');
+    setFormVariants(resolveVariants(product));
     setFormName(product.name);
     setFormSlug(product.slug);
     setFormCategory(product.category);
@@ -95,53 +372,112 @@ export default function ProductsView() {
     setFormDescription(product.description);
   };
 
-  const handleCreateSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const priceNum = parseFloat(formPrice) || 0;
-    const stockNum = parseInt(formStock, 10) || 0;
-    const compareNum = parseFloat(formComparePrice) || undefined;
-
-    createProduct({
-      name: formName || 'Untitled Garment',
-      slug: formSlug || formName.toLowerCase().replace(/\s+/g, '-'),
-      category: formCategory,
-      price: priceNum,
-      compareAtPrice: compareNum,
-      stock: stockNum,
-      colors: formColors.split(',').map((c) => c.trim()).filter(Boolean),
-      sizes: formSizes.split(',').map((s) => s.trim()).filter(Boolean),
-      partner: formPartner,
-      placement: formPlacement,
-      publicationStatus: formStatus,
-      description: formDescription,
-      imageBg: 'linear-gradient(135deg, #FAF3F7 0%, #EFE1EB 100%)',
-    });
-
-    setIsCreateOpen(false);
-  };
-
   const handleEditSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isCreating) {
+      const priceNum = parseFloat(formPrice) || 0;
+      const stockNum = parseInt(formStock, 10) || 0;
+      const compareNum = parseFloat(formComparePrice) || undefined;
+      createProduct({
+        name: formName || 'Untitled Garment',
+        slug: formSlug || formName.toLowerCase().replace(/\s+/g, '-'),
+        category: formCategory,
+        price: priceNum,
+        compareAtPrice: compareNum,
+        stock: stockNum,
+        colors: parseList(formColors),
+        sizes: parseList(formSizes),
+        partner: formPartner,
+        placement: formPlacement,
+        publicationStatus: formStatus,
+        description: formDescription,
+        image: formImages[0]?.src || undefined,
+        video: formVideo || undefined,
+        images: formImages.filter((im) => im.persisted).map((im) => im.src),
+        imageBg: 'linear-gradient(135deg, #FAF3F7 0%, #EFE1EB 100%)',
+        fabricGsm: formFabricGsm || undefined,
+        cut: formCut || undefined,
+        modelDims: formModelDims || undefined,
+        care: formCare || undefined,
+        monogram: formMonogramEnabled
+          ? {
+              enabled: true,
+              maxChars: parseInt(formMonogramChars, 10) || 3,
+              upcharge: parseFloat(formMonogramUpcharge) || 0,
+            }
+          : undefined,
+        seoTitle: formSeoTitle || undefined,
+        seoDescription: formSeoDescription || undefined,
+      });
+      const droppedCount =
+        formImages.filter((im) => !im.persisted).length + (uploadReel !== null ? 1 : 0);
+      if (droppedCount > 0) {
+        showToast({
+          type: 'info',
+          title: 'Session Previews Dropped',
+          description: `${droppedCount} uploaded preview${droppedCount === 1 ? '' : 's'} can't persist as files — add URLs to keep them.`,
+        });
+      }
+      setIsCreating(false);
+      return;
+    }
     if (!editingProduct) return;
 
     const priceNum = parseFloat(formPrice) || editingProduct.price;
-    const stockNum = parseInt(formStock, 10) || editingProduct.stock;
     const compareNum = parseFloat(formComparePrice) || undefined;
+
+    // The draft matrix is the submit source: colors/sizes/stock derive from
+    // it in the seam; price follows the lowest variant ("from $X" semantics).
+    const draftError = variantDraftError();
+    if (draftError) {
+      showToast({ type: 'warning', title: 'Check Variants', description: draftError });
+      setProductTab('variants');
+      return;
+    }
+    const submitVariants = formVariants.length > 0 ? formVariants : resolveVariants(editingProduct);
+    const minPrice =
+      submitVariants.length > 0
+        ? Math.min(...submitVariants.map((v) => v.price))
+        : priceNum;
 
     updateProduct(editingProduct.id, {
       name: formName,
       slug: formSlug,
       category: formCategory,
-      price: priceNum,
+      price: minPrice,
       compareAtPrice: compareNum,
-      stock: stockNum,
-      colors: formColors.split(',').map((c) => c.trim()).filter(Boolean),
-      sizes: formSizes.split(',').map((s) => s.trim()).filter(Boolean),
       partner: formPartner,
       placement: formPlacement,
       publicationStatus: formStatus,
       description: formDescription,
+      image: formImages[0]?.src || undefined,
+      video: formVideo || undefined,
+      images: formImages.filter((im) => im.persisted).map((im) => im.src),
+      variants: submitVariants,
+      fabricGsm: formFabricGsm || undefined,
+      cut: formCut || undefined,
+      modelDims: formModelDims || undefined,
+      care: formCare || undefined,
+      monogram: formMonogramEnabled
+        ? {
+            enabled: true,
+            maxChars: parseInt(formMonogramChars, 10) || 3,
+            upcharge: parseFloat(formMonogramUpcharge) || 0,
+          }
+        : undefined,
+      seoTitle: formSeoTitle || undefined,
+      seoDescription: formSeoDescription || undefined,
     });
+
+    const droppedCount =
+      formImages.filter((im) => !im.persisted).length + (uploadReel !== null ? 1 : 0);
+    if (droppedCount > 0) {
+      showToast({
+        type: 'info',
+        title: 'Session Previews Dropped',
+        description: `${droppedCount} uploaded preview${droppedCount === 1 ? '' : 's'} can't persist as files — add URLs to keep them.`,
+      });
+    }
 
     setEditingProduct(null);
   };
@@ -189,6 +525,75 @@ export default function ProductsView() {
       return next;
     });
   };
+
+  // Matrix row patch (variants tab): single source stays the draft.
+  const updateVariant = (id: string, patch: Partial<ProductVariant>) => {
+    setFormVariants((prev) => prev.map((v) => (v.id === id ? { ...v, ...patch } : v)));
+  };
+
+  // Add / remove matrix rows (V1): new rows carry tmp- ids (same convention
+  // as rebuildMatrix fresh cells) with blank color/size rendered as inputs;
+  // touching color/size on a tmp- row regenerates its SKU.
+  const addVariant = () => {
+    const basePrice = parseFloat(formPrice) || 0;
+    setFormVariants((prev) => [
+      ...prev,
+      {
+        id: `tmp-${Date.now()}`,
+        color: '',
+        size: '',
+        sku: '',
+        price: basePrice,
+        stock: 0,
+      },
+    ]);
+  };
+  const touchVariant = (id: string, patch: Partial<ProductVariant>) => {
+    setFormVariants((prev) => {
+      const colors = [...new Set(prev.map((v) => v.color).filter(Boolean))];
+      return prev.map((v) => {
+        if (v.id !== id) return v;
+        const next = { ...v, ...patch };
+        if (v.id.startsWith('tmp-') && (patch.color !== undefined || patch.size !== undefined)) {
+          const known = colors.includes(next.color);
+          next.sku = next.color && next.size
+            ? buildVariantSku(editingProduct?.id ?? 'PRD', known ? colors.indexOf(next.color) : colors.length, next.size)
+            : '';
+        }
+        return next;
+      });
+    });
+  };
+  const removeVariant = (id: string) => {
+    setFormVariants((prev) => prev.filter((v) => v.id !== id));
+  };
+
+  // Save guard (V1): blank or duplicate color|size rows block the submit
+  // with a naming toast; all input is preserved (drawer stays open).
+  const variantDraftError = (): string | null => {
+    const seen = new Set<string>();
+    for (const v of formVariants) {
+      const color = v.color.trim();
+      const size = v.size.trim();
+      if (!color || !size) return 'Each variant needs a color and a size — fill the blank row or remove it.';
+      const key = `${color.toLowerCase()}|${size.toLowerCase()}`;
+      if (seen.has(key)) return `Duplicate variant "${v.color} / ${v.size}" — merge it or remove one.`;
+      seen.add(key);
+    }
+    return null;
+  };
+
+  // Customer-view gallery slides: uploaded reel previews live, else the
+  // persisted reel URL; then the ordered image list (persisted + previews).
+  // The reel obeys the visibility toggle; uploads never persist.
+  const galleryReelSrc = uploadReel ? uploadReel.url : formVideo !== '' ? formVideo : null;
+  const showReel = visibleSections.video && galleryReelSrc !== null;
+  const gallerySlides: Array<{ type: 'image' | 'video'; src: string; alt: string; poster?: string }> = [
+    ...(showReel && galleryReelSrc
+      ? [{ type: 'video' as const, src: galleryReelSrc, alt: `${formName || 'Product'} video reel`, poster: formImages[0]?.src }]
+      : []),
+    ...formImages.map((im) => ({ type: 'image' as const, src: im.src, alt: formName || 'Product image' })),
+  ];
 
   // Bulk actions (table-view bar appears when rows are selected)
   const clearSelection = () => setSelectedIds(new Set());
@@ -295,6 +700,269 @@ export default function ProductsView() {
       }
     };
 
+  // Media stage + asset panel blocks (MX2): defined once, arranged by width.
+  const stageIndexClamped = Math.min(stageIndex, Math.max(0, gallerySlides.length - 1));
+  const stageHeader = (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+      <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.04em', color: 'var(--tuw-text-secondary, #5D6772)' }}>
+        MEDIA STAGE & LIVE PREVIEW
+      </span>
+      <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+        {gallerySlides.length > 0 ? `${stageIndexClamped + 1} of ${gallerySlides.length} assets` : 'No assets'}
+      </span>
+    </div>
+  );
+  const stageCarousel = gallerySlides.length > 0 ? (
+    <Carousel
+      ariaLabel="Customer gallery preview"
+      variant="filmstrip"
+      slides={gallerySlides}
+      index={stageIndexClamped}
+      onIndexChange={setStageIndex}
+    />
+  ) : (
+    <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', padding: '12px 0' }}>
+      No gallery images yet — add a URL below or upload photos.
+    </div>
+  );
+  const assetRows = formImages.map((im, idx) => (
+    <SurfaceCard
+      key={im.id}
+      direction="row"
+      padding="10px"
+      gap="12px"
+      hoverable
+      className={`${idx === 0 ? 'tuw-stat-active' : ''} ${draggingId === im.id ? 'tuw-stat-active' : ''}`.trim()}
+      draggable
+      onDragStart={(e) => {
+        dragIdRef.current = im.id;
+        setDraggingId(im.id);
+        e.dataTransfer.effectAllowed = 'move';
+      }}
+      onDragEnd={() => setDraggingId(null)}
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={(e) => {
+        e.preventDefault();
+        if (dragIdRef.current) {
+          moveImageTo(dragIdRef.current, im.id);
+          dragIdRef.current = null;
+        }
+        setDraggingId(null);
+      }}
+      style={{ alignItems: 'center' }}
+    >
+      <span style={{ cursor: 'grab', display: 'inline-flex', color: 'var(--tuw-text-secondary, #5D6772)' }} aria-hidden="true">
+        <GripVertical size={14} />
+      </span>
+      <MediaFrame height={40} width={40} radius={8} style={{ flexShrink: 0 }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={im.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      </MediaFrame>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {im.name}
+        </div>
+        <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {im.src}
+        </div>
+      </div>
+      {idx === 0 ? (
+        <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.04em', color: '#FFFFFF', backgroundColor: 'var(--tuw-action-primary, #7539FF)', borderRadius: 4, padding: '2px 6px', flexShrink: 0 }}>
+          COVER
+        </span>
+      ) : (
+        <>
+          {!im.persisted ? (
+            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--tuw-text-warning, #856300)', backgroundColor: 'var(--tuw-bg-warning, #FEFBF5)', borderRadius: 4, padding: '2px 6px', flexShrink: 0 }}>
+              Preview only
+            </span>
+          ) : null}
+          {im.persisted ? (
+            <button
+              type="button"
+              onClick={() => setCoverImage(im.id)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', padding: '4px 2px', flexShrink: 0 }}
+            >
+              Set Cover
+            </button>
+          ) : null}
+        </>
+      )}
+      <UpliftSurface active width={28} height={28} className="tuw-danger-hover" style={{ flexShrink: 0, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+        <button
+          type="button"
+          aria-label={`Remove ${im.name}`}
+          onClick={() => removeImage(im.id)}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, display: 'inline-flex' }}
+        >
+          <Trash2 size={14} />
+        </button>
+      </UpliftSurface>
+    </SurfaceCard>
+  ));
+  // Card twin of assetRows for wide containers (MX4): the row's design DNA
+  // (1:1 thumb, name + URL, badge row, delete) in a 2-per-row grid. Drag
+  // anywhere on the card; same cover / preview / delete paths.
+  const assetCards = (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+      {formImages.map((im, idx) => (
+        <SurfaceCard
+          key={im.id}
+          direction="row"
+          padding="10px"
+          gap="12px"
+          hoverable
+          className={`${idx === 0 ? 'tuw-stat-active' : ''} ${draggingId === im.id ? 'tuw-stat-active' : ''}`.trim()}
+          draggable
+          onDragStart={(e) => {
+            dragIdRef.current = im.id;
+            setDraggingId(im.id);
+            e.dataTransfer.effectAllowed = 'move';
+          }}
+          onDragEnd={() => setDraggingId(null)}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault();
+            if (dragIdRef.current) {
+              moveImageTo(dragIdRef.current, im.id);
+              dragIdRef.current = null;
+            }
+            setDraggingId(null);
+          }}
+          style={{ alignItems: 'center', minWidth: 0 }}
+        >
+          <MediaFrame height={72} width={72} radius={8} style={{ flexShrink: 0 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={im.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </MediaFrame>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {im.name}
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {im.src}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
+              {idx === 0 ? (
+                <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.04em', color: '#FFFFFF', backgroundColor: 'var(--tuw-action-primary, #7539FF)', borderRadius: 4, padding: '2px 6px' }}>
+                  COVER
+                </span>
+              ) : (
+                <>
+                  {!im.persisted ? (
+                    <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--tuw-text-warning, #856300)', backgroundColor: 'var(--tuw-bg-warning, #FEFBF5)', borderRadius: 4, padding: '2px 6px' }}>
+                      Preview only
+                    </span>
+                  ) : null}
+                  {im.persisted ? (
+                    <button
+                      type="button"
+                      onClick={() => setCoverImage(im.id)}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', padding: '4px 2px' }}
+                    >
+                      Set Cover
+                    </button>
+                  ) : null}
+                </>
+              )}
+            </div>
+          </div>
+          <UpliftSurface active width={28} height={28} className="tuw-danger-hover" style={{ flexShrink: 0, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+            <button
+              type="button"
+              aria-label={`Remove ${im.name}`}
+              onClick={() => removeImage(im.id)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, display: 'inline-flex' }}
+            >
+              <Trash2 size={14} />
+            </button>
+          </UpliftSurface>
+        </SurfaceCard>
+      ))}
+    </div>
+  );
+  const panelHeader = (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+          Uploaded Assets & Reel
+        </span>
+        <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={() => photoInputRef.current?.click()}>
+          Add Media
+        </Button>
+      </div>
+      <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: '4px 0 0 0' }}>
+        Drag or click to reorder. Set the primary cover photo for your storefront.
+      </p>
+    </div>
+  );
+  const dropzone = (
+    <div
+      role="button"
+      tabIndex={0}
+      aria-label="Upload photos or video reel"
+      className="tuw-stat-hover"
+      onClick={() => photoInputRef.current?.click()}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          photoInputRef.current?.click();
+        }
+      }}
+      onDragOver={(e) => {
+        e.preventDefault();
+        setDragActive(true);
+      }}
+      onDragLeave={() => setDragActive(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setDragActive(false);
+        handlePickedFiles(e.dataTransfer.files);
+      }}
+      style={{
+        border: `1px dashed ${dragActive ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-border-control, #D1D5DB)'}`,
+        borderRadius: 12,
+        padding: 24,
+        textAlign: 'center',
+        cursor: 'pointer',
+        backgroundColor: dragActive ? 'var(--tuw-bg-selected, #F8F5FF)' : 'transparent',
+      }}
+    >
+      <span style={{ display: 'inline-flex', color: 'var(--tuw-action-primary, #7539FF)' }}>
+        <Upload size={20} />
+      </span>
+      <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginTop: 8 }}>
+        Click to upload photos or reel, or drag files here
+      </div>
+      <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', marginTop: 4 }}>
+        PNG, JPG, WEBP, or MP4 Video Reel (Max 25MB)
+      </div>
+    </div>
+  );
+  const reelUrlField = visibleSections.video ? (
+    <Input
+      label="Video Reel URL (persisted)"
+      placeholder="/products/4.mp4"
+      value={formVideo}
+      onChange={(e) => setFormVideo(e.target.value)}
+    />
+  ) : null;
+  const addUrlRow = (
+    <div style={{ display: 'flex', gap: 8 }}>
+      <div style={{ flex: 1 }}>
+        <Input
+          aria-label="Image URL to add"
+          placeholder="Paste image URL, then Add"
+          value={addImageUrl}
+          onChange={(e) => setAddImageUrl(e.target.value)}
+        />
+      </div>
+      <Button variant="secondary" size="md" onClick={addImageUrlEntry}>
+        Add
+      </Button>
+    </div>
+  );
+
   return (
     <DashboardShell pageTitle="Products" activeNav="products">
       <PageHeader
@@ -304,7 +972,7 @@ export default function ProductsView() {
             variant="primary"
             size="md"
             icon={<Plus size={16} />}
-            onClick={openCreateModal}
+            onClick={openCreateDrawer}
           >
             <span>Add New Product</span>
           </Button>
@@ -739,279 +1407,80 @@ export default function ProductsView() {
         )}
       </ContentCard>
 
-      {/* Add New Product Modal */}
-      <Modal
-        isOpen={isCreateOpen}
-        onClose={() => setIsCreateOpen(false)}
-        title="Add New Catalog Garment"
-        subtitle="Create an apparel item with partner mapping and size variants"
-        maxWidth="620px"
-        footer={
-          <div style={{ display: 'flex', gap: 10 }}>
-            <Button variant="secondary" size="md" onClick={() => setIsCreateOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="primary" size="md" onClick={handleCreateSubmit}>
-              Save to Catalog
-            </Button>
-          </div>
-        }
-      >
-        <form onSubmit={handleCreateSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <Input
-              label="Product Title"
-              placeholder="e.g. Heavyweight Fleece Zip Hoodie"
-              value={formName}
-              onChange={(e) => {
-                setFormName(e.target.value);
-                if (!formSlug) setFormSlug(e.target.value.toLowerCase().replace(/\s+/g, '-'));
-              }}
-              required
-            />
-            <Input
-              label="URL Slug"
-              placeholder="e.g. heavyweight-fleece-zip-hoodie"
-              value={formSlug}
-              onChange={(e) => setFormSlug(e.target.value)}
-              required
-            />
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', marginBottom: 6 }}>
-                Category
-              </div>
-              <DropdownMenu
-                ariaLabel="Category"
-                trigger={
-                  <span
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`Category, currently ${formCategory}`}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
-                    }}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: 8,
-                      width: '100%',
-                      height: 40,
-                      padding: '0 12px',
-                      fontSize: 13,
-                      fontWeight: 500,
-                      fontFamily: 'var(--font-main)',
-                      borderRadius: 8,
-                      border: '1px solid var(--tuw-border-control, #D1D5DB)',
-                      backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
-                      color: 'var(--tuw-text-primary, #262626)',
-                      cursor: 'pointer',
-                      userSelect: 'none',
-                    }}
-                  >
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {formCategory}
-                    </span>
-                    <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
-                  </span>
-                }
-                items={['T-Shirts', 'Hoodies', 'Jackets', 'Pants', 'Accessories'].map((c) => ({ value: c, label: c }))}
-                selectedValue={formCategory}
-                onSelect={(v) => setFormCategory(v as ProductItem['category'])}
-              />
-            </div>
-
-            <Input
-              label="Price ($ USD)"
-              type="number"
-              step="0.01"
-              value={formPrice}
-              onChange={(e) => setFormPrice(e.target.value)}
-              required
-            />
-
-            <Input
-              label="Initial Stock Units"
-              type="number"
-              value={formStock}
-              onChange={(e) => setFormStock(e.target.value)}
-              required
-            />
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', marginBottom: 6 }}>
-                Fulfillment Partner
-              </div>
-              <DropdownMenu
-                ariaLabel="Fulfillment partner"
-                trigger={
-                  <span
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`Fulfillment partner, currently ${formPartner}`}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
-                    }}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: 8,
-                      width: '100%',
-                      height: 40,
-                      padding: '0 12px',
-                      fontSize: 13,
-                      fontWeight: 500,
-                      fontFamily: 'var(--font-main)',
-                      borderRadius: 8,
-                      border: '1px solid var(--tuw-border-control, #D1D5DB)',
-                      backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
-                      color: 'var(--tuw-text-primary, #262626)',
-                      cursor: 'pointer',
-                      userSelect: 'none',
-                    }}
-                  >
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {formPartner}
-                    </span>
-                    <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
-                  </span>
-                }
-                items={['Qikink Direct API', 'Printrove Hub', 'Custom Atelier'].map((p) => ({ value: p, label: p }))}
-                selectedValue={formPartner}
-                onSelect={(v) => setFormPartner(v as ProductItem['partner'])}
-              />
-            </div>
-
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', marginBottom: 6 }}>
-                Artwork Placement Spec
-              </div>
-              <DropdownMenu
-                ariaLabel="Artwork placement spec"
-                trigger={
-                  <span
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`Artwork placement spec, currently ${formPlacement}`}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
-                    }}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: 8,
-                      width: '100%',
-                      height: 40,
-                      padding: '0 12px',
-                      fontSize: 13,
-                      fontWeight: 500,
-                      fontFamily: 'var(--font-main)',
-                      borderRadius: 8,
-                      border: '1px solid var(--tuw-border-control, #D1D5DB)',
-                      backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
-                      color: 'var(--tuw-text-primary, #262626)',
-                      cursor: 'pointer',
-                      userSelect: 'none',
-                    }}
-                  >
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {formPlacement}
-                    </span>
-                    <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
-                  </span>
-                }
-                items={['Chest (45mm)', 'Back Oversized', 'Sleeve Length', 'Interior Hem'].map((pl) => ({ value: pl, label: pl }))}
-                selectedValue={formPlacement}
-                onSelect={(v) => setFormPlacement(v as ProductItem['placement'])}
-              />
-            </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <Input
-              label="Colors (comma separated)"
-              value={formColors}
-              onChange={(e) => setFormColors(e.target.value)}
-            />
-            <Input
-              label="Sizes (comma separated)"
-              value={formSizes}
-              onChange={(e) => setFormSizes(e.target.value)}
-            />
-          </div>
-
-            <FormTextarea
-              label="Garment Description & Care"
-              rows={3}
-              value={formDescription}
-              onChange={(e) => setFormDescription(e.target.value)}
-            />
-
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', marginBottom: 6 }}>
-                Publication State
-              </div>
-              <DropdownMenu
-                ariaLabel="Publication state"
-                trigger={
-                  <span
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`Publication state, currently ${formStatus === 'published' ? 'Published (Visible in Storefront)' : formStatus === 'draft' ? 'Draft (Editorial review only)' : 'Archived (Hidden from catalog)'}`}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
-                    }}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: 8,
-                      width: '100%',
-                      height: 40,
-                      padding: '0 12px',
-                      fontSize: 13,
-                      fontWeight: 500,
-                      fontFamily: 'var(--font-main)',
-                      borderRadius: 8,
-                      border: '1px solid var(--tuw-border-control, #D1D5DB)',
-                      backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
-                      color: 'var(--tuw-text-primary, #262626)',
-                      cursor: 'pointer',
-                      userSelect: 'none',
-                    }}
-                  >
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {formStatus === 'published' ? 'Published (Visible in Storefront)' : formStatus === 'draft' ? 'Draft (Editorial review only)' : 'Archived (Hidden from catalog)'}
-                    </span>
-                    <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
-                  </span>
-                }
-                items={[
-                  { value: 'published', label: 'Published (Visible in Storefront)' },
-                  { value: 'draft', label: 'Draft (Editorial review only)' },
-                  { value: 'archived', label: 'Archived (Hidden from catalog)' },
-                ]}
-                selectedValue={formStatus}
-                onSelect={(v) => setFormStatus(v as ProductItem['publicationStatus'])}
-              />
-            </div>
-        </form>
-      </Modal>
-
       {/* Edit Product Drawer */}
       <Drawer
-        isOpen={Boolean(editingProduct)}
-        onClose={() => setEditingProduct(null)}
-        title={editingProduct ? `Manage ${editingProduct.name}` : 'Edit Product'}
-        subtitle={`ID: ${editingProduct?.id} · ${editingProduct?.partner}`}
+        isOpen={Boolean(editingProduct) || isCreating}
+        onClose={() => {
+          setEditingProduct(null);
+          setIsCreating(false);
+          setDrawerView('compact');
+          preTableView.current = null;
+          setFormImages((prev) => {
+            revokeUploads(prev.filter((im) => !im.persisted).map((im) => ({ url: im.src })));
+            return prev;
+          });
+          setUploadReel((prev) => {
+            if (prev) revokeUploads([{ url: prev.url }]);
+            return null;
+          });
+        }}
+        title={editingProduct ? `Manage ${editingProduct.name}` : 'Add New Product'}
+        subtitle={
+          editingProduct ? (
+            <span style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+              {`ID: ${editingProduct.id} · ${editingProduct.partner} · `}
+              <Badge
+                variant={
+                  editingProduct.publicationStatus === 'published'
+                    ? 'success'
+                    : editingProduct.publicationStatus === 'draft'
+                      ? 'warning'
+                      : 'neutral'
+                }
+              >
+                {editingProduct.publicationStatus === 'published' ? 'Live' : editingProduct.publicationStatus}
+              </Badge>
+            </span>
+          ) : (
+            'New catalog entry'
+          )
+        }
+        expandable
+        view={drawerView}
+        onViewChange={setDrawerView}
+        headerExtra={
+          <Tabs
+            variant="underline"
+            ariaLabel="Product editor sections"
+            tabs={
+              isCreating
+                ? [
+                    { id: 'general', label: 'General' },
+                    { id: 'media', label: 'Media', badge: formImages.length + (uploadReel !== null || formVideo !== '' ? 1 : 0) },
+                  ]
+                : [
+                    { id: 'general', label: 'General' },
+                    { id: 'media', label: 'Media', badge: formImages.length + (uploadReel !== null || formVideo !== '' ? 1 : 0) },
+                    { id: 'variants', label: 'Variants & Stock', badge: formVariants.length },
+                    { id: 'specs', label: 'Clothing Specs' },
+                    { id: 'seo', label: 'SEO' },
+                  ]
+            }
+            activeTab={productTab}
+            onChange={(id) => setProductTab(id as typeof productTab)}
+          />
+        }
         footer={
+          isCreating ? (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, width: '100%' }}>
+              <Button variant="secondary" size="sm" onClick={() => setIsCreating(false)}>
+                Cancel
+              </Button>
+              <Button variant="primary" size="sm" onClick={handleEditSubmit}>
+                Create Product
+              </Button>
+            </div>
+          ) : (
           editingProduct && (
             <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
               <Button
@@ -1037,29 +1506,12 @@ export default function ProductsView() {
               </div>
             </div>
           )
+          )
         }
       >
-        {editingProduct && (
+        {(editingProduct || isCreating) && (
+          productTab === 'general' ? (
           <form onSubmit={handleEditSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {editingProduct.image && (
-              <MediaFrame height={220} radius={10}>
-                {editingProduct.video ? (
-                  <video
-                    src={editingProduct.video}
-                    controls
-                    poster={editingProduct.image}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                ) : (
-                  <Image
-                    src={editingProduct.image}
-                    alt={editingProduct.name}
-                    fill
-                    style={{ objectFit: 'cover' }}
-                  />
-                )}
-              </MediaFrame>
-            )}
             <Input
               label="Product Title"
               value={formName}
@@ -1078,14 +1530,14 @@ export default function ProductsView() {
                 type="number"
                 step="0.01"
                 value={formPrice}
-                onChange={(e) => setFormPrice(e.target.value)}
+                onChange={(e) => writePriceAll(e.target.value)}
                 required
               />
               <Input
                 label="Stock Quantity"
                 type="number"
                 value={formStock}
-                onChange={(e) => setFormStock(e.target.value)}
+                onChange={(e) => writeStockTotal(e.target.value)}
                 required
               />
             </div>
@@ -1140,12 +1592,28 @@ export default function ProductsView() {
             <Input
               label="Color Variations"
               value={formColors}
-              onChange={(e) => setFormColors(e.target.value)}
+              onChange={(e) => {
+                setFormColors(e.target.value);
+                rebuildMatrix(
+                  parseList(e.target.value),
+                  parseList(formSizes),
+                  parseFloat(formPrice) || 0,
+                  editingProduct?.id ?? 'PRD'
+                );
+              }}
             />
             <Input
               label="Size Variations"
               value={formSizes}
-              onChange={(e) => setFormSizes(e.target.value)}
+              onChange={(e) => {
+                setFormSizes(e.target.value);
+                rebuildMatrix(
+                  parseList(formColors),
+                  parseList(e.target.value),
+                  parseFloat(formPrice) || 0,
+                  editingProduct?.id ?? 'PRD'
+                );
+              }}
             />
             <FormTextarea
               label="Description"
@@ -1154,6 +1622,263 @@ export default function ProductsView() {
               onChange={(e) => setFormDescription(e.target.value)}
             />
           </form>
+          ) : productTab === 'media' ? (
+          <div ref={mediaWrapRef} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {mediaWide ? (
+            <div style={{ display: 'grid', gridTemplateColumns: '9fr 11fr', gap: 20, alignItems: 'start' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0 }}>
+                {stageHeader}
+                <Carousel ariaLabel="Customer gallery preview" variant="filmstrip" slides={gallerySlides} index={stageIndexClamped} onIndexChange={setStageIndex} />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
+                {panelHeader}
+                {mediaCards ? assetCards : assetRows}
+                {addUrlRow}
+                {dropzone}
+                {reelUrlField}
+              </div>
+            </div>
+            ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {stageHeader}
+              <Carousel ariaLabel="Customer gallery preview" variant="filmstrip" slides={gallerySlides} index={stageIndexClamped} onIndexChange={setStageIndex} />
+              {panelHeader}
+              {mediaCards ? assetCards : assetRows}
+              {addUrlRow}
+              {dropzone}
+              {reelUrlField}
+            </div>
+            )}
+            <input
+              ref={photoInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              aria-label="Upload photos"
+              style={{ display: 'none' }}
+              onChange={(e) => {
+                handlePickedFiles(e.target.files);
+                e.target.value = '';
+              }}
+            />
+            <input
+              ref={videoInputRef}
+              type="file"
+              accept="video/*"
+              aria-label="Upload video reel"
+              style={{ display: 'none' }}
+              onChange={(e) => {
+                handlePickedFiles(e.target.files);
+                e.target.value = '';
+              }}
+            />
+          </div>
+          ) : productTab === 'variants' ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+              <span style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                {formVariants.length} variants · {variantStockTotal(formVariants)} units in stock
+              </span>
+              <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={addVariant}>
+                Add Variant
+              </Button>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow hoverable={false}>
+                  <TableHead style={{ padding: '12px 16px' }}>Color</TableHead>
+                  <TableHead style={{ padding: '12px 16px' }}>Size</TableHead>
+                  <TableHead style={{ padding: '12px 16px' }}>SKU</TableHead>
+                  <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Price</TableHead>
+                  <TableHead style={{ padding: '12px 16px' }}>Stock</TableHead>
+                  <TableHead style={{ padding: '12px 16px', width: 48 }}><span className="sr-only">Actions</span></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {formVariants.map((v) => (
+                  <TableRow key={v.id} hoverable={false}>
+                    <TableCell style={{ padding: '10px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
+                      {v.id.startsWith('tmp-') ? (
+                        <Input
+                          aria-label="Variant color"
+                          placeholder={v.color === '' ? 'Color' : undefined}
+                          // eslint-disable-next-line jsx-a11y/no-autofocus
+                          autoFocus={v.color === '' && v.size === ''}
+                          value={v.color}
+                          onChange={(e) => touchVariant(v.id, { color: e.target.value })}
+                          style={{ height: 36 }}
+                        />
+                      ) : (
+                        v.color
+                      )}
+                    </TableCell>
+                    <TableCell style={{ padding: '10px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
+                      {v.id.startsWith('tmp-') ? (
+                        <Input
+                          aria-label="Variant size"
+                          placeholder={v.size === '' ? 'Size' : undefined}
+                          value={v.size}
+                          onChange={(e) => touchVariant(v.id, { size: e.target.value })}
+                          style={{ height: 36 }}
+                        />
+                      ) : (
+                        v.size
+                      )}
+                    </TableCell>
+                    <TableCell style={{ padding: '10px 16px' }}>
+                      <Input
+                        aria-label={`SKU for ${v.color} ${v.size}`}
+                        value={v.sku}
+                        onChange={(e) => updateVariant(v.id, { sku: e.target.value })}
+                        style={{ height: 36 }}
+                      />
+                    </TableCell>
+                    <TableCell style={{ padding: '10px 16px' }}>
+                      <Input
+                        aria-label={`Price for ${v.color} ${v.size}`}
+                        type="number"
+                        step="0.01"
+                        value={String(v.price)}
+                        onChange={(e) => {
+                          const n = parseFloat(e.target.value);
+                          if (!isNaN(n)) updateVariant(v.id, { price: n });
+                        }}
+                        style={{ height: 36, textAlign: 'right' }}
+                      />
+                    </TableCell>
+                    <TableCell style={{ padding: '10px 16px' }}>
+                      <Stepper
+                        ariaLabel={`Stock for ${v.color} ${v.size}`}
+                        value={v.stock}
+                        editableValue
+                        onChange={(n) => updateVariant(v.id, { stock: n })}
+                      />
+                    </TableCell>
+                    <TableCell style={{ padding: '10px 16px', width: 48 }}>
+                      <UpliftSurface active width={28} height={28} className="tuw-danger-hover" style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                        <button
+                          type="button"
+                          aria-label={`Remove variant ${v.color} ${v.size}`}
+                          onClick={() => removeVariant(v.id)}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, display: 'inline-flex' }}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </UpliftSurface>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          ) : productTab === 'specs' ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <DrawerSection title="Display Options" titleGap={10}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <Switch
+                  label="Video Reel slot"
+                  description="Show the video block on the Media tab"
+                  checked={visibleSections.video}
+                  onChange={(v) => setVisibleSections((s) => ({ ...s, video: v }))}
+                />
+                <Switch
+                  label="Monogram & embroidery"
+                  description="Show the custom embroidery block below"
+                  checked={visibleSections.monogram}
+                  onChange={(v) => setVisibleSections((s) => ({ ...s, monogram: v }))}
+                />
+              </div>
+            </DrawerSection>
+            <DrawerSection title="Clothing Specifications" titleGap={10}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <Input
+                  label="Fabric Composition & GSM"
+                  placeholder="460 GSM Heavyweight French Terry Cotton"
+                  value={formFabricGsm}
+                  onChange={(e) => setFormFabricGsm(e.target.value)}
+                />
+                <Input
+                  label="Cut & Silhouette"
+                  placeholder="Boxy Drop-Shoulder"
+                  value={formCut}
+                  onChange={(e) => setFormCut(e.target.value)}
+                />
+                <Input
+                  label="Model Dimensions"
+                  placeholder="Model is 6'1&quot; wearing Size L"
+                  value={formModelDims}
+                  onChange={(e) => setFormModelDims(e.target.value)}
+                />
+                <FormTextarea
+                  label="Care & Wash Instructions"
+                  rows={3}
+                  placeholder="Cold wash inside out, lay flat to dry"
+                  value={formCare}
+                  onChange={(e) => setFormCare(e.target.value)}
+                />
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                  <span style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                    Associated Size Chart Template
+                  </span>
+                  <Link href="/content/pages" style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)', textDecoration: 'none' }}>
+                    Open Fit Guide
+                  </Link>
+                </div>
+              </div>
+            </DrawerSection>
+            {visibleSections.monogram ? (
+            <DrawerSection title="Monogram & Custom Embroidery" titleGap={10}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <Switch
+                  label="Offer monogramming"
+                  description="On-demand chest initials with upcharge"
+                  checked={formMonogramEnabled}
+                  onChange={setFormMonogramEnabled}
+                />
+                {formMonogramEnabled ? (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <Input
+                    label="Max Characters"
+                    type="number"
+                    value={formMonogramChars}
+                    onChange={(e) => setFormMonogramChars(e.target.value)}
+                  />
+                  <Input
+                    label="Upcharge ($ USD)"
+                    type="number"
+                    step="0.01"
+                    value={formMonogramUpcharge}
+                    onChange={(e) => setFormMonogramUpcharge(e.target.value)}
+                  />
+                </div>
+                ) : null}
+              </div>
+            </DrawerSection>
+            ) : null}
+          </div>
+          ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <Input
+              label="SEO Title"
+              placeholder={formName || 'Product name'}
+              value={formSeoTitle}
+              onChange={(e) => setFormSeoTitle(e.target.value)}
+            />
+            <FormTextarea
+              label="Meta Description"
+              rows={3}
+              placeholder="Search-result snippet for this product"
+              value={formSeoDescription}
+              onChange={(e) => setFormSeoDescription(e.target.value)}
+            />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+              <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>Canonical slug</span>
+              <span style={{ fontFamily: 'monospace', color: 'var(--tuw-text-primary, #262626)' }}>
+                /products/{formSlug || '…'}
+              </span>
+            </div>
+          </div>
+          )
         )}
       </Drawer>
     </DashboardShell>

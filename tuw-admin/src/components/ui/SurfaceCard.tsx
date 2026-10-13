@@ -5,6 +5,8 @@ import React from 'react';
 export interface SurfaceCardProps extends React.HTMLAttributes<HTMLDivElement> {
   padding?: string;
   gap?: string;
+  /** Layout direction. Default 'column' — existing consumers byte-identical. */
+  direction?: 'row' | 'column';
   /** Opt-in hover treatment (border tint + wash). Default false. */
   hoverable?: boolean;
   /** Forces width 100% (block contexts). Default false: grid/flex parents size the card. */
@@ -19,6 +21,7 @@ export default function SurfaceCard({
   children,
   padding = '20px 24px',
   gap,
+  direction = 'column',
   hoverable = false,
   fullWidth = false,
   className = '',
@@ -35,7 +38,7 @@ export default function SurfaceCard({
         boxShadow: 'var(--shadow-subtle, 0 1px 4px rgba(0, 0, 0, 0.02))',
         border: '1px solid var(--tuw-border-subtle, #E5E7EB)',
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: direction,
         ...(fullWidth ? { width: '100%' } : {}),
         boxSizing: 'border-box',
         transition:

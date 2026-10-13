@@ -8,16 +8,16 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 164,
-    "done": 150,
+    "total": 181,
+    "done": 167,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "7dc9105",
-    "unpushed": ["7dc9105", "5fb3226", "18d2294", "21dd603", "678cd42", "577ee59", "b65ad39", "7514e44", "6c832f4", "4167f92", "99d8f10", "3f3bc5b", "ca44d64", "b9a009c", "8c0cfc9", "c2a4c49", "1a3e512", "1545ebf", "68d17f6", "be9f529", "688d868", "66f4ad3", "e22c105", "cd7723e", "3a2c8f8", "316b767", "b8d7ada", "f80f089", "a22478a", "4ce4aac", "f5bfcfa", "585529f", "ba74b76", "203c970", "32d74a3", "8f6c386", "b211dd2", "96067e3", "2011ae2", "8fad108", "401b217", "e533db4", "bc4808e", "b947977", "cf68bdb", "fa750ca"],
-    "next_up": "Fulfillment Phase 2 per-card bulk bars; anim-probe re-run expecting end-Out events; browser verification backlog",
+    "tip": "247ed13",
+    "unpushed": ["247ed13", "b8fce75", "cbd3fa3", "b28e17c", "103b81f", "12bd989", "22c72ba", "30995c6", "f3400ad", "96f675a", "dc319f3", "e27e7fd", "b5141b7", "0c831f4", "bcb3786", "660b89b", "2010981", "d1f8179", "7567c95", "a7de6b5", "b31c9b1", "254e214", "bb6b19f", "e8e3882", "cc84644", "2087447", "be2e49f", "bc6a90d", "7002594", "29d165b", "35e3fdf", "9a49435", "0638769", "b7f1e4c", "1a0e6dd"],
+    "next_up": "Fulfillment Phase 2 per-card bulk bars; DW2 drawer verification pass; anim-probe re-run; browser verification backlog",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
       "dashboard D-series: KPI tiers, range/sort menus, badge mapping, calendar pills, header tint (360/768/1024/1440)",
@@ -1266,6 +1266,289 @@
       "verified": true,
       "pushed": false,
       "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PE0",
+      "title": "Product variant data model (types, synthesis, seams, tests)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal: 1a0e6dd types+helpers + b7f1e4c seams + 0638769 tests (suite now 7)",
+      "design_match": "yes",
+      "key_decisions": [
+        "optional variants[] + lazy synthesis — zero fixture edits",
+        "float prices match domain; minor-unit tension recorded, not converted",
+        "updateProduct derives colors/sizes/stock from matrix"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PE1",
+      "title": "Drawer elastic workspace shell",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal:9a49435 (expandable 880/full-canvas + headerExtra; 12 drawers byte-identical)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PE2",
+      "title": "Products drawer General/Media tabs",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal: 35e3fdf state + 29d165b tabs/media (live preview, URL fields, Tabs aria-label fix)",
+      "design_match": "yes",
+      "key_decisions": [
+        "tabs grow per phase (no dead controls); media URL-based, no upload flow"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PE3",
+      "title": "Variants matrix tab + Stepper (+ mirror writers)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal: 7002594 stepper + bc6a90d matrix (dual-editor mirror writes documented; caught unreachable-branch slip pre-gate)",
+      "design_match": "yes",
+      "key_decisions": [
+        "matrix is submit source; General inputs mirror-write; modal keeps legacy",
+        "price follows min variant (from-$X semantics)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PE4",
+      "title": "Specs/SEO tabs, monogram, visibility, size link",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal: be2e49f state + 2087447 UI (section toggles in Specs tab, not header popover — menu closes per select)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-PE5",
+      "title": "Unify create into drawer, retire modal",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal: cc84644 create mode + e8e3882 modal retire (-313/+3; chunked demolition with reads)",
+      "design_match": "yes",
+      "key_decisions": [
+        "create tabs gated to General+Media; legacy handleCreateSubmit deleted with modal"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-MD1",
+      "title": "Drawer 3-seg workspace control (ViewToggle + UpliftSurface)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal:b31c9b1 (exclusive value mapping; no dead expanded+full combo)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-MD2",
+      "title": "ui/Carousel customer-view gallery",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal:a7de6b5 (contain letterbox, dots, native video, plain-img for blob slides)",
+      "design_match": "yes",
+      "key_decisions": [],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-MD3",
+      "title": "Products gallery model (URLs persist, uploads preview, carousel tab)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal: 7567c95 state + d1f8179 UI/submit (video-first; block-2nd-video toast; revoke discipline; formImage deleted dead)",
+      "design_match": "yes",
+      "key_decisions": [
+        "uploads session-only with demo-truth toast; URLs persist via formGallery",
+        "hero = gallery[0]; visibility toggle gates reel rows + slide"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-MX2",
+      "title": "Products dual-pane media (asset manager, reorder, cover, dropzone)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal: 2010981 helpers + 138dd6e inits/slides + 660b89b Carousel index + bcb3786 UI/submit/chrome (unified formImages; HTML5 DnD + chevrons; 25MB guard; Live badge; subtitle nodes)",
+      "design_match": "yes",
+      "key_decisions": [
+        "no framework DnD exists — native HTML5 + chevron keyboard path, zero deps",
+        "uploads session-only; cover = index 0 of persisted; hero follows",
+        "stage/panel blocks defined once, arranged by ResizeObserver width"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-MX4",
+      "title": "Asset containment + 2-col cards at 1000px+",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal: 0c831f4 wrap + b5141b7 cards (width threshold in shared observer; row-semantics twin, no new primitive)",
+      "design_match": "yes",
+      "key_decisions": [
+        "cards at container >=1000px, not drawer-mode literal",
+        "stage minWidth:0 already present; duplication disclosed over extraction"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DS1",
+      "title": "Design-system media surfaces (SurfaceCard rows/cards, 1:1 thumbs, cover wash)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal: e27e7fd primitives + dc319f3 rows + 96f675a cards (direction/width props, defaults keep existing consumers byte-identical; tuw-stat-active/hover verified in globals.css)",
+      "design_match": "yes",
+      "key_decisions": [
+        "cover = tuw-stat-active selected language, no invented accent",
+        "rows structural 1:1 via MediaFrame width=40; cards landscape cover unchanged",
+        "drag-held tint via draggingId (HTML5 DnD does not re-render source)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-DS2",
+      "title": "Chevron-free media, 45/55 stage, 1:1 cards, tuw-danger-hover + 3D deletes",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal: f3400ad chevrons + 30995c6 45/55 + 1:1 cards + 22c72ba danger-hover class (drawer-only application; everywhere-sweep deferred)",
+      "design_match": "yes",
+      "key_decisions": [
+        "drag-only reorder; moveImage deleted with its buttons",
+        "cards mirror row DNA horizontally at 72x72, 2-per-row",
+        "tuw-danger-hover created from error tokens; applied to media deletes only"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": ["sweep tuw-danger-hover onto logout row + other destructive hovers"]
+    },
+    {
+      "id": "TL-DASH-ED1",
+      "title": "Dropzone hover, stepper green/red hovers, click-to-type stock",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal: 12bd989 dropzone + 103b81f success-hover/stepper + b28e17c editableValue (opt-in, Stepper has 1 consumer; price already direct-Input)",
+      "design_match": "yes",
+      "key_decisions": [
+        "dropzone reuses tuw-stat-hover, zero new code",
+        "minus reuses tuw-danger-hover; plus gets mirror tuw-success-hover",
+        "Stepper extension over new component; steppers lock while typing"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-ED2",
+      "title": "Stepper seamless edit slot (shared geometry, no spinners)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-12",
+      "finished": "2026-10-12",
+      "log": "feat/search-modal: cbd3fa3 shared 44x24 border-box slot + tuw-no-spinner (browser snippet: pre-fix 36->56 FAIL baseline confirmed by user, post-fix re-run pending)",
+      "design_match": "yes",
+      "key_decisions": [
+        "span reserves input border via transparent edge; identical outer box",
+        "tuw-no-spinner shared for all future numeric inputs",
+        "non-editable Steppers byte-identical (minWidth 36 path kept)"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-DASH-VA1",
+      "title": "Variants add/remove rows (auto-SKU, draft guard, 3D deletes)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-13",
+      "finished": "2026-10-13",
+      "log": "feat/search-modal: b8fce75 Add Variant header-right + tmp- new rows + touchVariant SKU + save guard + trailing delete column (edit path only; matrix/tests untouched)",
+      "design_match": "yes",
+      "key_decisions": [
+        "summary row doubles as mini-header (Media tab grammar)",
+        "new-row inputs only; existing rows static",
+        "draft is the safety net: no confirm modal, guard toasts + preserves input"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": ["A1 attribute library", "A2 attribute-driven matrix", "X1/X2 variant export/import"]
+    },
+    {
+      "id": "TL-DASH-DX1",
+      "title": "Drawer controlled view + per-tab auto-expand (variants forces matrix)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-13",
+      "finished": "2026-10-13",
+      "log": "feat/search-modal: 247ed13 DrawerView controlled prop (uncontrolled fallback identical) + products tab-enter force/restore (matrix cap, manual picks win)",
+      "design_match": "yes",
+      "key_decisions": [
+        "controlled view opt-in; all other drawers byte-identical",
+        "force on tab-enter only; explicit compact re-pick respected",
+        "crushed-table state unreachable: table renders at >=880px"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": ["A1 attribute library", "A2 attribute-driven matrix", "X1/X2 variant export/import"]
     },
     {
       "id": "TL-DASH-HOV5",

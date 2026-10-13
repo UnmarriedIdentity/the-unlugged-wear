@@ -1,20 +1,31 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
-import { X } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { X, Minimize2, Expand, Maximize2 } from 'lucide-react';
 import PanelLayout from './PanelLayout';
+import ViewToggle from './ViewToggle';
 import { usePopoverAnimation } from '@/hooks/usePopoverAnimation';
+
+export type DrawerView = 'compact' | 'matrix' | 'full';
 
 export interface DrawerProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  subtitle?: string;
+  subtitle?: React.ReactNode;
   children: React.ReactNode;
   footer?: React.ReactNode;
   /** Panel width. Per-content variance is deliberate: 480px media preview,
    * 520px default, 540px page forms, 560px support threads. */
   width?: string | number;
+  /** Elastic workspace: matrix (880px) + full-canvas modes with header
+   * controls. Off by default — all existing drawers behave byte-identically. */
+  expandable?: boolean;
+  /** Extra header row under the title (tabs, visibility controls). */
+  headerExtra?: React.ReactNode;
+  /** Controlled workspace size. Omit for internal state (existing behavior). */
+  view?: DrawerView;
+  onViewChange?: (view: DrawerView) => void;
 }
 
 export default function Drawer({
@@ -25,11 +36,31 @@ export default function Drawer({
   children,
   footer,
   width = '520px',
+  expandable = false,
+  headerExtra,
+  view,
+  onViewChange,
 }: DrawerProps) {
   const drawerRef = useRef<HTMLDivElement>(null);
   // Exit plays through the shared popover contract (180ms drawer rhythm);
   // render follows visibility so the slide-out completes before unmount.
   const anim = usePopoverAnimation(isOpen, undefined, 180);
+  // Elastic sizes: compact (width prop) → matrix 880 → full canvas.
+  // width:100% + maxWidth auto-clamps below 920px viewports.
+  // Controlled mode (view/onViewChange): caller owns the size; internal
+  // state stays as the uncontrolled fallback so existing drawers behave
+  // byte-identically.
+  const [expanded, setExpanded] = useState(false);
+  const [fullScreen, setFullScreen] = useState(false);
+  const effectiveView: DrawerView =
+    view ?? (fullScreen ? 'full' : expanded ? 'matrix' : 'compact');
+  const applyView = (v: DrawerView) => {
+    if (onViewChange) onViewChange(v);
+    else {
+      setFullScreen(v === 'full');
+      setExpanded(v === 'matrix');
+    }
+  };
 
   // Focus trap: focus the panel on open, cycle Tab within it, and return
   // focus to the invoker on close. Paint-free (programmatic focus never
@@ -105,11 +136,14 @@ export default function Drawer({
         tabIndex={-1}
         style={{
           width: '100%',
-          maxWidth: width,
+          maxWidth: effectiveView === 'full' ? '100vw' : effectiveView === 'matrix' ? 880 : width,
           height: '100%',
           backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
           boxShadow: '-10px 0 25px -5px rgba(0, 0, 0, 0.1)',
-          borderLeft: '1px solid var(--tuw-border-subtle, #E5E7EB)',
+          borderLeft: effectiveView === 'full'
+            ? 'none'
+            : '1px solid var(--tuw-border-subtle, #E5E7EB)',
+          transition: 'max-width 0.2s ease',
           animation:
             anim.phase === 'closing'
               ? 'slideOutRight 0.18s ease-in'
@@ -122,13 +156,17 @@ export default function Drawer({
           style={{
             padding: '20px 24px',
             borderBottom: '1px solid var(--tuw-border-subtle, #E5E7EB)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '16px',
             backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
           }}
         >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '16px',
+            }}
+          >
           <div>
             <h3
               style={{
@@ -141,7 +179,7 @@ export default function Drawer({
             >
               {title}
             </h3>
-            {subtitle && (
+            {subtitle && typeof subtitle === 'string' ? (
               <p
                 style={{
                   fontSize: '13px',
@@ -151,8 +189,23 @@ export default function Drawer({
               >
                 {subtitle}
               </p>
+            ) : (
+              subtitle
             )}
           </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            {expandable ? (
+              <ViewToggle
+                ariaLabel="Workspace size"
+                options={[
+                  { value: 'compact', label: 'Compact view', icon: <Minimize2 size={16} /> },
+                  { value: 'matrix', label: 'Expanded matrix view', icon: <Expand size={16} /> },
+                  { value: 'full', label: 'Full canvas view', icon: <Maximize2 size={16} /> },
+                ]}
+                value={effectiveView}
+                onChange={(v) => applyView(v as DrawerView)}
+              />
+            ) : null}
           <button
             type="button"
             onClick={onClose}
@@ -171,6 +224,9 @@ export default function Drawer({
           >
             <X size={20} />
           </button>
+          </div>
+          </div>
+          {headerExtra ? <div style={{ marginTop: 16 }}>{headerExtra}</div> : null}
         </div>
           }
           footer={
