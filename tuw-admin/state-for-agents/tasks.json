@@ -8,15 +8,15 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 180,
-    "done": 166,
+    "total": 181,
+    "done": 167,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "b8fce75",
-    "unpushed": ["b8fce75", "cbd3fa3", "b28e17c", "103b81f", "12bd989", "22c72ba", "30995c6", "f3400ad", "96f675a", "dc319f3", "e27e7fd", "b5141b7", "0c831f4", "bcb3786", "660b89b", "2010981", "d1f8179", "7567c95", "a7de6b5", "b31c9b1", "254e214", "bb6b19f", "e8e3882", "cc84644", "2087447", "be2e49f", "bc6a90d", "7002594", "29d165b", "35e3fdf", "9a49435", "0638769", "b7f1e4c", "1a0e6dd"],
+    "tip": "247ed13",
+    "unpushed": ["247ed13", "b8fce75", "cbd3fa3", "b28e17c", "103b81f", "12bd989", "22c72ba", "30995c6", "f3400ad", "96f675a", "dc319f3", "e27e7fd", "b5141b7", "0c831f4", "bcb3786", "660b89b", "2010981", "d1f8179", "7567c95", "a7de6b5", "b31c9b1", "254e214", "bb6b19f", "e8e3882", "cc84644", "2087447", "be2e49f", "bc6a90d", "7002594", "29d165b", "35e3fdf", "9a49435", "0638769", "b7f1e4c", "1a0e6dd"],
     "next_up": "Fulfillment Phase 2 per-card bulk bars; DW2 drawer verification pass; anim-probe re-run; browser verification backlog",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
@@ -1527,6 +1527,24 @@
         "summary row doubles as mini-header (Media tab grammar)",
         "new-row inputs only; existing rows static",
         "draft is the safety net: no confirm modal, guard toasts + preserves input"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": ["A1 attribute library", "A2 attribute-driven matrix", "X1/X2 variant export/import"]
+    },
+    {
+      "id": "TL-DASH-DW1",
+      "title": "Drawer controlled view + per-tab auto-expand (variants forces matrix)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-13",
+      "finished": "2026-10-13",
+      "log": "feat/search-modal: 247ed13 DrawerView controlled prop (uncontrolled fallback identical) + products tab-enter force/restore (matrix cap, manual picks win)",
+      "design_match": "yes",
+      "key_decisions": [
+        "controlled view opt-in; all other drawers byte-identical",
+        "force on tab-enter only; explicit compact re-pick respected",
+        "crushed-table state unreachable: table renders at >=880px"
       ],
       "verified": true,
       "pushed": false,
