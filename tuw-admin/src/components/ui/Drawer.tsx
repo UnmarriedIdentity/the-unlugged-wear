@@ -6,6 +6,8 @@ import PanelLayout from './PanelLayout';
 import ViewToggle from './ViewToggle';
 import { usePopoverAnimation } from '@/hooks/usePopoverAnimation';
 
+export type DrawerView = 'compact' | 'matrix' | 'full';
+
 export interface DrawerProps {
   isOpen: boolean;
   onClose: () => void;
@@ -21,6 +23,9 @@ export interface DrawerProps {
   expandable?: boolean;
   /** Extra header row under the title (tabs, visibility controls). */
   headerExtra?: React.ReactNode;
+  /** Controlled workspace size. Omit for internal state (existing behavior). */
+  view?: DrawerView;
+  onViewChange?: (view: DrawerView) => void;
 }
 
 export default function Drawer({
@@ -33,6 +38,8 @@ export default function Drawer({
   width = '520px',
   expandable = false,
   headerExtra,
+  view,
+  onViewChange,
 }: DrawerProps) {
   const drawerRef = useRef<HTMLDivElement>(null);
   // Exit plays through the shared popover contract (180ms drawer rhythm);
@@ -40,8 +47,20 @@ export default function Drawer({
   const anim = usePopoverAnimation(isOpen, undefined, 180);
   // Elastic sizes: compact (width prop) → matrix 880 → full canvas.
   // width:100% + maxWidth auto-clamps below 920px viewports.
+  // Controlled mode (view/onViewChange): caller owns the size; internal
+  // state stays as the uncontrolled fallback so existing drawers behave
+  // byte-identically.
   const [expanded, setExpanded] = useState(false);
   const [fullScreen, setFullScreen] = useState(false);
+  const effectiveView: DrawerView =
+    view ?? (fullScreen ? 'full' : expanded ? 'matrix' : 'compact');
+  const applyView = (v: DrawerView) => {
+    if (onViewChange) onViewChange(v);
+    else {
+      setFullScreen(v === 'full');
+      setExpanded(v === 'matrix');
+    }
+  };
 
   // Focus trap: focus the panel on open, cycle Tab within it, and return
   // focus to the invoker on close. Paint-free (programmatic focus never
@@ -117,11 +136,11 @@ export default function Drawer({
         tabIndex={-1}
         style={{
           width: '100%',
-          maxWidth: fullScreen ? '100vw' : expanded ? 880 : width,
+          maxWidth: effectiveView === 'full' ? '100vw' : effectiveView === 'matrix' ? 880 : width,
           height: '100%',
           backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
           boxShadow: '-10px 0 25px -5px rgba(0, 0, 0, 0.1)',
-          borderLeft: fullScreen
+          borderLeft: effectiveView === 'full'
             ? 'none'
             : '1px solid var(--tuw-border-subtle, #E5E7EB)',
           transition: 'max-width 0.2s ease',
@@ -183,11 +202,8 @@ export default function Drawer({
                   { value: 'matrix', label: 'Expanded matrix view', icon: <Expand size={16} /> },
                   { value: 'full', label: 'Full canvas view', icon: <Maximize2 size={16} /> },
                 ]}
-                value={fullScreen ? 'full' : expanded ? 'matrix' : 'compact'}
-                onChange={(v) => {
-                  setFullScreen(v === 'full');
-                  setExpanded(v === 'matrix');
-                }}
+                value={effectiveView}
+                onChange={(v) => applyView(v as DrawerView)}
               />
             ) : null}
           <button

@@ -71,6 +71,8 @@ export default function ProductsView() {
     setEditingProduct(null);
     setIsCreating(true);
     setProductTab('general');
+    setDrawerView('compact');
+    preTableView.current = null;
     setStageIndex(0);
     setFormName('');
     setFormSlug('');
@@ -179,6 +181,26 @@ export default function ProductsView() {
     ro.observe(el);
     return () => ro.disconnect();
   }, [productTab]);
+
+  // Elastic view ownership (W1): products drives the Drawer size per tab.
+  // Entering Variants from compact stashes the choice and forces matrix
+  // (never full); leaving restores the stash. Manual picks always win —
+  // forcing fires on tab-enter only, never fights the hand on the control.
+  const [drawerView, setDrawerView] = useState<'compact' | 'matrix' | 'full'>('compact');
+  const preTableView = useRef<'compact' | 'matrix' | 'full' | null>(null);
+  const prevTab = useRef<'general' | 'media' | 'variants' | 'specs' | 'seo'>('general');
+  React.useEffect(() => {
+    const entered = prevTab.current !== 'variants' && productTab === 'variants';
+    const left = prevTab.current === 'variants' && productTab !== 'variants';
+    prevTab.current = productTab;
+    if (entered && drawerView === 'compact') {
+      preTableView.current = 'compact';
+      setDrawerView('matrix');
+    } else if (left && preTableView.current !== null) {
+      setDrawerView(preTableView.current);
+      preTableView.current = null;
+    }
+  }, [productTab, drawerView]);
 
   const removeImage = (id: string) => {
     setFormImages((prev) => {
@@ -309,6 +331,8 @@ export default function ProductsView() {
     setIsCreating(false);
     setEditingProduct(product);
     setProductTab('general');
+    setDrawerView('compact');
+    preTableView.current = null;
     setStageIndex(0);
     setFormVideo(product.video || '');
     setFormImages(
@@ -1389,6 +1413,8 @@ export default function ProductsView() {
         onClose={() => {
           setEditingProduct(null);
           setIsCreating(false);
+          setDrawerView('compact');
+          preTableView.current = null;
           setFormImages((prev) => {
             revokeUploads(prev.filter((im) => !im.persisted).map((im) => ({ url: im.src })));
             return prev;
@@ -1420,6 +1446,8 @@ export default function ProductsView() {
           )
         }
         expandable
+        view={drawerView}
+        onViewChange={setDrawerView}
         headerExtra={
           <Tabs
             variant="underline"

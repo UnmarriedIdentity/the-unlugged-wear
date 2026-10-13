@@ -38,7 +38,7 @@ export { default as Modal } from './Modal';
 export type { ModalProps } from './Modal';
 
 export { default as Drawer } from './Drawer';
-export type { DrawerProps } from './Drawer';
+export type { DrawerProps, DrawerView } from './Drawer';
 
 export { default as Tabs } from './Tabs';
 export type { TabsProps, TabItem } from './Tabs';
