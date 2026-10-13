@@ -404,6 +404,12 @@ export default function ProductsView() {
 
     // The draft matrix is the submit source: colors/sizes/stock derive from
     // it in the seam; price follows the lowest variant ("from $X" semantics).
+    const draftError = variantDraftError();
+    if (draftError) {
+      showToast({ type: 'warning', title: 'Check Variants', description: draftError });
+      setProductTab('variants');
+      return;
+    }
     const submitVariants = formVariants.length > 0 ? formVariants : resolveVariants(editingProduct);
     const minPrice =
       submitVariants.length > 0
@@ -499,6 +505,58 @@ export default function ProductsView() {
   // Matrix row patch (variants tab): single source stays the draft.
   const updateVariant = (id: string, patch: Partial<ProductVariant>) => {
     setFormVariants((prev) => prev.map((v) => (v.id === id ? { ...v, ...patch } : v)));
+  };
+
+  // Add / remove matrix rows (V1): new rows carry tmp- ids (same convention
+  // as rebuildMatrix fresh cells) with blank color/size rendered as inputs;
+  // touching color/size on a tmp- row regenerates its SKU.
+  const addVariant = () => {
+    const basePrice = parseFloat(formPrice) || 0;
+    setFormVariants((prev) => [
+      ...prev,
+      {
+        id: `tmp-${Date.now()}`,
+        color: '',
+        size: '',
+        sku: '',
+        price: basePrice,
+        stock: 0,
+      },
+    ]);
+  };
+  const touchVariant = (id: string, patch: Partial<ProductVariant>) => {
+    setFormVariants((prev) => {
+      const colors = [...new Set(prev.map((v) => v.color).filter(Boolean))];
+      return prev.map((v) => {
+        if (v.id !== id) return v;
+        const next = { ...v, ...patch };
+        if (v.id.startsWith('tmp-') && (patch.color !== undefined || patch.size !== undefined)) {
+          const known = colors.includes(next.color);
+          next.sku = next.color && next.size
+            ? buildVariantSku(editingProduct?.id ?? 'PRD', known ? colors.indexOf(next.color) : colors.length, next.size)
+            : '';
+        }
+        return next;
+      });
+    });
+  };
+  const removeVariant = (id: string) => {
+    setFormVariants((prev) => prev.filter((v) => v.id !== id));
+  };
+
+  // Save guard (V1): blank or duplicate color|size rows block the submit
+  // with a naming toast; all input is preserved (drawer stays open).
+  const variantDraftError = (): string | null => {
+    const seen = new Set<string>();
+    for (const v of formVariants) {
+      const color = v.color.trim();
+      const size = v.size.trim();
+      if (!color || !size) return 'Each variant needs a color and a size — fill the blank row or remove it.';
+      const key = `${color.toLowerCase()}|${size.toLowerCase()}`;
+      if (seen.has(key)) return `Duplicate variant "${v.color} / ${v.size}" — merge it or remove one.`;
+      seen.add(key);
+    }
+    return null;
   };
 
   // Customer-view gallery slides: uploaded reel previews live, else the
@@ -1589,8 +1647,13 @@ export default function ProductsView() {
           </div>
           ) : productTab === 'variants' ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-              {formVariants.length} variants · {variantStockTotal(formVariants)} units in stock
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+              <span style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                {formVariants.length} variants · {variantStockTotal(formVariants)} units in stock
+              </span>
+              <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={addVariant}>
+                Add Variant
+              </Button>
             </div>
             <Table>
               <TableHeader>
@@ -1600,16 +1663,39 @@ export default function ProductsView() {
                   <TableHead style={{ padding: '12px 16px' }}>SKU</TableHead>
                   <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Price</TableHead>
                   <TableHead style={{ padding: '12px 16px' }}>Stock</TableHead>
+                  <TableHead style={{ padding: '12px 16px', width: 48 }}><span className="sr-only">Actions</span></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {formVariants.map((v) => (
                   <TableRow key={v.id} hoverable={false}>
                     <TableCell style={{ padding: '10px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
-                      {v.color}
+                      {v.id.startsWith('tmp-') ? (
+                        <Input
+                          aria-label="Variant color"
+                          placeholder={v.color === '' ? 'Color' : undefined}
+                          // eslint-disable-next-line jsx-a11y/no-autofocus
+                          autoFocus={v.color === '' && v.size === ''}
+                          value={v.color}
+                          onChange={(e) => touchVariant(v.id, { color: e.target.value })}
+                          style={{ height: 36 }}
+                        />
+                      ) : (
+                        v.color
+                      )}
                     </TableCell>
                     <TableCell style={{ padding: '10px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
-                      {v.size}
+                      {v.id.startsWith('tmp-') ? (
+                        <Input
+                          aria-label="Variant size"
+                          placeholder={v.size === '' ? 'Size' : undefined}
+                          value={v.size}
+                          onChange={(e) => touchVariant(v.id, { size: e.target.value })}
+                          style={{ height: 36 }}
+                        />
+                      ) : (
+                        v.size
+                      )}
                     </TableCell>
                     <TableCell style={{ padding: '10px 16px' }}>
                       <Input
@@ -1639,6 +1725,18 @@ export default function ProductsView() {
                         editableValue
                         onChange={(n) => updateVariant(v.id, { stock: n })}
                       />
+                    </TableCell>
+                    <TableCell style={{ padding: '10px 16px', width: 48 }}>
+                      <UpliftSurface active width={28} height={28} className="tuw-danger-hover" style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                        <button
+                          type="button"
+                          aria-label={`Remove variant ${v.color} ${v.size}`}
+                          onClick={() => removeVariant(v.id)}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, display: 'inline-flex' }}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </UpliftSurface>
                     </TableCell>
                   </TableRow>
                 ))}
