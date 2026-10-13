@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive, GripVertical, Upload } from 'lucide-react';
+import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive, GripVertical, Upload, X } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
 import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, Input, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection, Carousel } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
@@ -64,6 +64,9 @@ export default function ProductsView() {
   const attrValues = (name: string) => formAttributes.find((a) => a.name === name)?.values ?? [];
   const colorValues = attrValues('Color');
   const sizeValues = attrValues('Size');
+  // Per-card value drafts + new-attribute draft (A1b chip editor).
+  const [attrDrafts, setAttrDrafts] = useState<Record<string, string>>({});
+  const [newAttrName, setNewAttrName] = useState('');
   const [formPartner, setFormPartner] = useState<ProductItem['partner']>('Qikink Direct API');
   const [formPlacement, setFormPlacement] = useState<ProductItem['placement']>('Chest (45mm)');
   const [formStatus, setFormStatus] = useState<ProductItem['publicationStatus']>('published');
@@ -286,8 +289,6 @@ export default function ProductsView() {
   // here so the matrix stays the single submit source.
   const [formVariants, setFormVariants] = useState<ProductVariant[]>([]);
 
-  const parseList = (s: string) => s.split(',').map((x) => x.trim()).filter(Boolean);
-
   const writePriceAll = (priceStr: string) => {
     setFormPrice(priceStr);
     const n = parseFloat(priceStr);
@@ -334,17 +335,52 @@ export default function ProductsView() {
     });
   };
 
-  // Comma-field bridge (A1a): keeps the General inputs behavior-identical
-  // until A1b swaps them for chip cards. Typing still rebuilds live.
-  const setColorText = (s: string) => {
-    const values = parseList(s);
-    setFormAttributes((prev) => prev.map((a) => (a.name === 'Color' ? { ...a, values } : a)));
-    rebuildMatrix(values, attrValues('Size'), parseFloat(formPrice) || 0, editingProduct?.id ?? 'PRD');
+  // Chip editor (A1b): one-by-one values, no comma parsing. Builtin
+  // Color/Size edits rebuild the matrix (kept cells preserve price/stock);
+  // custom attributes store on the draft for A2's generalized matrix.
+  const colorsSizesOf = (attrs: Array<{ name: string; values: string[] }>) => ({
+    colors: attrs.find((a) => a.name === 'Color')?.values ?? [],
+    sizes: attrs.find((a) => a.name === 'Size')?.values ?? [],
+  });
+  const addAttrValue = (name: string) => {
+    const v = (attrDrafts[name] ?? '').trim();
+    if (!v) return;
+    const attr = formAttributes.find((a) => a.name === name);
+    if (!attr) return;
+    if (attr.values.some((x) => x.toLowerCase() === v.toLowerCase())) {
+      showToast({ type: 'warning', title: 'Duplicate Value', description: `"${v}" is already a ${name} value.` });
+      return;
+    }
+    const next = formAttributes.map((a) => (a.name === name ? { ...a, values: [...a.values, v] } : a));
+    setFormAttributes(next);
+    setAttrDrafts((prev) => ({ ...prev, [name]: '' }));
+    if (name === 'Color' || name === 'Size') {
+      const { colors, sizes } = colorsSizesOf(next);
+      rebuildMatrix(colors, sizes, parseFloat(formPrice) || 0, editingProduct?.id ?? 'PRD');
+    }
   };
-  const setSizeText = (s: string) => {
-    const values = parseList(s);
-    setFormAttributes((prev) => prev.map((a) => (a.name === 'Size' ? { ...a, values } : a)));
-    rebuildMatrix(attrValues('Color'), values, parseFloat(formPrice) || 0, editingProduct?.id ?? 'PRD');
+  const removeAttrValue = (name: string, value: string) => {
+    const next = formAttributes.map((a) =>
+      a.name === name ? { ...a, values: a.values.filter((x) => x !== value) } : a
+    );
+    setFormAttributes(next);
+    if (name === 'Color' || name === 'Size') {
+      const { colors, sizes } = colorsSizesOf(next);
+      rebuildMatrix(colors, sizes, parseFloat(formPrice) || 0, editingProduct?.id ?? 'PRD');
+    }
+  };
+  const addAttribute = () => {
+    const name = newAttrName.trim();
+    if (!name) return;
+    if (formAttributes.some((a) => a.name.toLowerCase() === name.toLowerCase())) {
+      showToast({ type: 'warning', title: 'Duplicate Attribute', description: `"${name}" already exists.` });
+      return;
+    }
+    setFormAttributes((prev) => [...prev, { name, values: [], builtin: false }]);
+    setNewAttrName('');
+  };
+  const removeAttribute = (name: string) => {
+    setFormAttributes((prev) => prev.filter((a) => a.name !== name));
   };
 
   const openEditDrawer = (product: ProductItem) => {
@@ -1612,16 +1648,95 @@ export default function ProductsView() {
                 onSelect={(v) => setFormStatus(v as ProductItem['publicationStatus'])}
               />
             </div>
-            <Input
-              label="Color Variations"
-              value={colorValues.join(', ')}
-              onChange={(e) => setColorText(e.target.value)}
-            />
-            <Input
-              label="Size Variations"
-              value={sizeValues.join(', ')}
-              onChange={(e) => setSizeText(e.target.value)}
-            />
+            <DrawerSection title="Attributes & Values" titleGap={10}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
+                  Color and Size ship with every product. Add custom attributes (Fabric, Fit…) and define their values one by one.
+                </p>
+                {formAttributes.map((attr) => (
+                  <SurfaceCard key={attr.name} padding="12px" gap="10px">
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                      <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                        {attr.name}
+                      </span>
+                      {attr.builtin ? (
+                        <Badge variant="info" size="sm">Default</Badge>
+                      ) : (
+                        <UpliftSurface active width={28} height={28} className="tuw-danger-hover" style={{ flexShrink: 0, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                          <button
+                            type="button"
+                            aria-label={`Remove attribute ${attr.name}`}
+                            onClick={() => removeAttribute(attr.name)}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, display: 'inline-flex' }}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </UpliftSurface>
+                      )}
+                    </div>
+                    {attr.values.length > 0 ? (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                        {attr.values.map((val) => (
+                          <span key={val} style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}>
+                            <Badge variant="neutral" size="sm">{val}</Badge>
+                            <button
+                              type="button"
+                              aria-label={`Remove ${val} from ${attr.name}`}
+                              onClick={() => removeAttrValue(attr.name, val)}
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tuw-text-secondary, #5D6772)', padding: 2, display: 'inline-flex' }}
+                            >
+                              <X size={12} />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                        No values yet — add the first one below.
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <div style={{ flex: 1 }}>
+                        <Input
+                          aria-label={`Add ${attr.name} value`}
+                          placeholder={`Add ${attr.name.toLowerCase()} value, then Add`}
+                          value={attrDrafts[attr.name] ?? ''}
+                          onChange={(e) => setAttrDrafts((prev) => ({ ...prev, [attr.name]: e.target.value }))}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              addAttrValue(attr.name);
+                            }
+                          }}
+                        />
+                      </div>
+                      <Button variant="secondary" size="md" onClick={() => addAttrValue(attr.name)} disabled={(attrDrafts[attr.name] ?? '').trim() === ''}>
+                        Add
+                      </Button>
+                    </div>
+                  </SurfaceCard>
+                ))}
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <div style={{ flex: 1 }}>
+                    <Input
+                      aria-label="New attribute name"
+                      placeholder="New attribute name, e.g. Fabric"
+                      value={newAttrName}
+                      onChange={(e) => setNewAttrName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          addAttribute();
+                        }
+                      }}
+                    />
+                  </div>
+                  <Button variant="secondary" size="md" icon={<Plus size={14} />} onClick={addAttribute} disabled={newAttrName.trim() === ''}>
+                    Add Attribute
+                  </Button>
+                </div>
+              </div>
+            </DrawerSection>
             <FormTextarea
               label="Description"
               rows={4}
