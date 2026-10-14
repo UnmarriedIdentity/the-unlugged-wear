@@ -26,17 +26,18 @@ constraints, not application-code promises — and one migration history. Primar
 merge-safe). Depth: `12-UI-Merge-Single-Deploy.md`, `13-API-Contracts.md`,
 `14-Single-URL-Gating.md`.
 
-## 3. Data at a glance (35 tables, one Postgres)
+## 3. Data at a glance (59 tables, one Postgres)
 
 | Domain | Tables | Notes |
 |---|---|---|
-| Auth & RBAC | users, roles, permissions, role_permissions, user_roles, addresses, refresh_tokens | Normalized roles; the gate reads `users → user_roles → roles.slug` |
-| Catalog | categories, brands*, products, product_variants, product_images, product_options, product_option_values, product_variant_option_values, product_attributes, product_attribute_values, stock_movements, product_discounts, reviews | *brands defined but unbuilt — `products.brand_id` stays nullable so launch is seed + UI only |
+| Auth & RBAC | users, roles, permissions, role_permissions, user_roles, addresses, refresh_tokens, customer_notes, staff_invitations, audit_logs | Normalized roles; the gate reads `users → user_roles → roles.slug` |
+| Catalog | categories, brands*, products, product_variants, product_images, product_options, product_option_values, product_variant_option_values, product_attributes, product_attribute_values, stock_movements, product_discounts, reviews, collections, collection_products | *brands defined but unbuilt — `products.brand_id` stays nullable so launch is seed + UI only |
 | Cart & wishlist | carts, cart_items, wishlists, wishlist_items | Snapshot display fields; one-active-cart partial unique |
-| Orders & money | orders, order_items, order_status_history, payments, discount_codes, shipments | Dual status axes; immutable snapshots; DECIMAL(12,2) |
+| Orders & money | orders, order_items, order_status_history, payments, refunds, returns, return_items, discount_codes, shipments | Dual status axes; immutable snapshots; DECIMAL(12,2) |
 | Platform | import_jobs, email_logs, notification_templates | CSV pipeline reports; delivery states |
-| CMS (jsonb, no Mongo) | cms_sections, cms_settings, navigation_settings, pages, blogs, blog_categories, media | Whole-document reads; app-layer Zod validation |
-| Analytics (partitioned) | page_views, sessions, cart_events, abandoned_carts, daily_stats | Monthly partitions; raw events drop >30d, rollups kept |
+| CMS (jsonb, no Mongo) | cms_sections, cms_settings, navigation_settings, pages, blogs, blog_categories, media, store_settings | Whole-document reads; app-layer Zod validation |
+| Analytics (partitioned) | page_views, sessions, cart_events, abandoned_carts, daily_stats, product_views, search_terms | Monthly partitions; raw events drop >30d, rollups kept |
+| Operations | support_tickets, support_messages, notifications | Threads + staff replies; in-app bell (email stays in logs) |
 
 Search has **no table** in v1 — `tsvector` + GIN on products/categories
 covers it. Full inventory: `02-Data-Tables.md`.
