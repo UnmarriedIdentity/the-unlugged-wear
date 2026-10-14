@@ -1738,21 +1738,53 @@ export default function ProductsView() {
                       />
                     </div>
                     {attr.values.length > 0 ? (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                        {attr.values.map((val) => (
-                          <span key={val} style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}>
-                            <Badge variant="neutral" size="sm">{val}</Badge>
-                            <button
-                              type="button"
-                              aria-label={`Remove ${val} from ${attr.name}`}
-                              onClick={() => removeAttrValue(attr.name, val)}
-                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tuw-text-secondary, #5D6772)', padding: 2, display: 'inline-flex' }}
-                            >
-                              <X size={12} />
-                            </button>
-                          </span>
-                        ))}
-                      </div>
+                      <Table>
+                        <TableHeader>
+                          <TableRow hoverable={false}>
+                            <TableHead style={{ padding: '8px 12px' }}>Value</TableHead>
+                            <TableHead style={{ padding: '8px 12px' }}>Storefront preview</TableHead>
+                            <TableHead style={{ padding: '8px 12px', width: 48 }}><span className="sr-only">Remove</span></TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {attr.values.map((val) => (
+                            <TableRow key={val} hoverable={false}>
+                              <TableCell style={{ padding: '8px 12px', fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
+                                {val}
+                              </TableCell>
+                              <TableCell style={{ padding: '8px 12px' }}>
+                                {attr.displayType === 'pill' ? (
+                                  <Badge variant="neutral" size="sm">{val}</Badge>
+                                ) : attr.displayType === 'swatch' ? (
+                                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
+                                    <span
+                                      aria-hidden="true"
+                                      title="Neutral preview — value→hex mapping lands with the backend"
+                                      style={{ width: 16, height: 16, borderRadius: '50%', backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)', border: '1px solid var(--tuw-border-control, #D1D5DB)', flexShrink: 0 }}
+                                    />
+                                    {val}
+                                  </span>
+                                ) : (
+                                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
+                                    <span aria-hidden="true" style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid var(--tuw-border-control, #D1D5DB)', flexShrink: 0, boxSizing: 'border-box' }} />
+                                    {val}
+                                  </span>
+                                )}
+                              </TableCell>
+                              <TableCell style={{ padding: '8px 12px', width: 48 }}>
+                                <button
+                                  type="button"
+                                  aria-label={`Remove ${val} from ${attr.name}`}
+                                  onClick={() => removeAttrValue(attr.name, val)}
+                                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tuw-text-secondary, #5D6772)', padding: 2, display: 'inline-flex' }}
+                                >
+                                  <X size={12} />
+                                </button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
                     ) : (
                       <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
                         No values yet — add the first one below.
