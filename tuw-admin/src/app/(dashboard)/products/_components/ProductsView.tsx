@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive, GripVertical, Upload, X } from 'lucide-react';
+import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive, GripVertical, Upload } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
 import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, Input, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection, Carousel } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
@@ -1745,18 +1745,18 @@ export default function ProductsView() {
                       <Table>
                         <TableHeader>
                           <TableRow hoverable={false}>
-                            <TableHead style={{ padding: '8px 12px' }}>Value</TableHead>
-                            <TableHead style={{ padding: '8px 12px' }}>Storefront preview</TableHead>
-                            <TableHead style={{ padding: '8px 12px', width: 48 }}><span className="sr-only">Remove</span></TableHead>
+                            <TableHead style={{ padding: '10px 16px' }}>Value</TableHead>
+                            <TableHead style={{ padding: '10px 16px' }}>Storefront preview</TableHead>
+                            <TableHead style={{ padding: '10px 16px', width: 48 }}><span className="sr-only">Remove</span></TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {attr.values.map((val) => (
                             <TableRow key={val} hoverable={false}>
-                              <TableCell style={{ padding: '8px 12px', fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
+                              <TableCell style={{ padding: '10px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
                                 {val}
                               </TableCell>
-                              <TableCell style={{ padding: '8px 12px' }}>
+                              <TableCell style={{ padding: '10px 16px' }}>
                                 {attr.displayType === 'pill' ? (
                                   <Badge variant="neutral" size="sm">{val}</Badge>
                                 ) : attr.displayType === 'swatch' ? (
@@ -1781,15 +1781,17 @@ export default function ProductsView() {
                                   </span>
                                 )}
                               </TableCell>
-                              <TableCell style={{ padding: '8px 12px', width: 48 }}>
-                                <button
-                                  type="button"
-                                  aria-label={`Remove ${val} from ${attr.name}`}
-                                  onClick={() => removeAttrValue(attr.name, val)}
-                                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tuw-text-secondary, #5D6772)', padding: 2, display: 'inline-flex' }}
-                                >
-                                  <X size={12} />
-                                </button>
+                              <TableCell style={{ padding: '10px 16px', width: 48 }}>
+                                <UpliftSurface active width={28} height={28} className="tuw-danger-hover" style={{ flexShrink: 0, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                                  <button
+                                    type="button"
+                                    aria-label={`Remove ${val} from ${attr.name}`}
+                                    onClick={() => removeAttrValue(attr.name, val)}
+                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, display: 'inline-flex' }}
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                </UpliftSurface>
                               </TableCell>
                             </TableRow>
                           ))}
