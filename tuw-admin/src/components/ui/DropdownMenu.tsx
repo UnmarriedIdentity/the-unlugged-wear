@@ -29,6 +29,9 @@ export interface DropdownMenuProps {
    * menuitemradio semantics. Omitted for pure action menus (Mark-as).
    */
   selectedValue?: string;
+  /** Stretches the anchor to its parent (form-grid pickers). Default false:
+   * all existing shrink-to-fit callers behave byte-identically. */
+  fullWidth?: boolean;
 }
 
 // Shared action menu (DM1): dumb, props-fed, mock/live agnostic. Follows the
@@ -43,6 +46,7 @@ export default function DropdownMenu({
   align = 'left',
   selectedValue,
   direction = 'down',
+  fullWidth = false,
 }: DropdownMenuProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const anim = usePopoverAnimation(menuOpen, () => setMenuOpen(false));
@@ -85,8 +89,8 @@ export default function DropdownMenu({
   }, [anim.visible]);
 
   return (
-    <div ref={wrapRef} style={{ position: 'relative', display: 'inline-flex' }}>
-      <span onClick={toggle} aria-haspopup="menu" aria-expanded={anim.visible}>
+    <div ref={wrapRef} style={{ position: 'relative', display: fullWidth ? 'flex' : 'inline-flex', ...(fullWidth ? { width: '100%' } : {}) }}>
+      <span onClick={toggle} aria-haspopup="menu" aria-expanded={anim.visible} style={fullWidth ? { flex: 1, minWidth: 0, display: 'flex' } : undefined}>
         {trigger}
       </span>
       {anim.visible && (

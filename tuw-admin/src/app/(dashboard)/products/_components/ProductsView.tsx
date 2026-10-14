@@ -1945,6 +1945,7 @@ export default function ProductsView() {
                     </span>
                   <DropdownMenu
                     ariaLabel="Gender"
+                    fullWidth
                     trigger={
                       <span
                         role="button"
