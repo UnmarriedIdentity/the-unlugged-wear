@@ -31,6 +31,15 @@ export interface ProductItem {
   cut?: string;
   modelDims?: string;
   care?: string;
+  // Catalog scalars (Y1 — all optional; every existing fixture stays valid).
+  // Single-valued import columns live here; multi-valued ones live in
+  // attributes[] (see ProductAttribute). REST: same names on the API.
+  styleCode?: string;
+  weight?: string;
+  shippingWeight?: string;
+  dimensions?: string;
+  gender?: 'Female' | 'Male' | 'Unisex' | 'Kids';
+  taxRate?: number;
   monogram?: { enabled: boolean; maxChars: number; upcharge: number };
   seoTitle?: string;
   seoDescription?: string;

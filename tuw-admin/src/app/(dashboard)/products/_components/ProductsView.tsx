@@ -60,9 +60,16 @@ export default function ProductsView() {
   const [formPrice, setFormPrice] = useState('48.00');
   const [formComparePrice, setFormComparePrice] = useState('58.00');
   const [formStock, setFormStock] = useState('30');
+  // Catalog scalars (Y1): single-valued fields, Input/picker-edited.
+  const [formStyleCode, setFormStyleCode] = useState('');
+  const [formWeight, setFormWeight] = useState('');
+  const [formShipWeight, setFormShipWeight] = useState('');
+  const [formDims, setFormDims] = useState('');
+  const [formGender, setFormGender] = useState<ProductItem['gender'] | ''>('');
+  const [formTax, setFormTax] = useState('');
   // Per-product attributes (A1): the single source behind colors/sizes.
   // REST: GET/PUT /products/:id/attributes → [{ name, values[], builtin }].
-  // Color + Size ship builtin (locked); custom attributes append here.
+  // Color + Size + Placements ship builtin (locked); customs append here.
   // The matrix still cross-products Color×Size until A2 generalizes it.
   const [formAttributes, setFormAttributes] = useState<ProductAttribute[]>([]);
   const attrValues = (name: string) => formAttributes.find((a) => a.name === name)?.values ?? [];
@@ -93,9 +100,16 @@ export default function ProductsView() {
     setFormPrice('48.00');
     setFormComparePrice('58.00');
     setFormStock('25');
+    setFormStyleCode('');
+    setFormWeight('');
+    setFormShipWeight('');
+    setFormDims('');
+    setFormGender('');
+    setFormTax('');
     setFormAttributes([
       { name: 'Color', values: ['Black', 'Chalk White', 'Olive'], builtin: true, displayType: 'swatch', swatchHex: {} },
       { name: 'Size', values: ['S', 'M', 'L', 'XL'], builtin: true, displayType: 'pill', swatchHex: {} },
+      { name: 'Placements', values: [], builtin: true, displayType: 'radio', swatchHex: {} },
     ]);
     setFormPartner('Qikink Direct API');
     setFormPlacement('Chest (45mm)');
@@ -435,12 +449,19 @@ export default function ProductsView() {
     setFormPrice(product.price.toFixed(2));
     setFormComparePrice(product.compareAtPrice ? product.compareAtPrice.toFixed(2) : '');
     setFormStock(String(product.stock));
+    setFormStyleCode(product.styleCode || '');
+    setFormWeight(product.weight || '');
+    setFormShipWeight(product.shippingWeight || '');
+    setFormDims(product.dimensions || '');
+    setFormGender(product.gender || '');
+    setFormTax(product.taxRate !== undefined ? String(product.taxRate) : '');
     setFormAttributes(
       product.attributes && product.attributes.length > 0
         ? product.attributes.map((a) => ({ ...a, values: [...a.values], swatchHex: { ...a.swatchHex } }))
         : [
             { name: 'Color', values: [...product.colors], builtin: true, displayType: 'swatch' as const, swatchHex: {} },
             { name: 'Size', values: [...product.sizes], builtin: true, displayType: 'pill' as const, swatchHex: {} },
+            { name: 'Placements', values: [], builtin: true, displayType: 'radio' as const, swatchHex: {} },
           ]
     );
     setFormPartner(product.partner);
@@ -464,6 +485,12 @@ export default function ProductsView() {
         stock: stockNum,
         colors: colorValues,
         sizes: sizeValues,
+        styleCode: formStyleCode.trim() || undefined,
+        weight: formWeight.trim() || undefined,
+        shippingWeight: formShipWeight.trim() || undefined,
+        dimensions: formDims.trim() || undefined,
+        gender: formGender || undefined,
+        taxRate: formTax.trim() !== '' && !isNaN(parseFloat(formTax)) ? parseFloat(formTax) : undefined,
         partner: formPartner,
         placement: formPlacement,
         publicationStatus: formStatus,
@@ -528,6 +555,12 @@ export default function ProductsView() {
       placement: formPlacement,
       publicationStatus: formStatus,
       description: formDescription,
+      styleCode: formStyleCode.trim() || undefined,
+      weight: formWeight.trim() || undefined,
+      shippingWeight: formShipWeight.trim() || undefined,
+      dimensions: formDims.trim() || undefined,
+      gender: formGender || undefined,
+      taxRate: formTax.trim() !== '' && !isNaN(parseFloat(formTax)) ? parseFloat(formTax) : undefined,
       image: formImages[0]?.src || undefined,
       video: formVideo || undefined,
       images: formImages.filter((im) => im.persisted).map((im) => im.src),
