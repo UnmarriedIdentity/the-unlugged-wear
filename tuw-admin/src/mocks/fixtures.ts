@@ -23,6 +23,9 @@ export interface ProductItem {
   variants?: ProductVariant[];
   /** Gallery image URLs beyond the hero image. Default []. */
   images?: string[];
+  /** Admin attribute drafts (names, values, display types, swatch colors).
+   * Optional: absent means the Color×Size builtins (see resolveVariants). */
+  attributes?: ProductAttribute[];
   // Apparel metadata (all optional — existing fixtures stay valid)
   fabricGsm?: string;
   cut?: string;
@@ -43,6 +46,18 @@ export interface ProductVariant {
   sku: string;
   price: number;
   stock: number;
+}
+
+/** Admin-defined product attribute (AX3). Color + Size ship builtin;
+ * customs append per product. displayType decides the storefront rendering;
+ * swatchHex maps value → PDP dot color (unset values fall back to neutral).
+ * REST: GET/PUT /products/:id/attributes → ProductAttribute[]. */
+export interface ProductAttribute {
+  name: string;
+  values: string[];
+  builtin: boolean;
+  displayType: 'pill' | 'swatch' | 'radio';
+  swatchHex: Record<string, string>;
 }
 
 export interface OrderItemLine {

@@ -9,20 +9,13 @@ import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, Input
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 import { resolveVariants, variantStockTotal, buildVariantSku } from '@/mocks/variants';
-import type { ProductVariant } from '@/mocks/fixtures';
+import type { ProductVariant, ProductAttribute } from '@/mocks/fixtures';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
 
-// Per-product attribute draft (A1/AX2).
-// REST: GET/PUT /products/:id/attributes → FormAttribute[].
-// displayType decides the storefront rendering (pill | swatch | radio);
+// Per-product attribute draft (A1/AX2). Shape lives on ProductAttribute
+// (fixtures) so the seam persists it verbatim; see the REST note there.
 // swatch dots stay neutral until a value→hex map lands (recorded follow-up).
-export interface FormAttribute {
-  name: string;
-  values: string[];
-  builtin: boolean;
-  displayType: 'pill' | 'swatch' | 'radio';
-}
 
 export default function ProductsView() {
   const { products, createProduct, updateProduct, deleteProduct, canPerformAction, showToast } = useAdminState();
@@ -71,7 +64,7 @@ export default function ProductsView() {
   // REST: GET/PUT /products/:id/attributes → [{ name, values[], builtin }].
   // Color + Size ship builtin (locked); custom attributes append here.
   // The matrix still cross-products Color×Size until A2 generalizes it.
-  const [formAttributes, setFormAttributes] = useState<FormAttribute[]>([]);
+  const [formAttributes, setFormAttributes] = useState<ProductAttribute[]>([]);
   const attrValues = (name: string) => formAttributes.find((a) => a.name === name)?.values ?? [];
   const colorValues = attrValues('Color');
   const sizeValues = attrValues('Size');
@@ -101,8 +94,8 @@ export default function ProductsView() {
     setFormComparePrice('58.00');
     setFormStock('25');
     setFormAttributes([
-      { name: 'Color', values: ['Black', 'Chalk White', 'Olive'], builtin: true, displayType: 'swatch' },
-      { name: 'Size', values: ['S', 'M', 'L', 'XL'], builtin: true, displayType: 'pill' },
+      { name: 'Color', values: ['Black', 'Chalk White', 'Olive'], builtin: true, displayType: 'swatch', swatchHex: {} },
+      { name: 'Size', values: ['S', 'M', 'L', 'XL'], builtin: true, displayType: 'pill', swatchHex: {} },
     ]);
     setFormPartner('Qikink Direct API');
     setFormPlacement('Chest (45mm)');
@@ -387,16 +380,21 @@ export default function ProductsView() {
       showToast({ type: 'warning', title: 'Duplicate Attribute', description: `"${name}" already exists.` });
       return;
     }
-    setFormAttributes((prev) => [...prev, { name, values: [], builtin: false, displayType: 'pill' }]);
+    setFormAttributes((prev) => [...prev, { name, values: [], builtin: false, displayType: 'pill', swatchHex: {} }]);
     setNewAttrName('');
   };
   const removeAttribute = (name: string) => {
     setFormAttributes((prev) => prev.filter((a) => a.name !== name));
   };
-  const displayTypeLabel = (t: FormAttribute['displayType']) =>
+  const displayTypeLabel = (t: ProductAttribute['displayType']) =>
     t === 'pill' ? 'Pill' : t === 'swatch' ? 'Color swatch' : 'Radio select';
-  const setDisplayType = (name: string, displayType: FormAttribute['displayType']) => {
+  const setDisplayType = (name: string, displayType: ProductAttribute['displayType']) => {
     setFormAttributes((prev) => prev.map((a) => (a.name === name ? { ...a, displayType } : a)));
+  };
+  const setSwatchHex = (name: string, value: string, hex: string) => {
+    setFormAttributes((prev) =>
+      prev.map((a) => (a.name === name ? { ...a, swatchHex: { ...a.swatchHex, [value]: hex } } : a))
+    );
   };
 
   const openEditDrawer = (product: ProductItem) => {
@@ -437,10 +435,14 @@ export default function ProductsView() {
     setFormPrice(product.price.toFixed(2));
     setFormComparePrice(product.compareAtPrice ? product.compareAtPrice.toFixed(2) : '');
     setFormStock(String(product.stock));
-    setFormAttributes([
-      { name: 'Color', values: [...product.colors], builtin: true, displayType: 'swatch' },
-      { name: 'Size', values: [...product.sizes], builtin: true, displayType: 'pill' },
-    ]);
+    setFormAttributes(
+      product.attributes && product.attributes.length > 0
+        ? product.attributes.map((a) => ({ ...a, values: [...a.values], swatchHex: { ...a.swatchHex } }))
+        : [
+            { name: 'Color', values: [...product.colors], builtin: true, displayType: 'swatch' as const, swatchHex: {} },
+            { name: 'Size', values: [...product.sizes], builtin: true, displayType: 'pill' as const, swatchHex: {} },
+          ]
+    );
     setFormPartner(product.partner);
     setFormPlacement(product.placement);
     setFormStatus(product.publicationStatus);
@@ -469,6 +471,7 @@ export default function ProductsView() {
         image: formImages[0]?.src || undefined,
         video: formVideo || undefined,
         images: formImages.filter((im) => im.persisted).map((im) => im.src),
+        attributes: formAttributes,
         imageBg: 'linear-gradient(135deg, #FAF3F7 0%, #EFE1EB 100%)',
         fabricGsm: formFabricGsm || undefined,
         cut: formCut || undefined,
@@ -529,6 +532,7 @@ export default function ProductsView() {
       video: formVideo || undefined,
       images: formImages.filter((im) => im.persisted).map((im) => im.src),
       variants: submitVariants,
+      attributes: formAttributes,
       fabricGsm: formFabricGsm || undefined,
       cut: formCut || undefined,
       modelDims: formModelDims || undefined,
@@ -1734,7 +1738,7 @@ export default function ProductsView() {
                           { value: 'radio', label: 'Radio select' },
                         ]}
                         selectedValue={attr.displayType}
-                        onSelect={(v) => setDisplayType(attr.name, v as FormAttribute['displayType'])}
+                        onSelect={(v) => setDisplayType(attr.name, v as ProductAttribute['displayType'])}
                       />
                     </div>
                     {attr.values.length > 0 ? (
@@ -1757,12 +1761,18 @@ export default function ProductsView() {
                                   <Badge variant="neutral" size="sm">{val}</Badge>
                                 ) : attr.displayType === 'swatch' ? (
                                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
-                                    <span
-                                      aria-hidden="true"
-                                      title="Neutral preview — value→hex mapping lands with the backend"
-                                      style={{ width: 16, height: 16, borderRadius: '50%', backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)', border: '1px solid var(--tuw-border-control, #D1D5DB)', flexShrink: 0 }}
+                                    <input
+                                      type="color"
+                                      aria-label={`Swatch color for ${val}`}
+                                      title={`Pick the PDP swatch color for ${val}`}
+                                      value={attr.swatchHex[val] ?? '#D1D5DB'}
+                                      onChange={(e) => setSwatchHex(attr.name, val, e.target.value)}
+                                      style={{ width: 28, height: 28, padding: 0, border: 'none', borderRadius: 8, background: 'none', cursor: 'pointer', flexShrink: 0 }}
                                     />
                                     {val}
+                                    <span style={{ fontSize: 12, fontFamily: 'monospace', color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                                      {attr.swatchHex[val] ?? '#D1D5DB'}
+                                    </span>
                                   </span>
                                 ) : (
                                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
