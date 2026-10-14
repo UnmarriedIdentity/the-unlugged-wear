@@ -8,15 +8,15 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 187,
-    "done": 173,
+    "total": 188,
+    "done": 174,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "0bf92b2",
-    "unpushed": ["0bf92b2", "4eb86d2", "c862bed", "500c697", "0f32d65", "7ad9d8e", "901737d", "43583fb", "355732c", "df6e638", "247ed13", "b8fce75", "cbd3fa3", "b28e17c", "103b81f", "12bd989", "22c72ba", "30995c6", "f3400ad", "96f675a", "dc319f3", "e27e7fd", "b5141b7", "0c831f4", "bcb3786", "660b89b", "2010981", "d1f8179", "7567c95", "a7de6b5", "b31c9b1", "254e214", "bb6b19f", "e8e3882", "cc84644", "2087447", "be2e49f", "bc6a90d", "7002594", "29d165b", "35e3fdf", "9a49435", "0638769", "b7f1e4c", "1a0e6dd"],
+    "tip": "6746306",
+    "unpushed": ["6746306", "eff0749", "1b39511", "322738e", "e05ef9a", "5bf7fac", "cc39c32", "84f1722", "7d0cf05", "00955a2", "b9d0ee3", "023106c", "fb5edfd", "0b4fcd1", "705cda4", "0bf92b2", "4eb86d2", "c862bed", "500c697", "0f32d65", "7ad9d8e", "901737d", "43583fb", "355732c", "df6e638", "247ed13", "b8fce75", "cbd3fa3", "b28e17c", "103b81f", "12bd989", "22c72ba", "30995c6", "f3400ad", "96f675a", "dc319f3", "e27e7fd", "b5141b7", "0c831f4", "bcb3786", "660b89b", "2010981", "d1f8179", "7567c95", "a7de6b5", "b31c9b1", "254e214", "bb6b19f", "e8e3882", "cc84644", "2087447", "be2e49f", "bc6a90d", "7002594", "29d165b", "35e3fdf", "9a49435", "0638769", "b7f1e4c", "1a0e6dd"],
     "next_up": "Fulfillment Phase 2 per-card bulk bars; DW2 drawer verification pass; anim-probe re-run; browser verification backlog",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
@@ -1649,6 +1649,20 @@
       "verified": true,
       "pushed": false,
       "follow_ups": ["X1b CSV pipeline"]
+    },
+    {
+      "id": "TL-DASH-DOC1",
+      "title": "Backend DOC scaffold (15 empty files, per-file commits)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-14",
+      "finished": "2026-10-14",
+      "log": "DOC/backend/00-14 empty scaffolds, 15 commits (705cda4..6746306); Next.js-native backend direction recorded (middleware + handler wrappers)",
+      "design_match": "yes",
+      "key_decisions": ["DOC/backend/ path per instruction; content fills step-by-step"],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": ["Step 2 auth columns into 03-Auth-RBAC.md"]
     },
     {
       "id": "TL-DASH-HOV5",
