@@ -5,13 +5,17 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive, GripVertical, Upload } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, Input, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection, Carousel } from '@/components/ui';
+import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, Input, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection, Disclosure, Carousel } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
-import { resolveVariants, deriveColors, deriveSizes, variantStockTotal, buildVariantSku } from '@/mocks/variants';
-import type { ProductVariant } from '@/mocks/fixtures';
+import { resolveVariants, variantStockTotal, buildVariantSku } from '@/mocks/variants';
+import type { ProductVariant, ProductAttribute } from '@/mocks/fixtures';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
+
+// Per-product attribute draft (A1/AX2). Shape lives on ProductAttribute
+// (fixtures) so the seam persists it verbatim; see the REST note there.
+// swatch dots stay neutral until a value→hex map lands (recorded follow-up).
 
 export default function ProductsView() {
   const { products, createProduct, updateProduct, deleteProduct, canPerformAction, showToast } = useAdminState();
@@ -56,8 +60,24 @@ export default function ProductsView() {
   const [formPrice, setFormPrice] = useState('48.00');
   const [formComparePrice, setFormComparePrice] = useState('58.00');
   const [formStock, setFormStock] = useState('30');
-  const [formColors, setFormColors] = useState('Black, Chalk White, Olive');
-  const [formSizes, setFormSizes] = useState('S, M, L, XL');
+  // Catalog scalars (Y1): single-valued fields, Input/picker-edited.
+  const [formStyleCode, setFormStyleCode] = useState('');
+  const [formWeight, setFormWeight] = useState('');
+  const [formShipWeight, setFormShipWeight] = useState('');
+  const [formDims, setFormDims] = useState('');
+  const [formGender, setFormGender] = useState<ProductItem['gender'] | ''>('');
+  const [formTax, setFormTax] = useState('');
+  // Per-product attributes (A1): the single source behind colors/sizes.
+  // REST: GET/PUT /products/:id/attributes → [{ name, values[], builtin }].
+  // Color + Size + Placements ship builtin (locked); customs append here.
+  // The matrix still cross-products Color×Size until A2 generalizes it.
+  const [formAttributes, setFormAttributes] = useState<ProductAttribute[]>([]);
+  const attrValues = (name: string) => formAttributes.find((a) => a.name === name)?.values ?? [];
+  const colorValues = attrValues('Color');
+  const sizeValues = attrValues('Size');
+  // Per-card value drafts + new-attribute draft (A1b chip editor).
+  const [attrDrafts, setAttrDrafts] = useState<Record<string, string>>({});
+  const [newAttrName, setNewAttrName] = useState('');
   const [formPartner, setFormPartner] = useState<ProductItem['partner']>('Qikink Direct API');
   const [formPlacement, setFormPlacement] = useState<ProductItem['placement']>('Chest (45mm)');
   const [formStatus, setFormStatus] = useState<ProductItem['publicationStatus']>('published');
@@ -80,8 +100,17 @@ export default function ProductsView() {
     setFormPrice('48.00');
     setFormComparePrice('58.00');
     setFormStock('25');
-    setFormColors('Black, Chalk White, Olive');
-    setFormSizes('S, M, L, XL');
+    setFormStyleCode('');
+    setFormWeight('');
+    setFormShipWeight('');
+    setFormDims('');
+    setFormGender('');
+    setFormTax('');
+    setFormAttributes([
+      { name: 'Color', values: ['Black', 'Chalk White', 'Olive'], builtin: true, displayType: 'swatch', swatchHex: {} },
+      { name: 'Size', values: ['S', 'M', 'L', 'XL'], builtin: true, displayType: 'pill', swatchHex: {} },
+      { name: 'Placements', values: [], builtin: true, displayType: 'radio', swatchHex: {} },
+    ]);
     setFormPartner('Qikink Direct API');
     setFormPlacement('Chest (45mm)');
     setFormStatus('published');
@@ -278,8 +307,6 @@ export default function ProductsView() {
   // here so the matrix stays the single submit source.
   const [formVariants, setFormVariants] = useState<ProductVariant[]>([]);
 
-  const parseList = (s: string) => s.split(',').map((x) => x.trim()).filter(Boolean);
-
   const writePriceAll = (priceStr: string) => {
     setFormPrice(priceStr);
     const n = parseFloat(priceStr);
@@ -326,6 +353,220 @@ export default function ProductsView() {
     });
   };
 
+  // Chip editor (A1b): one-by-one values, no comma parsing. Builtin
+  // Color/Size edits rebuild the matrix (kept cells preserve price/stock);
+  // custom attributes store on the draft for A2's generalized matrix.
+  const colorsSizesOf = (attrs: Array<{ name: string; values: string[] }>) => ({
+    colors: attrs.find((a) => a.name === 'Color')?.values ?? [],
+    sizes: attrs.find((a) => a.name === 'Size')?.values ?? [],
+  });
+  const addAttrValue = (name: string) => {
+    const v = (attrDrafts[name] ?? '').trim();
+    if (!v) return;
+    const attr = formAttributes.find((a) => a.name === name);
+    if (!attr) return;
+    if (attr.values.some((x) => x.toLowerCase() === v.toLowerCase())) {
+      showToast({ type: 'warning', title: 'Duplicate Value', description: `"${v}" is already a ${name} value.` });
+      return;
+    }
+    const next = formAttributes.map((a) => (a.name === name ? { ...a, values: [...a.values, v] } : a));
+    setFormAttributes(next);
+    setAttrDrafts((prev) => ({ ...prev, [name]: '' }));
+    if (name === 'Color' || name === 'Size') {
+      const { colors, sizes } = colorsSizesOf(next);
+      rebuildMatrix(colors, sizes, parseFloat(formPrice) || 0, editingProduct?.id ?? 'PRD');
+    }
+  };
+  const removeAttrValue = (name: string, value: string) => {
+    const next = formAttributes.map((a) =>
+      a.name === name ? { ...a, values: a.values.filter((x) => x !== value) } : a
+    );
+    setFormAttributes(next);
+    if (name === 'Color' || name === 'Size') {
+      const { colors, sizes } = colorsSizesOf(next);
+      rebuildMatrix(colors, sizes, parseFloat(formPrice) || 0, editingProduct?.id ?? 'PRD');
+    }
+  };
+  const addAttribute = () => {
+    const name = newAttrName.trim();
+    if (!name) return;
+    if (formAttributes.some((a) => a.name.toLowerCase() === name.toLowerCase())) {
+      showToast({ type: 'warning', title: 'Duplicate Attribute', description: `"${name}" already exists.` });
+      return;
+    }
+    setFormAttributes((prev) => [...prev, { name, values: [], builtin: false, displayType: 'pill', swatchHex: {} }]);
+    setNewAttrName('');
+  };
+  const removeAttribute = (name: string) => {
+    setFormAttributes((prev) => prev.filter((a) => a.name !== name));
+  };
+  const displayTypeLabel = (t: ProductAttribute['displayType']) =>
+    t === 'pill' ? 'Pill' : t === 'swatch' ? 'Color swatch' : 'Radio select';
+  const setDisplayType = (name: string, displayType: ProductAttribute['displayType']) => {
+    setFormAttributes((prev) => prev.map((a) => (a.name === name ? { ...a, displayType } : a)));
+  };
+  const setSwatchHex = (name: string, value: string, hex: string) => {
+    setFormAttributes((prev) =>
+      prev.map((a) => (a.name === name ? { ...a, swatchHex: { ...a.swatchHex, [value]: hex } } : a))
+    );
+  };
+
+  // Shared attribute card (Y1b): PDP section and the Internal Placements
+  // block render the same card. hideDisplay drops the storefront picker
+  // where it has no meaning (admin-only attributes).
+  const renderAttrCard = (attr: ProductAttribute, hideDisplay = false) => (
+    <SurfaceCard key={attr.name} padding="12px" gap="10px">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+          {attr.name}
+        </span>
+        {attr.builtin ? (
+          <Badge variant="info" size="sm">Default</Badge>
+        ) : (
+          <UpliftSurface active width={28} height={28} className="tuw-danger-hover" style={{ flexShrink: 0, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+            <button
+              type="button"
+              aria-label={`Remove attribute ${attr.name}`}
+              onClick={() => removeAttribute(attr.name)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, display: 'inline-flex' }}
+            >
+              <Trash2 size={14} />
+            </button>
+          </UpliftSurface>
+        )}
+      </div>
+      {hideDisplay ? null : (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+          Shows on storefront as
+        </span>
+        <DropdownMenu
+          ariaLabel={`${attr.name} storefront display`}
+          trigger={
+            <span
+              role="button"
+              tabIndex={0}
+              aria-label={`${attr.name} display, currently ${displayTypeLabel(attr.displayType)}`}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 8,
+                height: 32,
+                padding: '0 10px',
+                fontSize: 12,
+                fontWeight: 500,
+                fontFamily: 'var(--font-main)',
+                borderRadius: 8,
+                border: '1px solid var(--tuw-border-control, #D1D5DB)',
+                backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
+                color: 'var(--tuw-text-primary, #262626)',
+                cursor: 'pointer',
+                userSelect: 'none',
+              }}
+            >
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {displayTypeLabel(attr.displayType)}
+              </span>
+              <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
+            </span>
+          }
+          items={[
+            { value: 'pill', label: 'Pill' },
+            { value: 'swatch', label: 'Color swatch' },
+            { value: 'radio', label: 'Radio select' },
+          ]}
+          selectedValue={attr.displayType}
+          onSelect={(v) => setDisplayType(attr.name, v as ProductAttribute['displayType'])}
+        />
+      </div>
+      )}
+      {attr.values.length > 0 ? (
+        <Table>
+          <TableHeader>
+            <TableRow hoverable={false}>
+              <TableHead style={{ padding: '10px 16px' }}>Value</TableHead>
+              <TableHead style={{ padding: '10px 16px' }}>Storefront preview</TableHead>
+              <TableHead style={{ padding: '10px 16px', width: 48 }}><span className="sr-only">Remove</span></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {attr.values.map((val) => (
+              <TableRow key={val} hoverable={false}>
+                <TableCell style={{ padding: '10px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
+                  {val}
+                </TableCell>
+                <TableCell style={{ padding: '10px 16px' }}>
+                  {attr.displayType === 'pill' ? (
+                    <Badge variant="neutral" size="sm">{val}</Badge>
+                  ) : attr.displayType === 'swatch' ? (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
+                      <input
+                        type="color"
+                        aria-label={`Swatch color for ${val}`}
+                        title={`Pick the PDP swatch color for ${val}`}
+                        value={attr.swatchHex[val] ?? '#D1D5DB'}
+                        onChange={(e) => setSwatchHex(attr.name, val, e.target.value)}
+                        style={{ width: 28, height: 28, padding: 0, border: 'none', borderRadius: 8, background: 'none', cursor: 'pointer', flexShrink: 0 }}
+                      />
+                      {val}
+                      <span style={{ fontSize: 12, fontFamily: 'monospace', color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                        {attr.swatchHex[val] ?? '#D1D5DB'}
+                      </span>
+                    </span>
+                  ) : (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
+                      <span aria-hidden="true" style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid var(--tuw-border-control, #D1D5DB)', flexShrink: 0, boxSizing: 'border-box' }} />
+                      {val}
+                    </span>
+                  )}
+                </TableCell>
+                <TableCell style={{ padding: '10px 16px', width: 48 }}>
+                  <UpliftSurface active width={28} height={28} className="tuw-danger-hover" style={{ flexShrink: 0, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                    <button
+                      type="button"
+                      aria-label={`Remove ${val} from ${attr.name}`}
+                      onClick={() => removeAttrValue(attr.name, val)}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, display: 'inline-flex' }}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </UpliftSurface>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      ) : (
+        <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+          No values yet — add the first one below.
+        </div>
+      )}
+      <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ flex: 1 }}>
+          <Input
+            aria-label={`Add ${attr.name} value`}
+            placeholder={`Add ${attr.name.toLowerCase()} value, then Add`}
+            value={attrDrafts[attr.name] ?? ''}
+            onChange={(e) => setAttrDrafts((prev) => ({ ...prev, [attr.name]: e.target.value }))}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                addAttrValue(attr.name);
+              }
+            }}
+          />
+        </div>
+        <Button variant="secondary" size="md" onClick={() => addAttrValue(attr.name)} disabled={(attrDrafts[attr.name] ?? '').trim() === ''}>
+          Add
+        </Button>
+      </div>
+    </SurfaceCard>
+  );
+
   const openEditDrawer = (product: ProductItem) => {
     if (!canPerformAction('products')) return;
     setIsCreating(false);
@@ -364,8 +605,21 @@ export default function ProductsView() {
     setFormPrice(product.price.toFixed(2));
     setFormComparePrice(product.compareAtPrice ? product.compareAtPrice.toFixed(2) : '');
     setFormStock(String(product.stock));
-    setFormColors(product.colors.join(', '));
-    setFormSizes(product.sizes.join(', '));
+    setFormStyleCode(product.styleCode || '');
+    setFormWeight(product.weight || '');
+    setFormShipWeight(product.shippingWeight || '');
+    setFormDims(product.dimensions || '');
+    setFormGender(product.gender || '');
+    setFormTax(product.taxRate !== undefined ? String(product.taxRate) : '');
+    setFormAttributes(
+      product.attributes && product.attributes.length > 0
+        ? product.attributes.map((a) => ({ ...a, values: [...a.values], swatchHex: { ...a.swatchHex } }))
+        : [
+            { name: 'Color', values: [...product.colors], builtin: true, displayType: 'swatch' as const, swatchHex: {} },
+            { name: 'Size', values: [...product.sizes], builtin: true, displayType: 'pill' as const, swatchHex: {} },
+            { name: 'Placements', values: [], builtin: true, displayType: 'radio' as const, swatchHex: {} },
+          ]
+    );
     setFormPartner(product.partner);
     setFormPlacement(product.placement);
     setFormStatus(product.publicationStatus);
@@ -385,8 +639,14 @@ export default function ProductsView() {
         price: priceNum,
         compareAtPrice: compareNum,
         stock: stockNum,
-        colors: parseList(formColors),
-        sizes: parseList(formSizes),
+        colors: colorValues,
+        sizes: sizeValues,
+        styleCode: formStyleCode.trim() || undefined,
+        weight: formWeight.trim() || undefined,
+        shippingWeight: formShipWeight.trim() || undefined,
+        dimensions: formDims.trim() || undefined,
+        gender: formGender || undefined,
+        taxRate: formTax.trim() !== '' && !isNaN(parseFloat(formTax)) ? parseFloat(formTax) : undefined,
         partner: formPartner,
         placement: formPlacement,
         publicationStatus: formStatus,
@@ -394,6 +654,7 @@ export default function ProductsView() {
         image: formImages[0]?.src || undefined,
         video: formVideo || undefined,
         images: formImages.filter((im) => im.persisted).map((im) => im.src),
+        attributes: formAttributes,
         imageBg: 'linear-gradient(135deg, #FAF3F7 0%, #EFE1EB 100%)',
         fabricGsm: formFabricGsm || undefined,
         cut: formCut || undefined,
@@ -450,10 +711,17 @@ export default function ProductsView() {
       placement: formPlacement,
       publicationStatus: formStatus,
       description: formDescription,
+      styleCode: formStyleCode.trim() || undefined,
+      weight: formWeight.trim() || undefined,
+      shippingWeight: formShipWeight.trim() || undefined,
+      dimensions: formDims.trim() || undefined,
+      gender: formGender || undefined,
+      taxRate: formTax.trim() !== '' && !isNaN(parseFloat(formTax)) ? parseFloat(formTax) : undefined,
       image: formImages[0]?.src || undefined,
       video: formVideo || undefined,
       images: formImages.filter((im) => im.persisted).map((im) => im.src),
       variants: submitVariants,
+      attributes: formAttributes,
       fabricGsm: formFabricGsm || undefined,
       cut: formCut || undefined,
       modelDims: formModelDims || undefined,
@@ -1524,6 +1792,12 @@ export default function ProductsView() {
               onChange={(e) => setFormSlug(e.target.value)}
               required
             />
+            <Input
+              label="Style Code"
+              placeholder="e.g. FC34"
+              value={formStyleCode}
+              onChange={(e) => setFormStyleCode(e.target.value)}
+            />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <Input
                 label="Price ($ USD)"
@@ -1589,38 +1863,136 @@ export default function ProductsView() {
                 onSelect={(v) => setFormStatus(v as ProductItem['publicationStatus'])}
               />
             </div>
-            <Input
-              label="Color Variations"
-              value={formColors}
-              onChange={(e) => {
-                setFormColors(e.target.value);
-                rebuildMatrix(
-                  parseList(e.target.value),
-                  parseList(formSizes),
-                  parseFloat(formPrice) || 0,
-                  editingProduct?.id ?? 'PRD'
-                );
-              }}
-            />
-            <Input
-              label="Size Variations"
-              value={formSizes}
-              onChange={(e) => {
-                setFormSizes(e.target.value);
-                rebuildMatrix(
-                  parseList(formColors),
-                  parseList(e.target.value),
-                  parseFloat(formPrice) || 0,
-                  editingProduct?.id ?? 'PRD'
-                );
-              }}
-            />
+            <DrawerSection title="Attributes & Values" titleGap={10}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
+                  Color and Size ship with every product. Add custom attributes (Fabric, Fit…) and define their values one by one.
+                </p>
+                {formAttributes.filter((a) => a.name !== 'Placements').map((attr) => renderAttrCard(attr))}
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <div style={{ flex: 1 }}>
+                    <Input
+                      aria-label="New attribute name"
+                      placeholder="New attribute name, e.g. Fabric"
+                      value={newAttrName}
+                      onChange={(e) => setNewAttrName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          addAttribute();
+                        }
+                      }}
+                    />
+                  </div>
+                  <Button variant="secondary" size="md" icon={<Plus size={14} />} onClick={addAttribute} disabled={newAttrName.trim() === ''}>
+                    Add Attribute
+                  </Button>
+                </div>
+              </div>
+            </DrawerSection>
             <FormTextarea
               label="Description"
               rows={4}
               value={formDescription}
               onChange={(e) => setFormDescription(e.target.value)}
             />
+            <DrawerSection title="Checkout" titleGap={10}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <Input
+                  label="Tax Rate (%)"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="e.g. 18"
+                  value={formTax}
+                  onChange={(e) => setFormTax(e.target.value)}
+                />
+                <p style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
+                  Applied at checkout — never shown on the product page.
+                </p>
+              </div>
+            </DrawerSection>
+            <Disclosure
+              title="Internal fields"
+              subtitle="Warehouse-facing data: weights, dimensions, print placements. Hidden from shoppers."
+              badge={<Badge variant="neutral" size="sm">{[formWeight, formShipWeight, formDims, formGender].filter(Boolean).length + formAttributes.filter((a) => a.name === 'Placements').reduce((n, a) => n + a.values.length, 0)} filled</Badge>}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <Input
+                    label="Weight"
+                    placeholder="e.g. 180g"
+                    value={formWeight}
+                    onChange={(e) => setFormWeight(e.target.value)}
+                  />
+                  <Input
+                    label="Shipping Weight"
+                    placeholder="e.g. 250g"
+                    value={formShipWeight}
+                    onChange={(e) => setFormShipWeight(e.target.value)}
+                  />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <Input
+                    label="Package Dimensions"
+                    placeholder="e.g. 18x20x2.3"
+                    value={formDims}
+                    onChange={(e) => setFormDims(e.target.value)}
+                  />
+                  <div>
+                    <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
+                      Gender
+                    </span>
+                  <DropdownMenu
+                    ariaLabel="Gender"
+                    trigger={
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`Gender, currently ${formGender || 'Unspecified'}`}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+                        }}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: 8,
+                          width: '100%',
+                          height: 40,
+                          padding: '0 12px',
+                          fontSize: 13,
+                          fontWeight: 500,
+                          fontFamily: 'var(--font-main)',
+                          borderRadius: 8,
+                          border: '1px solid var(--tuw-border-control, #D1D5DB)',
+                          backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
+                          color: 'var(--tuw-text-primary, #262626)',
+                          cursor: 'pointer',
+                          userSelect: 'none',
+                        }}
+                      >
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {formGender || 'Select gender'}
+                        </span>
+                        <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
+                      </span>
+                    }
+                    items={[
+                      { value: '', label: 'Unspecified' },
+                      { value: 'Female', label: 'Female' },
+                      { value: 'Male', label: 'Male' },
+                      { value: 'Unisex', label: 'Unisex' },
+                      { value: 'Kids', label: 'Kids' },
+                    ]}
+                    selectedValue={formGender}
+                    onSelect={(v) => setFormGender(v as ProductItem['gender'] | '')}
+                  />
+                  </div>
+                </div>
+                {formAttributes.filter((a) => a.name === 'Placements').map((attr) => renderAttrCard(attr, true))}
+              </div>
+            </Disclosure>
           </form>
           ) : productTab === 'media' ? (
           <div ref={mediaWrapRef} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
