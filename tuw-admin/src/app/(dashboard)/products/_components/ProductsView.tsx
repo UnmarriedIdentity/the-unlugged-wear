@@ -1236,14 +1236,37 @@ export default function ProductsView() {
       <PageHeader
         title="Product Catalog"
         actions={
-          <Button
-            variant="primary"
-            size="md"
-            icon={<Plus size={16} />}
-            onClick={openCreateDrawer}
-          >
-            <span>Add New Product</span>
-          </Button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <Button
+              variant="secondary"
+              size="md"
+              icon={<Upload size={16} />}
+              onClick={() => {
+                if (!canPerformAction('products')) return;
+                // IB1 stub: bulk import activates with the backend pipeline.
+                // Column contract (Final Listing): Style (name | code),
+                // sizes, Colors (comma lists), Weight, Shipping Weight,
+                // Base Price, Placements (comma list), Package Dimensions
+                // (LxBxH), Tax Rate → draft products via createProduct with
+                // attributes[] prebuilt (X1b: parse → validate → preview).
+                showToast({
+                  type: 'info',
+                  title: 'Import Coming With Backend',
+                  description: 'Final Listing columns are mapped — bulk import activates with the backend pipeline.',
+                });
+              }}
+            >
+              <span>Import Products</span>
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
+              icon={<Plus size={16} />}
+              onClick={openCreateDrawer}
+            >
+              <span>Add New Product</span>
+            </Button>
+          </div>
         }
       />
 
