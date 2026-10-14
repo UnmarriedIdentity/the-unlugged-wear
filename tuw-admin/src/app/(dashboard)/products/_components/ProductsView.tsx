@@ -13,6 +13,17 @@ import type { ProductVariant } from '@/mocks/fixtures';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
 
+// Per-product attribute draft (A1/AX2).
+// REST: GET/PUT /products/:id/attributes → FormAttribute[].
+// displayType decides the storefront rendering (pill | swatch | radio);
+// swatch dots stay neutral until a value→hex map lands (recorded follow-up).
+export interface FormAttribute {
+  name: string;
+  values: string[];
+  builtin: boolean;
+  displayType: 'pill' | 'swatch' | 'radio';
+}
+
 export default function ProductsView() {
   const { products, createProduct, updateProduct, deleteProduct, canPerformAction, showToast } = useAdminState();
 
@@ -60,7 +71,7 @@ export default function ProductsView() {
   // REST: GET/PUT /products/:id/attributes → [{ name, values[], builtin }].
   // Color + Size ship builtin (locked); custom attributes append here.
   // The matrix still cross-products Color×Size until A2 generalizes it.
-  const [formAttributes, setFormAttributes] = useState<Array<{ name: string; values: string[]; builtin: boolean }>>([]);
+  const [formAttributes, setFormAttributes] = useState<FormAttribute[]>([]);
   const attrValues = (name: string) => formAttributes.find((a) => a.name === name)?.values ?? [];
   const colorValues = attrValues('Color');
   const sizeValues = attrValues('Size');
@@ -90,8 +101,8 @@ export default function ProductsView() {
     setFormComparePrice('58.00');
     setFormStock('25');
     setFormAttributes([
-      { name: 'Color', values: ['Black', 'Chalk White', 'Olive'], builtin: true },
-      { name: 'Size', values: ['S', 'M', 'L', 'XL'], builtin: true },
+      { name: 'Color', values: ['Black', 'Chalk White', 'Olive'], builtin: true, displayType: 'swatch' },
+      { name: 'Size', values: ['S', 'M', 'L', 'XL'], builtin: true, displayType: 'pill' },
     ]);
     setFormPartner('Qikink Direct API');
     setFormPlacement('Chest (45mm)');
@@ -376,11 +387,16 @@ export default function ProductsView() {
       showToast({ type: 'warning', title: 'Duplicate Attribute', description: `"${name}" already exists.` });
       return;
     }
-    setFormAttributes((prev) => [...prev, { name, values: [], builtin: false }]);
+    setFormAttributes((prev) => [...prev, { name, values: [], builtin: false, displayType: 'pill' }]);
     setNewAttrName('');
   };
   const removeAttribute = (name: string) => {
     setFormAttributes((prev) => prev.filter((a) => a.name !== name));
+  };
+  const displayTypeLabel = (t: FormAttribute['displayType']) =>
+    t === 'pill' ? 'Pill' : t === 'swatch' ? 'Color swatch' : 'Radio select';
+  const setDisplayType = (name: string, displayType: FormAttribute['displayType']) => {
+    setFormAttributes((prev) => prev.map((a) => (a.name === name ? { ...a, displayType } : a)));
   };
 
   const openEditDrawer = (product: ProductItem) => {
@@ -422,8 +438,8 @@ export default function ProductsView() {
     setFormComparePrice(product.compareAtPrice ? product.compareAtPrice.toFixed(2) : '');
     setFormStock(String(product.stock));
     setFormAttributes([
-      { name: 'Color', values: [...product.colors], builtin: true },
-      { name: 'Size', values: [...product.sizes], builtin: true },
+      { name: 'Color', values: [...product.colors], builtin: true, displayType: 'swatch' },
+      { name: 'Size', values: [...product.sizes], builtin: true, displayType: 'pill' },
     ]);
     setFormPartner(product.partner);
     setFormPlacement(product.placement);
@@ -1673,6 +1689,53 @@ export default function ProductsView() {
                           </button>
                         </UpliftSurface>
                       )}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                        Shows on storefront as
+                      </span>
+                      <DropdownMenu
+                        ariaLabel={`${attr.name} storefront display`}
+                        trigger={
+                          <span
+                            role="button"
+                            tabIndex={0}
+                            aria-label={`${attr.name} display, currently ${displayTypeLabel(attr.displayType)}`}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+                            }}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: 8,
+                              height: 32,
+                              padding: '0 10px',
+                              fontSize: 12,
+                              fontWeight: 500,
+                              fontFamily: 'var(--font-main)',
+                              borderRadius: 8,
+                              border: '1px solid var(--tuw-border-control, #D1D5DB)',
+                              backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
+                              color: 'var(--tuw-text-primary, #262626)',
+                              cursor: 'pointer',
+                              userSelect: 'none',
+                            }}
+                          >
+                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {displayTypeLabel(attr.displayType)}
+                            </span>
+                            <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
+                          </span>
+                        }
+                        items={[
+                          { value: 'pill', label: 'Pill' },
+                          { value: 'swatch', label: 'Color swatch' },
+                          { value: 'radio', label: 'Radio select' },
+                        ]}
+                        selectedValue={attr.displayType}
+                        onSelect={(v) => setDisplayType(attr.name, v as FormAttribute['displayType'])}
+                      />
                     </div>
                     {attr.values.length > 0 ? (
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
