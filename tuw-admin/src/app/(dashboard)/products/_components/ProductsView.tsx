@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive, GripVertical, Upload } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, Input, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection, Carousel } from '@/components/ui';
+import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, Input, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection, Disclosure, Carousel } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 import { resolveVariants, variantStockTotal, buildVariantSku } from '@/mocks/variants';
@@ -410,6 +410,162 @@ export default function ProductsView() {
       prev.map((a) => (a.name === name ? { ...a, swatchHex: { ...a.swatchHex, [value]: hex } } : a))
     );
   };
+
+  // Shared attribute card (Y1b): PDP section and the Internal Placements
+  // block render the same card. hideDisplay drops the storefront picker
+  // where it has no meaning (admin-only attributes).
+  const renderAttrCard = (attr: ProductAttribute, hideDisplay = false) => (
+    <SurfaceCard key={attr.name} padding="12px" gap="10px">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+          {attr.name}
+        </span>
+        {attr.builtin ? (
+          <Badge variant="info" size="sm">Default</Badge>
+        ) : (
+          <UpliftSurface active width={28} height={28} className="tuw-danger-hover" style={{ flexShrink: 0, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+            <button
+              type="button"
+              aria-label={`Remove attribute ${attr.name}`}
+              onClick={() => removeAttribute(attr.name)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, display: 'inline-flex' }}
+            >
+              <Trash2 size={14} />
+            </button>
+          </UpliftSurface>
+        )}
+      </div>
+      {hideDisplay ? null : (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+          Shows on storefront as
+        </span>
+        <DropdownMenu
+          ariaLabel={`${attr.name} storefront display`}
+          trigger={
+            <span
+              role="button"
+              tabIndex={0}
+              aria-label={`${attr.name} display, currently ${displayTypeLabel(attr.displayType)}`}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 8,
+                height: 32,
+                padding: '0 10px',
+                fontSize: 12,
+                fontWeight: 500,
+                fontFamily: 'var(--font-main)',
+                borderRadius: 8,
+                border: '1px solid var(--tuw-border-control, #D1D5DB)',
+                backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
+                color: 'var(--tuw-text-primary, #262626)',
+                cursor: 'pointer',
+                userSelect: 'none',
+              }}
+            >
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {displayTypeLabel(attr.displayType)}
+              </span>
+              <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
+            </span>
+          }
+          items={[
+            { value: 'pill', label: 'Pill' },
+            { value: 'swatch', label: 'Color swatch' },
+            { value: 'radio', label: 'Radio select' },
+          ]}
+          selectedValue={attr.displayType}
+          onSelect={(v) => setDisplayType(attr.name, v as ProductAttribute['displayType'])}
+        />
+      </div>
+      )}
+      {attr.values.length > 0 ? (
+        <Table>
+          <TableHeader>
+            <TableRow hoverable={false}>
+              <TableHead style={{ padding: '10px 16px' }}>Value</TableHead>
+              <TableHead style={{ padding: '10px 16px' }}>Storefront preview</TableHead>
+              <TableHead style={{ padding: '10px 16px', width: 48 }}><span className="sr-only">Remove</span></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {attr.values.map((val) => (
+              <TableRow key={val} hoverable={false}>
+                <TableCell style={{ padding: '10px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
+                  {val}
+                </TableCell>
+                <TableCell style={{ padding: '10px 16px' }}>
+                  {attr.displayType === 'pill' ? (
+                    <Badge variant="neutral" size="sm">{val}</Badge>
+                  ) : attr.displayType === 'swatch' ? (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
+                      <input
+                        type="color"
+                        aria-label={`Swatch color for ${val}`}
+                        title={`Pick the PDP swatch color for ${val}`}
+                        value={attr.swatchHex[val] ?? '#D1D5DB'}
+                        onChange={(e) => setSwatchHex(attr.name, val, e.target.value)}
+                        style={{ width: 28, height: 28, padding: 0, border: 'none', borderRadius: 8, background: 'none', cursor: 'pointer', flexShrink: 0 }}
+                      />
+                      {val}
+                      <span style={{ fontSize: 12, fontFamily: 'monospace', color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                        {attr.swatchHex[val] ?? '#D1D5DB'}
+                      </span>
+                    </span>
+                  ) : (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
+                      <span aria-hidden="true" style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid var(--tuw-border-control, #D1D5DB)', flexShrink: 0, boxSizing: 'border-box' }} />
+                      {val}
+                    </span>
+                  )}
+                </TableCell>
+                <TableCell style={{ padding: '10px 16px', width: 48 }}>
+                  <UpliftSurface active width={28} height={28} className="tuw-danger-hover" style={{ flexShrink: 0, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                    <button
+                      type="button"
+                      aria-label={`Remove ${val} from ${attr.name}`}
+                      onClick={() => removeAttrValue(attr.name, val)}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, display: 'inline-flex' }}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </UpliftSurface>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      ) : (
+        <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+          No values yet — add the first one below.
+        </div>
+      )}
+      <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ flex: 1 }}>
+          <Input
+            aria-label={`Add ${attr.name} value`}
+            placeholder={`Add ${attr.name.toLowerCase()} value, then Add`}
+            value={attrDrafts[attr.name] ?? ''}
+            onChange={(e) => setAttrDrafts((prev) => ({ ...prev, [attr.name]: e.target.value }))}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                addAttrValue(attr.name);
+              }
+            }}
+          />
+        </div>
+        <Button variant="secondary" size="md" onClick={() => addAttrValue(attr.name)} disabled={(attrDrafts[attr.name] ?? '').trim() === ''}>
+          Add
+        </Button>
+      </div>
+    </SurfaceCard>
+  );
 
   const openEditDrawer = (product: ProductItem) => {
     if (!canPerformAction('products')) return;
@@ -1636,6 +1792,12 @@ export default function ProductsView() {
               onChange={(e) => setFormSlug(e.target.value)}
               required
             />
+            <Input
+              label="Style Code"
+              placeholder="e.g. FC34"
+              value={formStyleCode}
+              onChange={(e) => setFormStyleCode(e.target.value)}
+            />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <Input
                 label="Price ($ USD)"
@@ -1706,156 +1868,7 @@ export default function ProductsView() {
                 <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
                   Color and Size ship with every product. Add custom attributes (Fabric, Fit…) and define their values one by one.
                 </p>
-                {formAttributes.map((attr) => (
-                  <SurfaceCard key={attr.name} padding="12px" gap="10px">
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-                      <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-                        {attr.name}
-                      </span>
-                      {attr.builtin ? (
-                        <Badge variant="info" size="sm">Default</Badge>
-                      ) : (
-                        <UpliftSurface active width={28} height={28} className="tuw-danger-hover" style={{ flexShrink: 0, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                          <button
-                            type="button"
-                            aria-label={`Remove attribute ${attr.name}`}
-                            onClick={() => removeAttribute(attr.name)}
-                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, display: 'inline-flex' }}
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </UpliftSurface>
-                      )}
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                        Shows on storefront as
-                      </span>
-                      <DropdownMenu
-                        ariaLabel={`${attr.name} storefront display`}
-                        trigger={
-                          <span
-                            role="button"
-                            tabIndex={0}
-                            aria-label={`${attr.name} display, currently ${displayTypeLabel(attr.displayType)}`}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
-                            }}
-                            style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              gap: 8,
-                              height: 32,
-                              padding: '0 10px',
-                              fontSize: 12,
-                              fontWeight: 500,
-                              fontFamily: 'var(--font-main)',
-                              borderRadius: 8,
-                              border: '1px solid var(--tuw-border-control, #D1D5DB)',
-                              backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
-                              color: 'var(--tuw-text-primary, #262626)',
-                              cursor: 'pointer',
-                              userSelect: 'none',
-                            }}
-                          >
-                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                              {displayTypeLabel(attr.displayType)}
-                            </span>
-                            <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
-                          </span>
-                        }
-                        items={[
-                          { value: 'pill', label: 'Pill' },
-                          { value: 'swatch', label: 'Color swatch' },
-                          { value: 'radio', label: 'Radio select' },
-                        ]}
-                        selectedValue={attr.displayType}
-                        onSelect={(v) => setDisplayType(attr.name, v as ProductAttribute['displayType'])}
-                      />
-                    </div>
-                    {attr.values.length > 0 ? (
-                      <Table>
-                        <TableHeader>
-                          <TableRow hoverable={false}>
-                            <TableHead style={{ padding: '10px 16px' }}>Value</TableHead>
-                            <TableHead style={{ padding: '10px 16px' }}>Storefront preview</TableHead>
-                            <TableHead style={{ padding: '10px 16px', width: 48 }}><span className="sr-only">Remove</span></TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {attr.values.map((val) => (
-                            <TableRow key={val} hoverable={false}>
-                              <TableCell style={{ padding: '10px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
-                                {val}
-                              </TableCell>
-                              <TableCell style={{ padding: '10px 16px' }}>
-                                {attr.displayType === 'pill' ? (
-                                  <Badge variant="neutral" size="sm">{val}</Badge>
-                                ) : attr.displayType === 'swatch' ? (
-                                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
-                                    <input
-                                      type="color"
-                                      aria-label={`Swatch color for ${val}`}
-                                      title={`Pick the PDP swatch color for ${val}`}
-                                      value={attr.swatchHex[val] ?? '#D1D5DB'}
-                                      onChange={(e) => setSwatchHex(attr.name, val, e.target.value)}
-                                      style={{ width: 28, height: 28, padding: 0, border: 'none', borderRadius: 8, background: 'none', cursor: 'pointer', flexShrink: 0 }}
-                                    />
-                                    {val}
-                                    <span style={{ fontSize: 12, fontFamily: 'monospace', color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                                      {attr.swatchHex[val] ?? '#D1D5DB'}
-                                    </span>
-                                  </span>
-                                ) : (
-                                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
-                                    <span aria-hidden="true" style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid var(--tuw-border-control, #D1D5DB)', flexShrink: 0, boxSizing: 'border-box' }} />
-                                    {val}
-                                  </span>
-                                )}
-                              </TableCell>
-                              <TableCell style={{ padding: '10px 16px', width: 48 }}>
-                                <UpliftSurface active width={28} height={28} className="tuw-danger-hover" style={{ flexShrink: 0, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                                  <button
-                                    type="button"
-                                    aria-label={`Remove ${val} from ${attr.name}`}
-                                    onClick={() => removeAttrValue(attr.name, val)}
-                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, display: 'inline-flex' }}
-                                  >
-                                    <Trash2 size={14} />
-                                  </button>
-                                </UpliftSurface>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    ) : (
-                      <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                        No values yet — add the first one below.
-                      </div>
-                    )}
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <div style={{ flex: 1 }}>
-                        <Input
-                          aria-label={`Add ${attr.name} value`}
-                          placeholder={`Add ${attr.name.toLowerCase()} value, then Add`}
-                          value={attrDrafts[attr.name] ?? ''}
-                          onChange={(e) => setAttrDrafts((prev) => ({ ...prev, [attr.name]: e.target.value }))}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              addAttrValue(attr.name);
-                            }
-                          }}
-                        />
-                      </div>
-                      <Button variant="secondary" size="md" onClick={() => addAttrValue(attr.name)} disabled={(attrDrafts[attr.name] ?? '').trim() === ''}>
-                        Add
-                      </Button>
-                    </div>
-                  </SurfaceCard>
-                ))}
+                {formAttributes.filter((a) => a.name !== 'Placements').map((attr) => renderAttrCard(attr))}
                 <div style={{ display: 'flex', gap: 8 }}>
                   <div style={{ flex: 1 }}>
                     <Input
@@ -1883,6 +1896,103 @@ export default function ProductsView() {
               value={formDescription}
               onChange={(e) => setFormDescription(e.target.value)}
             />
+            <DrawerSection title="Checkout" titleGap={10}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <Input
+                  label="Tax Rate (%)"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="e.g. 18"
+                  value={formTax}
+                  onChange={(e) => setFormTax(e.target.value)}
+                />
+                <p style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
+                  Applied at checkout — never shown on the product page.
+                </p>
+              </div>
+            </DrawerSection>
+            <Disclosure
+              title="Internal fields"
+              subtitle="Warehouse-facing data: weights, dimensions, print placements. Hidden from shoppers."
+              badge={<Badge variant="neutral" size="sm">{[formWeight, formShipWeight, formDims, formGender].filter(Boolean).length + formAttributes.filter((a) => a.name === 'Placements').reduce((n, a) => n + a.values.length, 0)} filled</Badge>}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <Input
+                    label="Weight"
+                    placeholder="e.g. 180g"
+                    value={formWeight}
+                    onChange={(e) => setFormWeight(e.target.value)}
+                  />
+                  <Input
+                    label="Shipping Weight"
+                    placeholder="e.g. 250g"
+                    value={formShipWeight}
+                    onChange={(e) => setFormShipWeight(e.target.value)}
+                  />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <Input
+                    label="Package Dimensions"
+                    placeholder="e.g. 18x20x2.3"
+                    value={formDims}
+                    onChange={(e) => setFormDims(e.target.value)}
+                  />
+                  <div>
+                    <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
+                      Gender
+                    </span>
+                  <DropdownMenu
+                    ariaLabel="Gender"
+                    trigger={
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`Gender, currently ${formGender || 'Unspecified'}`}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+                        }}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: 8,
+                          width: '100%',
+                          height: 40,
+                          padding: '0 12px',
+                          fontSize: 13,
+                          fontWeight: 500,
+                          fontFamily: 'var(--font-main)',
+                          borderRadius: 8,
+                          border: '1px solid var(--tuw-border-control, #D1D5DB)',
+                          backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
+                          color: 'var(--tuw-text-primary, #262626)',
+                          cursor: 'pointer',
+                          userSelect: 'none',
+                        }}
+                      >
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {formGender || 'Select gender'}
+                        </span>
+                        <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
+                      </span>
+                    }
+                    items={[
+                      { value: '', label: 'Unspecified' },
+                      { value: 'Female', label: 'Female' },
+                      { value: 'Male', label: 'Male' },
+                      { value: 'Unisex', label: 'Unisex' },
+                      { value: 'Kids', label: 'Kids' },
+                    ]}
+                    selectedValue={formGender}
+                    onSelect={(v) => setFormGender(v as ProductItem['gender'] | '')}
+                  />
+                  </div>
+                </div>
+                {formAttributes.filter((a) => a.name === 'Placements').map((attr) => renderAttrCard(attr, true))}
+              </div>
+            </Disclosure>
           </form>
           ) : productTab === 'media' ? (
           <div ref={mediaWrapRef} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
