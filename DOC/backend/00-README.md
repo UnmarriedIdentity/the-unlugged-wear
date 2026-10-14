@@ -1,9 +1,7 @@
 # The Unplugged Wear — Backend Project Overview
 
-> Status: Draft | Last Updated: 2026-10-14
+> Status: Draft | Last Updated: 2026-10-15
 > Single-URL monolith: one Next.js app, one PostgreSQL, R2 for bytes.
-> Parent docs: `3.Database-Schema.md` + `4.API-Design.md` (microservice drafts —
-> adapted here, not followed literally).
 
 ## 1. What this is
 
@@ -23,9 +21,8 @@ Next.js Route Handlers expose the API; `middleware.ts` enforces the role
 gate on route groups (`(admin)` vs `(storefront)`); decorator-style handler
 wrappers (`withRole('admin')`, validated-input wrappers) carry auth and
 validation so handlers stay thin. PostgreSQL is the single source of truth
-with **real foreign keys everywhere** (the microservice docs' "logical refs
-only" rule existed for independent deploys — dead in a monolith) and one
-migration history. Primary keys are **UUIDv7** (time-ordered, unguessable,
+with **real foreign keys everywhere** — cross-domain references are true
+constraints, not application-code promises — and one migration history. Primary keys are **UUIDv7** (time-ordered, unguessable,
 merge-safe). Depth: `12-UI-Merge-Single-Deploy.md`, `13-API-Contracts.md`,
 `14-Single-URL-Gating.md`.
 

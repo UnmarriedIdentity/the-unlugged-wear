@@ -69,8 +69,7 @@
 
 ## 6. Data-integrity rules
 
-- **Real FKs everywhere** (monolith adaptation — the microservice docs'
-  "logical refs" rule is void). `ON DELETE CASCADE` for owned children
+- **Real FKs everywhere.** `ON DELETE CASCADE` for owned children
   (variants, images, options, order items); `RESTRICT`-by-default
   elsewhere — deletes that would orphan must fail loudly, not cascade
   silently.
