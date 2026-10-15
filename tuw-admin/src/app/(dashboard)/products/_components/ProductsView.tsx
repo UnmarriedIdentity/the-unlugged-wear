@@ -18,7 +18,7 @@ const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + 
 // swatch dots stay neutral until a value→hex map lands (recorded follow-up).
 
 export default function ProductsView() {
-  const { products, createProduct, updateProduct, deleteProduct, canPerformAction, showToast } = useAdminState();
+  const { products, createProduct, updateProduct, deleteProduct, canPerformAction, showToast, stockMovements } = useAdminState();
 
   const [selectedCat, setSelectedCat] = useState<string>('All');
   const [publicationFilter, setPublicationFilter] = useState<'all' | 'published' | 'draft' | 'archived'>('all');
@@ -2281,6 +2281,47 @@ export default function ProductsView() {
                 ))}
               </TableBody>
             </Table>
+            <Disclosure
+              title={`Stock history (${editingProduct ? stockMovements.filter((m) => m.productId === editingProduct.id).length : 0})`}
+              subtitle="Ledger of stock changes — every save that moves units appends here."
+            >
+              {editingProduct && stockMovements.some((m) => m.productId === editingProduct.id) ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow hoverable={false}>
+                      <TableHead style={{ padding: '10px 16px' }}>Date</TableHead>
+                      <TableHead style={{ padding: '10px 16px', textAlign: 'right' }}>Change</TableHead>
+                      <TableHead style={{ padding: '10px 16px' }}>Reason</TableHead>
+                      <TableHead style={{ padding: '10px 16px', textAlign: 'right' }}>Balance</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {stockMovements
+                      .filter((m) => m.productId === editingProduct.id)
+                      .map((m) => (
+                        <TableRow key={m.id} hoverable={false}>
+                          <TableCell style={{ padding: '10px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                            {m.createdAt}
+                          </TableCell>
+                          <TableCell style={{ padding: '10px 16px', textAlign: 'right', fontSize: 14, fontWeight: 600, color: m.qtyChange >= 0 ? 'var(--tuw-text-success, #187343)' : 'var(--tuw-text-error, #C91818)' }}>
+                            {m.qtyChange >= 0 ? `+${m.qtyChange}` : m.qtyChange}
+                          </TableCell>
+                          <TableCell style={{ padding: '10px 16px' }}>
+                            <Badge variant="neutral" size="sm">{m.reason.replace(/_/g, ' ')}</Badge>
+                          </TableCell>
+                          <TableCell style={{ padding: '10px 16px', textAlign: 'right', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
+                            {m.qtyAfter}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                  No movements yet — edit stock and save to grow this ledger.
+                </div>
+              )}
+            </Disclosure>
           </div>
           ) : productTab === 'specs' ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

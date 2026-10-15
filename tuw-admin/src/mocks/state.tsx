@@ -14,6 +14,7 @@ import {
   TeamMember,
   StoreSettings,
   StaffRole,
+  StockMovement,
   initialProducts,
   initialOrders,
   initialShipments,
@@ -25,6 +26,7 @@ import {
   initialDesigns,
   initialTeam,
   initialSettings,
+  initialStockMovements,
 } from './fixtures';
 import {
   synthesizeVariants,
@@ -63,6 +65,7 @@ interface AdminStateContextType {
   designs: DesignAsset[];
   team: TeamMember[];
   settings: StoreSettings;
+  stockMovements: StockMovement[];
 
   toasts: ToastMessage[];
   showToast: (toast: Omit<ToastMessage, 'id'>) => void;
@@ -128,6 +131,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
   const [designs, setDesigns] = useState<DesignAsset[]>(initialDesigns);
   const [team, setTeam] = useState<TeamMember[]>(initialTeam);
   const [settings, setSettings] = useState<StoreSettings>(initialSettings);
+  const [stockMovements, setStockMovements] = useState<StockMovement[]>(initialStockMovements);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -147,6 +151,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         if (parsed.designs) setDesigns(parsed.designs);
         if (parsed.team) setTeam(parsed.team);
         if (parsed.settings) setSettings(parsed.settings);
+        if (parsed.stockMovements) setStockMovements(parsed.stockMovements);
       }
     } catch {
       // Local storage fallback
@@ -168,6 +173,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
       designs?: DesignAsset[];
       team?: TeamMember[];
       settings?: StoreSettings;
+      stockMovements?: StockMovement[];
     }) => {
       try {
         const current = {
@@ -183,6 +189,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
           designs,
           team,
           settings,
+          stockMovements,
           ...newState,
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
@@ -190,7 +197,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         // Storage quota / privacy protection
       }
     },
-    [activeRole, products, orders, shipments, refunds, returns, customers, supportTickets, collections, designs, team, settings]
+    [activeRole, products, orders, shipments, refunds, returns, customers, supportTickets, collections, designs, team, settings, stockMovements]
   );
 
   const showToast = useCallback((toast: Omit<ToastMessage, 'id'>) => {
@@ -276,6 +283,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
 
   const updateProduct = (id: string, updates: Partial<ProductItem>, silent = false) => {
     if (!canPerformAction('products')) return false;
+    const target = products.find((p) => p.id === id);
     const next = products.map((p) => {
       if (p.id !== id) return p;
       const merged = { ...p, ...updates };
@@ -288,8 +296,39 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
       }
       return merged;
     });
+    // Ledger truthfulness (P1b): every variant stock delta in a save appends
+    // an admin_adjustment movement, so the history view grows with edits.
+    if (target && updates.variants) {
+      const before = new Map(
+        (target.variants ?? synthesizeVariants(target)).map((v) => [v.id, v.stock])
+      );
+      const stamp = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short', year: 'numeric' });
+      const appended: StockMovement[] = [];
+      updates.variants.forEach((v) => {
+        const old = before.get(v.id);
+        if (old !== undefined && old !== v.stock) {
+          appended.push({
+            id: `STM-${Date.now()}-${v.id}`,
+            productId: id,
+            variantId: v.id,
+            qtyChange: v.stock - old,
+            reason: 'admin_adjustment',
+            qtyAfter: v.stock,
+            createdAt: stamp,
+          });
+        }
+      });
+      if (appended.length > 0) {
+        const nextMovements = [...appended, ...stockMovements];
+        setStockMovements(nextMovements);
+        persistState({ products: next, stockMovements: nextMovements });
+      } else {
+        persistState({ products: next });
+      }
+    } else {
+      persistState({ products: next });
+    }
     setProducts(next);
-    persistState({ products: next });
     if (!silent) {
       showToast({
         type: 'success',
@@ -783,6 +822,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     setDesigns(initialDesigns);
     setTeam(initialTeam);
     setSettings(initialSettings);
+    setStockMovements(initialStockMovements);
 
     showToast({
       type: 'info',
@@ -812,6 +852,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         designs,
         team,
         settings,
+        stockMovements,
         toasts,
         showToast,
         dismissToast,

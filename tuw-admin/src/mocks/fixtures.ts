@@ -1059,6 +1059,63 @@ export const initialReturns: ReturnItem[] = [
   },
 ];
 
+/** Stock ledger row (P1b demo seam): signed delta + reason + balance
+ * snapshot. The seam appends admin_adjustment rows whenever a save
+ * changes variant stock, so history stays truthful after edits. */
+export interface StockMovement {
+  id: string;
+  productId: string;
+  variantId?: string;
+  qtyChange: number;
+  reason: 'sale' | 'restock' | 'import' | 'admin_adjustment' | 'return' | 'cancel';
+  qtyAfter: number;
+  createdAt: string;
+}
+
+export const initialStockMovements: StockMovement[] = [
+  {
+    id: 'STM-01',
+    productId: 'PRD-01',
+    qtyChange: 120,
+    reason: 'import',
+    qtyAfter: 412,
+    createdAt: '10 Apr 2026, 09:00',
+  },
+  {
+    id: 'STM-02',
+    productId: 'PRD-01',
+    qtyChange: -8,
+    reason: 'sale',
+    qtyAfter: 404,
+    createdAt: '14 Apr 2026, 16:20',
+  },
+  {
+    id: 'STM-03',
+    productId: 'PRD-01',
+    variantId: 'PRD-01-V3',
+    qtyChange: 25,
+    reason: 'admin_adjustment',
+    qtyAfter: 41,
+    createdAt: '15 Apr 2026, 11:05',
+  },
+  {
+    id: 'STM-04',
+    productId: 'PRD-02',
+    qtyChange: 200,
+    reason: 'import',
+    qtyAfter: 200,
+    createdAt: '09 Apr 2026, 10:30',
+  },
+  {
+    id: 'STM-05',
+    productId: 'PRD-02',
+    qtyChange: -14,
+    reason: 'sale',
+    qtyAfter: 186,
+    createdAt: '15 Apr 2026, 13:40',
+  },
+];
+
 export const initialCustomers: CustomerItem[] = [
   {
     id: 'CUST-01',
