@@ -1116,6 +1116,26 @@ export const initialStockMovements: StockMovement[] = [
   },
 ];
 
+/** Storefront search demand (P1c demo seed): what shoppers typed and how
+ * often it returned nothing. Static fixture — nothing in demo writes
+ * these; live tracking swaps the import with zero layout change. */
+export interface SearchTerm {
+  term: string;
+  searches: number;
+  zeroResults: number;
+}
+
+export const initialSearchTerms: SearchTerm[] = [
+  { term: 'oversized hoodie', searches: 1840, zeroResults: 0 },
+  { term: 'linen shirt', searches: 1215, zeroResults: 0 },
+  { term: 'chikankari kurta', searches: 864, zeroResults: 864 },
+  { term: 'cargo pants', searches: 792, zeroResults: 0 },
+  { term: 'aop dress', searches: 640, zeroResults: 0 },
+  { term: 'handloom saree', searches: 515, zeroResults: 515 },
+  { term: 'gym leggings', searches: 402, zeroResults: 0 },
+  { term: 'kurta palazzo set', searches: 288, zeroResults: 288 },
+];
+
 export const initialCustomers: CustomerItem[] = [
   {
     id: 'CUST-01',
