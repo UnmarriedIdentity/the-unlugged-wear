@@ -39,9 +39,13 @@
   login email, all slugs, SKUs, token hashes, one-default-address
   (partial unique), one-primary-image (partial unique), one-active-cart
   (partial unique), composite junction PKs.
+- **Index the access path, not the column.** Uniqueness, FK cascades, and
+  proven-hot lookups get indexes on day one; speculative filters (status
+  sweeps on hundred-row tables) wait for measured need (~100k rows).
+- **No speculative states.** Every status/enum value ships with the flow
+  that reads it (`pending` returns with verification + token table).
 - Hot filtered reads get **partial indexes** (`WHERE status='active'`,
-  outbox `WHERE status='pending'`, navbar flags) — narrow, fast, documented
-  per table in the domain files.
+  navbar flags) — narrow, fast, documented per table in the domain files.
 
 ## 4. Handler & service discipline
 
