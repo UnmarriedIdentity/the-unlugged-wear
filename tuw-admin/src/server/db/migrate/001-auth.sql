@@ -31,14 +31,12 @@ CREATE TABLE users (
   first_name    varchar(100) NOT NULL,
   last_name     varchar(100) NOT NULL,
   phone         varchar(20),
-  avatar_url    varchar(2048),
   status        varchar(20)  NOT NULL DEFAULT 'active'
-    CHECK (status IN ('active','disabled','pending')),
+    CHECK (status IN ('active','disabled')),
   last_login_at timestamptz,
   created_at    timestamptz  NOT NULL DEFAULT now(),
   updated_at    timestamptz  NOT NULL DEFAULT now()
 );
-CREATE INDEX idx_users_status ON users (status);
 
 -- ----------------------------------------------------- role_permissions
 CREATE TABLE role_permissions (
@@ -88,7 +86,6 @@ CREATE TABLE refresh_tokens (
   created_at timestamptz  NOT NULL DEFAULT now()
 );
 CREATE INDEX idx_refresh_tokens_user_id ON refresh_tokens (user_id);
-CREATE INDEX idx_refresh_tokens_expires_at ON refresh_tokens (expires_at);
 
 -- -------------------------------------------------------- customer_notes
 CREATE TABLE customer_notes (
@@ -113,7 +110,6 @@ CREATE TABLE staff_invitations (
   created_at timestamptz  NOT NULL DEFAULT now()
 );
 CREATE INDEX idx_staff_invitations_email ON staff_invitations (email);
-CREATE INDEX idx_staff_invitations_status ON staff_invitations (status);
 
 -- ------------------------------------------------------------- audit_logs
 CREATE TABLE audit_logs (
