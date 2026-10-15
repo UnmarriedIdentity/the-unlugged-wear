@@ -8,7 +8,7 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 189,
+    "total": 209,
     "done": 175,
     "in_progress": 3,
     "backlog": 11
@@ -1681,6 +1681,226 @@
       "verified": true,
       "pushed": false,
       "follow_ups": ["domain column fills 03-10, 15 with slices + normal-form notes", "admin UI: discount manager", "admin UI: abandonment view", "admin UI: search-terms view", "PDP stars + reviews moderation UI (joint ship)"]
+    },
+    {
+      "id": "TL-UI-FX1",
+      "title": "Focus parity on form primitives + journal proof",
+      "status": "backlog",
+      "owner": "unassigned",
+      "log": "FormTextarea/FormSelect/ui-Select/ui-Textarea gain Input focus language; journal modal proves it",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-SEL",
+      "title": "Migrate 17 raw selects + 1 raw textarea to primitives",
+      "status": "backlog",
+      "owner": "unassigned",
+      "log": "Audited app-wide; parked pending docs completion",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-CBX",
+      "title": "Parked Checkbox swaps",
+      "status": "backlog",
+      "owner": "unassigned",
+      "log": "Raw checkboxes to Checkbox primitive",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-IMG",
+      "title": "ImageWithFallback fallbackTone + product next/image pass",
+      "status": "backlog",
+      "owner": "unassigned",
+      "log": "Parked image-system completion",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-A2",
+      "title": "Attribute-driven variant matrix (headers, SKU, tests)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "log": "Generalize rebuildMatrix beyond Color×Size; 3-attribute cross-product tests",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-X1A",
+      "title": "Attribute visibility model (pdp/checkout/admin) + card checkboxes",
+      "status": "backlog",
+      "owner": "unassigned",
+      "log": "visibleOn per attribute; storefront/checkout contract",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-X1B",
+      "title": "CSV import pipeline (picker, parse, preview modal, draft-stage)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "log": "Final Listing contract; IB1 stub swaps body at backend",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-ATTRLIB",
+      "title": "Settings global attribute library",
+      "status": "backlog",
+      "owner": "unassigned",
+      "log": "Library CRUD + in-use guards + enable/disable; drawer stays select-only",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-SIZE",
+      "title": "Size-chart manager + per-product assignment",
+      "status": "backlog",
+      "owner": "unassigned",
+      "log": "Needs size_charts table (filed); replaces hardcoded guide",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-SWEEP",
+      "title": "Danger/success-hover sweep (logout + destructive hovers)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "log": "tuw-danger-hover + tuw-success-hover onto all identical-token sites; explicitly deferred",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-FUL2",
+      "title": "Fulfillment Phase 2 per-card bulk bars",
+      "status": "backlog",
+      "owner": "unassigned",
+      "log": "Scrapped once; still pending",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-DISC",
+      "title": "Discount-code manager UI",
+      "status": "backlog",
+      "owner": "unassigned",
+      "log": "discount_codes ready; create/kill/usage views missing",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-ABND",
+      "title": "Abandoned-cart view + reminder state",
+      "status": "backlog",
+      "owner": "unassigned",
+      "log": "abandoned_carts ready; recovery screen missing",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-SEARCHUI",
+      "title": "Search-terms view (zero-result first)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "log": "search_terms ready; demand-intelligence screen missing",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-REV",
+      "title": "PDP stars + reviews moderation (joint ship)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "log": "reviews table ready; neither side built — ship together",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-STOCKHIST",
+      "title": "Stock movement history view",
+      "status": "backlog",
+      "owner": "unassigned",
+      "log": "Adjustments exist; ledger trail invisible (stock_movements ready)",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-AUDIT",
+      "title": "Audit-log viewer",
+      "status": "backlog",
+      "owner": "unassigned",
+      "log": "audit_logs planned; no screen",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-DW2",
+      "title": "13-drawer verification pass",
+      "status": "backlog",
+      "owner": "unassigned",
+      "log": "Pending full-drawer audit",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-ANIM",
+      "title": "Anim-probe re-run (post all motion work)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "log": "Pending motion verification",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-MERGE",
+      "title": "Storefront route migration per file 12 (last)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "log": "Route-by-route after docs; delete tuw-website/ only on full parity",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
     },
     {
       "id": "TL-DASH-HOV5",
