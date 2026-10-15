@@ -57,7 +57,6 @@ export default function ViewToggle({
             aria-label={option.label}
             title={option.label}
             onClick={() => onChange(option.value)}
-            className={labeled && selected ? 'tuw-stat-active' : ''}
             style={
               labeled
                 ? {
@@ -97,12 +96,27 @@ export default function ViewToggle({
             }
           >
             {labeled ? (
-              <>
+              <UpliftSurface
+                active={selected}
+                width="100%"
+                height="100%"
+                radius={8}
+                style={{
+                  gap: 6,
+                  color: selected
+                    ? 'var(--tuw-action-primary, #7539FF)'
+                    : 'var(--tuw-text-secondary, #5D6772)',
+                  transition: 'all 0.15s ease',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  fontFamily: 'var(--font-main)',
+                }}
+              >
                 {option.icon}
                 <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {option.label}
                 </span>
-              </>
+              </UpliftSurface>
             ) : (
             <UpliftSurface
               active={selected}
