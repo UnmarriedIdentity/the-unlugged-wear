@@ -14,13 +14,12 @@
 | first_name | varchar(100) | NOT NULL | |
 | last_name | varchar(100) | NOT NULL | |
 | phone | varchar(20) | NULL | Optional; stored E.164 (`+91…`) when present |
-| avatar_url | varchar(2048) | NULL | R2 object URL (see `11-Storage.md`) |
-| status | varchar(20) | NOT NULL DEFAULT 'active', CHECK IN ('active','disabled','pending') | Account lifecycle; disabled blocks login + refresh |
+| status | varchar(20) | NOT NULL DEFAULT 'active', CHECK IN ('active','disabled') | Off-switch: disabled blocks login + refresh, history preserved (deletes are RESTRICT-blocked); `pending` returns with the verification flow + token table |
 | last_login_at | timestamptz | NULL | Idle detection, security review |
 | created_at / updated_at | timestamptz | NOT NULL DEFAULT now() | Convention |
 
-Indexes: PK · unique `users_email_key` (hottest auth query) ·
-`idx_users_status` (admin filtering).
+Indexes: PK · unique `users_email_key` (hottest auth query). Status
+filtering needs no index until ~100k users (file 01 §3 access-path rule).
 
 ## 2. addresses
 
@@ -54,7 +53,7 @@ Indexes: PK · `idx_addresses_user_id` (book load) ·
 | created_at | timestamptz | NOT NULL | |
 
 Indexes: PK · unique hash (refresh lookup) · `idx_refresh_tokens_user_id`
-(revoke-all) · `idx_refresh_tokens_expires_at` (cleanup job).
+(revoke-all). Expiry cleanup scans need no index at this scale (file 01 §3).
 
 ## 4. RBAC quartet
 
@@ -109,7 +108,22 @@ Flow: session cookie → `user_id` → role set (cached, 5-min TTL) →
 `(admin)` paths + `/api/admin/*` require `admin`; customer routes require
 ownership (`order.user_id = session user_id`), never a permission row.
 
-## 6. AuthN rules
+## 6. customer_notes · staff_invitations · audit_logs
+
+- **customer_notes** (`user_id` FK cascade, `author_id` FK restrict,
+  `note` text): staff timeline on the customer record. Index on user
+  (timeline read). Author is RESTRICT — note history survives staff
+  offboarding.
+- **staff_invitations** (email, `role_id` FK restrict, token hash UNIQUE,
+  status CHECK(pending/accepted/expired/revoked), expiry, inviter):
+  invite flow for the team screen. Email index (accept lookup); no
+  status index at this scale. Members themselves are `users` + roles —
+  only the invitation needs a table.
+- **audit_logs** (actor FK, action, entity, entity_id, diff jsonb):
+  every admin mutation lands here. Indexes on actor, (entity,
+  entity_id), created_at — the table exists *for* these queries.
+
+## 7. AuthN rules
 
 - Argon2id for passwords (memory-hard; no legacy hashes accepted).
 - Access token 15 min; refresh token 30-day rotation; reuse of a rotated
