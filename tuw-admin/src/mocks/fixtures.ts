@@ -40,6 +40,9 @@ export interface ProductItem {
   dimensions?: string;
   gender?: 'Female' | 'Male' | 'Unisex' | 'Kids';
   taxRate?: number;
+  /** Scheduled discounts (P1d): percent/fixed with window + kill switch.
+   * Optional — absent means none. Mirrors product_discounts intent. */
+  discounts?: ProductDiscount[];
   monogram?: { enabled: boolean; maxChars: number; upcharge: number };
   seoTitle?: string;
   seoDescription?: string;
@@ -56,11 +59,21 @@ export interface PhotoSettings {
   showPhotos: boolean;
 }
 
+/** Scheduled product discount (P1d draft shape): percent/fixed with a
+ * window and kill switch. Dates are ISO strings in the draft. */
+export interface ProductDiscount {
+  id: string;
+  discountType: 'percent' | 'fixed';
+  value: number;
+  startsAt: string;
+  endsAt: string;
+  isActive: boolean;
+}
+
 /** Per-size/color inventory unit. Prices follow ProductItem.price convention
  * (floats — matches the product domain; AGENTS minor-unit tension recorded
  * for later reconciliation, not silently converted). */
-export interface ProductVariant {
-  id: string;
+export interface ProductVariant {  id: string;
   color: string;
   size: string;
   sku: string;

@@ -9,7 +9,7 @@ import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, Input
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 import { resolveVariants, variantStockTotal, buildVariantSku } from '@/mocks/variants';
-import type { ProductVariant, ProductAttribute, PhotoSettings } from '@/mocks/fixtures';
+import type { ProductVariant, ProductAttribute, PhotoSettings, ProductDiscount } from '@/mocks/fixtures';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
 
@@ -67,6 +67,8 @@ export default function ProductsView() {
   const [formDims, setFormDims] = useState('');
   const [formGender, setFormGender] = useState<ProductItem['gender'] | ''>('');
   const [formTax, setFormTax] = useState('');
+  // Scheduled discounts draft (P1d): rows with type/value/window/switch.
+  const [formDiscounts, setFormDiscounts] = useState<ProductDiscount[]>([]);
   // Per-product attributes (A1): the single source behind colors/sizes.
   // REST: GET/PUT /products/:id/attributes → [{ name, values[], builtin }].
   // Color + Size + Placements ship builtin (locked); customs append here.
@@ -106,6 +108,7 @@ export default function ProductsView() {
     setFormDims('');
     setFormGender('');
     setFormTax('');
+    setFormDiscounts([]);
     setFormAttributes([
       { name: 'Color', values: ['Black', 'Chalk White', 'Olive'], builtin: true, displayType: 'swatch', swatchHex: {} },
       { name: 'Size', values: ['S', 'M', 'L', 'XL'], builtin: true, displayType: 'pill', swatchHex: {} },
@@ -404,6 +407,21 @@ export default function ProductsView() {
   const removeAttribute = (name: string) => {
     setFormAttributes((prev) => prev.filter((a) => a.name !== name));
   };
+
+  // Scheduled discount rows (P1d): local composition, no new primitive.
+  // Kill switch flips isActive (reversible); trash removes the draft row.
+  const addDiscount = () => {
+    setFormDiscounts((prev) => [
+      ...prev,
+      { id: `tmp-d-${Date.now()}`, discountType: 'percent', value: 10, startsAt: '', endsAt: '', isActive: true },
+    ]);
+  };
+  const patchDiscount = (id: string, patch: Partial<ProductDiscount>) => {
+    setFormDiscounts((prev) => prev.map((d) => (d.id === id ? { ...d, ...patch } : d)));
+  };
+  const removeDiscount = (id: string) => {
+    setFormDiscounts((prev) => prev.filter((d) => d.id !== id));
+  };
   const displayTypeLabel = (t: ProductAttribute['displayType']) =>
     t === 'pill' ? 'Pill' : t === 'swatch' ? 'Color swatch' : 'Radio select';
   const setDisplayType = (name: string, displayType: ProductAttribute['displayType']) => {
@@ -616,6 +634,7 @@ export default function ProductsView() {
     setFormDims(product.dimensions || '');
     setFormGender(product.gender || '');
     setFormTax(product.taxRate !== undefined ? String(product.taxRate) : '');
+    setFormDiscounts((product.discounts ?? []).map((d) => ({ ...d })));
     setFormAttributes(
       product.attributes && product.attributes.length > 0
         ? product.attributes.map((a) => ({ ...a, values: [...a.values], swatchHex: { ...a.swatchHex } }))
@@ -659,6 +678,7 @@ export default function ProductsView() {
         image: formImages[0]?.src || undefined,
         video: formVideo || undefined,
         photoSettings: formPhoto,
+        discounts: formDiscounts,
         images: formImages.filter((im) => im.persisted).map((im) => im.src),
         attributes: formAttributes,
         imageBg: 'linear-gradient(135deg, #FAF3F7 0%, #EFE1EB 100%)',
@@ -726,6 +746,7 @@ export default function ProductsView() {
       image: formImages[0]?.src || undefined,
       video: formVideo || undefined,
       photoSettings: formPhoto,
+      discounts: formDiscounts,
       images: formImages.filter((im) => im.persisted).map((im) => im.src),
       variants: submitVariants,
       attributes: formAttributes,
@@ -1951,6 +1972,115 @@ export default function ProductsView() {
                 required
               />
             </div>
+            <DrawerSection title="Pricing & Discounts" titleGap={10}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
+                  Scheduled price cuts with a window and kill switch. The compare price above is static marketing text.
+                </p>
+                {formDiscounts.map((d) => (
+                  <SurfaceCard key={d.id} padding="10px" gap="8px">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{ width: 130, flexShrink: 0 }}>
+                        <DropdownMenu
+                          ariaLabel="Discount type"
+                          trigger={
+                            <span
+                              role="button"
+                              tabIndex={0}
+                              aria-label={`Discount type, currently ${d.discountType}`}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+                              }}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                gap: 8,
+                                width: '100%',
+                                height: 36,
+                                padding: '0 10px',
+                                fontSize: 13,
+                                fontWeight: 500,
+                                fontFamily: 'var(--font-main)',
+                                borderRadius: 8,
+                                border: '1px solid var(--tuw-border-control, #D1D5DB)',
+                                backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
+                                color: 'var(--tuw-text-primary, #262626)',
+                                cursor: 'pointer',
+                                userSelect: 'none',
+                              }}
+                            >
+                              <span>{d.discountType === 'percent' ? 'Percent %' : 'Fixed ₹'}</span>
+                              <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
+                            </span>
+                          }
+                          items={[
+                            { value: 'percent', label: 'Percent %' },
+                            { value: 'fixed', label: 'Fixed ₹' },
+                          ]}
+                          selectedValue={d.discountType}
+                          onSelect={(v) => patchDiscount(d.id, { discountType: v as ProductDiscount['discountType'] })}
+                        />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <Input
+                          aria-label="Discount value"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          max={d.discountType === 'percent' ? '100' : undefined}
+                          value={String(d.value)}
+                          onChange={(e) => {
+                            const n = parseFloat(e.target.value);
+                            if (isNaN(n)) return;
+                            patchDiscount(d.id, {
+                              value: d.discountType === 'percent' ? Math.min(100, Math.max(0, n)) : Math.max(0, n),
+                            });
+                          }}
+                          style={{ height: 36 }}
+                        />
+                      </div>
+                      <Switch
+                        label=""
+                        checked={d.isActive}
+                        onChange={(v) => patchDiscount(d.id, { isActive: v })}
+                      />
+                      <UpliftSurface active width={28} height={28} className="tuw-danger-hover" style={{ flexShrink: 0, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                        <button
+                          type="button"
+                          aria-label="Remove discount"
+                          onClick={() => removeDiscount(d.id)}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, display: 'inline-flex' }}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </UpliftSurface>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                      <Input
+                        aria-label="Discount starts"
+                        type="date"
+                        value={d.startsAt}
+                        onChange={(e) => patchDiscount(d.id, { startsAt: e.target.value })}
+                        style={{ height: 36 }}
+                      />
+                      <Input
+                        aria-label="Discount ends"
+                        type="date"
+                        value={d.endsAt}
+                        onChange={(e) => patchDiscount(d.id, { endsAt: e.target.value })}
+                        style={{ height: 36 }}
+                      />
+                    </div>
+                  </SurfaceCard>
+                ))}
+                <div>
+                  <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={addDiscount}>
+                    Add Discount
+                  </Button>
+                </div>
+              </div>
+            </DrawerSection>
             <div>
               <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', marginBottom: 6 }}>
                 Publication Status
