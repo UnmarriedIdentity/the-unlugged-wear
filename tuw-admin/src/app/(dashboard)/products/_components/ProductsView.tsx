@@ -1267,6 +1267,7 @@ export default function ProductsView() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <ViewToggle
           ariaLabel="Gallery layout"
+          variant="labeled"
           options={[
             { value: 'grid', label: 'Grid', icon: <LayoutGrid size={16} /> },
             { value: 'carousel', label: 'Carousel', icon: <Images size={16} /> },
