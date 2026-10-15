@@ -3,13 +3,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive, GripVertical, Upload } from 'lucide-react';
+import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive, GripVertical, Upload, Images, Focus } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
 import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, Input, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection, Disclosure, Carousel } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 import { resolveVariants, variantStockTotal, buildVariantSku } from '@/mocks/variants';
-import type { ProductVariant, ProductAttribute } from '@/mocks/fixtures';
+import type { ProductVariant, ProductAttribute, PhotoSettings } from '@/mocks/fixtures';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
 
@@ -116,6 +116,7 @@ export default function ProductsView() {
     setFormStatus('published');
     setFormDescription('Pre-shrunk premium heavyweight combed cotton with reinforced seams.');
     setFormVideo('');
+    setFormPhoto({ layout: 'carousel', ratio: '4:3', showPhotos: true });
     setFormImages([]);
     setUploadReel((prev) => {
       if (prev) revokeUploads([{ url: prev.url }]);
@@ -137,6 +138,9 @@ export default function ProductsView() {
   // Drawer tab + media draft state (elastic workspace; tabs grow per phase)
   const [productTab, setProductTab] = useState<'general' | 'media' | 'variants' | 'specs' | 'seo'>('general');
   const [formVideo, setFormVideo] = useState('');
+  // Gallery presentation draft (P1a): PDP stage layout + ratio + visibility.
+  const [formPhoto, setFormPhoto] = useState<PhotoSettings>({ layout: 'carousel', ratio: '4:3', showPhotos: true });
+  const photoAspect = formPhoto.ratio === '1:1' ? '1 / 1' : formPhoto.ratio === '16:9' ? '16 / 9' : '4 / 3';
   // Gallery draft: persisted URL list + session-only upload previews.
   // Uploads preview instantly but never persist (blob URLs die on reload) —
   // the save toast states this demo truth outright.
@@ -576,6 +580,7 @@ export default function ProductsView() {
     preTableView.current = null;
     setStageIndex(0);
     setFormVideo(product.video || '');
+    setFormPhoto(product.photoSettings ?? { layout: 'carousel', ratio: '4:3', showPhotos: true });
     setFormImages(
       (product.images && product.images.length > 0
         ? product.images
@@ -653,6 +658,7 @@ export default function ProductsView() {
         description: formDescription,
         image: formImages[0]?.src || undefined,
         video: formVideo || undefined,
+        photoSettings: formPhoto,
         images: formImages.filter((im) => im.persisted).map((im) => im.src),
         attributes: formAttributes,
         imageBg: 'linear-gradient(135deg, #FAF3F7 0%, #EFE1EB 100%)',
@@ -719,6 +725,7 @@ export default function ProductsView() {
       taxRate: formTax.trim() !== '' && !isNaN(parseFloat(formTax)) ? parseFloat(formTax) : undefined,
       image: formImages[0]?.src || undefined,
       video: formVideo || undefined,
+      photoSettings: formPhoto,
       images: formImages.filter((im) => im.persisted).map((im) => im.src),
       variants: submitVariants,
       attributes: formAttributes,
@@ -980,10 +987,48 @@ export default function ProductsView() {
       </span>
     </div>
   );
-  const stageCarousel = gallerySlides.length > 0 ? (
+  const stageCarousel = !formPhoto.showPhotos ? (
+    <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', padding: '12px 0' }}>
+      Gallery hidden — shoppers see no photos until Show photos is on.
+    </div>
+  ) : gallerySlides.length > 0 && formPhoto.layout === 'grid' ? (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }} role="listbox" aria-label="Customer gallery grid preview">
+      {gallerySlides.map((s, i) => (
+        <button
+          key={`${s.type}-${s.src}-${i}`}
+          type="button"
+          role="option"
+          aria-selected={i === stageIndexClamped}
+          aria-label={`Preview asset ${i + 1} of ${gallerySlides.length}`}
+          onClick={() => setStageIndex(i)}
+          style={{
+            padding: 0,
+            borderRadius: 8,
+            overflow: 'hidden',
+            border: i === stageIndexClamped
+              ? '2px solid var(--tuw-action-primary, #7539FF)'
+              : '1px solid var(--tuw-border-subtle, #E5E7EB)',
+            backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)',
+            cursor: 'pointer',
+            aspectRatio: photoAspect,
+          }}
+        >
+          {s.type === 'video' ? (
+            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', fontSize: 10, fontWeight: 700, color: '#FFFFFF', backgroundColor: '#1A1A1A' }}>
+              REEL
+            </span>
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={s.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          )}
+        </button>
+      ))}
+    </div>
+  ) : gallerySlides.length > 0 ? (
     <Carousel
       ariaLabel="Customer gallery preview"
-      variant="filmstrip"
+      variant={formPhoto.layout === 'spotlight' ? 'dots' : 'filmstrip'}
+      aspect={photoAspect}
       slides={gallerySlides}
       index={stageIndexClamped}
       onIndexChange={setStageIndex}
@@ -1215,6 +1260,73 @@ export default function ProductsView() {
       onChange={(e) => setFormVideo(e.target.value)}
     />
   ) : null;
+  // Gallery presentation controls (P1a): layout toggle + ratio picker +
+  // visibility switch. The stage above reflects every choice live.
+  const presentationSection = (
+    <DrawerSection title="Presentation" titleGap={10}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <ViewToggle
+          ariaLabel="Gallery layout"
+          options={[
+            { value: 'grid', label: 'Grid', icon: <LayoutGrid size={16} /> },
+            { value: 'carousel', label: 'Carousel', icon: <Images size={16} /> },
+            { value: 'spotlight', label: 'Spotlight', icon: <Focus size={16} /> },
+          ]}
+          value={formPhoto.layout}
+          onChange={(v) => setFormPhoto((prev) => ({ ...prev, layout: v as PhotoSettings['layout'] }))}
+        />
+        <DropdownMenu
+          ariaLabel="Gallery aspect ratio"
+          trigger={
+            <span
+              role="button"
+              tabIndex={0}
+              aria-label={`Gallery ratio, currently ${formPhoto.ratio}`}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 8,
+                width: '100%',
+                height: 40,
+                padding: '0 12px',
+                fontSize: 13,
+                fontWeight: 500,
+                fontFamily: 'var(--font-main)',
+                borderRadius: 8,
+                border: '1px solid var(--tuw-border-control, #D1D5DB)',
+                backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
+                color: 'var(--tuw-text-primary, #262626)',
+                cursor: 'pointer',
+                userSelect: 'none',
+              }}
+            >
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                Ratio {formPhoto.ratio}
+              </span>
+              <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
+            </span>
+          }
+          items={[
+            { value: '1:1', label: 'Square 1:1' },
+            { value: '4:3', label: 'Classic 4:3' },
+            { value: '16:9', label: 'Wide 16:9' },
+          ]}
+          selectedValue={formPhoto.ratio}
+          onSelect={(v) => setFormPhoto((prev) => ({ ...prev, ratio: v as PhotoSettings['ratio'] }))}
+        />
+        <Switch
+          label="Show photos on storefront"
+          description="Hidden galleries keep their assets in the draft"
+          checked={formPhoto.showPhotos}
+          onChange={(v) => setFormPhoto((prev) => ({ ...prev, showPhotos: v }))}
+        />
+      </div>
+    </DrawerSection>
+  );
   const addUrlRow = (
     <div style={{ display: 'flex', gap: 8 }}>
       <div style={{ flex: 1 }}>
@@ -2024,7 +2136,7 @@ export default function ProductsView() {
             <div style={{ display: 'grid', gridTemplateColumns: '9fr 11fr', gap: 20, alignItems: 'start' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0 }}>
                 {stageHeader}
-                <Carousel ariaLabel="Customer gallery preview" variant="filmstrip" slides={gallerySlides} index={stageIndexClamped} onIndexChange={setStageIndex} />
+                {stageCarousel}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
                 {panelHeader}
@@ -2032,17 +2144,19 @@ export default function ProductsView() {
                 {addUrlRow}
                 {dropzone}
                 {reelUrlField}
+                {presentationSection}
               </div>
             </div>
             ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {stageHeader}
-              <Carousel ariaLabel="Customer gallery preview" variant="filmstrip" slides={gallerySlides} index={stageIndexClamped} onIndexChange={setStageIndex} />
+              {stageCarousel}
               {panelHeader}
               {mediaCards ? assetCards : assetRows}
               {addUrlRow}
               {dropzone}
               {reelUrlField}
+              {presentationSection}
             </div>
             )}
             <input

@@ -43,6 +43,17 @@ export interface ProductItem {
   monogram?: { enabled: boolean; maxChars: number; upcharge: number };
   seoTitle?: string;
   seoDescription?: string;
+  /** Gallery presentation (P1a): layout + ratio + visibility for the PDP
+   * stage. Optional — absent means the drawer defaults (carousel/4:3/on). */
+  photoSettings?: PhotoSettings;
+}
+
+/** Per-product gallery presentation. Mirrors the DB photo_settings intent
+ * (see DOC/backend/04-Catalog.md) in drawer-draft shape. */
+export interface PhotoSettings {
+  layout: 'grid' | 'carousel' | 'spotlight';
+  ratio: '1:1' | '4:3' | '16:9';
+  showPhotos: boolean;
 }
 
 /** Per-size/color inventory unit. Prices follow ProductItem.price convention
