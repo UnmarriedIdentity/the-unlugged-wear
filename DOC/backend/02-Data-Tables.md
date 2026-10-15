@@ -1,7 +1,7 @@
 # Data Tables — Full Inventory (single PostgreSQL)
 
 > Status: Filling | Last Updated: 2026-10-15
-> 59 tables + 1 deferred footnote. Column detail lives in files 03–10 and
+> 60 tables + 1 deferred footnote (`search_documents`). Column detail lives in files 03–10 and
 > 15; this file is the index, ending with the full relationship diagram.
 > Conventions (UUIDv7, money, indexes): `01-Conventions.md`.
 
@@ -31,13 +31,13 @@
 The single-URL gate reads `users → user_roles → roles.slug`
 (see `14-Single-URL-Gating.md`).
 
-## Catalog (15) → detail: `04-Catalog.md`
+## Catalog (16) → detail: `04-Catalog.md`
 
 | Table | Purpose | Key links |
 |---|---|---|
 | categories | Tree (`parent_id` self-FK), nav flags, slug, tsvector | self |
 | brands | **Defined but unbuilt in v1** — no seed, no UI (see footnote) | — |
-| products | Core row: sku/slug unique, price/compare, stock balance, status, tags, `attributes` jsonb, `photo_settings` jsonb, source/external import ids, soft-delete, tsvector | categories, brands (nullable) |
+| products | Core row: sku/slug unique, price/compare, stock balance, status, tags, `attributes` jsonb, `photo_settings` jsonb, source/external import ids, soft-delete, tsvector | categories, brands (nullable), size_charts (nullable) |
 | product_variants | SKU-unique rows, price/stock override, active flag | products (cascade) |
 | product_images | Gallery order, one-primary partial unique, optional variant scope | products, variants |
 | product_options | Per-product definitions incl. `display_type` + `visible_on` (pill/swatch/radio; pdp/checkout/admin) | products |
@@ -50,6 +50,7 @@ The single-URL gate reads `users → user_roles → roles.slug`
 | reviews | Optional; approval queue | products, users |
 | collections | Storefront collection pages (name/slug/season/visibility) | — |
 | collection_products | Junction, composite PK (collection, product) + position | collections, products |
+| size_charts | Measurement sets by garment type (`rows` jsonb — columns vary: shirts need shoulder/sleeve, skirts waist/hip); linked from products | — |
 
 Footnote — brands: table ships in the DDL from day one with
 `products.brand_id` nullable, but v1 builds no seed, no UI, no queries.
@@ -155,6 +156,7 @@ erDiagram
     products ||--o{ reviews : rated-by
     products ||--o{ collection_products : collected-in
     collections ||--o{ collection_products : groups
+    size_charts ||--o{ products : sizes
     carts ||--o{ cart_items : contains
     products ||--o{ cart_items : references
     wishlists ||--o{ wishlist_items : saves
