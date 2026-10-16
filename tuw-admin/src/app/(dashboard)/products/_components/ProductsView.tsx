@@ -376,21 +376,30 @@ export default function ProductsView() {
   const addAttrValue = (name: string) => {
     const v = (attrDrafts[name] ?? '').trim();
     if (!v) return;
-    const attr = formAttributes.find((a) => a.name === name);
-    if (!attr) return;
-    if (attr.values.some((x) => x.toLowerCase() === v.toLowerCase())) {
-      showToast({ type: 'warning', title: 'Duplicate Value', description: `"${v}" is already a ${name} value.` });
-      return;
+    if (commitAttrValue(name, v)) {
+      setAttrDrafts((prev) => ({ ...prev, [name]: '' }));
     }
-    const next = formAttributes.map((a) => (a.name === name ? { ...a, values: [...a.values, v] } : a));
+  };
+  // Core value commit (VALPICK): dup guard + append + register-through +
+  // matrix rebuild. Picker and text input share it — one path, no drift.
+  const commitAttrValue = (name: string, v: string): boolean => {
+    const value = v.trim();
+    if (!value) return false;
+    const attr = formAttributes.find((a) => a.name === name);
+    if (!attr) return false;
+    if (attr.values.some((x) => x.toLowerCase() === value.toLowerCase())) {
+      showToast({ type: 'warning', title: 'Duplicate Value', description: `"${value}" is already a ${name} value.` });
+      return false;
+    }
+    const next = formAttributes.map((a) => (a.name === name ? { ...a, values: [...a.values, value] } : a));
     setFormAttributes(next);
-    setAttrDrafts((prev) => ({ ...prev, [name]: '' }));
     // N1a register-through: new drawer values join the linked library row.
-    if (attr.libraryId) addLibraryValue(attr.libraryId, v);
+    if (attr.libraryId) addLibraryValue(attr.libraryId, value);
     if (name === 'Color' || name === 'Size') {
       const { colors, sizes } = colorsSizesOf(next);
       rebuildMatrix(colors, sizes, parseFloat(formPrice) || 0, editingProduct?.id ?? 'PRD');
     }
+    return true;
   };
   const removeAttrValue = (name: string, value: string) => {
     const next = formAttributes.map((a) =>
@@ -661,6 +670,61 @@ export default function ProductsView() {
           No values yet — add the first one below.
         </div>
       )}
+      {/* Picker-first entry (VALPICK): known values for this attribute
+          (library row ∪ card, deduped) one click away; the text input
+          below stays for genuinely new values. Hidden when nothing new. */}
+      {(() => {
+        const lib = libraryAttributes.find((l) => l.id === attr.libraryId);
+        const known = [...new Set([...(lib?.values ?? []), ...attr.values])];
+        const missing = known.filter(
+          (v) => !attr.values.some((x) => x.toLowerCase() === v.toLowerCase())
+        );
+        if (missing.length === 0) return null;
+        return (
+          <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ flex: 1 }}>
+              <DropdownMenu
+                ariaLabel={`Pick known ${attr.name} value`}
+                trigger={
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Pick a known ${attr.name} value, ${missing.length} available`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 8,
+                      width: '100%',
+                      height: 40,
+                      padding: '0 12px',
+                      fontSize: 13,
+                      fontWeight: 500,
+                      fontFamily: 'var(--font-main)',
+                      borderRadius: 8,
+                      border: '1px dashed var(--tuw-border-control, #D1D5DB)',
+                      backgroundColor: 'transparent',
+                      color: 'var(--tuw-text-secondary, #5D6772)',
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                    }}
+                  >
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      Pick known value… ({missing.length})
+                    </span>
+                    <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
+                  </span>
+                }
+                items={missing.map((v) => ({ value: v, label: v }))}
+                onSelect={(v) => commitAttrValue(attr.name, v)}
+              />
+            </div>
+          </div>
+        );
+      })()}
       <div style={{ display: 'flex', gap: 8 }}>
         <div style={{ flex: 1 }}>
           <Input
