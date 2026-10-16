@@ -87,7 +87,7 @@ interface AdminStateContextType {
 
   createOrder: (order: Omit<OrderItem, 'id' | 'date' | 'timeline' | 'paidAmount' | 'refundedAmount'>) => boolean;
   updateOrderStatus: (orderId: string, paymentStatus?: OrderItem['paymentStatus'], fulfillmentStatus?: OrderItem['fulfillmentStatus'], silent?: boolean) => boolean;
-  retryFulfillment: (orderId: string) => Promise<boolean>;
+  retryFulfillment: (orderId: string, silent?: boolean) => Promise<boolean>;
 
   createShipment: (shipment: Omit<ShipmentItem, 'dispatchDate' | 'events'>) => boolean;
 
@@ -463,14 +463,16 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     return true;
   };
 
-  const retryFulfillment = async (orderId: string): Promise<boolean> => {
+  const retryFulfillment = async (orderId: string, silent = false): Promise<boolean> => {
     if (!canPerformAction('fulfillment')) return false;
     // Simulate network delay
-    showToast({
-      type: 'info',
-      title: 'Retrying Partner API Webhook',
-      description: `Submitting order ${orderId} payload to print hub...`,
-    });
+    if (!silent) {
+      showToast({
+        type: 'info',
+        title: 'Retrying Partner API Webhook',
+        description: `Submitting order ${orderId} payload to print hub...`,
+      });
+    }
     await new Promise((r) => setTimeout(r, 900));
 
     const next = orders.map((o) => {
@@ -492,11 +494,13 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     });
     setOrders(next);
     persistState({ orders: next });
-    showToast({
-      type: 'success',
-      title: 'Fulfillment Retry Succeeded',
-      description: `Order ${orderId} moved from submission_failed to printing queue.`,
-    });
+    if (!silent) {
+      showToast({
+        type: 'success',
+        title: 'Fulfillment Retry Succeeded',
+        description: `Order ${orderId} moved from submission_failed to printing queue.`,
+      });
+    }
     return true;
   };
 

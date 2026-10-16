@@ -2,15 +2,85 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Modal, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Modal, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader, Checkbox } from '@/components/ui';
 import { PackageCheck, Truck, RotateCcw, AlertTriangle, Printer, CheckCircle2, Clock } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { OrderItem } from '@/mocks/fixtures';
 
 export default function FulfillmentPage() {
-  const { orders, retryFulfillment, updateOrderStatus, canPerformAction } = useAdminState();
+  const { orders, retryFulfillment, updateOrderStatus, canPerformAction, showToast } = useAdminState();
   const [retryingId, setRetryingId] = useState<string | null>(null);
   const [selectedIssueOrder, setSelectedIssueOrder] = useState<OrderItem | null>(null);
+
+  // Per-card bulk selection (FUL2): each queue owns its scope — Retry,
+  // Dispatch, and Release never mix. Sets survive pagination.
+  const [failedSel, setFailedSel] = useState<Set<string>>(new Set());
+  const [printingSel, setPrintingSel] = useState<Set<string>>(new Set());
+  const [queuedSel, setQueuedSel] = useState<Set<string>>(new Set());
+  const [bulkBusy, setBulkBusy] = useState<'failed' | 'printing' | 'queued' | null>(null);
+  const [retryProgress, setRetryProgress] = useState<{ done: number; total: number } | null>(null);
+
+  const toggleSelected = (setter: React.Dispatch<React.SetStateAction<Set<string>>>, id: string) => {
+    setter((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+  const selectAllIn = (setter: React.Dispatch<React.SetStateAction<Set<string>>>, ids: string[], on: boolean) => {
+    setter((prev) => {
+      const next = new Set(prev);
+      ids.forEach((id) => {
+        if (on) next.add(id);
+        else next.delete(id);
+      });
+      return next;
+    });
+  };
+
+  const handleBulkRetry = async () => {
+    if (!canPerformAction('fulfillment') || failedSel.size === 0 || bulkBusy) return;
+    const ids = [...failedSel];
+    setBulkBusy('failed');
+    setRetryProgress({ done: 0, total: ids.length });
+    let ok = 0;
+    for (const id of ids) {
+      const done = await retryFulfillment(id, true);
+      if (done) ok++;
+      setRetryProgress({ done: ok, total: ids.length });
+    }
+    setBulkBusy(null);
+    setRetryProgress(null);
+    setFailedSel(new Set());
+    showToast({
+      type: ok === ids.length ? 'success' : 'warning',
+      title: 'Bulk Retry Complete',
+      description: `${ok} of ${ids.length} orders retried to the print floor.`,
+    });
+  };
+  const handleBulkDispatch = () => {
+    if (!canPerformAction('fulfillment') || printingSel.size === 0 || bulkBusy) return;
+    const ids = [...printingSel];
+    ids.forEach((id) => updateOrderStatus(id, undefined, 'shipped', true));
+    setPrintingSel(new Set());
+    showToast({
+      type: 'success',
+      title: 'Bulk Dispatch Complete',
+      description: `${ids.length} order${ids.length === 1 ? '' : 's'} marked shipped.`,
+    });
+  };
+  const handleBulkRelease = () => {
+    if (!canPerformAction('fulfillment') || queuedSel.size === 0 || bulkBusy) return;
+    const ids = [...queuedSel];
+    ids.forEach((id) => updateOrderStatus(id, undefined, 'printing', true));
+    setQueuedSel(new Set());
+    showToast({
+      type: 'success',
+      title: 'Batch Released',
+      description: `${ids.length} order${ids.length === 1 ? '' : 's'} released to the print floor.`,
+    });
+  };
 
   // Group orders by fulfillment status
   const failedOrders = orders.filter((o) => o.fulfillmentStatus === 'submission_failed');
@@ -98,16 +168,61 @@ export default function FulfillmentPage() {
 
           <Table>
             <TableHeader style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
+              {failedSel.size > 0 ? (
               <TableRow hoverable={false}>
+                <TableCell colSpan={5} style={{ padding: '6px 16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                    <Checkbox
+                      bare
+                      aria-label="Select all failed orders"
+                      checked={failedOrders.length > 0 && failedOrders.every((o) => failedSel.has(o.id))}
+                      indeterminate={failedSel.size > 0 && !failedOrders.every((o) => failedSel.has(o.id))}
+                      onChange={() => selectAllIn(setFailedSel, failedOrders.map((o) => o.id), !failedOrders.every((o) => failedSel.has(o.id)))}
+                    />
+                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                      {failedSel.size} selected
+                    </span>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      icon={<RotateCcw size={14} />}
+                      disabled={bulkBusy === 'failed'}
+                      onClick={handleBulkRetry}
+                    >
+                      {bulkBusy === 'failed' && retryProgress ? `Retrying ${retryProgress.done}/${retryProgress.total}…` : 'Retry Selected'}
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+              ) : (
+              <TableRow hoverable={false}>
+                <TableHead style={{ padding: '10px 14px', width: 44 }}>
+                  <Checkbox
+                    bare
+                    aria-label="Select all failed orders"
+                    checked={failedOrders.length > 0 && failedOrders.every((o) => failedSel.has(o.id))}
+                    indeterminate={failedSel.size > 0 && !failedOrders.every((o) => failedSel.has(o.id))}
+                    onChange={() => selectAllIn(setFailedSel, failedOrders.map((o) => o.id), !failedOrders.every((o) => failedSel.has(o.id)))}
+                  />
+                </TableHead>
                 <TableHead style={{ padding: '10px 14px' }}>Order</TableHead>
                 <TableHead style={{ padding: '10px 14px' }}>Customer</TableHead>
                 <TableHead style={{ padding: '10px 14px' }}>Exception Details</TableHead>
                 <TableHead style={{ padding: '10px 14px', textAlign: 'right' }}>Action</TableHead>
               </TableRow>
+              )}
             </TableHeader>
             <TableBody>
               {failedOrders.map((order) => (
                 <TableRow key={order.id} hoverable={false} style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
+                  <TableCell style={{ padding: '12px 14px', width: 44 }}>
+                    <Checkbox
+                      bare
+                      aria-label={`Select order ${order.id}`}
+                      checked={failedSel.has(order.id)}
+                      onChange={() => toggleSelected(setFailedSel, order.id)}
+                    />
+                  </TableCell>
                   <TableCell style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)' }}>
                     {order.id}
                   </TableCell>
@@ -160,16 +275,61 @@ export default function FulfillmentPage() {
         ) : (
           <Table>
             <TableHeader style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
+              {printingSel.size > 0 ? (
               <TableRow hoverable={false}>
+                <TableCell colSpan={5} style={{ padding: '6px 16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                    <Checkbox
+                      bare
+                      aria-label="Select printing orders on this page"
+                      checked={paginatedPrintingOrders.length > 0 && paginatedPrintingOrders.every((o) => printingSel.has(o.id))}
+                      indeterminate={printingSel.size > 0 && !paginatedPrintingOrders.every((o) => printingSel.has(o.id))}
+                      onChange={() => selectAllIn(setPrintingSel, paginatedPrintingOrders.map((o) => o.id), !paginatedPrintingOrders.every((o) => printingSel.has(o.id)))}
+                    />
+                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                      {printingSel.size} selected
+                    </span>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      icon={<CheckCircle2 size={14} />}
+                      disabled={bulkBusy === 'printing'}
+                      onClick={handleBulkDispatch}
+                    >
+                      Dispatch Selected
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+              ) : (
+              <TableRow hoverable={false}>
+                <TableHead style={{ padding: '10px 14px', width: 44 }}>
+                  <Checkbox
+                    bare
+                    aria-label="Select printing orders on this page"
+                    checked={paginatedPrintingOrders.length > 0 && paginatedPrintingOrders.every((o) => printingSel.has(o.id))}
+                    indeterminate={printingSel.size > 0 && !paginatedPrintingOrders.every((o) => printingSel.has(o.id))}
+                    onChange={() => selectAllIn(setPrintingSel, paginatedPrintingOrders.map((o) => o.id), !paginatedPrintingOrders.every((o) => printingSel.has(o.id)))}
+                  />
+                </TableHead>
                 <TableHead style={{ padding: '10px 14px' }}>Order</TableHead>
                 <TableHead style={{ padding: '10px 14px' }}>Garment Items</TableHead>
                 <TableHead style={{ padding: '10px 14px' }}>Routing Partner</TableHead>
                 <TableHead style={{ padding: '10px 14px', textAlign: 'right' }}>Floor Action</TableHead>
               </TableRow>
+              )}
             </TableHeader>
             <TableBody>
               {paginatedPrintingOrders.map((order) => (
                 <TableRow key={order.id} hoverable={false} style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
+                  <TableCell style={{ padding: '12px 14px', width: 44 }}>
+                    <Checkbox
+                      bare
+                      aria-label={`Select order ${order.id}`}
+                      checked={printingSel.has(order.id)}
+                      onChange={() => toggleSelected(setPrintingSel, order.id)}
+                    />
+                  </TableCell>
                   <TableCell style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)' }}>
                     {order.id}
                   </TableCell>
@@ -231,16 +391,61 @@ export default function FulfillmentPage() {
 
         <Table>
           <TableHeader style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
+            {queuedSel.size > 0 ? (
             <TableRow hoverable={false}>
+              <TableCell colSpan={5} style={{ padding: '6px 16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                  <Checkbox
+                    bare
+                    aria-label="Select queued orders on this page"
+                    checked={paginatedQueuedOrders.length > 0 && paginatedQueuedOrders.every((o) => queuedSel.has(o.id))}
+                    indeterminate={queuedSel.size > 0 && !paginatedQueuedOrders.every((o) => queuedSel.has(o.id))}
+                    onChange={() => selectAllIn(setQueuedSel, paginatedQueuedOrders.map((o) => o.id), !paginatedQueuedOrders.every((o) => queuedSel.has(o.id)))}
+                  />
+                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                    {queuedSel.size} selected
+                  </span>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    icon={<Printer size={14} />}
+                    disabled={bulkBusy === 'queued'}
+                    onClick={handleBulkRelease}
+                  >
+                    Release Selected
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+            ) : (
+            <TableRow hoverable={false}>
+              <TableHead style={{ padding: '10px 14px', width: 44 }}>
+                <Checkbox
+                  bare
+                  aria-label="Select queued orders on this page"
+                  checked={paginatedQueuedOrders.length > 0 && paginatedQueuedOrders.every((o) => queuedSel.has(o.id))}
+                  indeterminate={queuedSel.size > 0 && !paginatedQueuedOrders.every((o) => queuedSel.has(o.id))}
+                  onChange={() => selectAllIn(setQueuedSel, paginatedQueuedOrders.map((o) => o.id), !paginatedQueuedOrders.every((o) => queuedSel.has(o.id)))}
+                />
+              </TableHead>
               <TableHead style={{ padding: '10px 14px' }}>Order</TableHead>
               <TableHead style={{ padding: '10px 14px' }}>Customer</TableHead>
               <TableHead style={{ padding: '10px 14px' }}>Payment Status</TableHead>
               <TableHead style={{ padding: '10px 14px', textAlign: 'right' }}>Batch Action</TableHead>
             </TableRow>
+            )}
           </TableHeader>
           <TableBody>
             {paginatedQueuedOrders.map((order) => (
               <TableRow key={order.id} hoverable={false} style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
+                <TableCell style={{ padding: '12px 14px', width: 44 }}>
+                  <Checkbox
+                    bare
+                    aria-label={`Select order ${order.id}`}
+                    checked={queuedSel.has(order.id)}
+                    onChange={() => toggleSelected(setQueuedSel, order.id)}
+                  />
+                </TableCell>
                 <TableCell style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)' }}>
                   {order.id}
                 </TableCell>
