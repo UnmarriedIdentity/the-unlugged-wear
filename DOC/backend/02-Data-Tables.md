@@ -1,7 +1,7 @@
 # Data Tables — Full Inventory (single PostgreSQL)
 
 > Status: Filling | Last Updated: 2026-10-15
-> 60 tables + 1 deferred footnote (`search_documents`). Column detail lives in files 03–10 and
+> 62 tables + 1 deferred footnote (`search_documents`). Column detail lives in files 03–10 and
 > 15; this file is the index, ending with the full relationship diagram.
 > Conventions (UUIDv7, money, indexes): `01-Conventions.md`.
 
@@ -116,6 +116,13 @@ Monthly partitions; raw events drop >30d, rollups kept forever.
 | support_messages | Normalized replies with sender + timestamp | support_tickets |
 | notifications | In-app bell: kind/title/body/link, read_at (email stays in `email_logs`) | users |
 
+## Partner seam (2) → detail: `16-Partner-Qikink.md`
+
+| Table | Purpose | Key links |
+|---|---|---|
+| partner_orders | Our order ↔ Qikink order/AWB/courier/status/raw/synced_at — one per order (unique) | orders |
+| partner_wallet_ledger | Credit debit/refund per order (Rs.1=1 trail) | orders |
+
 ## Deferred, not dropped
 
 - `search_documents` — `tsvector` + GIN on products/categories covers v1;
@@ -169,5 +176,7 @@ erDiagram
     orders ||--o{ shipments : ships
     discount_codes ||--o{ orders : applied-to
     support_tickets ||--o{ support_messages : threads
+    orders ||--o{ partner_orders : synced-to
+    orders ||--o{ partner_wallet_ledger : debits
     import_jobs ||--o{ products : creates
 ```

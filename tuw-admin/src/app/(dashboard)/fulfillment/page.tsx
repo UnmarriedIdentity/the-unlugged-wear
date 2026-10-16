@@ -55,8 +55,8 @@ export default function FulfillmentPage() {
     setFailedSel(new Set());
     showToast({
       type: ok === ids.length ? 'success' : 'warning',
-      title: 'Bulk Retry Complete',
-      description: `${ok} of ${ids.length} orders retried to the print floor.`,
+      title: 'Bulk Resubmission Complete',
+      description: `${ok} of ${ids.length} orders resubmitted to Qikink.`,
     });
   };
   const handleBulkDispatch = () => {
@@ -67,7 +67,7 @@ export default function FulfillmentPage() {
     showToast({
       type: 'success',
       title: 'Bulk Dispatch Complete',
-      description: `${ids.length} order${ids.length === 1 ? '' : 's'} marked shipped.`,
+      description: `${ids.length} order${ids.length === 1 ? '' : 's'} marked shipped from partner sync.`,
     });
   };
   const handleBulkRelease = () => {
@@ -77,8 +77,8 @@ export default function FulfillmentPage() {
     setQueuedSel(new Set());
     showToast({
       type: 'success',
-      title: 'Batch Released',
-      description: `${ids.length} order${ids.length === 1 ? '' : 's'} released to the print floor.`,
+      title: 'Batch Submitted',
+      description: `${ids.length} order${ids.length === 1 ? '' : 's'} submitted to Qikink for printing.`,
     });
   };
 
@@ -119,6 +119,13 @@ export default function FulfillmentPage() {
 
       {/* Live Metric Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
+        <StatCard
+          label="Wallet Credits"
+          value="₹12,500"
+          subtitle="Rs.1 = 1 credit · demo balance, live wallet connects at backend"
+          trendType="neutral"
+          hoverable
+        />
         <StatCard
           label="Submission Failed"
           value={String(failedOrders.length)}
@@ -189,7 +196,7 @@ export default function FulfillmentPage() {
                       disabled={bulkBusy === 'failed'}
                       onClick={handleBulkRetry}
                     >
-                      {bulkBusy === 'failed' && retryProgress ? `Retrying ${retryProgress.done}/${retryProgress.total}…` : 'Retry Selected'}
+                      {bulkBusy === 'failed' && retryProgress ? `Resubmitting ${retryProgress.done}/${retryProgress.total}…` : 'Resubmit Selected'}
                     </Button>
                   </div>
                 </TableCell>
@@ -277,7 +284,7 @@ export default function FulfillmentPage() {
             <TableHeader style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
               {printingSel.size > 0 ? (
               <TableRow hoverable={false}>
-                <TableCell colSpan={5} style={{ padding: '6px 16px' }}>
+                <TableCell colSpan={6} style={{ padding: '6px 16px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                     <Checkbox
                       bare
@@ -315,6 +322,7 @@ export default function FulfillmentPage() {
                 <TableHead style={{ padding: '10px 14px' }}>Order</TableHead>
                 <TableHead style={{ padding: '10px 14px' }}>Garment Items</TableHead>
                 <TableHead style={{ padding: '10px 14px' }}>Routing Partner</TableHead>
+                <TableHead style={{ padding: '10px 14px' }}>Partner AWB</TableHead>
                 <TableHead style={{ padding: '10px 14px', textAlign: 'right' }}>Floor Action</TableHead>
               </TableRow>
               )}
@@ -342,6 +350,9 @@ export default function FulfillmentPage() {
                   </TableCell>
                   <TableCell style={{ padding: '12px 14px' }}>
                     <Badge variant="warning">Printing (In Progress)</Badge>
+                  </TableCell>
+                  <TableCell style={{ padding: '12px 14px', fontSize: 13, fontFamily: 'monospace', color: order.trackingNumber ? 'var(--tuw-text-primary, #262626)' : 'var(--tuw-text-secondary, #5D6772)' }}>
+                    {order.trackingNumber ?? 'Sync pending'}
                   </TableCell>
                   <TableCell style={{ padding: '12px 14px', textAlign: 'right' }}>
                     <Button
@@ -412,7 +423,7 @@ export default function FulfillmentPage() {
                     disabled={bulkBusy === 'queued'}
                     onClick={handleBulkRelease}
                   >
-                    Release Selected
+                    Submit Selected to Qikink
                   </Button>
                 </div>
               </TableCell>
@@ -468,7 +479,7 @@ export default function FulfillmentPage() {
                       }
                     }}
                   >
-                    Release to Print Floor
+                    Submit to Qikink
                   </Button>
                 </TableCell>
               </TableRow>

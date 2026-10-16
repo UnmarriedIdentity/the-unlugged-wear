@@ -26,7 +26,7 @@ constraints, not application-code promises — and one migration history. Primar
 merge-safe). Depth: `12-UI-Merge-Single-Deploy.md`, `13-API-Contracts.md`,
 `14-Single-URL-Gating.md`.
 
-## 3. Data at a glance (60 tables, one Postgres)
+## 3. Data at a glance (62 tables, one Postgres)
 
 | Domain | Tables | Notes |
 |---|---|---|
@@ -38,6 +38,7 @@ merge-safe). Depth: `12-UI-Merge-Single-Deploy.md`, `13-API-Contracts.md`,
 | CMS (jsonb, no Mongo) | cms_sections, cms_settings, navigation_settings, pages, blogs, blog_categories, media, store_settings | Whole-document reads; app-layer Zod validation |
 | Analytics (partitioned) | page_views, sessions, cart_events, abandoned_carts, daily_stats, product_views, search_terms | Monthly partitions; raw events drop >30d, rollups kept |
 | Operations | support_tickets, support_messages, notifications | Threads + staff replies; in-app bell (email stays in logs) |
+| Partner seam | partner_orders, partner_wallet_ledger | Qikink sync + wallet trail (file 16) |
 
 Search has **no table** in v1 — `tsvector` + GIN on products/categories
 covers it. Full inventory: `02-Data-Tables.md`.
