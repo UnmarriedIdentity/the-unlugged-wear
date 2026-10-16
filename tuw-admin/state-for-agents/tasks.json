@@ -15,8 +15,8 @@
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "863475a",
-    "unpushed": ["863475a", "81b2c28", "c135635", "e2d3980", "59ccd5d", "410afd4", "29789c3"],
+    "tip": "70bd69a",
+    "unpushed": ["70bd69a", "863475a", "81b2c28", "c135635", "e2d3980", "59ccd5d", "410afd4", "29789c3"],
     "next_up": "Fulfillment Phase 2 per-card bulk bars; DW2 drawer verification pass; anim-probe re-run; browser verification backlog",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
@@ -2033,7 +2033,7 @@
       "owner": "agent",
       "started": "2026-10-16",
       "finished": "2026-10-16",
-      "log": "feat/search-modal: 863475a libraryId + open-link + register + link picker + Linked badge (values stay strings until A2)",
+      "log": "feat/search-modal: 863475a links + 70bd69a legacy-row linking (fallback LIB ids, name-fallback guard)",
       "design_match": "yes",
       "key_decisions": ["reference not copy; value spellings may repeat, definitions don't; seam returns id"],
       "verified": true,
