@@ -11,7 +11,10 @@ CREATE TABLE partner_orders (
   qikink_order_id varchar(100),
   awb             varchar(100),
   courier         varchar(100),
-  partner_status  varchar(50),
+  partner_status  varchar(30) CHECK (partner_status IS NULL OR partner_status IN
+    ('On Hold','Live OOS','Live','To be Printed','Partially Picklisted',
+     'Printed','Manifested','In-Transit','Exception','Delivered',
+     'RTO Initiated','Returned','Cancelled')),
   raw_payload     jsonb        NOT NULL DEFAULT '{}',
   synced_at       timestamptz,
   created_at      timestamptz  NOT NULL DEFAULT now(),

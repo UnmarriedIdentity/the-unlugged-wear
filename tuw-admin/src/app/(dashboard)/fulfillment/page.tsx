@@ -141,7 +141,7 @@ export default function FulfillmentPage() {
           hoverable
         />
         <StatCard
-          label="Queued in Warehouse"
+          label="Awaiting Submission"
           value={String(queuedOrders.length)}
           subtitle="Awaiting allocation"
           trendType="neutral"
@@ -392,7 +392,7 @@ export default function FulfillmentPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <Clock size={20} color="var(--tuw-text-secondary, #5D6772)" />
             <h3 style={{ fontSize: 16, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', margin: 0 }}>
-              Warehouse Queue ({queuedOrders.length})
+              Submission Queue ({queuedOrders.length})
             </h3>
           </div>
           <span style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>

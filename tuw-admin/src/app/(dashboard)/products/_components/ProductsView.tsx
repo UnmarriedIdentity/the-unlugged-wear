@@ -2189,7 +2189,7 @@ export default function ProductsView() {
             </DrawerSection>
             <Disclosure
               title="Internal fields"
-              subtitle="Warehouse-facing data: weights, dimensions, print placements. Hidden from shoppers."
+              subtitle="Internal data: weights, dimensions, print placements. Hidden from shoppers."
               badge={<Badge variant="neutral" size="sm">{[formWeight, formShipWeight, formDims, formGender].filter(Boolean).length + formAttributes.filter((a) => a.name === 'Placements').reduce((n, a) => n + a.values.length, 0)} filled</Badge>}
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>

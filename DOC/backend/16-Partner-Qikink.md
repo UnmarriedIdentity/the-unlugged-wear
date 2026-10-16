@@ -50,9 +50,26 @@ availability renders from `is_active`. Edit/cancel supported pre-print.
 AWB + courier + status stored on `partner_orders` (`synced_at` per row);
 `shipments.tracking_number` carries the AWB (no new column needed).
 Strategy is **poll + AWB store** until sandbox proves webhook push —
-polling is the cheaper assumption to be wrong about. Shipment statuses
-to map: Manifested, Pickup Scheduled/Error, In Transit, Out for
-Delivery, Delivered, RTO.
+polling is the cheaper assumption to be wrong about. Per-row **Sync now**
+button in admin is the honest manual fallback from day one.
+
+## Qikink → ours status map (CHECK-enforced on `partner_orders`)
+
+| Qikink status | Our mirror | Side effect |
+|---|---|---|
+| On Hold | `queued` (held) | wallet warning fires (insufficient credits) |
+| Live OOS | `queued` (held) | partner-stock flag; surfaces availability |
+| Live | `printing` | — |
+| To be Printed | `printing` | — |
+| Partially Picklisted | `printing` | — |
+| Printed | `printing` | — |
+| Manifested | `printing` | — |
+| In-Transit | `shipped` | AWB → `shipments.tracking_number` |
+| Exception | `submission_failed` | resubmit path |
+| Delivered | `delivered` | — |
+| RTO Initiated | — | triggers returns flow (RMA, not a status) |
+| Returned | — | triggers returns flow |
+| Cancelled | our order `cancelled` | only from Live OOS / Live per their rules |
 
 ## Tables (detail in file 02; DDL in migration sequence)
 

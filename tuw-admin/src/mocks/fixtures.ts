@@ -474,7 +474,7 @@ export const initialOrders: OrderItem[] = [
     timeline: [
       { title: 'Order Placed', time: '16 Apr, 14:32', note: 'Customer completed checkout via Visa' },
       { title: 'Payment Captured', time: '16 Apr, 14:33', note: 'Stripe webhook verified settlement' },
-      { title: 'Fulfillment Queued', time: '16 Apr, 14:40', note: 'Sent to warehouse batch printer' },
+      { title: 'Fulfillment Queued', time: '16 Apr, 14:40', note: 'Submitted to Qikink, awaiting print' },
       { title: 'Dispatched via DHL', time: '16 Apr, 16:10', note: 'Tracking # DHL-489102834 generated' },
     ],
   },
@@ -690,7 +690,7 @@ export const initialOrders: OrderItem[] = [
     paymentMethod: 'Credit Card (Visa)',
     date: '16 Apr 2026, 09:50',
     timeline: [
-      { title: 'In Queue', time: '16 Apr, 09:50', note: 'Allocated warehouse stock slot' },
+      { title: 'In Queue', time: '16 Apr, 09:50', note: 'Qikink confirmed receipt' },
     ],
   },
   {
