@@ -48,10 +48,10 @@ The single-URL gate reads `users → user_roles → roles.slug`
 | collections | Storefront collection pages (name/slug/season/visibility) | — |
 | collection_products | Junction, composite PK (collection, product) + position | collections, products |
 | size_charts | Measurement sets by garment type (`rows` jsonb — columns vary: shirts need shoulder/sleeve, skirts waist/hip); linked from products | — |
-| attribute_definitions | Global single-record definitions: name UNIQUE, display_type, enabled — the one place attributes are defined | — |
+| attribute_definitions | Global single-record definitions: name UNIQUE, display_type — the one place attributes are defined | — |
 | attribute_values | Global values + swatch_hex, UNIQUE(definition, value) | definitions |
 | product_attribute_links | Assignment: (product, definition) composite PK | products, definitions |
-| product_attribute_link_values | Chosen values as rows (queryable; never arrays) | products, definitions, values |
+| product_attribute_link_values | Chosen values as rows + optional per-value price (NULL = base path); queryable, never arrays | products, definitions, values |
 
 Footnote — brands: table ships in the DDL from day one with
 `products.brand_id` nullable, but v1 builds no seed, no UI, no queries.

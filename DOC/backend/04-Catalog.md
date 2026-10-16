@@ -129,7 +129,6 @@ Indexes: PK · `(product_id, sort_order)` (gallery read) ·
 | attribute_definitions | show_on_pdp | boolean | NOT NULL DEFAULT true | Explicit booleans — indexable, no array operators in hot reads |
 | attribute_definitions | show_on_checkout | boolean | NOT NULL DEFAULT false | |
 | attribute_definitions | show_on_admin | boolean | NOT NULL DEFAULT true | |
-| attribute_definitions | enabled | boolean | NOT NULL DEFAULT true | Disabled hides from pickers, keeps data |
 | attribute_values | id | uuid | PK | |
 | attribute_values | definition_id | uuid | NOT NULL, FK → attribute_definitions(id) ON DELETE CASCADE | |
 | attribute_values | value | varchar(150) | NOT NULL | Stored once per definition |
@@ -140,6 +139,7 @@ Indexes: PK · `(product_id, sort_order)` (gallery read) ·
 | product_attribute_link_values | product_id | uuid | NOT NULL, composite PK (product_id, definition_id, value_id) | Chosen values as rows — queryable ("products using Onyx"), never arrays |
 | product_attribute_link_values | definition_id | uuid | NOT NULL | Part of the composite PK (scoped lookup) |
 | product_attribute_link_values | value_id | uuid | NOT NULL, FK → attribute_values(id) ON DELETE RESTRICT | Restrict: deleting a chosen value fails loudly |
+| product_attribute_link_values | price | DECIMAL(12,2) | NULL, CHECK (price >= 0) | Per-value price for this product; NULL = base path (matches the draft sidecar 1:1) |
 
 Indexes: PKs · unique `attribute_definitions.name` · unique
 `(definition_id, value)` on values · composite link PKs serve both join

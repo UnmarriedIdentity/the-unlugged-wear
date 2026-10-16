@@ -11,7 +11,6 @@ CREATE TABLE attribute_definitions (
   show_on_pdp      boolean  NOT NULL DEFAULT true,
   show_on_checkout boolean  NOT NULL DEFAULT false,
   show_on_admin    boolean  NOT NULL DEFAULT true,
-  enabled      boolean      NOT NULL DEFAULT true,
   created_at   timestamptz  NOT NULL DEFAULT now(),
   updated_at   timestamptz  NOT NULL DEFAULT now(),
   CHECK (show_on_pdp OR show_on_checkout OR show_on_admin)
@@ -40,6 +39,7 @@ CREATE TABLE product_attribute_link_values (
   product_id    uuid NOT NULL REFERENCES products (id) ON DELETE CASCADE,
   definition_id uuid NOT NULL REFERENCES attribute_definitions (id) ON DELETE CASCADE,
   value_id      uuid NOT NULL REFERENCES attribute_values (id) ON DELETE RESTRICT,
+  price         DECIMAL(12,2) CHECK (price >= 0),
   PRIMARY KEY (product_id, definition_id, value_id)
 );
 CREATE INDEX idx_palv_value_id ON product_attribute_link_values (value_id);
