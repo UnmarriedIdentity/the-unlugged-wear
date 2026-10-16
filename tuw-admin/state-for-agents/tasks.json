@@ -16,7 +16,7 @@
   "session": {
     "branch": "feat/search-modal",
     "tip": "29789c3",
-    "unpushed": ["29789c3"],
+    "unpushed": ["410afd4", "29789c3"],
     "next_up": "Fulfillment Phase 2 per-card bulk bars; DW2 drawer verification pass; anim-probe re-run; browser verification backlog",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
