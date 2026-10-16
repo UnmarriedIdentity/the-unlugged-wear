@@ -9,14 +9,14 @@
   },
   "summary": {
     "total": 212,
-    "done": 184,
+    "done": 185,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "b765bb3",
-    "unpushed": [],
+    "tip": "29789c3",
+    "unpushed": ["29789c3"],
     "next_up": "Fulfillment Phase 2 per-card bulk bars; DW2 drawer verification pass; anim-probe re-run; browser verification backlog",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
@@ -1781,12 +1781,14 @@
     },
     {
       "id": "TL-UI-X1A",
-      "title": "Attribute visibility model (pdp/checkout/admin) + card checkboxes",
-      "status": "backlog",
-      "owner": "unassigned",
-      "log": "visibleOn per attribute; storefront/checkout contract",
-      "design_match": "pending",
-      "verified": false,
+      "title": "Attribute visibility model (pdp/checkout/admin)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-16",
+      "finished": "2026-10-16",
+      "log": "feat/search-modal: 29789c3 visibleOn fixture + backfill + Shows-on checkboxes + last-surface guard",
+      "design_match": "yes",
+      "verified": true,
       "pushed": false,
       "follow_ups": []
     },
