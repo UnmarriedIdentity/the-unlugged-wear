@@ -582,7 +582,7 @@ export default function ProductsView() {
             }}
           />
         </div>
-        <Button variant="secondary" size="md" onClick={() => addAttrValue(attr.name)} disabled={(attrDrafts[attr.name] ?? '').trim() === ''}>
+        <Button variant="secondary" size="md" type="button" onClick={() => addAttrValue(attr.name)} disabled={(attrDrafts[attr.name] ?? '').trim() === ''}>
           Add
         </Button>
       </div>
@@ -2075,7 +2075,7 @@ export default function ProductsView() {
                   </SurfaceCard>
                 ))}
                 <div>
-                  <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={addDiscount}>
+                  <Button variant="secondary" size="sm" icon={<Plus size={14} />} type="button" onClick={addDiscount}>
                     Add Discount
                   </Button>
                 </div>
@@ -2150,7 +2150,7 @@ export default function ProductsView() {
                       }}
                     />
                   </div>
-                  <Button variant="secondary" size="md" icon={<Plus size={14} />} onClick={addAttribute} disabled={newAttrName.trim() === ''}>
+                  <Button variant="secondary" size="md" icon={<Plus size={14} />} type="button" onClick={addAttribute} disabled={newAttrName.trim() === ''}>
                     Add Attribute
                   </Button>
                 </div>
