@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader, Tabs, DropdownMenu, Switch } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader, Tabs, DropdownMenu, Switch, UpliftSurface } from '@/components/ui';
 import { Plus, Download, Trash2, ChevronDown } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { DiscountCode } from '@/mocks/fixtures';
@@ -258,14 +258,16 @@ export default function DiscountsPage() {
                   </span>
                 </TableCell>
                 <TableCell style={{ padding: '10px 16px', width: 48 }}>
-                  <button
-                    type="button"
-                    aria-label={`Delete code ${d.code}`}
-                    onClick={() => deleteDiscountCode(d.id)}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--tuw-text-secondary, #5D6772)', padding: 4, display: 'inline-flex' }}
-                  >
-                    <Trash2 size={14} />
-                  </button>
+                  <UpliftSurface active width={28} height={28} className="tuw-danger-hover" style={{ flexShrink: 0, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                    <button
+                      type="button"
+                      aria-label={`Delete code ${d.code}`}
+                      onClick={() => deleteDiscountCode(d.id)}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, display: 'inline-flex' }}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </UpliftSurface>
                 </TableCell>
               </TableRow>
             ))}
