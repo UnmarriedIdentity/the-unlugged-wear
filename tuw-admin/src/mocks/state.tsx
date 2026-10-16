@@ -81,7 +81,7 @@ interface AdminStateContextType {
   dismissToast: (id: string) => void;
 
   // Mutations
-  createProduct: (product: Omit<ProductItem, 'id' | 'soldCount' | 'rating'>) => boolean;
+  createProduct: (product: Omit<ProductItem, 'id' | 'soldCount' | 'rating'>, silent?: boolean) => boolean;
   updateProduct: (id: string, updates: Partial<ProductItem>, silent?: boolean) => boolean;
   deleteProduct: (id: string, silent?: boolean) => boolean;
 
@@ -292,7 +292,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
   // MUTATION IMPLEMENTATIONS
   // -------------------------------------------------------------
 
-  const createProduct = (p: Omit<ProductItem, 'id' | 'soldCount' | 'rating' | 'variants' | 'images'>) => {
+  const createProduct = (p: Omit<ProductItem, 'id' | 'soldCount' | 'rating' | 'variants' | 'images'>, silent = false) => {
     if (!canPerformAction('products')) return false;
     const id = `PRD-${Math.floor(10 + Math.random() * 90)}`;
     const newProduct: ProductItem = {
@@ -306,11 +306,13 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     const next = [newProduct, ...products];
     setProducts(next);
     persistState({ products: next });
-    showToast({
-      type: 'success',
-      title: 'Product Created',
-      description: `"${p.name}" has been added to the local catalog.`,
-    });
+    if (!silent) {
+      showToast({
+        type: 'success',
+        title: 'Product Created',
+        description: `"${p.name}" has been added to the local catalog.`,
+      });
+    }
     return true;
   };
 
