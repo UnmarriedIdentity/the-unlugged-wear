@@ -120,8 +120,12 @@ ownership (`order.user_id = session user_id`), never a permission row.
   status index at this scale. Members themselves are `users` + roles —
   only the invitation needs a table.
 - **audit_logs** (actor FK, action, entity, entity_id, diff jsonb):
-  every admin mutation lands here. Indexes on actor, (entity,
-  entity_id), created_at — the table exists *for* these queries.
+  stock-edit summaries ONLY — one row per product per import job
+  (`action='stock.import'`, diff carries qty inserted + job ref). Variant
+  deltas live in `stock_movements`; manual edits live there too. Nothing
+  else is recorded here (role/settings/auth trails deferred to their own
+  triggers). Indexes on (entity, entity_id) + created_at — the import
+  report reads exactly these.
 
 ## 7. AuthN rules
 

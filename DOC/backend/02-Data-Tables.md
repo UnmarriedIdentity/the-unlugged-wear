@@ -26,7 +26,7 @@
 | refresh_tokens | Hashed rotation tokens, revocation, expiry cleanup | users |
 | customer_notes | Staff notes with author + timestamp (tier stays computed, never stored) | users, users (author) |
 | staff_invitations | Invite flow: email, role, token hash, expiry, status (members *are* users) | users (inviter) |
-| audit_logs | Admin action trail: actor, action, entity, entity_id, diff jsonb | users (actor) |
+| audit_logs | Stock-edit summaries only: one row per product per import job (qty inserted, job ref) — variant deltas live in stock_movements; nothing else is recorded here | users (actor) |
 
 The single-URL gate reads `users → user_roles → roles.slug`
 (see `14-Single-URL-Gating.md`).
@@ -135,7 +135,7 @@ erDiagram
     users ||--o{ customer_notes : annotated
     users ||--o{ staff_invitations : invited-by
     users ||--o{ notifications : receives
-    users ||--o{ audit_logs : actors
+    users ||--o{ audit_logs : imports-stock-for
     users ||--o{ carts : owns
     users ||--o{ orders : places
     users ||--o{ wishlists : keeps

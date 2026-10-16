@@ -39,7 +39,10 @@ Unknown columns are ignored with notice (forward-compatible sheets).
 3. Valid rows create **draft** products with `attributes[]` prebuilt
    (colors/sizes + customs with visibility defaults) via the same seam
    the drawer uses — import and UI can never disagree on shape.
-4. Counters + `errors[]` accumulate live; terminal status
+4. Per applied product, exactly **one** `audit_logs` row
+   (`action='stock.import'`, diff = qty inserted + job id) — the import
+   summary. Per-variant deltas go to `stock_movements` as usual.
+5. Counters + `errors[]` accumulate live; terminal status
    (`completed` / `failed` / `partial`) closes the job.
 
 ## Idempotency

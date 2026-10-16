@@ -1870,10 +1870,10 @@
     },
     {
       "id": "TL-UI-AUDIT",
-      "title": "Audit-log viewer",
+      "title": "Audit log narrowed to stock-import summaries (viewer parked)",
       "status": "backlog",
       "owner": "unassigned",
-      "log": "audit_logs planned; no screen",
+      "log": "audit_logs records stock.import one-row-per-product-per-job only; variant/manual edits live in stock_movements; viewer parked until team/dispute trigger",
       "design_match": "pending",
       "verified": false,
       "pushed": false,

@@ -54,6 +54,6 @@ guest state per the file-05 rule, then the session upgrades to customer.
   role set as non-admin (fail closed).
 - Every deny logs `{path, user_id?, reason}` at info level — the audit
   trail for gate decisions (separate from `audit_logs`, which records
-  admin actions, not gate checks).
+  per-import stock summaries, not gate checks).
 - Load test target: gate overhead <2ms p99 (cache hit) — matcher runs
   before any render or query.
