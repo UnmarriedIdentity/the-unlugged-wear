@@ -119,12 +119,16 @@ Indexes: PK · `(product_id, sort_order)` (gallery read) ·
 `idx_product_images_variant_id` · partial unique `one_primary_per_product
 (product_id) WHERE is_primary`.
 
-## product_options (definitions incl. storefront rendering)
+## product_options (LEGACY — per-product copies, new writes go library)
+
+> Deprecated: every row duplicates what `attribute_definitions` stores
+> once. Existing rows stay valid; all new writes use the library tables
+> below. A later migration task moves legacy rows, recorded not attempted.
 
 | Column | Type | Constraints | Reason |
 |---|---|---|---|
 | id | uuid | PK | |
-| product_id | uuid | NOT NULL, FK → products(id) ON DELETE CASCADE | |
+| product_id | uuid | NOT NULL, FK → products(id) ON DELETE CASCADE | The FK that makes each row a copy — the design flaw this file replaces |
 | name | varchar(100) | NOT NULL | Size, Color, Fabric… (Color/Size builtin per product) |
 | display_type | varchar(20) | NOT NULL DEFAULT 'pill', CHECK IN ('pill','swatch','radio') | PDP widget: pill / color swatch / radio (admin picks per attribute) |
 | show_on_pdp | boolean | NOT NULL DEFAULT true | Customer-choice surface |
@@ -157,11 +161,37 @@ the option lookup — no separate FK index).
 | Column | Type | Constraints | Reason |
 |---|---|---|---|
 | variant_id | uuid | NOT NULL, FK → product_variants(id) ON DELETE CASCADE, composite PK (variant_id, option_id) | One row per option per variant |
-| option_id | uuid | NOT NULL, FK → product_options(id) ON DELETE CASCADE | |
+| option_id | uuid | NOT NULL, FK → product_options(id) ON DELETE CASCADE | Legacy option rows (see deprecation above) |
 | option_value_id | uuid | NOT NULL, FK → product_option_values(id) ON DELETE RESTRICT | Restrict: deleting a value in use must fail loudly |
 
 Indexes: composite PK (serves variant→options) ·
 `idx_pvov_option_value_id` ("variants using X") · `idx_pvov_option_id`.
+
+## attribute_definitions + attribute_values + links (library — new writes go here)
+
+| Table | Column | Type | Constraints | Reason |
+|---|---|---|---|---|
+| attribute_definitions | id | uuid | PK | Single record per attribute — the normalized source |
+| attribute_definitions | name | varchar(100) | NOT NULL, UNIQUE | One row per name, enforced (no duplicates by construction) |
+| attribute_definitions | display_type | varchar(20) | NOT NULL DEFAULT 'pill', CHECK IN ('pill','swatch','radio') | PDP widget, owned once |
+| attribute_definitions | show_on_pdp | boolean | NOT NULL DEFAULT true | Mirrors the legacy columns — same grammar, owned once |
+| attribute_definitions | show_on_checkout | boolean | NOT NULL DEFAULT false | |
+| attribute_definitions | show_on_admin | boolean | NOT NULL DEFAULT true | |
+| attribute_definitions | enabled | boolean | NOT NULL DEFAULT true | Disabled hides from pickers, keeps data |
+| attribute_values | id | uuid | PK | |
+| attribute_values | definition_id | uuid | NOT NULL, FK → attribute_definitions(id) ON DELETE CASCADE | |
+| attribute_values | value | varchar(150) | NOT NULL | Stored once per definition |
+| attribute_values | swatch_hex | varchar(7) | NULL, CHECK (swatch_hex ~ '^#[0-9A-Fa-f]{6}$') | Dot color owned once, inherited by every linked product |
+| attribute_values | position | integer | NOT NULL DEFAULT 0 | Display order |
+| product_attribute_links | product_id | uuid | NOT NULL, FK → products(id) ON DELETE CASCADE, composite PK (product_id, definition_id) | The assignment — reference, never copy |
+| product_attribute_links | definition_id | uuid | NOT NULL, FK → attribute_definitions(id) ON DELETE RESTRICT | Restrict: deleting a referenced definition fails loudly |
+| product_attribute_link_values | product_id | uuid | NOT NULL, composite PK (product_id, definition_id, value_id) | Chosen values as rows — queryable ("products using Onyx"), never arrays |
+| product_attribute_link_values | definition_id | uuid | NOT NULL | Part of the composite PK (scoped lookup) |
+| product_attribute_link_values | value_id | uuid | NOT NULL, FK → attribute_values(id) ON DELETE RESTRICT | Restrict: deleting a chosen value fails loudly |
+
+Indexes: PKs · unique `attribute_definitions.name` · unique
+`(definition_id, value)` on values · composite link PKs serve both join
+directions (product→definitions, definition→products).
 
 ## product_attributes + product_attribute_values (compare engine)
 
