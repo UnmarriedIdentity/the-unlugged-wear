@@ -94,6 +94,10 @@ export interface ProductAttribute {
   builtin: boolean;
   displayType: 'pill' | 'swatch' | 'radio';
   swatchHex: Record<string, string>;
+  /** Surfaces allowed to render this attribute (X1a): pdp (shopper
+   * choices), checkout (money-affecting), admin (internal). At least one
+   * always — the UI refuses an attribute visible nowhere. */
+  visibleOn: Array<'pdp' | 'checkout' | 'admin'>;
 }
 
 export interface OrderItemLine {

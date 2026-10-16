@@ -116,9 +116,9 @@ export default function ProductsView() {
     setFormDiscounts([]);
     setFormSizeChartId('');
     setFormAttributes([
-      { name: 'Color', values: ['Black', 'Chalk White', 'Olive'], builtin: true, displayType: 'swatch', swatchHex: {} },
-      { name: 'Size', values: ['S', 'M', 'L', 'XL'], builtin: true, displayType: 'pill', swatchHex: {} },
-      { name: 'Placements', values: [], builtin: true, displayType: 'radio', swatchHex: {} },
+      { name: 'Color', values: ['Black', 'Chalk White', 'Olive'], builtin: true, displayType: 'swatch', swatchHex: {}, visibleOn: ['pdp', 'admin'] },
+      { name: 'Size', values: ['S', 'M', 'L', 'XL'], builtin: true, displayType: 'pill', swatchHex: {}, visibleOn: ['pdp', 'admin'] },
+      { name: 'Placements', values: [], builtin: true, displayType: 'radio', swatchHex: {}, visibleOn: ['admin'] },
     ]);
     setFormPartner('Qikink Direct API');
     setFormPlacement('Chest (45mm)');
@@ -407,7 +407,7 @@ export default function ProductsView() {
       showToast({ type: 'warning', title: 'Duplicate Attribute', description: `"${name}" already exists.` });
       return;
     }
-    setFormAttributes((prev) => [...prev, { name, values: [], builtin: false, displayType: 'pill', swatchHex: {} }]);
+    setFormAttributes((prev) => [...prev, { name, values: [], builtin: false, displayType: 'pill', swatchHex: {}, visibleOn: ['pdp', 'admin'] }]);
     setNewAttrName('');
   };
   const removeAttribute = (name: string) => {
@@ -436,6 +436,33 @@ export default function ProductsView() {
   const setSwatchHex = (name: string, value: string, hex: string) => {
     setFormAttributes((prev) =>
       prev.map((a) => (a.name === name ? { ...a, swatchHex: { ...a.swatchHex, [value]: hex } } : a))
+    );
+  };
+  // Visibility toggles (X1a): at least one surface always — unchecking the
+  // last one is refused with a naming toast, input preserved.
+  const toggleVisibility = (name: string, surface: 'pdp' | 'checkout' | 'admin') => {
+    const attr = formAttributes.find((a) => a.name === name);
+    if (!attr) return;
+    const has = (attr.visibleOn ?? []).includes(surface);
+    if (has && (attr.visibleOn ?? []).length === 1) {
+      showToast({
+        type: 'warning',
+        title: 'Visibility Required',
+        description: `"${name}" must show on at least one surface.`,
+      });
+      return;
+    }
+    setFormAttributes((prev) =>
+      prev.map((a) =>
+        a.name === name
+          ? {
+              ...a,
+              visibleOn: has
+                ? (a.visibleOn ?? []).filter((s) => s !== surface)
+                : [...(a.visibleOn ?? []), surface],
+            }
+          : a
+      )
     );
   };
 
@@ -512,6 +539,19 @@ export default function ProductsView() {
         />
       </div>
       )}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+          Shows on
+        </span>
+        {(['pdp', 'checkout', 'admin'] as const).map((surface) => (
+          <Checkbox
+            key={surface}
+            label={surface === 'pdp' ? 'PDP' : surface === 'checkout' ? 'Checkout' : 'Admin-only'}
+            checked={(attr.visibleOn ?? []).includes(surface)}
+            onChange={() => toggleVisibility(attr.name, surface)}
+          />
+        ))}
+      </div>
       {attr.values.length > 0 ? (
         <Table>
           <TableHeader>
@@ -644,11 +684,21 @@ export default function ProductsView() {
     setFormSizeChartId(product.sizeChartId ?? '');
     setFormAttributes(
       product.attributes && product.attributes.length > 0
-        ? product.attributes.map((a) => ({ ...a, values: [...a.values], swatchHex: { ...a.swatchHex } }))
+        ? product.attributes.map((a) => ({
+            ...a,
+            values: [...a.values],
+            swatchHex: { ...(a.swatchHex ?? {}) },
+            visibleOn:
+              a.visibleOn && a.visibleOn.length > 0
+                ? [...a.visibleOn]
+                : a.name === 'Placements'
+                  ? ['admin' as const]
+                  : (['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'>),
+          }))
         : [
-            { name: 'Color', values: [...product.colors], builtin: true, displayType: 'swatch' as const, swatchHex: {} },
-            { name: 'Size', values: [...product.sizes], builtin: true, displayType: 'pill' as const, swatchHex: {} },
-            { name: 'Placements', values: [], builtin: true, displayType: 'radio' as const, swatchHex: {} },
+            { name: 'Color', values: [...product.colors], builtin: true, displayType: 'swatch' as const, swatchHex: {}, visibleOn: ['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'> },
+            { name: 'Size', values: [...product.sizes], builtin: true, displayType: 'pill' as const, swatchHex: {}, visibleOn: ['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'> },
+            { name: 'Placements', values: [], builtin: true, displayType: 'radio' as const, swatchHex: {}, visibleOn: ['admin'] as Array<'pdp' | 'checkout' | 'admin'> },
           ]
     );
     setFormPartner(product.partner);
