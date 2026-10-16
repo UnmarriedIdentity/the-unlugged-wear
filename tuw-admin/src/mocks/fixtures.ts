@@ -139,6 +139,19 @@ export interface ShipmentItem {
   events: { time: string; location: string; description: string }[];
 }
 
+/** Abandoned cart (Phase-2 abandonment): idle-cart snapshot + recovery
+ * pipeline. Exactly-once reminder per cart (remindedAt set once). */
+export interface AbandonedCart {
+  id: string;
+  cartId: string;
+  email?: string;
+  items: Array<{ name: string; qty: number; price: number }>;
+  cartTotal: number;
+  abandonedAt: string;
+  remindedAt?: string;
+  status: 'detected' | 'reminded' | 'converted' | 'recovered';
+}
+
 /** Storefront coupon (Phase-2 discounts): code-unique, percent/fixed with
  * caps, window, kill switch. Checkout validates; this screen governs. */
 export interface DiscountCode {
@@ -1198,6 +1211,49 @@ export const initialDiscountCodes: DiscountCode[] = [
     startsAt: '2026-10-18',
     endsAt: '2026-11-05',
     isActive: false,
+  },
+];
+
+export const initialAbandonedCarts: AbandonedCart[] = [
+  {
+    id: 'AC-01',
+    cartId: 'CART-8814',
+    email: 'priya.nair@example.com',
+    items: [
+      { name: 'Signature Boxy Hoodie (M)', qty: 1, price: 2499 },
+      { name: 'Everyday Tee (S)', qty: 2, price: 899 },
+    ],
+    cartTotal: 4297,
+    abandonedAt: '15 Apr 2026, 18:20',
+    status: 'detected',
+  },
+  {
+    id: 'AC-02',
+    cartId: 'CART-8809',
+    items: [{ name: 'Architectural Trench (L)', qty: 1, price: 5999 }],
+    cartTotal: 5999,
+    abandonedAt: '15 Apr 2026, 09:45',
+    status: 'detected',
+  },
+  {
+    id: 'AC-03',
+    cartId: 'CART-8798',
+    email: 'arjun.mehta@example.com',
+    items: [{ name: 'Urbanist Hoodie (XL)', qty: 1, price: 2799 }],
+    cartTotal: 2799,
+    abandonedAt: '14 Apr 2026, 21:10',
+    remindedAt: '15 Apr 2026, 10:00',
+    status: 'reminded',
+  },
+  {
+    id: 'AC-04',
+    cartId: 'CART-8771',
+    email: 'kavya.reddy@example.com',
+    items: [{ name: 'AOP Tote (Standard)', qty: 1, price: 1299 }],
+    cartTotal: 1299,
+    abandonedAt: '12 Apr 2026, 14:30',
+    remindedAt: '13 Apr 2026, 09:15',
+    status: 'converted',
   },
 ];
 

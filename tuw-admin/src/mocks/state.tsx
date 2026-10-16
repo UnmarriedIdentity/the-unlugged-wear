@@ -16,6 +16,7 @@ import {
   StaffRole,
   StockMovement,
   DiscountCode,
+  AbandonedCart,
   initialProducts,
   initialOrders,
   initialShipments,
@@ -29,6 +30,7 @@ import {
   initialSettings,
   initialStockMovements,
   initialDiscountCodes,
+  initialAbandonedCarts,
 } from './fixtures';
 import {
   synthesizeVariants,
@@ -69,6 +71,7 @@ interface AdminStateContextType {
   settings: StoreSettings;
   stockMovements: StockMovement[];
   discountCodes: DiscountCode[];
+  abandonedCarts: AbandonedCart[];
 
   toasts: ToastMessage[];
   showToast: (toast: Omit<ToastMessage, 'id'>) => void;
@@ -114,6 +117,8 @@ interface AdminStateContextType {
   toggleDiscountCode: (id: string) => boolean;
   deleteDiscountCode: (id: string) => boolean;
 
+  remindAbandonedCart: (id: string) => boolean;
+
   resetDemoData: () => void;
 }
 
@@ -140,6 +145,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
   const [settings, setSettings] = useState<StoreSettings>(initialSettings);
   const [stockMovements, setStockMovements] = useState<StockMovement[]>(initialStockMovements);
   const [discountCodes, setDiscountCodes] = useState<DiscountCode[]>(initialDiscountCodes);
+  const [abandonedCarts, setAbandonedCarts] = useState<AbandonedCart[]>(initialAbandonedCarts);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -161,6 +167,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         if (parsed.settings) setSettings(parsed.settings);
         if (parsed.stockMovements) setStockMovements(parsed.stockMovements);
         if (parsed.discountCodes) setDiscountCodes(parsed.discountCodes);
+        if (parsed.abandonedCarts) setAbandonedCarts(parsed.abandonedCarts);
       }
     } catch {
       // Local storage fallback
@@ -184,6 +191,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
       settings?: StoreSettings;
       stockMovements?: StockMovement[];
       discountCodes?: DiscountCode[];
+      abandonedCarts?: AbandonedCart[];
     }) => {
       try {
         const current = {
@@ -201,6 +209,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
           settings,
           stockMovements,
           discountCodes,
+          abandonedCarts,
           ...newState,
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
@@ -208,7 +217,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         // Storage quota / privacy protection
       }
     },
-    [activeRole, products, orders, shipments, refunds, returns, customers, supportTickets, collections, designs, team, settings, stockMovements, discountCodes]
+    [activeRole, products, orders, shipments, refunds, returns, customers, supportTickets, collections, designs, team, settings, stockMovements, discountCodes, abandonedCarts]
   );
 
   const showToast = useCallback((toast: Omit<ToastMessage, 'id'>) => {
@@ -378,7 +387,20 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     };
     const next = [newOrder, ...orders];
     setOrders(next);
-    persistState({ orders: next });
+    // Recovery matcher: an order from the same email converts their
+    // open abandonment rows (detected/reminded only — never rewrites).
+    const email = o.customerEmail.trim().toLowerCase();
+    const converted = abandonedCarts.map((c) =>
+      c.email?.toLowerCase() === email && (c.status === 'detected' || c.status === 'reminded')
+        ? { ...c, status: 'converted' as const }
+        : c
+    );
+    if (converted.some((c, i) => c !== abandonedCarts[i])) {
+      setAbandonedCarts(converted);
+      persistState({ orders: next, abandonedCarts: converted });
+    } else {
+      persistState({ orders: next });
+    }
     showToast({
       type: 'success',
       title: 'Order Created',
@@ -785,6 +807,27 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     return true;
   };
 
+  // Recovery: exactly-once reminder per cart (remindedAt set once).
+  const remindAbandonedCart = (id: string) => {
+    if (!canPerformAction('orders')) return false;
+    const target = abandonedCarts.find((c) => c.id === id);
+    if (!target || target.status !== 'detected') return false;
+    const stamp = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short', year: 'numeric' });
+    const next = abandonedCarts.map((c) =>
+      c.id === id ? { ...c, status: 'reminded' as const, remindedAt: stamp } : c
+    );
+    setAbandonedCarts(next);
+    persistState({ abandonedCarts: next });
+    showToast({
+      type: 'info',
+      title: 'Reminder Queued',
+      description: target.email
+        ? `Recovery email queued for ${target.email} — sends at backend.`
+        : 'Guest cart noted — email capture needed before a reminder can send.',
+    });
+    return true;
+  };
+
   const setScenario = (sc: DemoScenario) => {
     setScenarioState(sc);
     if (sc === 'empty') {
@@ -880,6 +923,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     setSettings(initialSettings);
     setStockMovements(initialStockMovements);
     setDiscountCodes(initialDiscountCodes);
+    setAbandonedCarts(initialAbandonedCarts);
 
     showToast({
       type: 'info',
@@ -911,6 +955,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         settings,
         stockMovements,
         discountCodes,
+        abandonedCarts,
         toasts,
         showToast,
         dismissToast,
@@ -934,6 +979,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         createDiscountCode,
         toggleDiscountCode,
         deleteDiscountCode,
+        remindAbandonedCart,
         resetDemoData,
       }}
     >

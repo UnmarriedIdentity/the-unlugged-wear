@@ -12,6 +12,7 @@ import {
   TrendingUp,
   LayoutGrid,
   ShoppingBag,
+  ShoppingCart,
   Settings,
   Headphones,
   LogOut,
@@ -61,7 +62,8 @@ function getActiveGroupForPath(pathname: string): string | null {
     pathname.startsWith('/returns') ||
     pathname.startsWith('/refunds') ||
     pathname.startsWith('/payments') ||
-    pathname.startsWith('/discounts')
+    pathname.startsWith('/discounts') ||
+    pathname.startsWith('/abandoned')
   ) {
     return 'operations';
   }
@@ -113,6 +115,7 @@ const NAV_GROUPS: NavGroupDef[] = [
       { href: '/refunds', label: 'Refunds', icon: RotateCcw, match: ['/refunds'] },
       { href: '/payments', label: 'Payments', icon: CreditCard, match: ['/payments'] },
       { href: '/discounts', label: 'Discounts', icon: BadgePercent, match: ['/discounts'] },
+      { href: '/abandoned', label: 'Abandoned', icon: ShoppingCart, match: ['/abandoned'] },
     ],
   },
   {
