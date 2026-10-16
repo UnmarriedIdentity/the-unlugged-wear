@@ -15,8 +15,8 @@
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "c135635",
-    "unpushed": ["c135635", "e2d3980", "59ccd5d", "410afd4", "29789c3"],
+    "tip": "81b2c28",
+    "unpushed": ["81b2c28", "c135635", "e2d3980", "59ccd5d", "410afd4", "29789c3"],
     "next_up": "Fulfillment Phase 2 per-card bulk bars; DW2 drawer verification pass; anim-probe re-run; browser verification backlog",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
@@ -2019,7 +2019,7 @@
       "owner": "agent",
       "started": "2026-10-16",
       "finished": "2026-10-16",
-      "log": "feat/search-modal: c135635 definitions/values/links/link-values + 02/04/00 sync (66 tables)",
+      "log": "feat/search-modal: c135635 library tables + 81b2c28 options-trio DELETED (63 total, zero legacy; removal note kept as provenance)",
       "design_match": "yes",
       "key_decisions": ["junction over arrays; legacy rows valid, new writes go library"],
       "verified": true,
