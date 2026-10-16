@@ -9,14 +9,14 @@
   },
   "summary": {
     "total": 212,
-    "done": 186,
+    "done": 187,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "59ccd5d",
-    "unpushed": ["59ccd5d", "410afd4", "29789c3"],
+    "tip": "e2d3980",
+    "unpushed": ["e2d3980", "59ccd5d", "410afd4", "29789c3"],
     "next_up": "Fulfillment Phase 2 per-card bulk bars; DW2 drawer verification pass; anim-probe re-run; browser verification backlog",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
@@ -1807,12 +1807,14 @@
     },
     {
       "id": "TL-UI-ATTRLIB",
-      "title": "Settings global attribute library",
-      "status": "backlog",
-      "owner": "unassigned",
-      "log": "Library CRUD + in-use guards + enable/disable; drawer stays select-only",
-      "design_match": "pending",
-      "verified": false,
+      "title": "Settings attribute library + drawer copy-in",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-16",
+      "finished": "2026-10-16",
+      "log": "feat/search-modal: e2d3980 /settings/attributes (CRUD, enable, in-use guards) + copy-from-library picker",
+      "design_match": "yes",
+      "verified": true,
       "pushed": false,
       "follow_ups": []
     },
