@@ -9,7 +9,7 @@ import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, Input
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 import { resolveVariants, variantStockTotal, buildVariantSku } from '@/mocks/variants';
-import type { ProductVariant, ProductAttribute, PhotoSettings, ProductDiscount } from '@/mocks/fixtures';
+import type { ProductVariant, ProductAttribute, PhotoSettings, ProductDiscount, SizeChart } from '@/mocks/fixtures';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
 
@@ -18,7 +18,7 @@ const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + 
 // swatch dots stay neutral until a value→hex map lands (recorded follow-up).
 
 export default function ProductsView() {
-  const { products, createProduct, updateProduct, deleteProduct, canPerformAction, showToast, stockMovements } = useAdminState();
+  const { products, createProduct, updateProduct, deleteProduct, canPerformAction, showToast, stockMovements, sizeCharts, createSizeChart, deleteSizeChart, addSizeChartRow, removeSizeChartRow, patchSizeChartCell } = useAdminState();
 
   const [selectedCat, setSelectedCat] = useState<string>('All');
   const [publicationFilter, setPublicationFilter] = useState<'all' | 'published' | 'draft' | 'archived'>('all');
@@ -80,6 +80,11 @@ export default function ProductsView() {
   // Per-card value drafts + new-attribute draft (A1b chip editor).
   const [attrDrafts, setAttrDrafts] = useState<Record<string, string>>({});
   const [newAttrName, setNewAttrName] = useState('');
+  // Size-chart drafts (specs manager): per-chart new-row size + new chart name.
+  const [chartRowDrafts, setChartRowDrafts] = useState<Record<string, string>>({});
+  const [newChartName, setNewChartName] = useState('');
+  const [formSizeChartId, setFormSizeChartId] = useState('');
+  const chartColumns = (chart: SizeChart) => [...new Set(chart.rows.flatMap((r) => Object.keys(r.measures)))];
   const [formPartner, setFormPartner] = useState<ProductItem['partner']>('Qikink Direct API');
   const [formPlacement, setFormPlacement] = useState<ProductItem['placement']>('Chest (45mm)');
   const [formStatus, setFormStatus] = useState<ProductItem['publicationStatus']>('published');
@@ -109,6 +114,7 @@ export default function ProductsView() {
     setFormGender('');
     setFormTax('');
     setFormDiscounts([]);
+    setFormSizeChartId('');
     setFormAttributes([
       { name: 'Color', values: ['Black', 'Chalk White', 'Olive'], builtin: true, displayType: 'swatch', swatchHex: {} },
       { name: 'Size', values: ['S', 'M', 'L', 'XL'], builtin: true, displayType: 'pill', swatchHex: {} },
@@ -635,6 +641,7 @@ export default function ProductsView() {
     setFormGender(product.gender || '');
     setFormTax(product.taxRate !== undefined ? String(product.taxRate) : '');
     setFormDiscounts((product.discounts ?? []).map((d) => ({ ...d })));
+    setFormSizeChartId(product.sizeChartId ?? '');
     setFormAttributes(
       product.attributes && product.attributes.length > 0
         ? product.attributes.map((a) => ({ ...a, values: [...a.values], swatchHex: { ...a.swatchHex } }))
@@ -671,6 +678,7 @@ export default function ProductsView() {
         dimensions: formDims.trim() || undefined,
         gender: formGender || undefined,
         taxRate: formTax.trim() !== '' && !isNaN(parseFloat(formTax)) ? parseFloat(formTax) : undefined,
+      sizeChartId: formSizeChartId || undefined,
         partner: formPartner,
         placement: formPlacement,
         publicationStatus: formStatus,
@@ -743,6 +751,7 @@ export default function ProductsView() {
       dimensions: formDims.trim() || undefined,
       gender: formGender || undefined,
       taxRate: formTax.trim() !== '' && !isNaN(parseFloat(formTax)) ? parseFloat(formTax) : undefined,
+      sizeChartId: formSizeChartId || undefined,
       image: formImages[0]?.src || undefined,
       video: formVideo || undefined,
       photoSettings: formPhoto,
@@ -2506,6 +2515,199 @@ export default function ProductsView() {
                     Open Fit Guide
                   </Link>
                 </div>
+                <div>
+                  <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
+                    Size Chart
+                  </span>
+                  <DropdownMenu
+                    ariaLabel="Product size chart"
+                    fullWidth
+                    trigger={
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`Size chart, currently ${sizeCharts.find((c) => c.id === formSizeChartId)?.name ?? 'None'}`}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+                        }}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: 8,
+                          width: '100%',
+                          height: 40,
+                          padding: '0 12px',
+                          fontSize: 13,
+                          fontWeight: 500,
+                          fontFamily: 'var(--font-main)',
+                          borderRadius: 8,
+                          border: '1px solid var(--tuw-border-control, #D1D5DB)',
+                          backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
+                          color: 'var(--tuw-text-primary, #262626)',
+                          cursor: 'pointer',
+                          userSelect: 'none',
+                        }}
+                      >
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {sizeCharts.find((c) => c.id === formSizeChartId)?.name ?? 'No chart — legacy guide applies'}
+                        </span>
+                        <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
+                      </span>
+                    }
+                    items={[
+                      { value: '', label: 'No chart — legacy guide applies' },
+                      ...sizeCharts.map((c) => ({ value: c.id, label: c.name })),
+                    ]}
+                    selectedValue={formSizeChartId}
+                    onSelect={(v) => setFormSizeChartId(v)}
+                  />
+                </div>
+                <Disclosure
+                  title={`Size charts (${sizeCharts.length})`}
+                  subtitle="Measuring sets by garment. Columns vary — hoodies track sleeve, pants track waist."
+                >
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {sizeCharts.map((chart) => {
+                      const cols = chartColumns(chart);
+                      return (
+                        <SurfaceCard key={chart.id} padding="12px" gap="10px">
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                              {chart.name}
+                            </span>
+                            <UpliftSurface active width={28} height={28} className="tuw-danger-hover" style={{ flexShrink: 0, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                              <button
+                                type="button"
+                                aria-label={`Remove chart ${chart.name}`}
+                                onClick={() => {
+                                  const usedBy = products.find((p) => p.sizeChartId === chart.id);
+                                  if (usedBy) {
+                                    showToast({ type: 'warning', title: 'Chart In Use', description: `"${chart.name}" is assigned to ${usedBy.name} — reassign first.` });
+                                    return;
+                                  }
+                                  deleteSizeChart(chart.id);
+                                }}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, display: 'inline-flex' }}
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </UpliftSurface>
+                          </div>
+                          {chart.rows.length > 0 ? (
+                            <Table>
+                              <TableHeader>
+                                <TableRow hoverable={false}>
+                                  <TableHead style={{ padding: '10px 16px' }}>Size</TableHead>
+                                  {cols.map((col) => (
+                                    <TableHead key={col} style={{ padding: '10px 16px', textTransform: 'capitalize' }}>{col} (cm)</TableHead>
+                                  ))}
+                                  <TableHead style={{ padding: '10px 16px', width: 48 }}><span className="sr-only">Remove</span></TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {chart.rows.map((row) => (
+                                  <TableRow key={row.size} hoverable={false}>
+                                    <TableCell style={{ padding: '10px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                                      {row.size}
+                                    </TableCell>
+                                    {cols.map((col) => (
+                                      <TableCell key={col} style={{ padding: '10px 16px' }}>
+                                        <Input
+                                          aria-label={`${row.size} ${col} in cm`}
+                                          type="number"
+                                          min="0"
+                                          value={row.measures[col] ?? ''}
+                                          onChange={(e) => patchSizeChartCell(chart.id, row.size, col, e.target.value)}
+                                          style={{ height: 36 }}
+                                        />
+                                      </TableCell>
+                                    ))}
+                                    <TableCell style={{ padding: '10px 16px', width: 48 }}>
+                                      <UpliftSurface active width={28} height={28} className="tuw-danger-hover" style={{ flexShrink: 0, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                                        <button
+                                          type="button"
+                                          aria-label={`Remove size ${row.size} from ${chart.name}`}
+                                          onClick={() => removeSizeChartRow(chart.id, row.size)}
+                                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, display: 'inline-flex' }}
+                                        >
+                                          <Trash2 size={14} />
+                                        </button>
+                                      </UpliftSurface>
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          ) : (
+                            <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                              No sizes yet — add the first one below.
+                            </div>
+                          )}
+                          <div style={{ display: 'flex', gap: 8 }}>
+                            <div style={{ flex: 1 }}>
+                              <Input
+                                aria-label={`Add size to ${chart.name}`}
+                                placeholder="Size, e.g. XXS"
+                                value={chartRowDrafts[chart.id] ?? ''}
+                                onChange={(e) => setChartRowDrafts((prev) => ({ ...prev, [chart.id]: e.target.value }))}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    if (addSizeChartRow(chart.id, chartRowDrafts[chart.id] ?? '')) {
+                                      setChartRowDrafts((prev) => ({ ...prev, [chart.id]: '' }));
+                                    }
+                                  }
+                                }}
+                              />
+                            </div>
+                            <Button
+                              variant="secondary"
+                              size="md"
+                              type="button"
+                              onClick={() => {
+                                if (addSizeChartRow(chart.id, chartRowDrafts[chart.id] ?? '')) {
+                                  setChartRowDrafts((prev) => ({ ...prev, [chart.id]: '' }));
+                                }
+                              }}
+                              disabled={(chartRowDrafts[chart.id] ?? '').trim() === ''}
+                            >
+                              Add
+                            </Button>
+                          </div>
+                        </SurfaceCard>
+                      );
+                    })}
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <div style={{ flex: 1 }}>
+                        <Input
+                          aria-label="New chart name"
+                          placeholder="New chart, e.g. Kids Tops"
+                          value={newChartName}
+                          onChange={(e) => setNewChartName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              if (createSizeChart(newChartName)) setNewChartName('');
+                            }
+                          }}
+                        />
+                      </div>
+                      <Button
+                        variant="secondary"
+                        size="md"
+                        icon={<Plus size={14} />}
+                        type="button"
+                        onClick={() => {
+                          if (createSizeChart(newChartName)) setNewChartName('');
+                        }}
+                        disabled={newChartName.trim() === ''}
+                      >
+                        Add Chart
+                      </Button>
+                    </div>
+                  </div>
+                </Disclosure>
               </div>
             </DrawerSection>
             {visibleSections.monogram ? (

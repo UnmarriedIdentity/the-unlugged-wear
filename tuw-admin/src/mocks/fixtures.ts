@@ -40,6 +40,9 @@ export interface ProductItem {
   dimensions?: string;
   gender?: 'Female' | 'Male' | 'Unisex' | 'Kids';
   taxRate?: number;
+  /** Linked measuring set (size-chart manager). Optional — absent means
+   * the legacy hardcoded guide. */
+  sizeChartId?: string;
   /** Scheduled discounts (P1d): percent/fixed with window + kill switch.
    * Optional — absent means none. Mirrors product_discounts intent. */
   discounts?: ProductDiscount[];
@@ -1175,6 +1178,57 @@ export const initialSearchTerms: SearchTerm[] = [
   { term: 'handloom saree', searches: 515, zeroResults: 515 },
   { term: 'gym leggings', searches: 402, zeroResults: 0 },
   { term: 'kurta palazzo set', searches: 288, zeroResults: 288 },
+];
+
+/** Garment measuring sets (size-chart manager): sparse per-row measures —
+ * columns vary by garment (hoodies need sleeve, pants need waist/hip),
+ * which is why rows are maps, not fixed columns (see file 04 jsonb note).
+ * Transcribed from the storefront Fit & Sizing Guide. */
+export interface SizeChartRow {
+  size: string;
+  measures: Record<string, number>;
+}
+export interface SizeChart {
+  id: string;
+  name: string;
+  rows: SizeChartRow[];
+}
+
+export const initialSizeCharts: SizeChart[] = [
+  {
+    id: 'SC-01',
+    name: 'Hoodies',
+    rows: [
+      { size: 'XS', measures: { chest: 108, length: 66, shoulder: 54, sleeve: 59 } },
+      { size: 'S', measures: { chest: 114, length: 69, shoulder: 57, sleeve: 61 } },
+      { size: 'M', measures: { chest: 120, length: 72, shoulder: 60, sleeve: 63 } },
+      { size: 'L', measures: { chest: 126, length: 74, shoulder: 63, sleeve: 64 } },
+      { size: 'XL', measures: { chest: 132, length: 76, shoulder: 66, sleeve: 65 } },
+      { size: 'XXL', measures: { chest: 138, length: 78, shoulder: 69, sleeve: 66 } },
+    ],
+  },
+  {
+    id: 'SC-02',
+    name: 'Tees',
+    rows: [
+      { size: 'XS', measures: { chest: 104, length: 68, shoulder: 50, sleeve: 22 } },
+      { size: 'S', measures: { chest: 110, length: 71, shoulder: 53, sleeve: 23 } },
+      { size: 'M', measures: { chest: 116, length: 74, shoulder: 56, sleeve: 24 } },
+      { size: 'L', measures: { chest: 122, length: 76, shoulder: 59, sleeve: 25 } },
+      { size: 'XL', measures: { chest: 128, length: 78, shoulder: 62, sleeve: 26 } },
+      { size: 'XXL', measures: { chest: 134, length: 80, shoulder: 65, sleeve: 27 } },
+    ],
+  },
+  {
+    id: 'SC-03',
+    name: 'Pants',
+    rows: [
+      { size: 'S (30)', measures: { waist: 78, hip: 106, length: 102, thigh: 66 } },
+      { size: 'M (32)', measures: { waist: 83, hip: 112, length: 104, thigh: 69 } },
+      { size: 'L (34)', measures: { waist: 88, hip: 118, length: 106, thigh: 72 } },
+      { size: 'XL (36)', measures: { waist: 93, hip: 124, length: 108, thigh: 75 } },
+    ],
+  },
 ];
 
 export const initialDiscountCodes: DiscountCode[] = [

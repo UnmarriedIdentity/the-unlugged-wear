@@ -17,6 +17,7 @@ import {
   StockMovement,
   DiscountCode,
   AbandonedCart,
+  SizeChart,
   initialProducts,
   initialOrders,
   initialShipments,
@@ -31,6 +32,7 @@ import {
   initialStockMovements,
   initialDiscountCodes,
   initialAbandonedCarts,
+  initialSizeCharts,
 } from './fixtures';
 import {
   synthesizeVariants,
@@ -72,6 +74,7 @@ interface AdminStateContextType {
   stockMovements: StockMovement[];
   discountCodes: DiscountCode[];
   abandonedCarts: AbandonedCart[];
+  sizeCharts: SizeChart[];
 
   toasts: ToastMessage[];
   showToast: (toast: Omit<ToastMessage, 'id'>) => void;
@@ -119,6 +122,12 @@ interface AdminStateContextType {
 
   remindAbandonedCart: (id: string) => boolean;
 
+  createSizeChart: (name: string) => boolean;
+  deleteSizeChart: (id: string) => boolean;
+  addSizeChartRow: (chartId: string, size: string) => boolean;
+  removeSizeChartRow: (chartId: string, size: string) => boolean;
+  patchSizeChartCell: (chartId: string, size: string, key: string, raw: string) => boolean;
+
   resetDemoData: () => void;
 }
 
@@ -146,6 +155,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
   const [stockMovements, setStockMovements] = useState<StockMovement[]>(initialStockMovements);
   const [discountCodes, setDiscountCodes] = useState<DiscountCode[]>(initialDiscountCodes);
   const [abandonedCarts, setAbandonedCarts] = useState<AbandonedCart[]>(initialAbandonedCarts);
+  const [sizeCharts, setSizeCharts] = useState<SizeChart[]>(initialSizeCharts);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -168,6 +178,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         if (parsed.stockMovements) setStockMovements(parsed.stockMovements);
         if (parsed.discountCodes) setDiscountCodes(parsed.discountCodes);
         if (parsed.abandonedCarts) setAbandonedCarts(parsed.abandonedCarts);
+        if (parsed.sizeCharts) setSizeCharts(parsed.sizeCharts);
       }
     } catch {
       // Local storage fallback
@@ -192,6 +203,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
       stockMovements?: StockMovement[];
       discountCodes?: DiscountCode[];
       abandonedCarts?: AbandonedCart[];
+      sizeCharts?: SizeChart[];
     }) => {
       try {
         const current = {
@@ -210,6 +222,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
           stockMovements,
           discountCodes,
           abandonedCarts,
+          sizeCharts,
           ...newState,
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
@@ -217,7 +230,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         // Storage quota / privacy protection
       }
     },
-    [activeRole, products, orders, shipments, refunds, returns, customers, supportTickets, collections, designs, team, settings, stockMovements, discountCodes, abandonedCarts]
+    [activeRole, products, orders, shipments, refunds, returns, customers, supportTickets, collections, designs, team, settings, stockMovements, discountCodes, abandonedCarts, sizeCharts]
   );
 
   const showToast = useCallback((toast: Omit<ToastMessage, 'id'>) => {
@@ -828,6 +841,77 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     return true;
   };
 
+  // Size charts: sparse-measure rows (columns vary by garment).
+  const createSizeChart = (name: string) => {
+    if (!canPerformAction('products')) return false;
+    const trimmed = name.trim();
+    if (!trimmed) return false;
+    if (sizeCharts.some((c) => c.name.toLowerCase() === trimmed.toLowerCase())) {
+      showToast({ type: 'warning', title: 'Duplicate Chart', description: `"${trimmed}" already exists.` });
+      return false;
+    }
+    const next = [...sizeCharts, { id: `SC-${Date.now()}`, name: trimmed, rows: [] }];
+    setSizeCharts(next);
+    persistState({ sizeCharts: next });
+    return true;
+  };
+  const deleteSizeChart = (id: string) => {
+    if (!canPerformAction('products')) return false;
+    const next = sizeCharts.filter((c) => c.id !== id);
+    setSizeCharts(next);
+    persistState({ sizeCharts: next });
+    return true;
+  };
+  const addSizeChartRow = (chartId: string, size: string) => {
+    if (!canPerformAction('products')) return false;
+    const trimmed = size.trim();
+    if (!trimmed) return false;
+    const chart = sizeCharts.find((c) => c.id === chartId);
+    if (!chart || chart.rows.some((r) => r.size.toLowerCase() === trimmed.toLowerCase())) {
+      if (chart) showToast({ type: 'warning', title: 'Duplicate Size', description: `"${trimmed}" is already in ${chart.name}.` });
+      return false;
+    }
+    const next = sizeCharts.map((c) =>
+      c.id === chartId ? { ...c, rows: [...c.rows, { size: trimmed, measures: {} }] } : c
+    );
+    setSizeCharts(next);
+    persistState({ sizeCharts: next });
+    return true;
+  };
+  const removeSizeChartRow = (chartId: string, size: string) => {
+    if (!canPerformAction('products')) return false;
+    const next = sizeCharts.map((c) =>
+      c.id === chartId ? { ...c, rows: c.rows.filter((r) => r.size !== size) } : c
+    );
+    setSizeCharts(next);
+    persistState({ sizeCharts: next });
+    return true;
+  };
+  const patchSizeChartCell = (chartId: string, size: string, key: string, raw: string) => {
+    if (!canPerformAction('products')) return false;
+    const trimmed = raw.trim();
+    const next = sizeCharts.map((c) => {
+      if (c.id !== chartId) return c;
+      return {
+        ...c,
+        rows: c.rows.map((r) => {
+          if (r.size !== size) return r;
+          const measures = { ...r.measures };
+          if (trimmed === '') delete measures[key];
+          else {
+            const n = parseFloat(trimmed);
+            if (isNaN(n) || n < 0) return r;
+            measures[key] = n;
+          }
+          return { ...r, measures };
+        }),
+      };
+    });
+    setSizeCharts(next);
+    persistState({ sizeCharts: next });
+    return true;
+  };
+
   const setScenario = (sc: DemoScenario) => {
     setScenarioState(sc);
     if (sc === 'empty') {
@@ -924,6 +1008,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     setStockMovements(initialStockMovements);
     setDiscountCodes(initialDiscountCodes);
     setAbandonedCarts(initialAbandonedCarts);
+    setSizeCharts(initialSizeCharts);
 
     showToast({
       type: 'info',
@@ -956,6 +1041,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         stockMovements,
         discountCodes,
         abandonedCarts,
+        sizeCharts,
         toasts,
         showToast,
         dismissToast,
@@ -980,6 +1066,11 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         toggleDiscountCode,
         deleteDiscountCode,
         remindAbandonedCart,
+        createSizeChart,
+        deleteSizeChart,
+        addSizeChartRow,
+        removeSizeChartRow,
+        patchSizeChartCell,
         resetDemoData,
       }}
     >
