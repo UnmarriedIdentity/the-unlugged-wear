@@ -8,15 +8,15 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 213,
-    "done": 188,
+    "total": 214,
+    "done": 189,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "81b2c28",
-    "unpushed": ["81b2c28", "c135635", "e2d3980", "59ccd5d", "410afd4", "29789c3"],
+    "tip": "863475a",
+    "unpushed": ["863475a", "81b2c28", "c135635", "e2d3980", "59ccd5d", "410afd4", "29789c3"],
     "next_up": "Fulfillment Phase 2 per-card bulk bars; DW2 drawer verification pass; anim-probe re-run; browser verification backlog",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
@@ -2025,6 +2025,20 @@
       "verified": true,
       "pushed": false,
       "follow_ups": ["UI N1a model/linking", "UI N1b write-through", "legacy row migration (later)"]
+    },
+    {
+      "id": "TL-UI-N1A",
+      "title": "Attribute single-record links (auto-register, link picker, id guards)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-16",
+      "finished": "2026-10-16",
+      "log": "feat/search-modal: 863475a libraryId + open-link + register + link picker + Linked badge (values stay strings until A2)",
+      "design_match": "yes",
+      "key_decisions": ["reference not copy; value spellings may repeat, definitions don't; seam returns id"],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": ["N1b write-through display/visibility/hex"]
     },
     {
       "id": "TL-DASH-HOV5",
