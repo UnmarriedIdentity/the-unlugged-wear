@@ -949,10 +949,14 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     return id;
   };
   const libraryUsedBy = (id: string, value?: string): string | null => {
+    const lib = libraryAttributes.find((a) => a.id === id);
     const hit = products.find((p) =>
       (p.attributes ?? []).some(
         (a) =>
-          a.libraryId === id &&
+          // id match first; name fallback catches legacy rows persisted
+          // before links existed (belt + suspenders, never silent).
+          (a.libraryId === id ||
+            (!a.libraryId && lib !== undefined && a.name.toLowerCase() === lib.name.toLowerCase())) &&
           (value === undefined || a.values.some((v) => v.toLowerCase() === value.toLowerCase()))
       )
     );

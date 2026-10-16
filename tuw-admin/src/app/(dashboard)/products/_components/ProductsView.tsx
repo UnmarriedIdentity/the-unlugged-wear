@@ -752,9 +752,9 @@ export default function ProductsView() {
             };
           })
         : [
-            { name: 'Color', values: [...product.colors], builtin: true, displayType: 'swatch' as const, swatchHex: {}, visibleOn: ['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'> },
-            { name: 'Size', values: [...product.sizes], builtin: true, displayType: 'pill' as const, swatchHex: {}, visibleOn: ['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'> },
-            { name: 'Placements', values: [], builtin: true, displayType: 'radio' as const, swatchHex: {}, visibleOn: ['admin'] as Array<'pdp' | 'checkout' | 'admin'> },
+            { name: 'Color', values: [...product.colors], builtin: true, displayType: 'swatch' as const, swatchHex: {}, visibleOn: ['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'>, libraryId: 'LIB-01' },
+            { name: 'Size', values: [...product.sizes], builtin: true, displayType: 'pill' as const, swatchHex: {}, visibleOn: ['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'>, libraryId: 'LIB-02' },
+            { name: 'Placements', values: [], builtin: true, displayType: 'radio' as const, swatchHex: {}, visibleOn: ['admin'] as Array<'pdp' | 'checkout' | 'admin'>, libraryId: 'LIB-03' },
           ]
     );
     setFormPartner(product.partner);
