@@ -40,16 +40,43 @@ export interface ProductItem {
   dimensions?: string;
   gender?: 'Female' | 'Male' | 'Unisex' | 'Kids';
   taxRate?: number;
+  /** Linked measuring set (size-chart manager). Optional — absent means
+   * the legacy hardcoded guide. */
+  sizeChartId?: string;
+  /** Scheduled discounts (P1d): percent/fixed with window + kill switch.
+   * Optional — absent means none. Mirrors product_discounts intent. */
+  discounts?: ProductDiscount[];
   monogram?: { enabled: boolean; maxChars: number; upcharge: number };
   seoTitle?: string;
   seoDescription?: string;
+  /** Gallery presentation (P1a): layout + ratio + visibility for the PDP
+   * stage. Optional — absent means the drawer defaults (carousel/4:3/on). */
+  photoSettings?: PhotoSettings;
+}
+
+/** Per-product gallery presentation. Mirrors the DB photo_settings intent
+ * (see DOC/backend/04-Catalog.md) in drawer-draft shape. */
+export interface PhotoSettings {
+  layout: 'grid' | 'carousel' | 'spotlight';
+  ratio: '1:1' | '4:3' | '16:9';
+  showPhotos: boolean;
+}
+
+/** Scheduled product discount (P1d draft shape): percent/fixed with a
+ * window and kill switch. Dates are ISO strings in the draft. */
+export interface ProductDiscount {
+  id: string;
+  discountType: 'percent' | 'fixed';
+  value: number;
+  startsAt: string;
+  endsAt: string;
+  isActive: boolean;
 }
 
 /** Per-size/color inventory unit. Prices follow ProductItem.price convention
  * (floats — matches the product domain; AGENTS minor-unit tension recorded
  * for later reconciliation, not silently converted). */
-export interface ProductVariant {
-  id: string;
+export interface ProductVariant {  id: string;
   color: string;
   size: string;
   sku: string;
@@ -113,6 +140,34 @@ export interface ShipmentItem {
   estimatedDelivery: string;
   status: 'delivered' | 'in_transit' | 'out_for_delivery' | 'exception';
   events: { time: string; location: string; description: string }[];
+}
+
+/** Abandoned cart (Phase-2 abandonment): idle-cart snapshot + recovery
+ * pipeline. Exactly-once reminder per cart (remindedAt set once). */
+export interface AbandonedCart {
+  id: string;
+  cartId: string;
+  email?: string;
+  items: Array<{ name: string; qty: number; price: number }>;
+  cartTotal: number;
+  abandonedAt: string;
+  remindedAt?: string;
+  status: 'detected' | 'reminded' | 'converted' | 'recovered';
+}
+
+/** Storefront coupon (Phase-2 discounts): code-unique, percent/fixed with
+ * caps, window, kill switch. Checkout validates; this screen governs. */
+export interface DiscountCode {
+  id: string;
+  code: string;
+  discountType: 'percent' | 'fixed';
+  value: number;
+  minOrderAmount?: number;
+  maxUses?: number;
+  usesCount: number;
+  startsAt: string;
+  endsAt: string;
+  isActive: boolean;
 }
 
 export interface RefundItem {
@@ -419,7 +474,7 @@ export const initialOrders: OrderItem[] = [
     timeline: [
       { title: 'Order Placed', time: '16 Apr, 14:32', note: 'Customer completed checkout via Visa' },
       { title: 'Payment Captured', time: '16 Apr, 14:33', note: 'Stripe webhook verified settlement' },
-      { title: 'Fulfillment Queued', time: '16 Apr, 14:40', note: 'Sent to warehouse batch printer' },
+      { title: 'Fulfillment Queued', time: '16 Apr, 14:40', note: 'Submitted to Qikink, awaiting print' },
       { title: 'Dispatched via DHL', time: '16 Apr, 16:10', note: 'Tracking # DHL-489102834 generated' },
     ],
   },
@@ -635,7 +690,7 @@ export const initialOrders: OrderItem[] = [
     paymentMethod: 'Credit Card (Visa)',
     date: '16 Apr 2026, 09:50',
     timeline: [
-      { title: 'In Queue', time: '16 Apr, 09:50', note: 'Allocated warehouse stock slot' },
+      { title: 'In Queue', time: '16 Apr, 09:50', note: 'Qikink confirmed receipt' },
     ],
   },
   {
@@ -1045,6 +1100,214 @@ export const initialReturns: ReturnItem[] = [
     stage: 'disputed',
     date: '12 Apr 2026',
     reason: 'Returned garment exhibits perfume odor and tag removal',
+  },
+];
+
+/** Stock ledger row (P1b demo seam): signed delta + reason + balance
+ * snapshot. The seam appends admin_adjustment rows whenever a save
+ * changes variant stock, so history stays truthful after edits. */
+export interface StockMovement {
+  id: string;
+  productId: string;
+  variantId?: string;
+  qtyChange: number;
+  reason: 'sale' | 'restock' | 'import' | 'admin_adjustment' | 'return' | 'cancel';
+  qtyAfter: number;
+  createdAt: string;
+}
+
+export const initialStockMovements: StockMovement[] = [
+  {
+    id: 'STM-01',
+    productId: 'PRD-01',
+    qtyChange: 120,
+    reason: 'import',
+    qtyAfter: 412,
+    createdAt: '10 Apr 2026, 09:00',
+  },
+  {
+    id: 'STM-02',
+    productId: 'PRD-01',
+    qtyChange: -8,
+    reason: 'sale',
+    qtyAfter: 404,
+    createdAt: '14 Apr 2026, 16:20',
+  },
+  {
+    id: 'STM-03',
+    productId: 'PRD-01',
+    variantId: 'PRD-01-V3',
+    qtyChange: 25,
+    reason: 'admin_adjustment',
+    qtyAfter: 41,
+    createdAt: '15 Apr 2026, 11:05',
+  },
+  {
+    id: 'STM-04',
+    productId: 'PRD-02',
+    qtyChange: 200,
+    reason: 'import',
+    qtyAfter: 200,
+    createdAt: '09 Apr 2026, 10:30',
+  },
+  {
+    id: 'STM-05',
+    productId: 'PRD-02',
+    qtyChange: -14,
+    reason: 'sale',
+    qtyAfter: 186,
+    createdAt: '15 Apr 2026, 13:40',
+  },
+];
+
+/** Storefront search demand (P1c demo seed): what shoppers typed and how
+ * often it returned nothing. Static fixture — nothing in demo writes
+ * these; live tracking swaps the import with zero layout change. */
+export interface SearchTerm {
+  term: string;
+  searches: number;
+  zeroResults: number;
+}
+
+export const initialSearchTerms: SearchTerm[] = [
+  { term: 'oversized hoodie', searches: 1840, zeroResults: 0 },
+  { term: 'linen shirt', searches: 1215, zeroResults: 0 },
+  { term: 'chikankari kurta', searches: 864, zeroResults: 864 },
+  { term: 'cargo pants', searches: 792, zeroResults: 0 },
+  { term: 'aop dress', searches: 640, zeroResults: 0 },
+  { term: 'handloom saree', searches: 515, zeroResults: 515 },
+  { term: 'gym leggings', searches: 402, zeroResults: 0 },
+  { term: 'kurta palazzo set', searches: 288, zeroResults: 288 },
+];
+
+/** Garment measuring sets (size-chart manager): sparse per-row measures —
+ * columns vary by garment (hoodies need sleeve, pants need waist/hip),
+ * which is why rows are maps, not fixed columns (see file 04 jsonb note).
+ * Transcribed from the storefront Fit & Sizing Guide. */
+export interface SizeChartRow {
+  size: string;
+  measures: Record<string, number>;
+}
+export interface SizeChart {
+  id: string;
+  name: string;
+  rows: SizeChartRow[];
+}
+
+export const initialSizeCharts: SizeChart[] = [
+  {
+    id: 'SC-01',
+    name: 'Hoodies',
+    rows: [
+      { size: 'XS', measures: { chest: 108, length: 66, shoulder: 54, sleeve: 59 } },
+      { size: 'S', measures: { chest: 114, length: 69, shoulder: 57, sleeve: 61 } },
+      { size: 'M', measures: { chest: 120, length: 72, shoulder: 60, sleeve: 63 } },
+      { size: 'L', measures: { chest: 126, length: 74, shoulder: 63, sleeve: 64 } },
+      { size: 'XL', measures: { chest: 132, length: 76, shoulder: 66, sleeve: 65 } },
+      { size: 'XXL', measures: { chest: 138, length: 78, shoulder: 69, sleeve: 66 } },
+    ],
+  },
+  {
+    id: 'SC-02',
+    name: 'Tees',
+    rows: [
+      { size: 'XS', measures: { chest: 104, length: 68, shoulder: 50, sleeve: 22 } },
+      { size: 'S', measures: { chest: 110, length: 71, shoulder: 53, sleeve: 23 } },
+      { size: 'M', measures: { chest: 116, length: 74, shoulder: 56, sleeve: 24 } },
+      { size: 'L', measures: { chest: 122, length: 76, shoulder: 59, sleeve: 25 } },
+      { size: 'XL', measures: { chest: 128, length: 78, shoulder: 62, sleeve: 26 } },
+      { size: 'XXL', measures: { chest: 134, length: 80, shoulder: 65, sleeve: 27 } },
+    ],
+  },
+  {
+    id: 'SC-03',
+    name: 'Pants',
+    rows: [
+      { size: 'S (30)', measures: { waist: 78, hip: 106, length: 102, thigh: 66 } },
+      { size: 'M (32)', measures: { waist: 83, hip: 112, length: 104, thigh: 69 } },
+      { size: 'L (34)', measures: { waist: 88, hip: 118, length: 106, thigh: 72 } },
+      { size: 'XL (36)', measures: { waist: 93, hip: 124, length: 108, thigh: 75 } },
+    ],
+  },
+];
+
+export const initialDiscountCodes: DiscountCode[] = [
+  {
+    id: 'DC-01',
+    code: 'UNPLUGGED10',
+    discountType: 'percent',
+    value: 10,
+    minOrderAmount: 999,
+    maxUses: 500,
+    usesCount: 187,
+    startsAt: '2026-04-01',
+    endsAt: '2026-12-31',
+    isActive: true,
+  },
+  {
+    id: 'DC-02',
+    code: 'FLAT200',
+    discountType: 'fixed',
+    value: 200,
+    minOrderAmount: 1499,
+    usesCount: 64,
+    startsAt: '2026-03-15',
+    endsAt: '2026-10-31',
+    isActive: true,
+  },
+  {
+    id: 'DC-03',
+    code: 'DIWALI20',
+    discountType: 'percent',
+    value: 20,
+    maxUses: 200,
+    usesCount: 0,
+    startsAt: '2026-10-18',
+    endsAt: '2026-11-05',
+    isActive: false,
+  },
+];
+
+export const initialAbandonedCarts: AbandonedCart[] = [
+  {
+    id: 'AC-01',
+    cartId: 'CART-8814',
+    email: 'priya.nair@example.com',
+    items: [
+      { name: 'Signature Boxy Hoodie (M)', qty: 1, price: 2499 },
+      { name: 'Everyday Tee (S)', qty: 2, price: 899 },
+    ],
+    cartTotal: 4297,
+    abandonedAt: '15 Apr 2026, 18:20',
+    status: 'detected',
+  },
+  {
+    id: 'AC-02',
+    cartId: 'CART-8809',
+    items: [{ name: 'Architectural Trench (L)', qty: 1, price: 5999 }],
+    cartTotal: 5999,
+    abandonedAt: '15 Apr 2026, 09:45',
+    status: 'detected',
+  },
+  {
+    id: 'AC-03',
+    cartId: 'CART-8798',
+    email: 'arjun.mehta@example.com',
+    items: [{ name: 'Urbanist Hoodie (XL)', qty: 1, price: 2799 }],
+    cartTotal: 2799,
+    abandonedAt: '14 Apr 2026, 21:10',
+    remindedAt: '15 Apr 2026, 10:00',
+    status: 'reminded',
+  },
+  {
+    id: 'AC-04',
+    cartId: 'CART-8771',
+    email: 'kavya.reddy@example.com',
+    items: [{ name: 'AOP Tote (Standard)', qty: 1, price: 1299 }],
+    cartTotal: 1299,
+    abandonedAt: '12 Apr 2026, 14:30',
+    remindedAt: '13 Apr 2026, 09:15',
+    status: 'converted',
   },
 ];
 

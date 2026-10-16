@@ -14,6 +14,10 @@ import {
   TeamMember,
   StoreSettings,
   StaffRole,
+  StockMovement,
+  DiscountCode,
+  AbandonedCart,
+  SizeChart,
   initialProducts,
   initialOrders,
   initialShipments,
@@ -25,6 +29,10 @@ import {
   initialDesigns,
   initialTeam,
   initialSettings,
+  initialStockMovements,
+  initialDiscountCodes,
+  initialAbandonedCarts,
+  initialSizeCharts,
 } from './fixtures';
 import {
   synthesizeVariants,
@@ -63,6 +71,10 @@ interface AdminStateContextType {
   designs: DesignAsset[];
   team: TeamMember[];
   settings: StoreSettings;
+  stockMovements: StockMovement[];
+  discountCodes: DiscountCode[];
+  abandonedCarts: AbandonedCart[];
+  sizeCharts: SizeChart[];
 
   toasts: ToastMessage[];
   showToast: (toast: Omit<ToastMessage, 'id'>) => void;
@@ -75,7 +87,7 @@ interface AdminStateContextType {
 
   createOrder: (order: Omit<OrderItem, 'id' | 'date' | 'timeline' | 'paidAmount' | 'refundedAmount'>) => boolean;
   updateOrderStatus: (orderId: string, paymentStatus?: OrderItem['paymentStatus'], fulfillmentStatus?: OrderItem['fulfillmentStatus'], silent?: boolean) => boolean;
-  retryFulfillment: (orderId: string) => Promise<boolean>;
+  retryFulfillment: (orderId: string, silent?: boolean) => Promise<boolean>;
 
   createShipment: (shipment: Omit<ShipmentItem, 'dispatchDate' | 'events'>) => boolean;
 
@@ -104,6 +116,18 @@ interface AdminStateContextType {
 
   updateSettings: (newSettings: Partial<StoreSettings>) => boolean;
 
+  createDiscountCode: (input: Omit<DiscountCode, 'id' | 'usesCount'>) => boolean;
+  toggleDiscountCode: (id: string) => boolean;
+  deleteDiscountCode: (id: string) => boolean;
+
+  remindAbandonedCart: (id: string) => boolean;
+
+  createSizeChart: (name: string) => boolean;
+  deleteSizeChart: (id: string) => boolean;
+  addSizeChartRow: (chartId: string, size: string) => boolean;
+  removeSizeChartRow: (chartId: string, size: string) => boolean;
+  patchSizeChartCell: (chartId: string, size: string, key: string, raw: string) => boolean;
+
   resetDemoData: () => void;
 }
 
@@ -128,6 +152,10 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
   const [designs, setDesigns] = useState<DesignAsset[]>(initialDesigns);
   const [team, setTeam] = useState<TeamMember[]>(initialTeam);
   const [settings, setSettings] = useState<StoreSettings>(initialSettings);
+  const [stockMovements, setStockMovements] = useState<StockMovement[]>(initialStockMovements);
+  const [discountCodes, setDiscountCodes] = useState<DiscountCode[]>(initialDiscountCodes);
+  const [abandonedCarts, setAbandonedCarts] = useState<AbandonedCart[]>(initialAbandonedCarts);
+  const [sizeCharts, setSizeCharts] = useState<SizeChart[]>(initialSizeCharts);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -147,6 +175,10 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         if (parsed.designs) setDesigns(parsed.designs);
         if (parsed.team) setTeam(parsed.team);
         if (parsed.settings) setSettings(parsed.settings);
+        if (parsed.stockMovements) setStockMovements(parsed.stockMovements);
+        if (parsed.discountCodes) setDiscountCodes(parsed.discountCodes);
+        if (parsed.abandonedCarts) setAbandonedCarts(parsed.abandonedCarts);
+        if (parsed.sizeCharts) setSizeCharts(parsed.sizeCharts);
       }
     } catch {
       // Local storage fallback
@@ -168,6 +200,10 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
       designs?: DesignAsset[];
       team?: TeamMember[];
       settings?: StoreSettings;
+      stockMovements?: StockMovement[];
+      discountCodes?: DiscountCode[];
+      abandonedCarts?: AbandonedCart[];
+      sizeCharts?: SizeChart[];
     }) => {
       try {
         const current = {
@@ -183,6 +219,10 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
           designs,
           team,
           settings,
+          stockMovements,
+          discountCodes,
+          abandonedCarts,
+          sizeCharts,
           ...newState,
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
@@ -190,7 +230,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         // Storage quota / privacy protection
       }
     },
-    [activeRole, products, orders, shipments, refunds, returns, customers, supportTickets, collections, designs, team, settings]
+    [activeRole, products, orders, shipments, refunds, returns, customers, supportTickets, collections, designs, team, settings, stockMovements, discountCodes, abandonedCarts, sizeCharts]
   );
 
   const showToast = useCallback((toast: Omit<ToastMessage, 'id'>) => {
@@ -276,6 +316,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
 
   const updateProduct = (id: string, updates: Partial<ProductItem>, silent = false) => {
     if (!canPerformAction('products')) return false;
+    const target = products.find((p) => p.id === id);
     const next = products.map((p) => {
       if (p.id !== id) return p;
       const merged = { ...p, ...updates };
@@ -288,8 +329,39 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
       }
       return merged;
     });
+    // Ledger truthfulness (P1b): every variant stock delta in a save appends
+    // an admin_adjustment movement, so the history view grows with edits.
+    if (target && updates.variants) {
+      const before = new Map(
+        (target.variants ?? synthesizeVariants(target)).map((v) => [v.id, v.stock])
+      );
+      const stamp = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short', year: 'numeric' });
+      const appended: StockMovement[] = [];
+      updates.variants.forEach((v) => {
+        const old = before.get(v.id);
+        if (old !== undefined && old !== v.stock) {
+          appended.push({
+            id: `STM-${Date.now()}-${v.id}`,
+            productId: id,
+            variantId: v.id,
+            qtyChange: v.stock - old,
+            reason: 'admin_adjustment',
+            qtyAfter: v.stock,
+            createdAt: stamp,
+          });
+        }
+      });
+      if (appended.length > 0) {
+        const nextMovements = [...appended, ...stockMovements];
+        setStockMovements(nextMovements);
+        persistState({ products: next, stockMovements: nextMovements });
+      } else {
+        persistState({ products: next });
+      }
+    } else {
+      persistState({ products: next });
+    }
     setProducts(next);
-    persistState({ products: next });
     if (!silent) {
       showToast({
         type: 'success',
@@ -328,7 +400,20 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     };
     const next = [newOrder, ...orders];
     setOrders(next);
-    persistState({ orders: next });
+    // Recovery matcher: an order from the same email converts their
+    // open abandonment rows (detected/reminded only — never rewrites).
+    const email = o.customerEmail.trim().toLowerCase();
+    const converted = abandonedCarts.map((c) =>
+      c.email?.toLowerCase() === email && (c.status === 'detected' || c.status === 'reminded')
+        ? { ...c, status: 'converted' as const }
+        : c
+    );
+    if (converted.some((c, i) => c !== abandonedCarts[i])) {
+      setAbandonedCarts(converted);
+      persistState({ orders: next, abandonedCarts: converted });
+    } else {
+      persistState({ orders: next });
+    }
     showToast({
       type: 'success',
       title: 'Order Created',
@@ -378,14 +463,16 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     return true;
   };
 
-  const retryFulfillment = async (orderId: string): Promise<boolean> => {
+  const retryFulfillment = async (orderId: string, silent = false): Promise<boolean> => {
     if (!canPerformAction('fulfillment')) return false;
     // Simulate network delay
-    showToast({
-      type: 'info',
-      title: 'Retrying Partner API Webhook',
-      description: `Submitting order ${orderId} payload to print hub...`,
-    });
+    if (!silent) {
+      showToast({
+        type: 'info',
+        title: 'Retrying Partner API Webhook',
+        description: `Submitting order ${orderId} payload to print hub...`,
+      });
+    }
     await new Promise((r) => setTimeout(r, 900));
 
     const next = orders.map((o) => {
@@ -407,11 +494,13 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     });
     setOrders(next);
     persistState({ orders: next });
-    showToast({
-      type: 'success',
-      title: 'Fulfillment Retry Succeeded',
-      description: `Order ${orderId} moved from submission_failed to printing queue.`,
-    });
+    if (!silent) {
+      showToast({
+        type: 'success',
+        title: 'Fulfillment Retry Succeeded',
+        description: `Order ${orderId} moved from submission_failed to printing queue.`,
+      });
+    }
     return true;
   };
 
@@ -690,6 +779,143 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     return true;
   };
 
+  // Discount codes (Phase-2 discounts): used codes are history (delete
+  // refused); kill switch flips is_active reversibly.
+  const createDiscountCode = (input: Omit<DiscountCode, 'id' | 'usesCount'>) => {
+    if (!canPerformAction('orders')) return false;
+    const code = input.code.trim().toUpperCase();
+    if (!code) return false;
+    if (discountCodes.some((d) => d.code.toUpperCase() === code)) {
+      showToast({ type: 'warning', title: 'Duplicate Code', description: `"${code}" already exists.` });
+      return false;
+    }
+    if (input.discountType === 'percent' && (input.value <= 0 || input.value > 100)) {
+      showToast({ type: 'warning', title: 'Invalid Percent', description: 'Percent codes run 1–100.' });
+      return false;
+    }
+    if (input.value <= 0) {
+      showToast({ type: 'warning', title: 'Invalid Value', description: 'Discount value must be above zero.' });
+      return false;
+    }
+    const next = [...discountCodes, { ...input, code, id: `DC-${Date.now()}`, usesCount: 0 }];
+    setDiscountCodes(next);
+    persistState({ discountCodes: next });
+    showToast({ type: 'success', title: 'Code Created', description: `"${code}" is live for checkout.` });
+    return true;
+  };
+  const toggleDiscountCode = (id: string) => {
+    if (!canPerformAction('orders')) return false;
+    const next = discountCodes.map((d) => (d.id === id ? { ...d, isActive: !d.isActive } : d));
+    setDiscountCodes(next);
+    persistState({ discountCodes: next });
+    return true;
+  };
+  const deleteDiscountCode = (id: string) => {
+    if (!canPerformAction('orders')) return false;
+    const target = discountCodes.find((d) => d.id === id);
+    if (!target) return false;
+    if (target.usesCount > 0) {
+      showToast({ type: 'warning', title: 'Code In Use', description: `"${target.code}" has redemptions — kill it instead of deleting.` });
+      return false;
+    }
+    const next = discountCodes.filter((d) => d.id !== id);
+    setDiscountCodes(next);
+    persistState({ discountCodes: next });
+    return true;
+  };
+
+  // Recovery: exactly-once reminder per cart (remindedAt set once).
+  const remindAbandonedCart = (id: string) => {
+    if (!canPerformAction('orders')) return false;
+    const target = abandonedCarts.find((c) => c.id === id);
+    if (!target || target.status !== 'detected') return false;
+    const stamp = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short', year: 'numeric' });
+    const next = abandonedCarts.map((c) =>
+      c.id === id ? { ...c, status: 'reminded' as const, remindedAt: stamp } : c
+    );
+    setAbandonedCarts(next);
+    persistState({ abandonedCarts: next });
+    showToast({
+      type: 'info',
+      title: 'Reminder Queued',
+      description: target.email
+        ? `Recovery email queued for ${target.email} — sends at backend.`
+        : 'Guest cart noted — email capture needed before a reminder can send.',
+    });
+    return true;
+  };
+
+  // Size charts: sparse-measure rows (columns vary by garment).
+  const createSizeChart = (name: string) => {
+    if (!canPerformAction('products')) return false;
+    const trimmed = name.trim();
+    if (!trimmed) return false;
+    if (sizeCharts.some((c) => c.name.toLowerCase() === trimmed.toLowerCase())) {
+      showToast({ type: 'warning', title: 'Duplicate Chart', description: `"${trimmed}" already exists.` });
+      return false;
+    }
+    const next = [...sizeCharts, { id: `SC-${Date.now()}`, name: trimmed, rows: [] }];
+    setSizeCharts(next);
+    persistState({ sizeCharts: next });
+    return true;
+  };
+  const deleteSizeChart = (id: string) => {
+    if (!canPerformAction('products')) return false;
+    const next = sizeCharts.filter((c) => c.id !== id);
+    setSizeCharts(next);
+    persistState({ sizeCharts: next });
+    return true;
+  };
+  const addSizeChartRow = (chartId: string, size: string) => {
+    if (!canPerformAction('products')) return false;
+    const trimmed = size.trim();
+    if (!trimmed) return false;
+    const chart = sizeCharts.find((c) => c.id === chartId);
+    if (!chart || chart.rows.some((r) => r.size.toLowerCase() === trimmed.toLowerCase())) {
+      if (chart) showToast({ type: 'warning', title: 'Duplicate Size', description: `"${trimmed}" is already in ${chart.name}.` });
+      return false;
+    }
+    const next = sizeCharts.map((c) =>
+      c.id === chartId ? { ...c, rows: [...c.rows, { size: trimmed, measures: {} }] } : c
+    );
+    setSizeCharts(next);
+    persistState({ sizeCharts: next });
+    return true;
+  };
+  const removeSizeChartRow = (chartId: string, size: string) => {
+    if (!canPerformAction('products')) return false;
+    const next = sizeCharts.map((c) =>
+      c.id === chartId ? { ...c, rows: c.rows.filter((r) => r.size !== size) } : c
+    );
+    setSizeCharts(next);
+    persistState({ sizeCharts: next });
+    return true;
+  };
+  const patchSizeChartCell = (chartId: string, size: string, key: string, raw: string) => {
+    if (!canPerformAction('products')) return false;
+    const trimmed = raw.trim();
+    const next = sizeCharts.map((c) => {
+      if (c.id !== chartId) return c;
+      return {
+        ...c,
+        rows: c.rows.map((r) => {
+          if (r.size !== size) return r;
+          const measures = { ...r.measures };
+          if (trimmed === '') delete measures[key];
+          else {
+            const n = parseFloat(trimmed);
+            if (isNaN(n) || n < 0) return r;
+            measures[key] = n;
+          }
+          return { ...r, measures };
+        }),
+      };
+    });
+    setSizeCharts(next);
+    persistState({ sizeCharts: next });
+    return true;
+  };
+
   const setScenario = (sc: DemoScenario) => {
     setScenarioState(sc);
     if (sc === 'empty') {
@@ -783,6 +1009,10 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     setDesigns(initialDesigns);
     setTeam(initialTeam);
     setSettings(initialSettings);
+    setStockMovements(initialStockMovements);
+    setDiscountCodes(initialDiscountCodes);
+    setAbandonedCarts(initialAbandonedCarts);
+    setSizeCharts(initialSizeCharts);
 
     showToast({
       type: 'info',
@@ -812,6 +1042,10 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         designs,
         team,
         settings,
+        stockMovements,
+        discountCodes,
+        abandonedCarts,
+        sizeCharts,
         toasts,
         showToast,
         dismissToast,
@@ -832,6 +1066,15 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         inviteTeamMember,
         removeTeamMember,
         updateSettings,
+        createDiscountCode,
+        toggleDiscountCode,
+        deleteDiscountCode,
+        remindAbandonedCart,
+        createSizeChart,
+        deleteSizeChart,
+        addSizeChartRow,
+        removeSizeChartRow,
+        patchSizeChartCell,
         resetDemoData,
       }}
     >

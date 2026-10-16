@@ -3,13 +3,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive, GripVertical, Upload } from 'lucide-react';
+import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive, GripVertical, Upload, Images, Focus } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
 import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, Input, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection, Disclosure, Carousel } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 import { resolveVariants, variantStockTotal, buildVariantSku } from '@/mocks/variants';
-import type { ProductVariant, ProductAttribute } from '@/mocks/fixtures';
+import type { ProductVariant, ProductAttribute, PhotoSettings, ProductDiscount, SizeChart } from '@/mocks/fixtures';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
 
@@ -18,7 +18,7 @@ const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + 
 // swatch dots stay neutral until a value→hex map lands (recorded follow-up).
 
 export default function ProductsView() {
-  const { products, createProduct, updateProduct, deleteProduct, canPerformAction, showToast } = useAdminState();
+  const { products, createProduct, updateProduct, deleteProduct, canPerformAction, showToast, stockMovements, sizeCharts, createSizeChart, deleteSizeChart, addSizeChartRow, removeSizeChartRow, patchSizeChartCell } = useAdminState();
 
   const [selectedCat, setSelectedCat] = useState<string>('All');
   const [publicationFilter, setPublicationFilter] = useState<'all' | 'published' | 'draft' | 'archived'>('all');
@@ -67,6 +67,8 @@ export default function ProductsView() {
   const [formDims, setFormDims] = useState('');
   const [formGender, setFormGender] = useState<ProductItem['gender'] | ''>('');
   const [formTax, setFormTax] = useState('');
+  // Scheduled discounts draft (P1d): rows with type/value/window/switch.
+  const [formDiscounts, setFormDiscounts] = useState<ProductDiscount[]>([]);
   // Per-product attributes (A1): the single source behind colors/sizes.
   // REST: GET/PUT /products/:id/attributes → [{ name, values[], builtin }].
   // Color + Size + Placements ship builtin (locked); customs append here.
@@ -78,6 +80,11 @@ export default function ProductsView() {
   // Per-card value drafts + new-attribute draft (A1b chip editor).
   const [attrDrafts, setAttrDrafts] = useState<Record<string, string>>({});
   const [newAttrName, setNewAttrName] = useState('');
+  // Size-chart drafts (specs manager): per-chart new-row size + new chart name.
+  const [chartRowDrafts, setChartRowDrafts] = useState<Record<string, string>>({});
+  const [newChartName, setNewChartName] = useState('');
+  const [formSizeChartId, setFormSizeChartId] = useState('');
+  const chartColumns = (chart: SizeChart) => [...new Set(chart.rows.flatMap((r) => Object.keys(r.measures)))];
   const [formPartner, setFormPartner] = useState<ProductItem['partner']>('Qikink Direct API');
   const [formPlacement, setFormPlacement] = useState<ProductItem['placement']>('Chest (45mm)');
   const [formStatus, setFormStatus] = useState<ProductItem['publicationStatus']>('published');
@@ -106,6 +113,8 @@ export default function ProductsView() {
     setFormDims('');
     setFormGender('');
     setFormTax('');
+    setFormDiscounts([]);
+    setFormSizeChartId('');
     setFormAttributes([
       { name: 'Color', values: ['Black', 'Chalk White', 'Olive'], builtin: true, displayType: 'swatch', swatchHex: {} },
       { name: 'Size', values: ['S', 'M', 'L', 'XL'], builtin: true, displayType: 'pill', swatchHex: {} },
@@ -116,6 +125,7 @@ export default function ProductsView() {
     setFormStatus('published');
     setFormDescription('Pre-shrunk premium heavyweight combed cotton with reinforced seams.');
     setFormVideo('');
+    setFormPhoto({ layout: 'carousel', ratio: '4:3', showPhotos: true });
     setFormImages([]);
     setUploadReel((prev) => {
       if (prev) revokeUploads([{ url: prev.url }]);
@@ -137,6 +147,9 @@ export default function ProductsView() {
   // Drawer tab + media draft state (elastic workspace; tabs grow per phase)
   const [productTab, setProductTab] = useState<'general' | 'media' | 'variants' | 'specs' | 'seo'>('general');
   const [formVideo, setFormVideo] = useState('');
+  // Gallery presentation draft (P1a): PDP stage layout + ratio + visibility.
+  const [formPhoto, setFormPhoto] = useState<PhotoSettings>({ layout: 'carousel', ratio: '4:3', showPhotos: true });
+  const photoAspect = formPhoto.ratio === '1:1' ? '1 / 1' : formPhoto.ratio === '16:9' ? '16 / 9' : '4 / 3';
   // Gallery draft: persisted URL list + session-only upload previews.
   // Uploads preview instantly but never persist (blob URLs die on reload) —
   // the save toast states this demo truth outright.
@@ -400,6 +413,21 @@ export default function ProductsView() {
   const removeAttribute = (name: string) => {
     setFormAttributes((prev) => prev.filter((a) => a.name !== name));
   };
+
+  // Scheduled discount rows (P1d): local composition, no new primitive.
+  // Kill switch flips isActive (reversible); trash removes the draft row.
+  const addDiscount = () => {
+    setFormDiscounts((prev) => [
+      ...prev,
+      { id: `tmp-d-${Date.now()}`, discountType: 'percent', value: 10, startsAt: '', endsAt: '', isActive: true },
+    ]);
+  };
+  const patchDiscount = (id: string, patch: Partial<ProductDiscount>) => {
+    setFormDiscounts((prev) => prev.map((d) => (d.id === id ? { ...d, ...patch } : d)));
+  };
+  const removeDiscount = (id: string) => {
+    setFormDiscounts((prev) => prev.filter((d) => d.id !== id));
+  };
   const displayTypeLabel = (t: ProductAttribute['displayType']) =>
     t === 'pill' ? 'Pill' : t === 'swatch' ? 'Color swatch' : 'Radio select';
   const setDisplayType = (name: string, displayType: ProductAttribute['displayType']) => {
@@ -560,7 +588,7 @@ export default function ProductsView() {
             }}
           />
         </div>
-        <Button variant="secondary" size="md" onClick={() => addAttrValue(attr.name)} disabled={(attrDrafts[attr.name] ?? '').trim() === ''}>
+        <Button variant="secondary" size="md" type="button" onClick={() => addAttrValue(attr.name)} disabled={(attrDrafts[attr.name] ?? '').trim() === ''}>
           Add
         </Button>
       </div>
@@ -576,6 +604,7 @@ export default function ProductsView() {
     preTableView.current = null;
     setStageIndex(0);
     setFormVideo(product.video || '');
+    setFormPhoto(product.photoSettings ?? { layout: 'carousel', ratio: '4:3', showPhotos: true });
     setFormImages(
       (product.images && product.images.length > 0
         ? product.images
@@ -611,6 +640,8 @@ export default function ProductsView() {
     setFormDims(product.dimensions || '');
     setFormGender(product.gender || '');
     setFormTax(product.taxRate !== undefined ? String(product.taxRate) : '');
+    setFormDiscounts((product.discounts ?? []).map((d) => ({ ...d })));
+    setFormSizeChartId(product.sizeChartId ?? '');
     setFormAttributes(
       product.attributes && product.attributes.length > 0
         ? product.attributes.map((a) => ({ ...a, values: [...a.values], swatchHex: { ...a.swatchHex } }))
@@ -647,12 +678,15 @@ export default function ProductsView() {
         dimensions: formDims.trim() || undefined,
         gender: formGender || undefined,
         taxRate: formTax.trim() !== '' && !isNaN(parseFloat(formTax)) ? parseFloat(formTax) : undefined,
+      sizeChartId: formSizeChartId || undefined,
         partner: formPartner,
         placement: formPlacement,
         publicationStatus: formStatus,
         description: formDescription,
         image: formImages[0]?.src || undefined,
         video: formVideo || undefined,
+        photoSettings: formPhoto,
+        discounts: formDiscounts,
         images: formImages.filter((im) => im.persisted).map((im) => im.src),
         attributes: formAttributes,
         imageBg: 'linear-gradient(135deg, #FAF3F7 0%, #EFE1EB 100%)',
@@ -717,8 +751,11 @@ export default function ProductsView() {
       dimensions: formDims.trim() || undefined,
       gender: formGender || undefined,
       taxRate: formTax.trim() !== '' && !isNaN(parseFloat(formTax)) ? parseFloat(formTax) : undefined,
+      sizeChartId: formSizeChartId || undefined,
       image: formImages[0]?.src || undefined,
       video: formVideo || undefined,
+      photoSettings: formPhoto,
+      discounts: formDiscounts,
       images: formImages.filter((im) => im.persisted).map((im) => im.src),
       variants: submitVariants,
       attributes: formAttributes,
@@ -980,10 +1017,48 @@ export default function ProductsView() {
       </span>
     </div>
   );
-  const stageCarousel = gallerySlides.length > 0 ? (
+  const stageCarousel = !formPhoto.showPhotos ? (
+    <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', padding: '12px 0' }}>
+      Gallery hidden — shoppers see no photos until Show photos is on.
+    </div>
+  ) : gallerySlides.length > 0 && formPhoto.layout === 'grid' ? (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }} role="listbox" aria-label="Customer gallery grid preview">
+      {gallerySlides.map((s, i) => (
+        <button
+          key={`${s.type}-${s.src}-${i}`}
+          type="button"
+          role="option"
+          aria-selected={i === stageIndexClamped}
+          aria-label={`Preview asset ${i + 1} of ${gallerySlides.length}`}
+          onClick={() => setStageIndex(i)}
+          style={{
+            padding: 0,
+            borderRadius: 8,
+            overflow: 'hidden',
+            border: i === stageIndexClamped
+              ? '2px solid var(--tuw-action-primary, #7539FF)'
+              : '1px solid var(--tuw-border-subtle, #E5E7EB)',
+            backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)',
+            cursor: 'pointer',
+            aspectRatio: photoAspect,
+          }}
+        >
+          {s.type === 'video' ? (
+            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', fontSize: 10, fontWeight: 700, color: '#FFFFFF', backgroundColor: '#1A1A1A' }}>
+              REEL
+            </span>
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={s.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          )}
+        </button>
+      ))}
+    </div>
+  ) : gallerySlides.length > 0 ? (
     <Carousel
       ariaLabel="Customer gallery preview"
-      variant="filmstrip"
+      variant={formPhoto.layout === 'spotlight' ? 'dots' : 'filmstrip'}
+      aspect={photoAspect}
       slides={gallerySlides}
       index={stageIndexClamped}
       onIndexChange={setStageIndex}
@@ -1215,6 +1290,74 @@ export default function ProductsView() {
       onChange={(e) => setFormVideo(e.target.value)}
     />
   ) : null;
+  // Gallery presentation controls (P1a): layout toggle + ratio picker +
+  // visibility switch. The stage above reflects every choice live.
+  const presentationSection = (
+    <DrawerSection title="Presentation" titleGap={10}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <ViewToggle
+          ariaLabel="Gallery layout"
+          variant="labeled"
+          options={[
+            { value: 'grid', label: 'Grid', icon: <LayoutGrid size={16} /> },
+            { value: 'carousel', label: 'Carousel', icon: <Images size={16} /> },
+            { value: 'spotlight', label: 'Spotlight', icon: <Focus size={16} /> },
+          ]}
+          value={formPhoto.layout}
+          onChange={(v) => setFormPhoto((prev) => ({ ...prev, layout: v as PhotoSettings['layout'] }))}
+        />
+        <DropdownMenu
+          ariaLabel="Gallery aspect ratio"
+          trigger={
+            <span
+              role="button"
+              tabIndex={0}
+              aria-label={`Gallery ratio, currently ${formPhoto.ratio}`}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 8,
+                width: '100%',
+                height: 40,
+                padding: '0 12px',
+                fontSize: 13,
+                fontWeight: 500,
+                fontFamily: 'var(--font-main)',
+                borderRadius: 8,
+                border: '1px solid var(--tuw-border-control, #D1D5DB)',
+                backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
+                color: 'var(--tuw-text-primary, #262626)',
+                cursor: 'pointer',
+                userSelect: 'none',
+              }}
+            >
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                Ratio {formPhoto.ratio}
+              </span>
+              <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
+            </span>
+          }
+          items={[
+            { value: '1:1', label: 'Square 1:1' },
+            { value: '4:3', label: 'Classic 4:3' },
+            { value: '16:9', label: 'Wide 16:9' },
+          ]}
+          selectedValue={formPhoto.ratio}
+          onSelect={(v) => setFormPhoto((prev) => ({ ...prev, ratio: v as PhotoSettings['ratio'] }))}
+        />
+        <Switch
+          label="Show photos on storefront"
+          description="Hidden galleries keep their assets in the draft"
+          checked={formPhoto.showPhotos}
+          onChange={(v) => setFormPhoto((prev) => ({ ...prev, showPhotos: v }))}
+        />
+      </div>
+    </DrawerSection>
+  );
   const addUrlRow = (
     <div style={{ display: 'flex', gap: 8 }}>
       <div style={{ flex: 1 }}>
@@ -1838,6 +1981,115 @@ export default function ProductsView() {
                 required
               />
             </div>
+            <DrawerSection title="Pricing & Discounts" titleGap={10}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
+                  Scheduled price cuts with a window and kill switch. The compare price above is static marketing text.
+                </p>
+                {formDiscounts.map((d) => (
+                  <SurfaceCard key={d.id} padding="10px" gap="8px">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{ width: 130, flexShrink: 0 }}>
+                        <DropdownMenu
+                          ariaLabel="Discount type"
+                          trigger={
+                            <span
+                              role="button"
+                              tabIndex={0}
+                              aria-label={`Discount type, currently ${d.discountType}`}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+                              }}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                gap: 8,
+                                width: '100%',
+                                height: 36,
+                                padding: '0 10px',
+                                fontSize: 13,
+                                fontWeight: 500,
+                                fontFamily: 'var(--font-main)',
+                                borderRadius: 8,
+                                border: '1px solid var(--tuw-border-control, #D1D5DB)',
+                                backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
+                                color: 'var(--tuw-text-primary, #262626)',
+                                cursor: 'pointer',
+                                userSelect: 'none',
+                              }}
+                            >
+                              <span>{d.discountType === 'percent' ? 'Percent %' : 'Fixed ₹'}</span>
+                              <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
+                            </span>
+                          }
+                          items={[
+                            { value: 'percent', label: 'Percent %' },
+                            { value: 'fixed', label: 'Fixed ₹' },
+                          ]}
+                          selectedValue={d.discountType}
+                          onSelect={(v) => patchDiscount(d.id, { discountType: v as ProductDiscount['discountType'] })}
+                        />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <Input
+                          aria-label="Discount value"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          max={d.discountType === 'percent' ? '100' : undefined}
+                          value={String(d.value)}
+                          onChange={(e) => {
+                            const n = parseFloat(e.target.value);
+                            if (isNaN(n)) return;
+                            patchDiscount(d.id, {
+                              value: d.discountType === 'percent' ? Math.min(100, Math.max(0, n)) : Math.max(0, n),
+                            });
+                          }}
+                          style={{ height: 36 }}
+                        />
+                      </div>
+                      <Switch
+                        label=""
+                        checked={d.isActive}
+                        onChange={(v) => patchDiscount(d.id, { isActive: v })}
+                      />
+                      <UpliftSurface active width={28} height={28} className="tuw-danger-hover" style={{ flexShrink: 0, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                        <button
+                          type="button"
+                          aria-label="Remove discount"
+                          onClick={() => removeDiscount(d.id)}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, display: 'inline-flex' }}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </UpliftSurface>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                      <Input
+                        aria-label="Discount starts"
+                        type="date"
+                        value={d.startsAt}
+                        onChange={(e) => patchDiscount(d.id, { startsAt: e.target.value })}
+                        style={{ height: 36 }}
+                      />
+                      <Input
+                        aria-label="Discount ends"
+                        type="date"
+                        value={d.endsAt}
+                        onChange={(e) => patchDiscount(d.id, { endsAt: e.target.value })}
+                        style={{ height: 36 }}
+                      />
+                    </div>
+                  </SurfaceCard>
+                ))}
+                <div>
+                  <Button variant="secondary" size="sm" icon={<Plus size={14} />} type="button" onClick={addDiscount}>
+                    Add Discount
+                  </Button>
+                </div>
+              </div>
+            </DrawerSection>
             <div>
               <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', marginBottom: 6 }}>
                 Publication Status
@@ -1907,7 +2159,7 @@ export default function ProductsView() {
                       }}
                     />
                   </div>
-                  <Button variant="secondary" size="md" icon={<Plus size={14} />} onClick={addAttribute} disabled={newAttrName.trim() === ''}>
+                  <Button variant="secondary" size="md" icon={<Plus size={14} />} type="button" onClick={addAttribute} disabled={newAttrName.trim() === ''}>
                     Add Attribute
                   </Button>
                 </div>
@@ -1937,7 +2189,7 @@ export default function ProductsView() {
             </DrawerSection>
             <Disclosure
               title="Internal fields"
-              subtitle="Warehouse-facing data: weights, dimensions, print placements. Hidden from shoppers."
+              subtitle="Internal data: weights, dimensions, print placements. Hidden from shoppers."
               badge={<Badge variant="neutral" size="sm">{[formWeight, formShipWeight, formDims, formGender].filter(Boolean).length + formAttributes.filter((a) => a.name === 'Placements').reduce((n, a) => n + a.values.length, 0)} filled</Badge>}
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -2024,7 +2276,7 @@ export default function ProductsView() {
             <div style={{ display: 'grid', gridTemplateColumns: '9fr 11fr', gap: 20, alignItems: 'start' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0 }}>
                 {stageHeader}
-                <Carousel ariaLabel="Customer gallery preview" variant="filmstrip" slides={gallerySlides} index={stageIndexClamped} onIndexChange={setStageIndex} />
+                {stageCarousel}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
                 {panelHeader}
@@ -2032,17 +2284,19 @@ export default function ProductsView() {
                 {addUrlRow}
                 {dropzone}
                 {reelUrlField}
+                {presentationSection}
               </div>
             </div>
             ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {stageHeader}
-              <Carousel ariaLabel="Customer gallery preview" variant="filmstrip" slides={gallerySlides} index={stageIndexClamped} onIndexChange={setStageIndex} />
+              {stageCarousel}
               {panelHeader}
               {mediaCards ? assetCards : assetRows}
               {addUrlRow}
               {dropzone}
               {reelUrlField}
+              {presentationSection}
             </div>
             )}
             <input
@@ -2166,6 +2420,47 @@ export default function ProductsView() {
                 ))}
               </TableBody>
             </Table>
+            <Disclosure
+              title={`Stock history (${editingProduct ? stockMovements.filter((m) => m.productId === editingProduct.id).length : 0})`}
+              subtitle="Ledger of stock changes — every save that moves units appends here."
+            >
+              {editingProduct && stockMovements.some((m) => m.productId === editingProduct.id) ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow hoverable={false}>
+                      <TableHead style={{ padding: '10px 16px' }}>Date</TableHead>
+                      <TableHead style={{ padding: '10px 16px', textAlign: 'right' }}>Change</TableHead>
+                      <TableHead style={{ padding: '10px 16px' }}>Reason</TableHead>
+                      <TableHead style={{ padding: '10px 16px', textAlign: 'right' }}>Balance</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {stockMovements
+                      .filter((m) => m.productId === editingProduct.id)
+                      .map((m) => (
+                        <TableRow key={m.id} hoverable={false}>
+                          <TableCell style={{ padding: '10px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                            {m.createdAt}
+                          </TableCell>
+                          <TableCell style={{ padding: '10px 16px', textAlign: 'right', fontSize: 14, fontWeight: 600, color: m.qtyChange >= 0 ? 'var(--tuw-text-success, #187343)' : 'var(--tuw-text-error, #C91818)' }}>
+                            {m.qtyChange >= 0 ? `+${m.qtyChange}` : m.qtyChange}
+                          </TableCell>
+                          <TableCell style={{ padding: '10px 16px' }}>
+                            <Badge variant="neutral" size="sm">{m.reason.replace(/_/g, ' ')}</Badge>
+                          </TableCell>
+                          <TableCell style={{ padding: '10px 16px', textAlign: 'right', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
+                            {m.qtyAfter}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                  No movements yet — edit stock and save to grow this ledger.
+                </div>
+              )}
+            </Disclosure>
           </div>
           ) : productTab === 'specs' ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -2220,6 +2515,199 @@ export default function ProductsView() {
                     Open Fit Guide
                   </Link>
                 </div>
+                <div>
+                  <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
+                    Size Chart
+                  </span>
+                  <DropdownMenu
+                    ariaLabel="Product size chart"
+                    fullWidth
+                    trigger={
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`Size chart, currently ${sizeCharts.find((c) => c.id === formSizeChartId)?.name ?? 'None'}`}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+                        }}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: 8,
+                          width: '100%',
+                          height: 40,
+                          padding: '0 12px',
+                          fontSize: 13,
+                          fontWeight: 500,
+                          fontFamily: 'var(--font-main)',
+                          borderRadius: 8,
+                          border: '1px solid var(--tuw-border-control, #D1D5DB)',
+                          backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
+                          color: 'var(--tuw-text-primary, #262626)',
+                          cursor: 'pointer',
+                          userSelect: 'none',
+                        }}
+                      >
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {sizeCharts.find((c) => c.id === formSizeChartId)?.name ?? 'No chart — legacy guide applies'}
+                        </span>
+                        <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
+                      </span>
+                    }
+                    items={[
+                      { value: '', label: 'No chart — legacy guide applies' },
+                      ...sizeCharts.map((c) => ({ value: c.id, label: c.name })),
+                    ]}
+                    selectedValue={formSizeChartId}
+                    onSelect={(v) => setFormSizeChartId(v)}
+                  />
+                </div>
+                <Disclosure
+                  title={`Size charts (${sizeCharts.length})`}
+                  subtitle="Measuring sets by garment. Columns vary — hoodies track sleeve, pants track waist."
+                >
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {sizeCharts.map((chart) => {
+                      const cols = chartColumns(chart);
+                      return (
+                        <SurfaceCard key={chart.id} padding="12px" gap="10px">
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                              {chart.name}
+                            </span>
+                            <UpliftSurface active width={28} height={28} className="tuw-danger-hover" style={{ flexShrink: 0, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                              <button
+                                type="button"
+                                aria-label={`Remove chart ${chart.name}`}
+                                onClick={() => {
+                                  const usedBy = products.find((p) => p.sizeChartId === chart.id);
+                                  if (usedBy) {
+                                    showToast({ type: 'warning', title: 'Chart In Use', description: `"${chart.name}" is assigned to ${usedBy.name} — reassign first.` });
+                                    return;
+                                  }
+                                  deleteSizeChart(chart.id);
+                                }}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, display: 'inline-flex' }}
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </UpliftSurface>
+                          </div>
+                          {chart.rows.length > 0 ? (
+                            <Table>
+                              <TableHeader>
+                                <TableRow hoverable={false}>
+                                  <TableHead style={{ padding: '10px 16px' }}>Size</TableHead>
+                                  {cols.map((col) => (
+                                    <TableHead key={col} style={{ padding: '10px 16px', textTransform: 'capitalize' }}>{col} (cm)</TableHead>
+                                  ))}
+                                  <TableHead style={{ padding: '10px 16px', width: 48 }}><span className="sr-only">Remove</span></TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {chart.rows.map((row) => (
+                                  <TableRow key={row.size} hoverable={false}>
+                                    <TableCell style={{ padding: '10px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                                      {row.size}
+                                    </TableCell>
+                                    {cols.map((col) => (
+                                      <TableCell key={col} style={{ padding: '10px 16px' }}>
+                                        <Input
+                                          aria-label={`${row.size} ${col} in cm`}
+                                          type="number"
+                                          min="0"
+                                          value={row.measures[col] ?? ''}
+                                          onChange={(e) => patchSizeChartCell(chart.id, row.size, col, e.target.value)}
+                                          style={{ height: 36 }}
+                                        />
+                                      </TableCell>
+                                    ))}
+                                    <TableCell style={{ padding: '10px 16px', width: 48 }}>
+                                      <UpliftSurface active width={28} height={28} className="tuw-danger-hover" style={{ flexShrink: 0, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                                        <button
+                                          type="button"
+                                          aria-label={`Remove size ${row.size} from ${chart.name}`}
+                                          onClick={() => removeSizeChartRow(chart.id, row.size)}
+                                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, display: 'inline-flex' }}
+                                        >
+                                          <Trash2 size={14} />
+                                        </button>
+                                      </UpliftSurface>
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          ) : (
+                            <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                              No sizes yet — add the first one below.
+                            </div>
+                          )}
+                          <div style={{ display: 'flex', gap: 8 }}>
+                            <div style={{ flex: 1 }}>
+                              <Input
+                                aria-label={`Add size to ${chart.name}`}
+                                placeholder="Size, e.g. XXS"
+                                value={chartRowDrafts[chart.id] ?? ''}
+                                onChange={(e) => setChartRowDrafts((prev) => ({ ...prev, [chart.id]: e.target.value }))}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    if (addSizeChartRow(chart.id, chartRowDrafts[chart.id] ?? '')) {
+                                      setChartRowDrafts((prev) => ({ ...prev, [chart.id]: '' }));
+                                    }
+                                  }
+                                }}
+                              />
+                            </div>
+                            <Button
+                              variant="secondary"
+                              size="md"
+                              type="button"
+                              onClick={() => {
+                                if (addSizeChartRow(chart.id, chartRowDrafts[chart.id] ?? '')) {
+                                  setChartRowDrafts((prev) => ({ ...prev, [chart.id]: '' }));
+                                }
+                              }}
+                              disabled={(chartRowDrafts[chart.id] ?? '').trim() === ''}
+                            >
+                              Add
+                            </Button>
+                          </div>
+                        </SurfaceCard>
+                      );
+                    })}
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <div style={{ flex: 1 }}>
+                        <Input
+                          aria-label="New chart name"
+                          placeholder="New chart, e.g. Kids Tops"
+                          value={newChartName}
+                          onChange={(e) => setNewChartName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              if (createSizeChart(newChartName)) setNewChartName('');
+                            }
+                          }}
+                        />
+                      </div>
+                      <Button
+                        variant="secondary"
+                        size="md"
+                        icon={<Plus size={14} />}
+                        type="button"
+                        onClick={() => {
+                          if (createSizeChart(newChartName)) setNewChartName('');
+                        }}
+                        disabled={newChartName.trim() === ''}
+                      >
+                        Add Chart
+                      </Button>
+                    </div>
+                  </div>
+                </Disclosure>
               </div>
             </DrawerSection>
             {visibleSections.monogram ? (

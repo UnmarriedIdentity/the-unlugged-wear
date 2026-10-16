@@ -20,6 +20,7 @@ import {
 import DashboardShell from '@/components/layout/DashboardShell';
 import { StatCard, ContentCard, Button, Badge, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
+import { initialSearchTerms } from '@/mocks/fixtures';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
 
@@ -36,6 +37,11 @@ export default function AnalyticsView() {
   const aov = paidOrders.length > 0 ? totalRevenue / paidOrders.length : 0;
   const totalRefundsSum = refunds.reduce((sum, r) => sum + r.amount, 0);
 
+  // Search demand (P1c): share of searches returning nothing.
+  const totalSearches = initialSearchTerms.reduce((sum, t) => sum + t.searches, 0);
+  const totalZeroHits = initialSearchTerms.reduce((sum, t) => sum + t.zeroResults, 0);
+  const totalZeroRate = totalSearches > 0 ? (totalZeroHits / totalSearches) * 100 : 0;
+
   const totalPages = Math.max(1, Math.ceil(products.length / pageSize));
   const paginatedProducts = products.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
@@ -46,6 +52,8 @@ export default function AnalyticsView() {
       ['Total Processed Orders', String(totalOrdersCount), timeRange],
       ['Average Order Value (AOV)', `₹${Math.round(aov).toLocaleString()}`, timeRange],
       ['Total Refund Disbursements', `₹${totalRefundsSum.toLocaleString()}`, timeRange],
+      ['Top Search Term', `${[...initialSearchTerms].sort((a, b) => b.searches - a.searches)[0]?.term ?? '—'}`, timeRange],
+      ['Zero-Result Searches', `${totalZeroHits.toLocaleString()} (${totalZeroRate.toFixed(1)}%)`, timeRange],
       ['Active Catalog Garments', String(products.length), 'Current'],
       ['Registered Client Base', String(customers.length), 'Current'],
     ];
@@ -200,6 +208,51 @@ export default function AnalyticsView() {
           <span>Wk 4</span>
         </div>
       </div>
+
+      {/* Product Merchandising Breakdown */}
+      <ContentCard>
+        <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginBottom: 4 }}>
+          Top Searches
+        </h3>
+        <p style={{ fontSize: '13px', color: 'var(--tuw-text-secondary, #5D6772)', margin: '0 0 12px 0' }}>
+          Sample data — live tracking connects at launch. Zero-result terms guide what to import next.
+        </p>
+        <p style={{ fontSize: '13px', color: 'var(--tuw-text-secondary, #5D6772)', margin: '0 0 12px 0' }}>
+          <strong style={{ color: totalZeroRate > 20 ? 'var(--tuw-text-error, #C91818)' : 'var(--tuw-text-primary, #262626)' }}>
+            {totalZeroRate.toFixed(1)}%
+          </strong>{' '}
+          of searches return nothing.
+        </p>
+        <Table>
+          <TableHeader style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
+            <TableRow hoverable={false}>
+              <TableHead style={{ padding: '10px 14px' }}>Term</TableHead>
+              <TableHead style={{ padding: '10px 14px', textAlign: 'right' }}>Searches</TableHead>
+              <TableHead style={{ padding: '10px 14px', textAlign: 'right' }}>No-result rate</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {[...initialSearchTerms].sort((a, b) => b.searches - a.searches).map((t) => {
+              const rate = t.searches > 0 ? (t.zeroResults / t.searches) * 100 : 0;
+              return (
+                <TableRow key={t.term} hoverable={false} style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
+                  <TableCell style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                    {t.term}
+                  </TableCell>
+                  <TableCell className="tuw-tabular-nums" style={{ padding: '12px 14px', fontSize: 13, color: 'var(--tuw-text-primary, #262626)', textAlign: 'right' }}>
+                    {t.searches.toLocaleString()}
+                  </TableCell>
+                  <TableCell style={{ padding: '12px 14px', textAlign: 'right' }}>
+                    <Badge variant={rate >= 100 ? 'danger' : rate > 0 ? 'warning' : 'success'} size="sm">
+                      {rate.toFixed(0)}%
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </ContentCard>
 
       {/* Product Merchandising Breakdown */}
       <ContentCard>

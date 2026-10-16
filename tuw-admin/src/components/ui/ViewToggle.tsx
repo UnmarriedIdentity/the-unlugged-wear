@@ -14,6 +14,10 @@ export interface ViewToggleProps {
   value: string;
   onChange: (value: string) => void;
   ariaLabel?: string;
+  /** Segment treatment. 'icon' (default, 32px squares — all existing
+   * callers byte-identical); 'labeled' (full-width, icon + text with
+   * dividers between segments). */
+  variant?: 'icon' | 'labeled';
 }
 
 // Segmented grid/table view switch (VT1): dumb, props-fed, mock/live
@@ -25,21 +29,24 @@ export default function ViewToggle({
   value,
   onChange,
   ariaLabel = 'Change view',
+  variant = 'icon',
 }: ViewToggleProps) {
+  const labeled = variant === 'labeled';
   return (
     <div
       role="radiogroup"
       aria-label={ariaLabel}
       style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '4px',
+        display: 'flex',
+        alignItems: 'stretch',
+        gap: labeled ? 0 : '4px',
         padding: '4px',
         borderRadius: 'var(--tuw-radius-card, 12px)',
         backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)',
+        ...(labeled ? { width: '100%', boxSizing: 'border-box' } : { display: 'inline-flex', alignItems: 'center' }),
       }}
     >
-      {options.map((option) => {
+      {options.map((option, i) => {
         const selected = option.value === value;
         return (
           <button
@@ -50,19 +57,67 @@ export default function ViewToggle({
             aria-label={option.label}
             title={option.label}
             onClick={() => onChange(option.value)}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 32,
-              height: 32,
-              padding: 0,
-              borderRadius: 8,
-              border: 'none',
-              backgroundColor: 'transparent',
-              cursor: 'pointer',
-            }}
+            style={
+              labeled
+                ? {
+                    flex: 1,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                    minWidth: 0,
+                    height: 36,
+                    padding: '0 8px',
+                    background: 'none',
+                    border: 'none',
+                    borderLeft:
+                      i > 0 ? '1px solid var(--tuw-border-subtle, #E5E7EB)' : 'none',
+                    borderRadius: 8,
+                    cursor: 'pointer',
+                    fontSize: 12,
+                    fontWeight: 600,
+                    fontFamily: 'var(--font-main)',
+                    color: selected
+                      ? 'var(--tuw-action-primary, #7539FF)'
+                      : 'var(--tuw-text-secondary, #5D6772)',
+                  }
+                : {
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: 32,
+                    height: 32,
+                    padding: 0,
+                    borderRadius: 8,
+                    border: 'none',
+                    backgroundColor: 'transparent',
+                    cursor: 'pointer',
+                  }
+            }
           >
+            {labeled ? (
+              <UpliftSurface
+                active={selected}
+                width="100%"
+                height="100%"
+                radius={8}
+                style={{
+                  gap: 6,
+                  color: selected
+                    ? 'var(--tuw-action-primary, #7539FF)'
+                    : 'var(--tuw-text-secondary, #5D6772)',
+                  transition: 'all 0.15s ease',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  fontFamily: 'var(--font-main)',
+                }}
+              >
+                {option.icon}
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {option.label}
+                </span>
+              </UpliftSurface>
+            ) : (
             <UpliftSurface
               active={selected}
               width={32}
@@ -77,6 +132,7 @@ export default function ViewToggle({
             >
               {option.icon}
             </UpliftSurface>
+            )}
           </button>
         );
       })}

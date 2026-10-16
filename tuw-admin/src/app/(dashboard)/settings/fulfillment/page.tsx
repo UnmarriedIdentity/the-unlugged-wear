@@ -35,7 +35,7 @@ export default function FulfillmentSettingsPage() {
       <ContentCard>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           <h3 style={{ fontSize: 18, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-            3PL Warehouse API
+            Print Partner API (Qikink)
           </h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
             <Input label="Webhook Secret" value={partnerApiKey} onChange={(e) => setPartnerApiKey(e.target.value)} />
