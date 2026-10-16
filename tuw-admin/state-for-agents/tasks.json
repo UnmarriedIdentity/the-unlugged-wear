@@ -8,15 +8,15 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 214,
-    "done": 189,
+    "total": 215,
+    "done": 190,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "70bd69a",
-    "unpushed": ["70bd69a", "863475a", "81b2c28", "c135635", "e2d3980", "59ccd5d", "410afd4", "29789c3"],
+    "tip": "542f570",
+    "unpushed": ["542f570", "70bd69a", "863475a", "81b2c28", "c135635", "e2d3980", "59ccd5d", "410afd4", "29789c3"],
     "next_up": "Fulfillment Phase 2 per-card bulk bars; DW2 drawer verification pass; anim-probe re-run; browser verification backlog",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
@@ -2039,6 +2039,19 @@
       "verified": true,
       "pushed": false,
       "follow_ups": ["N1b write-through display/visibility/hex"]
+    },
+    {
+      "id": "TL-UI-VALPICK",
+      "title": "Picker-first value entry (V1 drawer; V2 retired as no-op)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-16",
+      "finished": "2026-10-16",
+      "log": "feat/search-modal: 542f570 shared commitAttrValue + known-values picker (V2 would duplicate its own complete set — refused per no-dead-controls)",
+      "design_match": "yes",
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
     },
     {
       "id": "TL-DASH-HOV5",
