@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive, GripVertical, Upload, Images, Focus } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, Input, Drawer, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection, Disclosure, Carousel } from '@/components/ui';
+import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, Input, Drawer, Modal, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection, Disclosure, Carousel } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 import { resolveVariants, variantStockTotal, buildVariantSku } from '@/mocks/variants';
@@ -116,9 +116,9 @@ export default function ProductsView() {
     setFormDiscounts([]);
     setFormSizeChartId('');
     setFormAttributes([
-      { name: 'Color', values: ['Black', 'Chalk White', 'Olive'], builtin: true, displayType: 'swatch', swatchHex: {} },
-      { name: 'Size', values: ['S', 'M', 'L', 'XL'], builtin: true, displayType: 'pill', swatchHex: {} },
-      { name: 'Placements', values: [], builtin: true, displayType: 'radio', swatchHex: {} },
+      { name: 'Color', values: ['Black', 'Chalk White', 'Olive'], builtin: true, displayType: 'swatch', swatchHex: {}, visibleOn: ['pdp', 'admin'] },
+      { name: 'Size', values: ['S', 'M', 'L', 'XL'], builtin: true, displayType: 'pill', swatchHex: {}, visibleOn: ['pdp', 'admin'] },
+      { name: 'Placements', values: [], builtin: true, displayType: 'radio', swatchHex: {}, visibleOn: ['admin'] },
     ]);
     setFormPartner('Qikink Direct API');
     setFormPlacement('Chest (45mm)');
@@ -407,7 +407,7 @@ export default function ProductsView() {
       showToast({ type: 'warning', title: 'Duplicate Attribute', description: `"${name}" already exists.` });
       return;
     }
-    setFormAttributes((prev) => [...prev, { name, values: [], builtin: false, displayType: 'pill', swatchHex: {} }]);
+    setFormAttributes((prev) => [...prev, { name, values: [], builtin: false, displayType: 'pill', swatchHex: {}, visibleOn: ['pdp', 'admin'] }]);
     setNewAttrName('');
   };
   const removeAttribute = (name: string) => {
@@ -436,6 +436,33 @@ export default function ProductsView() {
   const setSwatchHex = (name: string, value: string, hex: string) => {
     setFormAttributes((prev) =>
       prev.map((a) => (a.name === name ? { ...a, swatchHex: { ...a.swatchHex, [value]: hex } } : a))
+    );
+  };
+  // Visibility toggles (X1a): at least one surface always — unchecking the
+  // last one is refused with a naming toast, input preserved.
+  const toggleVisibility = (name: string, surface: 'pdp' | 'checkout' | 'admin') => {
+    const attr = formAttributes.find((a) => a.name === name);
+    if (!attr) return;
+    const has = (attr.visibleOn ?? []).includes(surface);
+    if (has && (attr.visibleOn ?? []).length === 1) {
+      showToast({
+        type: 'warning',
+        title: 'Visibility Required',
+        description: `"${name}" must show on at least one surface.`,
+      });
+      return;
+    }
+    setFormAttributes((prev) =>
+      prev.map((a) =>
+        a.name === name
+          ? {
+              ...a,
+              visibleOn: has
+                ? (a.visibleOn ?? []).filter((s) => s !== surface)
+                : [...(a.visibleOn ?? []), surface],
+            }
+          : a
+      )
     );
   };
 
@@ -512,6 +539,19 @@ export default function ProductsView() {
         />
       </div>
       )}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+          Shows on
+        </span>
+        {(['pdp', 'checkout', 'admin'] as const).map((surface) => (
+          <Checkbox
+            key={surface}
+            label={surface === 'pdp' ? 'PDP' : surface === 'checkout' ? 'Checkout' : 'Admin-only'}
+            checked={(attr.visibleOn ?? []).includes(surface)}
+            onChange={() => toggleVisibility(attr.name, surface)}
+          />
+        ))}
+      </div>
       {attr.values.length > 0 ? (
         <Table>
           <TableHeader>
@@ -644,11 +684,21 @@ export default function ProductsView() {
     setFormSizeChartId(product.sizeChartId ?? '');
     setFormAttributes(
       product.attributes && product.attributes.length > 0
-        ? product.attributes.map((a) => ({ ...a, values: [...a.values], swatchHex: { ...a.swatchHex } }))
+        ? product.attributes.map((a) => ({
+            ...a,
+            values: [...a.values],
+            swatchHex: { ...(a.swatchHex ?? {}) },
+            visibleOn:
+              a.visibleOn && a.visibleOn.length > 0
+                ? [...a.visibleOn]
+                : a.name === 'Placements'
+                  ? ['admin' as const]
+                  : (['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'>),
+          }))
         : [
-            { name: 'Color', values: [...product.colors], builtin: true, displayType: 'swatch' as const, swatchHex: {} },
-            { name: 'Size', values: [...product.sizes], builtin: true, displayType: 'pill' as const, swatchHex: {} },
-            { name: 'Placements', values: [], builtin: true, displayType: 'radio' as const, swatchHex: {} },
+            { name: 'Color', values: [...product.colors], builtin: true, displayType: 'swatch' as const, swatchHex: {}, visibleOn: ['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'> },
+            { name: 'Size', values: [...product.sizes], builtin: true, displayType: 'pill' as const, swatchHex: {}, visibleOn: ['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'> },
+            { name: 'Placements', values: [], builtin: true, displayType: 'radio' as const, swatchHex: {}, visibleOn: ['admin'] as Array<'pdp' | 'checkout' | 'admin'> },
           ]
     );
     setFormPartner(product.partner);
@@ -886,6 +936,199 @@ export default function ProductsView() {
       seen.add(key);
     }
     return null;
+  };
+
+  // CSV import pipeline (X1b): Final Listing workbooks re-saved as CSV.
+  // Quoted-field-aware parse (no dependency); unknown columns ignored;
+  // valid rows stage as drafts, failures preserve file + error list.
+  interface ImportRow {
+    name: string;
+    styleCode: string;
+    colors: string[];
+    sizes: string[];
+    placements: string[];
+    price: number;
+    weight: string;
+    shipWeight: string;
+    dims: string;
+    tax: string;
+    gender: string;
+  }
+  const [importPreview, setImportPreview] = useState<{
+    fileName: string;
+    valid: ImportRow[];
+    errors: Array<{ row: number; message: string }>;
+  } | null>(null);
+  const csvInputRef = useRef<HTMLInputElement>(null);
+
+  const parseCsv = (text: string): string[][] => {
+    const rows: string[][] = [];
+    let row: string[] = [];
+    let cell = '';
+    let inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+      if (inQuotes) {
+        if (ch === '"') {
+          if (text[i + 1] === '"') {
+            cell += '"';
+            i++;
+          } else inQuotes = false;
+        } else cell += ch;
+      } else if (ch === '"') inQuotes = true;
+      else if (ch === ',') {
+        row.push(cell);
+        cell = '';
+      } else if (ch === '\n') {
+        row.push(cell);
+        rows.push(row);
+        row = [];
+        cell = '';
+      } else if (ch !== '\r') cell += ch;
+    }
+    if (cell !== '' || row.length > 0) {
+      row.push(cell);
+      rows.push(row);
+    }
+    return rows.filter((r) => r.some((c) => c.trim() !== ''));
+  };
+
+  const splitList = (s: string) =>
+    s.split(',').map((x) => x.trim()).filter(Boolean);
+
+  const handleImportFile = (file: File | undefined) => {
+    if (!file) return;
+    if (!/\.csv$/i.test(file.name)) {
+      showToast({
+        type: 'info',
+        title: 'Save As CSV First',
+        description: 'Binary .xls workbooks cannot be parsed — re-save the sheet as CSV and drop it here.',
+      });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const grid = parseCsv(String(reader.result ?? ''));
+      if (grid.length < 2) {
+        showToast({ type: 'warning', title: 'Empty Sheet', description: `"${file.name}" has no data rows.` });
+        return;
+      }
+      const headers = grid[0].map((h) => h.trim().toLowerCase());
+      const col = (names: string[]) => {
+        for (const n of names) {
+          const i = headers.indexOf(n);
+          if (i >= 0) return i;
+        }
+        return -1;
+      };
+      const cStyle = col(['style']);
+      const cSizes = col(['sizes', 'size']);
+      const cColors = col(['colors', 'color']);
+      const cWeight = col(['weight']);
+      const cShip = col(['shipping weight', 'ship weight']);
+      const cPrice = col(['base price', 'price']);
+      const cPlace = col(['placements', 'placement']);
+      const cDims = col(['package dimensions', 'dimensions']);
+      const cTax = col(['tax rate', 'tax']);
+      const cGender = col(['gender']);
+      const valid: ImportRow[] = [];
+      const errors: Array<{ row: number; message: string }> = [];
+      const seenCodes = new Set<string>();
+      grid.slice(1).forEach((cells, i) => {
+        const rowNo = i + 2;
+        const get = (c: number) => (c >= 0 ? (cells[c] ?? '').trim() : '');
+        const styleRaw = get(cStyle);
+        const name = styleRaw.split('|')[0]?.trim() ?? '';
+        const styleCode = styleRaw.split('|')[1]?.trim() ?? '';
+        const priceRaw = get(cPrice);
+        if (!name) {
+          errors.push({ row: rowNo, message: 'Style is required.' });
+          return;
+        }
+        const price = parseFloat(priceRaw);
+        if (priceRaw === '' || isNaN(price) || price < 0) {
+          errors.push({ row: rowNo, message: `"${name}": Base Price must be zero or more.` });
+          return;
+        }
+        if (styleCode !== '') {
+          if (seenCodes.has(styleCode.toLowerCase())) {
+            errors.push({ row: rowNo, message: `"${name}": duplicate style code "${styleCode}" in this file.` });
+            return;
+          }
+          seenCodes.add(styleCode.toLowerCase());
+        }
+        const taxRaw = get(cTax);
+        if (taxRaw !== '' && (isNaN(parseFloat(taxRaw)) || parseFloat(taxRaw) < 0)) {
+          errors.push({ row: rowNo, message: `"${name}": Tax Rate must be zero or more.` });
+          return;
+        }
+        const genderRaw = get(cGender);
+        if (genderRaw !== '' && !['Female', 'Male', 'Unisex', 'Kids'].includes(genderRaw)) {
+          errors.push({ row: rowNo, message: `"${name}": Gender must be Female, Male, Unisex, or Kids.` });
+          return;
+        }
+        valid.push({
+          name,
+          styleCode,
+          colors: splitList(get(cColors)),
+          sizes: splitList(get(cSizes)),
+          placements: splitList(get(cPlace)),
+          price,
+          weight: get(cWeight),
+          shipWeight: get(cShip),
+          dims: get(cDims),
+          tax: taxRaw,
+          gender: genderRaw,
+        });
+      });
+      setImportPreview({ fileName: file.name, valid, errors });
+    };
+    reader.readAsText(file);
+  };
+
+  const applyImport = () => {
+    if (!importPreview || importPreview.valid.length === 0) return;
+    const stamp = Date.now().toString(36);
+    let staged = 0;
+    importPreview.valid.forEach((r, i) => {
+      const ok = createProduct(
+        {
+          name: r.name,
+          slug: `${r.name.toLowerCase().replace(/\s+/g, '-')}-imp-${stamp}-${i}`,
+          category: 'T-Shirts',
+          price: r.price,
+          compareAtPrice: undefined,
+          stock: 0,
+          colors: r.colors.length > 0 ? r.colors : ['Default'],
+          sizes: r.sizes.length > 0 ? r.sizes : ['Standard'],
+          partner: 'Qikink Direct API',
+          placement: 'Chest (45mm)',
+          publicationStatus: 'draft',
+          description: '',
+          imageBg: 'linear-gradient(135deg, #FAF3F7 0%, #EFE1EB 100%)',
+          styleCode: r.styleCode || undefined,
+          weight: r.weight || undefined,
+          shippingWeight: r.shipWeight || undefined,
+          dimensions: r.dims || undefined,
+          gender: (r.gender || undefined) as ProductItem['gender'] | undefined,
+          taxRate: r.tax !== '' ? parseFloat(r.tax) : undefined,
+          attributes: [
+            { name: 'Color', values: r.colors, builtin: true, displayType: 'swatch', swatchHex: {}, visibleOn: ['pdp', 'admin'] },
+            { name: 'Size', values: r.sizes, builtin: true, displayType: 'pill', swatchHex: {}, visibleOn: ['pdp', 'admin'] },
+            { name: 'Placements', values: r.placements, builtin: true, displayType: 'radio', swatchHex: {}, visibleOn: ['admin'] },
+          ],
+        },
+        true
+      );
+      if (ok) staged++;
+    });
+    setImportPreview(null);
+    if (csvInputRef.current) csvInputRef.current.value = '';
+    showToast({
+      type: 'success',
+      title: 'Import Staged',
+      description: `${staged} draft${staged === 1 ? '' : 's'} added — review and publish each from the catalog. Demo catalog persists locally.`,
+    });
   };
 
   // Customer-view gallery slides: uploaded reel previews live, else the
@@ -1386,21 +1629,22 @@ export default function ProductsView() {
               icon={<Upload size={16} />}
               onClick={() => {
                 if (!canPerformAction('products')) return;
-                // IB1 stub: bulk import activates with the backend pipeline.
-                // Column contract (Final Listing): Style (name | code),
-                // sizes, Colors (comma lists), Weight, Shipping Weight,
-                // Base Price, Placements (comma list), Package Dimensions
-                // (LxBxH), Tax Rate → draft products via createProduct with
-                // attributes[] prebuilt (X1b: parse → validate → preview).
-                showToast({
-                  type: 'info',
-                  title: 'Import Coming With Backend',
-                  description: 'Final Listing columns are mapped — bulk import activates with the backend pipeline.',
-                });
+                csvInputRef.current?.click();
               }}
             >
               <span>Import Products</span>
             </Button>
+            <input
+              ref={csvInputRef}
+              type="file"
+              accept=".csv"
+              aria-label="Import products CSV"
+              style={{ display: 'none' }}
+              onChange={(e) => {
+                handleImportFile(e.target.files?.[0]);
+                e.target.value = '';
+              }}
+            />
             <Button
               variant="primary"
               size="md"
@@ -2765,6 +3009,76 @@ export default function ProductsView() {
           )
         )}
       </Drawer>
+
+      {/* CSV import preview (X1b): counts + row errors → stage drafts. */}
+      <Modal
+        isOpen={importPreview !== null}
+        onClose={() => setImportPreview(null)}
+        title={`Import Preview — ${importPreview?.fileName ?? ''}`}
+        subtitle={
+          importPreview
+            ? `${importPreview.valid.length} valid · ${importPreview.errors.length} rejected. Valid rows stage as drafts.`
+            : ''
+        }
+        footer={
+          <>
+            <Button variant="secondary" size="md" type="button" onClick={() => setImportPreview(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
+              type="button"
+              disabled={!importPreview || importPreview.valid.length === 0}
+              onClick={applyImport}
+            >
+              Stage {importPreview?.valid.length ?? 0} Drafts
+            </Button>
+          </>
+        }
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {importPreview && importPreview.valid.length > 0 ? (
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginBottom: 6 }}>
+                Ready to stage ({importPreview.valid.length})
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 180, overflowY: 'auto' }}>
+                {importPreview.valid.slice(0, 20).map((r, i) => (
+                  <div key={i} style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                    {r.name} · ₹{r.price.toLocaleString()}
+                    {r.styleCode ? ` · ${r.styleCode}` : ''}
+                  </div>
+                ))}
+                {importPreview.valid.length > 20 ? (
+                  <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                    …and {importPreview.valid.length - 20} more
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
+          {importPreview && importPreview.errors.length > 0 ? (
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-text-error, #C91818)', marginBottom: 6 }}>
+                Rejected ({importPreview.errors.length}) — fix the sheet and re-drop
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 180, overflowY: 'auto' }}>
+                {importPreview.errors.map((e, i) => (
+                  <div key={i} style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                    Row {e.row}: {e.message}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+          {importPreview && importPreview.valid.length === 0 && importPreview.errors.length === 0 ? (
+            <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+              No rows found.
+            </div>
+          ) : null}
+        </div>
+      </Modal>
     </DashboardShell>
   );
 }
