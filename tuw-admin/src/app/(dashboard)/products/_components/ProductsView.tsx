@@ -18,7 +18,7 @@ const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + 
 // swatch dots stay neutral until a value→hex map lands (recorded follow-up).
 
 export default function ProductsView() {
-  const { products, createProduct, updateProduct, deleteProduct, canPerformAction, showToast, stockMovements, sizeCharts, createSizeChart, deleteSizeChart, addSizeChartRow, removeSizeChartRow, patchSizeChartCell, libraryAttributes } = useAdminState();
+  const { products, createProduct, updateProduct, deleteProduct, canPerformAction, showToast, stockMovements, sizeCharts, createSizeChart, deleteSizeChart, addSizeChartRow, removeSizeChartRow, patchSizeChartCell, libraryAttributes, createLibraryAttribute, addLibraryValue } = useAdminState();
 
   const [selectedCat, setSelectedCat] = useState<string>('All');
   const [publicationFilter, setPublicationFilter] = useState<'all' | 'published' | 'draft' | 'archived'>('all');
@@ -116,9 +116,9 @@ export default function ProductsView() {
     setFormDiscounts([]);
     setFormSizeChartId('');
     setFormAttributes([
-      { name: 'Color', values: ['Black', 'Chalk White', 'Olive'], builtin: true, displayType: 'swatch', swatchHex: {}, visibleOn: ['pdp', 'admin'] },
-      { name: 'Size', values: ['S', 'M', 'L', 'XL'], builtin: true, displayType: 'pill', swatchHex: {}, visibleOn: ['pdp', 'admin'] },
-      { name: 'Placements', values: [], builtin: true, displayType: 'radio', swatchHex: {}, visibleOn: ['admin'] },
+      { name: 'Color', values: ['Black', 'Chalk White', 'Olive'], builtin: true, displayType: 'swatch', swatchHex: {}, visibleOn: ['pdp', 'admin'], libraryId: 'LIB-01' },
+      { name: 'Size', values: ['S', 'M', 'L', 'XL'], builtin: true, displayType: 'pill', swatchHex: {}, visibleOn: ['pdp', 'admin'], libraryId: 'LIB-02' },
+      { name: 'Placements', values: [], builtin: true, displayType: 'radio', swatchHex: {}, visibleOn: ['admin'], libraryId: 'LIB-03' },
     ]);
     setFormPartner('Qikink Direct API');
     setFormPlacement('Chest (45mm)');
@@ -385,6 +385,8 @@ export default function ProductsView() {
     const next = formAttributes.map((a) => (a.name === name ? { ...a, values: [...a.values, v] } : a));
     setFormAttributes(next);
     setAttrDrafts((prev) => ({ ...prev, [name]: '' }));
+    // N1a register-through: new drawer values join the linked library row.
+    if (attr.libraryId) addLibraryValue(attr.libraryId, v);
     if (name === 'Color' || name === 'Size') {
       const { colors, sizes } = colorsSizesOf(next);
       rebuildMatrix(colors, sizes, parseFloat(formPrice) || 0, editingProduct?.id ?? 'PRD');
@@ -407,8 +409,16 @@ export default function ProductsView() {
       showToast({ type: 'warning', title: 'Duplicate Attribute', description: `"${name}" already exists.` });
       return;
     }
-    setFormAttributes((prev) => [...prev, { name, values: [], builtin: false, displayType: 'pill', swatchHex: {}, visibleOn: ['pdp', 'admin'] }]);
+    // N1a auto-register: link when the library knows this name, else
+    // register it there first (disclosed) so one record always exists.
+    const lib = libraryAttributes.find((l) => l.name.toLowerCase() === name.toLowerCase());
+    const linkedId = lib?.id ?? createLibraryAttribute(name);
+    if (!linkedId) return;
+    setFormAttributes((prev) => [...prev, { name, values: [], builtin: false, displayType: 'pill', swatchHex: {}, visibleOn: ['pdp', 'admin'], libraryId: linkedId }]);
     setNewAttrName('');
+    if (!lib) {
+      showToast({ type: 'info', title: 'Registered in Library', description: `"${name}" now lives in the attribute library too.` });
+    }
   };
   const removeAttribute = (name: string) => {
     setFormAttributes((prev) => prev.filter((a) => a.name !== name));
@@ -416,45 +426,37 @@ export default function ProductsView() {
 
   // Copy from the global library (settings manager): missing values merge
   // into the draft (new card when absent); drafts diverge after copy.
-  const copyFromLibrary = (libId: string) => {
+  // Link a library attribute (N1a): adds a linked card carrying the
+  // library's current values (inheriting display type); already-linked
+  // attributes are skipped with an info toast. No copies, no merges.
+  const linkFromLibrary = (libId: string) => {
     const lib = libraryAttributes.find((a) => a.id === libId);
     if (!lib) return;
     const existing = formAttributes.find((a) => a.name.toLowerCase() === lib.name.toLowerCase());
-    const missing = existing
-      ? lib.values.filter((v) => !existing.values.some((x) => x.toLowerCase() === v.toLowerCase()))
-      : [...lib.values];
-    if (!existing) {
-      setFormAttributes((prev) => [
-        ...prev,
-        {
-          name: lib.name,
-          values: [...lib.values],
-          builtin: false,
-          displayType: lib.displayType,
-          swatchHex: {},
-          visibleOn: ['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'>,
-        },
-      ]);
-    } else if (missing.length > 0) {
-      setFormAttributes((prev) =>
-        prev.map((a) =>
-          a.name.toLowerCase() === lib.name.toLowerCase()
-            ? { ...a, values: [...a.values, ...missing] }
-            : a
-        )
-      );
+    if (existing) {
+      if (!existing.libraryId) {
+        setFormAttributes((prev) =>
+          prev.map((a) =>
+            a.name.toLowerCase() === lib.name.toLowerCase() ? { ...a, libraryId: lib.id } : a
+          )
+        );
+      }
+      showToast({ type: 'info', title: 'Already Linked', description: `"${lib.name}" is already on this product.` });
+      return;
     }
-    const added = !existing ? lib.values.length : missing.length;
-    showToast({
-      type: added > 0 ? 'success' : 'info',
-      title: added > 0 ? 'Copied From Library' : 'Already In Sync',
-      description:
-        !existing && added > 0
-          ? `"${lib.name}" added with ${added} value${added === 1 ? '' : 's'}.`
-          : added > 0
-            ? `${added} new ${lib.name} value${added === 1 ? '' : 's'} merged.`
-            : `"${lib.name}" already matches the library.`,
-    });
+    setFormAttributes((prev) => [
+      ...prev,
+      {
+        name: lib.name,
+        values: [...lib.values],
+        builtin: false,
+        displayType: lib.displayType,
+        swatchHex: {},
+        visibleOn: ['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'>,
+        libraryId: lib.id,
+      },
+    ]);
+    showToast({ type: 'success', title: 'Linked From Library', description: `"${lib.name}" linked with ${lib.values.length} values.` });
   };
 
   // Scheduled discount rows (P1d): local composition, no new primitive.
@@ -515,8 +517,11 @@ export default function ProductsView() {
   const renderAttrCard = (attr: ProductAttribute, hideDisplay = false) => (
     <SurfaceCard key={attr.name} padding="12px" gap="10px">
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-        <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
           {attr.name}
+          {attr.libraryId ? (
+            <Badge variant="success" size="sm" title="Linked to the single library record">Linked</Badge>
+          ) : null}
         </span>
         {attr.builtin ? (
           <Badge variant="info" size="sm">Default</Badge>
@@ -727,17 +732,25 @@ export default function ProductsView() {
     setFormSizeChartId(product.sizeChartId ?? '');
     setFormAttributes(
       product.attributes && product.attributes.length > 0
-        ? product.attributes.map((a) => ({
-            ...a,
-            values: [...a.values],
-            swatchHex: { ...(a.swatchHex ?? {}) },
-            visibleOn:
-              a.visibleOn && a.visibleOn.length > 0
-                ? [...a.visibleOn]
-                : a.name === 'Placements'
-                  ? ['admin' as const]
-                  : (['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'>),
-          }))
+        ? product.attributes.map((a) => {
+            // N1a link: match persisted attrs to the library by name once,
+            // so every card carries its single-record id from here on.
+            const lib = libraryAttributes.find(
+              (l) => l.name.toLowerCase() === a.name.toLowerCase()
+            );
+            return {
+              ...a,
+              libraryId: a.libraryId ?? lib?.id,
+              values: [...a.values],
+              swatchHex: { ...(a.swatchHex ?? {}) },
+              visibleOn:
+                a.visibleOn && a.visibleOn.length > 0
+                  ? [...a.visibleOn]
+                  : a.name === 'Placements'
+                    ? ['admin' as const]
+                    : (['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'>),
+            };
+          })
         : [
             { name: 'Color', values: [...product.colors], builtin: true, displayType: 'swatch' as const, swatchHex: {}, visibleOn: ['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'> },
             { name: 'Size', values: [...product.sizes], builtin: true, displayType: 'pill' as const, swatchHex: {}, visibleOn: ['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'> },
@@ -2435,12 +2448,12 @@ export default function ProductsView() {
                   <div style={{ display: 'flex', gap: 8 }}>
                     <div style={{ flex: 1 }}>
                       <DropdownMenu
-                        ariaLabel="Copy values from library"
+                        ariaLabel="Link attribute from library"
                         trigger={
                           <span
                             role="button"
                             tabIndex={0}
-                            aria-label="Copy values from the attribute library"
+                            aria-label="Link an attribute from the library"
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
                             }}
@@ -2464,7 +2477,7 @@ export default function ProductsView() {
                             }}
                           >
                             <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                              Copy values from library…
+                              Link attribute from library…
                             </span>
                             <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
                           </span>
@@ -2472,7 +2485,7 @@ export default function ProductsView() {
                         items={libraryAttributes
                           .filter((a) => a.enabled)
                           .map((a) => ({ value: a.id, label: `${a.name} (${a.values.length})` }))}
-                        onSelect={(v) => copyFromLibrary(v)}
+                        onSelect={(v) => linkFromLibrary(v)}
                       />
                     </div>
                   </div>

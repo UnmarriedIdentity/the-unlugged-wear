@@ -94,6 +94,10 @@ export interface ProductAttribute {
   builtin: boolean;
   displayType: 'pill' | 'swatch' | 'radio';
   swatchHex: Record<string, string>;
+  /** Library link (N1a): definition-level single record. Values stay
+   * strings (spelling may repeat); display/visibility/hex write through
+   * to the library at N1b. */
+  libraryId?: string;
   /** Surfaces allowed to render this attribute (X1a): pdp (shopper
    * choices), checkout (money-affecting), admin (internal). At least one
    * always — the UI refuses an attribute visible nowhere. */

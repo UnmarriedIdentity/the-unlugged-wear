@@ -131,7 +131,7 @@ interface AdminStateContextType {
   removeSizeChartRow: (chartId: string, size: string) => boolean;
   patchSizeChartCell: (chartId: string, size: string, key: string, raw: string) => boolean;
 
-  createLibraryAttribute: (name: string) => boolean;
+  createLibraryAttribute: (name: string) => string | false;
   deleteLibraryAttribute: (id: string) => boolean;
   toggleLibraryAttribute: (id: string) => boolean;
   addLibraryValue: (id: string, value: string) => boolean;
@@ -934,7 +934,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
   // Attribute library (settings manager): copy-source for drawer drafts.
   // Delete guards read persisted products (real check, not theater);
   // disable always allowed — data preserved, picker hides it.
-  const createLibraryAttribute = (name: string) => {
+  const createLibraryAttribute = (name: string): string | false => {
     if (!canPerformAction('products')) return false;
     const trimmed = name.trim();
     if (!trimmed) return false;
@@ -942,16 +942,17 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
       showToast({ type: 'warning', title: 'Duplicate Attribute', description: `"${trimmed}" is already in the library.` });
       return false;
     }
-    const next = [...libraryAttributes, { id: `LIB-${Date.now()}`, name: trimmed, values: [], displayType: 'pill' as const, enabled: true }];
+    const id = `LIB-${Date.now()}`;
+    const next = [...libraryAttributes, { id, name: trimmed, values: [], displayType: 'pill' as const, enabled: true }];
     setLibraryAttributes(next);
     persistState({ libraryAttributes: next });
-    return true;
+    return id;
   };
-  const libraryInUseBy = (name: string, value?: string): string | null => {
+  const libraryUsedBy = (id: string, value?: string): string | null => {
     const hit = products.find((p) =>
       (p.attributes ?? []).some(
         (a) =>
-          a.name.toLowerCase() === name.toLowerCase() &&
+          a.libraryId === id &&
           (value === undefined || a.values.some((v) => v.toLowerCase() === value.toLowerCase()))
       )
     );
@@ -961,9 +962,9 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     if (!canPerformAction('products')) return false;
     const target = libraryAttributes.find((a) => a.id === id);
     if (!target) return false;
-    const usedBy = libraryInUseBy(target.name);
+    const usedBy = libraryUsedBy(id);
     if (usedBy) {
-      showToast({ type: 'warning', title: 'Attribute In Use', description: `"${target.name}" is used by ${usedBy} — remove it there first.` });
+      showToast({ type: 'warning', title: 'Attribute In Use', description: `"${target.name}" is linked by ${usedBy} — unlink it there first.` });
       return false;
     }
     const next = libraryAttributes.filter((a) => a.id !== id);
@@ -999,9 +1000,9 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     if (!canPerformAction('products')) return false;
     const target = libraryAttributes.find((a) => a.id === id);
     if (!target) return false;
-    const usedBy = libraryInUseBy(target.name, value);
+    const usedBy = libraryUsedBy(id, value);
     if (usedBy) {
-      showToast({ type: 'warning', title: 'Value In Use', description: `"${value}" is used by ${usedBy} — remove it there first.` });
+      showToast({ type: 'warning', title: 'Value In Use', description: `"${value}" is linked by ${usedBy} — remove it there first.` });
       return false;
     }
     const next = libraryAttributes.map((a) =>
