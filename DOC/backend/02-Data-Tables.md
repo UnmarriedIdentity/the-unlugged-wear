@@ -1,7 +1,7 @@
 # Data Tables — Full Inventory (single PostgreSQL)
 
 > Status: Filling | Last Updated: 2026-10-15
-> 66 tables + 1 deferred footnote (`search_documents`). Column detail lives in files 03–10 and
+> 63 tables + 1 deferred footnote (`search_documents`). Column detail lives in files 03–10 and
 > 15; this file is the index, ending with the full relationship diagram.
 > Conventions (UUIDv7, money, indexes): `01-Conventions.md`.
 
@@ -31,7 +31,7 @@
 The single-URL gate reads `users → user_roles → roles.slug`
 (see `14-Single-URL-Gating.md`).
 
-## Catalog (20) → detail: `04-Catalog.md`
+## Catalog (17) → detail: `04-Catalog.md`
 
 | Table | Purpose | Key links |
 |---|---|---|
@@ -40,9 +40,6 @@ The single-URL gate reads `users → user_roles → roles.slug`
 | products | Core row: sku/slug unique, price/compare, stock balance, status, tags, `attributes` jsonb, `photo_settings` jsonb, source/external import ids, soft-delete, tsvector | categories, brands (nullable), size_charts (nullable) |
 | product_variants | SKU-unique rows, price/stock override, active flag | products (cascade) |
 | product_images | Gallery order, one-primary partial unique, optional variant scope | products, variants |
-| product_options | Per-product definitions incl. `display_type` + `visible_on` (pill/swatch/radio; pdp/checkout/admin) | products |
-| product_option_values | Values stored once, unique per option | options |
-| product_variant_option_values | Junction, composite PK (variant, option) | variants, options, values |
 | product_attributes | Compare/spec definitions (name/slug/type/unit) | — |
 | product_attribute_values | One value per (product, attribute), unique pair | products, attributes |
 | stock_movements | Ledger: signed delta, reason, balance snapshot | products, variants |
@@ -51,7 +48,7 @@ The single-URL gate reads `users → user_roles → roles.slug`
 | collections | Storefront collection pages (name/slug/season/visibility) | — |
 | collection_products | Junction, composite PK (collection, product) + position | collections, products |
 | size_charts | Measurement sets by garment type (`rows` jsonb — columns vary: shirts need shoulder/sleeve, skirts waist/hip); linked from products | — |
-| attribute_definitions | Global single-record definitions: name UNIQUE, display_type, enabled — new writes go here; `product_options` legacy only | — |
+| attribute_definitions | Global single-record definitions: name UNIQUE, display_type, enabled — the one place attributes are defined | — |
 | attribute_values | Global values + swatch_hex, UNIQUE(definition, value) | definitions |
 | product_attribute_links | Assignment: (product, definition) composite PK | products, definitions |
 | product_attribute_link_values | Chosen values as rows (queryable; never arrays) | products, definitions, values |
@@ -59,6 +56,11 @@ The single-URL gate reads `users → user_roles → roles.slug`
 Footnote — brands: table ships in the DDL from day one with
 `products.brand_id` nullable, but v1 builds no seed, no UI, no queries.
 Launch = seed + UI only, zero migration.
+
+Note — variant resolution: variants currently pair to values through the
+deleted junction. A2's matrix generalization re-points variant↔value
+resolution at `product_attribute_link_values`; until then the draft matrix
+carries combinations in memory (unchanged behavior).
 
 ## Cart & wishlist (4) → detail: `05-Cart-Wishlist.md`
 
@@ -156,12 +158,9 @@ erDiagram
     brands ||--o{ products : labels
     products ||--o{ product_variants : offers
     products ||--o{ product_images : shows
-    products ||--o{ product_options : defines-legacy
-    product_options ||--o{ product_option_values : contains
     attribute_definitions ||--o{ attribute_values : contains-once
     products ||--o{ product_attribute_links : assigns
     product_attribute_links ||--o{ product_attribute_link_values : chooses
-    product_variants ||--o{ product_variant_option_values : resolves
     products ||--o{ product_attribute_values : specifies
     product_attributes ||--o{ product_attribute_values : valued-by
     products ||--o{ product_views : viewed-in

@@ -1,7 +1,7 @@
 # Catalog — Columns, Constraints, Indexes
 
 > Status: Filling | Last Updated: 2026-10-15
-> 16 tables. Conventions: `01-Conventions.md`. Money semantics follow the
+> 13 tables. Conventions: `01-Conventions.md`. Money semantics follow the
 > open currency decision (`00-README.md` §7) — DECIMAL(12,2) shape is final.
 > Mermaid slice for this domain sits at the end.
 
@@ -66,7 +66,7 @@ No seed, no UI, no queries in v1 — launch is seed + UI only.
 | stock | integer | NOT NULL DEFAULT 0, CHECK (stock >= 0) | Balance; ledger in stock_movements |
 | status | varchar(20) | NOT NULL DEFAULT 'draft', CHECK IN ('draft','active','archived') | Publish lifecycle |
 | tags | varchar(50)[] | NULL | 1NF exception (documented): flat facet list, GIN-indexed; split to a junction if tag writes ever need history |
-| attributes | jsonb | NOT NULL DEFAULT '{}' | Non-compare spec bag (placement notes, MarCom flags) |
+| attributes | jsonb | NOT NULL DEFAULT '{}' | Freeform specs ONLY (placement notes, MarCom flags) — structured attribute data lives in link tables, never here |
 | photo_settings | jsonb | NOT NULL DEFAULT '{}' | Per-product gallery overrides (ratio, layout, blend) |
 | source | varchar(20) | NOT NULL DEFAULT 'local', CHECK IN ('local','csv','shopify','bigcommerce','odoo') | Import provenance; idempotent re-syncs |
 | external_id | varchar(255) | NULL | Source row id for re-import matching |
@@ -119,62 +119,14 @@ Indexes: PK · `(product_id, sort_order)` (gallery read) ·
 `idx_product_images_variant_id` · partial unique `one_primary_per_product
 (product_id) WHERE is_primary`.
 
-## product_options (LEGACY — per-product copies, new writes go library)
-
-> Deprecated: every row duplicates what `attribute_definitions` stores
-> once. Existing rows stay valid; all new writes use the library tables
-> below. A later migration task moves legacy rows, recorded not attempted.
-
-| Column | Type | Constraints | Reason |
-|---|---|---|---|
-| id | uuid | PK | |
-| product_id | uuid | NOT NULL, FK → products(id) ON DELETE CASCADE | The FK that makes each row a copy — the design flaw this file replaces |
-| name | varchar(100) | NOT NULL | Size, Color, Fabric… (Color/Size builtin per product) |
-| display_type | varchar(20) | NOT NULL DEFAULT 'pill', CHECK IN ('pill','swatch','radio') | PDP widget: pill / color swatch / radio (admin picks per attribute) |
-| show_on_pdp | boolean | NOT NULL DEFAULT true | Customer-choice surface |
-| show_on_checkout | boolean | NOT NULL DEFAULT false | e.g. Tax-adjacent options later |
-| show_on_admin | boolean | NOT NULL DEFAULT true | Internal options stay visible in admin |
-| position | integer | NOT NULL DEFAULT 0 | Selector ordering |
-| created_at / updated_at | timestamptz | NOT NULL | |
-
-Explicit booleans (not an array) — indexable, no array operators in hot
-reads. CHECK: at least one of the three show_* is true (app + constraint).
-
-Indexes: PK · `idx_product_options_product_id`.
-
-## product_option_values
-
-| Column | Type | Constraints | Reason |
-|---|---|---|---|
-| id | uuid | PK | |
-| option_id | uuid | NOT NULL, FK → product_options(id) ON DELETE CASCADE | |
-| value | varchar(150) | NOT NULL | Stored once per option |
-| swatch_hex | varchar(7) | NULL, CHECK (swatch_hex ~ '^#[0-9A-Fa-f]{6}$') | PDP dot color; NULL = unset grey (admin picks per value) |
-| position | integer | NOT NULL DEFAULT 0 | Display order |
-| created_at | timestamptz | NOT NULL | |
-
-Indexes: PK · unique `(option_id, value)` (no dupes; leading column serves
-the option lookup — no separate FK index).
-
-## product_variant_option_values (junction)
-
-| Column | Type | Constraints | Reason |
-|---|---|---|---|
-| variant_id | uuid | NOT NULL, FK → product_variants(id) ON DELETE CASCADE, composite PK (variant_id, option_id) | One row per option per variant |
-| option_id | uuid | NOT NULL, FK → product_options(id) ON DELETE CASCADE | Legacy option rows (see deprecation above) |
-| option_value_id | uuid | NOT NULL, FK → product_option_values(id) ON DELETE RESTRICT | Restrict: deleting a value in use must fail loudly |
-
-Indexes: composite PK (serves variant→options) ·
-`idx_pvov_option_value_id` ("variants using X") · `idx_pvov_option_id`.
-
-## attribute_definitions + attribute_values + links (library — new writes go here)
+## attribute_definitions + attribute_values + links (library — the single source)
 
 | Table | Column | Type | Constraints | Reason |
 |---|---|---|---|---|
 | attribute_definitions | id | uuid | PK | Single record per attribute — the normalized source |
 | attribute_definitions | name | varchar(100) | NOT NULL, UNIQUE | One row per name, enforced (no duplicates by construction) |
 | attribute_definitions | display_type | varchar(20) | NOT NULL DEFAULT 'pill', CHECK IN ('pill','swatch','radio') | PDP widget, owned once |
-| attribute_definitions | show_on_pdp | boolean | NOT NULL DEFAULT true | Mirrors the legacy columns — same grammar, owned once |
+| attribute_definitions | show_on_pdp | boolean | NOT NULL DEFAULT true | Explicit booleans — indexable, no array operators in hot reads |
 | attribute_definitions | show_on_checkout | boolean | NOT NULL DEFAULT false | |
 | attribute_definitions | show_on_admin | boolean | NOT NULL DEFAULT true | |
 | attribute_definitions | enabled | boolean | NOT NULL DEFAULT true | Disabled hides from pickers, keeps data |
@@ -294,9 +246,6 @@ erDiagram
     size_charts ||--o{ products : sizes
     products ||--o{ product_variants : offers
     products ||--o{ product_images : shows
-    products ||--o{ product_options : defines
-    product_options ||--o{ product_option_values : contains
-    product_variants ||--o{ product_variant_option_values : resolves
     products ||--o{ product_attribute_values : specifies
     product_attributes ||--o{ product_attribute_values : valued-by
     products ||--o{ stock_movements : tracks

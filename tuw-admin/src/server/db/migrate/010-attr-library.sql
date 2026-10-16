@@ -1,7 +1,6 @@
 -- 010-attr-library.sql — Global attribute library (4 tables)
 -- Source of truth: DOC/backend/04-Catalog.md (library section).
 -- One attribute = one row; products hold references, never copies.
--- Legacy product_options/* stay valid (deprecated, not dropped).
 
 -- ---------------------------------------------- attribute_definitions
 CREATE TABLE attribute_definitions (

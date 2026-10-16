@@ -26,12 +26,12 @@ constraints, not application-code promises — and one migration history. Primar
 merge-safe). Depth: `12-UI-Merge-Single-Deploy.md`, `13-API-Contracts.md`,
 `14-Single-URL-Gating.md`.
 
-## 3. Data at a glance (66 tables, one Postgres)
+## 3. Data at a glance (63 tables, one Postgres)
 
 | Domain | Tables | Notes |
 |---|---|---|
 | Auth & RBAC | users, roles, permissions, role_permissions, user_roles, addresses, refresh_tokens, customer_notes, staff_invitations, audit_logs | Normalized roles; the gate reads `users → user_roles → roles.slug` |
-| Catalog | categories, brands*, products, product_variants, product_images, product_options†, product_option_values, product_variant_option_values, product_attributes, product_attribute_values, stock_movements, product_discounts, reviews, collections, collection_products, size_charts, attribute_definitions, attribute_values, product_attribute_links, product_attribute_link_values | *brands defined but unbuilt; †`product_options` legacy (new writes go library) |
+| Catalog | categories, brands*, products, product_variants, product_images, product_attributes, product_attribute_values, stock_movements, product_discounts, reviews, collections, collection_products, size_charts, attribute_definitions, attribute_values, product_attribute_links, product_attribute_link_values | *brands defined but unbuilt |
 | Cart & wishlist | carts, cart_items, wishlists, wishlist_items | Snapshot display fields; one-active-cart partial unique |
 | Orders & money | orders, order_items, order_status_history, payments, refunds, returns, return_items, discount_codes, shipments | Dual status axes; immutable snapshots; DECIMAL(12,2) |
 | Platform | import_jobs, email_logs, notification_templates | CSV pipeline reports; delivery states |
