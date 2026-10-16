@@ -1235,6 +1235,24 @@ export const initialSizeCharts: SizeChart[] = [
   },
 ];
 
+/** Global attribute library (settings manager): starter definitions products
+ * copy values from. Copy semantics — drafts diverge after copy (documented).
+ * Disabled attributes hide from the drawer picker but keep their data. */
+export interface LibraryAttribute {
+  id: string;
+  name: string;
+  values: string[];
+  displayType: 'pill' | 'swatch' | 'radio';
+  enabled: boolean;
+}
+
+export const initialLibraryAttributes: LibraryAttribute[] = [
+  { id: 'LIB-01', name: 'Color', values: ['Black', 'Onyx', 'Chalk White', 'Olive', 'Navy Blue', 'Maroon'], displayType: 'swatch', enabled: true },
+  { id: 'LIB-02', name: 'Size', values: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], displayType: 'pill', enabled: true },
+  { id: 'LIB-03', name: 'Placements', values: ['Front', 'Back', 'Left Pocket', 'Right Pocket', 'Left Sleeve', 'Right Sleeve'], displayType: 'radio', enabled: true },
+  { id: 'LIB-04', name: 'Fabric', values: ['Cotton', 'French Terry', 'Fleece', 'Linen'], displayType: 'pill', enabled: true },
+];
+
 export const initialDiscountCodes: DiscountCode[] = [
   {
     id: 'DC-01',

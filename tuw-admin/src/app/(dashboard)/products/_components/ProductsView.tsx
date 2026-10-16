@@ -18,7 +18,7 @@ const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + 
 // swatch dots stay neutral until a value→hex map lands (recorded follow-up).
 
 export default function ProductsView() {
-  const { products, createProduct, updateProduct, deleteProduct, canPerformAction, showToast, stockMovements, sizeCharts, createSizeChart, deleteSizeChart, addSizeChartRow, removeSizeChartRow, patchSizeChartCell } = useAdminState();
+  const { products, createProduct, updateProduct, deleteProduct, canPerformAction, showToast, stockMovements, sizeCharts, createSizeChart, deleteSizeChart, addSizeChartRow, removeSizeChartRow, patchSizeChartCell, libraryAttributes } = useAdminState();
 
   const [selectedCat, setSelectedCat] = useState<string>('All');
   const [publicationFilter, setPublicationFilter] = useState<'all' | 'published' | 'draft' | 'archived'>('all');
@@ -412,6 +412,49 @@ export default function ProductsView() {
   };
   const removeAttribute = (name: string) => {
     setFormAttributes((prev) => prev.filter((a) => a.name !== name));
+  };
+
+  // Copy from the global library (settings manager): missing values merge
+  // into the draft (new card when absent); drafts diverge after copy.
+  const copyFromLibrary = (libId: string) => {
+    const lib = libraryAttributes.find((a) => a.id === libId);
+    if (!lib) return;
+    const existing = formAttributes.find((a) => a.name.toLowerCase() === lib.name.toLowerCase());
+    const missing = existing
+      ? lib.values.filter((v) => !existing.values.some((x) => x.toLowerCase() === v.toLowerCase()))
+      : [...lib.values];
+    if (!existing) {
+      setFormAttributes((prev) => [
+        ...prev,
+        {
+          name: lib.name,
+          values: [...lib.values],
+          builtin: false,
+          displayType: lib.displayType,
+          swatchHex: {},
+          visibleOn: ['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'>,
+        },
+      ]);
+    } else if (missing.length > 0) {
+      setFormAttributes((prev) =>
+        prev.map((a) =>
+          a.name.toLowerCase() === lib.name.toLowerCase()
+            ? { ...a, values: [...a.values, ...missing] }
+            : a
+        )
+      );
+    }
+    const added = !existing ? lib.values.length : missing.length;
+    showToast({
+      type: added > 0 ? 'success' : 'info',
+      title: added > 0 ? 'Copied From Library' : 'Already In Sync',
+      description:
+        !existing && added > 0
+          ? `"${lib.name}" added with ${added} value${added === 1 ? '' : 's'}.`
+          : added > 0
+            ? `${added} new ${lib.name} value${added === 1 ? '' : 's'} merged.`
+            : `"${lib.name}" already matches the library.`,
+    });
   };
 
   // Scheduled discount rows (P1d): local composition, no new primitive.
@@ -2386,7 +2429,54 @@ export default function ProductsView() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
                   Color and Size ship with every product. Add custom attributes (Fabric, Fit…) and define their values one by one.
+                  {' '}<Link href="/settings/attributes" style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)', textDecoration: 'none' }}>Manage library</Link>
                 </p>
+                {libraryAttributes.filter((a) => a.enabled).length > 0 ? (
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <div style={{ flex: 1 }}>
+                      <DropdownMenu
+                        ariaLabel="Copy values from library"
+                        trigger={
+                          <span
+                            role="button"
+                            tabIndex={0}
+                            aria-label="Copy values from the attribute library"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+                            }}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: 8,
+                              width: '100%',
+                              height: 40,
+                              padding: '0 12px',
+                              fontSize: 13,
+                              fontWeight: 500,
+                              fontFamily: 'var(--font-main)',
+                              borderRadius: 8,
+                              border: '1px dashed var(--tuw-border-control, #D1D5DB)',
+                              backgroundColor: 'transparent',
+                              color: 'var(--tuw-text-secondary, #5D6772)',
+                              cursor: 'pointer',
+                              userSelect: 'none',
+                            }}
+                          >
+                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              Copy values from library…
+                            </span>
+                            <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
+                          </span>
+                        }
+                        items={libraryAttributes
+                          .filter((a) => a.enabled)
+                          .map((a) => ({ value: a.id, label: `${a.name} (${a.values.length})` }))}
+                        onSelect={(v) => copyFromLibrary(v)}
+                      />
+                    </div>
+                  </div>
+                ) : null}
                 {formAttributes.filter((a) => a.name !== 'Placements').map((attr) => renderAttrCard(attr))}
                 <div style={{ display: 'flex', gap: 8 }}>
                   <div style={{ flex: 1 }}>
