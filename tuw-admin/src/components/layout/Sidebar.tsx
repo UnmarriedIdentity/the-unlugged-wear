@@ -25,6 +25,7 @@ import {
   FileText,
   ShieldCheck,
   X,
+  BadgePercent,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { SidebarNavGroup, SidebarNavItem, SidebarDock } from './sidebar-nav';
@@ -59,7 +60,8 @@ function getActiveGroupForPath(pathname: string): string | null {
     pathname.startsWith('/shipments') ||
     pathname.startsWith('/returns') ||
     pathname.startsWith('/refunds') ||
-    pathname.startsWith('/payments')
+    pathname.startsWith('/payments') ||
+    pathname.startsWith('/discounts')
   ) {
     return 'operations';
   }
@@ -110,6 +112,7 @@ const NAV_GROUPS: NavGroupDef[] = [
       { href: '/returns', label: 'Returns & RMA', icon: Undo2, match: ['/returns'], badge: { text: '2', dotClassName: 'bg-nav-badge-amber-text', className: 'inline-flex min-w-[18px] items-center justify-center rounded-full bg-nav-badge-amber-bg px-[7.5px] py-[2.5px] text-center text-[11.5px] font-bold leading-none text-nav-badge-amber-text' } },
       { href: '/refunds', label: 'Refunds', icon: RotateCcw, match: ['/refunds'] },
       { href: '/payments', label: 'Payments', icon: CreditCard, match: ['/payments'] },
+      { href: '/discounts', label: 'Discounts', icon: BadgePercent, match: ['/discounts'] },
     ],
   },
   {

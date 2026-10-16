@@ -139,6 +139,21 @@ export interface ShipmentItem {
   events: { time: string; location: string; description: string }[];
 }
 
+/** Storefront coupon (Phase-2 discounts): code-unique, percent/fixed with
+ * caps, window, kill switch. Checkout validates; this screen governs. */
+export interface DiscountCode {
+  id: string;
+  code: string;
+  discountType: 'percent' | 'fixed';
+  value: number;
+  minOrderAmount?: number;
+  maxUses?: number;
+  usesCount: number;
+  startsAt: string;
+  endsAt: string;
+  isActive: boolean;
+}
+
 export interface RefundItem {
   id: string;
   orderId: string;
@@ -1147,6 +1162,43 @@ export const initialSearchTerms: SearchTerm[] = [
   { term: 'handloom saree', searches: 515, zeroResults: 515 },
   { term: 'gym leggings', searches: 402, zeroResults: 0 },
   { term: 'kurta palazzo set', searches: 288, zeroResults: 288 },
+];
+
+export const initialDiscountCodes: DiscountCode[] = [
+  {
+    id: 'DC-01',
+    code: 'UNPLUGGED10',
+    discountType: 'percent',
+    value: 10,
+    minOrderAmount: 999,
+    maxUses: 500,
+    usesCount: 187,
+    startsAt: '2026-04-01',
+    endsAt: '2026-12-31',
+    isActive: true,
+  },
+  {
+    id: 'DC-02',
+    code: 'FLAT200',
+    discountType: 'fixed',
+    value: 200,
+    minOrderAmount: 1499,
+    usesCount: 64,
+    startsAt: '2026-03-15',
+    endsAt: '2026-10-31',
+    isActive: true,
+  },
+  {
+    id: 'DC-03',
+    code: 'DIWALI20',
+    discountType: 'percent',
+    value: 20,
+    maxUses: 200,
+    usesCount: 0,
+    startsAt: '2026-10-18',
+    endsAt: '2026-11-05',
+    isActive: false,
+  },
 ];
 
 export const initialCustomers: CustomerItem[] = [

@@ -15,6 +15,7 @@ import {
   StoreSettings,
   StaffRole,
   StockMovement,
+  DiscountCode,
   initialProducts,
   initialOrders,
   initialShipments,
@@ -27,6 +28,7 @@ import {
   initialTeam,
   initialSettings,
   initialStockMovements,
+  initialDiscountCodes,
 } from './fixtures';
 import {
   synthesizeVariants,
@@ -66,6 +68,7 @@ interface AdminStateContextType {
   team: TeamMember[];
   settings: StoreSettings;
   stockMovements: StockMovement[];
+  discountCodes: DiscountCode[];
 
   toasts: ToastMessage[];
   showToast: (toast: Omit<ToastMessage, 'id'>) => void;
@@ -107,6 +110,10 @@ interface AdminStateContextType {
 
   updateSettings: (newSettings: Partial<StoreSettings>) => boolean;
 
+  createDiscountCode: (input: Omit<DiscountCode, 'id' | 'usesCount'>) => boolean;
+  toggleDiscountCode: (id: string) => boolean;
+  deleteDiscountCode: (id: string) => boolean;
+
   resetDemoData: () => void;
 }
 
@@ -132,6 +139,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
   const [team, setTeam] = useState<TeamMember[]>(initialTeam);
   const [settings, setSettings] = useState<StoreSettings>(initialSettings);
   const [stockMovements, setStockMovements] = useState<StockMovement[]>(initialStockMovements);
+  const [discountCodes, setDiscountCodes] = useState<DiscountCode[]>(initialDiscountCodes);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -152,6 +160,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         if (parsed.team) setTeam(parsed.team);
         if (parsed.settings) setSettings(parsed.settings);
         if (parsed.stockMovements) setStockMovements(parsed.stockMovements);
+        if (parsed.discountCodes) setDiscountCodes(parsed.discountCodes);
       }
     } catch {
       // Local storage fallback
@@ -174,6 +183,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
       team?: TeamMember[];
       settings?: StoreSettings;
       stockMovements?: StockMovement[];
+      discountCodes?: DiscountCode[];
     }) => {
       try {
         const current = {
@@ -190,6 +200,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
           team,
           settings,
           stockMovements,
+          discountCodes,
           ...newState,
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
@@ -197,7 +208,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         // Storage quota / privacy protection
       }
     },
-    [activeRole, products, orders, shipments, refunds, returns, customers, supportTickets, collections, designs, team, settings, stockMovements]
+    [activeRole, products, orders, shipments, refunds, returns, customers, supportTickets, collections, designs, team, settings, stockMovements, discountCodes]
   );
 
   const showToast = useCallback((toast: Omit<ToastMessage, 'id'>) => {
@@ -729,6 +740,51 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     return true;
   };
 
+  // Discount codes (Phase-2 discounts): used codes are history (delete
+  // refused); kill switch flips is_active reversibly.
+  const createDiscountCode = (input: Omit<DiscountCode, 'id' | 'usesCount'>) => {
+    if (!canPerformAction('orders')) return false;
+    const code = input.code.trim().toUpperCase();
+    if (!code) return false;
+    if (discountCodes.some((d) => d.code.toUpperCase() === code)) {
+      showToast({ type: 'warning', title: 'Duplicate Code', description: `"${code}" already exists.` });
+      return false;
+    }
+    if (input.discountType === 'percent' && (input.value <= 0 || input.value > 100)) {
+      showToast({ type: 'warning', title: 'Invalid Percent', description: 'Percent codes run 1–100.' });
+      return false;
+    }
+    if (input.value <= 0) {
+      showToast({ type: 'warning', title: 'Invalid Value', description: 'Discount value must be above zero.' });
+      return false;
+    }
+    const next = [...discountCodes, { ...input, code, id: `DC-${Date.now()}`, usesCount: 0 }];
+    setDiscountCodes(next);
+    persistState({ discountCodes: next });
+    showToast({ type: 'success', title: 'Code Created', description: `"${code}" is live for checkout.` });
+    return true;
+  };
+  const toggleDiscountCode = (id: string) => {
+    if (!canPerformAction('orders')) return false;
+    const next = discountCodes.map((d) => (d.id === id ? { ...d, isActive: !d.isActive } : d));
+    setDiscountCodes(next);
+    persistState({ discountCodes: next });
+    return true;
+  };
+  const deleteDiscountCode = (id: string) => {
+    if (!canPerformAction('orders')) return false;
+    const target = discountCodes.find((d) => d.id === id);
+    if (!target) return false;
+    if (target.usesCount > 0) {
+      showToast({ type: 'warning', title: 'Code In Use', description: `"${target.code}" has redemptions — kill it instead of deleting.` });
+      return false;
+    }
+    const next = discountCodes.filter((d) => d.id !== id);
+    setDiscountCodes(next);
+    persistState({ discountCodes: next });
+    return true;
+  };
+
   const setScenario = (sc: DemoScenario) => {
     setScenarioState(sc);
     if (sc === 'empty') {
@@ -823,6 +879,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     setTeam(initialTeam);
     setSettings(initialSettings);
     setStockMovements(initialStockMovements);
+    setDiscountCodes(initialDiscountCodes);
 
     showToast({
       type: 'info',
@@ -853,6 +910,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         team,
         settings,
         stockMovements,
+        discountCodes,
         toasts,
         showToast,
         dismissToast,
@@ -873,6 +931,9 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         inviteTeamMember,
         removeTeamMember,
         updateSettings,
+        createDiscountCode,
+        toggleDiscountCode,
+        deleteDiscountCode,
         resetDemoData,
       }}
     >
