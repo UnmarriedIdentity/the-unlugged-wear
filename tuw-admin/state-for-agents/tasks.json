@@ -9,14 +9,14 @@
   },
   "summary": {
     "total": 212,
-    "done": 185,
+    "done": 186,
     "in_progress": 3,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "29789c3",
-    "unpushed": ["410afd4", "29789c3"],
+    "tip": "59ccd5d",
+    "unpushed": ["59ccd5d", "410afd4", "29789c3"],
     "next_up": "Fulfillment Phase 2 per-card bulk bars; DW2 drawer verification pass; anim-probe re-run; browser verification backlog",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
@@ -1794,12 +1794,14 @@
     },
     {
       "id": "TL-UI-X1B",
-      "title": "CSV import pipeline (picker, parse, preview modal, draft-stage)",
-      "status": "backlog",
-      "owner": "unassigned",
-      "log": "Final Listing contract; IB1 stub swaps body at backend",
-      "design_match": "pending",
-      "verified": false,
+      "title": "CSV import pipeline (parse, validate, preview, draft-stage)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-16",
+      "finished": "2026-10-16",
+      "log": "feat/search-modal: 59ccd5d quoted-aware parser + Final Listing map + preview modal + silent bulk create",
+      "design_match": "yes",
+      "verified": true,
       "pushed": false,
       "follow_ups": []
     },
