@@ -21,6 +21,7 @@
 | megamenu_show_images | boolean | NOT NULL DEFAULT false | |
 | sort_order | integer | NOT NULL DEFAULT 0 | Nav ordering |
 | settings | jsonb | NOT NULL DEFAULT '{}' | Per-category overrides (photo ratio, layout) |
+| style_slot_id | uuid | NULL, FK → style_slots(id) ON DELETE SET NULL | Garment type → look slot (`18-Recommendations.md`); NULL = never suggested |
 | deleted_at | timestamptz | NULL | Soft-delete (catalog rule) |
 | search_vector | tsvector | GENERATED ALWAYS AS (to_tsvector('english', name \|\| ' ' \|\| coalesce(description,''))) STORED | Always-consistent search, no triggers |
 | created_at / updated_at | timestamptz | NOT NULL DEFAULT now() | |
@@ -29,6 +30,8 @@ Indexes: PK · unique slug (routing) · `idx_categories_parent_id` (tree) ·
 GIN `idx_categories_search_vector` · partial
 `idx_categories_navbar (is_active, show_in_navbar, sort_order)
 WHERE is_active AND show_in_navbar` (nav render = one narrow read).
+What completes a garment type is data: `style_slot_id` + the promote
+matrix in `18-Recommendations.md` §2.
 
 ## brands (defined, unbuilt v1)
 

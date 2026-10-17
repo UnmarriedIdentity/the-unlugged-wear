@@ -1,8 +1,8 @@
 # Data Tables — Full Inventory (single PostgreSQL)
 
 > Status: Filling | Last Updated: 2026-10-17
-> 68 tables + 1 deferred footnote (`search_documents`). Column detail lives in files 03–10,
-> 15, and 17; this file is the index, ending with the full relationship diagram.
+> 71 tables + 1 deferred footnote (`search_documents`). Column detail lives in files 03–10,
+> 15, 17, and 18; this file is the index, ending with the full relationship diagram.
 > Conventions (UUIDv7, money, indexes): `01-Conventions.md`.
 
 ## Design rules (apply to every table below)
@@ -45,7 +45,7 @@ The single-URL gate reads `users → user_roles → roles.slug`
 
 | Table | Purpose | Key links |
 |---|---|---|
-| categories | Tree (`parent_id` self-FK), nav flags, slug, tsvector | self |
+| categories | Tree (`parent_id` self-FK), nav flags, slug, tsvector, `style_slot_id` (garment type → look slot, file 18) | self, style_slots |
 | brands | **Defined but unbuilt in v1** — no seed, no UI (see footnote) | — |
 | products | Core row: sku/slug unique, price/compare, stock balance, status, tags, `attributes` jsonb, `photo_settings` jsonb, source/external import ids, soft-delete, tsvector | categories, brands (nullable), size_charts (nullable) |
 | product_variants | SKU-unique rows, price/stock override, active flag | products (cascade) |
@@ -71,6 +71,14 @@ Note — variant resolution: variants currently pair to values through the
 deleted junction. A2's matrix generalization re-points variant↔value
 resolution at `product_attribute_link_values`; until then the draft matrix
 carries combinations in memory (unchanged behavior).
+
+## Recommendations (3) → detail: `18-Recommendations.md`
+
+| Table | Purpose | Key links |
+|---|---|---|
+| style_slots | Look slots as rows (top/bottom/…); new product types are inserts, never migrations | — |
+| style_slot_pairings | Directed promote matrix with weights (a cap's rail leads with tops) | style_slots ×2 |
+| product_pairings | Materialized rail: score + source (curated/copurchase/heuristic); upsert per pair | products ×2 |
 
 ## Cart & wishlist (4) → detail: `05-Cart-Wishlist.md`
 
@@ -176,6 +184,8 @@ erDiagram
     profiles ||--o{ addresses : personal
     categories ||--o{ categories : nests
     categories ||--o{ products : lists
+    style_slots ||--o{ categories : slots
+    style_slots ||--o{ style_slot_pairings : pairs
     brands ||--o{ products : labels
     products ||--o{ product_variants : offers
     products ||--o{ product_images : shows
@@ -188,6 +198,7 @@ erDiagram
     products ||--o{ stock_movements : tracks
     products ||--o{ product_discounts : prices
     products ||--o{ reviews : rated-by
+    products ||--o{ product_pairings : suggests
     products ||--o{ collection_products : collected-in
     collections ||--o{ collection_products : groups
     size_charts ||--o{ products : sizes

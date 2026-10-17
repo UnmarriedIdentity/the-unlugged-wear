@@ -26,12 +26,13 @@ constraints, not application-code promises — and one migration history. Primar
 merge-safe). Depth: `12-UI-Merge-Single-Deploy.md`, `13-API-Contracts.md`,
 `14-Single-URL-Gating.md`.
 
-## 3. Data at a glance (68 tables, one Postgres)
+## 3. Data at a glance (71 tables, one Postgres)
 
 | Domain | Tables | Notes |
 |---|---|---|
 | Auth & RBAC | users, profiles, roles, permissions, role_permissions, user_roles, refresh_tokens, customer_notes, staff_invitations, audit_logs | Two-row identity (credential + person); normalized roles; the gate reads `users → user_roles → roles.slug` |
 | Household & family | households, household_members, profile_size_preferences, household_invitations, addresses | Family profiles (dependents need no email); proxy ordering + per-order size edits (file 17) |
+| Recommendations | style_slots, style_slot_pairings, product_pairings | Complete-the-look rails; slots + weights are data, curated/copurchase rows upgrade quality (file 18) |
 | Catalog | categories, brands*, products, product_variants, product_images, product_attributes, product_attribute_values, stock_movements, product_discounts, reviews, collections, collection_products, size_charts, attribute_definitions, attribute_values, product_attribute_links, product_attribute_link_values | *brands defined but unbuilt |
 | Cart & wishlist | carts, cart_items, wishlists, wishlist_items | Snapshot display fields; one-active-cart partial unique |
 | Orders & money | orders, order_items, order_status_history, payments, refunds, returns, return_items, discount_codes, shipments | Dual status axes; immutable snapshots; DECIMAL(12,2) |
@@ -97,3 +98,4 @@ kilobytes — never the risk. Detail: `10-Analytics.md`, `11-Storage.md`.
 | 15-Operations.md | Support threads, notifications | Filling |
 | 16-Partner-Qikink.md | POD partner seam + wallet | Draft |
 | 17-Household-Accounts.md | Family groups, profiles, proxy ordering | Filling |
+| 18-Recommendations.md | Complete the look: slots, ranking, pairings | Filling |
