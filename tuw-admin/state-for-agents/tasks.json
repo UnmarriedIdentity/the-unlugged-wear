@@ -9,14 +9,14 @@
   },
   "summary": {
     "total": 221,
-    "done": 207,
+    "done": 208,
     "in_progress": 1,
-    "backlog": 13
+    "backlog": 12
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "758ac64",
-    "unpushed": ["758ac64", "28d254d", "64f2fbc", "e5f8370", "3099979", "c108569", "7021c60", "cec156f", "a687bff", "f0806c4", "3c74e37", "b1da14f", "23ea4bc", "af28a44", "1fa6064", "e33270d", "542f570", "4f2c373", "a7b7d13", "70bd69a", "be65b2e", "863475a", "c32f777", "81b2c28", "2ab5dcf", "c135635", "df9fc73", "e2d3980"],
+    "tip": "b4750b3",
+    "unpushed": ["b4750b3", "758ac64", "28d254d", "64f2fbc", "e5f8370", "3099979", "c108569", "7021c60", "cec156f", "a687bff", "f0806c4", "3c74e37", "b1da14f", "23ea4bc", "af28a44", "1fa6064", "e33270d", "542f570", "4f2c373", "a7b7d13", "70bd69a", "be65b2e", "863475a", "c32f777", "81b2c28", "2ab5dcf", "c135635", "df9fc73", "e2d3980"],
     "next_up": "VPRICE-1 per-value price model (base anchor + additive priceAdjustments → matrix precedence; in_progress) → VPRICE-2 (drawer adjustment editor + matrix provenance) → LIBCTRL (attribute library delete/disable removal) → attribute edge log (file 18) → N1b write-through (display/visibility/hex + disclosure); styling engine (file 19) is the project's FINAL feature — build it only after the core e-commerce app is complete; shipments partner-sync reframe; design-system tail (FX1/SEL/CBX/IMG); DW2 pass; anim re-run; household UI build reads file 17",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
@@ -3517,23 +3517,30 @@
     {
       "id": "TL-UI-VPRICE-1",
       "title": "Per-value price model — base anchor + additive adjustments + override pinning (matrix + drawer logic)",
-      "status": "in_progress",
+      "status": "done",
       "owner": "agent",
       "started": "2026-10-18",
-      "finished": null,
-      "log": null,
-      "design_match": null,
-      "key_decisions": [],
-      "verified": false,
+      "finished": "2026-10-18",
+      "log": "v2:b4750b3",
+      "design_match": "yes",
+      "key_decisions": [
+        "effective = override ?? base + Σ adjustments (keyed \"Attribute:Value\"); additive combos, 2dp, 0≡NULL≡cleared, negatives refused",
+        "write-all trample fixed: base edits re-derive unpinned cells; typing a cell pins it; aria-labelled reset control unpins",
+        "legacy load migration: cells differing from derived become pinned, equal stay derived; sidecar sanitized + pruned against attribute values",
+        "value removal prunes its adjustment with a toast; Cancel discards the sidecar; Reset Demo restores fixtures",
+        "PRD-01 seeded (base 48 + Washed Olive 4 / XL 6) so From + spread render day-zero; list/grid show From only when cells vary",
+        "tests: Price Ladder (R1) suite — 11 cases mirroring mocks/variants.ts (18 admin tests total)"
+      ],
+      "verified": true,
       "pushed": false,
       "follow_ups": []
     },
     {
       "id": "TL-UI-VPRICE-2",
       "title": "Drawer price-adjustment editor + matrix provenance (R2a)",
-      "status": "backlog",
-      "owner": null,
-      "started": null,
+      "status": "in_progress",
+      "owner": "agent",
+      "started": "2026-10-18",
       "finished": null,
       "log": null,
       "design_match": null,
