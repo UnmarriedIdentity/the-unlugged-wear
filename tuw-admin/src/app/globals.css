@@ -269,6 +269,17 @@
   --tuw-text-on-primary: #FFFFFF;
   --tuw-color-text-on-primary: #FFFFFF;
 
+  /* Legacy token aliases (ghost-var sweep, task 007) — v1-era names referenced
+     by ported JSX. Values are the exact fallbacks already rendering, so this
+     is pixel-neutral; canonical 18 roles above are preferred for new work. */
+  --tuw-bg-surface-subtle: #F1F3F5;
+  --tuw-border-error: #FED7D7;
+  --tuw-border-strong: #D1D5DB;
+  --tuw-status-danger: #EF4444;
+  --tuw-status-success: #10B981;
+  --tuw-status-warning: #F59E0B;
+  --tuw-text-tertiary: #9CA3AF;
+
   /* Admin Radii per DESIGN_SYSTEM.md */
   --tuw-radius-sm: 4px;
   --tuw-radius-control: 8px;
