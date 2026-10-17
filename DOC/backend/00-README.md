@@ -32,7 +32,6 @@ merge-safe). Depth: `12-UI-Merge-Single-Deploy.md`, `13-API-Contracts.md`,
 |---|---|---|
 | Auth & RBAC | users, profiles, roles, permissions, role_permissions, user_roles, refresh_tokens, customer_notes, staff_invitations, audit_logs | Two-row identity (credential + person); normalized roles; the gate reads `users → user_roles → roles.slug` |
 | Household & family | households, household_members, profile_size_preferences, household_invitations, addresses | Family profiles (dependents need no email); proxy ordering + per-order size edits (file 17) |
-| Recommendations | style_slots, style_slot_pairings, product_pairings | Complete-the-look rails; slots + weights are data, curated/copurchase rows upgrade quality (file 18) |
 | Catalog | categories, brands*, products, product_variants, product_images, product_attributes, product_attribute_values, stock_movements, product_discounts, reviews, collections, collection_products, size_charts, attribute_definitions, attribute_values, product_attribute_links, product_attribute_link_values | *brands defined but unbuilt |
 | Cart & wishlist | carts, cart_items, wishlists, wishlist_items | Snapshot display fields; one-active-cart partial unique |
 | Orders & money | orders, order_items, order_status_history, payments, refunds, returns, return_items, discount_codes, shipments | Dual status axes; immutable snapshots; DECIMAL(12,2) |
@@ -41,6 +40,7 @@ merge-safe). Depth: `12-UI-Merge-Single-Deploy.md`, `13-API-Contracts.md`,
 | Analytics (partitioned) | page_views, sessions, cart_events, abandoned_carts, daily_stats, product_views, search_terms | Monthly partitions; raw events drop >30d, rollups kept |
 | Operations | support_tickets, support_messages, notifications | Threads + staff replies; in-app bell (email stays in logs) |
 | Partner seam | partner_orders, partner_wallet_ledger | Qikink sync + wallet trail (file 16) |
+| Recommendations | outfit_slots, slot_pairing_rules, product_pairings | Outfit-role rules + manual pins; behavioral co-purchase deferred (file 18) |
 
 Search has **no table** in v1 — `tsvector` + GIN on products/categories
 covers it. Full inventory: `02-Data-Tables.md`.
@@ -75,6 +75,7 @@ kilobytes — never the risk. Detail: `10-Analytics.md`, `11-Storage.md`.
 | 2026-10-14 | Analytics event collection start (which release lights up tracking) | OPEN |
 | 2026-10-14 | Brands launch scope (table ready, UI unbuilt) | OPEN, non-blocking |
 | 2026-10-17 | Household accounts: one household per profile, manager/member roles, any member orders for any — resolved into `17-Household-Accounts.md` | RESOLVED (file 17) |
+| 2026-10-17 | Complete the Look: 6 outfit slots, slot→slot rules + manual pins, v1 PDP + cart drawer — resolved into `18-Recommendations.md` | RESOLVED (file 18) |
 
 ## 8. Doc map & status
 
@@ -98,4 +99,4 @@ kilobytes — never the risk. Detail: `10-Analytics.md`, `11-Storage.md`.
 | 15-Operations.md | Support threads, notifications | Filling |
 | 16-Partner-Qikink.md | POD partner seam + wallet | Draft |
 | 17-Household-Accounts.md | Family groups, profiles, proxy ordering | Filling |
-| 18-Recommendations.md | Complete the look: slots, ranking, pairings | Filling |
+| 18-Recommendations.md | Complete the Look engine | Filling |

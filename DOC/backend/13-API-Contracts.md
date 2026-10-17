@@ -58,7 +58,7 @@ Line-level size edits are cart-local and never call these routes
 |---|---|---|---|
 | GET | `/products` | – | cursor + `category/brand/minPrice/maxPrice/tag/q/sort` |
 | GET | `/products/:slug` | – | PDP: product + images + options/values + variants + active discount + attributes |
-| GET | `/products/:id/complete-the-look` | – | ranked look completions (`?limit=&color=` — slots + pairings + scorer, file 18) |
+| GET | `/products/:slug/look` | – | Complete the Look groups — outfit-slot rules + pins (file 18) |
 | POST / PATCH / DELETE | `/products` (+`/:id`) | A | create / partial / soft-delete |
 | POST / PATCH / DELETE | `/products/:id/variants`, `/variants/:id` | A | variant CRUD |
 | POST / PATCH | `/products/:id/options`, `/options/:id` | A | option + values write |
@@ -73,10 +73,10 @@ Line-level size edits are cart-local and never call these routes
 
 ## Cart `/api/cart` (auth or `x-session-id`)
 
-`GET /cart` · `POST /cart/items` · `PATCH /cart/items/:id` (qty) ·
+`GET /cart` · `GET /cart/look` (style-with groups, file 18) ·
+`POST /cart/items` · `PATCH /cart/items/:id` (qty) ·
 `DELETE /cart/items/:id` · `DELETE /cart/items` (`{ids[]}` batch) ·
 `PATCH /cart/recipient` (`{profileId|null}` — "Order for") ·
-`GET /cart/complete-the-look` (missing-slot fills, file 18) ·
 `DELETE /cart` (clear) · `POST /cart/merge` (guest→user on login) ·
 wishlist `GET / POST / DELETE` trio. Side effects fire-and-forget.
 

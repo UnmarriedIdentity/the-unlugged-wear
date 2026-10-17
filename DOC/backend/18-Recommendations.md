@@ -1,297 +1,424 @@
-# Recommendations — Complete the Look (Slots, Ranking, Pairings)
+# Recommendations — Complete the Look Engine
 
 > Status: Filling | Last Updated: 2026-10-17
-> 3 tables (`style_slots`, `style_slot_pairings`, `product_pairings`) +
-> `categories.style_slot_id`; total 71 tables. Surfaces: PDP (v1) → cart
-> (v2) → confirmation (later). The promise: **coverage is structural,
-> quality is data** — every slotted product suggests look completions from
-> day one; curation and purchase history only re-rank. Conventions:
+> 3 tables here (`outfit_slots`, `slot_pairing_rules`, `product_pairings`) +
+> one column on `categories` (`outfit_slot_id`, file 04). Phase-2
+> `product_co_purchases` is designed here and built only when real order
+> data exists (§3.5). DDL (`012-recommendations.sql`) is deferred by
+> decision (2026-10-17) — this file is the build contract. Conventions:
 > `01-Conventions.md`.
 
-## 1. What this is (requirements, verbatim-shaped)
+## 1. Why & scope
 
-1. A user viewing any product — including one added five minutes ago —
-   gets "complete the look" suggestions immediately.
-2. Types must match: never same-slot (no pants-with-pants); a cap
-   suggests tops/bottoms/footwear; pants suggest tops/headwear/footwear.
-3. Colors must match well: black pants → light or neutral top; no clashing
-   hues; all-black reads as a look, not a mistake.
-4. Fast (the rail renders on the PDP hot path), scalable (thousands of
-   products), honest in copy.
-5. Adding a new product type (socks, bags — anything) must be a **data
-   edit, never a schema or code change**.
+Requirements shaped this design:
 
-Delta vs the 68-table map: +3 tables +1 column (this file). Everything
-else the engine needs already exists — attribute swatches
-(`swatch_hex`), categories, orders, `daily_stats`/`product_views`.
+1. "Considering a black pant → suggest a white tee, a cap, sneakers" —
+   **complementary** items, never more of the same thing.
+2. Accuracy first: suggestions respect audience (men/women/kids),
+   availability, and look coherent (color, season, price band).
+3. Product types will change; adding or renaming types must cause **zero
+   code and zero schema changes** — the engine works on outfit *roles*,
+   not product names.
+4. Scale: thousands of products; no hand-pairing treadmill, while manual
+   control stays available where it matters most.
+5. v1 surfaces: **PDP section + cart drawer** (decided 2026-10-17).
+   Admin management UI follows in a later phase.
 
-## 2. The model
+Rejected approaches, recorded so they stay rejected:
 
-- **`style_slots`** — a controlled vocabulary stored as **rows, not code
-  constants**: `top`, `bottom`, `outerwear`, `headwear`, `footwear`,
-  `accessory`. Code only ever sees `slug`.
-- **`categories.style_slot_id`** — garment type → slot. A new product in
-  an existing category inherits its slot instantly; a brand-new type is
-  one field on one category row.
-- **`style_slot_pairings`** — directed rows with weights. Direction means
-  "when **this** slot is the anchor, promote these": a cap's rail leads
-  with tops; a top's rail leads with bottoms. Asymmetry is intentional.
-- **`product_pairings`** — the materialized ranking (curated >
-  copurchase > heuristic), one row per (anchor, suggestion) pair.
-
-**Coverage invariant.** Any active product whose category has a slot
-yields ≥1 suggestion whenever any paired slot has stock — with **zero**
-`product_pairings` rows written. Rows re-rank; they never gate.
-
-**Seed matrix** (idempotent app-bootstrap block, `ON CONFLICT DO NOTHING`
-— same pattern as the RBAC seeds in file 03). Weights are starting data;
-admins tune them freely later:
-
-| Anchor slot | Promotes (higher weight = earlier) |
+| Approach | Why not |
 |---|---|
-| headwear | top 100 · bottom 90 · footwear 70 · outerwear 40 |
-| top | bottom 100 · footwear 70 · headwear 60 · outerwear 50 |
-| bottom | top 100 · footwear 80 · headwear 60 · outerwear 40 |
-| outerwear | top 90 · bottom 90 · footwear 60 · headwear 40 |
-| footwear | bottom 90 · top 80 · headwear 60 |
-| accessory | bottom 70 · top 60 · footwear 50 |
+| Hand-pair products only | Every new arrival needs manual pairing to appear anywhere — a treadmill that fails silently |
+| Rules hardcoded in code ("if pant then tshirt") | Every catalog change becomes a deploy — violates requirement 3 |
+| ML / embeddings / vector store | No training data pre-launch, non-deterministic output, and a second datastore violates the one-Postgres monolith |
+| Repurposing `collections` as the engine | Collections are editorial curation with manual membership; this engine is computed. Different lifecycles — both coexist (an editorial "look" page stays a collection) |
 
-No self-pairs (structural CHECK); the seed is deliberately small — it
-covers the launch catalog and grows as rows.
+### Change-impact guarantee (requirement 3, restated as a table)
+
+| Event | Action | Code/schema change |
+|---|---|---|
+| New product type ("Sarong") | New category + slot assignment (admin) | **None** — participates instantly |
+| New role needed ("Bags" split from accessory) | Insert slot row + rule rows (data) | **None** |
+| Retire a type | Deactivate category (existing switch) | **None** |
+| Import new arrivals | Category already slotted | **None** — suggestions appear automatically |
+| New surface (order confirmation) | One thin route reusing the engine | One route only |
+
+## 2. The four layers
+
+```
+product → category → outfit slot          (Layer 1: the anchor's role)
+slot → slot + count                       (Layer 2: which roles complete which)
+candidates → deterministic score          (Layer 3: ranking within every role)
+admin pins override everything            (Layer 4: curation)
+future: co-purchase rollup boosts         (Phase 2: behavioral data)
+```
+
+- **Layer 1 — Outfit slots.** Each category optionally maps to one role:
+  `top`, `bottom`, `outerwear`, `footwear`, `headwear`, `accessory`.
+  Subcategories inherit the nearest ancestor's value. Categories without
+  a resolvable slot simply don't participate (no half-guessed suggestions).
+- **Layer 2 — Pairing rules.** Rows: "anchor is a bottom → suggest 2 tops,
+  1 footwear, 1 headwear, 1 accessory". Rules are data; a new role is a
+  data insert.
+- **Layer 3 — Deterministic ranking.** §5: hard filters + weighted score.
+  Same inputs always produce the same list — fixture-testable, honest in
+  the demo phase, debuggable in production.
+- **Layer 4 — Pins.** `product_pairings` hand-picked by staff; rendered
+  first in their group, never displaced by scoring.
 
 ## 3. Tables
 
-### style_slots
+### 3.1 outfit_slots
 
 | Column | Type | Constraints | Reason |
 |---|---|---|---|
 | id | uuid | PK, UUIDv7 | |
-| name | varchar(50) | NOT NULL | Display: "Top", "Headwear" |
-| slug | varchar(50) | NOT NULL, UNIQUE | Code contract — the only names code ever sees |
-| position | integer | NOT NULL DEFAULT 0 | Admin display order |
+| slug | varchar(30) | NOT NULL, UNIQUE | `top`, `bottom`… — the code contract |
+| name | varchar(50) | NOT NULL | Display ("Tops") |
+| sort_order | integer | NOT NULL DEFAULT 0 | Group order across surfaces |
+| is_active | boolean | NOT NULL DEFAULT true | Kill switch — retire a role without deleting rules |
 | created_at / updated_at | timestamptz | NOT NULL DEFAULT now() | Convention |
 
 Indexes: PK · unique slug.
 
-### categories.style_slot_id (added by 012)
+**Why a table and not `CHECK IN (...)`:** our status columns are closed
+sets by nature; slots are an **open** set owned by merchandising. A new
+slot must be an insert, never a migration — that is the requirement-3
+guarantee. (Deliberate, documented exception to the status convention.)
+
+### 3.2 slot_pairing_rules
 
 | Column | Type | Constraints | Reason |
 |---|---|---|---|
-| style_slot_id | uuid | NULL, FK → style_slots(id) ON DELETE SET NULL | NULL = never suggested (gift cards, non-wearables). Assign per garment type — a new type is one field, not a migration |
+| id | uuid | PK | |
+| from_slot_id | uuid | NOT NULL, FK → outfit_slots(id) ON DELETE RESTRICT | The anchor's role; RESTRICT — a slot still referenced by rules fails loudly (retire via `is_active` first) |
+| to_slot_id | uuid | NOT NULL, FK → outfit_slots(id) ON DELETE RESTRICT | The suggested role |
+| suggest_count | integer | NOT NULL DEFAULT 1, CHECK (suggest_count BETWEEN 1 AND 4) | How many cards this role contributes |
+| sort_order | integer | NOT NULL DEFAULT 0 | Target-group display order |
+| is_active | boolean | NOT NULL DEFAULT true | Kill switch — a rule is retired without a delete |
+| created_at / updated_at | timestamptz | NOT NULL DEFAULT now() | Convention |
+| UNIQUE | — | `(from_slot_id, to_slot_id)` | One rule per direction pair |
+| CHECK | — | `from_slot_id <> to_slot_id` | The same-slot law lives in the schema, not in code re-discovery |
 
-Index: `idx_categories_style_slot_id`. The ALTER lives in
-`012-recommendations.sql` because `style_slots` is created there —
-ordering, not migration debt (the chain is unbuilt).
+Indexes: PK · unique pair (rule load by anchor slot) ·
+`idx_slot_pairing_rules_to_slot_id` (reverse FK guard).
 
-### style_slot_pairings
-
-| Column | Type | Constraints | Reason |
-|---|---|---|---|
-| slot_id | uuid | NOT NULL, FK → style_slots(id) ON DELETE CASCADE, composite PK (slot_id, pairs_with_slot_id) | The anchor |
-| pairs_with_slot_id | uuid | NOT NULL, FK → style_slots(id) ON DELETE CASCADE | The promoted slot |
-| weight | integer | NOT NULL DEFAULT 0 | Ordering within a rail — higher = earlier |
-| CHECK | — | `slot_id <> pairs_with_slot_id` | Self-pairs are nonsense — refused structurally |
-
-Indexes: composite PK (anchor → promotes — the rail read) ·
-`idx_style_slot_pairings_target (pairs_with_slot_id)` (matrix admin +
-delete guard).
-
-### product_pairings
+### 3.3 product_pairings
 
 | Column | Type | Constraints | Reason |
 |---|---|---|---|
 | id | uuid | PK | |
 | product_id | uuid | NOT NULL, FK → products(id) ON DELETE CASCADE | Anchor product |
-| paired_product_id | uuid | NOT NULL, FK → products(id) ON DELETE CASCADE | Suggested product |
-| score | numeric(5,4) | NOT NULL DEFAULT 0, CHECK (0 ≤ score ≤ 1) | Normalized quality — the sort key |
-| source | varchar(20) | NOT NULL DEFAULT 'heuristic', CHECK IN ('curated','copurchase','heuristic') | How it was learned; curated > copurchase > heuristic at read time |
-| created_at / updated_at | timestamptz | NOT NULL DEFAULT now() | `updated_at` = last recompute |
-| UNIQUE (product_id, paired_product_id) | — | | Upsert target — one winning row per pair |
-| CHECK | — | `product_id <> paired_product_id` | Products never suggest themselves |
+| paired_product_id | uuid | NOT NULL, FK → products(id) ON DELETE CASCADE | The hand-pinned suggestion |
+| sort_order | integer | NOT NULL DEFAULT 0 | Pin order within its group |
+| created_at / updated_at | timestamptz | NOT NULL DEFAULT now() | Convention |
+| CHECK | — | `product_id <> paired_product_id` | No self-pins |
+| UNIQUE | — | `(product_id, paired_product_id)` | No duplicate pins |
 
-Indexes: PK · `(product_id, score DESC)` (the rail read — leading column,
-one scan) · `(paired_product_id)` (reverse admin view + delete guard).
+Indexes: PK · unique pair (anchor lookup) ·
+`idx_product_pairings_paired_product_id` (reverse).
 
-**Storage bound:** the pipeline writes at most ~20 rows per product per
-source-pass — the table stays ≈ catalog × 20, kilobytes per thousand
-products.
+Pins are directional — A pinned to B does not pin B to A (the admin
+decides per product; seed sets are written symmetrically where wanted).
 
-## 4. Ranking (how "best possible" is decided)
+### 3.4 categories.outfit_slot_id (column on file 04's table)
 
-### 4.1 Read precedence
+| Column | Type | Constraints | Reason |
+|---|---|---|---|
+| outfit_slot_id | uuid | NULL, FK → outfit_slots(id) ON DELETE RESTRICT | Outfit role; subcategories inherit the nearest ancestor's value (resolution query §5.6). RESTRICT — a slot still in use fails loudly |
 
-Rows compete per pair (UNIQUE — one winner), and the read sorts by
-source priority first, score second:
+Index: `idx_categories_outfit_slot_id` (delete-guard). The column is set
+in the admin category write (`PATCH /api/categories/:id`,
+`outfitSlotId`); NULL is a valid state (unmapped categories don't
+participate).
 
+### 3.5 product_co_purchases — phase 2, documented not built
+
+| Column | Type | Constraints | Reason |
+|---|---|---|---|
+| product_id | uuid | NOT NULL, FK → products(id) ON DELETE CASCADE, PK (product_id, paired_product_id) | Anchor |
+| paired_product_id | uuid | NOT NULL, FK → products(id) ON DELETE CASCADE | Co-bought candidate |
+| co_orders | integer | NOT NULL DEFAULT 0, CHECK (co_orders >= 0) | Orders containing both, 90-day window |
+| computed_at | timestamptz | NOT NULL | Weekly job stamp (truncate + rebuild — a derived table, never merged) |
+
+Indexes: PK · `idx_product_co_purchases_paired` (reverse). Built only
+when real orders exist; the ranking step reads it **only if rows exist**
+(zero redesign — §5.2 adds the boost automatically).
+
+## 4. Seed data (idempotent)
+
+### Slots
+
+| slug | name | sort_order |
+|---|---|---|
+| top | Tops | 1 |
+| bottom | Bottoms | 2 |
+| outerwear | Outerwear | 3 |
+| footwear | Footwear | 4 |
+| headwear | Headwear | 5 |
+| accessory | Accessories | 6 |
+
+### Rule matrix (suggest_count per from → to; seeded, editable later)
+
+| from ↓ / suggests → | top | bottom | outerwear | footwear | headwear | accessory |
+|---|---|---|---|---|---|---|
+| top | — | 2 | 1 | 1 | 1 | 1 |
+| bottom | 2 | — | — | 1 | 1 | 1 |
+| outerwear | 2 | 2 | — | 1 | 1 | 1 |
+| footwear | 1 | 1 | — | — | 1 | 1 |
+| headwear | 2 | 2 | — | 1 | — | 1 |
+| accessory | 2 | 2 | — | 1 | 1 | — |
+
+`sort_order` = column order (top → accessory). Caps:
+`suggest_count` per rule ≤ 4 (DB); surface totals capped in §5.4.
+
+## 5. Matching — the deterministic algorithm
+
+Given anchor product(s) — PDP: the viewed product; cart drawer: the cart's
+distinct products:
+
+1. Resolve each anchor's slot (nearest-ancestor walk, §5.6; the service
+   caches the resolved tree → slot map, 5-min TTL like the role cache).
+2. Load active rules for the anchor's slot, ordered by `sort_order`.
+3. Build the candidate pool per target slot: all category ids resolving
+   to that slot → `products.category_id = ANY(...)`, then hard filters.
+4. Apply hard filters (§5.1) — ALL must pass.
+5. Score each candidate (§5.2) — max across anchors when several.
+6. Merge pins, dedupe, sort, cap, group (§5.4).
+
+### 5.1 Hard filters
+
+- `status = 'active' AND deleted_at IS NULL`
+- `stock > 0` (both surfaces hide OOS by default; badge variant deferred)
+- candidate slot ≠ anchor slot (schema CHECK + engine both enforce)
+- gender compatible (matrix below)
+- not an anchor product; cart surface additionally excludes every in-cart
+  product (already chosen = not a suggestion)
+
+Gender compatibility (`products.gender` already exists):
+
+| anchor ↓ / candidate → | Female | Male | Unisex | Kids | NULL |
+|---|---|---|---|---|---|
+| Female | ✓ | — | ✓ | — | ✓ |
+| Male | — | ✓ | ✓ | — | ✓ |
+| Unisex | ✓ | ✓ | ✓ | — | ✓ |
+| Kids | — | — | — | ✓ | ✓ |
+| NULL | ✓ | ✓ | ✓ | ✓ | ✓ |
+
+Kids never mix with adult lines; Unisex bridges Female/Male. NULL is a
+wildcard (the import always maps the Gender column — hygiene note, not a
+filter failure).
+
+### 5.2 Scoring (named constants, one place, tunable)
+
+| Signal | Source (exists today) | Formula | Range |
+|---|---|---|---|
+| Tag affinity | `products.tags[]` (GIN) | `min(shared_tags, 3)` | 0…3 |
+| Collection affinity | `collection_products` | shared published collection → `+2` | 0…2 |
+| Color harmony | `attribute_values.swatch_hex` | best pair score across color values (§5.3) | −1…2 |
+| Price proximity | `products.price` | band distance (§ band rule) | 0…2 |
+| Freshness | `products.created_at` | ≤ 30 days → `+1` | 0…1 |
+| Active discount | `product_discounts` | active window now → `+1` | 0…1 |
+| Bestseller (phase 2) | `product_co_purchases.co_orders` | normalized `0…2` (0 today) | 0…2 |
+
+Price bands: **≤ ₹1,499 → 0 · ₹1,500–3,499 → 1 · ≥ ₹3,500 → 2**; same
+band `+2`, adjacent `+1`, else 0.
+
+Tie-breakers — a **total order** so output is deterministic:
+score ↓ → `created_at` ↓ → `id` ↑.
+
+### 5.3 Color harmony from `swatch_hex`
+
+Convert both hexes to HSL and classify each value:
+
+- **neutral** if `L ≥ 0.88` (ivory/beige/white), or `L ≤ 0.20`
+  (black/charcoal), or `S ≤ 0.12` (greys)
+- **colored** otherwise (hue = `H`)
+
+Pair score — the **max** across both products' color values (multi-color
+products use their best combination):
+
+| Pair | Score |
+|---|---|
+| neutral × neutral, ΔL ≥ 0.35 (black ↔ white, charcoal ↔ ivory) | **+2** |
+| neutral × neutral, smaller ΔL (grey ↔ beige) | **+1** |
+| neutral × colored (a pop on a neutral base) | **+1** |
+| colored × colored, same family (ΔH ≤ 30°) | **+1** |
+| colored × colored, different families | **−1** (clash) |
+
+Products with no color values score **0** — missing data is silent, never
+a penalty. Thresholds (`0.88 / 0.20 / 0.12 / 0.35 / 30°`) are named
+constants: tunable without redesign.
+
+### 5.4 Pins, merge, order, caps
+
+- Pins load per anchor and render **first** in their resolved slot's
+  group; a pinned product with no resolvable slot joins a final
+  **"Pairs well with"** group. Pins still obey status/stock filters — an
+  OOS pin is hidden like any card (no dead tile).
+- A pinned product is never repeated in the computed set (pin wins).
+- Group order = slot `sort_order`; within a group: pinned (by pin
+  `sort_order`) → computed (score ↓, `created_at` ↓, `id` ↑).
+- Caps (service constants): **PDP 8 cards total · cart drawer 4**; take
+  up to `suggest_count` per group, then trim whole groups by group order —
+  never pad with worse-fitting roles (no noise).
+- Cart surface: anchors = distinct cart products; per-slot count = MAX of
+  the anchors' rule counts for that slot; every in-cart product excluded.
+- Empty result → the surface does not render (no dead section).
+
+### 5.5 Worked example — black pant (Men, in stock)
+
+Anchor color: Black (`#111111` → L ≈ 0.07 → neutral, dark).
+
+| Candidate | Slot | Signals | Score |
+|---|---|---|---|
+| Oversized tee, white (Men) | top | color +2 (ΔL ≈ 0.93), tags +1, band +2, never-worn fresh +1 | **6** |
+| Tee, ivory (Men) | top | color +2, band +1 | **3** |
+| Sneakers, black/white (Unisex) | footwear | color +2, tags +1, band +1 | **4** |
+| Cap, grey (Unisex) | headwear | color +1 (neutral, ΔL < 0.35), band +2 | **3** |
+
+Result: top group = white tee → ivory tee (score 6 → 3); footwear =
+sneakers; headwear = cap. Exactly the "white tee + cap + shoes" behavior
+— computed, not hand-paired.
+
+### 5.6 Gate queries (copy-pasteable)
+
+```sql
+-- 1. Slot resolution — nearest ancestor with a value wins ($1 = category id)
+WITH RECURSIVE walk AS (
+  SELECT id, parent_id, outfit_slot_id, 0 AS depth
+  FROM categories WHERE id = $1
+  UNION ALL
+  SELECT c.id, c.parent_id, c.outfit_slot_id, w.depth + 1
+  FROM categories c JOIN walk w ON c.id = w.parent_id
+  WHERE w.outfit_slot_id IS NULL
+)
+SELECT outfit_slot_id FROM walk
+WHERE outfit_slot_id IS NOT NULL
+ORDER BY depth LIMIT 1;
+-- The service caches the whole tree → slot map (5-min TTL); per-request
+-- work is a map lookup, never this query.
+
+-- 2. Rules for an anchor slot ($1 = anchor slot slug)
+SELECT r.to_slot_id, s.slug, s.name, r.suggest_count, r.sort_order
+FROM slot_pairing_rules r
+JOIN outfit_slots s ON s.id = r.to_slot_id
+WHERE r.from_slot_id = (SELECT id FROM outfit_slots WHERE slug = $1)
+  AND r.is_active
+ORDER BY r.sort_order;
+
+-- 3. Pins for an anchor ($1 = product id)
+SELECT pp.paired_product_id, pp.sort_order
+FROM product_pairings pp
+WHERE pp.product_id = $1
+ORDER BY pp.sort_order;
+
+-- 4. Candidates for one target slot ($categoryIds = every category whose
+--    nearest-ancestor resolution lands on the slot — from the cached map)
+SELECT p.id, p.name, p.slug, p.price, p.gender, p.tags, p.created_at
+FROM products p
+WHERE p.category_id = ANY($categoryIds)
+  AND p.status = 'active' AND p.deleted_at IS NULL AND p.stock > 0
+  AND p.id <> ALL($excludeIds);
 ```
-curated (3) > copurchase (2) > heuristic (1)  →  score DESC  →  updated_at DESC
-```
 
-A curator's pick outranks everything for that pair; copurchase outranks
-the heuristic; the heuristic guarantees coverage. Later, better data
-**upgrades the row in place** — `source` records why it won.
+## 6. Surfaces (v1)
 
-### 4.2 The color doctrine (deterministic, unit-tested)
+### PDP — "Complete the Look"
 
-Inputs that already exist: each product's Color values
-(`product_attribute_link_values` → `attribute_values.swatch_hex`), plus
-the PDP-selected swatch passed as context (`?color=`). The doctrine, one
-module (`server/recommendations/color`), frozen weights, node-tested:
+Renders under the buy box. Groups titled by slot name (`Tops`,
+`Footwear`…); cards reuse the storefront card/button primitives. Add-to-cart
+opens a compact size picker whenever the product has size options —
+**never a silent default size** (wrong-size risk). The card links to its
+PDP. Inline skeleton while loading; section hidden when empty.
 
-1. Hex → HSL; read `chroma` and `lightness`.
-2. **Neutral rule** — chroma < 0.12 (black/white/grey/ivory/beige) pairs
-   with nearly everything: base score.
-3. **Contrast rule** — |ΔL| ≥ 0.35 is a strong pairing (the black-pants →
-   light-top case); mid contrast scores between.
-4. **Hue rule** — hue distance in the 30°–90° band adds a small bonus;
-   *chromatic* same-hue pairs (red ↔ red) score below neutral pairs
-   (muddy). **Neutrals are exempt** — all-black is a look by design.
-5. Product score = **max over its colors × the candidate's colors** — the
-   best pair wins, not the average.
+### Cart drawer — "Style it with"
 
-### 4.3 Non-color signals (same module, same weights discipline)
+Above the checkout CTA: up to 4 cards from the union of the cart's
+anchors, excluding in-cart items. Adds respect the existing cart merge
+rules (same variant → qty increment). Guests work via `x-session-id`.
+Hidden when empty or when no anchor resolves to a slot.
 
-- **Slot weight** (matrix) — primary ordering between slots, baked into
-  rows at pipeline time.
-- **Price-band proximity** — candidates within ~0.5×–2× of the anchor
-  price score best (a hero suggestion too far from the anchor reads
-  wrong). Never a hard filter.
-- **Newness** — a small boost; fresh drops surface (fits the drop model).
-- **Same collection/season** — small affinity bonus.
-- **Signed-in refinement (v1.1)** — when a household recipient is
-  selected (file 17), items whose stock covers the member's saved size
-  rank ahead; size-out-of-stock items only backfill when the rail would
-  otherwise empty. Never a blank rail, never a bad click on purpose.
+### Later surfaces (recorded)
 
-### 4.4 Merge (what a `product_pairings` row holds)
+Order confirmation / email cross-sell (same engine, one more route);
+admin management (category slot field, rules matrix editor in Settings,
+pins in the product drawer); demo phase — the storefront mock adapter
+implements §5 verbatim over fixtures so the widget shows deterministic,
+same-shaped lists before the backend lands.
 
-The pipeline enumerates candidates from the anchor's promoted slots,
-scores each with 4.2 + 4.3, and writes the top ~20 per source-pass.
-An upsert keeps the max; a higher-priority source replaces the row and
-records itself in `source`.
-
-## 5. Pipeline (who fills `product_pairings`)
-
-- **Event** — product created/updated/published → recompute **that
-  product's** rows (bounded: ≤4 slots × 12 candidates). New products are
-  covered in seconds, not at the next cron.
-- **Nightly** — full refresh rides the analytics-rollup rhythm; prices,
-  stock, and new arrivals shift ranks.
-- **Copurchase** — with volume, the nightly pass mines shared orders
-  (`order_items` self-join per order, different slots, min occurrences),
-  normalizes to 0..1, writes `source='copurchase'`. No schema change —
-  this is exactly the row shape.
-- **Read fallback** — zero rows (brand-new product, event missed) → the
-  endpoint runs a bounded live scored query; the event/nightly pass fills
-  the rows. Either way the rail is never empty for a slotted product.
-
-Code homes: `server/recommendations/` (doctrine constants, scorer,
-pipeline, merge); route handlers stay thin delegators (file 13).
-
-## 6. Endpoints & performance contract
+## 7. API contracts
 
 | Method | Path | Auth | Purpose |
 |---|---|---|---|
-| GET | `/products/:id/complete-the-look?limit=6&color=<valueId>` | – | PDP rail — materialized top-N, PDP passes the selected swatch |
-| GET | `/cart/complete-the-look` | cart auth (C or `x-session-id`) | missing-slot fills for the whole cart (v2 surface) |
+| GET | `/api/catalog/products/:slug/look` | – | grouped suggestions for the PDP (`?limit=` optional; server caps) |
+| GET | `/api/cart/look` | C / guest `x-session-id` | grouped suggestions from cart anchors |
 
-Curation endpoints ship with the curation UI (§9).
+Response shape (bounded — no pagination needed):
 
-- Steady-state read: `(product_id, score DESC)` index scan → source-
-  priority sort of ≤60 rows → product join ≤limit. **Budget: HTTP ~2ms +
-  scan ~3ms + join ~2ms ≈ 7ms typical; P99 <50ms** at catalog scale.
-- Suggestions always `status='active'`, not soft-deleted, purchasable;
-  suggestion colors ride the same join — **no N+1**.
-- Fallback path bounded (≤4 slot probes × limit); never unbounded scans.
-
-## 7. Gate queries (copy-pasteable)
-
-```sql
--- Promote matrix for an anchor slot (the rail's slot order)
-SELECT ssp.pairs_with_slot_id, ssp.weight
-FROM style_slot_pairings ssp
-WHERE ssp.slot_id = $anchorSlot
-ORDER BY ssp.weight DESC;
-
--- The rail read: materialized rows, source-priority sort
-SELECT pp.paired_product_id, pp.score, pp.source
-FROM product_pairings pp
-JOIN products p ON p.id = pp.paired_product_id
-WHERE pp.product_id = $1
-  AND p.status = 'active' AND p.deleted_at IS NULL AND p.stock > 0
-ORDER BY CASE pp.source
-           WHEN 'curated' THEN 3 WHEN 'copurchase' THEN 2 ELSE 1 END DESC,
-         pp.score DESC, pp.updated_at DESC
-LIMIT $2;
-
--- Fallback for cold products (bounded; service scores + trims)
-SELECT p.id, c.style_slot_id
-FROM products p
-JOIN categories c ON c.id = p.category_id
-WHERE c.style_slot_id = ANY($targetSlots)
-  AND p.status = 'active' AND p.deleted_at IS NULL AND p.stock > 0
-ORDER BY p.created_at DESC
-LIMIT 48;  -- ~4 slots x 12
-
--- Cart (v2): which slots are already present
-SELECT DISTINCT c.style_slot_id
-FROM cart_items ci
-JOIN products p ON p.id = ci.product_id
-JOIN categories c ON c.id = p.category_id
-WHERE ci.cart_id = $1 AND c.style_slot_id IS NOT NULL;
--- targets = promote(present) - present, then rank per §4
+```json
+{ "data": [
+  { "slot": { "slug": "top", "name": "Tops" },
+    "products": [
+      { "id": "…", "slug": "oversized-tee-white", "name": "…",
+        "price": 1499, "pinned": false, "inCart": false }
+    ] }
+] }
 ```
 
-(Purchasability across variant-level stock is a service check layered on
-top of `products.stock`.)
+Admin endpoints (reserved — ship with their UI phase, contract fixed
+here):
 
-## 8. Surfaces & copy (honesty rules)
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| GET/PUT | `/api/admin/recommendation-rules` | A | rules matrix |
+| POST/DELETE | `/api/products/:id/pairs` | A | pin management |
+| PATCH | `/api/categories/:id` | A | gains `outfitSlotId` with the existing category write |
 
-- **PDP (v1)** — "Complete the look" rail under the product. Calm
-  editorial framing: no urgency, no discount-led copy, no fabricated
-  counts. "Pairs well with" is earned copy (heuristic); "Often bought
-  together" ONLY once real copurchase rows exist — never before.
-- **Cart (v2)** — "Finish the look": missing slots across the cart's
-  own union of slots (has pants + tee → suggests headwear/footwear).
-- **Confirmation / account (later)** — same engine, post-purchase,
-  zero pressure.
-- **Demo phase (UI-only)** — a deterministic `recommendations` mock
-  adapter: fixtures + the same doctrine semantics over fixture colors,
-  seeded, reset-demo aware. Swapping to the API later touches only the
-  adapter, never the components.
+## 8. Scale & operations
+
+- **Compute-on-read**: category tree cached (5-min TTL), candidates via
+  `idx_products_category_id` + the partial active index, scoring in
+  memory — bounded by one slot's pool, not the catalog size.
+- **Escape hatch (not built)**: a materialized `product_look_suggestions`
+  cache refreshed on stock/status/rule changes, if P99 ever demands it.
+- **Freshness**: rule/pin/slot edits take effect on the next request — no
+  rebuild step, no stale window.
+- **Honesty**: rankings are computed and never dressed as claims — no
+  fabricated "trending"/"bestseller" labels before phase-2 data exists.
 
 ## 9. Decisions & deferrals
 
 **Locked (2026-10-17):**
 
-- Slots + promote matrix are **rows**; new product types need zero schema
-  and zero code — the seed grows as data.
-- Directed pairings (asymmetric priority) with weights.
-- Coverage is structural (invariant, §2); curated/copurchase rows only
-  re-rank. Heuristic rows materialized like the others; sources upgrade
-  in place.
-- Deterministic color doctrine, unit-tested; neutrals exempt from the
-  same-hue penalty (all-black is a look).
-- Reads prefer materialized rows; bounded live fallback for cold
-  products; never-empty rail for slotted products.
-- No counts / "also bought" copy until the data is real.
+- Six slots approved (`top`, `bottom`, `outerwear`, `footwear`,
+  `headwear`, `accessory`); slots are a table (open set), not an enum.
+- Rules are data; same-slot suggestions impossible (schema CHECK).
+- Pins ship in v1; pins render first and override scoring.
+- v1 surfaces: PDP + cart drawer. Deterministic scoring; no ML.
+- Behavioral rollup is phase 2 (`product_co_purchases`), zero redesign
+  when added.
+- DDL (`012-recommendations.sql`) deferred by decision — docs first.
 
 **Deferred (recorded, not built):**
 
-- Per-product slot override (`products.style_slot_id`) — until a real
-  exception product exists; category-level covers every stated case.
-- Curated-pairings admin UI (endpoints ship with it; rows can be seeded
-  by hand meanwhile).
-- Same-slot "similar products" sibling rail (different mechanic).
-- Wishlist-informed suggestions (file 05 hinted; later with this rail).
-- Embeddings / ML re-rank — additive later; table shape unchanged.
+- OOS suggestions with a badge (currently hidden).
+- Personalized ranking (per-user history boost).
+- Embedding/semantic similarity — only if the deterministic engine ever
+  shows a real gap.
+- Bundle discounts ("buy the look, save X") — pricing concern, not
+  recommendations; future `product_discounts` scope.
+- Click-through telemetry on suggestion cards (the tuning feedback loop).
 
 ## 10. Relationship slice
 
 ```mermaid
 erDiagram
-    style_slots ||--o{ categories : slots
-    style_slots ||--o{ style_slot_pairings : pairs
-    products ||--o{ product_pairings : suggests
-    categories ||--o{ products : classifies
+    outfit_slots ||--o{ categories : classifies
+    outfit_slots ||--o{ slot_pairing_rules : anchors-from
+    outfit_slots ||--o{ slot_pairing_rules : suggests-to
+    products ||--o{ product_pairings : pins
+    products ||--o{ product_pairings : paired
+    %% product_co_purchases ships phase 2 (documented, not built)
+    products ||--o{ product_co_purchases : co-bought
 ```
