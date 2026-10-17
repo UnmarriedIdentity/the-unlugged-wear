@@ -2600,6 +2600,7 @@ export default function ProductsView() {
                       </div>
                       <Switch
                         label=""
+                        ariaLabel={'Toggle ' + (d.discountType === 'percent' ? d.value + '%' : '₹' + d.value) + ' discount active'}
                         checked={d.isActive}
                         onChange={(v) => patchDiscount(d.id, { isActive: v })}
                       />

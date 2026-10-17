@@ -148,6 +148,7 @@ export default function AttributesSettingsPage() {
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                       <Switch
                         label=""
+                        ariaLabel={`Toggle ${attr.name} availability for product drafts`}
                         checked={attr.enabled}
                         onChange={() => toggleLibraryAttribute(attr.id)}
                       />
