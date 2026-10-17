@@ -15,9 +15,9 @@
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "cec156f",
-    "unpushed": ["cec156f", "a687bff", "f0806c4", "3c74e37", "b1da14f", "23ea4bc", "af28a44", "1fa6064", "e33270d", "542f570", "4f2c373", "a7b7d13", "70bd69a", "be65b2e", "863475a", "c32f777", "81b2c28", "2ab5dcf", "c135635", "df9fc73", "e2d3980"],
-    "next_up": "R1 per-value price model (valuePrices sidecar → matrix precedence) → R2 (drawer price column + library delete/disable removal) → attribute edge log (file 19) → N1b write-through (display/visibility/hex + disclosure); then recommendations build (PDP rail per file 18, cart rail v2) + household UI (file 17); shipments partner-sync reframe; design-system tail (FX1/SEL/CBX/IMG); DW2 pass; anim re-run",
+    "tip": "3099979",
+    "unpushed": ["3099979", "c108569", "7021c60", "cec156f", "a687bff", "f0806c4", "3c74e37", "b1da14f", "23ea4bc", "af28a44", "1fa6064", "e33270d", "542f570", "4f2c373", "a7b7d13", "70bd69a", "be65b2e", "863475a", "c32f777", "81b2c28", "2ab5dcf", "c135635", "df9fc73", "e2d3980"],
+    "next_up": "R1 per-value price model (valuePrices sidecar → matrix precedence) → R2 (drawer price column + library delete/disable removal) → attribute edge log (file 18) → N1b write-through (display/visibility/hex + disclosure); styling engine (file 19) is the project's FINAL feature — build it only after the core e-commerce app is complete; shipments partner-sync reframe; design-system tail (FX1/SEL/CBX/IMG); DW2 pass; anim re-run; household UI build reads file 17",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
       "dashboard D-series: KPI tiers, range/sort menus, badge mapping, calendar pills, header tint (360/768/1024/1440)",
@@ -26,7 +26,7 @@
       "settings/help purple hover + black cards",
       "responsive widths 767/768/1023/1024/1440/1920"
     ],
-    "last_updated": "2026-10-17",
+    "last_updated": "2026-10-18",
     "updated_by": "agent"
   },
   "tasks": [
@@ -2068,18 +2068,18 @@
       "follow_ups": ["household UI build (dropdown + 'Edit member' panel + autofill) follows the file-17 contract", "deferrals recorded in file 17 §7 (+Add member at checkout, per-order privacy toggle, size fallback)"]
     },
     {
-      "id": "TL-DB-RECOMMEND",
-      "title": "Complete-the-look recommendations DB design (style slots, promote matrix, ranking)",
+      "id": "TL-DB-STYLING",
+      "title": "Styling module DB design — Complete the Look (slots, rules, overrides, refinement roadmap)",
       "status": "done",
       "owner": "agent",
       "started": "2026-10-17",
-      "finished": "2026-10-17",
-      "log": "feat/search-modal: cec156f DOC/backend/18-Recommendations.md + 012-recommendations.sql (style_slots, style_slot_pairings, product_pairings + categories.style_slot_id); 68→71 tables; gates green",
+      "finished": "2026-10-18",
+      "log": "feat/search-modal: 3099979 DOC/backend/19-Styling-Recommendations.md + 012-styling.sql (7 module-owned tables: styling_slots, styling_category_slots, styling_slot_rules, styling_value_affinity, styling_overrides, styling_co_purchase, styling_events); supersedes the file-18 draft (18-Recommendations.md + 012-recommendations.sql deleted; zero core edits — no slot column on categories); 68→75 tables; gates green",
       "design_match": "yes",
-      "key_decisions": ["slots + promote matrix are rows — new product types are inserts, never migrations", "coverage structural: every slotted product suggests from day one; curated/copurchase rows only re-rank", "source-tagged pairings (curated > copurchase > heuristic), heuristic materialized + event recompute", "deterministic color doctrine (neutral/contrast/hue; all-black exempt by design)", "reads prefer materialized rows with bounded live fallback; no counts/'also bought' copy until data is real"],
+      "key_decisions": ["hybrid layered: slots+rules+pins/blocks at launch; computed boosts (co-purchase, clicks, popularity) + personalization after", "stock-honest substitution gate: near-to-best AND harmonious-with-source, else reject product → next candidate; all dry → strip hidden", "clash floor + display floor hard; fewer honest items over padded strips; pins lose to stock/clash", "module-owned styling_* tables, one-way FKs, flag-off = indistinguishable from no results; fully removable", "v2.1 refinement stages 0–5 with trust gates + shadow mode + exploration budget; no ML planned", "build order: LAST — after the core e-commerce app"],
       "verified": true,
       "pushed": false,
-      "follow_ups": ["PDP rail build (v1) + cart missing-slot rail (v2) per file 18", "product-event recompute + nightly pairings refresh when backend lands", "curated-pairings admin UI (writes source='curated' rows)"]
+      "follow_ups": ["feature build is the project's final step: P1 (seed + scorer + API + PDP rail + events) → P2 (admin screens + Styling report + co-purchase job) → P3 (personalization, size-aware via profile_size_preferences)", "styling_events doubles as the shadow-mode harness (variant + contributors columns) — no schema change needed at any stage", "file 18 is free again for the queued attribute edge log"]
     },
     {
       "id": "TL-UI-VALPICK",
