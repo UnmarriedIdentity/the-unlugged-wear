@@ -47,8 +47,8 @@ The single-URL gate reads `users → user_roles → roles.slug`
 |---|---|---|
 | categories | Tree (`parent_id` self-FK), nav flags, slug, tsvector | self |
 | brands | **Defined but unbuilt in v1** — no seed, no UI (see footnote) | — |
-| products | Core row: sku/slug unique, price/compare, stock balance, status, tags, `attributes` jsonb, `photo_settings` jsonb, source/external import ids, soft-delete, tsvector | categories, brands (nullable), size_charts (nullable) |
-| product_variants | SKU-unique rows, price/stock override, active flag | products (cascade) |
+| products | Core row: sku/slug unique, base_price anchor + materialized min price ("From"), compare, stock balance, status, tags, `attributes` jsonb, `photo_settings` jsonb, source/external import ids, soft-delete, tsvector | categories, brands (nullable), size_charts (nullable) |
+| product_variants | SKU-unique rows, materialized effective price + override flag, stock, active flag | products (cascade) |
 | product_images | Gallery order, one-primary partial unique, optional variant scope | products, variants |
 | product_attributes | Compare/spec definitions (name/slug/type/unit) | — |
 | product_attribute_values | One value per (product, attribute), unique pair | products, attributes |
@@ -61,7 +61,7 @@ The single-URL gate reads `users → user_roles → roles.slug`
 | attribute_definitions | Global single-record definitions: name UNIQUE, display_type — the one place attributes are defined | — |
 | attribute_values | Global values + swatch_hex, UNIQUE(definition, value) | definitions |
 | product_attribute_links | Assignment: (product, definition) composite PK | products, definitions |
-| product_attribute_link_values | Chosen values as rows + optional per-value price (NULL = base path); queryable, never arrays | products, definitions, values |
+| product_attribute_link_values | Chosen values as rows + optional per-value price adjustment (NULL/0 = no effect; additive upcharges); queryable, never arrays | products, definitions, values |
 
 Footnote — brands: table ships in the DDL from day one with
 `products.brand_id` nullable, but v1 builds no seed, no UI, no queries.

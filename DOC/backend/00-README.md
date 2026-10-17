@@ -76,6 +76,7 @@ kilobytes — never the risk. Detail: `10-Analytics.md`, `11-Storage.md`.
 | 2026-10-14 | Brands launch scope (table ready, UI unbuilt) | OPEN, non-blocking |
 | 2026-10-17 | Household accounts: one household per profile, manager/member roles, any member orders for any — resolved into `17-Household-Accounts.md` | RESOLVED (file 17) |
 | 2026-10-17 | Complete the Look: hybrid slot-based styling module (rules + overrides at launch, data refinement after) — the project's final feature | RESOLVED (file 19) |
+| 2026-10-18 | Variant pricing ladder: base anchor + additive per-value adjustments; explicit cell overrides pinned; listed price = materialized min ("From") | RESOLVED (04-Catalog.md; admin build VPRICE-1/2) |
 
 ## 8. Doc map & status
 

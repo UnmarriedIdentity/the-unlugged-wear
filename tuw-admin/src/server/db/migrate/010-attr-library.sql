@@ -36,10 +36,10 @@ CREATE TABLE product_attribute_links (
 
 -- -------------------------------------- product_attribute_link_values
 CREATE TABLE product_attribute_link_values (
-  product_id    uuid NOT NULL REFERENCES products (id) ON DELETE CASCADE,
-  definition_id uuid NOT NULL REFERENCES attribute_definitions (id) ON DELETE CASCADE,
-  value_id      uuid NOT NULL REFERENCES attribute_values (id) ON DELETE RESTRICT,
-  price         DECIMAL(12,2) CHECK (price >= 0),
+  product_id       uuid NOT NULL REFERENCES products (id) ON DELETE CASCADE,
+  definition_id    uuid NOT NULL REFERENCES attribute_definitions (id) ON DELETE CASCADE,
+  value_id         uuid NOT NULL REFERENCES attribute_values (id) ON DELETE RESTRICT,
+  price_adjustment DECIMAL(12,2) CHECK (price_adjustment >= 0),
   PRIMARY KEY (product_id, definition_id, value_id)
 );
 CREATE INDEX idx_palv_value_id ON product_attribute_link_values (value_id);

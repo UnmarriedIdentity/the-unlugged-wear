@@ -61,7 +61,8 @@ No seed, no UI, no queries in v1 — launch is seed + UI only.
 | category_id | uuid | NULL, FK → categories(id) ON DELETE SET NULL | Unassigned allowed; deleting a category must not delete products |
 | brand_id | uuid | NULL, FK → brands(id) ON DELETE SET NULL | Brands deferred — always nullable |
 | size_chart_id | uuid | NULL, FK → size_charts(id) ON DELETE SET NULL | Garment measuring (see size_charts) |
-| price | DECIMAL(12,2) | NOT NULL, CHECK (price >= 0) | Base price (minor-unit presentation lives in UI) |
+| price | DECIMAL(12,2) | NOT NULL, CHECK (price >= 0) | Listed price — materialized minimum of effective variant prices ("From $X"); written by the pipeline, never typed |
+| base_price | DECIMAL(12,2) | NULL, CHECK (base_price >= 0) | Editable pricing anchor; derived cells = base_price + Σ adjustments; NULL = price is the anchor (simple products) |
 | compare_at_price | DECIMAL(12,2) | NULL, CHECK (compare_at_price >= 0) | "Was" price, not a discount engine |
 | stock | integer | NOT NULL DEFAULT 0, CHECK (stock >= 0) | Balance; ledger in stock_movements |
 | status | varchar(20) | NOT NULL DEFAULT 'draft', CHECK IN ('draft','active','archived') | Publish lifecycle |
@@ -93,7 +94,8 @@ WHERE external_id IS NOT NULL` (idempotent re-imports) · partial
 | id | uuid | PK | |
 | product_id | uuid | NOT NULL, FK → products(id) ON DELETE CASCADE | Owned child |
 | sku | varchar(64) | NOT NULL, UNIQUE | Variant inventory identity; import upsert |
-| price | DECIMAL(12,2) | NOT NULL, CHECK (price >= 0) | Overrides base when set |
+| price | DECIMAL(12,2) | NOT NULL, CHECK (price >= 0) | Effective price, materialized on write — override ?? base_price + Σ adjustments |
+| price_overridden | boolean | NOT NULL DEFAULT false | true = explicit cell override (survives recomputes until cleared); false = derived, pipeline rewrites |
 | stock | integer | NOT NULL DEFAULT 0, CHECK (stock >= 0) | Variant balance |
 | image_url | varchar(2048) | NULL | Variant-scoped image |
 | is_active | boolean | NOT NULL DEFAULT true | Hide without deleting (sold-out configs) |
@@ -101,6 +103,17 @@ WHERE external_id IS NOT NULL` (idempotent re-imports) · partial
 
 Indexes: PK · unique sku · `idx_product_variants_product_id` (PDP
 selector) · partial `(product_id) WHERE is_active`.
+
+**Pricing ladder (base is an anchor; the listed price is derived).**
+`effective variant price = explicit override ?? base_price + Σ(price adjustments
+of the variant's values)`. Combination is additive (`Emerald +6` × `XL +4` →
+base + 10); adjustments are ≥ 0 in v1 (per-value discounts deferred — relax the
+CHECK when they land). On any write to base, adjustments, or value composition,
+the pipeline recomputes every `price_overridden = false` variant, then
+materializes `products.price` = min across variants (the listing/PDP "From").
+Order lines snapshot the effective price at purchase; scheduled discounts apply
+on top (ladder → discount → promo). Mirrors the admin-drawer draft fields
+(`basePrice`, `priceAdjustments`, `priceOverridden`) 1:1.
 
 ## product_images
 
@@ -139,7 +152,7 @@ Indexes: PK · `(product_id, sort_order)` (gallery read) ·
 | product_attribute_link_values | product_id | uuid | NOT NULL, composite PK (product_id, definition_id, value_id) | Chosen values as rows — queryable ("products using Onyx"), never arrays |
 | product_attribute_link_values | definition_id | uuid | NOT NULL | Part of the composite PK (scoped lookup) |
 | product_attribute_link_values | value_id | uuid | NOT NULL, FK → attribute_values(id) ON DELETE RESTRICT | Restrict: deleting a chosen value fails loudly |
-| product_attribute_link_values | price | DECIMAL(12,2) | NULL, CHECK (price >= 0) | Per-value price for this product; NULL = base path (matches the draft sidecar 1:1) |
+| product_attribute_link_values | price_adjustment | DECIMAL(12,2) | NULL, CHECK (price_adjustment >= 0) | Additive upcharge for this product+value; NULL/0 = no effect (base path); mirrors the draft priceAdjustments sidecar 1:1. ≥ 0 only — per-value discounts deferred |
 
 Indexes: PKs · unique `attribute_definitions.name` · unique
 `(definition_id, value)` on values · composite link PKs serve both join

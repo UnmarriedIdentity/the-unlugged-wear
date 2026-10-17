@@ -66,6 +66,7 @@ CREATE TABLE products (
   brand_id           uuid          REFERENCES brands (id) ON DELETE SET NULL,
   size_chart_id      uuid          REFERENCES size_charts (id) ON DELETE SET NULL,
   price              DECIMAL(12,2) NOT NULL CHECK (price >= 0),
+  base_price         DECIMAL(12,2) CHECK (base_price >= 0),
   compare_at_price   DECIMAL(12,2) CHECK (compare_at_price >= 0),
   stock              integer       NOT NULL DEFAULT 0 CHECK (stock >= 0),
   status             varchar(20)   NOT NULL DEFAULT 'draft'
@@ -99,15 +100,16 @@ CREATE INDEX idx_products_active_price ON products (status, price)
 
 -- ------------------------------------------------------- product_variants
 CREATE TABLE product_variants (
-  id         uuid          PRIMARY KEY,
-  product_id uuid          NOT NULL REFERENCES products (id) ON DELETE CASCADE,
-  sku        varchar(64)   NOT NULL UNIQUE,
-  price      DECIMAL(12,2) NOT NULL CHECK (price >= 0),
-  stock      integer       NOT NULL DEFAULT 0 CHECK (stock >= 0),
-  image_url  varchar(2048),
-  is_active  boolean       NOT NULL DEFAULT true,
-  created_at timestamptz   NOT NULL DEFAULT now(),
-  updated_at timestamptz   NOT NULL DEFAULT now()
+  id               uuid          PRIMARY KEY,
+  product_id       uuid          NOT NULL REFERENCES products (id) ON DELETE CASCADE,
+  sku              varchar(64)   NOT NULL UNIQUE,
+  price            DECIMAL(12,2) NOT NULL CHECK (price >= 0),
+  price_overridden boolean       NOT NULL DEFAULT false,
+  stock            integer       NOT NULL DEFAULT 0 CHECK (stock >= 0),
+  image_url        varchar(2048),
+  is_active        boolean       NOT NULL DEFAULT true,
+  created_at       timestamptz   NOT NULL DEFAULT now(),
+  updated_at       timestamptz   NOT NULL DEFAULT now()
 );
 CREATE INDEX idx_product_variants_product_id ON product_variants (product_id);
 CREATE INDEX idx_product_variants_active ON product_variants (product_id)
