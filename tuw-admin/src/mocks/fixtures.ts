@@ -5,6 +5,14 @@ export interface ProductItem {
   category: 'T-Shirts' | 'Hoodies' | 'Jackets' | 'Pants' | 'Accessories';
   price: number; // in USD (or formatted display)
   compareAtPrice?: number;
+  /** Pricing anchor (R1). Derived cells = basePrice + Σ priceAdjustments;
+   * absent means `price` itself is the anchor (simple products). Mirrors
+   * products.base_price (DOC/backend/04-Catalog.md). */
+  basePrice?: number;
+  /** Additive per-value upcharges (R1), keyed "Attribute:Value" (e.g.
+   * "Size:XL"). Absent/0 = no effect; v1 allows upcharges only. Mirrors
+   * product_attribute_link_values.price_adjustment. */
+  priceAdjustments?: Record<string, number>;
   stock: number;
   publicationStatus: 'published' | 'draft' | 'archived';
   description: string;
@@ -81,6 +89,10 @@ export interface ProductVariant {  id: string;
   size: string;
   sku: string;
   price: number;
+  /** Explicit cell override (R1): true pins this price through recomputes
+   * until reset. Absent = derived pipeline value. Mirrors
+   * product_variants.price_overridden (DOC/backend/04-Catalog.md). */
+  priceOverridden?: boolean;
   stock: number;
 }
 
@@ -275,6 +287,11 @@ export const initialProducts: ProductItem[] = [
     category: 'T-Shirts',
     price: 48.0,
     compareAtPrice: 58.0,
+    basePrice: 48.0,
+    // Ladder demo data (R1): additive per-value upcharges — Washed Olive +4,
+    // XL +6 (combo cells +10). Lowest cell stays 48.0, so the list reads
+    // "From ₹48.00"; the v-shaped spread proves derivation without edits.
+    priceAdjustments: { 'Color:Washed Olive': 4, 'Size:XL': 6 },
     stock: 42,
     publicationStatus: 'published',
     description: '280 GSM combed organic cotton with relaxed drop-shoulder silhouette and reinforced collar.',

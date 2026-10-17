@@ -3,12 +3,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive, GripVertical, Upload, Images, Focus, Library } from 'lucide-react';
+import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive, GripVertical, Upload, Images, Focus, Library, RotateCcw } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
 import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, Input, Drawer, Modal, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection, Disclosure, Carousel, LinkButton } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
-import { resolveVariants, variantStockTotal, buildVariantSku } from '@/mocks/variants';
+import { resolveVariants, variantStockTotal, buildVariantSku, deriveVariantPrice, recomputeVariants, minFromPrice, pruneAdjustments, roundPrice, hasPriceSpread } from '@/mocks/variants';
 import type { ProductVariant, ProductAttribute, PhotoSettings, ProductDiscount, SizeChart } from '@/mocks/fixtures';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
@@ -133,6 +133,7 @@ export default function ProductsView() {
     });
     setAddImageUrl('');
     setFormVariants([]);
+    setFormAdjustments({});
     setFormFabricGsm('');
     setFormCut('');
     setFormModelDims('');
@@ -319,12 +320,19 @@ export default function ProductsView() {
   // Variant matrix draft (drawer only): General variant inputs mirror-write
   // here so the matrix stays the single submit source.
   const [formVariants, setFormVariants] = useState<ProductVariant[]>([]);
+  // Per-value price adjustments draft (R1): "Attribute:Value" → additive
+  // upcharge (e.g. "Size:XL": 6). Sidecar only — cancelling the drawer
+  // discards it; submit prunes stale keys and persists what remains.
+  const [formAdjustments, setFormAdjustments] = useState<Record<string, number>>({});
 
-  const writePriceAll = (priceStr: string) => {
+  // Base price write (R1): re-derives every unpinned cell from
+  // base + Σ adjustments; explicit overrides stay pinned. This replaces
+  // the old write-all that trampled per-cell overrides on every keystroke.
+  const writeBasePrice = (priceStr: string) => {
     setFormPrice(priceStr);
     const n = parseFloat(priceStr);
-    if (isNaN(n)) return;
-    setFormVariants((prev) => prev.map((v) => ({ ...v, price: n })));
+    if (isNaN(n) || n < 0) return;
+    setFormVariants((prev) => recomputeVariants(roundPrice(n), formAdjustments, prev));
   };
 
   const writeStockTotal = (stockStr: string) => {
@@ -350,16 +358,23 @@ export default function ProductsView() {
       colors.forEach((color, ci) => {
         sizes.forEach((size) => {
           const kept = byKey.get(`${color}|${size}`);
-          if (kept) out.push(kept);
-          else
+          if (kept) {
+            // Kept cells re-derive through the ladder unless pinned (R1).
+            out.push(
+              kept.priceOverridden
+                ? kept
+                : { ...kept, price: deriveVariantPrice(basePrice, formAdjustments, color, size) }
+            );
+          } else {
             out.push({
               id: `tmp-${ci}-${size}`,
               color,
               size,
               sku: buildVariantSku(productId, ci, size),
-              price: basePrice,
+              price: deriveVariantPrice(basePrice, formAdjustments, color, size),
               stock: 0,
             });
+          }
         });
       });
       return out;
@@ -367,7 +382,8 @@ export default function ProductsView() {
   };
 
   // Chip editor (A1b): one-by-one values, no comma parsing. Builtin
-  // Color/Size edits rebuild the matrix (kept cells preserve price/stock);
+  // Color/Size edits rebuild the matrix (kept cells keep stock; unpinned
+  // prices re-derive through the ladder);
   // custom attributes store on the draft for A2's generalized matrix.
   const colorsSizesOf = (attrs: Array<{ name: string; values: string[] }>) => ({
     colors: attrs.find((a) => a.name === 'Color')?.values ?? [],
@@ -416,6 +432,16 @@ export default function ProductsView() {
       a.name === name ? { ...a, values: a.values.filter((x) => x !== value) } : a
     );
     setFormAttributes(next);
+    // Ladder hygiene (R1): a removed value takes its adjustment with it.
+    const pruned = pruneAdjustments(formAdjustments, next);
+    setFormAdjustments(pruned.next);
+    if (pruned.dropped.length > 0) {
+      showToast({
+        type: 'info',
+        title: 'Price Adjustment Cleared',
+        description: `The per-value adjustment for "${value}" was removed with the value.`,
+      });
+    }
     if (name === 'Color' || name === 'Size') {
       const { colors, sizes } = colorsSizesOf(next);
       rebuildMatrix(colors, sizes, parseFloat(formPrice) || 0, editingProduct?.id ?? 'PRD');
@@ -789,22 +815,11 @@ export default function ProductsView() {
     setFormMonogramUpcharge(product.monogram ? product.monogram.upcharge.toFixed(2) : '12.00');
     setFormSeoTitle(product.seoTitle || '');
     setFormSeoDescription(product.seoDescription || '');
-    setFormVariants(resolveVariants(product));
-    setFormName(product.name);
-    setFormSlug(product.slug);
-    setFormCategory(product.category);
-    setFormPrice(product.price.toFixed(2));
-    setFormComparePrice(product.compareAtPrice ? product.compareAtPrice.toFixed(2) : '');
-    setFormStock(String(product.stock));
-    setFormStyleCode(product.styleCode || '');
-    setFormWeight(product.weight || '');
-    setFormShipWeight(product.shippingWeight || '');
-    setFormDims(product.dimensions || '');
-    setFormGender(product.gender || '');
-    setFormTax(product.taxRate !== undefined ? String(product.taxRate) : '');
-    setFormDiscounts((product.discounts ?? []).map((d) => ({ ...d })));
-    setFormSizeChartId(product.sizeChartId ?? '');
-    setFormAttributes(
+
+    // Attribute draft (N1a link match) — built once: the ladder load below
+    // prunes adjustment keys against these values, and the drawer renders
+    // the same copy.
+    const loadedAttributes =
       product.attributes && product.attributes.length > 0
         ? product.attributes.map((a) => {
             // N1a link: match persisted attrs to the library by name once,
@@ -829,8 +844,38 @@ export default function ProductsView() {
             { name: 'Color', values: [...product.colors], builtin: true, displayType: 'swatch' as const, swatchHex: {}, visibleOn: ['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'>, libraryId: 'LIB-01' },
             { name: 'Size', values: [...product.sizes], builtin: true, displayType: 'pill' as const, swatchHex: {}, visibleOn: ['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'>, libraryId: 'LIB-02' },
             { name: 'Placements', values: [], builtin: true, displayType: 'radio' as const, swatchHex: {}, visibleOn: ['admin'] as Array<'pdp' | 'checkout' | 'admin'>, libraryId: 'LIB-03' },
-          ]
+          ];
+
+    // Pricing ladder load (R1): sanitize the sidecar against these values;
+    // legacy cells whose price differs from the derived value become pinned
+    // overrides (their look is preserved — reset unpins them spotwise).
+    const basePrice = product.basePrice ?? product.price;
+    const loadedAdjustments = pruneAdjustments(product.priceAdjustments, loadedAttributes).next;
+    setFormAdjustments(loadedAdjustments);
+    setFormVariants(
+      resolveVariants(product).map((v) =>
+        v.priceOverridden !== undefined
+          ? v
+          : deriveVariantPrice(basePrice, loadedAdjustments, v.color, v.size) === v.price
+            ? v
+            : { ...v, priceOverridden: true }
+      )
     );
+    setFormName(product.name);
+    setFormSlug(product.slug);
+    setFormCategory(product.category);
+    setFormPrice(product.price.toFixed(2));
+    setFormComparePrice(product.compareAtPrice ? product.compareAtPrice.toFixed(2) : '');
+    setFormStock(String(product.stock));
+    setFormStyleCode(product.styleCode || '');
+    setFormWeight(product.weight || '');
+    setFormShipWeight(product.shippingWeight || '');
+    setFormDims(product.dimensions || '');
+    setFormGender(product.gender || '');
+    setFormTax(product.taxRate !== undefined ? String(product.taxRate) : '');
+    setFormDiscounts((product.discounts ?? []).map((d) => ({ ...d })));
+    setFormSizeChartId(product.sizeChartId ?? '');
+    setFormAttributes(loadedAttributes);
     setFormPartner(product.partner);
     setFormPlacement(product.placement);
     setFormStatus(product.publicationStatus);
@@ -898,28 +943,37 @@ export default function ProductsView() {
     }
     if (!editingProduct) return;
 
-    const priceNum = parseFloat(formPrice) || editingProduct.price;
+    const parsedBase = parseFloat(formPrice);
+    const baseNum = roundPrice(
+      !isNaN(parsedBase) && parsedBase >= 0 ? parsedBase : editingProduct.basePrice ?? editingProduct.price
+    );
     const compareNum = parseFloat(formComparePrice) || undefined;
 
     // The draft matrix is the submit source: colors/sizes/stock derive from
-    // it in the seam; price follows the lowest variant ("from $X" semantics).
+    // it in the seam; prices re-derive through the ladder (R1:
+    // base + Σ adjustments, pinned cells stay), and the listed price is the
+    // lowest cell ("From $X"), materialized.
     const draftError = variantDraftError();
     if (draftError) {
       showToast({ type: 'warning', title: 'Check Variants', description: draftError });
       setProductTab('variants');
       return;
     }
-    const submitVariants = formVariants.length > 0 ? formVariants : resolveVariants(editingProduct);
-    const minPrice =
-      submitVariants.length > 0
-        ? Math.min(...submitVariants.map((v) => v.price))
-        : priceNum;
+    const draftVariants = formVariants.length > 0 ? formVariants : resolveVariants(editingProduct);
+    const submitVariants = recomputeVariants(baseNum, formAdjustments, draftVariants).map((v) => {
+      const { priceOverridden, ...rest } = v;
+      return priceOverridden ? { ...rest, priceOverridden: true as const } : rest;
+    });
+    const minPrice = submitVariants.length > 0 ? minFromPrice(submitVariants) : baseNum;
+    const cleanAdjustments = pruneAdjustments(formAdjustments, formAttributes).next;
 
     updateProduct(editingProduct.id, {
       name: formName,
       slug: formSlug,
       category: formCategory,
       price: minPrice,
+      basePrice: baseNum,
+      priceAdjustments: Object.keys(cleanAdjustments).length > 0 ? cleanAdjustments : undefined,
       compareAtPrice: compareNum,
       partner: formPartner,
       placement: formPlacement,
@@ -1044,6 +1098,10 @@ export default function ProductsView() {
           next.sku = next.color && next.size
             ? buildVariantSku(editingProduct?.id ?? 'PRD', known ? colors.indexOf(next.color) : colors.length, next.size)
             : '';
+          // Ladder (R1): typing a real color/size pulls its adjustments in.
+          if (!next.priceOverridden) {
+            next.price = deriveVariantPrice(parseFloat(formPrice) || 0, formAdjustments, next.color, next.size);
+          }
         }
         return next;
       });
@@ -1067,6 +1125,10 @@ export default function ProductsView() {
     }
     return null;
   };
+
+  // Ladder readout (R1): the lowest cell is the storefront "From" price.
+  const variantLowest = formVariants.length > 0 ? minFromPrice(formVariants) : null;
+  const variantSpread = formVariants.length > 1 && new Set(formVariants.map((v) => v.price)).size > 1;
 
   // CSV import pipeline (X1b): Final Listing workbooks re-saved as CSV.
   // Quoted-field-aware parse (no dependency); unknown columns ignored;
@@ -2041,7 +2103,7 @@ export default function ProductsView() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 14, paddingTop: 10, borderTop: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
                   <div>
                     <span className="tuw-tabular-nums" style={{ fontSize: '18px', fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-                      ₹{p.price.toFixed(2)}
+                      {hasPriceSpread(resolveVariants(p)) ? `From ₹${p.price.toFixed(2)}` : `₹${p.price.toFixed(2)}`}
                     </span>
                     {p.compareAtPrice && (
                       <span className="tuw-tabular-nums" style={{ fontSize: '13px', color: 'var(--tuw-text-secondary, #5D6772)', textDecoration: 'line-through', marginLeft: 6 }}>
@@ -2167,7 +2229,7 @@ export default function ProductsView() {
                     {p.category}
                   </TableCell>
                   <TableCell className="tuw-tabular-nums" style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', textAlign: 'right' }}>
-                    ₹{p.price.toFixed(2)}
+                    {hasPriceSpread(resolveVariants(p)) ? `From ₹${p.price.toFixed(2)}` : `₹${p.price.toFixed(2)}`}
                     {p.compareAtPrice && (
                       <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', textDecoration: 'line-through', marginLeft: 6, fontWeight: 400 }}>
                         ₹{p.compareAtPrice.toFixed(2)}
@@ -2348,12 +2410,13 @@ export default function ProductsView() {
             />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <Input
-                label="Price ($ USD)"
+                label="Base price ($ USD)"
                 type="number"
                 step="0.01"
                 value={formPrice}
-                onChange={(e) => writePriceAll(e.target.value)}
+                onChange={(e) => writeBasePrice(e.target.value)}
                 required
+                helperText="Variant cells derive from base + per-value adjustments; the lowest cell is the listed “From” price. Pinned cells keep their override."
               />
               <Input
                 label="Stock Quantity"
@@ -2757,6 +2820,9 @@ export default function ProductsView() {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
               <span style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
                 {formVariants.length} variants · {variantStockTotal(formVariants)} units in stock
+                {variantSpread && variantLowest !== null
+                  ? ` · From $${variantLowest.toFixed(2)}`
+                  : ''}
               </span>
               <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={addVariant}>
                 Add Variant
@@ -2813,17 +2879,46 @@ export default function ProductsView() {
                       />
                     </TableCell>
                     <TableCell style={{ padding: '10px 16px' }}>
-                      <Input
-                        aria-label={`Price for ${v.color} ${v.size}`}
-                        type="number"
-                        step="0.01"
-                        value={String(v.price)}
-                        onChange={(e) => {
-                          const n = parseFloat(e.target.value);
-                          if (!isNaN(n)) updateVariant(v.id, { price: n });
-                        }}
-                        style={{ height: 36, textAlign: 'right' }}
-                      />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'flex-end' }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <Input
+                            aria-label={`Price for ${v.color} ${v.size}`}
+                            type="number"
+                            step="0.01"
+                            value={String(v.price)}
+                            onChange={(e) => {
+                              const n = parseFloat(e.target.value);
+                              // Typing pins the cell (R1): the price survives
+                              // base/attribute recomputes until reset.
+                              if (!isNaN(n) && n >= 0) updateVariant(v.id, { price: roundPrice(n), priceOverridden: true });
+                            }}
+                            style={{ height: 36, textAlign: 'right' }}
+                          />
+                        </div>
+                        {v.priceOverridden && (
+                          <button
+                            type="button"
+                            aria-label={`Reset ${v.color} ${v.size} price to derived`}
+                            title="Pinned override — reset to derived price"
+                            onClick={() =>
+                              updateVariant(v.id, {
+                                price: deriveVariantPrice(parseFloat(formPrice) || 0, formAdjustments, v.color, v.size),
+                                priceOverridden: false,
+                              })
+                            }
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              cursor: 'pointer',
+                              padding: 0,
+                              display: 'inline-flex',
+                              color: 'var(--tuw-action-primary, #7539FF)',
+                            }}
+                          >
+                            <RotateCcw size={14} />
+                          </button>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell style={{ padding: '10px 16px' }}>
                       <Stepper
