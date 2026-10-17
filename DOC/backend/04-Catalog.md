@@ -145,6 +145,17 @@ Indexes: PKs · unique `attribute_definitions.name` · unique
 `(definition_id, value)` on values · composite link PKs serve both join
 directions (product→definitions, definition→products).
 
+**Assign vs register (write semantics — they are never conflated).**
+*Assigning* an existing library value to a product inserts one row into
+`product_attribute_link_values` (`ON CONFLICT DO NOTHING` — idempotent,
+silent) and never touches `attribute_values`; *registering* a genuinely
+new spelling inserts into `attribute_values` first (the
+`UNIQUE(definition_id, value)` is the dedupe authority), then assigns.
+The admin drawer picker only ever assigns — a picked value exists in the
+library by definition, so no register call is issued and no duplicate
+error can fire. Register-through happens only when a typed value's
+spelling is absent from the library row.
+
 ## product_attributes + product_attribute_values (compare engine)
 
 | Table | Column | Type | Constraints | Reason |

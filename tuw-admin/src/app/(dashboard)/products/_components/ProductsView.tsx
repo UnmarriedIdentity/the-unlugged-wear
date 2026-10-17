@@ -380,8 +380,10 @@ export default function ProductsView() {
       setAttrDrafts((prev) => ({ ...prev, [name]: '' }));
     }
   };
-  // Core value commit (VALPICK): dup guard + append + register-through +
-  // matrix rebuild. Picker and text input share it — one path, no drift.
+  // Core value commit (VALPICK): dup guard + append + conditional
+  // register-through + matrix rebuild. Picker and text input share it —
+  // one path, no drift. Existing library values are ASSIGNED, never
+  // re-registered (assign vs register — DOC/backend/04-Catalog.md).
   const commitAttrValue = (name: string, v: string): boolean => {
     const value = v.trim();
     if (!value) return false;
@@ -393,8 +395,16 @@ export default function ProductsView() {
     }
     const next = formAttributes.map((a) => (a.name === name ? { ...a, values: [...a.values, value] } : a));
     setFormAttributes(next);
-    // N1a register-through: new drawer values join the linked library row.
-    if (attr.libraryId) addLibraryValue(attr.libraryId, value);
+    // Assign vs register: a value that already exists in the linked library
+    // row is a pure assignment — the card gains it, the library is
+    // untouched (calling the register seam on an existing spelling fired a
+    // false "Duplicate Value" on every picker click). Register-through
+    // fires only for genuinely new spellings.
+    if (attr.libraryId) {
+      const lib = libraryAttributes.find((l) => l.id === attr.libraryId);
+      const known = (lib?.values ?? []).some((x) => x.toLowerCase() === value.toLowerCase());
+      if (!known) addLibraryValue(attr.libraryId, value);
+    }
     if (name === 'Color' || name === 'Size') {
       const { colors, sizes } = colorsSizesOf(next);
       rebuildMatrix(colors, sizes, parseFloat(formPrice) || 0, editingProduct?.id ?? 'PRD');
