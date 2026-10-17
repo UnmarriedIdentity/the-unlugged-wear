@@ -21,14 +21,12 @@
 | megamenu_show_images | boolean | NOT NULL DEFAULT false | |
 | sort_order | integer | NOT NULL DEFAULT 0 | Nav ordering |
 | settings | jsonb | NOT NULL DEFAULT '{}' | Per-category overrides (photo ratio, layout) |
-| outfit_slot_id | uuid | NULL, FK → outfit_slots(id) ON DELETE RESTRICT | Outfit role for Complete the Look; nearest ancestor with a value wins (file 18 §5) |
 | deleted_at | timestamptz | NULL | Soft-delete (catalog rule) |
 | search_vector | tsvector | GENERATED ALWAYS AS (to_tsvector('english', name \|\| ' ' \|\| coalesce(description,''))) STORED | Always-consistent search, no triggers |
 | created_at / updated_at | timestamptz | NOT NULL DEFAULT now() | |
 
 Indexes: PK · unique slug (routing) · `idx_categories_parent_id` (tree) ·
-`idx_categories_outfit_slot_id` (slot delete-guard) · GIN
-`idx_categories_search_vector` · partial
+GIN `idx_categories_search_vector` · partial
 `idx_categories_navbar (is_active, show_in_navbar, sort_order)
 WHERE is_active AND show_in_navbar` (nav render = one narrow read).
 
@@ -257,7 +255,6 @@ Indexes: PK · partial `(product_id) WHERE is_approved` (PDP read) ·
 
 ```mermaid
 erDiagram
-    outfit_slots ||--o{ categories : classifies
     categories ||--o{ categories : nests
     categories ||--o{ products : lists
     brands ||--o{ products : labels

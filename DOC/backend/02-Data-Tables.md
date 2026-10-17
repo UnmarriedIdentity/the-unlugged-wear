@@ -1,9 +1,8 @@
 # Data Tables — Full Inventory (single PostgreSQL)
 
 > Status: Filling | Last Updated: 2026-10-17
-> 71 tables + 2 deferred footnotes (`search_documents`, `product_co_purchases`). Column
-> detail lives in files 03–10, 15, 17, and 18; this file is the index, ending with the
-> full relationship diagram.
+> 75 tables + 1 deferred footnote (`search_documents`). Column detail lives in files 03–10,
+> 15, 17, and 19; this file is the index, ending with the full relationship diagram.
 > Conventions (UUIDv7, money, indexes): `01-Conventions.md`.
 
 ## Design rules (apply to every table below)
@@ -46,7 +45,7 @@ The single-URL gate reads `users → user_roles → roles.slug`
 
 | Table | Purpose | Key links |
 |---|---|---|
-| categories | Tree (`parent_id` self-FK), nav flags, slug, tsvector, outfit slot for Complete the Look | self |
+| categories | Tree (`parent_id` self-FK), nav flags, slug, tsvector | self |
 | brands | **Defined but unbuilt in v1** — no seed, no UI (see footnote) | — |
 | products | Core row: sku/slug unique, price/compare, stock balance, status, tags, `attributes` jsonb, `photo_settings` jsonb, source/external import ids, soft-delete, tsvector | categories, brands (nullable), size_charts (nullable) |
 | product_variants | SKU-unique rows, price/stock override, active flag | products (cascade) |
@@ -140,24 +139,29 @@ Monthly partitions; raw events drop >30d, rollups kept forever.
 | partner_orders | Our order ↔ Qikink order/AWB/courier/status/raw/synced_at — one per order (unique) | orders |
 | partner_wallet_ledger | Credit debit/refund per order (Rs.1=1 trail) | orders |
 
-## Recommendations (3) → detail: `18-Recommendations.md`
+## Styling — Complete the Look (7, module-owned) → detail: `19-Styling-Recommendations.md`
 
 | Table | Purpose | Key links |
 |---|---|---|
-| outfit_slots | Outfit roles (`top`, `bottom`…) — **open set, data not enum**; new roles are inserts | — |
-| slot_pairing_rules | "Anchor role → suggest N of role", one row per direction, schema CHECK blocks same-slot | outfit_slots ×2 |
-| product_pairings | Hand-pinned "goes with" overrides — render first, override scoring | products ×2 |
+| styling_slots | The 6 outfit roles (top/bottom/outerwear/headwear/footwear/accessory) | — |
+| styling_category_slots | Category → slot map with ancestor-walk inheritance (~10 rows) | categories, styling_slots |
+| styling_slot_rules | Which roles complement which, with weights — the day-zero matrix | styling_slots |
+| styling_value_affinity | Style↔style scores + manual color overrides (any axis, definition-scoped) | attribute_definitions, attribute_values |
+| styling_overrides | Pin/block per product pair — the merchandiser's two buttons | products, users (author) |
+| styling_co_purchase | Nightly co-purchase boosts (dormant until refinement stage 2) | products |
+| styling_events | Impression/click/ATC telemetry (30-day raw; partitioned at build) | products, styling_slots |
+
+Module-owned: **zero edits to any other table**, one-way dependency
+(styling reads core, nothing reads styling). **Ships last** — after the
+core e-commerce app (file 19 §1).
 
 ## Deferred, not dropped
 
 - `search_documents` — `tsvector` + GIN on products/categories covers v1;
   revisit only if ranked cross-entity search outgrows it.
 - `brands` UI/seed — schema ready (above), build deferred.
-- `product_co_purchases` — phase 2 of the recommendations engine (file 18
-  §3.5): built only when real order data exists; the matcher reads it
-  automatically, zero redesign.
 
-## Relationship diagram (full map; per-domain slices live in files 03–10, 15)
+## Relationship diagram (full map; per-domain slices live in files 03–10, 15, 17, 19)
 
 ```mermaid
 erDiagram
@@ -186,11 +190,6 @@ erDiagram
     attribute_values ||--o{ profile_size_preferences : picks
     households ||--o{ addresses : owns
     profiles ||--o{ addresses : personal
-    outfit_slots ||--o{ categories : classifies
-    outfit_slots ||--o{ slot_pairing_rules : anchors-from
-    outfit_slots ||--o{ slot_pairing_rules : suggests-to
-    products ||--o{ product_pairings : pins
-    products ||--o{ product_pairings : paired
     categories ||--o{ categories : nests
     categories ||--o{ products : lists
     brands ||--o{ products : labels
@@ -222,5 +221,13 @@ erDiagram
     support_tickets ||--o{ support_messages : threads
     orders ||--o{ partner_orders : synced-to
     orders ||--o{ partner_wallet_ledger : debits
+    styling_slots ||--o{ styling_category_slots : role-of
+    categories ||--o{ styling_category_slots : mapped-by
+    styling_slots ||--o{ styling_slot_rules : complements
+    attribute_definitions ||--o{ styling_value_affinity : scopes
+    attribute_values ||--o{ styling_value_affinity : pairs-with
+    products ||--o{ styling_overrides : override-pairs
+    products ||--o{ styling_co_purchase : co-bought
+    products ||--o{ styling_events : surfaced-in
     import_jobs ||--o{ products : creates
 ```

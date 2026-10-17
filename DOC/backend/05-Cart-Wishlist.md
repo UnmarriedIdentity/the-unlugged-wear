@@ -63,7 +63,7 @@ NULL variant counts as equal; leading cart_id serves the cart-load read) ·
 
 Indexes: PKs · `idx_wishlist_items_wishlist_id` · unique
 `(wishlist_id, product_id)`. No admin UI by design — wishlists inform
-nothing operational; they surface only in recommendations later (file 18).
+nothing operational; they surface only in recommendations later.
 
 ## Checkout recipient ("Order for")
 

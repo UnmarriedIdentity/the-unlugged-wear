@@ -58,7 +58,6 @@ Line-level size edits are cart-local and never call these routes
 |---|---|---|---|
 | GET | `/products` | – | cursor + `category/brand/minPrice/maxPrice/tag/q/sort` |
 | GET | `/products/:slug` | – | PDP: product + images + options/values + variants + active discount + attributes |
-| GET | `/products/:slug/look` | – | Complete the Look groups — outfit-slot rules + pins (file 18) |
 | POST / PATCH / DELETE | `/products` (+`/:id`) | A | create / partial / soft-delete |
 | POST / PATCH / DELETE | `/products/:id/variants`, `/variants/:id` | A | variant CRUD |
 | POST / PATCH | `/products/:id/options`, `/options/:id` | A | option + values write |
@@ -71,10 +70,20 @@ Line-level size edits are cart-local and never call these routes
 | GET | `/categories`, `/brands` | – | trees and brand pages (brands UI later) |
 | GET | `/collections/:slug` | – | collection page (junction read) |
 
+## Styling `/api/styling` (module — ships last; file 19)
+
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| GET | `/complete-the-look` | – | ranked complements (`?product=<slug>&limit=`); empty `data[]` when disabled or stock-dry — never an error |
+| POST | `/events` | – | impression/click/atc ingest, fire-and-forget (beacon class → 30/s) |
+
+Never writes cart/profile state; availability re-checked at serve time
+(file 19 §5). Cacheable while non-personalized (refinement stage 4
+switches it to per-session re-ranking).
+
 ## Cart `/api/cart` (auth or `x-session-id`)
 
-`GET /cart` · `GET /cart/look` (style-with groups, file 18) ·
-`POST /cart/items` · `PATCH /cart/items/:id` (qty) ·
+`GET /cart` · `POST /cart/items` · `PATCH /cart/items/:id` (qty) ·
 `DELETE /cart/items/:id` · `DELETE /cart/items` (`{ids[]}` batch) ·
 `PATCH /cart/recipient` (`{profileId|null}` — "Order for") ·
 `DELETE /cart` (clear) · `POST /cart/merge` (guest→user on login) ·
