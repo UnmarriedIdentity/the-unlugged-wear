@@ -24,7 +24,9 @@
       "trunk continuous-dark + elbow-only on 1st-4th actives (post Antigravity+z-lift)",
       "R-series parent icons + iconless rows + collapsed icons",
       "settings/help purple hover + black cards",
-      "responsive widths 767/768/1023/1024/1440/1920"
+      "responsive widths 767/768/1023/1024/1440/1920",
+      "R1 price ladder (VPRICE-1/2): PRD-01 'From ₹48.00', adjustment editor re-derives, pin/reset, persistence + Reset Demo",
+      "switch keyboard + naming: library + discounts toggles respond to Tab + Space/Enter (LIBCTRL)"
     ],
     "last_updated": "2026-10-18",
     "updated_by": "agent"
