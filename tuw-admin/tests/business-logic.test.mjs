@@ -262,6 +262,17 @@ describe('Price Ladder (R1)', () => {
     assert.equal(next[3].price, 60.0); // 50 + 10
   });
 
+  test('editing an adjustment re-derives only the affected cells', () => {
+    const next = recomputeVariants(base, { 'Size:XL': 10 }, [
+      { color: 'Jet Black', size: 'S', price: 48.0 },
+      { color: 'Jet Black', size: 'XL', price: 54.0 },
+      { color: 'Washed Olive', size: 'S', price: 48.0 },
+    ]);
+    assert.equal(next[0].price, 48.0); // untouched
+    assert.equal(next[1].price, 58.0); // 48 + 10
+    assert.equal(next[2].price, 48.0); // old Olive adj gone — cells follow the new sidecar
+  });
+
   test('pruning drops stale keys (reported) and cleans no-effect entries (silent)', () => {
     const attrs = [
       { name: 'Color', values: ['Jet Black', 'Washed Olive'] },

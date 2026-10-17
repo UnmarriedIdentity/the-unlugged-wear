@@ -8,7 +8,7 @@ import DashboardShell from '@/components/layout/DashboardShell';
 import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, Input, Drawer, Modal, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection, Disclosure, Carousel, LinkButton } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
-import { resolveVariants, variantStockTotal, buildVariantSku, deriveVariantPrice, recomputeVariants, minFromPrice, pruneAdjustments, roundPrice, hasPriceSpread } from '@/mocks/variants';
+import { resolveVariants, variantStockTotal, buildVariantSku, deriveVariantPrice, recomputeVariants, minFromPrice, pruneAdjustments, roundPrice, hasPriceSpread, adjustmentKey, sumAdjustments } from '@/mocks/variants';
 import type { ProductVariant, ProductAttribute, PhotoSettings, ProductDiscount, SizeChart } from '@/mocks/fixtures';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
@@ -134,6 +134,7 @@ export default function ProductsView() {
     setAddImageUrl('');
     setFormVariants([]);
     setFormAdjustments({});
+    setAdjustmentDrafts({});
     setFormFabricGsm('');
     setFormCut('');
     setFormModelDims('');
@@ -324,6 +325,41 @@ export default function ProductsView() {
   // upcharge (e.g. "Size:XL": 6). Sidecar only — cancelling the drawer
   // discards it; submit prunes stale keys and persists what remains.
   const [formAdjustments, setFormAdjustments] = useState<Record<string, number>>({});
+  // Raw strings while typing (VPRICE-2) so decimal keystrokes survive;
+  // commits are live, blur normalizes the display back to committed truth.
+  const [adjustmentDrafts, setAdjustmentDrafts] = useState<Record<string, string>>({});
+
+  const setAdjustment = (key: string, amount: number | null) => {
+    const nextAdj = { ...formAdjustments };
+    if (amount === null) delete nextAdj[key];
+    else nextAdj[key] = roundPrice(amount);
+    setFormAdjustments(nextAdj);
+    setFormVariants((prev) => recomputeVariants(parseFloat(formPrice) || 0, nextAdj, prev));
+  };
+
+  const writeAdjustment = (key: string, raw: string) => {
+    setAdjustmentDrafts((prev) => {
+      const next = { ...prev };
+      if (raw === '') delete next[key];
+      else next[key] = raw;
+      return next;
+    });
+    if (raw.trim() === '') {
+      setAdjustment(key, null);
+      return;
+    }
+    const n = parseFloat(raw);
+    if (Number.isFinite(n) && n > 0) setAdjustment(key, n);
+    // invalid or refused (≤ 0) — committed state untouched; blur snaps back
+  };
+
+  const clearAdjustmentDraft = (key: string) => {
+    setAdjustmentDrafts((prev) => {
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  };
 
   // Base price write (R1): re-derives every unpinned cell from
   // base + Σ adjustments; explicit overrides stay pinned. This replaces
@@ -852,6 +888,7 @@ export default function ProductsView() {
     const basePrice = product.basePrice ?? product.price;
     const loadedAdjustments = pruneAdjustments(product.priceAdjustments, loadedAttributes).next;
     setFormAdjustments(loadedAdjustments);
+    setAdjustmentDrafts({});
     setFormVariants(
       resolveVariants(product).map((v) =>
         v.priceOverridden !== undefined
@@ -1129,6 +1166,13 @@ export default function ProductsView() {
   // Ladder readout (R1): the lowest cell is the storefront "From" price.
   const variantLowest = formVariants.length > 0 ? minFromPrice(formVariants) : null;
   const variantSpread = formVariants.length > 1 && new Set(formVariants.map((v) => v.price)).size > 1;
+
+  // Per-cell Σ adjustments (VPRICE-2): provenance chip + tooltip data.
+  const cellAdjustment = (color: string, size: string) =>
+    sumAdjustments(formAdjustments, [
+      { attr: 'Color', value: color },
+      { attr: 'Size', value: size },
+    ]);
 
   // CSV import pipeline (X1b): Final Listing workbooks re-saved as CSV.
   // Quoted-field-aware parse (no dependency); unknown columns ignored;
@@ -2426,6 +2470,66 @@ export default function ProductsView() {
                 required
               />
             </div>
+            <Disclosure
+              title="Per-value price adjustments"
+              subtitle="Additive upcharges by attribute value — a cell's price is base + Σ its value adjustments."
+              badge={
+                Object.keys(formAdjustments).length > 0 ? (
+                  <Badge variant="info">{Object.keys(formAdjustments).length}</Badge>
+                ) : undefined
+              }
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {['Color', 'Size'].map((attrName) => {
+                  const attr = formAttributes.find((a) => a.name === attrName);
+                  if (!attr || attr.values.length === 0) return null;
+                  return (
+                    <div key={attrName} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      <div
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 600,
+                          letterSpacing: '0.06em',
+                          textTransform: 'uppercase',
+                          color: 'var(--tuw-text-secondary, #5D6772)',
+                        }}
+                      >
+                        {attrName}
+                      </div>
+                      {attr.values.map((value) => {
+                        const key = adjustmentKey(attrName, value);
+                        const committed = formAdjustments[key];
+                        const draft = adjustmentDrafts[key];
+                        return (
+                          <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <span style={{ flex: 1, fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
+                              {value}
+                            </span>
+                            <div style={{ width: 110, flexShrink: 0 }}>
+                              <Input
+                                aria-label={`${attrName} ${value} price adjustment`}
+                                type="number"
+                                step="0.01"
+                                min={0}
+                                placeholder="0"
+                                value={draft !== undefined ? draft : committed !== undefined ? String(committed) : ''}
+                                onChange={(e) => writeAdjustment(key, e.target.value)}
+                                onBlur={() => clearAdjustmentDraft(key)}
+                                style={{ height: 32, textAlign: 'right' }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
+                <p style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0, lineHeight: 1.5 }}>
+                  Upcharges only — negative adjustments are refused. Clearing a value removes its
+                  adjustment; removing the value does the same. Pinned cells keep their override.
+                </p>
+              </div>
+            </Disclosure>
             <DrawerSection title="Pricing & Discounts" titleGap={10}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
@@ -2895,6 +2999,24 @@ export default function ProductsView() {
                             style={{ height: 36, textAlign: 'right' }}
                           />
                         </div>
+                        {!v.priceOverridden &&
+                          (() => {
+                            const adjSum = cellAdjustment(v.color, v.size);
+                            if (adjSum <= 0) return null;
+                            return (
+                              <span
+                                title={`Derived: base ${formPrice || '0'} + ${adjSum.toFixed(2)} in value adjustments`}
+                                className="tuw-tabular-nums"
+                                style={{
+                                  fontSize: 11,
+                                  color: 'var(--tuw-text-secondary, #5D6772)',
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
+                                +{adjSum.toFixed(2)}
+                              </span>
+                            );
+                          })()}
                         {v.priceOverridden && (
                           <button
                             type="button"
