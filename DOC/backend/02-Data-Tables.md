@@ -1,8 +1,8 @@
 # Data Tables — Full Inventory (single PostgreSQL)
 
-> Status: Filling | Last Updated: 2026-10-15
-> 63 tables + 1 deferred footnote (`search_documents`). Column detail lives in files 03–10 and
-> 15; this file is the index, ending with the full relationship diagram.
+> Status: Filling | Last Updated: 2026-10-17
+> 68 tables + 1 deferred footnote (`search_documents`). Column detail lives in files 03–10,
+> 15, and 17; this file is the index, ending with the full relationship diagram.
 > Conventions (UUIDv7, money, indexes): `01-Conventions.md`.
 
 ## Design rules (apply to every table below)
@@ -17,19 +17,29 @@
 
 | Table | Purpose | Key links |
 |---|---|---|
-| users | Accounts (admins + customers), status lifecycle | — |
+| users | Login credentials only (email/password/status); person fields live on profiles | — |
+| profiles | The person you shop for: names, phone, DOB; `user_id` NULL = managed member with no login (file 17) | users (nullable) |
 | roles | `admin` / `customer` (+ future) referenced by `slug` | — |
 | permissions | Granular grants (`product.create`, `order.refund`) | — |
 | role_permissions | Grant map, composite PK (role, permission) | roles, permissions |
 | user_roles | Multi-role map, composite PK (user, role) | users, roles |
-| addresses | Shipping/billing book, one-default partial unique | users |
 | refresh_tokens | Hashed rotation tokens, revocation, expiry cleanup | users |
-| customer_notes | Staff notes with author + timestamp (tier stays computed, never stored) | users, users (author) |
+| customer_notes | Staff notes with author + timestamp (tier stays computed, never stored) | profiles, users (author) |
 | staff_invitations | Invite flow: email, role, token hash, expiry, status (members *are* users) | users (inviter) |
 | audit_logs | Stock-edit summaries only: one row per product per import job (qty inserted, job ref) — variant deltas live in stock_movements; nothing else is recorded here | users (actor) |
 
 The single-URL gate reads `users → user_roles → roles.slug`
 (see `14-Single-URL-Gating.md`).
+
+## Household & family (5) → detail: `17-Household-Accounts.md`
+
+| Table | Purpose | Key links |
+|---|---|---|
+| households | Family group; every signup auto-creates a solo one — uniform paths | — |
+| household_members | Composite PK (household, profile) + UNIQUE(profile) = one household per profile; roles manager/member | households, profiles |
+| profile_size_preferences | Per-person, per-category size (references Size library values, RESTRICT) | profiles, categories, attribute_values |
+| household_invitations | Join (email) + claim (profile) modes, one table, `staff_invitations` grammar | households, profiles, users (inviter) |
+| addresses | Family + personal book, household-level one-default partial uniques | households, profiles |
 
 ## Catalog (17) → detail: `04-Catalog.md`
 
@@ -66,7 +76,7 @@ carries combinations in memory (unchanged behavior).
 
 | Table | Purpose | Key links |
 |---|---|---|
-| carts | Guest (`session_id`) or user cart; one-active-per-user partial unique; ownership CHECK | users (nullable) |
+| carts | Guest (`session_id`) or user cart; one-active-per-user partial unique; ownership CHECK; `for_profile_id` recipient | users (nullable), profiles (nullable) |
 | cart_items | Lines with price/display snapshots; unique (cart, product, variant) NULLS NOT DISTINCT | carts (cascade) |
 | wishlists | One per user (unique) | users |
 | wishlist_items | Unique (wishlist, product) | wishlists |
@@ -75,7 +85,7 @@ carries combinations in memory (unchanged behavior).
 
 | Table | Purpose | Key links |
 |---|---|---|
-| orders | Number-unique, dual status axes, stored totals, address snapshots | users, discount_codes |
+| orders | Number-unique, dual status axes, stored totals, address snapshots; placed-by + for-profile | users (placed-by), profiles (for), discount_codes |
 | order_items | Immutable snapshots (name/sku/price/line, options jsonb) | orders (cascade) |
 | order_status_history | Status timeline + actor | orders |
 | payments | Provider lifecycle, unique transaction ref | orders |
@@ -143,16 +153,27 @@ erDiagram
     roles ||--o{ user_roles : grants
     roles ||--o{ role_permissions : defines
     permissions ||--o{ role_permissions : granted-by
-    users ||--o{ addresses : owns
+    users ||--o| profiles : credential-of
     users ||--o{ refresh_tokens : holds
-    users ||--o{ customer_notes : annotated
+    profiles ||--o{ customer_notes : annotated
     users ||--o{ staff_invitations : invited-by
     users ||--o{ notifications : receives
     users ||--o{ audit_logs : imports-stock-for
     users ||--o{ carts : owns
-    users ||--o{ orders : places
+    profiles ||--o{ carts : for
+    users ||--o{ orders : placed-by
+    profiles ||--o{ orders : for
     users ||--o{ wishlists : keeps
     users ||--o{ reviews : writes
+    households ||--o{ household_members : groups
+    profiles ||--o{ household_members : joins
+    households ||--o{ household_invitations : invites
+    profiles ||--o{ household_invitations : claims
+    profiles ||--o{ profile_size_preferences : sizes
+    categories ||--o{ profile_size_preferences : sized-in
+    attribute_values ||--o{ profile_size_preferences : picks
+    households ||--o{ addresses : owns
+    profiles ||--o{ addresses : personal
     categories ||--o{ categories : nests
     categories ||--o{ products : lists
     brands ||--o{ products : labels

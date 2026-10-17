@@ -1,6 +1,6 @@
 # Cart & Wishlist — Lines, Snapshots, Merge
 
-> Status: Filling | Last Updated: 2026-10-15
+> Status: Filling | Last Updated: 2026-10-17
 > 4 tables. The cart is a hot path — every design choice below serves the
 > P99 <100ms contract in §5. Conventions: `01-Conventions.md`.
 
@@ -11,6 +11,7 @@
 | id | uuid | PK, UUIDv7 | |
 | user_id | uuid | NULL, FK → users(id) ON DELETE CASCADE | Logged-in owner; account deletion clears the cart |
 | session_id | varchar(64) | NULL | Guest owner (signed cookie) |
+| for_profile_id | uuid | NULL, FK → profiles(id) ON DELETE SET NULL | Checkout recipient ("Order for") — NULL = the owner shops for themselves; set via `PATCH /cart/recipient`. SET NULL so member removal never blocks on a cart |
 | status | varchar(20) | NOT NULL DEFAULT 'active', CHECK IN ('active','abandoned','converted') | Abandonment + conversion lifecycle |
 | last_activity_at | timestamptz | NOT NULL DEFAULT now() | Idle >24h feeds the abandonment detector |
 | created_at / updated_at | timestamptz | NOT NULL | |
@@ -18,7 +19,8 @@
 
 Indexes: PK · partial unique `one_active_cart_per_user (user_id)
 WHERE user_id IS NOT NULL AND status = 'active'` (merge target) ·
-`idx_carts_session_id` (guest lookup) · partial
+`idx_carts_session_id` (guest lookup) ·
+`idx_carts_for_profile_id` (recipient lookups) · partial
 `idx_carts_abandoned (status, last_activity_at) WHERE status = 'active'`
 (detector scan — narrow by construction).
 
@@ -63,6 +65,14 @@ Indexes: PKs · `idx_wishlist_items_wishlist_id` · unique
 `(wishlist_id, product_id)`. No admin UI by design — wishlists inform
 nothing operational; they surface only in recommendations later.
 
+## Checkout recipient ("Order for")
+
+Storefront contract (full doctrine: `17-Household-Accounts.md` §5): the
+checkout shows a household member selector, an **Edit member** affordance
+(explicit profile write — the only checkout path that saves sizes to a
+profile), and per-line size chips that affect **that order only**. Line
+edits never write `profile_size_preferences`; autofill only reads it.
+
 ## Merge rule (guest → user on login)
 
 Additive qty per (product, variant), capped at live stock; loser guest
@@ -86,6 +96,7 @@ One-active-cart partial unique makes the target unambiguous.
 ```mermaid
 erDiagram
     users ||--o{ carts : owns
+    profiles ||--o{ carts : for
     carts ||--o{ cart_items : contains
     products ||--o{ cart_items : references
     users ||--o{ wishlists : keeps

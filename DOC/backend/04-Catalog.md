@@ -1,6 +1,6 @@
 # Catalog — Columns, Constraints, Indexes
 
-> Status: Filling | Last Updated: 2026-10-15
+> Status: Filling | Last Updated: 2026-10-17
 > 13 tables. Conventions: `01-Conventions.md`. Money semantics follow the
 > open currency decision (`00-README.md` §7) — DECIMAL(12,2) shape is final.
 > Mermaid slice for this domain sits at the end.
@@ -144,6 +144,10 @@ Indexes: PK · `(product_id, sort_order)` (gallery read) ·
 Indexes: PKs · unique `attribute_definitions.name` · unique
 `(definition_id, value)` on values · composite link PKs serve both join
 directions (product→definitions, definition→products).
+
+In-use guard (R2): deletion refuses while any row references the value —
+product links or family size preferences (`profile_size_preferences`,
+file 17 §3); both FKs are RESTRICT, so the DB fails loudly either way.
 
 **Assign vs register (write semantics — they are never conflated).**
 *Assigning* an existing library value to a product inserts one row into

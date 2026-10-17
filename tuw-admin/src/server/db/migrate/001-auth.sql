@@ -2,6 +2,8 @@
 -- Source of truth: DOC/backend/03-Auth-RBAC.md (transcribed 1:1).
 -- Conventions: UUIDv7 PKs (app-generated), timestamptz pairs, varchar+CHECK.
 -- Order matters: parents before children (roles/permissions before joins).
+-- users = credential, profiles = person (names/phone/DOB); addresses moved
+-- to 011-household.sql — the book is household-scoped, not login-scoped.
 
 -- ---------------------------------------------------------------- roles
 CREATE TABLE roles (
@@ -28,12 +30,24 @@ CREATE TABLE users (
   id            uuid         PRIMARY KEY,
   email         varchar(255) NOT NULL UNIQUE,
   password_hash varchar(255) NOT NULL,
-  first_name    varchar(100) NOT NULL,
-  last_name     varchar(100) NOT NULL,
-  phone         varchar(20),
   status        varchar(20)  NOT NULL DEFAULT 'active'
     CHECK (status IN ('active','disabled')),
   last_login_at timestamptz,
+  created_at    timestamptz  NOT NULL DEFAULT now(),
+  updated_at    timestamptz  NOT NULL DEFAULT now()
+);
+
+-- ------------------------------------------------------------ profiles
+-- The person you shop for. user_id NULL = managed family member with no
+-- login (no email required). One profile per user; one household per
+-- profile (011-household.sql).
+CREATE TABLE profiles (
+  id            uuid         PRIMARY KEY,
+  user_id       uuid         UNIQUE REFERENCES users (id) ON DELETE CASCADE,
+  first_name    varchar(100) NOT NULL,
+  last_name     varchar(100) NOT NULL,
+  phone         varchar(20),
+  date_of_birth date,
   created_at    timestamptz  NOT NULL DEFAULT now(),
   updated_at    timestamptz  NOT NULL DEFAULT now()
 );
@@ -55,26 +69,8 @@ CREATE TABLE user_roles (
 );
 CREATE INDEX idx_user_roles_role_id ON user_roles (role_id);
 
--- ------------------------------------------------------------- addresses
-CREATE TABLE addresses (
-  id          uuid         PRIMARY KEY,
-  user_id     uuid         NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-  type        varchar(10)  NOT NULL DEFAULT 'shipping'
-    CHECK (type IN ('shipping','billing')),
-  label       varchar(50),
-  line1       varchar(255) NOT NULL,
-  line2       varchar(255),
-  city        varchar(100) NOT NULL,
-  state       varchar(100),
-  postal_code varchar(20)  NOT NULL,
-  country     varchar(2)   NOT NULL DEFAULT 'IN',
-  is_default  boolean      NOT NULL DEFAULT false,
-  created_at  timestamptz  NOT NULL DEFAULT now(),
-  updated_at  timestamptz  NOT NULL DEFAULT now()
-);
-CREATE INDEX idx_addresses_user_id ON addresses (user_id);
-CREATE UNIQUE INDEX one_default_per_user ON addresses (user_id)
-  WHERE is_default;
+-- addresses moved to 011-household.sql — household-scoped book (shared +
+-- personal rows, household-level defaults).
 
 -- -------------------------------------------------------- refresh_tokens
 CREATE TABLE refresh_tokens (
@@ -90,12 +86,12 @@ CREATE INDEX idx_refresh_tokens_user_id ON refresh_tokens (user_id);
 -- -------------------------------------------------------- customer_notes
 CREATE TABLE customer_notes (
   id         uuid        PRIMARY KEY,
-  user_id    uuid        NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  profile_id uuid        NOT NULL REFERENCES profiles (id) ON DELETE CASCADE,
   author_id  uuid        NOT NULL REFERENCES users (id) ON DELETE RESTRICT,
   note       text        NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX idx_customer_notes_user_id ON customer_notes (user_id);
+CREATE INDEX idx_customer_notes_profile_id ON customer_notes (profile_id);
 
 -- ----------------------------------------------------- staff_invitations
 CREATE TABLE staff_invitations (

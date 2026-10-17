@@ -1,6 +1,6 @@
 # Orders & Money — Columns, Scopes, Guards
 
-> Status: Filling | Last Updated: 2026-10-15
+> Status: Filling | Last Updated: 2026-10-17
 > 9 tables. Money is DECIMAL(12,2); totals are **stored, not derived** —
 > a financial record must be immutable, not recomputed. Conventions:
 > `01-Conventions.md`. Currency default: `INR` (IN localization applied;
@@ -11,7 +11,8 @@
 | Column | Type | Constraints | Reason |
 |---|---|---|---|
 | id | uuid | PK, UUIDv7 | |
-| user_id | uuid | NOT NULL, FK → users(id) ON DELETE RESTRICT | Order history must survive; deleting a customer with orders fails loudly |
+| placed_by_user_id | uuid | NOT NULL, FK → users(id) ON DELETE RESTRICT | Payer of record — receipts, refunds, and visibility start here; RESTRICT keeps history |
+| for_profile_id | uuid | NOT NULL, FK → profiles(id) ON DELETE RESTRICT | Recipient — the person the clothes are for (self by default). Sizes prefilled from their profile, never written back (file 17 §6) |
 | order_number | varchar(30) | NOT NULL, UNIQUE | Human key (`#2026-000123`); support lookup |
 | status | varchar(20) | NOT NULL DEFAULT 'pending', CHECK IN ('pending','confirmed','processing','shipped','delivered','cancelled','failed','refunded') | Fulfillment axis — independent from payment |
 | subtotal | DECIMAL(12,2) | NOT NULL, CHECK (>= 0) | Sum of line totals at purchase |
@@ -27,8 +28,9 @@
 | notes | text | NULL | Admin/customer notes |
 | created_at / updated_at | timestamptz | NOT NULL | |
 
-Indexes: PK · unique order_number · `(user_id, created_at DESC)`
-(account history) · `idx_orders_status` · `idx_orders_created_at`
+Indexes: PK · unique order_number · `(placed_by_user_id, created_at DESC)`
+(placed history) · `(for_profile_id, created_at DESC)` (for-me history —
+household reads, file 17 §4) · `idx_orders_status` · `idx_orders_created_at`
 (date ranges) · `idx_orders_payment_status` (reconciliation).
 
 ## order_items
@@ -150,7 +152,7 @@ Indexes: PK · `idx_shipments_order_id`.
 
 | Transaction | Writes (single TX) | Guard |
 |---|---|---|
-| Checkout | orders + order_items + payments + stock decrement + cart→converted + discount uses_count+1 | Atomic `UPDATE … WHERE stock >= qty` (oversell impossible); idempotency-key map (24h); replay returns stored response |
+| Checkout | orders (carrying `placed_by_user_id` + `for_profile_id` from the cart) + order_items + payments + stock decrement + cart→converted + discount uses_count+1 | Atomic `UPDATE … WHERE stock >= qty` (oversell impossible); idempotency-key map (24h); replay returns stored response |
 | Refund | payments.status + refunds row + orders.payment_status | One-open-refund partial unique; amount ≤ grand_total |
 | Return restock | return_items.disposition + stock_movements (`return`) + variant/product balance | Same atomic path as checkout decrement |
 | Status change | orders.status + order_status_history row | History row written in-TX — timeline can never skip |
@@ -163,7 +165,8 @@ appears in metrics.
 
 ```mermaid
 erDiagram
-    users ||--o{ orders : places
+    users ||--o{ orders : placed-by
+    profiles ||--o{ orders : for
     discount_codes ||--o{ orders : applied-to
     orders ||--o{ order_items : snapshots
     orders ||--o{ order_status_history : timelines
