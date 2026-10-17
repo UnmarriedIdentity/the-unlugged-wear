@@ -8,16 +8,16 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 216,
-    "done": 191,
+    "total": 217,
+    "done": 192,
     "in_progress": 3,
     "backlog": 22
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "b1da14f",
-    "unpushed": ["b1da14f", "23ea4bc", "af28a44", "1fa6064", "e33270d", "542f570", "4f2c373", "a7b7d13", "70bd69a", "be65b2e", "863475a", "c32f777", "81b2c28", "2ab5dcf", "c135635", "df9fc73", "e2d3980"],
-    "next_up": "N1b library write-through (display/visibility/hex + disclosure); R1 per-value price model (valuePrices sidecar → matrix precedence); R2 drawer price column + library delete/disable removal; shipments partner-sync reframe; design-system tail (FX1/SEL/CBX/IMG); DW2 pass; anim re-run",
+    "tip": "f0806c4",
+    "unpushed": ["f0806c4", "3c74e37", "b1da14f", "23ea4bc", "af28a44", "1fa6064", "e33270d", "542f570", "4f2c373", "a7b7d13", "70bd69a", "be65b2e", "863475a", "c32f777", "81b2c28", "2ab5dcf", "c135635", "df9fc73", "e2d3980"],
+    "next_up": "R1 per-value price model (valuePrices sidecar → matrix precedence) → R2 (drawer price column + library delete/disable removal) → attribute edge log (file 18) → N1b write-through (display/visibility/hex + disclosure); shipments partner-sync reframe; design-system tail (FX1/SEL/CBX/IMG); DW2 pass; anim re-run; household UI build reads file 17",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
       "dashboard D-series: KPI tiers, range/sort menus, badge mapping, calendar pills, header tint (360/768/1024/1440)",
@@ -2052,6 +2052,20 @@
       "verified": true,
       "pushed": false,
       "follow_ups": []
+    },
+    {
+      "id": "TL-DB-HOUSEHOLD",
+      "title": "Household accounts DB design (profiles split, family groups, proxy ordering)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-17",
+      "finished": "2026-10-17",
+      "log": "feat/search-modal: f0806c4 DOC/backend/17-Household-Accounts.md + 011-household.sql (5 tables); 001 reshape (users slimmed, profiles added, addresses moved out, customer_notes → profiles); syncs 00/02/03/04/05/06/13; 63→68 tables; gates green",
+      "design_match": "yes",
+      "key_decisions": ["users=credential / profiles=person / households=group — dependents need no email", "one household per profile (UNIQUE); leave+join for moves", "any member orders for any; visibility placed-by ∪ for-me (+managers all-for-household)", "size edits: line=order-only, panel=explicit profile write — isolation structural (no override column)", "addresses → household-scoped (shared + personal rows)", "customer_notes → profiles; tickets/reviews/views stay user-scoped (login-attached)"],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": ["household UI build (dropdown + 'Edit member' panel + autofill) follows the file-17 contract", "deferrals recorded in file 17 §7 (+Add member at checkout, per-order privacy toggle, size fallback)"]
     },
     {
       "id": "TL-UI-VALPICK",
