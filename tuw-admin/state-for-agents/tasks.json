@@ -9,14 +9,14 @@
   },
   "summary": {
     "total": 221,
-    "done": 208,
+    "done": 209,
     "in_progress": 1,
-    "backlog": 12
+    "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "b4750b3",
-    "unpushed": ["b4750b3", "758ac64", "28d254d", "64f2fbc", "e5f8370", "3099979", "c108569", "7021c60", "cec156f", "a687bff", "f0806c4", "3c74e37", "b1da14f", "23ea4bc", "af28a44", "1fa6064", "e33270d", "542f570", "4f2c373", "a7b7d13", "70bd69a", "be65b2e", "863475a", "c32f777", "81b2c28", "2ab5dcf", "c135635", "df9fc73", "e2d3980"],
+    "tip": "4b65443",
+    "unpushed": ["4b65443", "b4750b3", "758ac64", "28d254d", "64f2fbc", "e5f8370", "3099979", "c108569", "7021c60", "cec156f", "a687bff", "f0806c4", "3c74e37", "b1da14f", "23ea4bc", "af28a44", "1fa6064", "e33270d", "542f570", "4f2c373", "a7b7d13", "70bd69a", "be65b2e", "863475a", "c32f777", "81b2c28", "2ab5dcf", "c135635", "df9fc73", "e2d3980"],
     "next_up": "VPRICE-1 per-value price model (base anchor + additive priceAdjustments → matrix precedence; in_progress) → VPRICE-2 (drawer adjustment editor + matrix provenance) → LIBCTRL (attribute library delete/disable removal) → attribute edge log (file 18) → N1b write-through (display/visibility/hex + disclosure); styling engine (file 19) is the project's FINAL feature — build it only after the core e-commerce app is complete; shipments partner-sync reframe; design-system tail (FX1/SEL/CBX/IMG); DW2 pass; anim re-run; household UI build reads file 17",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
@@ -3538,23 +3538,28 @@
     {
       "id": "TL-UI-VPRICE-2",
       "title": "Drawer price-adjustment editor + matrix provenance (R2a)",
-      "status": "in_progress",
+      "status": "done",
       "owner": "agent",
       "started": "2026-10-18",
-      "finished": null,
-      "log": null,
-      "design_match": null,
-      "key_decisions": [],
-      "verified": false,
+      "finished": "2026-10-18",
+      "log": "v2:4b65443",
+      "design_match": "yes",
+      "key_decisions": [
+        "General-tab Disclosure editor: per-value numeric inputs for matrix-forming attributes (Color + Size); badge shows the active count",
+        "drafts state keeps decimal keystrokes smooth; commits are live, blur snaps the display to committed truth; negatives/0 refused (min 0 + helper copy)",
+        "matrix provenance: derived cells with Σ > 0 show a +n.nn chip (tooltip: base + Σ breakdown); pinned cells keep the reset control",
+        "editor edits re-derive unpinned cells only; test 'editing an adjustment re-derives only the affected cells' (19 admin tests)"
+      ],
+      "verified": true,
       "pushed": false,
       "follow_ups": []
     },
     {
       "id": "TL-UI-LIBCTRL",
       "title": "Attribute library control cleanup (R2b — delete/disable removal or wiring)",
-      "status": "backlog",
-      "owner": null,
-      "started": null,
+      "status": "in_progress",
+      "owner": "agent",
+      "started": "2026-10-18",
       "finished": null,
       "log": null,
       "design_match": null,
