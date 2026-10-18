@@ -1174,6 +1174,20 @@ export default function ProductsView() {
       { attr: 'Size', value: size },
     ]);
 
+  // Tooltip copy for derived cells (VPRICE-3): names every contributing value
+  // upcharge so the +Δ chip explains itself without opening the editor.
+  const cellPriceBreakdown = (color: string, size: string, effective: number) => {
+    const base = parseFloat(formPrice) || 0;
+    const parts: string[] = [];
+    const colorAdj = formAdjustments[adjustmentKey('Color', color)] ?? 0;
+    const sizeAdj = formAdjustments[adjustmentKey('Size', size)] ?? 0;
+    if (colorAdj > 0) parts.push(`${color} $${colorAdj.toFixed(2)}`);
+    if (sizeAdj > 0) parts.push(`${size} $${sizeAdj.toFixed(2)}`);
+    return parts.length > 0
+      ? `Base $${base.toFixed(2)} + ${parts.join(' + ')} = $${effective.toFixed(2)}`
+      : `Base $${base.toFixed(2)}`;
+  };
+
   // CSV import pipeline (X1b): Final Listing workbooks re-saved as CSV.
   // Quoted-field-aware parse (no dependency); unknown columns ignored;
   // valid rows stage as drafts, failures preserve file + error list.
@@ -2147,7 +2161,10 @@ export default function ProductsView() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 14, paddingTop: 10, borderTop: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
                   <div>
                     <span className="tuw-tabular-nums" style={{ fontSize: '18px', fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-                      {hasPriceSpread(resolveVariants(p)) ? `From ₹${p.price.toFixed(2)}` : `₹${p.price.toFixed(2)}`}
+                      {hasPriceSpread(resolveVariants(p)) && (
+                        <span style={{ fontSize: '12px', fontWeight: 400, color: 'var(--tuw-text-secondary, #5D6772)', marginRight: 5 }}>From</span>
+                      )}
+                      ₹{p.price.toFixed(2)}
                     </span>
                     {p.compareAtPrice && (
                       <span className="tuw-tabular-nums" style={{ fontSize: '13px', color: 'var(--tuw-text-secondary, #5D6772)', textDecoration: 'line-through', marginLeft: 6 }}>
@@ -2273,7 +2290,12 @@ export default function ProductsView() {
                     {p.category}
                   </TableCell>
                   <TableCell className="tuw-tabular-nums" style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', textAlign: 'right' }}>
-                    {hasPriceSpread(resolveVariants(p)) ? `From ₹${p.price.toFixed(2)}` : `₹${p.price.toFixed(2)}`}
+                    {/* "From" reads as a quiet label (VPRICE-3); the amount
+                        stays the loud part of the cell. */}
+                    {hasPriceSpread(resolveVariants(p)) && (
+                      <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--tuw-text-secondary, #5D6772)', marginRight: 4 }}>From</span>
+                    )}
+                    ₹{p.price.toFixed(2)}
                     {p.compareAtPrice && (
                       <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', textDecoration: 'line-through', marginLeft: 6, fontWeight: 400 }}>
                         ₹{p.compareAtPrice.toFixed(2)}
@@ -2460,7 +2482,7 @@ export default function ProductsView() {
                 value={formPrice}
                 onChange={(e) => writeBasePrice(e.target.value)}
                 required
-                helperText="Variant cells derive from base + per-value adjustments; the lowest cell is the listed “From” price. Pinned cells keep their override."
+                helperText="Every variant price starts at this base."
               />
               <Input
                 label="Stock Quantity"
@@ -2472,7 +2494,7 @@ export default function ProductsView() {
             </div>
             <Disclosure
               title="Per-value price adjustments"
-              subtitle="Additive upcharges by attribute value — a cell's price is base + Σ its value adjustments."
+              subtitle="Value upcharges added on top of the base price."
               badge={
                 Object.keys(formAdjustments).length > 0 ? (
                   <Badge variant="info">{Object.keys(formAdjustments).length}</Badge>
@@ -2496,37 +2518,40 @@ export default function ProductsView() {
                       >
                         {attrName}
                       </div>
-                      {attr.values.map((value) => {
-                        const key = adjustmentKey(attrName, value);
-                        const committed = formAdjustments[key];
-                        const draft = adjustmentDrafts[key];
-                        return (
-                          <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <span style={{ flex: 1, fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
-                              {value}
-                            </span>
-                            <div style={{ width: 110, flexShrink: 0 }}>
-                              <Input
-                                aria-label={`${attrName} ${value} price adjustment`}
-                                type="number"
-                                step="0.01"
-                                min={0}
-                                placeholder="0"
-                                value={draft !== undefined ? draft : committed !== undefined ? String(committed) : ''}
-                                onChange={(e) => writeAdjustment(key, e.target.value)}
-                                onBlur={() => clearAdjustmentDraft(key)}
-                                style={{ height: 32, textAlign: 'right' }}
-                              />
+                      {/* Two-column value grid (VPRICE-3): roughly halves the
+                          expanded height without losing the name → input rhythm. */}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 16, rowGap: 8 }}>
+                        {attr.values.map((value) => {
+                          const key = adjustmentKey(attrName, value);
+                          const committed = formAdjustments[key];
+                          const draft = adjustmentDrafts[key];
+                          return (
+                            <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                              <span style={{ flex: 1, fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
+                                {value}
+                              </span>
+                              <div style={{ width: 110, flexShrink: 0 }}>
+                                <Input
+                                  aria-label={`${attrName} ${value} price adjustment`}
+                                  type="number"
+                                  step="0.01"
+                                  min={0}
+                                  placeholder="0"
+                                  value={draft !== undefined ? draft : committed !== undefined ? String(committed) : ''}
+                                  onChange={(e) => writeAdjustment(key, e.target.value)}
+                                  onBlur={() => clearAdjustmentDraft(key)}
+                                  style={{ height: 32, textAlign: 'right' }}
+                                />
+                              </div>
                             </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
+                      </div>
                     </div>
                   );
                 })}
                 <p style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0, lineHeight: 1.5 }}>
-                  Upcharges only — negative adjustments are refused. Clearing a value removes its
-                  adjustment; removing the value does the same. Pinned cells keep their override.
+                  Upcharges only. Clearing a field — or removing the value — drops its adjustment.
                 </p>
               </div>
             </Disclosure>
@@ -2925,13 +2950,24 @@ export default function ProductsView() {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
               <span style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
                 {formVariants.length} variants · {variantStockTotal(formVariants)} units in stock
-                {variantSpread && variantLowest !== null
-                  ? ` · From $${variantLowest.toFixed(2)}`
-                  : ''}
               </span>
-              <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={addVariant}>
-                Add Variant
-              </Button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                {/* Storefront "From" readout (VPRICE-3): its own quiet pill
+                    instead of a clause glued onto the counts sentence. */}
+                {variantSpread && variantLowest !== null && (
+                  <Badge
+                    size="sm"
+                    variant="neutral"
+                    className="tuw-tabular-nums"
+                    title="Lowest variant price — the storefront lists this as “From”"
+                  >
+                    From ${variantLowest.toFixed(2)}
+                  </Badge>
+                )}
+                <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={addVariant}>
+                  Add Variant
+                </Button>
+              </div>
             </div>
             <Table>
               <TableHeader>
@@ -2939,7 +2975,9 @@ export default function ProductsView() {
                   <TableHead style={{ padding: '12px 16px' }}>Color</TableHead>
                   <TableHead style={{ padding: '12px 16px' }}>Size</TableHead>
                   <TableHead style={{ padding: '12px 16px' }}>SKU</TableHead>
-                  <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Price</TableHead>
+                  {/* Right padding caps the label exactly over the inputs'
+                      right-aligned numbers (cell 16 + border 1 + pad 14). */}
+                  <TableHead style={{ padding: '12px 31px 12px 16px', textAlign: 'right' }}>Price</TableHead>
                   <TableHead style={{ padding: '12px 16px' }}>Stock</TableHead>
                   <TableHead style={{ padding: '12px 16px', width: 48 }}><span className="sr-only">Actions</span></TableHead>
                 </TableRow>
@@ -2984,7 +3022,73 @@ export default function ProductsView() {
                       />
                     </TableCell>
                     <TableCell style={{ padding: '10px 16px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'flex-end' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        {/* Fixed annotation slot (VPRICE-3): derived-Σ chip or
+                            pinned reset control — always reserved so every
+                            price input keeps the exact same width and the
+                            numbers line up down the column. */}
+                        <div
+                          style={{
+                            width: 56,
+                            flexShrink: 0,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'flex-end',
+                          }}
+                        >
+                          {!v.priceOverridden &&
+                            (() => {
+                              const adjSum = cellAdjustment(v.color, v.size);
+                              if (adjSum <= 0) return null;
+                              return (
+                                <span
+                                  title={cellPriceBreakdown(v.color, v.size, v.price)}
+                                  className="tuw-tabular-nums"
+                                  style={{
+                                    fontSize: 12,
+                                    color: 'var(--tuw-text-secondary, #5D6772)',
+                                    whiteSpace: 'nowrap',
+                                  }}
+                                >
+                                  +{adjSum.toFixed(2)}
+                                </span>
+                              );
+                            })()}
+                          {v.priceOverridden && (
+                            <button
+                              type="button"
+                              aria-label={`Reset ${v.color} ${v.size} price to derived`}
+                              title={`Pinned override — reset to derived $${deriveVariantPrice(
+                                parseFloat(formPrice) || 0,
+                                formAdjustments,
+                                v.color,
+                                v.size,
+                              ).toFixed(2)}`}
+                              onClick={() =>
+                                updateVariant(v.id, {
+                                  price: deriveVariantPrice(parseFloat(formPrice) || 0, formAdjustments, v.color, v.size),
+                                  priceOverridden: false,
+                                })
+                              }
+                              className="tuw-primary-hover"
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: 24,
+                                height: 24,
+                                padding: 0,
+                                borderRadius: 6,
+                                color: 'var(--tuw-action-primary, #7539FF)',
+                              }}
+                            >
+                              <RotateCcw size={14} />
+                            </button>
+                          )}
+                        </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <Input
                             aria-label={`Price for ${v.color} ${v.size}`}
@@ -3000,47 +3104,6 @@ export default function ProductsView() {
                             style={{ height: 36, textAlign: 'right' }}
                           />
                         </div>
-                        {!v.priceOverridden &&
-                          (() => {
-                            const adjSum = cellAdjustment(v.color, v.size);
-                            if (adjSum <= 0) return null;
-                            return (
-                              <span
-                                title={`Derived: base ${formPrice || '0'} + ${adjSum.toFixed(2)} in value adjustments`}
-                                className="tuw-tabular-nums"
-                                style={{
-                                  fontSize: 11,
-                                  color: 'var(--tuw-text-secondary, #5D6772)',
-                                  whiteSpace: 'nowrap',
-                                }}
-                              >
-                                +{adjSum.toFixed(2)}
-                              </span>
-                            );
-                          })()}
-                        {v.priceOverridden && (
-                          <button
-                            type="button"
-                            aria-label={`Reset ${v.color} ${v.size} price to derived`}
-                            title="Pinned override — reset to derived price"
-                            onClick={() =>
-                              updateVariant(v.id, {
-                                price: deriveVariantPrice(parseFloat(formPrice) || 0, formAdjustments, v.color, v.size),
-                                priceOverridden: false,
-                              })
-                            }
-                            style={{
-                              background: 'none',
-                              border: 'none',
-                              cursor: 'pointer',
-                              padding: 0,
-                              display: 'inline-flex',
-                              color: 'var(--tuw-action-primary, #7539FF)',
-                            }}
-                          >
-                            <RotateCcw size={14} />
-                          </button>
-                        )}
                       </div>
                     </TableCell>
                     <TableCell style={{ padding: '10px 16px' }}>

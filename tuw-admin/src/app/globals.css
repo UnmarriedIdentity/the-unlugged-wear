@@ -2148,6 +2148,15 @@
   color: var(--tuw-text-success, #187343) !important;
 }
 
+/* Shared primary-action hover (VPRICE-3): light violet wash for icon buttons
+   that restore derived state (matrix price reset). Mirror of
+   .tuw-danger-hover / .tuw-success-hover; same !important precedent; icon
+   follows via currentColor. */
+.tuw-primary-hover:hover {
+  background-color: var(--tuw-bg-selected, #F8F5FF) !important;
+  color: var(--tuw-action-primary, #7539FF) !important;
+}
+
 /* Native number-spinner kill (ED2): hides the OS up/down arrows on numeric
    inputs (e.g. the Stepper's click-to-type field) so the slot keeps its
    exact geometry. Shared/reusable for every future numeric input. */
