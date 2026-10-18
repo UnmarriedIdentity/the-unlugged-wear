@@ -2975,9 +2975,9 @@ export default function ProductsView() {
                   <TableHead style={{ padding: '12px 16px' }}>Color</TableHead>
                   <TableHead style={{ padding: '12px 16px' }}>Size</TableHead>
                   <TableHead style={{ padding: '12px 16px' }}>SKU</TableHead>
-                  {/* Right padding caps the label exactly over the inputs'
-                      right-aligned numbers (cell 16 + border 1 + pad 14). */}
-                  <TableHead style={{ padding: '12px 31px 12px 16px', textAlign: 'right' }}>Price</TableHead>
+                  {/* Right padding caps the label over the numbers' right edge
+                      (cell 16 + slot 56 + gap 8 + border 1 + pad 14 = 95). */}
+                  <TableHead style={{ padding: '12px 95px 12px 16px', textAlign: 'right' }}>Price</TableHead>
                   <TableHead style={{ padding: '12px 16px' }}>Stock</TableHead>
                   <TableHead style={{ padding: '12px 16px', width: 48 }}><span className="sr-only">Actions</span></TableHead>
                 </TableRow>
@@ -3023,8 +3023,24 @@ export default function ProductsView() {
                     </TableCell>
                     <TableCell style={{ padding: '10px 16px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        {/* Fixed annotation slot (VPRICE-3): derived-Σ chip or
-                            pinned reset control — always reserved so every
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <Input
+                            aria-label={`Price for ${v.color} ${v.size}`}
+                            type="number"
+                            step="0.01"
+                            value={String(v.price)}
+                            onChange={(e) => {
+                              const n = parseFloat(e.target.value);
+                              // Typing pins the cell (R1): the price survives
+                              // base/attribute recomputes until reset.
+                              if (!isNaN(n) && n >= 0) updateVariant(v.id, { price: roundPrice(n), priceOverridden: true });
+                            }}
+                            style={{ height: 36, textAlign: 'right' }}
+                          />
+                        </div>
+                        {/* Fixed annotation slot (VPRICE-3B): derived-Σ chip or
+                            pinned reset control, docked right of the input
+                            (early-version feel) — always reserved so every
                             price input keeps the exact same width and the
                             numbers line up down the column. */}
                         <div
@@ -3088,21 +3104,6 @@ export default function ProductsView() {
                               <RotateCcw size={14} />
                             </button>
                           )}
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <Input
-                            aria-label={`Price for ${v.color} ${v.size}`}
-                            type="number"
-                            step="0.01"
-                            value={String(v.price)}
-                            onChange={(e) => {
-                              const n = parseFloat(e.target.value);
-                              // Typing pins the cell (R1): the price survives
-                              // base/attribute recomputes until reset.
-                              if (!isNaN(n) && n >= 0) updateVariant(v.id, { price: roundPrice(n), priceOverridden: true });
-                            }}
-                            style={{ height: 36, textAlign: 'right' }}
-                          />
                         </div>
                       </div>
                     </TableCell>
