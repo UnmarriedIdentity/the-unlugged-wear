@@ -8,16 +8,16 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 222,
-    "done": 211,
+    "total": 223,
+    "done": 212,
     "in_progress": 0,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "975bf77",
-    "unpushed": ["975bf77", "0b9512b", "4b65443", "b4750b3", "758ac64", "28d254d", "64f2fbc", "e5f8370", "3099979", "c108569", "7021c60", "cec156f", "a687bff", "f0806c4", "3c74e37", "b1da14f", "23ea4bc", "af28a44", "1fa6064", "e33270d", "542f570", "4f2c373", "a7b7d13", "70bd69a", "be65b2e", "863475a", "c32f777", "81b2c28", "2ab5dcf", "c135635", "df9fc73", "e2d3980"],
-    "next_up": "R1 ladder shipped + polished (VPRICE-1/2/3 + LIBCTRL) → attribute edge log (file 18) → N1b write-through (display/visibility/hex + disclosure) → design-system tail (FX1/SEL/CBX/IMG) → DW2 pass → anim re-run; styling engine (file 19) is the project's FINAL feature — build it only after the core e-commerce app is complete; shipments partner-sync reframe; household UI build reads file 17",
+    "tip": "6eabe83",
+    "unpushed": ["6eabe83", "975bf77", "0b9512b", "4b65443", "b4750b3", "758ac64", "28d254d", "64f2fbc", "e5f8370", "3099979", "c108569", "7021c60", "cec156f", "a687bff", "f0806c4", "3c74e37", "b1da14f", "23ea4bc", "af28a44", "1fa6064", "e33270d", "542f570", "4f2c373", "a7b7d13", "70bd69a", "be65b2e", "863475a", "c32f777", "81b2c28", "2ab5dcf", "c135635", "df9fc73", "e2d3980"],
+    "next_up": "R1 ladder shipped + polished (VPRICE-1/2/3/3B + LIBCTRL) → attribute edge log (file 18) → N1b write-through (display/visibility/hex + disclosure) → design-system tail (FX1/SEL/CBX/IMG) → DW2 pass → anim re-run; styling engine (file 19) is the project's FINAL feature — build it only after the core e-commerce app is complete; shipments partner-sync reframe; household UI build reads file 17",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
       "dashboard D-series: KPI tiers, range/sort menus, badge mapping, calendar pills, header tint (360/768/1024/1440)",
@@ -27,7 +27,7 @@
       "responsive widths 767/768/1023/1024/1440/1920",
       "R1 price ladder (VPRICE-1/2): PRD-01 'From ₹48.00', adjustment editor re-derives, pin/reset, persistence + Reset Demo",
       "switch keyboard + naming: library + discounts toggles respond to Tab + Space/Enter (LIBCTRL)",
-      "VPRICE-3 polish: slot-aligned matrix price cells (+Δ chip / 24px reset), 'From $X' pill in the variants header, two-column adjustment editor + trimmed pricing copy"
+      "VPRICE-3/3B polish: right-docked matrix price cells (+Δ chip / 24px reset sharing one right edge, numbers aligned), 'From $X' pill in the variants header, two-column adjustment editor + trimmed pricing copy"
     ],
     "last_updated": "2026-10-18",
     "updated_by": "agent"
@@ -3591,6 +3591,25 @@
         "reset control gains .tuw-primary-hover (violet wash, bg-selected/action-primary tokens) in globals.css — third sibling of the danger/success hovers; built-CSS selector proof captured",
         "list/grid 'From' de-emphasized to a 12px quiet label ahead of the semibold amount; currency split ($ matrix / ₹ list) left parked as decided",
         "built on baseline 0d21513 (user-pinned reference); presentation-only — no model/math/currency changes"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-VPRICE-3B",
+      "title": "Matrix price delta docked right (VPRICE-3B — early-version feel, aligned geometry)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-18",
+      "finished": "2026-10-18",
+      "log": "v2:6eabe83",
+      "design_match": "yes",
+      "key_decisions": [
+        "user verdict: delta reads better on the right of the input (early-version placement) — the VPRICE-3 left slot is flipped, not removed",
+        "fixed 56px slot now sits right-flushed in the price cell: chip and 24px reset share one right edge at the cell padding; inputs stay identical width so numbers keep a single alignment line",
+        "Price header right pad recalibrated 31 → 95 so the label caps the numbers' right edge (cell 16 + slot 56 + gap 8 + border 1 + pad 14)",
+        "'From' pill, General-tab copy and list/grid labels unchanged — annotation side only"
       ],
       "verified": true,
       "pushed": false,
