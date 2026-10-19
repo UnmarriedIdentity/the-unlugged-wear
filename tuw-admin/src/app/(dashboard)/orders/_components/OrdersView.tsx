@@ -808,7 +808,7 @@ export default function OrdersView() {
         isOpen={isRefundOpen}
         onClose={() => setIsRefundOpen(false)}
         title="Simulated Validated Refund"
-        subtitle={`Order ${selectedOrder?.id} · Total: $${selectedOrder?.total.toFixed(2)}`}
+        subtitle={`Order ${selectedOrder?.id} · Total: ₹${selectedOrder?.total.toFixed(2)}`}
         footer={
           <div style={{ display: 'flex', gap: 10 }}>
             <Button variant="secondary" size="md" onClick={() => setIsRefundOpen(false)}>
@@ -837,7 +837,7 @@ export default function OrdersView() {
           )}
 
           <Input
-            label="Refund Amount ($ USD)"
+            label="Refund Amount (₹)"
             type="number"
             step="0.01"
             value={refundAmount}
