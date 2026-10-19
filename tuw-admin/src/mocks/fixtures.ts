@@ -23,7 +23,6 @@ export interface ProductItem {
   soldCount: number;
   imageBg: string;
   image?: string;
-  video?: string;
   rating: number;
   /** Explicit per-variant inventory. Optional: absent means synthesize from
    * colors/sizes/price/stock (see resolveVariants) — every existing fixture
@@ -319,7 +318,6 @@ export const initialProducts: ProductItem[] = [
     soldCount: 369,
     imageBg: 'linear-gradient(135deg, #FAF0EB 0%, #F5E2DA 100%)',
     image: '/products/2.jpeg',
-    video: '/products/2.mp4',
     rating: 4.8,
   },
   {
@@ -375,7 +373,6 @@ export const initialProducts: ProductItem[] = [
     soldCount: 0,
     imageBg: 'linear-gradient(135deg, #E6EEF5 0%, #D2DEEB 100%)',
     image: '/products/2.jpeg',
-    video: '/products/2.mp4',
     rating: 0,
   },
   {
@@ -430,7 +427,6 @@ export const initialProducts: ProductItem[] = [
     soldCount: 260,
     imageBg: 'linear-gradient(135deg, #F0F3F6 0%, #E3E7ED 100%)',
     image: '/products/2.jpeg',
-    video: '/products/2.mp4',
     rating: 4.9,
   },
   {

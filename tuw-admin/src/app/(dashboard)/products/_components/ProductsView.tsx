@@ -124,13 +124,8 @@ export default function ProductsView() {
     setFormPlacement('Chest (45mm)');
     setFormStatus('published');
     setFormDescription('Pre-shrunk premium heavyweight combed cotton with reinforced seams.');
-    setFormVideo('');
     setFormPhoto({ layout: 'carousel', ratio: '4:3', showPhotos: true });
     setFormImages([]);
-    setUploadReel((prev) => {
-      if (prev) revokeUploads([{ url: prev.url }]);
-      return null;
-    });
     setAddImageUrl('');
     setFormVariants([]);
     setFormAdjustments({});
@@ -147,7 +142,6 @@ export default function ProductsView() {
 
   // Drawer tab + media draft state (elastic workspace; tabs grow per phase)
   const [productTab, setProductTab] = useState<'general' | 'media' | 'variants' | 'specs'>('general');
-  const [formVideo, setFormVideo] = useState('');
   // Gallery presentation draft (P1a): PDP stage layout + ratio + visibility.
   const [formPhoto, setFormPhoto] = useState<PhotoSettings>({ layout: 'carousel', ratio: '4:3', showPhotos: true });
   const photoAspect = formPhoto.ratio === '1:1' ? '1 / 1' : formPhoto.ratio === '16:9' ? '16 / 9' : '4 / 3';
@@ -156,7 +150,6 @@ export default function ProductsView() {
   // the save toast states this demo truth outright.
   const [addImageUrl, setAddImageUrl] = useState('');
   const photoInputRef = useRef<HTMLInputElement>(null);
-  const videoInputRef = useRef<HTMLInputElement>(null);
 
   const revokeUploads = (uploads: Array<{ url: string }>) => {
     uploads.forEach((u) => {
@@ -175,7 +168,6 @@ export default function ProductsView() {
   const [formImages, setFormImages] = useState<
     Array<{ id: string; src: string; name: string; persisted: boolean }>
   >([]);
-  const [uploadReel, setUploadReel] = useState<{ id: string; url: string; name: string } | null>(null);
 
   const baseName = (url: string) => {
     const part = url.split('?')[0].split('/');
@@ -272,17 +264,6 @@ export default function ProductsView() {
       if (f.type.startsWith('image/')) {
         const url = URL.createObjectURL(f);
         setFormImages((prev) => [...prev, { id: `up-${Date.now()}-${f.name}`, src: url, name: f.name, persisted: false }]);
-      } else if (f.type.startsWith('video/')) {
-        const hasReel = formVideo !== '' || uploadReel !== null;
-        if (hasReel) {
-          showToast({
-            type: 'warning',
-            title: 'One Video Reel Only',
-            description: 'Remove the current reel before adding another.',
-          });
-          return;
-        }
-        setUploadReel({ id: `up-${Date.now()}`, url: URL.createObjectURL(f), name: f.name });
       }
     });
   };
@@ -294,12 +275,15 @@ export default function ProductsView() {
   const [formMonogramEnabled, setFormMonogramEnabled] = useState(false);
   const [formMonogramChars, setFormMonogramChars] = useState('3');
   const [formMonogramUpcharge, setFormMonogramUpcharge] = useState('12.00');
-  // Section visibility (persisted demo pref; all-visible default)
-  const [visibleSections, setVisibleSections] = useState({ video: true, monogram: true });
+  // Section visibility (persisted demo pref; monogram visible by default)
+  const [visibleSections, setVisibleSections] = useState({ monogram: true });
   React.useEffect(() => {
     try {
       const raw = localStorage.getItem('tuw_admin_v2_product_editor');
-      if (raw) setVisibleSections((prev) => ({ ...prev, ...JSON.parse(raw) }));
+      if (raw) {
+        const saved = JSON.parse(raw) as { monogram?: boolean };
+        if (typeof saved.monogram === 'boolean') setVisibleSections({ monogram: saved.monogram });
+      }
     } catch {
       /* private mode — defaults stand */
     }
@@ -842,7 +826,6 @@ export default function ProductsView() {
     setDrawerView('compact');
     autoExpandedRef.current = false;
     setStageIndex(0);
-    setFormVideo(product.video || '');
     setFormPhoto(product.photoSettings ?? { layout: 'carousel', ratio: '4:3', showPhotos: true });
     setFormImages(
       (product.images && product.images.length > 0
@@ -852,10 +835,6 @@ export default function ProductsView() {
           : []
       ).map((src, i) => ({ id: `g-${i}`, src, name: baseName(src), persisted: true }))
     );
-    setUploadReel((prev) => {
-      if (prev) revokeUploads([{ url: prev.url }]);
-      return null;
-    });
     setAddImageUrl('');
     setFormFabricGsm(product.fabricGsm || '');
     setFormCut(product.cut || '');
@@ -960,7 +939,6 @@ export default function ProductsView() {
         publicationStatus: formStatus,
         description: formDescription,
         image: formImages[0]?.src || undefined,
-        video: formVideo || undefined,
         photoSettings: formPhoto,
         discounts: formDiscounts,
         images: formImages.filter((im) => im.persisted).map((im) => im.src),
@@ -978,8 +956,7 @@ export default function ProductsView() {
             }
           : undefined,
       });
-      const droppedCount =
-        formImages.filter((im) => !im.persisted).length + (uploadReel !== null ? 1 : 0);
+      const droppedCount = formImages.filter((im) => !im.persisted).length;
       if (droppedCount > 0) {
         showToast({
           type: 'info',
@@ -1036,7 +1013,6 @@ export default function ProductsView() {
       taxRate: formTax.trim() !== '' && !isNaN(parseFloat(formTax)) ? parseFloat(formTax) : undefined,
       sizeChartId: formSizeChartId || undefined,
       image: formImages[0]?.src || undefined,
-      video: formVideo || undefined,
       photoSettings: formPhoto,
       discounts: formDiscounts,
       images: formImages.filter((im) => im.persisted).map((im) => im.src),
@@ -1055,8 +1031,7 @@ export default function ProductsView() {
         : undefined,
     });
 
-    const droppedCount =
-      formImages.filter((im) => !im.persisted).length + (uploadReel !== null ? 1 : 0);
+    const droppedCount = formImages.filter((im) => !im.persisted).length;
     if (droppedCount > 0) {
       showToast({
         type: 'info',
@@ -1391,17 +1366,12 @@ export default function ProductsView() {
     });
   };
 
-  // Customer-view gallery slides: uploaded reel previews live, else the
-  // persisted reel URL; then the ordered image list (persisted + previews).
-  // The reel obeys the visibility toggle; uploads never persist.
-  const galleryReelSrc = uploadReel ? uploadReel.url : formVideo !== '' ? formVideo : null;
-  const showReel = visibleSections.video && galleryReelSrc !== null;
-  const gallerySlides: Array<{ type: 'image' | 'video'; src: string; alt: string; poster?: string }> = [
-    ...(showReel && galleryReelSrc
-      ? [{ type: 'video' as const, src: galleryReelSrc, alt: `${formName || 'Product'} video reel`, poster: formImages[0]?.src }]
-      : []),
-    ...formImages.map((im) => ({ type: 'image' as const, src: im.src, alt: formName || 'Product image' })),
-  ];
+  // Customer-view gallery slides: the ordered image list (persisted + previews).
+  const gallerySlides: Array<{ type: 'image'; src: string; alt: string }> = formImages.map((im) => ({
+    type: 'image' as const,
+    src: im.src,
+    alt: formName || 'Product image',
+  }));
 
   // Bulk actions (table-view bar appears when rows are selected)
   const clearSelection = () => setSelectedIds(new Set());
@@ -1546,14 +1516,8 @@ export default function ProductsView() {
             aspectRatio: photoAspect,
           }}
         >
-          {s.type === 'video' ? (
-            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', fontSize: 10, fontWeight: 700, color: '#FFFFFF', backgroundColor: '#1A1A1A' }}>
-              REEL
-            </span>
-          ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={s.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          )}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={s.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </button>
       ))}
     </div>
@@ -1731,7 +1695,7 @@ export default function ProductsView() {
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
         <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-          Uploaded Assets & Reel
+          Uploaded Assets
         </span>
         <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={() => photoInputRef.current?.click()}>
           Add Media
@@ -1746,7 +1710,7 @@ export default function ProductsView() {
     <div
       role="button"
       tabIndex={0}
-      aria-label="Upload photos or video reel"
+      aria-label="Upload photos"
       className="tuw-stat-hover"
       onClick={() => photoInputRef.current?.click()}
       onKeyDown={(e) => {
@@ -1778,21 +1742,13 @@ export default function ProductsView() {
         <Upload size={20} />
       </span>
       <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginTop: 8 }}>
-        Click to upload photos or reel, or drag files here
+        Click to upload photos, or drag files here
       </div>
       <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', marginTop: 4 }}>
-        PNG, JPG, WEBP, or MP4 Video Reel (Max 25MB)
+        PNG, JPG, or WEBP (Max 25MB each)
       </div>
     </div>
   );
-  const reelUrlField = visibleSections.video ? (
-    <Input
-      label="Video Reel URL (persisted)"
-      placeholder="/products/4.mp4"
-      value={formVideo}
-      onChange={(e) => setFormVideo(e.target.value)}
-    />
-  ) : null;
   // Gallery presentation controls (P1a): layout toggle + ratio picker +
   // visibility switch. The stage above reflects every choice live.
   const presentationSection = (
@@ -2109,28 +2065,6 @@ export default function ProductsView() {
                       {p.name.slice(0, 2).toUpperCase()}
                     </span>
                   )}
-                  {p.video && (
-                    <div
-                      style={{
-                        position: 'absolute',
-                        bottom: 8,
-                        left: 8,
-                        background: 'rgba(0, 0, 0, 0.65)',
-                        backdropFilter: 'blur(4px)',
-                        color: '#FFFFFF',
-                        borderRadius: 4,
-                        padding: '2px 7px',
-                        fontSize: 10,
-                        fontWeight: 600,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 4,
-                        zIndex: 2,
-                      }}
-                    >
-                      ▶ Video Reel
-                    </div>
-                  )}
                   <div style={{ position: 'absolute', top: 10, right: 10, zIndex: 2 }}>
                     <Badge
                       variant={
@@ -2373,10 +2307,6 @@ export default function ProductsView() {
             revokeUploads(prev.filter((im) => !im.persisted).map((im) => ({ url: im.src })));
             return prev;
           });
-          setUploadReel((prev) => {
-            if (prev) revokeUploads([{ url: prev.url }]);
-            return null;
-          });
         }}
         title={editingProduct ? `Manage ${editingProduct.name}` : 'Add New Product'}
         subtitle={
@@ -2410,11 +2340,11 @@ export default function ProductsView() {
               isCreating
                 ? [
                     { id: 'general', label: 'General' },
-                    { id: 'media', label: 'Media', badge: formImages.length + (uploadReel !== null || formVideo !== '' ? 1 : 0) },
+                    { id: 'media', label: 'Media', badge: formImages.length },
                   ]
                 : [
                     { id: 'general', label: 'General' },
-                    { id: 'media', label: 'Media', badge: formImages.length + (uploadReel !== null || formVideo !== '' ? 1 : 0) },
+                    { id: 'media', label: 'Media', badge: formImages.length },
                     { id: 'variants', label: 'Variants & Stock', badge: formVariants.length },
                     { id: 'specs', label: 'Clothing Specs' },
                   ]
@@ -2851,7 +2781,6 @@ export default function ProductsView() {
                 {mediaCards ? assetCards : assetRows}
                 {addUrlRow}
                 {dropzone}
-                {reelUrlField}
                 {presentationSection}
               </div>
             </div>
@@ -2863,7 +2792,6 @@ export default function ProductsView() {
               {mediaCards ? assetCards : assetRows}
               {addUrlRow}
               {dropzone}
-              {reelUrlField}
               {presentationSection}
             </div>
             )}
@@ -2873,17 +2801,6 @@ export default function ProductsView() {
               accept="image/*"
               multiple
               aria-label="Upload photos"
-              style={{ display: 'none' }}
-              onChange={(e) => {
-                handlePickedFiles(e.target.files);
-                e.target.value = '';
-              }}
-            />
-            <input
-              ref={videoInputRef}
-              type="file"
-              accept="video/*"
-              aria-label="Upload video reel"
               style={{ display: 'none' }}
               onChange={(e) => {
                 handlePickedFiles(e.target.files);
@@ -3193,12 +3110,6 @@ export default function ProductsView() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <DrawerSection title="Display Options" titleGap={10}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <Switch
-                  label="Video Reel slot"
-                  description="Show the video block on the Media tab"
-                  checked={visibleSections.video}
-                  onChange={(v) => setVisibleSections((s) => ({ ...s, video: v }))}
-                />
                 <Switch
                   label="Monogram & embroidery"
                   description="Show the custom embroidery block below"
