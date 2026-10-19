@@ -3,7 +3,7 @@ export interface ProductItem {
   name: string;
   slug: string;
   category: 'T-Shirts' | 'Hoodies' | 'Jackets' | 'Pants' | 'Accessories';
-  price: number; // in USD (or formatted display)
+  price: number; // in INR (or formatted display)
   compareAtPrice?: number;
   /** Pricing anchor (R1). Derived cells = basePrice + Σ priceAdjustments;
    * absent means `price` itself is the anchor (simple products). Mirrors
@@ -1667,15 +1667,15 @@ export const initialSettings: StoreSettings = {
   storeName: 'The Unplugged Wear',
   legalEntity: 'The Unplugged Wear Apparel LLC',
   supportEmail: 'care@theunpluggedwear.com',
-  defaultCurrency: 'USD ($)',
+  defaultCurrency: 'INR (₹)',
   timezone: 'UTC+00:00 (London, Edinburgh)',
   brandTagline: 'Unplugged Luxury & Urban Minimalism',
   brandColor: '#7539FF',
   qikinkApiKey: 'qik_live_mock_connection_89172',
   qikinkEnvironment: 'sandbox',
   stripeLiveMode: false,
-  freeShippingThreshold: 150,
-  standardShippingFee: 12,
+  freeShippingThreshold: 3000,
+  standardShippingFee: 150,
   taxIncluded: true,
   orderNotificationEmail: 'orders@theunpluggedwear.com',
 };
