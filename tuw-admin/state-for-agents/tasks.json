@@ -8,15 +8,15 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 223,
-    "done": 212,
+    "total": 224,
+    "done": 213,
     "in_progress": 0,
     "backlog": 11
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "6eabe83",
-    "unpushed": ["6eabe83", "975bf77", "0b9512b", "4b65443", "b4750b3", "758ac64", "28d254d", "64f2fbc", "e5f8370", "3099979", "c108569", "7021c60", "cec156f", "a687bff", "f0806c4", "3c74e37", "b1da14f", "23ea4bc", "af28a44", "1fa6064", "e33270d", "542f570", "4f2c373", "a7b7d13", "70bd69a", "be65b2e", "863475a", "c32f777", "81b2c28", "2ab5dcf", "c135635", "df9fc73", "e2d3980"],
+    "tip": "b97e340",
+    "unpushed": ["b97e340", "6eabe83", "975bf77", "0b9512b", "4b65443", "b4750b3", "758ac64", "28d254d", "64f2fbc", "e5f8370", "3099979", "c108569", "7021c60", "cec156f", "a687bff", "f0806c4", "3c74e37", "b1da14f", "23ea4bc", "af28a44", "1fa6064", "e33270d", "542f570", "4f2c373", "a7b7d13", "70bd69a", "be65b2e", "863475a", "c32f777", "81b2c28", "2ab5dcf", "c135635", "df9fc73", "e2d3980"],
     "next_up": "R1 ladder shipped + polished (VPRICE-1/2/3/3B + LIBCTRL) → attribute edge log (file 18) → N1b write-through (display/visibility/hex + disclosure) → design-system tail (FX1/SEL/CBX/IMG) → DW2 pass → anim re-run; styling engine (file 19) is the project's FINAL feature — build it only after the core e-commerce app is complete; shipments partner-sync reframe; household UI build reads file 17",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
@@ -27,9 +27,9 @@
       "responsive widths 767/768/1023/1024/1440/1920",
       "R1 price ladder (VPRICE-1/2): PRD-01 'From ₹48.00', adjustment editor re-derives, pin/reset, persistence + Reset Demo",
       "switch keyboard + naming: library + discounts toggles respond to Tab + Space/Enter (LIBCTRL)",
-      "VPRICE-3/3B polish: right-docked matrix price cells (+Δ chip / 24px reset sharing one right edge, numbers aligned), 'From $X' pill in the variants header, two-column adjustment editor + trimmed pricing copy"
+      "VPRICE-3/3B/4 polish: right-docked matrix price cells (+Δ chip / 24px reset sharing one right edge), 'From $X' pill in the variants header, spinner-free number fields, 2dp resting prices + clean decimal typing, row hover wash, expand-once drawer width, upcharges strip in Variants"
     ],
-    "last_updated": "2026-10-18",
+    "last_updated": "2026-10-19",
     "updated_by": "agent"
   },
   "tasks": [
@@ -3610,6 +3610,28 @@
         "fixed 56px slot now sits right-flushed in the price cell: chip and 24px reset share one right edge at the cell padding; inputs stay identical width so numbers keep a single alignment line",
         "Price header right pad recalibrated 31 → 95 so the label caps the numbers' right edge (cell 16 + slot 56 + gap 8 + border 1 + pad 14)",
         "'From' pill, General-tab copy and list/grid labels unchanged — annotation side only"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-VPRICE-4",
+      "title": "Price-column feel pass (VPRICE-4 — spinner kill, money typing, row hover, expand-once tabs + upcharges strip)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-19",
+      "finished": "2026-10-19",
+      "log": "v2:b97e340",
+      "design_match": "yes",
+      "key_decisions": [
+        "Input primitive now auto-applies .tuw-no-spinner whenever type=\"number\" — one central edit kills the native step arrows admin-wide (hover no longer overlays/offsets digits); keyboard ↑/↓ stepping unaffected",
+        "money fields move to text + inputMode=\"decimal\" with per-key raw drafts (matrix price cells, upcharge boxes, base price): decimals type cleanly ('61.' stays), commits stay live (typing still pins the cell, R1 semantics untouched), blur snaps back to committed truth — resting matrix cells now read 48.00 instead of 48",
+        "digit+one-dot guard on all three writers (price cell, writeAdjustment, writeBasePrice) — letters/stray chars refused, invalid input never lands in state",
+        "TableRow hoverable is now real: .tuw-row-hover:hover canvas wash (!important wins over inline transparent/selected bases, same precedent as tuw-danger-hover); matrix rows flipped to default hoverable, header/ledger rows opt out — bare data rows across admin (products list, orders, etc.) gain the same wash",
+        "drawer width yoyo ends: entering Variants auto-widens compact → matrix once per drawer session (autoExpandedRef), then width is user-owned — no restore-on-leave, tab hops keep the chosen width",
+        "'Per-value price adjustments' moved from General into the Variants tab above the matrix (collapsed, count badge) — one home, beside the cells it feeds; General keeps Base + Stock + discounts + status",
+        "built-CSS proof: .tuw-row-hover:hover{background-color:var(--tuw-bg-canvas,#f7f8f9)!important} + Input/TableRow logic in shipped chunks; gates green (typecheck, 26/26 tests, 40+27 routes)"
       ],
       "verified": true,
       "pushed": false,
