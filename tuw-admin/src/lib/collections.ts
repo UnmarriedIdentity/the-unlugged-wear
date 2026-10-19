@@ -88,3 +88,16 @@ export function nextCollectionId(collections: Pick<CollectionItem, 'id'>[]): str
   }, 0);
   return `COL-${String(max + 1).padStart(2, '0')}`;
 }
+
+/** First free slug from a display name — appends -2, -3, … when taken. */
+export function uniqueSlug(
+  base: string,
+  collections: CollectionItem[],
+  excludeId?: string,
+): string {
+  const root = slugify(base) || 'collection';
+  if (!isSlugTaken(root, collections, excludeId)) return root;
+  let suffix = 2;
+  while (isSlugTaken(`${root}-${suffix}`, collections, excludeId)) suffix += 1;
+  return `${root}-${suffix}`;
+}
