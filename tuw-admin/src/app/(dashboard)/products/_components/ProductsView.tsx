@@ -1183,7 +1183,8 @@ export default function ProductsView() {
 
   // CSV import pipeline (X1b): Final Listing workbooks re-saved as CSV.
   // Quoted-field-aware parse (no dependency); unknown columns ignored;
-  // valid rows stage as drafts, failures preserve file + error list.
+  // an optional compare-at column must beat the row's base price; valid
+  // rows stage as drafts, failures preserve file + error list.
   interface ImportRow {
     name: string;
     styleCode: string;
@@ -1191,6 +1192,7 @@ export default function ProductsView() {
     sizes: string[];
     placements: string[];
     price: number;
+    compareAtPrice?: number;
     weight: string;
     shipWeight: string;
     dims: string;
@@ -1270,6 +1272,7 @@ export default function ProductsView() {
       const cWeight = col(['weight']);
       const cShip = col(['shipping weight', 'ship weight']);
       const cPrice = col(['base price', 'price']);
+      const cCompare = col(['compare at price', 'compare price', 'compare-at price', 'was price', 'original price']);
       const cPlace = col(['placements', 'placement']);
       const cDims = col(['package dimensions', 'dimensions']);
       const cTax = col(['tax rate', 'tax']);
@@ -1292,6 +1295,19 @@ export default function ProductsView() {
         if (priceRaw === '' || isNaN(price) || price < 0) {
           errors.push({ row: rowNo, message: `"${name}": Base Price must be zero or more.` });
           return;
+        }
+        const compareRaw = get(cCompare);
+        let compareAtPrice: number | undefined;
+        if (compareRaw !== '') {
+          const parsedCompare = parseCompareAtPrice(compareRaw, price);
+          if (parsedCompare.error) {
+            errors.push({
+              row: rowNo,
+              message: `"${name}": Compare-at price must be a valid amount above the base price (₹${price.toFixed(2)}).`,
+            });
+            return;
+          }
+          compareAtPrice = parsedCompare.value;
         }
         if (styleCode !== '') {
           if (seenCodes.has(styleCode.toLowerCase())) {
@@ -1317,6 +1333,7 @@ export default function ProductsView() {
           sizes: splitList(get(cSizes)),
           placements: splitList(get(cPlace)),
           price,
+          compareAtPrice,
           weight: get(cWeight),
           shipWeight: get(cShip),
           dims: get(cDims),
@@ -1340,7 +1357,7 @@ export default function ProductsView() {
           slug: `${r.name.toLowerCase().replace(/\s+/g, '-')}-imp-${stamp}-${i}`,
           category: 'T-Shirts',
           price: r.price,
-          compareAtPrice: undefined,
+          compareAtPrice: r.compareAtPrice,
           stock: 0,
           colors: r.colors.length > 0 ? r.colors : ['Default'],
           sizes: r.sizes.length > 0 ? r.sizes : ['Standard'],
@@ -3445,6 +3462,7 @@ export default function ProductsView() {
                 {importPreview.valid.slice(0, 20).map((r, i) => (
                   <div key={i} style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
                     {r.name} · ₹{r.price.toLocaleString()}
+                    {r.compareAtPrice ? ` · compare ₹${r.compareAtPrice.toFixed(2)}` : ''}
                     {r.styleCode ? ` · ${r.styleCode}` : ''}
                   </div>
                 ))}
