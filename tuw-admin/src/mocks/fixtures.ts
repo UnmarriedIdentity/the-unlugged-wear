@@ -104,13 +104,9 @@ export interface ProductAttribute {
   displayType: 'pill' | 'swatch' | 'radio';
   swatchHex: Record<string, string>;
   /** Library link (N1a): definition-level single record. Values stay
-   * strings (spelling may repeat); display/visibility/hex write through
-   * to the library at N1b. */
+   * strings (spelling may repeat); display/hex write through to the
+   * library at N1b. Visibility lives on the library record (global). */
   libraryId?: string;
-  /** Surfaces allowed to render this attribute (X1a): pdp (shopper
-   * choices), checkout (money-affecting), admin (internal). At least one
-   * always — the UI refuses an attribute visible nowhere. */
-  visibleOn: Array<'pdp' | 'checkout' | 'admin'>;
 }
 
 export interface OrderItemLine {
@@ -1259,13 +1255,28 @@ export interface LibraryAttribute {
   values: string[];
   displayType: 'pill' | 'swatch' | 'radio';
   enabled: boolean;
+  /** Global surfaces (X1a): applies to every product using this definition.
+   * pdp = shopper choices; checkout = money-affecting; admin = internal ops.
+   * At least one stays on — the UI refuses an attribute visible nowhere. */
+  showOnPdp: boolean;
+  showOnCheckout: boolean;
+  showOnAdmin: boolean;
 }
 
+/** Visibility defaults for a definition: first-party shopper attributes
+ * show on PDP + Admin; internal operational attributes (Placements) are
+ * admin-only; checkout is opt-in. */
+export const defaultLibraryVisibility = (name: string) => ({
+  showOnPdp: name.trim().toLowerCase() !== 'placements',
+  showOnCheckout: false,
+  showOnAdmin: true,
+});
+
 export const initialLibraryAttributes: LibraryAttribute[] = [
-  { id: 'LIB-01', name: 'Color', values: ['Black', 'Onyx', 'Chalk White', 'Olive', 'Navy Blue', 'Maroon'], displayType: 'swatch', enabled: true },
-  { id: 'LIB-02', name: 'Size', values: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], displayType: 'pill', enabled: true },
-  { id: 'LIB-03', name: 'Placements', values: ['Front', 'Back', 'Left Pocket', 'Right Pocket', 'Left Sleeve', 'Right Sleeve'], displayType: 'radio', enabled: true },
-  { id: 'LIB-04', name: 'Fabric', values: ['Cotton', 'French Terry', 'Fleece', 'Linen'], displayType: 'pill', enabled: true },
+  { id: 'LIB-01', name: 'Color', values: ['Black', 'Onyx', 'Chalk White', 'Olive', 'Navy Blue', 'Maroon'], displayType: 'swatch', enabled: true, ...defaultLibraryVisibility('Color') },
+  { id: 'LIB-02', name: 'Size', values: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], displayType: 'pill', enabled: true, ...defaultLibraryVisibility('Size') },
+  { id: 'LIB-03', name: 'Placements', values: ['Front', 'Back', 'Left Pocket', 'Right Pocket', 'Left Sleeve', 'Right Sleeve'], displayType: 'radio', enabled: true, ...defaultLibraryVisibility('Placements') },
+  { id: 'LIB-04', name: 'Fabric', values: ['Cotton', 'French Terry', 'Fleece', 'Linen'], displayType: 'pill', enabled: true, ...defaultLibraryVisibility('Fabric') },
 ];
 
 export const initialDiscountCodes: DiscountCode[] = [

@@ -35,6 +35,7 @@ import {
   initialAbandonedCarts,
   initialSizeCharts,
   initialLibraryAttributes,
+  defaultLibraryVisibility,
 } from './fixtures';
 import {
   synthesizeVariants,
@@ -134,6 +135,7 @@ interface AdminStateContextType {
   createLibraryAttribute: (name: string) => string | false;
   deleteLibraryAttribute: (id: string) => boolean;
   toggleLibraryAttribute: (id: string) => boolean;
+  setLibraryVisibility: (id: string, surface: 'pdp' | 'checkout' | 'admin', on: boolean) => boolean;
   addLibraryValue: (id: string, value: string) => boolean;
   removeLibraryValue: (id: string, value: string) => boolean;
 
@@ -197,7 +199,16 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         if (parsed.discountCodes) setDiscountCodes(parsed.discountCodes);
         if (parsed.abandonedCarts) setAbandonedCarts(parsed.abandonedCarts);
         if (parsed.sizeCharts) setSizeCharts(parsed.sizeCharts);
-        if (parsed.libraryAttributes) setLibraryAttributes(parsed.libraryAttributes);
+        if (parsed.libraryAttributes) {
+          // One-time normalization: visibility moved from per-product rows
+          // to the definition. Legacy records gain the global defaults.
+          setLibraryAttributes(
+            (parsed.libraryAttributes as LibraryAttribute[]).map((a) => ({
+              ...defaultLibraryVisibility(a.name),
+              ...a,
+            }))
+          );
+        }
       }
     } catch {
       // Local storage fallback
@@ -951,7 +962,10 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
       return false;
     }
     const id = `LIB-${Date.now()}`;
-    const next = [...libraryAttributes, { id, name: trimmed, values: [], displayType: 'pill' as const, enabled: true }];
+    const next = [
+      ...libraryAttributes,
+      { id, name: trimmed, values: [], displayType: 'pill' as const, enabled: true, ...defaultLibraryVisibility(trimmed) },
+    ];
     setLibraryAttributes(next);
     persistState({ libraryAttributes: next });
     return id;
@@ -987,6 +1001,37 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
   const toggleLibraryAttribute = (id: string) => {
     if (!canPerformAction('products')) return false;
     const next = libraryAttributes.map((a) => (a.id === id ? { ...a, enabled: !a.enabled } : a));
+    setLibraryAttributes(next);
+    persistState({ libraryAttributes: next });
+    return true;
+  };
+  // Global visibility (X1a): one definition controls every product using it.
+  // Refusing the last surface keeps at least one render target alive.
+  const setLibraryVisibility = (
+    id: string,
+    surface: 'pdp' | 'checkout' | 'admin',
+    on: boolean
+  ) => {
+    if (!canPerformAction('products')) return false;
+    const target = libraryAttributes.find((a) => a.id === id);
+    if (!target) return false;
+    const nextTarget: LibraryAttribute = {
+      ...target,
+      ...(surface === 'pdp'
+        ? { showOnPdp: on }
+        : surface === 'checkout'
+          ? { showOnCheckout: on }
+          : { showOnAdmin: on }),
+    };
+    if (!nextTarget.showOnPdp && !nextTarget.showOnCheckout && !nextTarget.showOnAdmin) {
+      showToast({
+        type: 'warning',
+        title: 'Visibility Required',
+        description: `"${target.name}" must show on at least one surface.`,
+      });
+      return false;
+    }
+    const next = libraryAttributes.map((a) => (a.id === id ? nextTarget : a));
     setLibraryAttributes(next);
     persistState({ libraryAttributes: next });
     return true;
@@ -1189,6 +1234,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         createLibraryAttribute,
         deleteLibraryAttribute,
         toggleLibraryAttribute,
+        setLibraryVisibility,
         addLibraryValue,
         removeLibraryValue,
         resetDemoData,

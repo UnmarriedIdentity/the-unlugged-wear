@@ -116,9 +116,9 @@ export default function ProductsView() {
     setFormDiscounts([]);
     setFormSizeChartId('');
     setFormAttributes([
-      { name: 'Color', values: ['Black', 'Chalk White', 'Olive'], builtin: true, displayType: 'swatch', swatchHex: {}, visibleOn: ['pdp', 'admin'], libraryId: 'LIB-01' },
-      { name: 'Size', values: ['S', 'M', 'L', 'XL'], builtin: true, displayType: 'pill', swatchHex: {}, visibleOn: ['pdp', 'admin'], libraryId: 'LIB-02' },
-      { name: 'Placements', values: [], builtin: true, displayType: 'radio', swatchHex: {}, visibleOn: ['admin'], libraryId: 'LIB-03' },
+      { name: 'Color', values: ['Black', 'Chalk White', 'Olive'], builtin: true, displayType: 'swatch', swatchHex: {}, libraryId: 'LIB-01' },
+      { name: 'Size', values: ['S', 'M', 'L', 'XL'], builtin: true, displayType: 'pill', swatchHex: {}, libraryId: 'LIB-02' },
+      { name: 'Placements', values: [], builtin: true, displayType: 'radio', swatchHex: {}, libraryId: 'LIB-03' },
     ]);
     setFormPartner('Qikink Direct API');
     setFormPlacement('Chest (45mm)');
@@ -494,7 +494,7 @@ export default function ProductsView() {
     const lib = libraryAttributes.find((l) => l.name.toLowerCase() === name.toLowerCase());
     const linkedId = lib?.id ?? createLibraryAttribute(name);
     if (!linkedId) return;
-    setFormAttributes((prev) => [...prev, { name, values: [], builtin: false, displayType: 'pill', swatchHex: {}, visibleOn: ['pdp', 'admin'], libraryId: linkedId }]);
+    setFormAttributes((prev) => [...prev, { name, values: [], builtin: false, displayType: 'pill', swatchHex: {}, libraryId: linkedId }]);
     setNewAttrName('');
     if (!lib) {
       showToast({ type: 'info', title: 'Registered in Library', description: `"${name}" now lives in the attribute library too.` });
@@ -532,7 +532,6 @@ export default function ProductsView() {
         builtin: false,
         displayType: lib.displayType,
         swatchHex: {},
-        visibleOn: ['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'>,
         libraryId: lib.id,
       },
     ]);
@@ -563,37 +562,17 @@ export default function ProductsView() {
       prev.map((a) => (a.name === name ? { ...a, swatchHex: { ...a.swatchHex, [value]: hex } } : a))
     );
   };
-  // Visibility toggles (X1a): at least one surface always — unchecking the
-  // last one is refused with a naming toast, input preserved.
-  const toggleVisibility = (name: string, surface: 'pdp' | 'checkout' | 'admin') => {
-    const attr = formAttributes.find((a) => a.name === name);
-    if (!attr) return;
-    const has = (attr.visibleOn ?? []).includes(surface);
-    if (has && (attr.visibleOn ?? []).length === 1) {
-      showToast({
-        type: 'warning',
-        title: 'Visibility Required',
-        description: `"${name}" must show on at least one surface.`,
-      });
-      return;
-    }
-    setFormAttributes((prev) =>
-      prev.map((a) =>
-        a.name === name
-          ? {
-              ...a,
-              visibleOn: has
-                ? (a.visibleOn ?? []).filter((s) => s !== surface)
-                : [...(a.visibleOn ?? []), surface],
-            }
-          : a
-      )
-    );
+  // Shared attribute card (Y1b): PDP section and the Internal block render
+  // the same card. hideDisplay drops the storefront picker where it has no
+  // meaning (attributes not shown on the PDP). Visibility itself is global:
+  // the card reports the linked library record and links out to Settings.
+  const libraryOf = (attr: ProductAttribute) =>
+    libraryAttributes.find((l) => l.id === attr.libraryId) ??
+    libraryAttributes.find((l) => l.name.toLowerCase() === attr.name.toLowerCase());
+  const showsOnPdp = (attr: ProductAttribute) => {
+    const lib = libraryOf(attr);
+    return lib ? lib.showOnPdp : attr.name !== 'Placements';
   };
-
-  // Shared attribute card (Y1b): PDP section and the Internal Placements
-  // block render the same card. hideDisplay drops the storefront picker
-  // where it has no meaning (admin-only attributes).
   const renderAttrCard = (attr: ProductAttribute, hideDisplay = false) => (
     <SurfaceCard key={attr.name} padding="12px" gap="10px">
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
@@ -667,18 +646,39 @@ export default function ProductsView() {
         />
       </div>
       )}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-          Shows on
+          Shown on
         </span>
-        {(['pdp', 'checkout', 'admin'] as const).map((surface) => (
-          <Checkbox
-            key={surface}
-            label={surface === 'pdp' ? 'PDP' : surface === 'checkout' ? 'Checkout' : 'Admin-only'}
-            checked={(attr.visibleOn ?? []).includes(surface)}
-            onChange={() => toggleVisibility(attr.name, surface)}
-          />
-        ))}
+        {(() => {
+          const lib = libraryOf(attr);
+          const surfaces = lib
+            ? [
+                lib.showOnPdp ? 'PDP' : null,
+                lib.showOnCheckout ? 'Checkout' : null,
+                lib.showOnAdmin ? 'Admin' : null,
+              ].filter((s): s is string => s !== null)
+            : [];
+          return surfaces.length > 0 ? (
+            surfaces.map((surface) => (
+              <Badge key={surface} variant="neutral" size="sm">{surface}</Badge>
+            ))
+          ) : (
+            <Badge variant="warning" size="sm">Unlinked</Badge>
+          );
+        })()}
+        <Link
+          href="/settings/attributes"
+          style={{
+            marginLeft: 'auto',
+            fontSize: 12,
+            fontWeight: 600,
+            color: 'var(--tuw-action-primary, #7539FF)',
+            textDecoration: 'none',
+          }}
+        >
+          Manage in Settings → Attributes
+        </Link>
       </div>
       {attr.values.length > 0 ? (
         <Table>
@@ -856,22 +856,20 @@ export default function ProductsView() {
               (l) => l.name.toLowerCase() === a.name.toLowerCase()
             );
             return {
-              ...a,
+              ...(() => {
+                const copy = { ...a } as ProductAttribute & { visibleOn?: unknown };
+                delete copy.visibleOn;
+                return copy;
+              })(),
               libraryId: a.libraryId ?? lib?.id,
               values: [...a.values],
               swatchHex: { ...(a.swatchHex ?? {}) },
-              visibleOn:
-                a.visibleOn && a.visibleOn.length > 0
-                  ? [...a.visibleOn]
-                  : a.name === 'Placements'
-                    ? ['admin' as const]
-                    : (['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'>),
             };
           })
         : [
-            { name: 'Color', values: [...product.colors], builtin: true, displayType: 'swatch' as const, swatchHex: {}, visibleOn: ['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'>, libraryId: 'LIB-01' },
-            { name: 'Size', values: [...product.sizes], builtin: true, displayType: 'pill' as const, swatchHex: {}, visibleOn: ['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'>, libraryId: 'LIB-02' },
-            { name: 'Placements', values: [], builtin: true, displayType: 'radio' as const, swatchHex: {}, visibleOn: ['admin'] as Array<'pdp' | 'checkout' | 'admin'>, libraryId: 'LIB-03' },
+            { name: 'Color', values: [...product.colors], builtin: true, displayType: 'swatch' as const, swatchHex: {}, libraryId: 'LIB-01' },
+            { name: 'Size', values: [...product.sizes], builtin: true, displayType: 'pill' as const, swatchHex: {}, libraryId: 'LIB-02' },
+            { name: 'Placements', values: [], builtin: true, displayType: 'radio' as const, swatchHex: {}, libraryId: 'LIB-03' },
           ];
 
     // Pricing ladder load (R1): sanitize the sidecar against these values;
@@ -1348,9 +1346,9 @@ export default function ProductsView() {
           gender: (r.gender || undefined) as ProductItem['gender'] | undefined,
           taxRate: r.tax !== '' ? parseFloat(r.tax) : undefined,
           attributes: [
-            { name: 'Color', values: r.colors, builtin: true, displayType: 'swatch', swatchHex: {}, visibleOn: ['pdp', 'admin'] },
-            { name: 'Size', values: r.sizes, builtin: true, displayType: 'pill', swatchHex: {}, visibleOn: ['pdp', 'admin'] },
-            { name: 'Placements', values: r.placements, builtin: true, displayType: 'radio', swatchHex: {}, visibleOn: ['admin'] },
+            { name: 'Color', values: r.colors, builtin: true, displayType: 'swatch', swatchHex: {} },
+            { name: 'Size', values: r.sizes, builtin: true, displayType: 'pill', swatchHex: {} },
+            { name: 'Placements', values: r.placements, builtin: true, displayType: 'radio', swatchHex: {} },
           ],
         },
         true
@@ -2641,7 +2639,7 @@ export default function ProductsView() {
                     </div>
                   </div>
                 ) : null}
-                {formAttributes.filter((a) => a.name !== 'Placements').map((attr) => renderAttrCard(attr))}
+                {formAttributes.filter((a) => showsOnPdp(a)).map((attr) => renderAttrCard(attr))}
                 <div style={{ display: 'flex', gap: 8 }}>
                   <div style={{ flex: 1 }}>
                     <Input
@@ -2688,7 +2686,7 @@ export default function ProductsView() {
             <Disclosure
               title="Internal fields"
               subtitle="Internal data: weights, dimensions, print placements. Hidden from shoppers."
-              badge={<Badge variant="neutral" size="sm">{[formWeight, formShipWeight, formDims, formGender].filter(Boolean).length + formAttributes.filter((a) => a.name === 'Placements').reduce((n, a) => n + a.values.length, 0)} filled</Badge>}
+              badge={<Badge variant="neutral" size="sm">{[formWeight, formShipWeight, formDims, formGender].filter(Boolean).length + formAttributes.filter((a) => !showsOnPdp(a)).reduce((n, a) => n + a.values.length, 0)} filled</Badge>}
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -2767,7 +2765,7 @@ export default function ProductsView() {
                   />
                   </div>
                 </div>
-                {formAttributes.filter((a) => a.name === 'Placements').map((attr) => renderAttrCard(attr, true))}
+                {formAttributes.filter((a) => !showsOnPdp(a)).map((attr) => renderAttrCard(attr, true))}
               </div>
             </Disclosure>
           </form>
