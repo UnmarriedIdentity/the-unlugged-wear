@@ -304,7 +304,7 @@ export default function RefundsPage() {
           )}
 
           <Input
-            label="Refund Amount ($ USD)"
+            label="Refund Amount (₹)"
             type="number"
             step="0.01"
             placeholder={availableBalance > 0 ? `Max: ${availableBalance.toFixed(2)}` : '0.00'}
