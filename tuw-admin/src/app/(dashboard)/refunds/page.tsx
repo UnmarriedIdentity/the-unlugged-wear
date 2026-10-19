@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader, HeroCard, DrawerSection, KeyValueList } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Select, SearchableSelect, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader, HeroCard, DrawerSection, KeyValueList } from '@/components/ui';
 import { RotateCcw, Search, Filter, Download, ArrowUpRight, CheckCircle2, Clock, AlertTriangle, Eye } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { RefundItem } from '@/mocks/fixtures';
@@ -242,63 +242,62 @@ export default function RefundsPage() {
         />
       </ContentCard>
 
-      {/* Validated Refund Dialog */}
-      <Modal
+      {/* Issue Refund Drawer */}
+      <Drawer
         isOpen={isIssueOpen}
         onClose={() => setIsIssueOpen(false)}
         title="Issue Validated Refund"
         subtitle="Refund amounts are strictly verified against captured order balances"
+        width="540px"
         footer={
-          <div style={{ display: 'flex', gap: 10 }}>
-            <Button variant="secondary" size="md" onClick={() => setIsIssueOpen(false)}>
+          <>
+            <Button variant="secondary" size="md" type="button" onClick={() => setIsIssueOpen(false)}>
               Cancel
             </Button>
-            <Button variant="primary" size="md" onClick={handleIssueSubmit}>
+            <Button variant="primary" size="md" type="submit" form="refund-issue-form">
               Execute Refund
             </Button>
-          </div>
+          </>
         }
       >
-        <form onSubmit={handleIssueSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <form id="refund-issue-form" onSubmit={handleIssueSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {refundError && (
             <div style={{ padding: 10, borderRadius: 8, backgroundColor: 'var(--tuw-bg-error, #FEF4F4)', color: 'var(--tuw-text-error, #C91818)', fontSize: 13 }}>
               {refundError}
             </div>
           )}
 
-          <div>
-            <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
-              Target Order
-            </label>
-            <select
-              value={selectedOrderId}
-              onChange={(e) => {
-                setSelectedOrderId(e.target.value);
-                setRefundError(null);
-              }}
-              style={{ width: '100%', height: 40, borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '0 10px', fontSize: 13 }}
-            >
-              {orders.map((o) => (
-                <option key={o.id} value={o.id}>
-                  {o.id} — {o.customerName} (Paid: ${o.paidAmount.toFixed(2)}, Refunded: ${o.refundedAmount.toFixed(2)})
-                </option>
-              ))}
-            </select>
-          </div>
+          <SearchableSelect
+            label="Target Order"
+            options={orders.map((o) => ({
+              value: o.id,
+              label: `${o.id} — ${o.customerName}`,
+              description: `Paid ₹${o.paidAmount.toFixed(2)} · Refunded ₹${o.refundedAmount.toFixed(2)}`,
+              keywords: `${o.id} ${o.customerName}`,
+            }))}
+            value={selectedOrderId}
+            onChange={(id) => {
+              setSelectedOrderId(id);
+              setRefundError(null);
+            }}
+            searchable
+            searchPlaceholder="Search orders by ID or customer…"
+            emptyText="No orders match your search."
+          />
 
           {selectedOrder && (
             <div style={{ padding: 12, borderRadius: 8, backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)', fontSize: 13 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span>Paid Order Amount:</span>
-                <strong>${selectedOrder.paidAmount.toFixed(2)}</strong>
+                <strong>₹{selectedOrder.paidAmount.toFixed(2)}</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--tuw-text-secondary, #5D6772)', marginTop: 4 }}>
                 <span>Already Refunded:</span>
-                <span>${selectedOrder.refundedAmount.toFixed(2)}</span>
+                <span>₹{selectedOrder.refundedAmount.toFixed(2)}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--tuw-text-success, #187343)', fontWeight: 600, marginTop: 4, borderTop: '1px solid var(--tuw-border-subtle, #E5E7EB)', paddingTop: 4 }}>
                 <span>Available to Refund:</span>
-                <span>${availableBalance.toFixed(2)}</span>
+                <span>₹{availableBalance.toFixed(2)}</span>
               </div>
             </div>
           )}
@@ -316,38 +315,30 @@ export default function RefundsPage() {
             required
           />
 
-          <div>
-            <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
-              Disbursement Method
-            </label>
-            <select
-              value={refundMethod}
-              onChange={(e) => setRefundMethod(e.target.value)}
-              style={{ width: '100%', height: 40, borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '0 10px', fontSize: 13 }}
-            >
-              <option value="Original Payment Method">Original Payment Method (Gateway Reversal)</option>
-              <option value="Store Credit Voucher">Store Credit Voucher</option>
-              <option value="Manual Bank Wire Transfer">Manual Bank Wire Transfer</option>
-            </select>
-          </div>
+          <Select
+            label="Disbursement Method"
+            value={refundMethod}
+            onChange={(e) => setRefundMethod(e.target.value)}
+            options={[
+              { value: 'Original Payment Method', label: 'Original Payment Method (Gateway Reversal)' },
+              { value: 'Store Credit Voucher', label: 'Store Credit Voucher' },
+              { value: 'Manual Bank Wire Transfer', label: 'Manual Bank Wire Transfer' },
+            ]}
+          />
 
-          <div>
-            <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
-              Reason for Refund
-            </label>
-            <select
-              value={refundReason}
-              onChange={(e) => setRefundReason(e.target.value)}
-              style={{ width: '100%', height: 40, borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '0 10px', fontSize: 13 }}
-            >
-              <option value="Customer cancellation prior to printing">Customer cancellation prior to printing</option>
-              <option value="Defective stitching or fabric flaw">Defective stitching or fabric flaw</option>
-              <option value="Carrier delay goodwill compensation">Carrier delay goodwill compensation</option>
-              <option value="RMA return inspected and restocked">RMA return inspected and restocked</option>
-            </select>
-          </div>
+          <Select
+            label="Reason for Refund"
+            value={refundReason}
+            onChange={(e) => setRefundReason(e.target.value)}
+            options={[
+              { value: 'Customer cancellation prior to printing', label: 'Customer cancellation prior to printing' },
+              { value: 'Defective stitching or fabric flaw', label: 'Defective stitching or fabric flaw' },
+              { value: 'Carrier delay goodwill compensation', label: 'Carrier delay goodwill compensation' },
+              { value: 'RMA return inspected and restocked', label: 'RMA return inspected and restocked' },
+            ]}
+          />
         </form>
-      </Modal>
+      </Drawer>
 
       {/* Refund Detail Drawer */}
       <Drawer
