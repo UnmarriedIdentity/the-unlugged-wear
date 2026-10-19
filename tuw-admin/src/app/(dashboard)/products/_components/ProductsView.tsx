@@ -2693,18 +2693,21 @@ export default function ProductsView() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                   <Input
-                    label="Weight"
-                    placeholder="e.g. 180g"
+                    label="Weight (g)"
+                    placeholder="e.g. 180"
                     value={formWeight}
                     onChange={(e) => setFormWeight(e.target.value)}
                   />
                   <Input
-                    label="Shipping Weight"
-                    placeholder="e.g. 250g"
+                    label="Shipping Weight (g)"
+                    placeholder="e.g. 250"
                     value={formShipWeight}
                     onChange={(e) => setFormShipWeight(e.target.value)}
                   />
                 </div>
+                <p style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
+                  Enter weights in whole grams — numbers only.
+                </p>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                   <Input
                     label="Package Dimensions"
