@@ -9,15 +9,15 @@
   },
   "summary": {
     "total": 247,
-    "done": 218,
+    "done": 220,
     "in_progress": 0,
-    "backlog": 29
+    "backlog": 27
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "7234b6d",
-    "unpushed": ["7234b6d", "599716c", "09765b0", "34c7259", "73bd526", "c60ab7c", "3b335aa", "975d66e", "0845928", "6c0a940", "b7bb05b", "b257aa3", "3fd55f3", "b7e9f88", "cee9ef0", "b97e340"],
-    "next_up": "Wave-2 backlog written 2026-10-19 in user order: Section 1 Fulfillment — TL-UI-FUL-KPI done (7234b6d, awaiting browser check). Section 2 Collections — TL-UI-COL-EDIT parent + TL-UI-COL-PICK / COL-DATA / COL-FORM / COL-ED / COL-TEST. Section 3 Product changes — TL-UI-PEDIT-IA parent + TL-UI-PEDIT-HOOK / SHELL / SPLIT / HEAD / RESET / CMP (CMP blocked on compare-at decision). Parked after: TL-UI-ADM-TABLES / ADM-INR / ADM-MONO, TL-UI-CMS-PERSIST, TL-UI-DESIGN-PLAN. Nothing in_progress — user will pick the next task. PEDIT cleanup wave + fulfillment grid still pending browser verification. Then attribute edge log (file 18) → N1b write-through (display/visibility/hex + disclosure) → design-system tail (FX1/SEL/CBX/IMG) → DW2 pass → anim re-run; styling engine (file 19) is the project's FINAL feature — build it only after the core e-commerce app is complete; shipments partner-sync reframe; household UI build reads file 17",
+    "tip": "96f4e9b",
+    "unpushed": ["96f4e9b", "87a0e67", "7234b6d", "599716c", "09765b0", "34c7259", "73bd526", "c60ab7c", "3b335aa", "975d66e", "0845928", "6c0a940", "b7bb05b", "b257aa3", "3fd55f3", "b7e9f88", "cee9ef0", "b97e340"],
+    "next_up": "Wave-2 in user order: Section 1 Fulfillment — TL-UI-FUL-KPI done (7234b6d, awaiting browser check). Section 2 Collections — parent TL-UI-COL-EDIT; children TL-UI-COL-DATA (87a0e67) + TL-UI-COL-TEST (96f4e9b) done; next TL-UI-COL-PICK (SearchableMultiSelect primitive, keybindings + chips) → TL-UI-COL-FORM (create/edit slide-in Drawer: Select visibility, auto-slug, picker) → TL-UI-COL-ED (detail drawer: editable editorial + real productIds-ordered ₹ product list). Section 3 Product changes — TL-UI-PEDIT-IA parent + TL-UI-PEDIT-HOOK / SHELL / SPLIT / HEAD / RESET / CMP (CMP blocked on compare-at decision). Parked after: TL-UI-ADM-TABLES / ADM-INR / ADM-MONO, TL-UI-CMS-PERSIST, TL-UI-DESIGN-PLAN. Nothing in_progress — user picks the next task. PEDIT cleanup wave + fulfillment grid + collections counts pending browser verification. Then attribute edge log (file 18) → N1b write-through (display/visibility/hex + disclosure) → design-system tail (FX1/SEL/CBX/IMG) → DW2 pass → anim re-run; styling engine (file 19) is the project's FINAL feature — build it only after the core e-commerce app is complete; shipments partner-sync reframe; household UI build reads file 17",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
       "dashboard D-series: KPI tiers, range/sort menus, badge mapping, calendar pills, header tint (360/768/1024/1440)",
@@ -29,7 +29,8 @@
       "switch keyboard + naming: library + discounts toggles respond to Tab + Space/Enter (LIBCTRL)",
       "VPRICE-3/3B/4 polish: right-docked matrix price cells (+Δ chip / 24px reset sharing one right edge), 'From ₹X' pill in the variants header, spinner-free number fields, 2dp resting prices + clean decimal typing, row hover wash, expand-once drawer width, upcharges strip in Variants",
       "PEDIT cleanup wave: INR-only Settings/Payments/Orders/Refunds (no USD), product SEO + video reel gone, gram-labelled weights, global visibility switches in Settings → Attributes with read-only product chips, one ordered gallery with cover at index 0 + legacy image migration + create-persists-images fix",
-      "fulfillment KPI grid: Wallet Credits card removed — verify 4 cards + alignment at 360/768/1024/1440"
+      "fulfillment KPI grid: Wallet Credits card removed — verify 4 cards + alignment at 360/768/1024/1440",
+      "collections data foundation: table counts + detail heading derive from productIds (fixtures 4/3/2/2), create persists real picked ids (no invented count), Reset Demo restores links; legacy saved rows show 0 until reset"
     ],
     "last_updated": "2026-10-19",
     "updated_by": "agent"
@@ -3743,8 +3744,8 @@
       "verified": false,
       "pushed": false,
       "follow_ups": [
-        "Legacy saved collections hydrate productIds: [] — never fabricate links",
-        "Fixture counts become real subsets (24/18/12/9 were fabricated against a 10-product catalog)"
+        "Legacy saved collections hydrate productIds: [] — never fabricate links — shipped in TL-UI-COL-DATA (87a0e67)",
+        "Fixture counts are now real subsets 4/3/2/2 — shipped in TL-UI-COL-DATA (87a0e67)"
       ]
     },
     {
@@ -3762,12 +3763,21 @@
     {
       "id": "TL-UI-COL-DATA",
       "title": "Collection productIds + updateCollection + derived helpers",
-      "status": "backlog",
-      "owner": "unassigned",
+      "status": "done",
+      "owner": "agent",
       "parent": "TL-UI-COL-EDIT",
-      "log": "CollectionItem.productIds replaces stored productCount; updateCollection(id, patch) mirrors createCollection (products role gate, persist, toast); derive count/slug/updatedAt/resolved products in pure helpers; fixture subsets; legacy hydration productIds: []",
-      "design_match": "pending",
-      "verified": false,
+      "started": "2026-10-19",
+      "finished": "2026-10-19",
+      "log": "v2:87a0e67",
+      "design_match": "yes",
+      "key_decisions": [
+        "productIds is the single source of truth; count, slug and product lists are derived — nothing stored twice",
+        "pure helpers live in src/lib/collections.ts (React-free) so src/mocks never imports app UI code",
+        "legacy persisted rows hydrate productIds: [] (deduped, unknown ids pruned); links are never fabricated — Reset Demo restores the real fixture subsets",
+        "fixture subsets are real (4/3/2/2); the old 24/18/12/9 counts were fabricated against a 10-product catalog",
+        "createCollection ids are collision-safe COL-xx (max+1) instead of random; updateCollection (role gate, persist, toast) added for the drawer wave"
+      ],
+      "verified": true,
       "pushed": false,
       "follow_ups": []
     },
@@ -3798,12 +3808,18 @@
     {
       "id": "TL-UI-COL-TEST",
       "title": "Collection helper tests — slugify/validate/derive/resolve",
-      "status": "backlog",
-      "owner": "unassigned",
+      "status": "done",
+      "owner": "agent",
       "parent": "TL-UI-COL-EDIT",
-      "log": "tests/collections.test.mjs mirrors the pure helpers under node --test (self-contained per repo convention)",
-      "design_match": "pending",
-      "verified": false,
+      "started": "2026-10-19",
+      "finished": "2026-10-19",
+      "log": "v2:96f4e9b",
+      "design_match": "yes",
+      "key_decisions": [
+        "self-contained mirror suite per repo convention — 21 new cases; admin suite now 40 passing",
+        "covers derived counts, ordered resolution + unknown-id pruning, slugify/validate/uniqueness, legacy hydration migration, COL-xx id generation"
+      ],
+      "verified": true,
       "pushed": false,
       "follow_ups": []
     },
