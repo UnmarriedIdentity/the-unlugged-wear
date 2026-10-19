@@ -8,7 +8,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { Check, ChevronDown, Search, X } from 'lucide-react';
+import { Check, ChevronDown, X } from 'lucide-react';
 import { usePopoverAnimation } from '@/hooks/usePopoverAnimation';
 import Checkbox from './Checkbox';
 
@@ -30,9 +30,10 @@ interface CommonProps {
   helperText?: string;
   error?: string;
   placeholder?: string;
+  /** Placeholder while the field itself is acting as the search box. */
   searchPlaceholder?: string;
   emptyText?: string;
-  /** Renders a query input at the top of the popover. */
+  /** Typing in the field filters the list (the field is the search box). */
   searchable?: boolean;
   disabled?: boolean;
   fullWidth?: boolean;
@@ -86,6 +87,7 @@ function SearchableSelectCore({
 }: CoreProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [queryDirty, setQueryDirty] = useState(false);
   const deferredQuery = useDeferredValue(query);
   const [activeIndex, setActiveIndex] = useState(0);
   const [focused, setFocused] = useState(false);
@@ -99,8 +101,9 @@ function SearchableSelectCore({
   } | null>(null);
 
   const triggerRef = useRef<HTMLDivElement>(null);
-  const searchRef = useRef<HTMLInputElement>(null);
-  const listRef = useRef<HTMLDivElement>(null);
+  const fieldRef = useRef<HTMLInputElement>(null);
+  const selectAllOnOpen = useRef(false);
+  const skipRefocus = useRef(false);
   const popoverRef = useRef<HTMLDivElement>(null);
   const optionRefs = useRef<Array<HTMLDivElement | null>>([]);
   const generatedId = React.useId();
@@ -108,7 +111,9 @@ function SearchableSelectCore({
 
   const anim = usePopoverAnimation(open, () => {
     setQuery('');
-    triggerRef.current?.focus();
+    setQueryDirty(false);
+    if (!skipRefocus.current) fieldRef.current?.focus();
+    skipRefocus.current = false;
   });
 
   const selectedOptions = useMemo(
@@ -120,7 +125,7 @@ function SearchableSelectCore({
   );
 
   const filtered = useMemo(() => {
-    const q = deferredQuery.trim().toLowerCase();
+    const q = (queryDirty ? deferredQuery : '').trim().toLowerCase();
     if (!q) return options;
     return options.filter((option) =>
       [option.label, option.description, option.meta, option.keywords]
@@ -129,13 +134,13 @@ function SearchableSelectCore({
         .toLowerCase()
         .includes(q)
     );
-  }, [options, deferredQuery]);
+  }, [options, deferredQuery, queryDirty]);
 
   // Keep the active row inside the filtered list and reset it when the query
   // changes (fresh results start at the top).
   useEffect(() => {
     setActiveIndex(0);
-  }, [deferredQuery]);
+  }, [queryDirty, deferredQuery]);
 
   useEffect(() => {
     setActiveIndex((index) => Math.min(Math.max(0, index), Math.max(0, filtered.length - 1)));
@@ -159,15 +164,19 @@ function SearchableSelectCore({
     };
   }, [anim.visible]);
 
-  // Focus the search field (or the list) on open.
+  // Focus the field on open. A seeded label is pre-selected so the first
+  // keystroke replaces it; typed opens keep the caret where it was.
   useEffect(() => {
     if (!anim.visible) return;
     const frame = requestAnimationFrame(() => {
-      if (searchable) searchRef.current?.focus();
-      else listRef.current?.focus();
+      const field = fieldRef.current;
+      if (!field) return;
+      field.focus();
+      if (selectAllOnOpen.current && field.value) field.select();
+      selectAllOnOpen.current = false;
     });
     return () => cancelAnimationFrame(frame);
-  }, [anim.visible, searchable]);
+  }, [anim.visible]);
 
   // Keep the keyboard-active option visible.
   useEffect(() => {
@@ -188,12 +197,17 @@ function SearchableSelectCore({
       vw: window.innerWidth,
       vh: window.innerHeight,
     });
-    setQuery('');
+    // Single-select seeds the field with the current label (pre-selected so
+    // the first keystroke replaces it); multi starts empty after its chips.
+    const seed = !multiple && searchable ? selectedOptions[0]?.label ?? '' : '';
+    selectAllOnOpen.current = seed !== '';
+    setQuery(seed);
+    setQueryDirty(false);
     const firstSelected = selected[0];
     const index = firstSelected ? options.findIndex((option) => option.value === firstSelected) : 0;
     setActiveIndex(Math.max(0, index));
     setOpen(true);
-  }, [disabled, options, selected]);
+  }, [disabled, multiple, options, searchable, selected, selectedOptions]);
 
   const close = useCallback(() => setOpen(false), []);
 
@@ -224,6 +238,19 @@ function SearchableSelectCore({
     }
 
     if (!open) {
+      const printable =
+        event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey;
+      if (searchable && printable) {
+        // Typing on the closed field opens it with the keystroke as the query.
+        event.preventDefault();
+        openPopover();
+        selectAllOnOpen.current = false;
+        if (event.key !== ' ') {
+          setQuery(event.key);
+          setQueryDirty(true);
+        }
+        return;
+      }
       if (
         event.key === 'Enter' ||
         event.key === ' ' ||
@@ -266,6 +293,7 @@ function SearchableSelectCore({
         }
         break;
       case 'Tab':
+        skipRefocus.current = true;
         setOpen(false);
         break;
       default:
@@ -273,7 +301,7 @@ function SearchableSelectCore({
     }
   };
 
-  const estimatedHeight = maxListHeight + (searchable ? 52 : 0) + (multiple && selected.length > 0 ? 40 : 0) + 18;
+  const estimatedHeight = maxListHeight + (multiple && selected.length > 0 ? 40 : 0) + 18;
   const opensUp = anchor ? anchor.vh - anchor.bottom < estimatedHeight && anchor.top > anchor.vh - anchor.bottom : false;
   const popoverWidth = anchor ? Math.max(220, Math.min(anchor.width, anchor.vw - 16)) : 220;
 
@@ -324,15 +352,12 @@ function SearchableSelectCore({
 
       <div
         ref={triggerRef}
-        role="combobox"
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        aria-controls={listId}
-        aria-label={ariaLabel || label || placeholder}
         aria-disabled={disabled || undefined}
-        tabIndex={disabled ? -1 : 0}
-        onClick={() => (open ? close() : openPopover())}
-        onKeyDown={handleKeyDown}
+        onClick={() => {
+          if (disabled) return;
+          if (!open) openPopover();
+          else if (!searchable) close();
+        }}
         onFocus={() => setFocused(true)}
         onBlur={(event) => {
           if (!event.currentTarget.contains(event.relatedTarget as Node)) setFocused(false);
@@ -376,11 +401,7 @@ function SearchableSelectCore({
           }}
         >
           {multiple ? (
-            selectedOptions.length === 0 ? (
-              <span style={{ fontSize: 14, color: 'var(--tuw-text-tertiary, #9CA3AF)' }}>
-                {placeholder}
-              </span>
-            ) : (
+            selectedOptions.length === 0 ? null : (
               <>
                 {displayChips.map((option) => (
                   <span
@@ -443,24 +464,72 @@ function SearchableSelectCore({
                 )}
               </>
             )
-          ) : (
-            <span
-              style={{
-                fontSize: 14,
-                color: selectedOptions[0]
+          ) : null}
+
+          <input
+            ref={fieldRef}
+            value={
+              multiple
+                ? query
+                : open && searchable
+                  ? query
+                  : selectedOptions[0]?.label ?? ''
+            }
+            onChange={(event) => {
+              if (!searchable) return;
+              setQuery(event.target.value);
+              setQueryDirty(true);
+            }}
+            onKeyDown={handleKeyDown}
+            placeholder={
+              open
+                ? searchable
+                  ? searchPlaceholder
+                  : placeholder
+                : selected.length > 0
+                  ? ''
+                  : placeholder
+            }
+            readOnly={!searchable}
+            disabled={disabled}
+            role="combobox"
+            aria-haspopup="listbox"
+            aria-expanded={open}
+            aria-controls={listId}
+            aria-autocomplete={searchable ? 'list' : undefined}
+            aria-label={ariaLabel || label || placeholder}
+            aria-activedescendant={
+              open && filtered[activeIndex] ? `${listId}-option-${activeIndex}` : undefined
+            }
+            autoComplete="off"
+            spellCheck={false}
+            style={{
+              flex: 1,
+              minWidth: multiple ? 90 : 0,
+              height: multiple ? 24 : 42,
+              padding: 0,
+              border: 'none',
+              outline: 'none',
+              background: 'transparent',
+              fontFamily: 'var(--font-main)',
+              fontSize: 14,
+              color:
+                (multiple ? selected.length > 0 : Boolean(selectedOptions[0])) || query
                   ? 'var(--tuw-text-primary, #262626)'
                   : 'var(--tuw-text-tertiary, #9CA3AF)',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {selectedOptions[0]?.label ?? placeholder}
-            </span>
-          )}
+              textOverflow: 'ellipsis',
+              cursor: disabled ? 'not-allowed' : searchable ? 'text' : 'pointer',
+            }}
+          />
         </div>
 
         <span
+          onClick={(event) => {
+            event.stopPropagation();
+            if (disabled) return;
+            if (open) close();
+            else openPopover();
+          }}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -468,6 +537,7 @@ function SearchableSelectCore({
             transform: open ? 'rotate(180deg)' : 'none',
             transition: 'transform 0.15s ease',
             flexShrink: 0,
+            cursor: disabled ? 'not-allowed' : 'pointer',
           }}
         >
           <ChevronDown size={16} />
@@ -488,53 +558,12 @@ function SearchableSelectCore({
             style={{ position: 'fixed', inset: 0, zIndex: 40, cursor: 'default' }}
           />
           <div ref={popoverRef} style={popoverStyle} onClick={(event) => event.stopPropagation()}>
-            {searchable && (
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  padding: '10px 12px',
-                  borderBottom: '1px solid var(--tuw-border-subtle, #E5E7EB)',
-                  flexShrink: 0,
-                }}
-              >
-                <span style={{ display: 'inline-flex', color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                  <Search size={15} />
-                </span>
-                <input
-                  ref={searchRef}
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder={searchPlaceholder}
-                  aria-label={searchPlaceholder}
-                  aria-controls={listId}
-                  aria-activedescendant={
-                    filtered[activeIndex] ? `${listId}-option-${activeIndex}` : undefined
-                  }
-                  style={{
-                    flex: 1,
-                    minWidth: 0,
-                    border: 'none',
-                    outline: 'none',
-                    background: 'transparent',
-                    fontSize: 13,
-                    fontFamily: 'var(--font-main)',
-                    color: 'var(--tuw-text-primary, #262626)',
-                  }}
-                />
-              </div>
-            )}
-
             <div
-              ref={listRef}
               id={listId}
               role="listbox"
               aria-multiselectable={multiple || undefined}
               aria-label={ariaLabel || label || 'Options'}
               tabIndex={-1}
-              onKeyDown={handleKeyDown}
               style={{
                 maxHeight: maxListHeight,
                 overflowY: 'auto',
