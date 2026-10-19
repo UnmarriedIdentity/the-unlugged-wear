@@ -18,7 +18,7 @@ export default function SettingsView() {
   const [storeName, setStoreName] = useState(settings.storeName);
   const [legalEntity, setLegalEntity] = useState(settings.legalEntity);
   const [supportEmail, setSupportEmail] = useState(settings.supportEmail);
-  const [currency, setCurrency] = useState(settings.defaultCurrency);
+  const currency = 'INR (₹)';
   const [timezone, setTimezone] = useState(settings.timezone);
 
   const [tagline, setTagline] = useState(settings.brandTagline);
@@ -46,8 +46,8 @@ export default function SettingsView() {
       brandTagline: tagline,
       brandColor,
       qikinkEnvironment: qikinkEnv,
-      freeShippingThreshold: parseFloat(freeShippingThreshold) || 150,
-      standardShippingFee: parseFloat(standardShippingFee) || 12,
+      freeShippingThreshold: parseFloat(freeShippingThreshold) || 3000,
+      standardShippingFee: parseFloat(standardShippingFee) || 150,
       taxIncluded,
       orderNotificationEmail: notifyEmail,
     });
@@ -169,16 +169,24 @@ export default function SettingsView() {
                 <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
                   Default Store Currency
                 </label>
-                <select
-                  value={currency}
-                  onChange={(e) => { setCurrency(e.target.value); markDirty(); }}
-                  style={{ width: '100%', height: 40, borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '0 10px', fontSize: 13 }}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    height: 40,
+                    padding: '0 10px',
+                    borderRadius: 8,
+                    border: '1px solid var(--tuw-border-subtle, #E2E4E6)',
+                    backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)',
+                    fontSize: 13,
+                    color: 'var(--tuw-text-primary, #262626)',
+                  }}
                 >
-                  <option value="USD ($)">USD ($) — United States Dollar</option>
-                  <option value="GBP (£)">GBP (£) — British Pound</option>
-                  <option value="EUR (€)">EUR (€) — Eurozone</option>
-                  <option value="INR (₹)">INR (₹) — Indian Rupee</option>
-                </select>
+                  INR (₹) — Indian Rupee
+                </div>
+                <p style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', margin: '6px 0 0' }}>
+                  Single-currency store — pricing is stored and displayed in INR.
+                </p>
               </div>
             </div>
 
@@ -341,14 +349,14 @@ export default function SettingsView() {
             </h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
               <Input
-                label="Free Shipping Minimum Threshold ($ USD)"
+                label="Free Shipping Minimum Threshold (₹)"
                 type="number"
                 value={freeShippingThreshold}
                 onChange={(e) => { setFreeShippingThreshold(e.target.value); markDirty(); }}
                 helperText="Orders with subtotal exceeding this amount receive zero shipping fees"
               />
               <Input
-                label="Standard Flat Rate Shipping Fee ($ USD)"
+                label="Standard Flat Rate Shipping Fee (₹)"
                 type="number"
                 value={standardShippingFee}
                 onChange={(e) => { setStandardShippingFee(e.target.value); markDirty(); }}
