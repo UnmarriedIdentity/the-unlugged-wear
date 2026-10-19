@@ -99,7 +99,7 @@ export default function ProductsView() {
     setIsCreating(true);
     setProductTab('general');
     setDrawerView('compact');
-    preTableView.current = null;
+    autoExpandedRef.current = false;
     setStageIndex(0);
     setFormName('');
     setFormSlug('');
@@ -135,6 +135,7 @@ export default function ProductsView() {
     setFormVariants([]);
     setFormAdjustments({});
     setAdjustmentDrafts({});
+    setPriceDrafts({});
     setFormFabricGsm('');
     setFormCut('');
     setFormModelDims('');
@@ -226,23 +227,19 @@ export default function ProductsView() {
     return () => ro.disconnect();
   }, [productTab]);
 
-  // Elastic view ownership (W1): products drives the Drawer size per tab.
-  // Entering Variants from compact stashes the choice and forces matrix
-  // (never full); leaving restores the stash. Manual picks always win —
-  // forcing fires on tab-enter only, never fights the hand on the control.
+  // Elastic view ownership (W1) + expand-once (VPRICE-4): the first hop into
+  // Variants widens compact → matrix (never full) so the matrix fits; after
+  // that the width is the user's choice and tab switches never resize the
+  // drawer (no 520↔880 yoyo while hopping tabs).
   const [drawerView, setDrawerView] = useState<'compact' | 'matrix' | 'full'>('compact');
-  const preTableView = useRef<'compact' | 'matrix' | 'full' | null>(null);
+  const autoExpandedRef = useRef(false);
   const prevTab = useRef<'general' | 'media' | 'variants' | 'specs' | 'seo'>('general');
   React.useEffect(() => {
     const entered = prevTab.current !== 'variants' && productTab === 'variants';
-    const left = prevTab.current === 'variants' && productTab !== 'variants';
     prevTab.current = productTab;
-    if (entered && drawerView === 'compact') {
-      preTableView.current = 'compact';
+    if (entered && drawerView === 'compact' && !autoExpandedRef.current) {
+      autoExpandedRef.current = true;
       setDrawerView('matrix');
-    } else if (left && preTableView.current !== null) {
-      setDrawerView(preTableView.current);
-      preTableView.current = null;
     }
   }, [productTab, drawerView]);
 
@@ -329,6 +326,11 @@ export default function ProductsView() {
   // commits are live, blur normalizes the display back to committed truth.
   const [adjustmentDrafts, setAdjustmentDrafts] = useState<Record<string, string>>({});
 
+  // Matrix price drafts (VPRICE-4): same raw-string pattern for the price
+  // column — text fields type decimals cleanly ("61." stays "61."), commits
+  // stay live (typing pins the cell), blur snaps back to the 2dp truth.
+  const [priceDrafts, setPriceDrafts] = useState<Record<string, string>>({});
+
   const setAdjustment = (key: string, amount: number | null) => {
     const nextAdj = { ...formAdjustments };
     if (amount === null) delete nextAdj[key];
@@ -338,6 +340,9 @@ export default function ProductsView() {
   };
 
   const writeAdjustment = (key: string, raw: string) => {
+    // Money keys only (VPRICE-4): the boxes are text fields now, so decimals
+    // type cleanly while letters and stray characters never enter state.
+    if (!/^\d*\.?\d*$/.test(raw)) return;
     setAdjustmentDrafts((prev) => {
       const next = { ...prev };
       if (raw === '') delete next[key];
@@ -361,10 +366,24 @@ export default function ProductsView() {
     });
   };
 
+  // Price-cell draft clear (VPRICE-4): blur drops the raw string so the
+  // cell re-renders the committed 2dp value.
+  const clearPriceDraft = (id: string) => {
+    setPriceDrafts((prev) => {
+      if (prev[id] === undefined) return prev;
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  };
+
   // Base price write (R1): re-derives every unpinned cell from
   // base + Σ adjustments; explicit overrides stay pinned. This replaces
   // the old write-all that trampled per-cell overrides on every keystroke.
   const writeBasePrice = (priceStr: string) => {
+    // Money keys only (VPRICE-4): the field is text now (clean decimals),
+    // so refuse anything that is not digits with at most one dot.
+    if (!/^\d*\.?\d*$/.test(priceStr)) return;
     setFormPrice(priceStr);
     const n = parseFloat(priceStr);
     if (isNaN(n) || n < 0) return;
@@ -825,7 +844,7 @@ export default function ProductsView() {
     setEditingProduct(product);
     setProductTab('general');
     setDrawerView('compact');
-    preTableView.current = null;
+    autoExpandedRef.current = false;
     setStageIndex(0);
     setFormVideo(product.video || '');
     setFormPhoto(product.photoSettings ?? { layout: 'carousel', ratio: '4:3', showPhotos: true });
@@ -889,6 +908,7 @@ export default function ProductsView() {
     const loadedAdjustments = pruneAdjustments(product.priceAdjustments, loadedAttributes).next;
     setFormAdjustments(loadedAdjustments);
     setAdjustmentDrafts({});
+    setPriceDrafts({});
     setFormVariants(
       resolveVariants(product).map((v) =>
         v.priceOverridden !== undefined
@@ -2358,7 +2378,7 @@ export default function ProductsView() {
           setEditingProduct(null);
           setIsCreating(false);
           setDrawerView('compact');
-          preTableView.current = null;
+          autoExpandedRef.current = false;
           setFormImages((prev) => {
             revokeUploads(prev.filter((im) => !im.persisted).map((im) => ({ url: im.src })));
             return prev;
@@ -2477,8 +2497,8 @@ export default function ProductsView() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <Input
                 label="Base price ($ USD)"
-                type="number"
-                step="0.01"
+                type="text"
+                inputMode="decimal"
                 value={formPrice}
                 onChange={(e) => writeBasePrice(e.target.value)}
                 required
@@ -2492,69 +2512,6 @@ export default function ProductsView() {
                 required
               />
             </div>
-            <Disclosure
-              title="Per-value price adjustments"
-              subtitle="Value upcharges added on top of the base price."
-              badge={
-                Object.keys(formAdjustments).length > 0 ? (
-                  <Badge variant="info">{Object.keys(formAdjustments).length}</Badge>
-                ) : undefined
-              }
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                {['Color', 'Size'].map((attrName) => {
-                  const attr = formAttributes.find((a) => a.name === attrName);
-                  if (!attr || attr.values.length === 0) return null;
-                  return (
-                    <div key={attrName} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                      <div
-                        style={{
-                          fontSize: 11,
-                          fontWeight: 600,
-                          letterSpacing: '0.06em',
-                          textTransform: 'uppercase',
-                          color: 'var(--tuw-text-secondary, #5D6772)',
-                        }}
-                      >
-                        {attrName}
-                      </div>
-                      {/* Two-column value grid (VPRICE-3): roughly halves the
-                          expanded height without losing the name → input rhythm. */}
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 16, rowGap: 8 }}>
-                        {attr.values.map((value) => {
-                          const key = adjustmentKey(attrName, value);
-                          const committed = formAdjustments[key];
-                          const draft = adjustmentDrafts[key];
-                          return (
-                            <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                              <span style={{ flex: 1, fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
-                                {value}
-                              </span>
-                              <div style={{ width: 110, flexShrink: 0 }}>
-                                <Input
-                                  aria-label={`${attrName} ${value} price adjustment`}
-                                  type="number"
-                                  step="0.01"
-                                  min={0}
-                                  placeholder="0"
-                                  value={draft !== undefined ? draft : committed !== undefined ? String(committed) : ''}
-                                  onChange={(e) => writeAdjustment(key, e.target.value)}
-                                  onBlur={() => clearAdjustmentDraft(key)}
-                                  style={{ height: 32, textAlign: 'right' }}
-                                />
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
-                <p style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0, lineHeight: 1.5 }}>
-                  Upcharges only. Clearing a field — or removing the value — drops its adjustment.
-                </p>
-              </div>
-            </Disclosure>
             <DrawerSection title="Pricing & Discounts" titleGap={10}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
@@ -2969,6 +2926,70 @@ export default function ProductsView() {
                 </Button>
               </div>
             </div>
+            {/* Upcharges strip (VPRICE-4): moved up from General so the
+                ladder's inputs sit beside the matrix they feed. */}
+            <Disclosure
+              title="Per-value price adjustments"
+              subtitle="Value upcharges added on top of the base price."
+              badge={
+                Object.keys(formAdjustments).length > 0 ? (
+                  <Badge variant="info">{Object.keys(formAdjustments).length}</Badge>
+                ) : undefined
+              }
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {['Color', 'Size'].map((attrName) => {
+                  const attr = formAttributes.find((a) => a.name === attrName);
+                  if (!attr || attr.values.length === 0) return null;
+                  return (
+                    <div key={attrName} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      <div
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 600,
+                          letterSpacing: '0.06em',
+                          textTransform: 'uppercase',
+                          color: 'var(--tuw-text-secondary, #5D6772)',
+                        }}
+                      >
+                        {attrName}
+                      </div>
+                      {/* Two-column value grid (VPRICE-3): roughly halves the
+                          expanded height without losing the name → input rhythm. */}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 16, rowGap: 8 }}>
+                        {attr.values.map((value) => {
+                          const key = adjustmentKey(attrName, value);
+                          const committed = formAdjustments[key];
+                          const draft = adjustmentDrafts[key];
+                          return (
+                            <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                              <span style={{ flex: 1, fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
+                                {value}
+                              </span>
+                              <div style={{ width: 110, flexShrink: 0 }}>
+                                <Input
+                                  aria-label={`${attrName} ${value} price adjustment`}
+                                  type="text"
+                                  inputMode="decimal"
+                                  placeholder="0"
+                                  value={draft !== undefined ? draft : committed !== undefined ? committed.toFixed(2) : ''}
+                                  onChange={(e) => writeAdjustment(key, e.target.value)}
+                                  onBlur={() => clearAdjustmentDraft(key)}
+                                  style={{ height: 32, textAlign: 'right' }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+                <p style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0, lineHeight: 1.5 }}>
+                  Upcharges only. Clearing a field — or removing the value — drops its adjustment.
+                </p>
+              </div>
+            </Disclosure>
             <Table>
               <TableHeader>
                 <TableRow hoverable={false}>
@@ -2984,7 +3005,7 @@ export default function ProductsView() {
               </TableHeader>
               <TableBody>
                 {formVariants.map((v) => (
-                  <TableRow key={v.id} hoverable={false}>
+                  <TableRow key={v.id}>
                     <TableCell style={{ padding: '10px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
                       {v.id.startsWith('tmp-') ? (
                         <Input
@@ -3026,15 +3047,21 @@ export default function ProductsView() {
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <Input
                             aria-label={`Price for ${v.color} ${v.size}`}
-                            type="number"
-                            step="0.01"
-                            value={String(v.price)}
+                            type="text"
+                            inputMode="decimal"
+                            value={priceDrafts[v.id] !== undefined ? priceDrafts[v.id] : v.price.toFixed(2)}
                             onChange={(e) => {
-                              const n = parseFloat(e.target.value);
+                              const raw = e.target.value;
+                              // Money keys only (VPRICE-4): digits + one dot,
+                              // so intermediate states like "61." type cleanly.
+                              if (!/^\d*\.?\d*$/.test(raw)) return;
+                              setPriceDrafts((prev) => ({ ...prev, [v.id]: raw }));
+                              const n = parseFloat(raw);
                               // Typing pins the cell (R1): the price survives
                               // base/attribute recomputes until reset.
                               if (!isNaN(n) && n >= 0) updateVariant(v.id, { price: roundPrice(n), priceOverridden: true });
                             }}
+                            onBlur={() => clearPriceDraft(v.id)}
                             style={{ height: 36, textAlign: 'right' }}
                           />
                         </div>

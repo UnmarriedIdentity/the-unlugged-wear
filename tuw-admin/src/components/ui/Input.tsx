@@ -25,6 +25,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       className = '',
       style = {},
       id,
+      type,
       onFocus,
       onBlur,
       ...props
@@ -33,6 +34,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
   ) => {
     const [isFocused, setIsFocused] = useState(false);
     const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, '-') : undefined);
+    // VPRICE-4: numeric inputs auto-suppress the native step arrows — one
+    // central kill instead of per-call-site classes, so hover no longer
+    // overlays/offsets the digits. Keyboard ↑/↓ stepping is unaffected.
+    const inputClassName = type === 'number' ? `${className} tuw-no-spinner`.trim() : className;
 
     const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
       setIsFocused(true);
@@ -100,6 +105,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           <input
             id={inputId}
             ref={ref}
+            type={type}
             onFocus={handleFocus}
             onBlur={handleBlur}
             style={{
@@ -113,7 +119,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               width: '100%',
               ...style,
             }}
-            className={className}
+            className={inputClassName}
             {...props}
           />
 

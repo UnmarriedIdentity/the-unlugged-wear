@@ -55,10 +55,14 @@ export function TableRow({
   children,
   style = {},
   hoverable = true,
+  className = '',
   ...props
 }: React.HTMLAttributes<HTMLTableRowElement> & { hoverable?: boolean }) {
   return (
     <tr
+      // VPRICE-4: `hoverable` now actually paints — a quiet canvas wash so
+      // wide rows track horizontally. Header rows opt out (hoverable={false}).
+      className={[hoverable ? 'tuw-row-hover' : '', className].filter(Boolean).join(' ') || undefined}
       style={{
         borderBottom: '1px solid var(--tuw-border-subtle, #E5E7EB)',
         transition: 'background-color 0.1s ease',
