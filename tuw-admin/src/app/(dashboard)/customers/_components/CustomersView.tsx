@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { UserPlus, Download, Search, Eye, MapPin, Phone, Mail, Calendar, Plus, MessageSquare } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, Button, Badge, Input, Drawer, Pagination, Modal, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader, DrawerSection, ItemsRow } from '@/components/ui';
+import { StatCard, ContentCard, Button, Badge, Input, Select, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader, DrawerSection, ItemsRow } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { CustomerItem } from '@/mocks/fixtures';
 
@@ -349,121 +349,84 @@ export default function CustomersView() {
         )}
       </Drawer>
 
-      {/* Add Customer Modal */}
-      <Modal
+      {/* Add Customer Drawer */}
+      <Drawer
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         title="Add New Customer"
         subtitle="Create a verified customer profile with delivery location and tier."
-        maxWidth="540px"
+        width="540px"
         footer={
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', width: '100%' }}>
-            <Button variant="secondary" size="md" onClick={() => setIsAddModalOpen(false)}>
+          <>
+            <Button variant="secondary" size="md" type="button" onClick={() => setIsAddModalOpen(false)}>
               Cancel
             </Button>
-            <Button variant="primary" size="md" onClick={() => handleCreateCustomer()}>
+            <Button variant="primary" size="md" type="submit" form="customer-create-form">
               Create Customer
             </Button>
-          </div>
+          </>
         }
       >
-        <form onSubmit={handleCreateCustomer} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: 'var(--tuw-text-primary, #262626)' }}>
-              Full Name *
-            </label>
+        <form id="customer-create-form" onSubmit={handleCreateCustomer} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <Input
+            label="Full Name"
+            placeholder="e.g. Maya Krishnan"
+            value={newCustomerForm.name}
+            onChange={(e) => setNewCustomerForm({ ...newCustomerForm, name: e.target.value })}
+            required
+          />
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <Input
-              placeholder="e.g. Maya Krishnan"
-              value={newCustomerForm.name}
-              onChange={(e) => setNewCustomerForm({ ...newCustomerForm, name: e.target.value })}
+              label="Email Address"
+              type="email"
+              placeholder="e.g. maya@example.com"
+              value={newCustomerForm.email}
+              onChange={(e) => setNewCustomerForm({ ...newCustomerForm, email: e.target.value })}
               required
             />
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <div>
-              <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: 'var(--tuw-text-primary, #262626)' }}>
-                Email Address *
-              </label>
-              <Input
-                type="email"
-                placeholder="e.g. maya@example.com"
-                value={newCustomerForm.email}
-                onChange={(e) => setNewCustomerForm({ ...newCustomerForm, email: e.target.value })}
-                required
-              />
-            </div>
-            <div>
-              <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: 'var(--tuw-text-primary, #262626)' }}>
-                Phone Number
-              </label>
-              <Input
-                placeholder="e.g. +91 98765 43210"
-                value={newCustomerForm.phone}
-                onChange={(e) => setNewCustomerForm({ ...newCustomerForm, phone: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <div>
-              <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: 'var(--tuw-text-primary, #262626)' }}>
-                City
-              </label>
-              <Input
-                placeholder="e.g. Bangalore"
-                value={newCustomerForm.city}
-                onChange={(e) => setNewCustomerForm({ ...newCustomerForm, city: e.target.value })}
-              />
-            </div>
-            <div>
-              <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: 'var(--tuw-text-primary, #262626)' }}>
-                Customer Tier
-              </label>
-              <select
-                value={newCustomerForm.tier}
-                onChange={(e) => setNewCustomerForm({ ...newCustomerForm, tier: e.target.value as any })}
-                style={{
-                  width: '100%',
-                  height: 40,
-                  borderRadius: 'var(--tuw-radius-control, 8px)',
-                  border: '1px solid var(--tuw-border-control, #D1D5DB)',
-                  padding: '0 12px',
-                  fontSize: 14,
-                  backgroundColor: '#FFFFFF',
-                  color: 'var(--tuw-text-primary, #262626)',
-                }}
-              >
-                <option value="New">New</option>
-                <option value="Active">Active</option>
-                <option value="VIP Customer">VIP Customer</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: 'var(--tuw-text-primary, #262626)' }}>
-              Street Address
-            </label>
             <Input
-              placeholder="e.g. 42 Indiranagar 12th Main Road"
-              value={newCustomerForm.address}
-              onChange={(e) => setNewCustomerForm({ ...newCustomerForm, address: e.target.value })}
+              label="Phone Number"
+              placeholder="e.g. +91 98765 43210"
+              value={newCustomerForm.phone}
+              onChange={(e) => setNewCustomerForm({ ...newCustomerForm, phone: e.target.value })}
             />
           </div>
 
-          <div>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: 'var(--tuw-text-primary, #262626)' }}>
-              Initial Staff Note (Optional)
-            </label>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <Input
-              placeholder="e.g. Inquired via slow luxury collection launch"
-              value={newCustomerForm.initialNote}
-              onChange={(e) => setNewCustomerForm({ ...newCustomerForm, initialNote: e.target.value })}
+              label="City"
+              placeholder="e.g. Bangalore"
+              value={newCustomerForm.city}
+              onChange={(e) => setNewCustomerForm({ ...newCustomerForm, city: e.target.value })}
+            />
+            <Select
+              label="Customer Tier"
+              value={newCustomerForm.tier}
+              onChange={(e) => setNewCustomerForm({ ...newCustomerForm, tier: e.target.value as any })}
+              options={[
+                { value: 'New', label: 'New' },
+                { value: 'Active', label: 'Active' },
+                { value: 'VIP Customer', label: 'VIP Customer' },
+              ]}
             />
           </div>
+
+          <Input
+            label="Street Address"
+            placeholder="e.g. 42 Indiranagar 12th Main Road"
+            value={newCustomerForm.address}
+            onChange={(e) => setNewCustomerForm({ ...newCustomerForm, address: e.target.value })}
+          />
+
+          <Input
+            label="Initial Staff Note (Optional)"
+            placeholder="e.g. Inquired via slow luxury collection launch"
+            value={newCustomerForm.initialNote}
+            onChange={(e) => setNewCustomerForm({ ...newCustomerForm, initialNote: e.target.value })}
+          />
         </form>
-      </Modal>
+      </Drawer>
     </DashboardShell>
   );
 }
