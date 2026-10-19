@@ -184,7 +184,15 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         if (parsed.collections) setCollections(parsed.collections);
         if (parsed.designs) setDesigns(parsed.designs);
         if (parsed.team) setTeam(parsed.team);
-        if (parsed.settings) setSettings(parsed.settings);
+        if (parsed.settings) setSettings({
+          ...parsed.settings,
+          defaultCurrency: 'INR (₹)',
+          // Legacy demo shipping defaults → INR-scale (storefront parity).
+          freeShippingThreshold:
+            parsed.settings.freeShippingThreshold === 150 ? 3000 : parsed.settings.freeShippingThreshold,
+          standardShippingFee:
+            parsed.settings.standardShippingFee === 12 ? 150 : parsed.settings.standardShippingFee,
+        });
         if (parsed.stockMovements) setStockMovements(parsed.stockMovements);
         if (parsed.discountCodes) setDiscountCodes(parsed.discountCodes);
         if (parsed.abandonedCarts) setAbandonedCarts(parsed.abandonedCarts);
@@ -596,7 +604,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
             {
               title: `Refund Processed (${newRefundId})`,
               time: 'Just now',
-              note: `$${params.amount.toFixed(2)} refunded via ${params.method}. Reason: ${params.reason}`,
+              note: `₹${params.amount.toFixed(2)} refunded via ${params.method}. Reason: ${params.reason}`,
             },
             ...o.timeline,
           ],
@@ -610,7 +618,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     showToast({
       type: 'success',
       title: 'Refund Successfully Disbursed',
-      description: `$${params.amount.toFixed(2)} refunded for ${params.orderId} via ${params.method}.`,
+      description: `₹${params.amount.toFixed(2)} refunded for ${params.orderId} via ${params.method}.`,
     });
 
     return { success: true };
