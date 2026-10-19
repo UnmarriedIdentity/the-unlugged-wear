@@ -1009,7 +1009,7 @@ export default function ProductsView() {
     // The draft matrix is the submit source: colors/sizes/stock derive from
     // it in the seam; prices re-derive through the ladder (R1:
     // base + Σ adjustments, pinned cells stay), and the listed price is the
-    // lowest cell ("From $X"), materialized.
+    // lowest cell ("From ₹X"), materialized.
     const draftError = variantDraftError();
     if (draftError) {
       showToast({ type: 'warning', title: 'Check Variants', description: draftError });
@@ -1201,11 +1201,11 @@ export default function ProductsView() {
     const parts: string[] = [];
     const colorAdj = formAdjustments[adjustmentKey('Color', color)] ?? 0;
     const sizeAdj = formAdjustments[adjustmentKey('Size', size)] ?? 0;
-    if (colorAdj > 0) parts.push(`${color} $${colorAdj.toFixed(2)}`);
-    if (sizeAdj > 0) parts.push(`${size} $${sizeAdj.toFixed(2)}`);
+    if (colorAdj > 0) parts.push(`${color} ₹${colorAdj.toFixed(2)}`);
+    if (sizeAdj > 0) parts.push(`${size} ₹${sizeAdj.toFixed(2)}`);
     return parts.length > 0
-      ? `Base $${base.toFixed(2)} + ${parts.join(' + ')} = $${effective.toFixed(2)}`
-      : `Base $${base.toFixed(2)}`;
+      ? `Base ₹${base.toFixed(2)} + ${parts.join(' + ')} = ₹${effective.toFixed(2)}`
+      : `Base ₹${base.toFixed(2)}`;
   };
 
   // CSV import pipeline (X1b): Final Listing workbooks re-saved as CSV.
@@ -2496,7 +2496,7 @@ export default function ProductsView() {
             />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <Input
-                label="Base price ($ USD)"
+                label="Base price (₹)"
                 type="text"
                 inputMode="decimal"
                 value={formPrice}
@@ -2918,7 +2918,7 @@ export default function ProductsView() {
                     className="tuw-tabular-nums"
                     title="Lowest variant price — the storefront lists this as “From”"
                   >
-                    From ${variantLowest.toFixed(2)}
+                    From ₹{variantLowest.toFixed(2)}
                   </Badge>
                 )}
                 <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={addVariant}>
@@ -3101,7 +3101,7 @@ export default function ProductsView() {
                             <button
                               type="button"
                               aria-label={`Reset ${v.color} ${v.size} price to derived`}
-                              title={`Pinned override — reset to derived $${deriveVariantPrice(
+                              title={`Pinned override — reset to derived ₹${deriveVariantPrice(
                                 parseFloat(formPrice) || 0,
                                 formAdjustments,
                                 v.color,
@@ -3466,7 +3466,7 @@ export default function ProductsView() {
                     onChange={(e) => setFormMonogramChars(e.target.value)}
                   />
                   <Input
-                    label="Upcharge ($ USD)"
+                    label="Upcharge (₹)"
                     type="number"
                     step="0.01"
                     value={formMonogramUpcharge}
