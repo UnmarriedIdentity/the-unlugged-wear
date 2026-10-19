@@ -443,14 +443,25 @@ export default function PagesManagementPage() {
         )}
       </ContentCard>
 
-      {/* Create Page Modal */}
-      <Modal
+      {/* Create Page Drawer */}
+      <Drawer
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         title="Create Static Page"
         subtitle="Publish a new markdown-rendered marketing or legal page."
+        width="540px"
+        footer={
+          <>
+            <Button variant="secondary" size="md" type="button" onClick={() => setIsCreateModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" size="md" type="submit" form="page-create-form">
+              Save & Create
+            </Button>
+          </>
+        }
       >
-        <form onSubmit={handleCreatePage} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <form id="page-create-form" onSubmit={handleCreatePage} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <Input
             label="Page Title"
             placeholder="e.g. Care & Maintenance Guide"
@@ -499,16 +510,8 @@ export default function PagesManagementPage() {
             onChange={(e) => setNewContent(e.target.value)}
             rows={6}
           />
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}>
-            <Button variant="secondary" onClick={() => setIsCreateModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="primary" type="submit">
-              Save & Create
-            </Button>
-          </div>
         </form>
-      </Modal>
+      </Drawer>
 
       {/* Edit Page Drawer */}
       <Drawer

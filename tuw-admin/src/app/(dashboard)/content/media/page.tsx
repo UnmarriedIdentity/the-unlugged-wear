@@ -10,7 +10,6 @@ import {
   Button,
   Input,
   Select,
-  Modal,
   Drawer,
   EmptyState,
   ImageWithFallback,
@@ -409,14 +408,25 @@ export default function MediaLibraryPage() {
         )}
       </ContentCard>
 
-      {/* Upload Modal */}
-      <Modal
+      {/* Upload Drawer */}
+      <Drawer
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
         title="Upload Media Asset"
         subtitle="Max file size 25MB. Automatically converted to WebP edge format."
+        width="540px"
+        footer={
+          <>
+            <Button variant="secondary" size="md" type="button" onClick={() => setIsUploadModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" size="md" type="submit" form="media-upload-form">
+              Upload to CDN
+            </Button>
+          </>
+        }
       >
-        <form onSubmit={handleUploadSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <form id="media-upload-form" onSubmit={handleUploadSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div>
             <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginBottom: 6, display: 'block' }}>
               Select Local File (Browser Object URL Preview)
@@ -456,7 +466,7 @@ export default function MediaLibraryPage() {
           <Select
             label="Asset Category"
             value={uploadCategory}
-            onChange={(val) => setUploadCategory(val as any)}
+            onChange={(e) => setUploadCategory(e.target.value as any)}
             options={[
               { value: 'photoshoot', label: 'Photoshoot & Editorial' },
               { value: 'product', label: 'Product Catalog Flatlay' },
@@ -471,16 +481,8 @@ export default function MediaLibraryPage() {
             onChange={(e) => setUploadUrl(e.target.value)}
             helperText="Provide an image URL or choose a file above to test local object URL previews."
           />
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}>
-            <Button variant="secondary" onClick={() => setIsUploadModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="primary" type="submit">
-              Upload to CDN
-            </Button>
-          </div>
         </form>
-      </Modal>
+      </Drawer>
 
       {/* Detail Drawer */}
       <Drawer
