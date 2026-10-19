@@ -115,6 +115,7 @@ interface AdminStateContextType {
 
   createCollection: (col: Omit<CollectionItem, 'id' | 'updatedAt'>) => boolean;
   updateCollection: (id: string, patch: Partial<Omit<CollectionItem, 'id' | 'updatedAt'>>) => boolean;
+  deleteCollection: (id: string) => boolean;
   uploadDesignAsset: (asset: Omit<DesignAsset, 'id' | 'updatedAt'>) => boolean;
 
   inviteTeamMember: (member: Omit<TeamMember, 'id' | 'lastActive' | 'avatarBg'>) => boolean;
@@ -797,6 +798,21 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     return true;
   };
 
+  const deleteCollection = (id: string) => {
+    if (!canPerformAction('products')) return false;
+    const target = collections.find((c) => c.id === id);
+    if (!target) return false;
+    const next = collections.filter((c) => c.id !== id);
+    setCollections(next);
+    persistState({ collections: next });
+    showToast({
+      type: 'success',
+      title: 'Collection Deleted',
+      description: `"${target.name}" removed from the demo catalog.`,
+    });
+    return true;
+  };
+
   const uploadDesignAsset = (asset: Omit<DesignAsset, 'id' | 'updatedAt'>) => {
     if (!canPerformAction('products')) return false;
     const newAsset: DesignAsset = {
@@ -1268,6 +1284,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         sendSupportReply,
         createCollection,
         updateCollection,
+        deleteCollection,
         uploadDesignAsset,
         inviteTeamMember,
         removeTeamMember,
