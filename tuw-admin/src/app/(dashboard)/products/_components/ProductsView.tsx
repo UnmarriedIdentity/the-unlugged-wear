@@ -828,12 +828,7 @@ export default function ProductsView() {
     setStageIndex(0);
     setFormPhoto(product.photoSettings ?? { layout: 'carousel', ratio: '4:3', showPhotos: true });
     setFormImages(
-      (product.images && product.images.length > 0
-        ? product.images
-        : product.image
-          ? [product.image]
-          : []
-      ).map((src, i) => ({ id: `g-${i}`, src, name: baseName(src), persisted: true }))
+      product.images.map((src, i) => ({ id: `g-${i}`, src, name: baseName(src), persisted: true }))
     );
     setAddImageUrl('');
     setFormFabricGsm(product.fabricGsm || '');
@@ -936,12 +931,10 @@ export default function ProductsView() {
         placement: formPlacement,
         publicationStatus: formStatus,
         description: formDescription,
-        image: formImages[0]?.src || undefined,
         photoSettings: formPhoto,
         discounts: formDiscounts,
         images: formImages.filter((im) => im.persisted).map((im) => im.src),
         attributes: formAttributes,
-        imageBg: 'linear-gradient(135deg, #FAF3F7 0%, #EFE1EB 100%)',
         fabricGsm: formFabricGsm || undefined,
         cut: formCut || undefined,
         modelDims: formModelDims || undefined,
@@ -1010,7 +1003,6 @@ export default function ProductsView() {
       gender: formGender || undefined,
       taxRate: formTax.trim() !== '' && !isNaN(parseFloat(formTax)) ? parseFloat(formTax) : undefined,
       sizeChartId: formSizeChartId || undefined,
-      image: formImages[0]?.src || undefined,
       photoSettings: formPhoto,
       discounts: formDiscounts,
       images: formImages.filter((im) => im.persisted).map((im) => im.src),
@@ -1338,7 +1330,7 @@ export default function ProductsView() {
           placement: 'Chest (45mm)',
           publicationStatus: 'draft',
           description: '',
-          imageBg: 'linear-gradient(135deg, #FAF3F7 0%, #EFE1EB 100%)',
+          images: [],
           styleCode: r.styleCode || undefined,
           weight: r.weight || undefined,
           shippingWeight: r.shipWeight || undefined,
@@ -2042,7 +2034,7 @@ export default function ProductsView() {
                 <div
                   className={styles.productThumbFrame}
                   style={{
-                    background: p.imageBg,
+                    background: 'var(--tuw-bg-canvas, #F7F8F9)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -2050,9 +2042,9 @@ export default function ProductsView() {
                     overflow: 'hidden',
                   }}
                 >
-                  {p.image ? (
+                  {p.images[0] ? (
                     <Image
-                      src={p.image}
+                      src={p.images[0]}
                       alt={p.name}
                       fill
                       sizes="(max-width: 768px) 100vw, 320px"
@@ -2209,9 +2201,9 @@ export default function ProductsView() {
                   </TableCell>
                   <TableCell style={{ padding: '14px 16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <div style={{ width: 40, height: 40, borderRadius: 8, overflow: 'hidden', position: 'relative', flexShrink: 0, background: p.imageBg, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--tuw-border-subtle, #E5E7EB)' }}>
-                        {p.image ? (
-                          <Image src={p.image} alt={p.name} fill sizes="80px" style={{ objectFit: 'cover' }} />
+                      <div style={{ width: 40, height: 40, borderRadius: 8, overflow: 'hidden', position: 'relative', flexShrink: 0, background: 'var(--tuw-bg-canvas, #F7F8F9)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--tuw-border-subtle, #E5E7EB)' }}>
+                        {p.images[0] ? (
+                          <Image src={p.images[0]} alt={p.name} fill sizes="80px" style={{ objectFit: 'cover' }} />
                         ) : (
                           <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)' }}>
                             {p.name.slice(0, 2).toUpperCase()}

@@ -21,15 +21,14 @@ export interface ProductItem {
   partner: 'Qikink Direct API' | 'Printrove Hub' | 'Custom Atelier';
   placement: 'Chest (45mm)' | 'Back Oversized' | 'Sleeve Length' | 'Interior Hem';
   soldCount: number;
-  imageBg: string;
-  image?: string;
+  /** Ordered gallery URLs. Index 0 is the cover (hero); reorder or
+   * Set Cover in the editor. Never optional — empty array means no image. */
+  images: string[];
   rating: number;
   /** Explicit per-variant inventory. Optional: absent means synthesize from
    * colors/sizes/price/stock (see resolveVariants) — every existing fixture
    * stays valid, and the future API returns explicit arrays. */
   variants?: ProductVariant[];
-  /** Gallery image URLs beyond the hero image. Default []. */
-  images?: string[];
   /** Admin attribute drafts (names, values, display types, swatch colors).
    * Optional: absent means the Color×Size builtins (see resolveVariants). */
   attributes?: ProductAttribute[];
@@ -293,8 +292,7 @@ export const initialProducts: ProductItem[] = [
     partner: 'Qikink Direct API',
     placement: 'Back Oversized',
     soldCount: 492,
-    imageBg: 'linear-gradient(135deg, #EBF4F8 0%, #D8EBF5 100%)',
-    image: '/products/1.jpeg',
+    images: ['/products/1.jpeg'],
     rating: 4.9,
   },
   {
@@ -312,8 +310,7 @@ export const initialProducts: ProductItem[] = [
     partner: 'Printrove Hub',
     placement: 'Chest (45mm)',
     soldCount: 369,
-    imageBg: 'linear-gradient(135deg, #FAF0EB 0%, #F5E2DA 100%)',
-    image: '/products/2.jpeg',
+    images: ['/products/2.jpeg'],
     rating: 4.8,
   },
   {
@@ -330,8 +327,7 @@ export const initialProducts: ProductItem[] = [
     partner: 'Custom Atelier',
     placement: 'Interior Hem',
     soldCount: 215,
-    imageBg: 'linear-gradient(135deg, #F0F3F6 0%, #E3E7ED 100%)',
-    image: '/products/3.jpeg',
+    images: ['/products/3.jpeg'],
     rating: 4.7,
   },
   {
@@ -349,8 +345,7 @@ export const initialProducts: ProductItem[] = [
     partner: 'Custom Atelier',
     placement: 'Sleeve Length',
     soldCount: 140,
-    imageBg: 'linear-gradient(135deg, #F7EFE8 0%, #EDE1D5 100%)',
-    image: '/products/1.jpeg',
+    images: ['/products/1.jpeg'],
     rating: 5.0,
   },
   {
@@ -367,8 +362,7 @@ export const initialProducts: ProductItem[] = [
     partner: 'Custom Atelier',
     placement: 'Interior Hem',
     soldCount: 0,
-    imageBg: 'linear-gradient(135deg, #E6EEF5 0%, #D2DEEB 100%)',
-    image: '/products/2.jpeg',
+    images: ['/products/2.jpeg'],
     rating: 0,
   },
   {
@@ -385,8 +379,7 @@ export const initialProducts: ProductItem[] = [
     partner: 'Qikink Direct API',
     placement: 'Back Oversized',
     soldCount: 520,
-    imageBg: 'linear-gradient(135deg, #FAF3F7 0%, #EFE1EB 100%)',
-    image: '/products/3.jpeg',
+    images: ['/products/3.jpeg'],
     rating: 4.9,
   },
   {
@@ -403,8 +396,7 @@ export const initialProducts: ProductItem[] = [
     partner: 'Custom Atelier',
     placement: 'Interior Hem',
     soldCount: 198,
-    imageBg: 'linear-gradient(135deg, #EBF4F8 0%, #D8EBF5 100%)',
-    image: '/products/1.jpeg',
+    images: ['/products/1.jpeg'],
     rating: 4.8,
   },
   {
@@ -421,8 +413,7 @@ export const initialProducts: ProductItem[] = [
     partner: 'Printrove Hub',
     placement: 'Chest (45mm)',
     soldCount: 260,
-    imageBg: 'linear-gradient(135deg, #F0F3F6 0%, #E3E7ED 100%)',
-    image: '/products/2.jpeg',
+    images: ['/products/2.jpeg'],
     rating: 4.9,
   },
   {
@@ -439,8 +430,7 @@ export const initialProducts: ProductItem[] = [
     partner: 'Qikink Direct API',
     placement: 'Chest (45mm)',
     soldCount: 310,
-    imageBg: 'linear-gradient(135deg, #FAF0EB 0%, #F5E2DA 100%)',
-    image: '/products/3.jpeg',
+    images: ['/products/3.jpeg'],
     rating: 4.6,
   },
   {
@@ -457,8 +447,7 @@ export const initialProducts: ProductItem[] = [
     partner: 'Custom Atelier',
     placement: 'Interior Hem',
     soldCount: 88,
-    imageBg: 'linear-gradient(135deg, #F7EFE8 0%, #EDE1D5 100%)',
-    image: '/products/1.jpeg',
+    images: ['/products/1.jpeg'],
     rating: 4.9,
   },
 ];

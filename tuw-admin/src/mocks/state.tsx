@@ -176,7 +176,27 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed.activeRole) setActiveRoleState(parsed.activeRole);
-        if (parsed.products) setProducts(parsed.products);
+        if (parsed.products) {
+          // One-time gallery migration: legacy hero `image` becomes the first
+          // ordered gallery entry (cover). Drop the old gradient field.
+          setProducts(
+            (parsed.products as Array<ProductItem & { image?: string }>).map((p) => {
+              const legacy = p as ProductItem & { image?: string; imageBg?: string };
+              const rest = { ...legacy };
+              delete rest.image;
+              delete rest.imageBg;
+              return {
+                ...rest,
+                images:
+                  Array.isArray(p.images) && p.images.length > 0
+                    ? [...p.images]
+                    : legacy.image
+                      ? [legacy.image]
+                      : [],
+              };
+            })
+          );
+        }
         if (parsed.orders) setOrders(parsed.orders);
         if (parsed.shipments) setShipments(parsed.shipments);
         if (parsed.refunds) setRefunds(parsed.refunds);
@@ -324,14 +344,13 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
   // MUTATION IMPLEMENTATIONS
   // -------------------------------------------------------------
 
-  const createProduct = (p: Omit<ProductItem, 'id' | 'soldCount' | 'rating' | 'variants' | 'images'>, silent = false) => {
+  const createProduct = (p: Omit<ProductItem, 'id' | 'soldCount' | 'rating' | 'variants'>, silent = false) => {
     if (!canPerformAction('products')) return false;
     const id = `PRD-${Math.floor(10 + Math.random() * 90)}`;
     const newProduct: ProductItem = {
       ...p,
       id,
       variants: synthesizeVariants({ id, price: p.price, stock: p.stock, colors: p.colors, sizes: p.sizes }),
-      images: [],
       soldCount: 0,
       rating: 5.0,
     };
