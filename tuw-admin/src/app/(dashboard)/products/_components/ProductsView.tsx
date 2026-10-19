@@ -10,6 +10,7 @@ import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 import { resolveVariants, variantStockTotal, buildVariantSku, deriveVariantPrice, recomputeVariants, minFromPrice, pruneAdjustments, roundPrice, hasPriceSpread, adjustmentKey, sumAdjustments } from '@/mocks/variants';
 import type { ProductVariant, ProductAttribute, PhotoSettings, ProductDiscount, SizeChart } from '@/mocks/fixtures';
+import { parseCompareAtPrice } from '@/lib/productPricing';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
 
@@ -58,7 +59,8 @@ export default function ProductsView() {
   const [formSlug, setFormSlug] = useState('');
   const [formCategory, setFormCategory] = useState<ProductItem['category']>('T-Shirts');
   const [formPrice, setFormPrice] = useState('48.00');
-  const [formComparePrice, setFormComparePrice] = useState('58.00');
+  const [formComparePrice, setFormComparePrice] = useState('');
+  const [formCompareError, setFormCompareError] = useState<string | null>(null);
   const [formStock, setFormStock] = useState('30');
   // Catalog scalars (Y1): single-valued fields, Input/picker-edited.
   const [formStyleCode, setFormStyleCode] = useState('');
@@ -105,7 +107,8 @@ export default function ProductsView() {
     setFormSlug('');
     setFormCategory('T-Shirts');
     setFormPrice('48.00');
-    setFormComparePrice('58.00');
+    setFormComparePrice('');
+    setFormCompareError(null);
     setFormStock('25');
     setFormStyleCode('');
     setFormWeight('');
@@ -365,6 +368,7 @@ export default function ProductsView() {
     // so refuse anything that is not digits with at most one dot.
     if (!/^\d*\.?\d*$/.test(priceStr)) return;
     setFormPrice(priceStr);
+    if (formCompareError) setFormCompareError(null);
     const n = parseFloat(priceStr);
     if (isNaN(n) || n < 0) return;
     setFormVariants((prev) => recomputeVariants(roundPrice(n), formAdjustments, prev));
@@ -823,6 +827,7 @@ export default function ProductsView() {
     setIsCreating(false);
     setEditingProduct(product);
     setProductTab('general');
+    setFormCompareError(null);
     setDrawerView('compact');
     autoExpandedRef.current = false;
     setStageIndex(0);
@@ -910,13 +915,20 @@ export default function ProductsView() {
     if (isCreating) {
       const priceNum = parseFloat(formPrice) || 0;
       const stockNum = parseInt(formStock, 10) || 0;
-      const compareNum = parseFloat(formComparePrice) || undefined;
+      const compare = parseCompareAtPrice(formComparePrice, priceNum);
+      if (compare.error) {
+        setFormCompareError(compare.error);
+        setProductTab('general');
+        showToast({ type: 'warning', title: 'Check Compare-at Price', description: compare.error });
+        return;
+      }
+      setFormCompareError(null);
       createProduct({
         name: formName || 'Untitled Garment',
         slug: formSlug || formName.toLowerCase().replace(/\s+/g, '-'),
         category: formCategory,
         price: priceNum,
-        compareAtPrice: compareNum,
+        compareAtPrice: compare.value,
         stock: stockNum,
         colors: colorValues,
         sizes: sizeValues,
@@ -964,8 +976,6 @@ export default function ProductsView() {
     const baseNum = roundPrice(
       !isNaN(parsedBase) && parsedBase >= 0 ? parsedBase : editingProduct.basePrice ?? editingProduct.price
     );
-    const compareNum = parseFloat(formComparePrice) || undefined;
-
     // The draft matrix is the submit source: colors/sizes/stock derive from
     // it in the seam; prices re-derive through the ladder (R1:
     // base + Σ adjustments, pinned cells stay), and the listed price is the
@@ -982,6 +992,14 @@ export default function ProductsView() {
       return priceOverridden ? { ...rest, priceOverridden: true as const } : rest;
     });
     const minPrice = submitVariants.length > 0 ? minFromPrice(submitVariants) : baseNum;
+    const compare = parseCompareAtPrice(formComparePrice, minPrice);
+    if (compare.error) {
+      setFormCompareError(compare.error);
+      setProductTab('general');
+      showToast({ type: 'warning', title: 'Check Compare-at Price', description: compare.error });
+      return;
+    }
+    setFormCompareError(null);
     const cleanAdjustments = pruneAdjustments(formAdjustments, formAttributes).next;
 
     updateProduct(editingProduct.id, {
@@ -991,7 +1009,7 @@ export default function ProductsView() {
       price: minPrice,
       basePrice: baseNum,
       priceAdjustments: Object.keys(cleanAdjustments).length > 0 ? cleanAdjustments : undefined,
-      compareAtPrice: compareNum,
+      compareAtPrice: compare.value,
       partner: formPartner,
       placement: formPlacement,
       publicationStatus: formStatus,
@@ -2100,7 +2118,7 @@ export default function ProductsView() {
                       )}
                       ₹{p.price.toFixed(2)}
                     </span>
-                    {p.compareAtPrice && (
+                    {p.compareAtPrice && p.compareAtPrice > p.price && (
                       <span className="tuw-tabular-nums" style={{ fontSize: '13px', color: 'var(--tuw-text-secondary, #5D6772)', textDecoration: 'line-through', marginLeft: 6 }}>
                         ₹{p.compareAtPrice.toFixed(2)}
                       </span>
@@ -2230,7 +2248,7 @@ export default function ProductsView() {
                       <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--tuw-text-secondary, #5D6772)', marginRight: 4 }}>From</span>
                     )}
                     ₹{p.price.toFixed(2)}
-                    {p.compareAtPrice && (
+                    {p.compareAtPrice && p.compareAtPrice > p.price && (
                       <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', textDecoration: 'line-through', marginLeft: 6, fontWeight: 400 }}>
                         ₹{p.compareAtPrice.toFixed(2)}
                       </span>
@@ -2421,10 +2439,25 @@ export default function ProductsView() {
                 required
               />
             </div>
+            <Input
+              label="Compare-at price (₹)"
+              type="text"
+              inputMode="decimal"
+              placeholder="Optional"
+              value={formComparePrice}
+              onChange={(e) => {
+                const raw = e.target.value;
+                if (!/^\d*\.?\d*$/.test(raw)) return;
+                setFormComparePrice(raw);
+                if (formCompareError) setFormCompareError(null);
+              }}
+              error={formCompareError ?? undefined}
+              helperText="Optional — shown struck through in the catalog as a reference price. Must be higher than the selling price."
+            />
             <DrawerSection title="Pricing & Discounts" titleGap={10}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
-                  Scheduled price cuts with a window and kill switch. The compare price above is static marketing text.
+                  Scheduled price cuts with a window and kill switch. The compare-at price above is a static catalog reference, separate from these scheduled cuts.
                 </p>
                 {formDiscounts.map((d) => (
                   <SurfaceCard key={d.id} padding="10px" gap="8px">
