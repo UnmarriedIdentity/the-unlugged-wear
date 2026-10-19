@@ -55,8 +55,6 @@ export interface ProductItem {
    * Optional — absent means none. Mirrors product_discounts intent. */
   discounts?: ProductDiscount[];
   monogram?: { enabled: boolean; maxChars: number; upcharge: number };
-  seoTitle?: string;
-  seoDescription?: string;
   /** Gallery presentation (P1a): layout + ratio + visibility for the PDP
    * stage. Optional — absent means the drawer defaults (carousel/4:3/on). */
   photoSettings?: PhotoSettings;

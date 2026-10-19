@@ -143,12 +143,10 @@ export default function ProductsView() {
     setFormMonogramEnabled(false);
     setFormMonogramChars('3');
     setFormMonogramUpcharge('12.00');
-    setFormSeoTitle('');
-    setFormSeoDescription('');
   };
 
   // Drawer tab + media draft state (elastic workspace; tabs grow per phase)
-  const [productTab, setProductTab] = useState<'general' | 'media' | 'variants' | 'specs' | 'seo'>('general');
+  const [productTab, setProductTab] = useState<'general' | 'media' | 'variants' | 'specs'>('general');
   const [formVideo, setFormVideo] = useState('');
   // Gallery presentation draft (P1a): PDP stage layout + ratio + visibility.
   const [formPhoto, setFormPhoto] = useState<PhotoSettings>({ layout: 'carousel', ratio: '4:3', showPhotos: true });
@@ -233,7 +231,7 @@ export default function ProductsView() {
   // drawer (no 520↔880 yoyo while hopping tabs).
   const [drawerView, setDrawerView] = useState<'compact' | 'matrix' | 'full'>('compact');
   const autoExpandedRef = useRef(false);
-  const prevTab = useRef<'general' | 'media' | 'variants' | 'specs' | 'seo'>('general');
+  const prevTab = useRef<'general' | 'media' | 'variants' | 'specs'>('general');
   React.useEffect(() => {
     const entered = prevTab.current !== 'variants' && productTab === 'variants';
     prevTab.current = productTab;
@@ -288,7 +286,7 @@ export default function ProductsView() {
       }
     });
   };
-  // Apparel + SEO draft state (specs/SEO tabs; all optional — fixtures stay valid)
+  // Apparel draft state (specs tab; all optional — fixtures stay valid)
   const [formFabricGsm, setFormFabricGsm] = useState('');
   const [formCut, setFormCut] = useState('');
   const [formModelDims, setFormModelDims] = useState('');
@@ -296,8 +294,6 @@ export default function ProductsView() {
   const [formMonogramEnabled, setFormMonogramEnabled] = useState(false);
   const [formMonogramChars, setFormMonogramChars] = useState('3');
   const [formMonogramUpcharge, setFormMonogramUpcharge] = useState('12.00');
-  const [formSeoTitle, setFormSeoTitle] = useState('');
-  const [formSeoDescription, setFormSeoDescription] = useState('');
   // Section visibility (persisted demo pref; all-visible default)
   const [visibleSections, setVisibleSections] = useState({ video: true, monogram: true });
   React.useEffect(() => {
@@ -868,8 +864,6 @@ export default function ProductsView() {
     setFormMonogramEnabled(product.monogram?.enabled || false);
     setFormMonogramChars(String(product.monogram?.maxChars ?? 3));
     setFormMonogramUpcharge(product.monogram ? product.monogram.upcharge.toFixed(2) : '12.00');
-    setFormSeoTitle(product.seoTitle || '');
-    setFormSeoDescription(product.seoDescription || '');
 
     // Attribute draft (N1a link match) — built once: the ladder load below
     // prunes adjustment keys against these values, and the drawer renders
@@ -983,8 +977,6 @@ export default function ProductsView() {
               upcharge: parseFloat(formMonogramUpcharge) || 0,
             }
           : undefined,
-        seoTitle: formSeoTitle || undefined,
-        seoDescription: formSeoDescription || undefined,
       });
       const droppedCount =
         formImages.filter((im) => !im.persisted).length + (uploadReel !== null ? 1 : 0);
@@ -1061,8 +1053,6 @@ export default function ProductsView() {
             upcharge: parseFloat(formMonogramUpcharge) || 0,
           }
         : undefined,
-      seoTitle: formSeoTitle || undefined,
-      seoDescription: formSeoDescription || undefined,
     });
 
     const droppedCount =
@@ -2427,7 +2417,6 @@ export default function ProductsView() {
                     { id: 'media', label: 'Media', badge: formImages.length + (uploadReel !== null || formVideo !== '' ? 1 : 0) },
                     { id: 'variants', label: 'Variants & Stock', badge: formVariants.length },
                     { id: 'specs', label: 'Clothing Specs' },
-                    { id: 'seo', label: 'SEO' },
                   ]
             }
             activeTab={productTab}
@@ -3478,29 +3467,7 @@ export default function ProductsView() {
             </DrawerSection>
             ) : null}
           </div>
-          ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <Input
-              label="SEO Title"
-              placeholder={formName || 'Product name'}
-              value={formSeoTitle}
-              onChange={(e) => setFormSeoTitle(e.target.value)}
-            />
-            <FormTextarea
-              label="Meta Description"
-              rows={3}
-              placeholder="Search-result snippet for this product"
-              value={formSeoDescription}
-              onChange={(e) => setFormSeoDescription(e.target.value)}
-            />
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-              <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>Canonical slug</span>
-              <span style={{ fontFamily: 'monospace', color: 'var(--tuw-text-primary, #262626)' }}>
-                /products/{formSlug || '…'}
-              </span>
-            </div>
-          </div>
-          )
+          ) : null
         )}
       </Drawer>
 
