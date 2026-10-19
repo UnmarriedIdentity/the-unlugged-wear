@@ -8,6 +8,8 @@ export interface SwitchProps {
   label?: string;
   description?: string;
   disabled?: boolean;
+  /** Accessible name for label-less uses (the track carries role="switch"). */
+  ariaLabel?: string;
 }
 
 export default function Switch({
@@ -16,6 +18,7 @@ export default function Switch({
   label,
   description,
   disabled = false,
+  ariaLabel,
 }: SwitchProps) {
   return (
     <label
@@ -29,7 +32,19 @@ export default function Switch({
       }}
     >
       <div
+        role="switch"
+        aria-checked={checked}
+        aria-label={(ariaLabel ?? label) || undefined}
+        aria-disabled={disabled || undefined}
+        tabIndex={disabled ? -1 : 0}
         onClick={() => !disabled && onChange(!checked)}
+        onKeyDown={(e) => {
+          if (disabled) return;
+          if (e.key === ' ' || e.key === 'Enter') {
+            e.preventDefault();
+            onChange(!checked);
+          }
+        }}
         style={{
           width: '42px',
           height: '24px',

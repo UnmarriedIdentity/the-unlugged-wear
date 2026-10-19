@@ -1,7 +1,7 @@
 # Catalog — Columns, Constraints, Indexes
 
-> Status: Filling | Last Updated: 2026-10-15
-> 16 tables. Conventions: `01-Conventions.md`. Money semantics follow the
+> Status: Filling | Last Updated: 2026-10-17
+> 17 tables. Conventions: `01-Conventions.md`. Money semantics follow the
 > open currency decision (`00-README.md` §7) — DECIMAL(12,2) shape is final.
 > Mermaid slice for this domain sits at the end.
 
@@ -61,12 +61,13 @@ No seed, no UI, no queries in v1 — launch is seed + UI only.
 | category_id | uuid | NULL, FK → categories(id) ON DELETE SET NULL | Unassigned allowed; deleting a category must not delete products |
 | brand_id | uuid | NULL, FK → brands(id) ON DELETE SET NULL | Brands deferred — always nullable |
 | size_chart_id | uuid | NULL, FK → size_charts(id) ON DELETE SET NULL | Garment measuring (see size_charts) |
-| price | DECIMAL(12,2) | NOT NULL, CHECK (price >= 0) | Base price (minor-unit presentation lives in UI) |
+| price | DECIMAL(12,2) | NOT NULL, CHECK (price >= 0) | Listed price — materialized minimum of effective variant prices ("From $X"); written by the pipeline, never typed |
+| base_price | DECIMAL(12,2) | NULL, CHECK (base_price >= 0) | Editable pricing anchor; derived cells = base_price + Σ adjustments; NULL = price is the anchor (simple products) |
 | compare_at_price | DECIMAL(12,2) | NULL, CHECK (compare_at_price >= 0) | "Was" price, not a discount engine |
 | stock | integer | NOT NULL DEFAULT 0, CHECK (stock >= 0) | Balance; ledger in stock_movements |
 | status | varchar(20) | NOT NULL DEFAULT 'draft', CHECK IN ('draft','active','archived') | Publish lifecycle |
 | tags | varchar(50)[] | NULL | 1NF exception (documented): flat facet list, GIN-indexed; split to a junction if tag writes ever need history |
-| attributes | jsonb | NOT NULL DEFAULT '{}' | Non-compare spec bag (placement notes, MarCom flags) |
+| attributes | jsonb | NOT NULL DEFAULT '{}' | Freeform specs ONLY (placement notes, MarCom flags) — structured attribute data lives in link tables, never here |
 | photo_settings | jsonb | NOT NULL DEFAULT '{}' | Per-product gallery overrides (ratio, layout, blend) |
 | source | varchar(20) | NOT NULL DEFAULT 'local', CHECK IN ('local','csv','shopify','bigcommerce','odoo') | Import provenance; idempotent re-syncs |
 | external_id | varchar(255) | NULL | Source row id for re-import matching |
@@ -93,7 +94,8 @@ WHERE external_id IS NOT NULL` (idempotent re-imports) · partial
 | id | uuid | PK | |
 | product_id | uuid | NOT NULL, FK → products(id) ON DELETE CASCADE | Owned child |
 | sku | varchar(64) | NOT NULL, UNIQUE | Variant inventory identity; import upsert |
-| price | DECIMAL(12,2) | NOT NULL, CHECK (price >= 0) | Overrides base when set |
+| price | DECIMAL(12,2) | NOT NULL, CHECK (price >= 0) | Effective price, materialized on write — override ?? base_price + Σ adjustments |
+| price_overridden | boolean | NOT NULL DEFAULT false | true = explicit cell override (survives recomputes until cleared); false = derived, pipeline rewrites |
 | stock | integer | NOT NULL DEFAULT 0, CHECK (stock >= 0) | Variant balance |
 | image_url | varchar(2048) | NULL | Variant-scoped image |
 | is_active | boolean | NOT NULL DEFAULT true | Hide without deleting (sold-out configs) |
@@ -101,6 +103,17 @@ WHERE external_id IS NOT NULL` (idempotent re-imports) · partial
 
 Indexes: PK · unique sku · `idx_product_variants_product_id` (PDP
 selector) · partial `(product_id) WHERE is_active`.
+
+**Pricing ladder (base is an anchor; the listed price is derived).**
+`effective variant price = explicit override ?? base_price + Σ(price adjustments
+of the variant's values)`. Combination is additive (`Emerald +6` × `XL +4` →
+base + 10); adjustments are ≥ 0 in v1 (per-value discounts deferred — relax the
+CHECK when they land). On any write to base, adjustments, or value composition,
+the pipeline recomputes every `price_overridden = false` variant, then
+materializes `products.price` = min across variants (the listing/PDP "From").
+Order lines snapshot the effective price at purchase; scheduled discounts apply
+on top (ladder → discount → promo). Mirrors the admin-drawer draft fields
+(`basePrice`, `priceAdjustments`, `priceOverridden`) 1:1.
 
 ## product_images
 
@@ -119,49 +132,46 @@ Indexes: PK · `(product_id, sort_order)` (gallery read) ·
 `idx_product_images_variant_id` · partial unique `one_primary_per_product
 (product_id) WHERE is_primary`.
 
-## product_options (definitions incl. storefront rendering)
+## attribute_definitions + attribute_values + links (library — the single source)
 
-| Column | Type | Constraints | Reason |
-|---|---|---|---|
-| id | uuid | PK | |
-| product_id | uuid | NOT NULL, FK → products(id) ON DELETE CASCADE | |
-| name | varchar(100) | NOT NULL | Size, Color, Fabric… (Color/Size builtin per product) |
-| display_type | varchar(20) | NOT NULL DEFAULT 'pill', CHECK IN ('pill','swatch','radio') | PDP widget: pill / color swatch / radio (admin picks per attribute) |
-| show_on_pdp | boolean | NOT NULL DEFAULT true | Customer-choice surface |
-| show_on_checkout | boolean | NOT NULL DEFAULT false | e.g. Tax-adjacent options later |
-| show_on_admin | boolean | NOT NULL DEFAULT true | Internal options stay visible in admin |
-| position | integer | NOT NULL DEFAULT 0 | Selector ordering |
-| created_at / updated_at | timestamptz | NOT NULL | |
+| Table | Column | Type | Constraints | Reason |
+|---|---|---|---|---|
+| attribute_definitions | id | uuid | PK | Single record per attribute — the normalized source |
+| attribute_definitions | name | varchar(100) | NOT NULL, UNIQUE | One row per name, enforced (no duplicates by construction) |
+| attribute_definitions | display_type | varchar(20) | NOT NULL DEFAULT 'pill', CHECK IN ('pill','swatch','radio') | PDP widget, owned once |
+| attribute_definitions | show_on_pdp | boolean | NOT NULL DEFAULT true | Explicit booleans — indexable, no array operators in hot reads |
+| attribute_definitions | show_on_checkout | boolean | NOT NULL DEFAULT false | |
+| attribute_definitions | show_on_admin | boolean | NOT NULL DEFAULT true | |
+| attribute_values | id | uuid | PK | |
+| attribute_values | definition_id | uuid | NOT NULL, FK → attribute_definitions(id) ON DELETE CASCADE | |
+| attribute_values | value | varchar(150) | NOT NULL | Stored once per definition |
+| attribute_values | swatch_hex | varchar(7) | NULL, CHECK (swatch_hex ~ '^#[0-9A-Fa-f]{6}$') | Dot color owned once, inherited by every linked product |
+| attribute_values | position | integer | NOT NULL DEFAULT 0 | Display order |
+| product_attribute_links | product_id | uuid | NOT NULL, FK → products(id) ON DELETE CASCADE, composite PK (product_id, definition_id) | The assignment — reference, never copy |
+| product_attribute_links | definition_id | uuid | NOT NULL, FK → attribute_definitions(id) ON DELETE RESTRICT | Restrict: deleting a referenced definition fails loudly |
+| product_attribute_link_values | product_id | uuid | NOT NULL, composite PK (product_id, definition_id, value_id) | Chosen values as rows — queryable ("products using Onyx"), never arrays |
+| product_attribute_link_values | definition_id | uuid | NOT NULL | Part of the composite PK (scoped lookup) |
+| product_attribute_link_values | value_id | uuid | NOT NULL, FK → attribute_values(id) ON DELETE RESTRICT | Restrict: deleting a chosen value fails loudly |
+| product_attribute_link_values | price_adjustment | DECIMAL(12,2) | NULL, CHECK (price_adjustment >= 0) | Additive upcharge for this product+value; NULL/0 = no effect (base path); mirrors the draft priceAdjustments sidecar 1:1. ≥ 0 only — per-value discounts deferred |
 
-Explicit booleans (not an array) — indexable, no array operators in hot
-reads. CHECK: at least one of the three show_* is true (app + constraint).
+Indexes: PKs · unique `attribute_definitions.name` · unique
+`(definition_id, value)` on values · composite link PKs serve both join
+directions (product→definitions, definition→products).
 
-Indexes: PK · `idx_product_options_product_id`.
+In-use guard (R2): deletion refuses while any row references the value —
+product links or family size preferences (`profile_size_preferences`,
+file 17 §3); both FKs are RESTRICT, so the DB fails loudly either way.
 
-## product_option_values
-
-| Column | Type | Constraints | Reason |
-|---|---|---|---|
-| id | uuid | PK | |
-| option_id | uuid | NOT NULL, FK → product_options(id) ON DELETE CASCADE | |
-| value | varchar(150) | NOT NULL | Stored once per option |
-| swatch_hex | varchar(7) | NULL, CHECK (swatch_hex ~ '^#[0-9A-Fa-f]{6}$') | PDP dot color; NULL = unset grey (admin picks per value) |
-| position | integer | NOT NULL DEFAULT 0 | Display order |
-| created_at | timestamptz | NOT NULL | |
-
-Indexes: PK · unique `(option_id, value)` (no dupes; leading column serves
-the option lookup — no separate FK index).
-
-## product_variant_option_values (junction)
-
-| Column | Type | Constraints | Reason |
-|---|---|---|---|
-| variant_id | uuid | NOT NULL, FK → product_variants(id) ON DELETE CASCADE, composite PK (variant_id, option_id) | One row per option per variant |
-| option_id | uuid | NOT NULL, FK → product_options(id) ON DELETE CASCADE | |
-| option_value_id | uuid | NOT NULL, FK → product_option_values(id) ON DELETE RESTRICT | Restrict: deleting a value in use must fail loudly |
-
-Indexes: composite PK (serves variant→options) ·
-`idx_pvov_option_value_id` ("variants using X") · `idx_pvov_option_id`.
+**Assign vs register (write semantics — they are never conflated).**
+*Assigning* an existing library value to a product inserts one row into
+`product_attribute_link_values` (`ON CONFLICT DO NOTHING` — idempotent,
+silent) and never touches `attribute_values`; *registering* a genuinely
+new spelling inserts into `attribute_values` first (the
+`UNIQUE(definition_id, value)` is the dedupe authority), then assigns.
+The admin drawer picker only ever assigns — a picked value exists in the
+library by definition, so no register call is issued and no duplicate
+error can fire. Register-through happens only when a typed value's
+spelling is absent from the library row.
 
 ## product_attributes + product_attribute_values (compare engine)
 
@@ -264,9 +274,6 @@ erDiagram
     size_charts ||--o{ products : sizes
     products ||--o{ product_variants : offers
     products ||--o{ product_images : shows
-    products ||--o{ product_options : defines
-    product_options ||--o{ product_option_values : contains
-    product_variants ||--o{ product_variant_option_values : resolves
     products ||--o{ product_attribute_values : specifies
     product_attributes ||--o{ product_attribute_values : valued-by
     products ||--o{ stock_movements : tracks

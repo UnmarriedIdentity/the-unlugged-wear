@@ -27,8 +27,9 @@ Indexes: PK · `idx_import_jobs_status` (admin list filter) ·
 Style (`name | code`) · sizes · Colors (comma lists) · Weight ·
 Shipping Weight · Base Price · Placements (comma list) · Package
 Dimensions (`LxBxH`) · Tax Rate. Mapping: name→products.name,
-code→products.style_code, Base Price→price, sizes/Colors→option values,
-Placements→attribute values, Dimensions/Weight→scalars, Tax→tax_rate.
+code→products.style_code, Base Price→base_price (derived cells follow
+the ladder), sizes/Colors→option values, Placements→attribute values,
+Dimensions/Weight→scalars, Tax→tax_rate.
 Unknown columns are ignored with notice (forward-compatible sheets).
 
 ## Row pipeline (one bad row never aborts the batch)

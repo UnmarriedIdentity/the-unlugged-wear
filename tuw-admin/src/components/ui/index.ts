@@ -10,6 +10,9 @@ export type { SurfaceCardProps } from './SurfaceCard';
 export { default as Button } from './Button';
 export type { ButtonProps } from './Button';
 
+export { default as LinkButton } from './LinkButton';
+export type { LinkButtonProps } from './LinkButton';
+
 export { default as Badge } from './Badge';
 export type { BadgeProps } from './Badge';
 

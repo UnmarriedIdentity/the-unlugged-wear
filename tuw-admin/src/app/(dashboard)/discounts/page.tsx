@@ -245,6 +245,7 @@ export default function DiscountsPage() {
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
                     <Switch
                       label=""
+                      ariaLabel={`Toggle discount ${d.code} active`}
                       checked={d.isActive}
                       onChange={() => toggleDiscountCode(d.id)}
                     />
@@ -331,6 +332,7 @@ export default function DiscountsPage() {
                 <TableCell style={{ padding: '10px 16px' }}>
                   <Switch
                     label=""
+                    ariaLabel={`Toggle discount for ${d.productName} active`}
                     checked={d.isActive}
                     onChange={() => {
                       const product = products.find((p) => p.id === d.productId);

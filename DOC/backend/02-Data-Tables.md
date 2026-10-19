@@ -1,8 +1,8 @@
 # Data Tables — Full Inventory (single PostgreSQL)
 
-> Status: Filling | Last Updated: 2026-10-15
-> 62 tables + 1 deferred footnote (`search_documents`). Column detail lives in files 03–10 and
-> 15; this file is the index, ending with the full relationship diagram.
+> Status: Filling | Last Updated: 2026-10-17
+> 75 tables + 1 deferred footnote (`search_documents`). Column detail lives in files 03–10,
+> 15, 17, and 19; this file is the index, ending with the full relationship diagram.
 > Conventions (UUIDv7, money, indexes): `01-Conventions.md`.
 
 ## Design rules (apply to every table below)
@@ -17,32 +17,39 @@
 
 | Table | Purpose | Key links |
 |---|---|---|
-| users | Accounts (admins + customers), status lifecycle | — |
+| users | Login credentials only (email/password/status); person fields live on profiles | — |
+| profiles | The person you shop for: names, phone, DOB; `user_id` NULL = managed member with no login (file 17) | users (nullable) |
 | roles | `admin` / `customer` (+ future) referenced by `slug` | — |
 | permissions | Granular grants (`product.create`, `order.refund`) | — |
 | role_permissions | Grant map, composite PK (role, permission) | roles, permissions |
 | user_roles | Multi-role map, composite PK (user, role) | users, roles |
-| addresses | Shipping/billing book, one-default partial unique | users |
 | refresh_tokens | Hashed rotation tokens, revocation, expiry cleanup | users |
-| customer_notes | Staff notes with author + timestamp (tier stays computed, never stored) | users, users (author) |
+| customer_notes | Staff notes with author + timestamp (tier stays computed, never stored) | profiles, users (author) |
 | staff_invitations | Invite flow: email, role, token hash, expiry, status (members *are* users) | users (inviter) |
 | audit_logs | Stock-edit summaries only: one row per product per import job (qty inserted, job ref) — variant deltas live in stock_movements; nothing else is recorded here | users (actor) |
 
 The single-URL gate reads `users → user_roles → roles.slug`
 (see `14-Single-URL-Gating.md`).
 
-## Catalog (16) → detail: `04-Catalog.md`
+## Household & family (5) → detail: `17-Household-Accounts.md`
+
+| Table | Purpose | Key links |
+|---|---|---|
+| households | Family group; every signup auto-creates a solo one — uniform paths | — |
+| household_members | Composite PK (household, profile) + UNIQUE(profile) = one household per profile; roles manager/member | households, profiles |
+| profile_size_preferences | Per-person, per-category size (references Size library values, RESTRICT) | profiles, categories, attribute_values |
+| household_invitations | Join (email) + claim (profile) modes, one table, `staff_invitations` grammar | households, profiles, users (inviter) |
+| addresses | Family + personal book, household-level one-default partial uniques | households, profiles |
+
+## Catalog (17) → detail: `04-Catalog.md`
 
 | Table | Purpose | Key links |
 |---|---|---|
 | categories | Tree (`parent_id` self-FK), nav flags, slug, tsvector | self |
 | brands | **Defined but unbuilt in v1** — no seed, no UI (see footnote) | — |
-| products | Core row: sku/slug unique, price/compare, stock balance, status, tags, `attributes` jsonb, `photo_settings` jsonb, source/external import ids, soft-delete, tsvector | categories, brands (nullable), size_charts (nullable) |
-| product_variants | SKU-unique rows, price/stock override, active flag | products (cascade) |
+| products | Core row: sku/slug unique, base_price anchor + materialized min price ("From"), compare, stock balance, status, tags, `attributes` jsonb, `photo_settings` jsonb, source/external import ids, soft-delete, tsvector | categories, brands (nullable), size_charts (nullable) |
+| product_variants | SKU-unique rows, materialized effective price + override flag, stock, active flag | products (cascade) |
 | product_images | Gallery order, one-primary partial unique, optional variant scope | products, variants |
-| product_options | Per-product definitions incl. `display_type` + `visible_on` (pill/swatch/radio; pdp/checkout/admin) | products |
-| product_option_values | Values stored once, unique per option | options |
-| product_variant_option_values | Junction, composite PK (variant, option) | variants, options, values |
 | product_attributes | Compare/spec definitions (name/slug/type/unit) | — |
 | product_attribute_values | One value per (product, attribute), unique pair | products, attributes |
 | stock_movements | Ledger: signed delta, reason, balance snapshot | products, variants |
@@ -51,16 +58,25 @@ The single-URL gate reads `users → user_roles → roles.slug`
 | collections | Storefront collection pages (name/slug/season/visibility) | — |
 | collection_products | Junction, composite PK (collection, product) + position | collections, products |
 | size_charts | Measurement sets by garment type (`rows` jsonb — columns vary: shirts need shoulder/sleeve, skirts waist/hip); linked from products | — |
+| attribute_definitions | Global single-record definitions: name UNIQUE, display_type — the one place attributes are defined | — |
+| attribute_values | Global values + swatch_hex, UNIQUE(definition, value) | definitions |
+| product_attribute_links | Assignment: (product, definition) composite PK | products, definitions |
+| product_attribute_link_values | Chosen values as rows + optional per-value price adjustment (NULL/0 = no effect; additive upcharges); queryable, never arrays | products, definitions, values |
 
 Footnote — brands: table ships in the DDL from day one with
 `products.brand_id` nullable, but v1 builds no seed, no UI, no queries.
 Launch = seed + UI only, zero migration.
 
+Note — variant resolution: variants currently pair to values through the
+deleted junction. A2's matrix generalization re-points variant↔value
+resolution at `product_attribute_link_values`; until then the draft matrix
+carries combinations in memory (unchanged behavior).
+
 ## Cart & wishlist (4) → detail: `05-Cart-Wishlist.md`
 
 | Table | Purpose | Key links |
 |---|---|---|
-| carts | Guest (`session_id`) or user cart; one-active-per-user partial unique; ownership CHECK | users (nullable) |
+| carts | Guest (`session_id`) or user cart; one-active-per-user partial unique; ownership CHECK; `for_profile_id` recipient | users (nullable), profiles (nullable) |
 | cart_items | Lines with price/display snapshots; unique (cart, product, variant) NULLS NOT DISTINCT | carts (cascade) |
 | wishlists | One per user (unique) | users |
 | wishlist_items | Unique (wishlist, product) | wishlists |
@@ -69,7 +85,7 @@ Launch = seed + UI only, zero migration.
 
 | Table | Purpose | Key links |
 |---|---|---|
-| orders | Number-unique, dual status axes, stored totals, address snapshots | users, discount_codes |
+| orders | Number-unique, dual status axes, stored totals, address snapshots; placed-by + for-profile | users (placed-by), profiles (for), discount_codes |
 | order_items | Immutable snapshots (name/sku/price/line, options jsonb) | orders (cascade) |
 | order_status_history | Status timeline + actor | orders |
 | payments | Provider lifecycle, unique transaction ref | orders |
@@ -123,13 +139,29 @@ Monthly partitions; raw events drop >30d, rollups kept forever.
 | partner_orders | Our order ↔ Qikink order/AWB/courier/status/raw/synced_at — one per order (unique) | orders |
 | partner_wallet_ledger | Credit debit/refund per order (Rs.1=1 trail) | orders |
 
+## Styling — Complete the Look (7, module-owned) → detail: `19-Styling-Recommendations.md`
+
+| Table | Purpose | Key links |
+|---|---|---|
+| styling_slots | The 6 outfit roles (top/bottom/outerwear/headwear/footwear/accessory) | — |
+| styling_category_slots | Category → slot map with ancestor-walk inheritance (~10 rows) | categories, styling_slots |
+| styling_slot_rules | Which roles complement which, with weights — the day-zero matrix | styling_slots |
+| styling_value_affinity | Style↔style scores + manual color overrides (any axis, definition-scoped) | attribute_definitions, attribute_values |
+| styling_overrides | Pin/block per product pair — the merchandiser's two buttons | products, users (author) |
+| styling_co_purchase | Nightly co-purchase boosts (dormant until refinement stage 2) | products |
+| styling_events | Impression/click/ATC telemetry (30-day raw; partitioned at build) | products, styling_slots |
+
+Module-owned: **zero edits to any other table**, one-way dependency
+(styling reads core, nothing reads styling). **Ships last** — after the
+core e-commerce app (file 19 §1).
+
 ## Deferred, not dropped
 
 - `search_documents` — `tsvector` + GIN on products/categories covers v1;
   revisit only if ranked cross-entity search outgrows it.
 - `brands` UI/seed — schema ready (above), build deferred.
 
-## Relationship diagram (full map; per-domain slices live in files 03–10, 15)
+## Relationship diagram (full map; per-domain slices live in files 03–10, 15, 17, 19)
 
 ```mermaid
 erDiagram
@@ -137,24 +169,35 @@ erDiagram
     roles ||--o{ user_roles : grants
     roles ||--o{ role_permissions : defines
     permissions ||--o{ role_permissions : granted-by
-    users ||--o{ addresses : owns
+    users ||--o| profiles : credential-of
     users ||--o{ refresh_tokens : holds
-    users ||--o{ customer_notes : annotated
+    profiles ||--o{ customer_notes : annotated
     users ||--o{ staff_invitations : invited-by
     users ||--o{ notifications : receives
     users ||--o{ audit_logs : imports-stock-for
     users ||--o{ carts : owns
-    users ||--o{ orders : places
+    profiles ||--o{ carts : for
+    users ||--o{ orders : placed-by
+    profiles ||--o{ orders : for
     users ||--o{ wishlists : keeps
     users ||--o{ reviews : writes
+    households ||--o{ household_members : groups
+    profiles ||--o{ household_members : joins
+    households ||--o{ household_invitations : invites
+    profiles ||--o{ household_invitations : claims
+    profiles ||--o{ profile_size_preferences : sizes
+    categories ||--o{ profile_size_preferences : sized-in
+    attribute_values ||--o{ profile_size_preferences : picks
+    households ||--o{ addresses : owns
+    profiles ||--o{ addresses : personal
     categories ||--o{ categories : nests
     categories ||--o{ products : lists
     brands ||--o{ products : labels
     products ||--o{ product_variants : offers
     products ||--o{ product_images : shows
-    products ||--o{ product_options : defines
-    product_options ||--o{ product_option_values : contains
-    product_variants ||--o{ product_variant_option_values : resolves
+    attribute_definitions ||--o{ attribute_values : contains-once
+    products ||--o{ product_attribute_links : assigns
+    product_attribute_links ||--o{ product_attribute_link_values : chooses
     products ||--o{ product_attribute_values : specifies
     product_attributes ||--o{ product_attribute_values : valued-by
     products ||--o{ product_views : viewed-in
@@ -178,5 +221,13 @@ erDiagram
     support_tickets ||--o{ support_messages : threads
     orders ||--o{ partner_orders : synced-to
     orders ||--o{ partner_wallet_ledger : debits
+    styling_slots ||--o{ styling_category_slots : role-of
+    categories ||--o{ styling_category_slots : mapped-by
+    styling_slots ||--o{ styling_slot_rules : complements
+    attribute_definitions ||--o{ styling_value_affinity : scopes
+    attribute_values ||--o{ styling_value_affinity : pairs-with
+    products ||--o{ styling_overrides : override-pairs
+    products ||--o{ styling_co_purchase : co-bought
+    products ||--o{ styling_events : surfaced-in
     import_jobs ||--o{ products : creates
 ```

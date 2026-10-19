@@ -3,12 +3,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive, GripVertical, Upload, Images, Focus } from 'lucide-react';
+import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive, GripVertical, Upload, Images, Focus, Library, RotateCcw } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, Input, Drawer, Modal, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection, Disclosure, Carousel } from '@/components/ui';
+import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, Input, Drawer, Modal, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection, Disclosure, Carousel, LinkButton } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
-import { resolveVariants, variantStockTotal, buildVariantSku } from '@/mocks/variants';
+import { resolveVariants, variantStockTotal, buildVariantSku, deriveVariantPrice, recomputeVariants, minFromPrice, pruneAdjustments, roundPrice, hasPriceSpread, adjustmentKey, sumAdjustments } from '@/mocks/variants';
 import type { ProductVariant, ProductAttribute, PhotoSettings, ProductDiscount, SizeChart } from '@/mocks/fixtures';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
@@ -18,7 +18,7 @@ const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + 
 // swatch dots stay neutral until a value→hex map lands (recorded follow-up).
 
 export default function ProductsView() {
-  const { products, createProduct, updateProduct, deleteProduct, canPerformAction, showToast, stockMovements, sizeCharts, createSizeChart, deleteSizeChart, addSizeChartRow, removeSizeChartRow, patchSizeChartCell } = useAdminState();
+  const { products, createProduct, updateProduct, deleteProduct, canPerformAction, showToast, stockMovements, sizeCharts, createSizeChart, deleteSizeChart, addSizeChartRow, removeSizeChartRow, patchSizeChartCell, libraryAttributes, createLibraryAttribute, addLibraryValue } = useAdminState();
 
   const [selectedCat, setSelectedCat] = useState<string>('All');
   const [publicationFilter, setPublicationFilter] = useState<'all' | 'published' | 'draft' | 'archived'>('all');
@@ -116,9 +116,9 @@ export default function ProductsView() {
     setFormDiscounts([]);
     setFormSizeChartId('');
     setFormAttributes([
-      { name: 'Color', values: ['Black', 'Chalk White', 'Olive'], builtin: true, displayType: 'swatch', swatchHex: {}, visibleOn: ['pdp', 'admin'] },
-      { name: 'Size', values: ['S', 'M', 'L', 'XL'], builtin: true, displayType: 'pill', swatchHex: {}, visibleOn: ['pdp', 'admin'] },
-      { name: 'Placements', values: [], builtin: true, displayType: 'radio', swatchHex: {}, visibleOn: ['admin'] },
+      { name: 'Color', values: ['Black', 'Chalk White', 'Olive'], builtin: true, displayType: 'swatch', swatchHex: {}, visibleOn: ['pdp', 'admin'], libraryId: 'LIB-01' },
+      { name: 'Size', values: ['S', 'M', 'L', 'XL'], builtin: true, displayType: 'pill', swatchHex: {}, visibleOn: ['pdp', 'admin'], libraryId: 'LIB-02' },
+      { name: 'Placements', values: [], builtin: true, displayType: 'radio', swatchHex: {}, visibleOn: ['admin'], libraryId: 'LIB-03' },
     ]);
     setFormPartner('Qikink Direct API');
     setFormPlacement('Chest (45mm)');
@@ -133,6 +133,8 @@ export default function ProductsView() {
     });
     setAddImageUrl('');
     setFormVariants([]);
+    setFormAdjustments({});
+    setAdjustmentDrafts({});
     setFormFabricGsm('');
     setFormCut('');
     setFormModelDims('');
@@ -319,12 +321,54 @@ export default function ProductsView() {
   // Variant matrix draft (drawer only): General variant inputs mirror-write
   // here so the matrix stays the single submit source.
   const [formVariants, setFormVariants] = useState<ProductVariant[]>([]);
+  // Per-value price adjustments draft (R1): "Attribute:Value" → additive
+  // upcharge (e.g. "Size:XL": 6). Sidecar only — cancelling the drawer
+  // discards it; submit prunes stale keys and persists what remains.
+  const [formAdjustments, setFormAdjustments] = useState<Record<string, number>>({});
+  // Raw strings while typing (VPRICE-2) so decimal keystrokes survive;
+  // commits are live, blur normalizes the display back to committed truth.
+  const [adjustmentDrafts, setAdjustmentDrafts] = useState<Record<string, string>>({});
 
-  const writePriceAll = (priceStr: string) => {
+  const setAdjustment = (key: string, amount: number | null) => {
+    const nextAdj = { ...formAdjustments };
+    if (amount === null) delete nextAdj[key];
+    else nextAdj[key] = roundPrice(amount);
+    setFormAdjustments(nextAdj);
+    setFormVariants((prev) => recomputeVariants(parseFloat(formPrice) || 0, nextAdj, prev));
+  };
+
+  const writeAdjustment = (key: string, raw: string) => {
+    setAdjustmentDrafts((prev) => {
+      const next = { ...prev };
+      if (raw === '') delete next[key];
+      else next[key] = raw;
+      return next;
+    });
+    if (raw.trim() === '') {
+      setAdjustment(key, null);
+      return;
+    }
+    const n = parseFloat(raw);
+    if (Number.isFinite(n) && n > 0) setAdjustment(key, n);
+    // invalid or refused (≤ 0) — committed state untouched; blur snaps back
+  };
+
+  const clearAdjustmentDraft = (key: string) => {
+    setAdjustmentDrafts((prev) => {
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  };
+
+  // Base price write (R1): re-derives every unpinned cell from
+  // base + Σ adjustments; explicit overrides stay pinned. This replaces
+  // the old write-all that trampled per-cell overrides on every keystroke.
+  const writeBasePrice = (priceStr: string) => {
     setFormPrice(priceStr);
     const n = parseFloat(priceStr);
-    if (isNaN(n)) return;
-    setFormVariants((prev) => prev.map((v) => ({ ...v, price: n })));
+    if (isNaN(n) || n < 0) return;
+    setFormVariants((prev) => recomputeVariants(roundPrice(n), formAdjustments, prev));
   };
 
   const writeStockTotal = (stockStr: string) => {
@@ -350,16 +394,23 @@ export default function ProductsView() {
       colors.forEach((color, ci) => {
         sizes.forEach((size) => {
           const kept = byKey.get(`${color}|${size}`);
-          if (kept) out.push(kept);
-          else
+          if (kept) {
+            // Kept cells re-derive through the ladder unless pinned (R1).
+            out.push(
+              kept.priceOverridden
+                ? kept
+                : { ...kept, price: deriveVariantPrice(basePrice, formAdjustments, color, size) }
+            );
+          } else {
             out.push({
               id: `tmp-${ci}-${size}`,
               color,
               size,
               sku: buildVariantSku(productId, ci, size),
-              price: basePrice,
+              price: deriveVariantPrice(basePrice, formAdjustments, color, size),
               stock: 0,
             });
+          }
         });
       });
       return out;
@@ -367,7 +418,8 @@ export default function ProductsView() {
   };
 
   // Chip editor (A1b): one-by-one values, no comma parsing. Builtin
-  // Color/Size edits rebuild the matrix (kept cells preserve price/stock);
+  // Color/Size edits rebuild the matrix (kept cells keep stock; unpinned
+  // prices re-derive through the ladder);
   // custom attributes store on the draft for A2's generalized matrix.
   const colorsSizesOf = (attrs: Array<{ name: string; values: string[] }>) => ({
     colors: attrs.find((a) => a.name === 'Color')?.values ?? [],
@@ -376,25 +428,56 @@ export default function ProductsView() {
   const addAttrValue = (name: string) => {
     const v = (attrDrafts[name] ?? '').trim();
     if (!v) return;
-    const attr = formAttributes.find((a) => a.name === name);
-    if (!attr) return;
-    if (attr.values.some((x) => x.toLowerCase() === v.toLowerCase())) {
-      showToast({ type: 'warning', title: 'Duplicate Value', description: `"${v}" is already a ${name} value.` });
-      return;
+    if (commitAttrValue(name, v)) {
+      setAttrDrafts((prev) => ({ ...prev, [name]: '' }));
     }
-    const next = formAttributes.map((a) => (a.name === name ? { ...a, values: [...a.values, v] } : a));
+  };
+  // Core value commit (VALPICK): dup guard + append + conditional
+  // register-through + matrix rebuild. Picker and text input share it —
+  // one path, no drift. Existing library values are ASSIGNED, never
+  // re-registered (assign vs register — DOC/backend/04-Catalog.md).
+  const commitAttrValue = (name: string, v: string): boolean => {
+    const value = v.trim();
+    if (!value) return false;
+    const attr = formAttributes.find((a) => a.name === name);
+    if (!attr) return false;
+    if (attr.values.some((x) => x.toLowerCase() === value.toLowerCase())) {
+      showToast({ type: 'warning', title: 'Duplicate Value', description: `"${value}" is already a ${name} value.` });
+      return false;
+    }
+    const next = formAttributes.map((a) => (a.name === name ? { ...a, values: [...a.values, value] } : a));
     setFormAttributes(next);
-    setAttrDrafts((prev) => ({ ...prev, [name]: '' }));
+    // Assign vs register: a value that already exists in the linked library
+    // row is a pure assignment — the card gains it, the library is
+    // untouched (calling the register seam on an existing spelling fired a
+    // false "Duplicate Value" on every picker click). Register-through
+    // fires only for genuinely new spellings.
+    if (attr.libraryId) {
+      const lib = libraryAttributes.find((l) => l.id === attr.libraryId);
+      const known = (lib?.values ?? []).some((x) => x.toLowerCase() === value.toLowerCase());
+      if (!known) addLibraryValue(attr.libraryId, value);
+    }
     if (name === 'Color' || name === 'Size') {
       const { colors, sizes } = colorsSizesOf(next);
       rebuildMatrix(colors, sizes, parseFloat(formPrice) || 0, editingProduct?.id ?? 'PRD');
     }
+    return true;
   };
   const removeAttrValue = (name: string, value: string) => {
     const next = formAttributes.map((a) =>
       a.name === name ? { ...a, values: a.values.filter((x) => x !== value) } : a
     );
     setFormAttributes(next);
+    // Ladder hygiene (R1): a removed value takes its adjustment with it.
+    const pruned = pruneAdjustments(formAdjustments, next);
+    setFormAdjustments(pruned.next);
+    if (pruned.dropped.length > 0) {
+      showToast({
+        type: 'info',
+        title: 'Price Adjustment Cleared',
+        description: `The per-value adjustment for "${value}" was removed with the value.`,
+      });
+    }
     if (name === 'Color' || name === 'Size') {
       const { colors, sizes } = colorsSizesOf(next);
       rebuildMatrix(colors, sizes, parseFloat(formPrice) || 0, editingProduct?.id ?? 'PRD');
@@ -407,11 +490,54 @@ export default function ProductsView() {
       showToast({ type: 'warning', title: 'Duplicate Attribute', description: `"${name}" already exists.` });
       return;
     }
-    setFormAttributes((prev) => [...prev, { name, values: [], builtin: false, displayType: 'pill', swatchHex: {}, visibleOn: ['pdp', 'admin'] }]);
+    // N1a auto-register: link when the library knows this name, else
+    // register it there first (disclosed) so one record always exists.
+    const lib = libraryAttributes.find((l) => l.name.toLowerCase() === name.toLowerCase());
+    const linkedId = lib?.id ?? createLibraryAttribute(name);
+    if (!linkedId) return;
+    setFormAttributes((prev) => [...prev, { name, values: [], builtin: false, displayType: 'pill', swatchHex: {}, visibleOn: ['pdp', 'admin'], libraryId: linkedId }]);
     setNewAttrName('');
+    if (!lib) {
+      showToast({ type: 'info', title: 'Registered in Library', description: `"${name}" now lives in the attribute library too.` });
+    }
   };
   const removeAttribute = (name: string) => {
     setFormAttributes((prev) => prev.filter((a) => a.name !== name));
+  };
+
+  // Copy from the global library (settings manager): missing values merge
+  // into the draft (new card when absent); drafts diverge after copy.
+  // Link a library attribute (N1a): adds a linked card carrying the
+  // library's current values (inheriting display type); already-linked
+  // attributes are skipped with an info toast. No copies, no merges.
+  const linkFromLibrary = (libId: string) => {
+    const lib = libraryAttributes.find((a) => a.id === libId);
+    if (!lib) return;
+    const existing = formAttributes.find((a) => a.name.toLowerCase() === lib.name.toLowerCase());
+    if (existing) {
+      if (!existing.libraryId) {
+        setFormAttributes((prev) =>
+          prev.map((a) =>
+            a.name.toLowerCase() === lib.name.toLowerCase() ? { ...a, libraryId: lib.id } : a
+          )
+        );
+      }
+      showToast({ type: 'info', title: 'Already Linked', description: `"${lib.name}" is already on this product.` });
+      return;
+    }
+    setFormAttributes((prev) => [
+      ...prev,
+      {
+        name: lib.name,
+        values: [...lib.values],
+        builtin: false,
+        displayType: lib.displayType,
+        swatchHex: {},
+        visibleOn: ['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'>,
+        libraryId: lib.id,
+      },
+    ]);
+    showToast({ type: 'success', title: 'Linked From Library', description: `"${lib.name}" linked with ${lib.values.length} values.` });
   };
 
   // Scheduled discount rows (P1d): local composition, no new primitive.
@@ -472,8 +598,11 @@ export default function ProductsView() {
   const renderAttrCard = (attr: ProductAttribute, hideDisplay = false) => (
     <SurfaceCard key={attr.name} padding="12px" gap="10px">
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-        <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
           {attr.name}
+          {attr.libraryId ? (
+            <Badge variant="success" size="sm" title="Linked to the single library record">Linked</Badge>
+          ) : null}
         </span>
         {attr.builtin ? (
           <Badge variant="info" size="sm">Default</Badge>
@@ -613,6 +742,61 @@ export default function ProductsView() {
           No values yet — add the first one below.
         </div>
       )}
+      {/* Picker-first entry (VALPICK): known values for this attribute
+          (library row ∪ card, deduped) one click away; the text input
+          below stays for genuinely new values. Hidden when nothing new. */}
+      {(() => {
+        const lib = libraryAttributes.find((l) => l.id === attr.libraryId);
+        const known = [...new Set([...(lib?.values ?? []), ...attr.values])];
+        const missing = known.filter(
+          (v) => !attr.values.some((x) => x.toLowerCase() === v.toLowerCase())
+        );
+        if (missing.length === 0) return null;
+        return (
+          <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ flex: 1 }}>
+              <DropdownMenu
+                ariaLabel={`Pick known ${attr.name} value`}
+                trigger={
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Pick a known ${attr.name} value, ${missing.length} available`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 8,
+                      width: '100%',
+                      height: 40,
+                      padding: '0 12px',
+                      fontSize: 13,
+                      fontWeight: 500,
+                      fontFamily: 'var(--font-main)',
+                      borderRadius: 8,
+                      border: '1px dashed var(--tuw-border-control, #D1D5DB)',
+                      backgroundColor: 'transparent',
+                      color: 'var(--tuw-text-secondary, #5D6772)',
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                    }}
+                  >
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      Pick known value… ({missing.length})
+                    </span>
+                    <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
+                  </span>
+                }
+                items={missing.map((v) => ({ value: v, label: v }))}
+                onSelect={(v) => commitAttrValue(attr.name, v)}
+              />
+            </div>
+          </div>
+        );
+      })()}
       <div style={{ display: 'flex', gap: 8 }}>
         <div style={{ flex: 1 }}>
           <Input
@@ -667,7 +851,53 @@ export default function ProductsView() {
     setFormMonogramUpcharge(product.monogram ? product.monogram.upcharge.toFixed(2) : '12.00');
     setFormSeoTitle(product.seoTitle || '');
     setFormSeoDescription(product.seoDescription || '');
-    setFormVariants(resolveVariants(product));
+
+    // Attribute draft (N1a link match) — built once: the ladder load below
+    // prunes adjustment keys against these values, and the drawer renders
+    // the same copy.
+    const loadedAttributes =
+      product.attributes && product.attributes.length > 0
+        ? product.attributes.map((a) => {
+            // N1a link: match persisted attrs to the library by name once,
+            // so every card carries its single-record id from here on.
+            const lib = libraryAttributes.find(
+              (l) => l.name.toLowerCase() === a.name.toLowerCase()
+            );
+            return {
+              ...a,
+              libraryId: a.libraryId ?? lib?.id,
+              values: [...a.values],
+              swatchHex: { ...(a.swatchHex ?? {}) },
+              visibleOn:
+                a.visibleOn && a.visibleOn.length > 0
+                  ? [...a.visibleOn]
+                  : a.name === 'Placements'
+                    ? ['admin' as const]
+                    : (['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'>),
+            };
+          })
+        : [
+            { name: 'Color', values: [...product.colors], builtin: true, displayType: 'swatch' as const, swatchHex: {}, visibleOn: ['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'>, libraryId: 'LIB-01' },
+            { name: 'Size', values: [...product.sizes], builtin: true, displayType: 'pill' as const, swatchHex: {}, visibleOn: ['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'>, libraryId: 'LIB-02' },
+            { name: 'Placements', values: [], builtin: true, displayType: 'radio' as const, swatchHex: {}, visibleOn: ['admin'] as Array<'pdp' | 'checkout' | 'admin'>, libraryId: 'LIB-03' },
+          ];
+
+    // Pricing ladder load (R1): sanitize the sidecar against these values;
+    // legacy cells whose price differs from the derived value become pinned
+    // overrides (their look is preserved — reset unpins them spotwise).
+    const basePrice = product.basePrice ?? product.price;
+    const loadedAdjustments = pruneAdjustments(product.priceAdjustments, loadedAttributes).next;
+    setFormAdjustments(loadedAdjustments);
+    setAdjustmentDrafts({});
+    setFormVariants(
+      resolveVariants(product).map((v) =>
+        v.priceOverridden !== undefined
+          ? v
+          : deriveVariantPrice(basePrice, loadedAdjustments, v.color, v.size) === v.price
+            ? v
+            : { ...v, priceOverridden: true }
+      )
+    );
     setFormName(product.name);
     setFormSlug(product.slug);
     setFormCategory(product.category);
@@ -682,25 +912,7 @@ export default function ProductsView() {
     setFormTax(product.taxRate !== undefined ? String(product.taxRate) : '');
     setFormDiscounts((product.discounts ?? []).map((d) => ({ ...d })));
     setFormSizeChartId(product.sizeChartId ?? '');
-    setFormAttributes(
-      product.attributes && product.attributes.length > 0
-        ? product.attributes.map((a) => ({
-            ...a,
-            values: [...a.values],
-            swatchHex: { ...(a.swatchHex ?? {}) },
-            visibleOn:
-              a.visibleOn && a.visibleOn.length > 0
-                ? [...a.visibleOn]
-                : a.name === 'Placements'
-                  ? ['admin' as const]
-                  : (['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'>),
-          }))
-        : [
-            { name: 'Color', values: [...product.colors], builtin: true, displayType: 'swatch' as const, swatchHex: {}, visibleOn: ['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'> },
-            { name: 'Size', values: [...product.sizes], builtin: true, displayType: 'pill' as const, swatchHex: {}, visibleOn: ['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'> },
-            { name: 'Placements', values: [], builtin: true, displayType: 'radio' as const, swatchHex: {}, visibleOn: ['admin'] as Array<'pdp' | 'checkout' | 'admin'> },
-          ]
-    );
+    setFormAttributes(loadedAttributes);
     setFormPartner(product.partner);
     setFormPlacement(product.placement);
     setFormStatus(product.publicationStatus);
@@ -768,28 +980,37 @@ export default function ProductsView() {
     }
     if (!editingProduct) return;
 
-    const priceNum = parseFloat(formPrice) || editingProduct.price;
+    const parsedBase = parseFloat(formPrice);
+    const baseNum = roundPrice(
+      !isNaN(parsedBase) && parsedBase >= 0 ? parsedBase : editingProduct.basePrice ?? editingProduct.price
+    );
     const compareNum = parseFloat(formComparePrice) || undefined;
 
     // The draft matrix is the submit source: colors/sizes/stock derive from
-    // it in the seam; price follows the lowest variant ("from $X" semantics).
+    // it in the seam; prices re-derive through the ladder (R1:
+    // base + Σ adjustments, pinned cells stay), and the listed price is the
+    // lowest cell ("From $X"), materialized.
     const draftError = variantDraftError();
     if (draftError) {
       showToast({ type: 'warning', title: 'Check Variants', description: draftError });
       setProductTab('variants');
       return;
     }
-    const submitVariants = formVariants.length > 0 ? formVariants : resolveVariants(editingProduct);
-    const minPrice =
-      submitVariants.length > 0
-        ? Math.min(...submitVariants.map((v) => v.price))
-        : priceNum;
+    const draftVariants = formVariants.length > 0 ? formVariants : resolveVariants(editingProduct);
+    const submitVariants = recomputeVariants(baseNum, formAdjustments, draftVariants).map((v) => {
+      const { priceOverridden, ...rest } = v;
+      return priceOverridden ? { ...rest, priceOverridden: true as const } : rest;
+    });
+    const minPrice = submitVariants.length > 0 ? minFromPrice(submitVariants) : baseNum;
+    const cleanAdjustments = pruneAdjustments(formAdjustments, formAttributes).next;
 
     updateProduct(editingProduct.id, {
       name: formName,
       slug: formSlug,
       category: formCategory,
       price: minPrice,
+      basePrice: baseNum,
+      priceAdjustments: Object.keys(cleanAdjustments).length > 0 ? cleanAdjustments : undefined,
       compareAtPrice: compareNum,
       partner: formPartner,
       placement: formPlacement,
@@ -914,6 +1135,10 @@ export default function ProductsView() {
           next.sku = next.color && next.size
             ? buildVariantSku(editingProduct?.id ?? 'PRD', known ? colors.indexOf(next.color) : colors.length, next.size)
             : '';
+          // Ladder (R1): typing a real color/size pulls its adjustments in.
+          if (!next.priceOverridden) {
+            next.price = deriveVariantPrice(parseFloat(formPrice) || 0, formAdjustments, next.color, next.size);
+          }
         }
         return next;
       });
@@ -936,6 +1161,31 @@ export default function ProductsView() {
       seen.add(key);
     }
     return null;
+  };
+
+  // Ladder readout (R1): the lowest cell is the storefront "From" price.
+  const variantLowest = formVariants.length > 0 ? minFromPrice(formVariants) : null;
+  const variantSpread = formVariants.length > 1 && new Set(formVariants.map((v) => v.price)).size > 1;
+
+  // Per-cell Σ adjustments (VPRICE-2): provenance chip + tooltip data.
+  const cellAdjustment = (color: string, size: string) =>
+    sumAdjustments(formAdjustments, [
+      { attr: 'Color', value: color },
+      { attr: 'Size', value: size },
+    ]);
+
+  // Tooltip copy for derived cells (VPRICE-3): names every contributing value
+  // upcharge so the +Δ chip explains itself without opening the editor.
+  const cellPriceBreakdown = (color: string, size: string, effective: number) => {
+    const base = parseFloat(formPrice) || 0;
+    const parts: string[] = [];
+    const colorAdj = formAdjustments[adjustmentKey('Color', color)] ?? 0;
+    const sizeAdj = formAdjustments[adjustmentKey('Size', size)] ?? 0;
+    if (colorAdj > 0) parts.push(`${color} $${colorAdj.toFixed(2)}`);
+    if (sizeAdj > 0) parts.push(`${size} $${sizeAdj.toFixed(2)}`);
+    return parts.length > 0
+      ? `Base $${base.toFixed(2)} + ${parts.join(' + ')} = $${effective.toFixed(2)}`
+      : `Base $${base.toFixed(2)}`;
   };
 
   // CSV import pipeline (X1b): Final Listing workbooks re-saved as CSV.
@@ -1623,6 +1873,14 @@ export default function ProductsView() {
         title="Product Catalog"
         actions={
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <LinkButton
+              href="/settings/attributes"
+              variant="secondary"
+              size="md"
+              icon={<Library size={16} />}
+            >
+              <span>Attribute Library</span>
+            </LinkButton>
             <Button
               variant="secondary"
               size="md"
@@ -1903,6 +2161,9 @@ export default function ProductsView() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 14, paddingTop: 10, borderTop: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
                   <div>
                     <span className="tuw-tabular-nums" style={{ fontSize: '18px', fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
+                      {hasPriceSpread(resolveVariants(p)) && (
+                        <span style={{ fontSize: '12px', fontWeight: 400, color: 'var(--tuw-text-secondary, #5D6772)', marginRight: 5 }}>From</span>
+                      )}
                       ₹{p.price.toFixed(2)}
                     </span>
                     {p.compareAtPrice && (
@@ -2029,6 +2290,11 @@ export default function ProductsView() {
                     {p.category}
                   </TableCell>
                   <TableCell className="tuw-tabular-nums" style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', textAlign: 'right' }}>
+                    {/* "From" reads as a quiet label (VPRICE-3); the amount
+                        stays the loud part of the cell. */}
+                    {hasPriceSpread(resolveVariants(p)) && (
+                      <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--tuw-text-secondary, #5D6772)', marginRight: 4 }}>From</span>
+                    )}
                     ₹{p.price.toFixed(2)}
                     {p.compareAtPrice && (
                       <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', textDecoration: 'line-through', marginLeft: 6, fontWeight: 400 }}>
@@ -2210,12 +2476,13 @@ export default function ProductsView() {
             />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <Input
-                label="Price ($ USD)"
+                label="Base price ($ USD)"
                 type="number"
                 step="0.01"
                 value={formPrice}
-                onChange={(e) => writePriceAll(e.target.value)}
+                onChange={(e) => writeBasePrice(e.target.value)}
                 required
+                helperText="Every variant price starts at this base."
               />
               <Input
                 label="Stock Quantity"
@@ -2225,6 +2492,69 @@ export default function ProductsView() {
                 required
               />
             </div>
+            <Disclosure
+              title="Per-value price adjustments"
+              subtitle="Value upcharges added on top of the base price."
+              badge={
+                Object.keys(formAdjustments).length > 0 ? (
+                  <Badge variant="info">{Object.keys(formAdjustments).length}</Badge>
+                ) : undefined
+              }
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {['Color', 'Size'].map((attrName) => {
+                  const attr = formAttributes.find((a) => a.name === attrName);
+                  if (!attr || attr.values.length === 0) return null;
+                  return (
+                    <div key={attrName} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      <div
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 600,
+                          letterSpacing: '0.06em',
+                          textTransform: 'uppercase',
+                          color: 'var(--tuw-text-secondary, #5D6772)',
+                        }}
+                      >
+                        {attrName}
+                      </div>
+                      {/* Two-column value grid (VPRICE-3): roughly halves the
+                          expanded height without losing the name → input rhythm. */}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 16, rowGap: 8 }}>
+                        {attr.values.map((value) => {
+                          const key = adjustmentKey(attrName, value);
+                          const committed = formAdjustments[key];
+                          const draft = adjustmentDrafts[key];
+                          return (
+                            <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                              <span style={{ flex: 1, fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
+                                {value}
+                              </span>
+                              <div style={{ width: 110, flexShrink: 0 }}>
+                                <Input
+                                  aria-label={`${attrName} ${value} price adjustment`}
+                                  type="number"
+                                  step="0.01"
+                                  min={0}
+                                  placeholder="0"
+                                  value={draft !== undefined ? draft : committed !== undefined ? String(committed) : ''}
+                                  onChange={(e) => writeAdjustment(key, e.target.value)}
+                                  onBlur={() => clearAdjustmentDraft(key)}
+                                  style={{ height: 32, textAlign: 'right' }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+                <p style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0, lineHeight: 1.5 }}>
+                  Upcharges only. Clearing a field — or removing the value — drops its adjustment.
+                </p>
+              </div>
+            </Disclosure>
             <DrawerSection title="Pricing & Discounts" titleGap={10}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
@@ -2295,6 +2625,7 @@ export default function ProductsView() {
                       </div>
                       <Switch
                         label=""
+                        ariaLabel={'Toggle ' + (d.discountType === 'percent' ? d.value + '%' : '₹' + d.value) + ' discount active'}
                         checked={d.isActive}
                         onChange={(v) => patchDiscount(d.id, { isActive: v })}
                       />
@@ -2386,7 +2717,54 @@ export default function ProductsView() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
                   Color and Size ship with every product. Add custom attributes (Fabric, Fit…) and define their values one by one.
+                  {' '}<Link href="/settings/attributes" style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)', textDecoration: 'none' }}>Manage library</Link>
                 </p>
+                {libraryAttributes.filter((a) => a.enabled).length > 0 ? (
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <div style={{ flex: 1 }}>
+                      <DropdownMenu
+                        ariaLabel="Link attribute from library"
+                        trigger={
+                          <span
+                            role="button"
+                            tabIndex={0}
+                            aria-label="Link an attribute from the library"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+                            }}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: 8,
+                              width: '100%',
+                              height: 40,
+                              padding: '0 12px',
+                              fontSize: 13,
+                              fontWeight: 500,
+                              fontFamily: 'var(--font-main)',
+                              borderRadius: 8,
+                              border: '1px dashed var(--tuw-border-control, #D1D5DB)',
+                              backgroundColor: 'transparent',
+                              color: 'var(--tuw-text-secondary, #5D6772)',
+                              cursor: 'pointer',
+                              userSelect: 'none',
+                            }}
+                          >
+                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              Link attribute from library…
+                            </span>
+                            <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
+                          </span>
+                        }
+                        items={libraryAttributes
+                          .filter((a) => a.enabled)
+                          .map((a) => ({ value: a.id, label: `${a.name} (${a.values.length})` }))}
+                        onSelect={(v) => linkFromLibrary(v)}
+                      />
+                    </div>
+                  </div>
+                ) : null}
                 {formAttributes.filter((a) => a.name !== 'Placements').map((attr) => renderAttrCard(attr))}
                 <div style={{ display: 'flex', gap: 8 }}>
                   <div style={{ flex: 1 }}>
@@ -2573,9 +2951,23 @@ export default function ProductsView() {
               <span style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
                 {formVariants.length} variants · {variantStockTotal(formVariants)} units in stock
               </span>
-              <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={addVariant}>
-                Add Variant
-              </Button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                {/* Storefront "From" readout (VPRICE-3): its own quiet pill
+                    instead of a clause glued onto the counts sentence. */}
+                {variantSpread && variantLowest !== null && (
+                  <Badge
+                    size="sm"
+                    variant="neutral"
+                    className="tuw-tabular-nums"
+                    title="Lowest variant price — the storefront lists this as “From”"
+                  >
+                    From ${variantLowest.toFixed(2)}
+                  </Badge>
+                )}
+                <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={addVariant}>
+                  Add Variant
+                </Button>
+              </div>
             </div>
             <Table>
               <TableHeader>
@@ -2583,7 +2975,9 @@ export default function ProductsView() {
                   <TableHead style={{ padding: '12px 16px' }}>Color</TableHead>
                   <TableHead style={{ padding: '12px 16px' }}>Size</TableHead>
                   <TableHead style={{ padding: '12px 16px' }}>SKU</TableHead>
-                  <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Price</TableHead>
+                  {/* Right padding caps the label over the numbers' right edge
+                      (cell 16 + slot 56 + gap 8 + border 1 + pad 14 = 95). */}
+                  <TableHead style={{ padding: '12px 95px 12px 16px', textAlign: 'right' }}>Price</TableHead>
                   <TableHead style={{ padding: '12px 16px' }}>Stock</TableHead>
                   <TableHead style={{ padding: '12px 16px', width: 48 }}><span className="sr-only">Actions</span></TableHead>
                 </TableRow>
@@ -2628,17 +3022,90 @@ export default function ProductsView() {
                       />
                     </TableCell>
                     <TableCell style={{ padding: '10px 16px' }}>
-                      <Input
-                        aria-label={`Price for ${v.color} ${v.size}`}
-                        type="number"
-                        step="0.01"
-                        value={String(v.price)}
-                        onChange={(e) => {
-                          const n = parseFloat(e.target.value);
-                          if (!isNaN(n)) updateVariant(v.id, { price: n });
-                        }}
-                        style={{ height: 36, textAlign: 'right' }}
-                      />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <Input
+                            aria-label={`Price for ${v.color} ${v.size}`}
+                            type="number"
+                            step="0.01"
+                            value={String(v.price)}
+                            onChange={(e) => {
+                              const n = parseFloat(e.target.value);
+                              // Typing pins the cell (R1): the price survives
+                              // base/attribute recomputes until reset.
+                              if (!isNaN(n) && n >= 0) updateVariant(v.id, { price: roundPrice(n), priceOverridden: true });
+                            }}
+                            style={{ height: 36, textAlign: 'right' }}
+                          />
+                        </div>
+                        {/* Fixed annotation slot (VPRICE-3B): derived-Σ chip or
+                            pinned reset control, docked right of the input
+                            (early-version feel) — always reserved so every
+                            price input keeps the exact same width and the
+                            numbers line up down the column. */}
+                        <div
+                          style={{
+                            width: 56,
+                            flexShrink: 0,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'flex-end',
+                          }}
+                        >
+                          {!v.priceOverridden &&
+                            (() => {
+                              const adjSum = cellAdjustment(v.color, v.size);
+                              if (adjSum <= 0) return null;
+                              return (
+                                <span
+                                  title={cellPriceBreakdown(v.color, v.size, v.price)}
+                                  className="tuw-tabular-nums"
+                                  style={{
+                                    fontSize: 12,
+                                    color: 'var(--tuw-text-secondary, #5D6772)',
+                                    whiteSpace: 'nowrap',
+                                  }}
+                                >
+                                  +{adjSum.toFixed(2)}
+                                </span>
+                              );
+                            })()}
+                          {v.priceOverridden && (
+                            <button
+                              type="button"
+                              aria-label={`Reset ${v.color} ${v.size} price to derived`}
+                              title={`Pinned override — reset to derived $${deriveVariantPrice(
+                                parseFloat(formPrice) || 0,
+                                formAdjustments,
+                                v.color,
+                                v.size,
+                              ).toFixed(2)}`}
+                              onClick={() =>
+                                updateVariant(v.id, {
+                                  price: deriveVariantPrice(parseFloat(formPrice) || 0, formAdjustments, v.color, v.size),
+                                  priceOverridden: false,
+                                })
+                              }
+                              className="tuw-primary-hover"
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: 24,
+                                height: 24,
+                                padding: 0,
+                                borderRadius: 6,
+                                color: 'var(--tuw-action-primary, #7539FF)',
+                              }}
+                            >
+                              <RotateCcw size={14} />
+                            </button>
+                          )}
+                        </div>
+                      </div>
                     </TableCell>
                     <TableCell style={{ padding: '10px 16px' }}>
                       <Stepper

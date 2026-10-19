@@ -2,24 +2,24 @@
 
 import React from 'react';
 
+export type ButtonVariant = 'primary' | 'secondary' | 'dark' | 'danger' | 'ghost' | 'outline';
+export type ButtonSize = 'sm' | 'md' | 'lg';
+
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'dark' | 'danger' | 'ghost' | 'outline';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: ButtonVariant;
+  size?: ButtonSize;
   fullWidth?: boolean;
   icon?: React.ReactNode;
 }
 
-export default function Button({
-  children,
-  variant = 'primary',
-  size = 'md',
+// Single styling source shared by Button and LinkButton — a link wearing the
+// button skin can never drift from the button itself (design-system verbatim).
+export function getButtonStyle(
+  variant: ButtonVariant = 'primary',
+  size: ButtonSize = 'md',
   fullWidth = false,
-  icon,
-  className = '',
-  style = {},
-  disabled,
-  ...props
-}: ButtonProps) {
+  disabled = false
+): React.CSSProperties {
   const baseStyles: React.CSSProperties = {
     display: 'inline-flex',
     alignItems: 'center',
@@ -38,7 +38,7 @@ export default function Button({
     opacity: disabled ? 0.6 : 1,
   };
 
-  const sizeStyles: Record<'sm' | 'md' | 'lg', React.CSSProperties> = {
+  const sizeStyles: Record<ButtonSize, React.CSSProperties> = {
     sm: {
       height: '36px',
       padding: '0 14px',
@@ -59,7 +59,7 @@ export default function Button({
     },
   };
 
-  const variantStyles: Record<'primary' | 'secondary' | 'dark' | 'danger' | 'ghost' | 'outline', React.CSSProperties> = {
+  const variantStyles: Record<ButtonVariant, React.CSSProperties> = {
     primary: {
       backgroundColor: 'var(--tuw-action-primary, #7539FF)',
       color: 'var(--tuw-text-on-primary, #FFFFFF)',
@@ -91,15 +91,24 @@ export default function Button({
     },
   };
 
+  return { ...baseStyles, ...sizeStyles[size], ...variantStyles[variant] };
+}
+
+export default function Button({
+  children,
+  variant = 'primary',
+  size = 'md',
+  fullWidth = false,
+  icon,
+  className = '',
+  style = {},
+  disabled,
+  ...props
+}: ButtonProps) {
   return (
     <button
       disabled={disabled}
-      style={{
-        ...baseStyles,
-        ...sizeStyles[size],
-        ...variantStyles[variant],
-        ...style,
-      }}
+      style={{ ...getButtonStyle(variant, size, fullWidth, disabled), ...style }}
       className={className}
       {...props}
     >

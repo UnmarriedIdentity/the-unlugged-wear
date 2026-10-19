@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Save, Store, Palette, CreditCard, Truck, Receipt, Bell, ShieldCheck, Check, AlertCircle, RefreshCw } from 'lucide-react';
+import { Save, Store, Palette, CreditCard, Truck, Receipt, Bell, ShieldCheck, Check, AlertCircle, RefreshCw, Library } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { Button, Input, ContentCard, Badge, PageHeader } from '@/components/ui';
+import { Button, Input, ContentCard, Badge, PageHeader, LinkButton } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
@@ -180,6 +180,22 @@ export default function SettingsView() {
                   <option value="INR (₹)">INR (₹) — Indian Rupee</option>
                 </select>
               </div>
+            </div>
+
+            {/* Canonical entry to the Attribute Library (row grammar mirrors
+                the Demo Sandbox row below). */}
+            <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid var(--tuw-border-subtle, #E2E4E6)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+              <div>
+                <h4 style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', margin: 0 }}>
+                  Attribute Library
+                </h4>
+                <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: '4px 0 0' }}>
+                  Define colors, sizes, fabrics, and other product attributes once — link them into any product.
+                </p>
+              </div>
+              <LinkButton href="/settings/attributes" variant="secondary" size="sm" icon={<Library size={14} />}>
+                Open Attribute Library
+              </LinkButton>
             </div>
 
             <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid var(--tuw-border-subtle, #E2E4E6)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>

@@ -1,6 +1,6 @@
 # Analytics — Events, Partitions, Retention, Views
 
-> Status: Filling | Last Updated: 2026-10-15
+> Status: Filling | Last Updated: 2026-10-17
 > 7 tables. Raw events are **transient evidence**, rollups are the record.
 > Free-tier survival is a DDL policy here, not advice. Conventions:
 > `01-Conventions.md`.
@@ -137,6 +137,14 @@ state** ("tracking connects at launch") — never demo numbers without the
 demo label. The current dashboard's demo-computed KPIs keep their labels
 until the events flow, then swap sources without layout changes.
 
+## Styling events (module-owned)
+
+`styling_events` (file 19) joins this lifecycle: append-only, monthly
+RANGE partitions on `ts` attach with the analytics build, raw rows drop
+>30 days. It is owned by the styling module — dropping the module drops
+its events and nothing else. Refinement-stage rollups live in the
+Styling report.
+
 ## Analytics relationship slice
 
 ```mermaid
@@ -149,4 +157,5 @@ erDiagram
     carts ||--o{ abandoned_carts : becomes
     users ||--o{ abandoned_carts : leaves
     sessions ||--o{ search_terms : types-in
+    products ||--o{ styling_events : styling-telemetry
 ```

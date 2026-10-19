@@ -1,8 +1,10 @@
 # Auth & RBAC — Columns, Seeds, Gate Queries
 
-> Status: Filling | Last Updated: 2026-10-14
+> Status: Filling | Last Updated: 2026-10-17
 > Conventions: `01-Conventions.md`. Defaults localized for IN (`country 'IN'`,
 > +91 phones); currency has no auth meaning — see the open decision in `00-README.md` §7.
+> Identity is two rows: `users` (credential) + `profiles` (person). Household
+> grouping lives in `17-Household-Accounts.md`.
 
 ## 1. users
 
@@ -11,35 +13,33 @@
 | id | uuid | PK, UUIDv7 | Global identity; unguessable session subject |
 | email | varchar(255) | NOT NULL, UNIQUE | Login key; lowercased in app (no citext extension) |
 | password_hash | varchar(255) | NOT NULL | Argon2id output fits 255 |
-| first_name | varchar(100) | NOT NULL | |
-| last_name | varchar(100) | NOT NULL | |
-| phone | varchar(20) | NULL | Optional; stored E.164 (`+91…`) when present |
 | status | varchar(20) | NOT NULL DEFAULT 'active', CHECK IN ('active','disabled') | Off-switch: disabled blocks login + refresh, history preserved (deletes are RESTRICT-blocked); `pending` returns with the verification flow + token table |
 | last_login_at | timestamptz | NULL | Idle detection, security review |
 | created_at / updated_at | timestamptz | NOT NULL DEFAULT now() | Convention |
 
 Indexes: PK · unique `users_email_key` (hottest auth query). Status
 filtering needs no index until ~100k users (file 01 §3 access-path rule).
+A user is only a credential — name, phone, and birth date live on
+`profiles` (§2).
 
-## 2. addresses
+## 2. profiles
 
 | Column | Type | Constraints | Reason |
 |---|---|---|---|
-| id | uuid | PK | |
-| user_id | uuid | NOT NULL, FK → users(id) ON DELETE CASCADE | Address book dies with the account (GDPR-friendly) |
-| type | varchar(10) | NOT NULL DEFAULT 'shipping', CHECK IN ('shipping','billing') | |
-| label | varchar(50) | NULL | "Home", "Office" |
-| line1 | varchar(255) | NOT NULL | |
-| line2 | varchar(255) | NULL | |
-| city | varchar(100) | NOT NULL | |
-| state | varchar(100) | NULL | Required for IN pincodes in practice (app validates) |
-| postal_code | varchar(20) | NOT NULL | 6-digit pincode validated in app |
-| country | varchar(2) | NOT NULL DEFAULT 'IN' | ISO-3166 alpha-2; IN-first per localization decision |
-| is_default | boolean | NOT NULL DEFAULT false | Checkout default |
-| created_at / updated_at | timestamptz | NOT NULL | |
+| id | uuid | PK | The person — orders and sizes point here, never at a credential |
+| user_id | uuid | NULL, UNIQUE, FK → users(id) ON DELETE CASCADE | The login this person owns; **NULL = managed family member with no email** (file 17) |
+| first_name | varchar(100) | NOT NULL | Moved from `users` — a name is person data |
+| last_name | varchar(100) | NOT NULL | Moved from `users` |
+| phone | varchar(20) | NULL | Moved from `users`; stored E.164 (`+91…`) when present |
+| date_of_birth | date | NULL | Optional — kid sizing over time, age-appropriate copy later |
+| created_at / updated_at | timestamptz | NOT NULL DEFAULT now() | Convention |
 
-Indexes: PK · `idx_addresses_user_id` (book load) ·
-`one_default_per_user` **partial unique (user_id) WHERE is_default**.
+Indexes: PK · unique `profiles_user_id_key` (session → profile — the hot
+auth join). Every profile holds **at most one** household membership
+(unique there); the signup/join transactions keep it exactly one.
+
+`addresses` moved to `17-Household-Accounts.md` §3 — the book is
+household-scoped (shared + personal rows), not login-scoped.
 
 ## 3. refresh_tokens
 
@@ -106,14 +106,16 @@ WHERE ur.user_id = $1 AND p.slug = $2;
 
 Flow: session cookie → `user_id` → role set (cached, 5-min TTL) →
 `(admin)` paths + `/api/admin/*` require `admin`; customer routes require
-ownership (`order.user_id = session user_id`), never a permission row.
+ownership (`order.placed_by_user_id = session user_id` — household
+visibility widens reads, file 17 §4), never a permission row.
 
 ## 6. customer_notes · staff_invitations · audit_logs
 
-- **customer_notes** (`user_id` FK cascade, `author_id` FK restrict,
-  `note` text): staff timeline on the customer record. Index on user
-  (timeline read). Author is RESTRICT — note history survives staff
-  offboarding.
+- **customer_notes** (`profile_id` FK cascade, `author_id` FK restrict,
+  `note` text): staff timeline on the customer **profile** — dependents
+  included, which is why it points at the person and not at a login row
+  (file 17 §7). Index on profile (timeline read). Author is RESTRICT —
+  note history survives staff offboarding.
 - **staff_invitations** (email, `role_id` FK restrict, token hash UNIQUE,
   status CHECK(pending/accepted/expired/revoked), expiry, inviter):
   invite flow for the team screen. Email index (accept lookup); no
@@ -136,3 +138,6 @@ ownership (`order.user_id = session user_id`), never a permission row.
   `idx_refresh_tokens_user_id`.
 - Login + refresh endpoints rate-limited (limits in `13-API-Contracts.md`).
 - `last_login_at` updates are fire-and-forget (never block the login response).
+- Signup creates `users` + `profiles` + a solo `households` +
+  `household_members` row in one TX (file 17 §4) — no user exists without
+  a person, no person without a household.

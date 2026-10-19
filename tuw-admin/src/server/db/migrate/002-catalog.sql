@@ -1,4 +1,4 @@
--- 002-catalog.sql — Catalog (16 tables)
+-- 002-catalog.sql — Catalog (13 tables; options trio removed for library)
 -- Source of truth: DOC/backend/04-Catalog.md (transcribed 1:1).
 -- Order: parents before children (categories/brands/charts/collections
 -- before products; products before everything referencing it).
@@ -66,6 +66,7 @@ CREATE TABLE products (
   brand_id           uuid          REFERENCES brands (id) ON DELETE SET NULL,
   size_chart_id      uuid          REFERENCES size_charts (id) ON DELETE SET NULL,
   price              DECIMAL(12,2) NOT NULL CHECK (price >= 0),
+  base_price         DECIMAL(12,2) CHECK (base_price >= 0),
   compare_at_price   DECIMAL(12,2) CHECK (compare_at_price >= 0),
   stock              integer       NOT NULL DEFAULT 0 CHECK (stock >= 0),
   status             varchar(20)   NOT NULL DEFAULT 'draft'
@@ -99,15 +100,16 @@ CREATE INDEX idx_products_active_price ON products (status, price)
 
 -- ------------------------------------------------------- product_variants
 CREATE TABLE product_variants (
-  id         uuid          PRIMARY KEY,
-  product_id uuid          NOT NULL REFERENCES products (id) ON DELETE CASCADE,
-  sku        varchar(64)   NOT NULL UNIQUE,
-  price      DECIMAL(12,2) NOT NULL CHECK (price >= 0),
-  stock      integer       NOT NULL DEFAULT 0 CHECK (stock >= 0),
-  image_url  varchar(2048),
-  is_active  boolean       NOT NULL DEFAULT true,
-  created_at timestamptz   NOT NULL DEFAULT now(),
-  updated_at timestamptz   NOT NULL DEFAULT now()
+  id               uuid          PRIMARY KEY,
+  product_id       uuid          NOT NULL REFERENCES products (id) ON DELETE CASCADE,
+  sku              varchar(64)   NOT NULL UNIQUE,
+  price            DECIMAL(12,2) NOT NULL CHECK (price >= 0),
+  price_overridden boolean       NOT NULL DEFAULT false,
+  stock            integer       NOT NULL DEFAULT 0 CHECK (stock >= 0),
+  image_url        varchar(2048),
+  is_active        boolean       NOT NULL DEFAULT true,
+  created_at       timestamptz   NOT NULL DEFAULT now(),
+  updated_at       timestamptz   NOT NULL DEFAULT now()
 );
 CREATE INDEX idx_product_variants_product_id ON product_variants (product_id);
 CREATE INDEX idx_product_variants_active ON product_variants (product_id)
@@ -130,44 +132,8 @@ CREATE INDEX idx_product_images_variant_id ON product_images (variant_id);
 CREATE UNIQUE INDEX one_primary_per_product ON product_images (product_id)
   WHERE is_primary;
 
--- -------------------------------------------------------- product_options
-CREATE TABLE product_options (
-  id              uuid         PRIMARY KEY,
-  product_id      uuid         NOT NULL REFERENCES products (id) ON DELETE CASCADE,
-  name            varchar(100) NOT NULL,
-  display_type    varchar(20)  NOT NULL DEFAULT 'pill'
-    CHECK (display_type IN ('pill','swatch','radio')),
-  show_on_pdp     boolean      NOT NULL DEFAULT true,
-  show_on_checkout boolean     NOT NULL DEFAULT false,
-  show_on_admin   boolean      NOT NULL DEFAULT true,
-  position        integer      NOT NULL DEFAULT 0,
-  created_at      timestamptz  NOT NULL DEFAULT now(),
-  updated_at      timestamptz  NOT NULL DEFAULT now(),
-  CHECK (show_on_pdp OR show_on_checkout OR show_on_admin)
-);
-CREATE INDEX idx_product_options_product_id ON product_options (product_id);
-
--- -------------------------------------------------- product_option_values
-CREATE TABLE product_option_values (
-  id         uuid         PRIMARY KEY,
-  option_id  uuid         NOT NULL REFERENCES product_options (id) ON DELETE CASCADE,
-  value      varchar(150) NOT NULL,
-  swatch_hex varchar(7)   CHECK (swatch_hex ~ '^#[0-9A-Fa-f]{6}$'),
-  position   integer      NOT NULL DEFAULT 0,
-  created_at timestamptz  NOT NULL DEFAULT now(),
-  UNIQUE (option_id, value)
-);
-
--- -------------------------------------------- product_variant_option_values
-CREATE TABLE product_variant_option_values (
-  variant_id      uuid NOT NULL REFERENCES product_variants (id) ON DELETE CASCADE,
-  option_id       uuid NOT NULL REFERENCES product_options (id) ON DELETE CASCADE,
-  option_value_id uuid NOT NULL REFERENCES product_option_values (id) ON DELETE RESTRICT,
-  PRIMARY KEY (variant_id, option_id)
-);
-CREATE INDEX idx_pvov_option_value_id
-  ON product_variant_option_values (option_value_id);
-CREATE INDEX idx_pvov_option_id ON product_variant_option_values (option_id);
+-- product_options trio REMOVED (single-record library replaces per-product
+-- copies; see 010-attr-library.sql). Nothing was ever built on them.
 
 -- ------------------------------------------------------ product_attributes
 CREATE TABLE product_attributes (

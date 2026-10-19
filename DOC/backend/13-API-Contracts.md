@@ -1,6 +1,6 @@
 # API Contracts — Monolith Routes
 
-> Status: Filling | Last Updated: 2026-10-15
+> Status: Filling | Last Updated: 2026-10-17
 > One API serving one first-party client — **no `/v1` segment** (versioning
 > retro-added only on a second client or breaking change). Handlers are
 > thin delegators to `server/<domain>` (file 01 §4); this file describes
@@ -25,18 +25,32 @@
 
 | Method | Path | Auth | Purpose |
 |---|---|---|---|
-| POST | `/register` | – | `{email, password, firstName, lastName}` → 201 user + tokens |
+| POST | `/register` | – | `{email, password, firstName, lastName}` → 201 user + profile + solo household + tokens |
 | POST | `/login` | – | credentials → tokens; 401 on bad |
 | POST | `/logout` | C | revoke family → 204 |
 | POST | `/refresh` | – | rotate by hash → new pair; reuse revokes family |
-| GET / PATCH | `/me` | C | profile read / partial update |
+| GET / PATCH | `/me` | C | my profile read / partial update (name/phone/DOB) |
 | PATCH | `/me/password` | C | revokes all sessions |
-| GET/POST | `/me/addresses` | C | book / add (default logic in service) |
+| GET/POST | `/me/addresses` | C | household book / add (shared or personal; default logic in service) |
 | PATCH/DELETE | `/me/addresses/:id` | C | edit / remove |
 | GET | `/users` | A | `?page=&status=` admin list |
 | PATCH | `/users/:id/status` | A | disable/enable |
 | GET/POST | `/roles` | A | list / create with permission slugs |
 | PATCH | `/users/:id/roles` | A | assign role slugs |
+
+## Household `/api/household`
+
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| GET | `/members` | C | "Order for" dropdown: profiles + `canLogIn` + saved sizes |
+| POST | `/members` | C manager | add managed member `{firstName, lastName, dateOfBirth?}` — no email, no invite |
+| PATCH | `/members/:profileId` | C self/manager | profile fields — the checkout "Edit member" panel calls this |
+| PUT | `/members/:profileId/sizes` | C self/manager | upsert size map `{categoryId: sizeValueId, …}` (full desired map) |
+| DELETE | `/members/:profileId` | C manager | managed member: delete (409 when order history exists); login member: fresh solo household (leave) |
+| POST / GET / DELETE | `/invitations` (+`/:id`) | C manager | join (email) / claim (`profileId`) links, 7-day expiry |
+
+Line-level size edits are cart-local and never call these routes
+(`17-Household-Accounts.md` §6).
 
 ## Catalog `/api/catalog`
 
@@ -56,10 +70,22 @@
 | GET | `/categories`, `/brands` | – | trees and brand pages (brands UI later) |
 | GET | `/collections/:slug` | – | collection page (junction read) |
 
+## Styling `/api/styling` (module — ships last; file 19)
+
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| GET | `/complete-the-look` | – | ranked complements (`?product=<slug>&limit=`); empty `data[]` when disabled or stock-dry — never an error |
+| POST | `/events` | – | impression/click/atc ingest, fire-and-forget (beacon class → 30/s) |
+
+Never writes cart/profile state; availability re-checked at serve time
+(file 19 §5). Cacheable while non-personalized (refinement stage 4
+switches it to per-session re-ranking).
+
 ## Cart `/api/cart` (auth or `x-session-id`)
 
 `GET /cart` · `POST /cart/items` · `PATCH /cart/items/:id` (qty) ·
 `DELETE /cart/items/:id` · `DELETE /cart/items` (`{ids[]}` batch) ·
+`PATCH /cart/recipient` (`{profileId|null}` — "Order for") ·
 `DELETE /cart` (clear) · `POST /cart/merge` (guest→user on login) ·
 wishlist `GET / POST / DELETE` trio. Side effects fire-and-forget.
 
@@ -67,9 +93,9 @@ wishlist `GET / POST / DELETE` trio. Side effects fire-and-forget.
 
 | Method | Path | Auth | Purpose |
 |---|---|---|---|
-| POST | `/checkout` | C + idempotency key | full TX scope (file 06); 409 on stock, 422 on coupon |
-| GET | `/orders/:id` | C owner / A | order + items + payments |
-| GET | `/me/orders` | C | cursor history |
+| POST | `/checkout` | C + idempotency key | full TX scope (file 06); copies `for_profile_id` from cart; 409 on stock, 422 on coupon |
+| GET | `/orders/:id` | C: placed-by or for-me / A | order + items + payments |
+| GET | `/me/orders` | C | cursor history (placed by me ∪ for me) |
 | GET | `/orders` | A | `?page=&status=&from=&to=&q=` |
 | PATCH | `/orders/:id/status` | A | status + history row |
 | POST | `/orders/:id/refund` | A | refund TX scope |

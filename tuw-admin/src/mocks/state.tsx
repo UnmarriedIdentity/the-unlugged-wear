@@ -18,6 +18,7 @@ import {
   DiscountCode,
   AbandonedCart,
   SizeChart,
+  LibraryAttribute,
   initialProducts,
   initialOrders,
   initialShipments,
@@ -33,6 +34,7 @@ import {
   initialDiscountCodes,
   initialAbandonedCarts,
   initialSizeCharts,
+  initialLibraryAttributes,
 } from './fixtures';
 import {
   synthesizeVariants,
@@ -75,6 +77,7 @@ interface AdminStateContextType {
   discountCodes: DiscountCode[];
   abandonedCarts: AbandonedCart[];
   sizeCharts: SizeChart[];
+  libraryAttributes: LibraryAttribute[];
 
   toasts: ToastMessage[];
   showToast: (toast: Omit<ToastMessage, 'id'>) => void;
@@ -128,6 +131,12 @@ interface AdminStateContextType {
   removeSizeChartRow: (chartId: string, size: string) => boolean;
   patchSizeChartCell: (chartId: string, size: string, key: string, raw: string) => boolean;
 
+  createLibraryAttribute: (name: string) => string | false;
+  deleteLibraryAttribute: (id: string) => boolean;
+  toggleLibraryAttribute: (id: string) => boolean;
+  addLibraryValue: (id: string, value: string) => boolean;
+  removeLibraryValue: (id: string, value: string) => boolean;
+
   resetDemoData: () => void;
 }
 
@@ -156,6 +165,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
   const [discountCodes, setDiscountCodes] = useState<DiscountCode[]>(initialDiscountCodes);
   const [abandonedCarts, setAbandonedCarts] = useState<AbandonedCart[]>(initialAbandonedCarts);
   const [sizeCharts, setSizeCharts] = useState<SizeChart[]>(initialSizeCharts);
+  const [libraryAttributes, setLibraryAttributes] = useState<LibraryAttribute[]>(initialLibraryAttributes);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -179,6 +189,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         if (parsed.discountCodes) setDiscountCodes(parsed.discountCodes);
         if (parsed.abandonedCarts) setAbandonedCarts(parsed.abandonedCarts);
         if (parsed.sizeCharts) setSizeCharts(parsed.sizeCharts);
+        if (parsed.libraryAttributes) setLibraryAttributes(parsed.libraryAttributes);
       }
     } catch {
       // Local storage fallback
@@ -204,6 +215,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
       discountCodes?: DiscountCode[];
       abandonedCarts?: AbandonedCart[];
       sizeCharts?: SizeChart[];
+      libraryAttributes?: LibraryAttribute[];
     }) => {
       try {
         const current = {
@@ -223,6 +235,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
           discountCodes,
           abandonedCarts,
           sizeCharts,
+          libraryAttributes,
           ...newState,
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
@@ -230,7 +243,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         // Storage quota / privacy protection
       }
     },
-    [activeRole, products, orders, shipments, refunds, returns, customers, supportTickets, collections, designs, team, settings, stockMovements, discountCodes, abandonedCarts, sizeCharts]
+    [activeRole, products, orders, shipments, refunds, returns, customers, supportTickets, collections, designs, team, settings, stockMovements, discountCodes, abandonedCarts, sizeCharts, libraryAttributes]
   );
 
   const showToast = useCallback((toast: Omit<ToastMessage, 'id'>) => {
@@ -918,6 +931,92 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     return true;
   };
 
+  // Attribute library (settings manager): copy-source for drawer drafts.
+  // Delete guards read persisted products (real check, not theater);
+  // disable always allowed — data preserved, picker hides it.
+  const createLibraryAttribute = (name: string): string | false => {
+    if (!canPerformAction('products')) return false;
+    const trimmed = name.trim();
+    if (!trimmed) return false;
+    if (libraryAttributes.some((a) => a.name.toLowerCase() === trimmed.toLowerCase())) {
+      showToast({ type: 'warning', title: 'Duplicate Attribute', description: `"${trimmed}" is already in the library.` });
+      return false;
+    }
+    const id = `LIB-${Date.now()}`;
+    const next = [...libraryAttributes, { id, name: trimmed, values: [], displayType: 'pill' as const, enabled: true }];
+    setLibraryAttributes(next);
+    persistState({ libraryAttributes: next });
+    return id;
+  };
+  const libraryUsedBy = (id: string, value?: string): string | null => {
+    const lib = libraryAttributes.find((a) => a.id === id);
+    const hit = products.find((p) =>
+      (p.attributes ?? []).some(
+        (a) =>
+          // id match first; name fallback catches legacy rows persisted
+          // before links existed (belt + suspenders, never silent).
+          (a.libraryId === id ||
+            (!a.libraryId && lib !== undefined && a.name.toLowerCase() === lib.name.toLowerCase())) &&
+          (value === undefined || a.values.some((v) => v.toLowerCase() === value.toLowerCase()))
+      )
+    );
+    return hit ? hit.name : null;
+  };
+  const deleteLibraryAttribute = (id: string) => {
+    if (!canPerformAction('products')) return false;
+    const target = libraryAttributes.find((a) => a.id === id);
+    if (!target) return false;
+    const usedBy = libraryUsedBy(id);
+    if (usedBy) {
+      showToast({ type: 'warning', title: 'Attribute In Use', description: `"${target.name}" is linked by ${usedBy} — unlink it there first.` });
+      return false;
+    }
+    const next = libraryAttributes.filter((a) => a.id !== id);
+    setLibraryAttributes(next);
+    persistState({ libraryAttributes: next });
+    return true;
+  };
+  const toggleLibraryAttribute = (id: string) => {
+    if (!canPerformAction('products')) return false;
+    const next = libraryAttributes.map((a) => (a.id === id ? { ...a, enabled: !a.enabled } : a));
+    setLibraryAttributes(next);
+    persistState({ libraryAttributes: next });
+    return true;
+  };
+  const addLibraryValue = (id: string, value: string) => {
+    if (!canPerformAction('products')) return false;
+    const trimmed = value.trim();
+    if (!trimmed) return false;
+    const target = libraryAttributes.find((a) => a.id === id);
+    if (!target) return false;
+    if (target.values.some((v) => v.toLowerCase() === trimmed.toLowerCase())) {
+      showToast({ type: 'warning', title: 'Duplicate Value', description: `"${trimmed}" is already a ${target.name} value.` });
+      return false;
+    }
+    const next = libraryAttributes.map((a) =>
+      a.id === id ? { ...a, values: [...a.values, trimmed] } : a
+    );
+    setLibraryAttributes(next);
+    persistState({ libraryAttributes: next });
+    return true;
+  };
+  const removeLibraryValue = (id: string, value: string) => {
+    if (!canPerformAction('products')) return false;
+    const target = libraryAttributes.find((a) => a.id === id);
+    if (!target) return false;
+    const usedBy = libraryUsedBy(id, value);
+    if (usedBy) {
+      showToast({ type: 'warning', title: 'Value In Use', description: `"${value}" is linked by ${usedBy} — remove it there first.` });
+      return false;
+    }
+    const next = libraryAttributes.map((a) =>
+      a.id === id ? { ...a, values: a.values.filter((v) => v !== value) } : a
+    );
+    setLibraryAttributes(next);
+    persistState({ libraryAttributes: next });
+    return true;
+  };
+
   const setScenario = (sc: DemoScenario) => {
     setScenarioState(sc);
     if (sc === 'empty') {
@@ -1015,6 +1114,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     setDiscountCodes(initialDiscountCodes);
     setAbandonedCarts(initialAbandonedCarts);
     setSizeCharts(initialSizeCharts);
+    setLibraryAttributes(initialLibraryAttributes);
 
     showToast({
       type: 'info',
@@ -1048,6 +1148,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         discountCodes,
         abandonedCarts,
         sizeCharts,
+        libraryAttributes,
         toasts,
         showToast,
         dismissToast,
@@ -1077,6 +1178,11 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         addSizeChartRow,
         removeSizeChartRow,
         patchSizeChartCell,
+        createLibraryAttribute,
+        deleteLibraryAttribute,
+        toggleLibraryAttribute,
+        addLibraryValue,
+        removeLibraryValue,
         resetDemoData,
       }}
     >
