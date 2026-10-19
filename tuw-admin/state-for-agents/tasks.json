@@ -8,16 +8,16 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 248,
+    "total": 255,
     "done": 225,
     "in_progress": 0,
-    "backlog": 23
+    "backlog": 30
   },
   "session": {
     "branch": "feat/search-modal",
     "tip": "d573776",
     "unpushed": ["d573776", "642627f", "5bce91b", "96f4e9b", "87a0e67", "7234b6d", "599716c", "09765b0", "34c7259", "73bd526", "c60ab7c", "3b335aa", "975d66e", "0845928", "6c0a940", "b7bb05b", "b257aa3", "3fd55f3", "b7e9f88", "cee9ef0", "b97e340"],
-    "next_up": "Wave-2 in user order: Section 1 Fulfillment — TL-UI-FUL-KPI done (7234b6d, awaiting browser check). Section 2 Collections — COMPLETE: parent TL-UI-COL-EDIT + children all done (DATA 87a0e67, TEST 96f4e9b, PICK 5bce91b, FORM 642627f, ED + ACT d573776) — create/edit drawer, custom SearchableSelect/MultiSelect dropdowns, searchable product picker, detail with real products, edit/duplicate/delete row actions; awaiting browser verification. Section 3 Product changes — TL-UI-PEDIT-IA parent + TL-UI-PEDIT-HOOK / SHELL / SPLIT / HEAD / RESET / CMP (CMP blocked on compare-at decision). Parked after: TL-UI-ADM-TABLES / ADM-INR / ADM-MONO, TL-UI-CMS-PERSIST, TL-UI-DESIGN-PLAN. Nothing in_progress — user picks the next task. PEDIT cleanup wave + fulfillment grid + collections wave pending browser verification. Then attribute edge log (file 18) → N1b write-through (display/visibility/hex + disclosure) → design-system tail (FX1/SEL/CBX/IMG) → DW2 pass → anim re-run; styling engine (file 19) is the project's FINAL feature — build it only after the core e-commerce app is complete; shipments partner-sync reframe; household UI build reads file 17",
+    "next_up": "Wave-2 in user order: Section 1 Fulfillment — TL-UI-FUL-KPI done (7234b6d, awaiting browser check). Section 2 Collections — COMPLETE: parent TL-UI-COL-EDIT + children all done (DATA 87a0e67, TEST 96f4e9b, PICK 5bce91b, FORM 642627f, ED + ACT d573776) — create/edit drawer, custom SearchableSelect/MultiSelect dropdowns, searchable product picker, detail with real products, edit/duplicate/delete row actions; awaiting browser verification. Section 3a NEW — TL-UI-ADM-DRAWERS: convert the 12 admin form modals to right-side drawers (children DRW-CONTENT / DRW-COMMERCE / DRW-SHIPPING / DRW-PEOPLE / DRW-STUDIO / DRW-CLEAN; the 4 confirm/review dialogs stay modals; raw selects swap to house primitives; $→₹ only inside touched lines). Section 3b Product changes — TL-UI-PEDIT-IA parent + TL-UI-PEDIT-HOOK / SHELL / SPLIT / HEAD / RESET / CMP (CMP blocked on compare-at decision). Parked after: TL-UI-ADM-TABLES / ADM-INR / ADM-MONO, TL-UI-CMS-PERSIST, TL-UI-DESIGN-PLAN. Nothing in_progress — user picks the next task. PEDIT cleanup wave + fulfillment grid + collections wave pending browser verification. Then attribute edge log (file 18) → N1b write-through (display/visibility/hex + disclosure) → design-system tail (FX1/SEL/CBX/IMG) → DW2 pass → anim re-run; styling engine (file 19) is the project's FINAL feature — build it only after the core e-commerce app is complete; shipments partner-sync reframe; household UI build reads file 17",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
       "dashboard D-series: KPI tiers, range/sort menus, badge mapping, calendar pills, header tint (360/768/1024/1440)",
@@ -3873,6 +3873,92 @@
         "covers derived counts, ordered resolution + unknown-id pruning, slugify/validate/uniqueness, legacy hydration migration, COL-xx id generation"
       ],
       "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-ADM-DRAWERS",
+      "title": "Admin form modals → drawers — side-panel conversion wave",
+      "status": "backlog",
+      "owner": "unassigned",
+      "log": "Approved 2026-10-20: convert the 12 multi-field form Modals into right-side Drawers (540px, footer submit via form attribute — collections pattern). Scope decisions: the 4 short confirm/review dialogs (delete static page, remove staff, delete collection, CSV import preview) stay modals; spotlight SearchModal stays an overlay; raw <select> fields inside converted forms swap to house Select/SearchableSelect primitives; $→₹ fixes limited to touched lines (full sweep stays TL-UI-ADM-INR)",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [
+        "Fulfillment page has a dead Modal import (never used) — removed in TL-UI-DRW-CLEAN",
+        "Storefront modals (account address/return, size guide) intentionally out of scope — separate app"
+      ]
+    },
+    {
+      "id": "TL-UI-DRW-CONTENT",
+      "title": "Content modals → drawers — pages create, media upload, nav add/edit, journal story",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-UI-ADM-DRAWERS",
+      "log": "Swap 5 form modals in content/* for right-side Drawers; footer submit via form attribute; nav/journal raw <select> + journal raw textarea to house primitives; the existing edit-page Drawer is the mirror reference",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-DRW-COMMERCE",
+      "title": "Orders & refunds modals → drawers — create order, order refund, issue refund",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-UI-ADM-DRAWERS",
+      "log": "Create Order + Validated Refund (orders) and Issue Refund (refunds) become drawers; product/order pickers become searchable SearchableSelect; payment/reason/method selects via house Select; $→₹ inside touched lines; refund validation + preserved input behavior identical",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-DRW-SHIPPING",
+      "title": "Shipments create modal → drawer",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-UI-ADM-DRAWERS",
+      "log": "Create Outbound Shipment as drawer; order picker searchable with ₹ totals; carrier select via house Select",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-DRW-PEOPLE",
+      "title": "Customers add + team invite modals → drawers",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-UI-ADM-DRAWERS",
+      "log": "Add Customer and Invite Staff become drawers; labels normalize to Input label props; tier/role selects via house Select",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-DRW-STUDIO",
+      "title": "Designs upload modal → drawer",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-UI-ADM-DRAWERS",
+      "log": "Upload Apparel Artwork Spec as drawer; dropzone visuals + file simulation preserved; category/placement selects via house Select",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-DRW-CLEAN",
+      "title": "Prune dead Modal imports + confirm remaining modal inventory",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-UI-ADM-DRAWERS",
+      "log": "Remove unused Modal imports (fulfillment dead import; any converted file); grep-verify only the 4 confirmed dialogs + spotlight SearchModal + Modal primitive remain",
+      "design_match": "pending",
+      "verified": false,
       "pushed": false,
       "follow_ups": []
     },
