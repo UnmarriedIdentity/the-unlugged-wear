@@ -52,6 +52,7 @@ export default function DropdownMenu({
   const anim = usePopoverAnimation(menuOpen, () => setMenuOpen(false));
   const opensUp = direction === 'up';
   const wrapRef = React.useRef<HTMLDivElement>(null);
+  const menuRef = React.useRef<HTMLDivElement>(null);
   const [anchor, setAnchor] = React.useState<{
     top: number;
     bottom: number;
@@ -76,15 +77,21 @@ export default function DropdownMenu({
     setMenuOpen((v) => !v);
   };
 
-  // Fixed menus can't ride scrolling — close on any scroll/resize while open.
+  // Fixed menus can't ride scrolling — close on outside scroll/resize while
+  // open. Scrolling inside the menu itself (overflowing item lists) keeps it open.
   React.useEffect(() => {
     if (!anim.visible) return;
-    const close = () => setMenuOpen(false);
-    window.addEventListener('scroll', close, true);
-    window.addEventListener('resize', close);
+    const handleScroll = (event: Event) => {
+      const target = event.target;
+      if (target instanceof Node && menuRef.current?.contains(target)) return;
+      setMenuOpen(false);
+    };
+    const handleResize = () => setMenuOpen(false);
+    window.addEventListener('scroll', handleScroll, true);
+    window.addEventListener('resize', handleResize);
     return () => {
-      window.removeEventListener('scroll', close, true);
-      window.removeEventListener('resize', close);
+      window.removeEventListener('scroll', handleScroll, true);
+      window.removeEventListener('resize', handleResize);
     };
   }, [anim.visible]);
 
@@ -101,6 +108,7 @@ export default function DropdownMenu({
             style={{ position: 'fixed', inset: 0, zIndex: 40, cursor: 'default' }}
           />
           <div
+            ref={menuRef}
             role="menu"
             aria-label={ariaLabel}
             onClick={(e) => e.stopPropagation()}

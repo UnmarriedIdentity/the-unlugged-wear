@@ -101,6 +101,7 @@ function SearchableSelectCore({
   const triggerRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
   const optionRefs = useRef<Array<HTMLDivElement | null>>([]);
   const generatedId = React.useId();
   const listId = `${generatedId}-listbox`;
@@ -140,15 +141,21 @@ function SearchableSelectCore({
     setActiveIndex((index) => Math.min(Math.max(0, index), Math.max(0, filtered.length - 1)));
   }, [filtered.length]);
 
-  // Close the fixed popover when the page moves under it.
+  // Close the fixed popover when the page moves under it — but never when the
+  // scroll happens inside the popover itself (the option list).
   useEffect(() => {
     if (!anim.visible) return;
-    const close = () => setOpen(false);
-    window.addEventListener('scroll', close, true);
-    window.addEventListener('resize', close);
+    const handleScroll = (event: Event) => {
+      const target = event.target;
+      if (target instanceof Node && popoverRef.current?.contains(target)) return;
+      setOpen(false);
+    };
+    const handleResize = () => setOpen(false);
+    window.addEventListener('scroll', handleScroll, true);
+    window.addEventListener('resize', handleResize);
     return () => {
-      window.removeEventListener('scroll', close, true);
-      window.removeEventListener('resize', close);
+      window.removeEventListener('scroll', handleScroll, true);
+      window.removeEventListener('resize', handleResize);
     };
   }, [anim.visible]);
 
@@ -480,7 +487,7 @@ function SearchableSelectCore({
             onClick={close}
             style={{ position: 'fixed', inset: 0, zIndex: 40, cursor: 'default' }}
           />
-          <div style={popoverStyle} onClick={(event) => event.stopPropagation()}>
+          <div ref={popoverRef} style={popoverStyle} onClick={(event) => event.stopPropagation()}>
             {searchable && (
               <div
                 style={{
