@@ -236,7 +236,8 @@ export interface CollectionItem {
   name: string;
   slug: string;
   season: string;
-  productCount: number;
+  /** Ordered product links — the single source of truth for count + content. */
+  productIds: string[];
   visibility: 'published' | 'draft' | 'scheduled';
   updatedAt: string;
   description: string;
@@ -1480,7 +1481,7 @@ export const initialCollections: CollectionItem[] = [
     name: 'Autumn/Winter Urban Minimal',
     slug: 'aw-urban-minimal',
     season: 'AW26',
-    productCount: 24,
+    productIds: ['PRD-02', 'PRD-03', 'PRD-04', 'PRD-05'],
     visibility: 'published',
     updatedAt: '16 Apr 2026',
     description: 'Structured silhouettes in heavyweight cottons, gabardine wools, and muted slate palettes.',
@@ -1490,7 +1491,7 @@ export const initialCollections: CollectionItem[] = [
     name: 'Core Heavyweight Basics',
     slug: 'core-heavyweight-basics',
     season: 'Perennial',
-    productCount: 18,
+    productIds: ['PRD-01', 'PRD-02', 'PRD-09'],
     visibility: 'published',
     updatedAt: '12 Apr 2026',
     description: 'High-density French terry and combed jersey fundamentals designed to last seasons.',
@@ -1500,7 +1501,7 @@ export const initialCollections: CollectionItem[] = [
     name: 'Unplugged Monochrome Series',
     slug: 'unplugged-monochrome',
     season: 'Limited Edition',
-    productCount: 12,
+    productIds: ['PRD-06', 'PRD-07'],
     visibility: 'scheduled',
     updatedAt: '10 Apr 2026',
     description: 'Experimental audio-visual soundwave screenprints in pitch black and optical white.',
@@ -1510,7 +1511,7 @@ export const initialCollections: CollectionItem[] = [
     name: 'Summer Archival Restock',
     slug: 'summer-archival',
     season: 'SS26',
-    productCount: 9,
+    productIds: ['PRD-03', 'PRD-05'],
     visibility: 'draft',
     updatedAt: '05 Apr 2026',
     description: 'Archived lightweight resort silhouettes and relaxed drop-shoulder linen blends.',

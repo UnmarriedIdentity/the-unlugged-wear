@@ -43,6 +43,7 @@ import {
   deriveSizes,
   variantStockTotal,
 } from './variants';
+import { normalizeCollection, nextCollectionId, type LegacyCollection } from '@/lib/collections';
 
 export interface ToastMessage {
   id: string;
@@ -113,6 +114,7 @@ interface AdminStateContextType {
   sendSupportReply: (ticketId: string, replyText: string, silent?: boolean) => boolean;
 
   createCollection: (col: Omit<CollectionItem, 'id' | 'updatedAt'>) => boolean;
+  updateCollection: (id: string, patch: Partial<Omit<CollectionItem, 'id' | 'updatedAt'>>) => boolean;
   uploadDesignAsset: (asset: Omit<DesignAsset, 'id' | 'updatedAt'>) => boolean;
 
   inviteTeamMember: (member: Omit<TeamMember, 'id' | 'lastActive' | 'avatarBg'>) => boolean;
@@ -203,7 +205,18 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         if (parsed.returns) setReturns(parsed.returns);
         if (parsed.customers) setCustomers(parsed.customers);
         if (parsed.supportTickets) setSupportTickets(parsed.supportTickets);
-        if (parsed.collections) setCollections(parsed.collections);
+        if (parsed.collections) {
+          // One-time migration: legacy rows carried a fabricated productCount.
+          // Keep real productIds when present (deduped, unknown ids pruned);
+          // otherwise [] — links are never invented. Reset Demo restores the
+          // baseline fixture links.
+          const validProductIds = new Set<string>(
+            ((parsed.products as ProductItem[] | undefined) ?? initialProducts).map((p) => p.id)
+          );
+          setCollections(
+            (parsed.collections as LegacyCollection[]).map((c) => normalizeCollection(c, validProductIds))
+          );
+        }
         if (parsed.designs) setDesigns(parsed.designs);
         if (parsed.team) setTeam(parsed.team);
         if (parsed.settings) setSettings({
@@ -753,7 +766,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     if (!canPerformAction('products')) return false;
     const newCol: CollectionItem = {
       ...col,
-      id: `COL-${Math.floor(10 + Math.random() * 90)}`,
+      id: nextCollectionId(collections),
       updatedAt: 'Just now',
     };
     const next = [newCol, ...collections];
@@ -763,6 +776,23 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
       type: 'success',
       title: 'Collection Created',
       description: `"${col.name}" is now ready for storefront curation.`,
+    });
+    return true;
+  };
+
+  const updateCollection = (id: string, patch: Partial<Omit<CollectionItem, 'id' | 'updatedAt'>>) => {
+    if (!canPerformAction('products')) return false;
+    const target = collections.find((c) => c.id === id);
+    if (!target) return false;
+    const next = collections.map((c) =>
+      c.id === id ? { ...c, ...patch, id: c.id, updatedAt: 'Just now' } : c
+    );
+    setCollections(next);
+    persistState({ collections: next });
+    showToast({
+      type: 'success',
+      title: 'Collection Updated',
+      description: `"${patch.name ?? target.name}" saved to the storefront catalog.`,
     });
     return true;
   };
@@ -1237,6 +1267,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         createCustomer,
         sendSupportReply,
         createCollection,
+        updateCollection,
         uploadDesignAsset,
         inviteTeamMember,
         removeTeamMember,

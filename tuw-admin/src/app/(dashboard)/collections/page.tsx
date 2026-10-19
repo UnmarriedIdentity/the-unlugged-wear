@@ -6,6 +6,7 @@ import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination,
 import { Layers, Plus, Search, Filter, Sparkles, FolderTree, Edit3 } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { CollectionItem } from '@/mocks/fixtures';
+import { collectionCount } from '@/lib/collections';
 
 export default function CollectionsPage() {
   const { collections, createCollection, products, canPerformAction } = useAdminState();
@@ -45,7 +46,7 @@ export default function CollectionsPage() {
       name: formName || 'New Seasonal Series',
       slug: formSlug || formName.toLowerCase().replace(/\s+/g, '-'),
       season: formSeason,
-      productCount: selectedProductIds.length || 6,
+      productIds: selectedProductIds,
       visibility: formVisibility,
       description: formDescription,
     });
@@ -124,7 +125,7 @@ export default function CollectionsPage() {
                   /{item.slug}
                 </TableCell>
                 <TableCell style={{ padding: '14px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
-                  {item.productCount} items
+                  {collectionCount(item)} items
                 </TableCell>
                 <TableCell style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
                   {item.season}
@@ -176,7 +177,7 @@ export default function CollectionsPage() {
               </div>
             </HeroCard>
 
-            <DrawerSection title={`Included Products (${selectedCol.productCount})`} titleGap={10}>
+            <DrawerSection title={`Included Products (${collectionCount(selectedCol)})`} titleGap={10}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {products.slice(0, 4).map((p) => (
                   <ItemsRow
