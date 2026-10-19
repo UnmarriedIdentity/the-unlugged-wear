@@ -120,13 +120,6 @@ export default function FulfillmentPage() {
       {/* Live Metric Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
         <StatCard
-          label="Wallet Credits"
-          value="₹12,500"
-          subtitle="Rs.1 = 1 credit · demo balance, live wallet connects at backend"
-          trendType="neutral"
-          hoverable
-        />
-        <StatCard
           label="Submission Failed"
           value={String(failedOrders.length)}
           subtitle={failedOrders.length > 0 ? 'Requires partner retry' : 'Zero sync errors'}
