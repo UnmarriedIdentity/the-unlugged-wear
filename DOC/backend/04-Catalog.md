@@ -61,7 +61,7 @@ No seed, no UI, no queries in v1 — launch is seed + UI only.
 | category_id | uuid | NULL, FK → categories(id) ON DELETE SET NULL | Unassigned allowed; deleting a category must not delete products |
 | brand_id | uuid | NULL, FK → brands(id) ON DELETE SET NULL | Brands deferred — always nullable |
 | size_chart_id | uuid | NULL, FK → size_charts(id) ON DELETE SET NULL | Garment measuring (see size_charts) |
-| price | DECIMAL(12,2) | NOT NULL, CHECK (price >= 0) | Listed price — materialized minimum of effective variant prices ("From $X"); written by the pipeline, never typed |
+| price | DECIMAL(12,2) | NOT NULL, CHECK (price >= 0) | Listed price — materialized minimum of effective variant prices ("From ₹X"); written by the pipeline, never typed |
 | base_price | DECIMAL(12,2) | NULL, CHECK (base_price >= 0) | Editable pricing anchor; derived cells = base_price + Σ adjustments; NULL = price is the anchor (simple products) |
 | compare_at_price | DECIMAL(12,2) | NULL, CHECK (compare_at_price >= 0) | "Was" price, not a discount engine |
 | stock | integer | NOT NULL DEFAULT 0, CHECK (stock >= 0) | Balance; ledger in stock_movements |
@@ -86,6 +86,9 @@ Indexes: PK · unique sku · unique slug · `idx_products_category_id` ·
 tags · unique partial `products_source_external_key (source, external_id)
 WHERE external_id IS NOT NULL` (idempotent re-imports) · partial
 `idx_products_active_price (status, price) WHERE status='active'`.
+
+**UI draft units:** `weight` / `shippingWeight` are typed in whole grams and
+map to `weight_g` / `shipping_weight_g`; CSV import keeps the same headers.
 
 ## product_variants
 
@@ -132,6 +135,14 @@ Indexes: PK · `(product_id, sort_order)` (gallery read) ·
 `idx_product_images_variant_id` · partial unique `one_primary_per_product
 (product_id) WHERE is_primary`.
 
+**UI contract (shared gallery):** the admin draft stores one ordered
+`images: string[]` on the product. Index 0 is the cover and the listing
+thumbnail; Set Cover moves that image to index 0. There is no separate hero
+`image` or per-product `imageBg` — legacy localStorage `image` values migrate
+to `images[0]` on hydration, while an existing saved gallery order wins.
+`images[]` maps 1:1 to `product_images` ordered by `sort_order`;
+`is_primary` mirrors `sort_order = 0` at the API boundary.
+
 ## attribute_definitions + attribute_values + links (library — the single source)
 
 | Table | Column | Type | Constraints | Reason |
@@ -157,6 +168,15 @@ Indexes: PK · `(product_id, sort_order)` (gallery read) ·
 Indexes: PKs · unique `attribute_definitions.name` · unique
 `(definition_id, value)` on values · composite link PKs serve both join
 directions (product→definitions, definition→products).
+
+**Visibility is global (UI wave):** `show_on_pdp` / `show_on_checkout` /
+`show_on_admin` live on the definition and apply to every product linked to
+it. At least one stays true — the admin refuses the last surface with a
+naming toast. There are no product-level visibility overrides; the product
+drawer shows read-only surface chips and links to Settings → Attributes.
+The `admin` flag is an internal-ops placement hint, not editor access:
+every linked attribute stays editable per product, and values/upcharges stay
+per-product in `product_attribute_link_values`.
 
 In-use guard (R2): deletion refuses while any row references the value —
 product links or family size preferences (`profile_size_preferences`,

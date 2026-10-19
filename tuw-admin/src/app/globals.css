@@ -2157,6 +2157,16 @@
   color: var(--tuw-action-primary, #7539FF) !important;
 }
 
+/* Shared row hover (VPRICE-4): addressable table rows get a quiet canvas
+   wash so wide rows track horizontally (variant matrix, list tables).
+   Opt-in via TableRow's `hoverable` prop (default true); header rows pass
+   hoverable={false}. !important wins over primitive inline bases (e.g. the
+   products list's transparent/selected inline background), same precedent
+   as .tuw-danger-hover / .tuw-stat-hover. */
+.tuw-row-hover:hover {
+  background-color: var(--tuw-bg-canvas, #F7F8F9) !important;
+}
+
 /* Native number-spinner kill (ED2): hides the OS up/down arrows on numeric
    inputs (e.g. the Stepper's click-to-type field) so the slot keeps its
    exact geometry. Shared/reusable for every future numeric input. */

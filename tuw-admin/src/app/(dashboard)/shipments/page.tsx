@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader, HeroCard, DrawerSection } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Select, SearchableSelect, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader, HeroCard, DrawerSection } from '@/components/ui';
 import { Truck, Search, Filter, Download, ExternalLink, Calendar, MapPin, Clock, Plus } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { ShipmentItem } from '@/mocks/fixtures';
@@ -272,56 +272,51 @@ export default function ShipmentsPage() {
         )}
       </Drawer>
 
-      {/* Create Shipment Modal */}
-      <Modal
+      {/* Create Shipment Drawer */}
+      <Drawer
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
         title="Create Outbound Shipment"
         subtitle="Generate a courier dispatch manifest record"
+        width="540px"
         footer={
-          <div style={{ display: 'flex', gap: 10 }}>
-            <Button variant="secondary" size="md" onClick={() => setIsCreateOpen(false)}>
+          <>
+            <Button variant="secondary" size="md" type="button" onClick={() => setIsCreateOpen(false)}>
               Cancel
             </Button>
-            <Button variant="primary" size="md" onClick={handleCreateSubmit}>
+            <Button variant="primary" size="md" type="submit" form="shipment-create-form">
               Generate Manifest
             </Button>
-          </div>
+          </>
         }
       >
-        <form onSubmit={handleCreateSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <div>
-            <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
-              Select Order
-            </label>
-            <select
-              value={formOrderId}
-              onChange={(e) => setFormOrderId(e.target.value)}
-              style={{ width: '100%', height: 40, borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '0 10px', fontSize: 13 }}
-            >
-              {orders.map((o) => (
-                <option key={o.id} value={o.id}>
-                  {o.id} — {o.customerName} (${o.total.toFixed(2)})
-                </option>
-              ))}
-            </select>
-          </div>
+        <form id="shipment-create-form" onSubmit={handleCreateSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <SearchableSelect
+            label="Select Order"
+            options={orders.map((o) => ({
+              value: o.id,
+              label: `${o.id} — ${o.customerName}`,
+              meta: `₹${o.total.toFixed(2)}`,
+              keywords: `${o.id} ${o.customerName}`,
+            }))}
+            value={formOrderId}
+            onChange={setFormOrderId}
+            searchable
+            searchPlaceholder="Search orders by ID or customer…"
+            emptyText="No orders match your search."
+          />
 
-          <div>
-            <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
-              Courier Carrier
-            </label>
-            <select
-              value={formCarrier}
-              onChange={(e) => setFormCarrier(e.target.value)}
-              style={{ width: '100%', height: 40, borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '0 10px', fontSize: 13 }}
-            >
-              <option value="DHL Express Worldwide">DHL Express Worldwide</option>
-              <option value="FedEx Priority">FedEx Priority</option>
-              <option value="UPS Ground">UPS Ground</option>
-              <option value="Bluedart Air Express">Bluedart Air Express</option>
-            </select>
-          </div>
+          <Select
+            label="Courier Carrier"
+            value={formCarrier}
+            onChange={(e) => setFormCarrier(e.target.value)}
+            options={[
+              { value: 'DHL Express Worldwide', label: 'DHL Express Worldwide' },
+              { value: 'FedEx Priority', label: 'FedEx Priority' },
+              { value: 'UPS Ground', label: 'UPS Ground' },
+              { value: 'Bluedart Air Express', label: 'Bluedart Air Express' },
+            ]}
+          />
 
           <Input
             label="Tracking Number"
@@ -353,7 +348,7 @@ export default function ShipmentsPage() {
             />
           </div>
         </form>
-      </Modal>
+      </Drawer>
     </DashboardShell>
   );
 }

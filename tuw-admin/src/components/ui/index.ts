@@ -25,6 +25,13 @@ export type { TextareaProps } from './Textarea';
 export { default as Select } from './Select';
 export type { SelectProps, SelectOption } from './Select';
 
+export { default as SearchableSelect, SearchableMultiSelect } from './SearchableSelect';
+export type {
+  SearchableSelectProps,
+  SearchableMultiSelectProps,
+  SearchableSelectOption,
+} from './SearchableSelect';
+
 export { default as Checkbox } from './Checkbox';
 export type { CheckboxProps } from './Checkbox';
 

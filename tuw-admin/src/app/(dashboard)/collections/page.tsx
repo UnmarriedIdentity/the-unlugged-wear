@@ -1,31 +1,55 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader, HeroCard, DrawerSection, ItemsRow } from '@/components/ui';
-import { Layers, Plus, Search, Filter, Sparkles, FolderTree, Edit3 } from 'lucide-react';
+import {
+  ContentCard,
+  StatCard,
+  Badge,
+  Button,
+  DropdownMenu,
+  IconButton,
+  Input,
+  Modal,
+  Pagination,
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+  PageHeader,
+} from '@/components/ui';
+import { Plus, Search, MoreHorizontal } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
-import { CollectionItem } from '@/mocks/fixtures';
+import type { CollectionItem } from '@/mocks/fixtures';
+import { collectionCount, uniqueSlug } from '@/lib/collections';
+import CollectionFormDrawer from './_components/collections/CollectionFormDrawer';
+import CollectionDetailDrawer from './_components/collections/CollectionDetailDrawer';
 
 export default function CollectionsPage() {
-  const { collections, createCollection, products, canPerformAction } = useAdminState();
+  const { collections, createCollection, deleteCollection, products, canPerformAction } =
+    useAdminState();
+  const canManage = canPerformAction('products');
+
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(6);
 
-  // Modals & Drawers
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [selectedCol, setSelectedCol] = useState<CollectionItem | null>(null);
+  // Drawers & confirm dialog. Detail/edit are id-driven so the open surface
+  // always reflects live state (no stale snapshots after a save).
+  const [selectedColId, setSelectedColId] = useState<string | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [returnToDetailId, setReturnToDetailId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<CollectionItem | null>(null);
 
-  // Form State
-  const [formName, setFormName] = useState('');
-  const [formSlug, setFormSlug] = useState('');
-  const [formSeason, setFormSeason] = useState('AW26');
-  const [formVisibility, setFormVisibility] = useState<CollectionItem['visibility']>('published');
-  const [formDescription, setFormDescription] = useState('Curated apparel grouping.');
-  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
+  const selectedCol = selectedColId
+    ? (collections.find((c) => c.id === selectedColId) ?? null)
+    : null;
+  const editingCol = editingId ? (collections.find((c) => c.id === editingId) ?? null) : null;
 
-  React.useEffect(() => {
+  useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
 
@@ -39,28 +63,67 @@ export default function CollectionsPage() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const paginated = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
-  const handleCreateSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    createCollection({
-      name: formName || 'New Seasonal Series',
-      slug: formSlug || formName.toLowerCase().replace(/\s+/g, '-'),
-      season: formSeason,
-      productCount: selectedProductIds.length || 6,
-      visibility: formVisibility,
-      description: formDescription,
-    });
-    setIsCreateOpen(false);
-    setFormName('');
-    setFormSlug('');
+  const openCreate = () => {
+    if (!canManage) return;
+    setEditingId(null);
+    setReturnToDetailId(null);
+    setFormOpen(true);
   };
 
-  const toggleProductSelect = (id: string) => {
-    if (selectedProductIds.includes(id)) {
-      setSelectedProductIds(selectedProductIds.filter((pId) => pId !== id));
-    } else {
-      setSelectedProductIds([...selectedProductIds, id]);
-    }
+  const openEdit = (id: string, fromDetail = false) => {
+    if (!canManage) return;
+    setReturnToDetailId(fromDetail ? id : null);
+    setSelectedColId(null);
+    setEditingId(id);
+    setFormOpen(true);
   };
+
+  const closeForm = () => {
+    setFormOpen(false);
+    setEditingId(null);
+  };
+
+  const handleSaved = (id: string) => {
+    // Edited from the detail drawer → reopen it with the fresh data.
+    if (returnToDetailId === id) setSelectedColId(id);
+    setReturnToDetailId(null);
+  };
+
+  const handleDuplicate = (col: CollectionItem) => {
+    if (!canManage) return;
+    const name = `${col.name} (Copy)`;
+    createCollection({
+      name,
+      slug: uniqueSlug(name, collections),
+      season: col.season,
+      visibility: 'draft',
+      description: col.description,
+      productIds: [...col.productIds],
+    });
+  };
+
+  const handleRowAction = (col: CollectionItem, action: string) => {
+    if (action === 'view') setSelectedColId(col.id);
+    else if (action === 'edit') openEdit(col.id);
+    else if (action === 'duplicate') handleDuplicate(col);
+    else if (action === 'delete') setDeleteTarget(col);
+  };
+
+  const confirmDelete = () => {
+    if (!deleteTarget) return;
+    const deleted = deleteCollection(deleteTarget.id);
+    if (deleted && selectedColId === deleteTarget.id) setSelectedColId(null);
+    setDeleteTarget(null);
+  };
+
+  const actionItems = canManage
+    ? [
+        { value: 'view', label: 'View details' },
+        { value: 'edit', label: 'Edit collection' },
+        { value: 'duplicate', label: 'Duplicate' },
+        { value: 'delete', label: 'Delete collection', danger: true },
+      ]
+    : [{ value: 'view', label: 'View details' }];
 
   return (
     <DashboardShell pageTitle="Collections">
@@ -71,9 +134,9 @@ export default function CollectionsPage() {
             variant="primary"
             size="md"
             icon={<Plus size={16} />}
-            onClick={() => {
-              if (canPerformAction('products')) setIsCreateOpen(true);
-            }}
+            disabled={!canManage}
+            title={canManage ? undefined : 'Your demo role cannot manage collections'}
+            onClick={openCreate}
           >
             Create Collection
           </Button>
@@ -114,7 +177,7 @@ export default function CollectionsPage() {
             {paginated.map((item) => (
               <TableRow
                 key={item.id}
-                onClick={() => setSelectedCol(item)}
+                onClick={() => setSelectedColId(item.id)}
                 style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', cursor: 'pointer' }}
               >
                 <TableCell style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
@@ -124,7 +187,7 @@ export default function CollectionsPage() {
                   /{item.slug}
                 </TableCell>
                 <TableCell style={{ padding: '14px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
-                  {item.productCount} items
+                  {collectionCount(item)} items
                 </TableCell>
                 <TableCell style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
                   {item.season}
@@ -135,9 +198,24 @@ export default function CollectionsPage() {
                   {item.visibility === 'draft' && <Badge variant="neutral">Draft</Badge>}
                 </TableCell>
                 <TableCell style={{ padding: '14px 16px', textAlign: 'right' }}>
-                  <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedCol(item); }}>
-                    View
-                  </Button>
+                  <div
+                    onClick={(e) => e.stopPropagation()}
+                    style={{ display: 'inline-flex', justifyContent: 'flex-end' }}
+                  >
+                    <DropdownMenu
+                      trigger={
+                        <IconButton
+                          label={`Actions for ${item.name}`}
+                          icon={<MoreHorizontal size={18} />}
+                          size="sm"
+                        />
+                      }
+                      items={actionItems}
+                      onSelect={(action) => handleRowAction(item, action)}
+                      ariaLabel={`Actions for ${item.name}`}
+                      align="right"
+                    />
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
@@ -158,121 +236,42 @@ export default function CollectionsPage() {
         />
       </ContentCard>
 
-      {/* Collection Detail Drawer */}
-      <Drawer
-        isOpen={Boolean(selectedCol)}
-        onClose={() => setSelectedCol(null)}
-        title={selectedCol ? selectedCol.name : 'Collection Detail'}
-        subtitle={selectedCol ? `${selectedCol.season} · /${selectedCol.slug}` : ''}
-      >
-        {selectedCol && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            <HeroCard>
-              <div>
-                <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>Editorial Overview</div>
-                <p style={{ fontSize: 14, color: 'var(--tuw-text-primary, #262626)', marginTop: 4, lineHeight: 1.5 }}>
-                  {selectedCol.description}
-                </p>
-              </div>
-            </HeroCard>
+      <CollectionDetailDrawer
+        collection={selectedCol}
+        products={products}
+        canEdit={canManage}
+        onClose={() => setSelectedColId(null)}
+        onEdit={(id) => openEdit(id, true)}
+      />
 
-            <DrawerSection title={`Included Products (${selectedCol.productCount})`} titleGap={10}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {products.slice(0, 4).map((p) => (
-                  <ItemsRow
-                    key={p.id}
-                    pad={10}
-                    left={
-                      <div>
-                        <strong>{p.name}</strong> · {p.category}
-                      </div>
-                    }
-                    right={<div style={{ fontWeight: 600 }}>${p.price.toFixed(2)}</div>}
-                  />
-                ))}
-              </div>
-            </DrawerSection>
-          </div>
-        )}
-      </Drawer>
+      <CollectionFormDrawer
+        isOpen={formOpen}
+        collection={editingCol}
+        onClose={closeForm}
+        onSaved={handleSaved}
+      />
 
-      {/* Create Collection Modal */}
       <Modal
-        isOpen={isCreateOpen}
-        onClose={() => setIsCreateOpen(false)}
-        title="Create New Collection"
-        subtitle="Group catalog items into a seasonal release"
+        isOpen={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+        title="Delete collection?"
+        subtitle={deleteTarget ? deleteTarget.name : ''}
         footer={
-          <div style={{ display: 'flex', gap: 10 }}>
-            <Button variant="secondary" size="md" onClick={() => setIsCreateOpen(false)}>
+          <>
+            <Button variant="secondary" size="md" onClick={() => setDeleteTarget(null)}>
               Cancel
             </Button>
-            <Button variant="primary" size="md" onClick={handleCreateSubmit}>
-              Save Collection
+            <Button variant="danger" size="md" onClick={confirmDelete}>
+              Delete Collection
             </Button>
-          </div>
+          </>
         }
       >
-        <form onSubmit={handleCreateSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <Input
-            label="Collection Title"
-            placeholder="e.g. Spring Minimalist Capsule"
-            value={formName}
-            onChange={(e) => {
-              setFormName(e.target.value);
-              if (!formSlug) setFormSlug(e.target.value.toLowerCase().replace(/\s+/g, '-'));
-            }}
-            required
-          />
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <Input
-              label="URL Slug"
-              value={formSlug}
-              onChange={(e) => setFormSlug(e.target.value)}
-              required
-            />
-            <Input
-              label="Season / Year"
-              value={formSeason}
-              onChange={(e) => setFormSeason(e.target.value)}
-              required
-            />
-          </div>
-
-          <div>
-            <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
-              Visibility Status
-            </label>
-            <select
-              value={formVisibility}
-              onChange={(e) => setFormVisibility(e.target.value as CollectionItem['visibility'])}
-              style={{ width: '100%', height: 40, borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '0 10px', fontSize: 13 }}
-            >
-              <option value="published">Published (Live in Navigation)</option>
-              <option value="scheduled">Scheduled Drop</option>
-              <option value="draft">Draft (Editorial review only)</option>
-            </select>
-          </div>
-
-          <div>
-            <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
-              Select Products for Collection
-            </label>
-            <div style={{ maxHeight: 160, overflowY: 'auto', border: '1px solid var(--tuw-border-subtle, #E2E4E6)', borderRadius: 8, padding: 8 }}>
-              {products.map((p) => (
-                <label key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', fontSize: 13, cursor: 'pointer' }}>
-                  <input
-                    type="checkbox"
-                    checked={selectedProductIds.includes(p.id)}
-                    onChange={() => toggleProductSelect(p.id)}
-                  />
-                  <span>{p.name} ({p.category}) — ${p.price.toFixed(2)}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        </form>
+        <p style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
+          This removes <strong style={{ color: 'var(--tuw-text-primary, #262626)' }}>{deleteTarget?.name}</strong> from
+          the demo workspace. Products stay in the catalog. This can&apos;t be undone — use Reset Demo to restore the
+          baseline collections.
+        </p>
       </Modal>
     </DashboardShell>
   );

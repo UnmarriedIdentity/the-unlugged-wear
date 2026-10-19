@@ -10,7 +10,6 @@ import {
   Button,
   Input,
   Select,
-  Modal,
   Drawer,
   EmptyState,
   PageHeader,
@@ -374,14 +373,25 @@ export default function NavigationPage() {
         )}
       </ContentCard>
 
-      {/* Add Item Modal */}
-      <Modal
+      {/* Add Item Drawer */}
+      <Drawer
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         title="Add Navigation Item"
         subtitle="Insert a link into the navigation hierarchy."
+        width="540px"
+        footer={
+          <>
+            <Button variant="secondary" size="md" type="button" onClick={() => setIsAddModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" size="md" type="submit" form="nav-add-form">
+              Add Link
+            </Button>
+          </>
+        }
       >
-        <form onSubmit={handleAddItem} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <form id="nav-add-form" onSubmit={handleAddItem} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <Input
             label="Display Label"
             placeholder="e.g. Heavyweight Hoodies"
@@ -399,32 +409,35 @@ export default function NavigationPage() {
           <Select
             label="Menu Location"
             value={newGroup}
-            onChange={(val) => setNewGroup(val as any)}
+            onChange={(e) => setNewGroup(e.target.value as any)}
             options={[
               { value: 'header', label: 'Main Header Navigation' },
               { value: 'footer_shop', label: 'Footer — Explore & Care' },
               { value: 'footer_legal', label: 'Footer — Legal & Policies' },
             ]}
           />
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}>
-            <Button variant="secondary" onClick={() => setIsAddModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="primary" type="submit">
-              Add Link
-            </Button>
-          </div>
         </form>
-      </Modal>
+      </Drawer>
 
-      {/* Edit Item Modal */}
-      <Modal
+      {/* Edit Item Drawer */}
+      <Drawer
         isOpen={Boolean(editingItem)}
         onClose={() => setEditingItem(null)}
         title="Edit Navigation Link"
+        width="540px"
+        footer={
+          <>
+            <Button variant="secondary" size="md" type="button" onClick={() => setEditingItem(null)}>
+              Cancel
+            </Button>
+            <Button variant="primary" size="md" type="submit" form="nav-edit-form">
+              Save Link
+            </Button>
+          </>
+        }
       >
         {editingItem && (
-          <form onSubmit={handleSaveEdit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <form id="nav-edit-form" onSubmit={handleSaveEdit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <Input
               label="Display Label"
               value={editingItem.label}
@@ -437,17 +450,9 @@ export default function NavigationPage() {
               onChange={(e) => setEditingItem({ ...editingItem, url: e.target.value })}
               required
             />
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}>
-              <Button variant="secondary" onClick={() => setEditingItem(null)}>
-                Cancel
-              </Button>
-              <Button variant="primary" type="submit">
-                Save Link
-              </Button>
-            </div>
           </form>
         )}
-      </Modal>
+      </Drawer>
     </DashboardShell>
   );
 }

@@ -16,6 +16,7 @@ export default function AttributesSettingsPage() {
     createLibraryAttribute,
     deleteLibraryAttribute,
     toggleLibraryAttribute,
+    setLibraryVisibility,
     addLibraryValue,
     removeLibraryValue,
   } = useAdminState();
@@ -126,7 +127,8 @@ export default function AttributesSettingsPage() {
 
           <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
             Starter values products copy from. Disabled attributes hide from the product picker.
-            Deletes are blocked while any product uses the name or value.
+            Visibility applies to every product using the attribute; deletes are blocked while any
+            product uses the name or value.
           </p>
 
           {filtered.length === 0 ? (
@@ -162,6 +164,34 @@ export default function AttributesSettingsPage() {
                           <Trash2 size={14} />
                         </button>
                       </UpliftSurface>
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingTop: 10, borderTop: '1px solid var(--tuw-border-subtle, #E5E7EB)' }}>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                      Shown on
+                    </span>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+                      <Switch
+                        label="PDP"
+                        ariaLabel={`Show ${attr.name} on product pages`}
+                        checked={attr.showOnPdp}
+                        onChange={(v) => setLibraryVisibility(attr.id, 'pdp', v)}
+                      />
+                      <Switch
+                        label="Checkout"
+                        ariaLabel={`Show ${attr.name} at checkout`}
+                        checked={attr.showOnCheckout}
+                        onChange={(v) => setLibraryVisibility(attr.id, 'checkout', v)}
+                      />
+                      <Switch
+                        label="Admin"
+                        ariaLabel={`Show ${attr.name} in the admin workspace`}
+                        checked={attr.showOnAdmin}
+                        onChange={(v) => setLibraryVisibility(attr.id, 'admin', v)}
+                      />
+                    </div>
+                    <span style={{ fontSize: 11, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                      Applies to every product using {attr.name}; at least one surface stays on.
                     </span>
                   </div>
                   {attr.values.length > 0 ? (

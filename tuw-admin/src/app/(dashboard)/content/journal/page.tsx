@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader, HeroCard, DrawerSection } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Select, Textarea, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader, HeroCard, DrawerSection } from '@/components/ui';
 import { BookOpen, Plus, ArrowLeft, Search, Eye, Edit3 } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 
@@ -270,24 +270,25 @@ export default function JournalPage() {
         )}
       </Drawer>
 
-      {/* New Story Modal */}
-      <Modal
+      {/* New Story Drawer */}
+      <Drawer
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
         title="Compose Editorial Story"
         subtitle="Publish lookbook reflections and brand journalism to storefront"
+        width="540px"
         footer={
-          <div style={{ display: 'flex', gap: 10 }}>
-            <Button variant="secondary" size="md" onClick={() => setIsCreateOpen(false)}>
+          <>
+            <Button variant="secondary" size="md" type="button" onClick={() => setIsCreateOpen(false)}>
               Cancel
             </Button>
-            <Button variant="primary" size="md" onClick={handleCreateSubmit}>
+            <Button variant="primary" size="md" type="submit" form="journal-create-form">
               Save Story
             </Button>
-          </div>
+          </>
         }
       >
-        <form onSubmit={handleCreateSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <form id="journal-create-form" onSubmit={handleCreateSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <Input
             label="Story Title"
             placeholder="e.g. Architectural Tailoring in Minimalist Apparel"
@@ -306,51 +307,38 @@ export default function JournalPage() {
               onChange={(e) => setFormSlug(e.target.value)}
               required
             />
-            <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
-                Category
-              </label>
-              <select
-                value={formCategory}
-                onChange={(e) => setFormCategory(e.target.value as StoryItem['category'])}
-                style={{ width: '100%', height: 40, borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '0 10px', fontSize: 13 }}
-              >
-                <option value="Design Notes">Design Notes</option>
-                <option value="Lookbook">Lookbook</option>
-                <option value="Sustainability">Sustainability</option>
-                <option value="Culture">Culture</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
-              Publication Status
-            </label>
-            <select
-              value={formStatus}
-              onChange={(e) => setFormStatus(e.target.value as StoryItem['status'])}
-              style={{ width: '100%', height: 40, borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '0 10px', fontSize: 13 }}
-            >
-              <option value="published">Published (Live on blog)</option>
-              <option value="draft">Draft (Editorial review)</option>
-            </select>
-          </div>
-
-          <div>
-            <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
-              Story Summary / Excerpt
-            </label>
-            <textarea
-              rows={4}
-              value={formExcerpt}
-              onChange={(e) => setFormExcerpt(e.target.value)}
-              placeholder="Lead narrative summary..."
-              style={{ width: '100%', borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '8px 12px', fontSize: 13, fontFamily: 'inherit' }}
+            <Select
+              label="Category"
+              value={formCategory}
+              onChange={(e) => setFormCategory(e.target.value as StoryItem['category'])}
+              options={[
+                { value: 'Design Notes', label: 'Design Notes' },
+                { value: 'Lookbook', label: 'Lookbook' },
+                { value: 'Sustainability', label: 'Sustainability' },
+                { value: 'Culture', label: 'Culture' },
+              ]}
             />
           </div>
+
+          <Select
+            label="Publication Status"
+            value={formStatus}
+            onChange={(e) => setFormStatus(e.target.value as StoryItem['status'])}
+            options={[
+              { value: 'published', label: 'Published (Live on blog)' },
+              { value: 'draft', label: 'Draft (Editorial review)' },
+            ]}
+          />
+
+          <Textarea
+            label="Story Summary / Excerpt"
+            rows={4}
+            value={formExcerpt}
+            onChange={(e) => setFormExcerpt(e.target.value)}
+            placeholder="Lead narrative summary..."
+          />
         </form>
-      </Modal>
+      </Drawer>
     </DashboardShell>
   );
 }

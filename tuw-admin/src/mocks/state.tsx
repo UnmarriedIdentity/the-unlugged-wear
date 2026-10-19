@@ -35,6 +35,7 @@ import {
   initialAbandonedCarts,
   initialSizeCharts,
   initialLibraryAttributes,
+  defaultLibraryVisibility,
 } from './fixtures';
 import {
   synthesizeVariants,
@@ -42,6 +43,7 @@ import {
   deriveSizes,
   variantStockTotal,
 } from './variants';
+import { normalizeCollection, nextCollectionId, type LegacyCollection } from '@/lib/collections';
 
 export interface ToastMessage {
   id: string;
@@ -112,6 +114,8 @@ interface AdminStateContextType {
   sendSupportReply: (ticketId: string, replyText: string, silent?: boolean) => boolean;
 
   createCollection: (col: Omit<CollectionItem, 'id' | 'updatedAt'>) => boolean;
+  updateCollection: (id: string, patch: Partial<Omit<CollectionItem, 'id' | 'updatedAt'>>) => boolean;
+  deleteCollection: (id: string) => boolean;
   uploadDesignAsset: (asset: Omit<DesignAsset, 'id' | 'updatedAt'>) => boolean;
 
   inviteTeamMember: (member: Omit<TeamMember, 'id' | 'lastActive' | 'avatarBg'>) => boolean;
@@ -134,6 +138,7 @@ interface AdminStateContextType {
   createLibraryAttribute: (name: string) => string | false;
   deleteLibraryAttribute: (id: string) => boolean;
   toggleLibraryAttribute: (id: string) => boolean;
+  setLibraryVisibility: (id: string, surface: 'pdp' | 'checkout' | 'admin', on: boolean) => boolean;
   addLibraryValue: (id: string, value: string) => boolean;
   removeLibraryValue: (id: string, value: string) => boolean;
 
@@ -174,22 +179,70 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed.activeRole) setActiveRoleState(parsed.activeRole);
-        if (parsed.products) setProducts(parsed.products);
+        if (parsed.products) {
+          // One-time gallery migration: legacy hero `image` becomes the first
+          // ordered gallery entry (cover). Drop the old gradient field.
+          setProducts(
+            (parsed.products as Array<ProductItem & { image?: string }>).map((p) => {
+              const legacy = p as ProductItem & { image?: string; imageBg?: string };
+              const rest = { ...legacy };
+              delete rest.image;
+              delete rest.imageBg;
+              return {
+                ...rest,
+                images:
+                  Array.isArray(p.images) && p.images.length > 0
+                    ? [...p.images]
+                    : legacy.image
+                      ? [legacy.image]
+                      : [],
+              };
+            })
+          );
+        }
         if (parsed.orders) setOrders(parsed.orders);
         if (parsed.shipments) setShipments(parsed.shipments);
         if (parsed.refunds) setRefunds(parsed.refunds);
         if (parsed.returns) setReturns(parsed.returns);
         if (parsed.customers) setCustomers(parsed.customers);
         if (parsed.supportTickets) setSupportTickets(parsed.supportTickets);
-        if (parsed.collections) setCollections(parsed.collections);
+        if (parsed.collections) {
+          // One-time migration: legacy rows carried a fabricated productCount.
+          // Keep real productIds when present (deduped, unknown ids pruned);
+          // otherwise [] — links are never invented. Reset Demo restores the
+          // baseline fixture links.
+          const validProductIds = new Set<string>(
+            ((parsed.products as ProductItem[] | undefined) ?? initialProducts).map((p) => p.id)
+          );
+          setCollections(
+            (parsed.collections as LegacyCollection[]).map((c) => normalizeCollection(c, validProductIds))
+          );
+        }
         if (parsed.designs) setDesigns(parsed.designs);
         if (parsed.team) setTeam(parsed.team);
-        if (parsed.settings) setSettings(parsed.settings);
+        if (parsed.settings) setSettings({
+          ...parsed.settings,
+          defaultCurrency: 'INR (₹)',
+          // Legacy demo shipping defaults → INR-scale (storefront parity).
+          freeShippingThreshold:
+            parsed.settings.freeShippingThreshold === 150 ? 3000 : parsed.settings.freeShippingThreshold,
+          standardShippingFee:
+            parsed.settings.standardShippingFee === 12 ? 150 : parsed.settings.standardShippingFee,
+        });
         if (parsed.stockMovements) setStockMovements(parsed.stockMovements);
         if (parsed.discountCodes) setDiscountCodes(parsed.discountCodes);
         if (parsed.abandonedCarts) setAbandonedCarts(parsed.abandonedCarts);
         if (parsed.sizeCharts) setSizeCharts(parsed.sizeCharts);
-        if (parsed.libraryAttributes) setLibraryAttributes(parsed.libraryAttributes);
+        if (parsed.libraryAttributes) {
+          // One-time normalization: visibility moved from per-product rows
+          // to the definition. Legacy records gain the global defaults.
+          setLibraryAttributes(
+            (parsed.libraryAttributes as LibraryAttribute[]).map((a) => ({
+              ...defaultLibraryVisibility(a.name),
+              ...a,
+            }))
+          );
+        }
       }
     } catch {
       // Local storage fallback
@@ -305,14 +358,13 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
   // MUTATION IMPLEMENTATIONS
   // -------------------------------------------------------------
 
-  const createProduct = (p: Omit<ProductItem, 'id' | 'soldCount' | 'rating' | 'variants' | 'images'>, silent = false) => {
+  const createProduct = (p: Omit<ProductItem, 'id' | 'soldCount' | 'rating' | 'variants'>, silent = false) => {
     if (!canPerformAction('products')) return false;
     const id = `PRD-${Math.floor(10 + Math.random() * 90)}`;
     const newProduct: ProductItem = {
       ...p,
       id,
       variants: synthesizeVariants({ id, price: p.price, stock: p.stock, colors: p.colors, sizes: p.sizes }),
-      images: [],
       soldCount: 0,
       rating: 5.0,
     };
@@ -596,7 +648,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
             {
               title: `Refund Processed (${newRefundId})`,
               time: 'Just now',
-              note: `$${params.amount.toFixed(2)} refunded via ${params.method}. Reason: ${params.reason}`,
+              note: `₹${params.amount.toFixed(2)} refunded via ${params.method}. Reason: ${params.reason}`,
             },
             ...o.timeline,
           ],
@@ -610,7 +662,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     showToast({
       type: 'success',
       title: 'Refund Successfully Disbursed',
-      description: `$${params.amount.toFixed(2)} refunded for ${params.orderId} via ${params.method}.`,
+      description: `₹${params.amount.toFixed(2)} refunded for ${params.orderId} via ${params.method}.`,
     });
 
     return { success: true };
@@ -715,7 +767,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     if (!canPerformAction('products')) return false;
     const newCol: CollectionItem = {
       ...col,
-      id: `COL-${Math.floor(10 + Math.random() * 90)}`,
+      id: nextCollectionId(collections),
       updatedAt: 'Just now',
     };
     const next = [newCol, ...collections];
@@ -725,6 +777,38 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
       type: 'success',
       title: 'Collection Created',
       description: `"${col.name}" is now ready for storefront curation.`,
+    });
+    return true;
+  };
+
+  const updateCollection = (id: string, patch: Partial<Omit<CollectionItem, 'id' | 'updatedAt'>>) => {
+    if (!canPerformAction('products')) return false;
+    const target = collections.find((c) => c.id === id);
+    if (!target) return false;
+    const next = collections.map((c) =>
+      c.id === id ? { ...c, ...patch, id: c.id, updatedAt: 'Just now' } : c
+    );
+    setCollections(next);
+    persistState({ collections: next });
+    showToast({
+      type: 'success',
+      title: 'Collection Updated',
+      description: `"${patch.name ?? target.name}" saved to the storefront catalog.`,
+    });
+    return true;
+  };
+
+  const deleteCollection = (id: string) => {
+    if (!canPerformAction('products')) return false;
+    const target = collections.find((c) => c.id === id);
+    if (!target) return false;
+    const next = collections.filter((c) => c.id !== id);
+    setCollections(next);
+    persistState({ collections: next });
+    showToast({
+      type: 'success',
+      title: 'Collection Deleted',
+      description: `"${target.name}" removed from the demo catalog.`,
     });
     return true;
   };
@@ -943,7 +1027,10 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
       return false;
     }
     const id = `LIB-${Date.now()}`;
-    const next = [...libraryAttributes, { id, name: trimmed, values: [], displayType: 'pill' as const, enabled: true }];
+    const next = [
+      ...libraryAttributes,
+      { id, name: trimmed, values: [], displayType: 'pill' as const, enabled: true, ...defaultLibraryVisibility(trimmed) },
+    ];
     setLibraryAttributes(next);
     persistState({ libraryAttributes: next });
     return id;
@@ -979,6 +1066,37 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
   const toggleLibraryAttribute = (id: string) => {
     if (!canPerformAction('products')) return false;
     const next = libraryAttributes.map((a) => (a.id === id ? { ...a, enabled: !a.enabled } : a));
+    setLibraryAttributes(next);
+    persistState({ libraryAttributes: next });
+    return true;
+  };
+  // Global visibility (X1a): one definition controls every product using it.
+  // Refusing the last surface keeps at least one render target alive.
+  const setLibraryVisibility = (
+    id: string,
+    surface: 'pdp' | 'checkout' | 'admin',
+    on: boolean
+  ) => {
+    if (!canPerformAction('products')) return false;
+    const target = libraryAttributes.find((a) => a.id === id);
+    if (!target) return false;
+    const nextTarget: LibraryAttribute = {
+      ...target,
+      ...(surface === 'pdp'
+        ? { showOnPdp: on }
+        : surface === 'checkout'
+          ? { showOnCheckout: on }
+          : { showOnAdmin: on }),
+    };
+    if (!nextTarget.showOnPdp && !nextTarget.showOnCheckout && !nextTarget.showOnAdmin) {
+      showToast({
+        type: 'warning',
+        title: 'Visibility Required',
+        description: `"${target.name}" must show on at least one surface.`,
+      });
+      return false;
+    }
+    const next = libraryAttributes.map((a) => (a.id === id ? nextTarget : a));
     setLibraryAttributes(next);
     persistState({ libraryAttributes: next });
     return true;
@@ -1165,6 +1283,8 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         createCustomer,
         sendSupportReply,
         createCollection,
+        updateCollection,
+        deleteCollection,
         uploadDesignAsset,
         inviteTeamMember,
         removeTeamMember,
@@ -1181,6 +1301,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         createLibraryAttribute,
         deleteLibraryAttribute,
         toggleLibraryAttribute,
+        setLibraryVisibility,
         addLibraryValue,
         removeLibraryValue,
         resetDemoData,

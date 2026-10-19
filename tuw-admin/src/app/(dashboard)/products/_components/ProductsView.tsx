@@ -99,7 +99,7 @@ export default function ProductsView() {
     setIsCreating(true);
     setProductTab('general');
     setDrawerView('compact');
-    preTableView.current = null;
+    autoExpandedRef.current = false;
     setStageIndex(0);
     setFormName('');
     setFormSlug('');
@@ -116,25 +116,21 @@ export default function ProductsView() {
     setFormDiscounts([]);
     setFormSizeChartId('');
     setFormAttributes([
-      { name: 'Color', values: ['Black', 'Chalk White', 'Olive'], builtin: true, displayType: 'swatch', swatchHex: {}, visibleOn: ['pdp', 'admin'], libraryId: 'LIB-01' },
-      { name: 'Size', values: ['S', 'M', 'L', 'XL'], builtin: true, displayType: 'pill', swatchHex: {}, visibleOn: ['pdp', 'admin'], libraryId: 'LIB-02' },
-      { name: 'Placements', values: [], builtin: true, displayType: 'radio', swatchHex: {}, visibleOn: ['admin'], libraryId: 'LIB-03' },
+      { name: 'Color', values: ['Black', 'Chalk White', 'Olive'], builtin: true, displayType: 'swatch', swatchHex: {}, libraryId: 'LIB-01' },
+      { name: 'Size', values: ['S', 'M', 'L', 'XL'], builtin: true, displayType: 'pill', swatchHex: {}, libraryId: 'LIB-02' },
+      { name: 'Placements', values: [], builtin: true, displayType: 'radio', swatchHex: {}, libraryId: 'LIB-03' },
     ]);
     setFormPartner('Qikink Direct API');
     setFormPlacement('Chest (45mm)');
     setFormStatus('published');
     setFormDescription('Pre-shrunk premium heavyweight combed cotton with reinforced seams.');
-    setFormVideo('');
     setFormPhoto({ layout: 'carousel', ratio: '4:3', showPhotos: true });
     setFormImages([]);
-    setUploadReel((prev) => {
-      if (prev) revokeUploads([{ url: prev.url }]);
-      return null;
-    });
     setAddImageUrl('');
     setFormVariants([]);
     setFormAdjustments({});
     setAdjustmentDrafts({});
+    setPriceDrafts({});
     setFormFabricGsm('');
     setFormCut('');
     setFormModelDims('');
@@ -142,13 +138,10 @@ export default function ProductsView() {
     setFormMonogramEnabled(false);
     setFormMonogramChars('3');
     setFormMonogramUpcharge('12.00');
-    setFormSeoTitle('');
-    setFormSeoDescription('');
   };
 
   // Drawer tab + media draft state (elastic workspace; tabs grow per phase)
-  const [productTab, setProductTab] = useState<'general' | 'media' | 'variants' | 'specs' | 'seo'>('general');
-  const [formVideo, setFormVideo] = useState('');
+  const [productTab, setProductTab] = useState<'general' | 'media' | 'variants' | 'specs'>('general');
   // Gallery presentation draft (P1a): PDP stage layout + ratio + visibility.
   const [formPhoto, setFormPhoto] = useState<PhotoSettings>({ layout: 'carousel', ratio: '4:3', showPhotos: true });
   const photoAspect = formPhoto.ratio === '1:1' ? '1 / 1' : formPhoto.ratio === '16:9' ? '16 / 9' : '4 / 3';
@@ -157,7 +150,6 @@ export default function ProductsView() {
   // the save toast states this demo truth outright.
   const [addImageUrl, setAddImageUrl] = useState('');
   const photoInputRef = useRef<HTMLInputElement>(null);
-  const videoInputRef = useRef<HTMLInputElement>(null);
 
   const revokeUploads = (uploads: Array<{ url: string }>) => {
     uploads.forEach((u) => {
@@ -176,7 +168,6 @@ export default function ProductsView() {
   const [formImages, setFormImages] = useState<
     Array<{ id: string; src: string; name: string; persisted: boolean }>
   >([]);
-  const [uploadReel, setUploadReel] = useState<{ id: string; url: string; name: string } | null>(null);
 
   const baseName = (url: string) => {
     const part = url.split('?')[0].split('/');
@@ -226,23 +217,19 @@ export default function ProductsView() {
     return () => ro.disconnect();
   }, [productTab]);
 
-  // Elastic view ownership (W1): products drives the Drawer size per tab.
-  // Entering Variants from compact stashes the choice and forces matrix
-  // (never full); leaving restores the stash. Manual picks always win —
-  // forcing fires on tab-enter only, never fights the hand on the control.
+  // Elastic view ownership (W1) + expand-once (VPRICE-4): the first hop into
+  // Variants widens compact → matrix (never full) so the matrix fits; after
+  // that the width is the user's choice and tab switches never resize the
+  // drawer (no 520↔880 yoyo while hopping tabs).
   const [drawerView, setDrawerView] = useState<'compact' | 'matrix' | 'full'>('compact');
-  const preTableView = useRef<'compact' | 'matrix' | 'full' | null>(null);
-  const prevTab = useRef<'general' | 'media' | 'variants' | 'specs' | 'seo'>('general');
+  const autoExpandedRef = useRef(false);
+  const prevTab = useRef<'general' | 'media' | 'variants' | 'specs'>('general');
   React.useEffect(() => {
     const entered = prevTab.current !== 'variants' && productTab === 'variants';
-    const left = prevTab.current === 'variants' && productTab !== 'variants';
     prevTab.current = productTab;
-    if (entered && drawerView === 'compact') {
-      preTableView.current = 'compact';
+    if (entered && drawerView === 'compact' && !autoExpandedRef.current) {
+      autoExpandedRef.current = true;
       setDrawerView('matrix');
-    } else if (left && preTableView.current !== null) {
-      setDrawerView(preTableView.current);
-      preTableView.current = null;
     }
   }, [productTab, drawerView]);
 
@@ -277,21 +264,10 @@ export default function ProductsView() {
       if (f.type.startsWith('image/')) {
         const url = URL.createObjectURL(f);
         setFormImages((prev) => [...prev, { id: `up-${Date.now()}-${f.name}`, src: url, name: f.name, persisted: false }]);
-      } else if (f.type.startsWith('video/')) {
-        const hasReel = formVideo !== '' || uploadReel !== null;
-        if (hasReel) {
-          showToast({
-            type: 'warning',
-            title: 'One Video Reel Only',
-            description: 'Remove the current reel before adding another.',
-          });
-          return;
-        }
-        setUploadReel({ id: `up-${Date.now()}`, url: URL.createObjectURL(f), name: f.name });
       }
     });
   };
-  // Apparel + SEO draft state (specs/SEO tabs; all optional — fixtures stay valid)
+  // Apparel draft state (specs tab; all optional — fixtures stay valid)
   const [formFabricGsm, setFormFabricGsm] = useState('');
   const [formCut, setFormCut] = useState('');
   const [formModelDims, setFormModelDims] = useState('');
@@ -299,14 +275,15 @@ export default function ProductsView() {
   const [formMonogramEnabled, setFormMonogramEnabled] = useState(false);
   const [formMonogramChars, setFormMonogramChars] = useState('3');
   const [formMonogramUpcharge, setFormMonogramUpcharge] = useState('12.00');
-  const [formSeoTitle, setFormSeoTitle] = useState('');
-  const [formSeoDescription, setFormSeoDescription] = useState('');
-  // Section visibility (persisted demo pref; all-visible default)
-  const [visibleSections, setVisibleSections] = useState({ video: true, monogram: true });
+  // Section visibility (persisted demo pref; monogram visible by default)
+  const [visibleSections, setVisibleSections] = useState({ monogram: true });
   React.useEffect(() => {
     try {
       const raw = localStorage.getItem('tuw_admin_v2_product_editor');
-      if (raw) setVisibleSections((prev) => ({ ...prev, ...JSON.parse(raw) }));
+      if (raw) {
+        const saved = JSON.parse(raw) as { monogram?: boolean };
+        if (typeof saved.monogram === 'boolean') setVisibleSections({ monogram: saved.monogram });
+      }
     } catch {
       /* private mode — defaults stand */
     }
@@ -329,6 +306,11 @@ export default function ProductsView() {
   // commits are live, blur normalizes the display back to committed truth.
   const [adjustmentDrafts, setAdjustmentDrafts] = useState<Record<string, string>>({});
 
+  // Matrix price drafts (VPRICE-4): same raw-string pattern for the price
+  // column — text fields type decimals cleanly ("61." stays "61."), commits
+  // stay live (typing pins the cell), blur snaps back to the 2dp truth.
+  const [priceDrafts, setPriceDrafts] = useState<Record<string, string>>({});
+
   const setAdjustment = (key: string, amount: number | null) => {
     const nextAdj = { ...formAdjustments };
     if (amount === null) delete nextAdj[key];
@@ -338,6 +320,9 @@ export default function ProductsView() {
   };
 
   const writeAdjustment = (key: string, raw: string) => {
+    // Money keys only (VPRICE-4): the boxes are text fields now, so decimals
+    // type cleanly while letters and stray characters never enter state.
+    if (!/^\d*\.?\d*$/.test(raw)) return;
     setAdjustmentDrafts((prev) => {
       const next = { ...prev };
       if (raw === '') delete next[key];
@@ -361,10 +346,24 @@ export default function ProductsView() {
     });
   };
 
+  // Price-cell draft clear (VPRICE-4): blur drops the raw string so the
+  // cell re-renders the committed 2dp value.
+  const clearPriceDraft = (id: string) => {
+    setPriceDrafts((prev) => {
+      if (prev[id] === undefined) return prev;
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  };
+
   // Base price write (R1): re-derives every unpinned cell from
   // base + Σ adjustments; explicit overrides stay pinned. This replaces
   // the old write-all that trampled per-cell overrides on every keystroke.
   const writeBasePrice = (priceStr: string) => {
+    // Money keys only (VPRICE-4): the field is text now (clean decimals),
+    // so refuse anything that is not digits with at most one dot.
+    if (!/^\d*\.?\d*$/.test(priceStr)) return;
     setFormPrice(priceStr);
     const n = parseFloat(priceStr);
     if (isNaN(n) || n < 0) return;
@@ -495,7 +494,7 @@ export default function ProductsView() {
     const lib = libraryAttributes.find((l) => l.name.toLowerCase() === name.toLowerCase());
     const linkedId = lib?.id ?? createLibraryAttribute(name);
     if (!linkedId) return;
-    setFormAttributes((prev) => [...prev, { name, values: [], builtin: false, displayType: 'pill', swatchHex: {}, visibleOn: ['pdp', 'admin'], libraryId: linkedId }]);
+    setFormAttributes((prev) => [...prev, { name, values: [], builtin: false, displayType: 'pill', swatchHex: {}, libraryId: linkedId }]);
     setNewAttrName('');
     if (!lib) {
       showToast({ type: 'info', title: 'Registered in Library', description: `"${name}" now lives in the attribute library too.` });
@@ -533,7 +532,6 @@ export default function ProductsView() {
         builtin: false,
         displayType: lib.displayType,
         swatchHex: {},
-        visibleOn: ['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'>,
         libraryId: lib.id,
       },
     ]);
@@ -564,37 +562,17 @@ export default function ProductsView() {
       prev.map((a) => (a.name === name ? { ...a, swatchHex: { ...a.swatchHex, [value]: hex } } : a))
     );
   };
-  // Visibility toggles (X1a): at least one surface always — unchecking the
-  // last one is refused with a naming toast, input preserved.
-  const toggleVisibility = (name: string, surface: 'pdp' | 'checkout' | 'admin') => {
-    const attr = formAttributes.find((a) => a.name === name);
-    if (!attr) return;
-    const has = (attr.visibleOn ?? []).includes(surface);
-    if (has && (attr.visibleOn ?? []).length === 1) {
-      showToast({
-        type: 'warning',
-        title: 'Visibility Required',
-        description: `"${name}" must show on at least one surface.`,
-      });
-      return;
-    }
-    setFormAttributes((prev) =>
-      prev.map((a) =>
-        a.name === name
-          ? {
-              ...a,
-              visibleOn: has
-                ? (a.visibleOn ?? []).filter((s) => s !== surface)
-                : [...(a.visibleOn ?? []), surface],
-            }
-          : a
-      )
-    );
+  // Shared attribute card (Y1b): PDP section and the Internal block render
+  // the same card. hideDisplay drops the storefront picker where it has no
+  // meaning (attributes not shown on the PDP). Visibility itself is global:
+  // the card reports the linked library record and links out to Settings.
+  const libraryOf = (attr: ProductAttribute) =>
+    libraryAttributes.find((l) => l.id === attr.libraryId) ??
+    libraryAttributes.find((l) => l.name.toLowerCase() === attr.name.toLowerCase());
+  const showsOnPdp = (attr: ProductAttribute) => {
+    const lib = libraryOf(attr);
+    return lib ? lib.showOnPdp : attr.name !== 'Placements';
   };
-
-  // Shared attribute card (Y1b): PDP section and the Internal Placements
-  // block render the same card. hideDisplay drops the storefront picker
-  // where it has no meaning (admin-only attributes).
   const renderAttrCard = (attr: ProductAttribute, hideDisplay = false) => (
     <SurfaceCard key={attr.name} padding="12px" gap="10px">
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
@@ -668,18 +646,39 @@ export default function ProductsView() {
         />
       </div>
       )}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-          Shows on
+          Shown on
         </span>
-        {(['pdp', 'checkout', 'admin'] as const).map((surface) => (
-          <Checkbox
-            key={surface}
-            label={surface === 'pdp' ? 'PDP' : surface === 'checkout' ? 'Checkout' : 'Admin-only'}
-            checked={(attr.visibleOn ?? []).includes(surface)}
-            onChange={() => toggleVisibility(attr.name, surface)}
-          />
-        ))}
+        {(() => {
+          const lib = libraryOf(attr);
+          const surfaces = lib
+            ? [
+                lib.showOnPdp ? 'PDP' : null,
+                lib.showOnCheckout ? 'Checkout' : null,
+                lib.showOnAdmin ? 'Admin' : null,
+              ].filter((s): s is string => s !== null)
+            : [];
+          return surfaces.length > 0 ? (
+            surfaces.map((surface) => (
+              <Badge key={surface} variant="neutral" size="sm">{surface}</Badge>
+            ))
+          ) : (
+            <Badge variant="warning" size="sm">Unlinked</Badge>
+          );
+        })()}
+        <Link
+          href="/settings/attributes"
+          style={{
+            marginLeft: 'auto',
+            fontSize: 12,
+            fontWeight: 600,
+            color: 'var(--tuw-action-primary, #7539FF)',
+            textDecoration: 'none',
+          }}
+        >
+          Manage in Settings → Attributes
+        </Link>
       </div>
       {attr.values.length > 0 ? (
         <Table>
@@ -825,22 +824,12 @@ export default function ProductsView() {
     setEditingProduct(product);
     setProductTab('general');
     setDrawerView('compact');
-    preTableView.current = null;
+    autoExpandedRef.current = false;
     setStageIndex(0);
-    setFormVideo(product.video || '');
     setFormPhoto(product.photoSettings ?? { layout: 'carousel', ratio: '4:3', showPhotos: true });
     setFormImages(
-      (product.images && product.images.length > 0
-        ? product.images
-        : product.image
-          ? [product.image]
-          : []
-      ).map((src, i) => ({ id: `g-${i}`, src, name: baseName(src), persisted: true }))
+      product.images.map((src, i) => ({ id: `g-${i}`, src, name: baseName(src), persisted: true }))
     );
-    setUploadReel((prev) => {
-      if (prev) revokeUploads([{ url: prev.url }]);
-      return null;
-    });
     setAddImageUrl('');
     setFormFabricGsm(product.fabricGsm || '');
     setFormCut(product.cut || '');
@@ -849,8 +838,6 @@ export default function ProductsView() {
     setFormMonogramEnabled(product.monogram?.enabled || false);
     setFormMonogramChars(String(product.monogram?.maxChars ?? 3));
     setFormMonogramUpcharge(product.monogram ? product.monogram.upcharge.toFixed(2) : '12.00');
-    setFormSeoTitle(product.seoTitle || '');
-    setFormSeoDescription(product.seoDescription || '');
 
     // Attribute draft (N1a link match) — built once: the ladder load below
     // prunes adjustment keys against these values, and the drawer renders
@@ -864,22 +851,20 @@ export default function ProductsView() {
               (l) => l.name.toLowerCase() === a.name.toLowerCase()
             );
             return {
-              ...a,
+              ...(() => {
+                const copy = { ...a } as ProductAttribute & { visibleOn?: unknown };
+                delete copy.visibleOn;
+                return copy;
+              })(),
               libraryId: a.libraryId ?? lib?.id,
               values: [...a.values],
               swatchHex: { ...(a.swatchHex ?? {}) },
-              visibleOn:
-                a.visibleOn && a.visibleOn.length > 0
-                  ? [...a.visibleOn]
-                  : a.name === 'Placements'
-                    ? ['admin' as const]
-                    : (['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'>),
             };
           })
         : [
-            { name: 'Color', values: [...product.colors], builtin: true, displayType: 'swatch' as const, swatchHex: {}, visibleOn: ['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'>, libraryId: 'LIB-01' },
-            { name: 'Size', values: [...product.sizes], builtin: true, displayType: 'pill' as const, swatchHex: {}, visibleOn: ['pdp', 'admin'] as Array<'pdp' | 'checkout' | 'admin'>, libraryId: 'LIB-02' },
-            { name: 'Placements', values: [], builtin: true, displayType: 'radio' as const, swatchHex: {}, visibleOn: ['admin'] as Array<'pdp' | 'checkout' | 'admin'>, libraryId: 'LIB-03' },
+            { name: 'Color', values: [...product.colors], builtin: true, displayType: 'swatch' as const, swatchHex: {}, libraryId: 'LIB-01' },
+            { name: 'Size', values: [...product.sizes], builtin: true, displayType: 'pill' as const, swatchHex: {}, libraryId: 'LIB-02' },
+            { name: 'Placements', values: [], builtin: true, displayType: 'radio' as const, swatchHex: {}, libraryId: 'LIB-03' },
           ];
 
     // Pricing ladder load (R1): sanitize the sidecar against these values;
@@ -889,6 +874,7 @@ export default function ProductsView() {
     const loadedAdjustments = pruneAdjustments(product.priceAdjustments, loadedAttributes).next;
     setFormAdjustments(loadedAdjustments);
     setAdjustmentDrafts({});
+    setPriceDrafts({});
     setFormVariants(
       resolveVariants(product).map((v) =>
         v.priceOverridden !== undefined
@@ -945,13 +931,10 @@ export default function ProductsView() {
         placement: formPlacement,
         publicationStatus: formStatus,
         description: formDescription,
-        image: formImages[0]?.src || undefined,
-        video: formVideo || undefined,
         photoSettings: formPhoto,
         discounts: formDiscounts,
         images: formImages.filter((im) => im.persisted).map((im) => im.src),
         attributes: formAttributes,
-        imageBg: 'linear-gradient(135deg, #FAF3F7 0%, #EFE1EB 100%)',
         fabricGsm: formFabricGsm || undefined,
         cut: formCut || undefined,
         modelDims: formModelDims || undefined,
@@ -963,11 +946,8 @@ export default function ProductsView() {
               upcharge: parseFloat(formMonogramUpcharge) || 0,
             }
           : undefined,
-        seoTitle: formSeoTitle || undefined,
-        seoDescription: formSeoDescription || undefined,
       });
-      const droppedCount =
-        formImages.filter((im) => !im.persisted).length + (uploadReel !== null ? 1 : 0);
+      const droppedCount = formImages.filter((im) => !im.persisted).length;
       if (droppedCount > 0) {
         showToast({
           type: 'info',
@@ -989,7 +969,7 @@ export default function ProductsView() {
     // The draft matrix is the submit source: colors/sizes/stock derive from
     // it in the seam; prices re-derive through the ladder (R1:
     // base + Σ adjustments, pinned cells stay), and the listed price is the
-    // lowest cell ("From $X"), materialized.
+    // lowest cell ("From ₹X"), materialized.
     const draftError = variantDraftError();
     if (draftError) {
       showToast({ type: 'warning', title: 'Check Variants', description: draftError });
@@ -1023,8 +1003,6 @@ export default function ProductsView() {
       gender: formGender || undefined,
       taxRate: formTax.trim() !== '' && !isNaN(parseFloat(formTax)) ? parseFloat(formTax) : undefined,
       sizeChartId: formSizeChartId || undefined,
-      image: formImages[0]?.src || undefined,
-      video: formVideo || undefined,
       photoSettings: formPhoto,
       discounts: formDiscounts,
       images: formImages.filter((im) => im.persisted).map((im) => im.src),
@@ -1041,12 +1019,9 @@ export default function ProductsView() {
             upcharge: parseFloat(formMonogramUpcharge) || 0,
           }
         : undefined,
-      seoTitle: formSeoTitle || undefined,
-      seoDescription: formSeoDescription || undefined,
     });
 
-    const droppedCount =
-      formImages.filter((im) => !im.persisted).length + (uploadReel !== null ? 1 : 0);
+    const droppedCount = formImages.filter((im) => !im.persisted).length;
     if (droppedCount > 0) {
       showToast({
         type: 'info',
@@ -1181,11 +1156,11 @@ export default function ProductsView() {
     const parts: string[] = [];
     const colorAdj = formAdjustments[adjustmentKey('Color', color)] ?? 0;
     const sizeAdj = formAdjustments[adjustmentKey('Size', size)] ?? 0;
-    if (colorAdj > 0) parts.push(`${color} $${colorAdj.toFixed(2)}`);
-    if (sizeAdj > 0) parts.push(`${size} $${sizeAdj.toFixed(2)}`);
+    if (colorAdj > 0) parts.push(`${color} ₹${colorAdj.toFixed(2)}`);
+    if (sizeAdj > 0) parts.push(`${size} ₹${sizeAdj.toFixed(2)}`);
     return parts.length > 0
-      ? `Base $${base.toFixed(2)} + ${parts.join(' + ')} = $${effective.toFixed(2)}`
-      : `Base $${base.toFixed(2)}`;
+      ? `Base ₹${base.toFixed(2)} + ${parts.join(' + ')} = ₹${effective.toFixed(2)}`
+      : `Base ₹${base.toFixed(2)}`;
   };
 
   // CSV import pipeline (X1b): Final Listing workbooks re-saved as CSV.
@@ -1355,7 +1330,7 @@ export default function ProductsView() {
           placement: 'Chest (45mm)',
           publicationStatus: 'draft',
           description: '',
-          imageBg: 'linear-gradient(135deg, #FAF3F7 0%, #EFE1EB 100%)',
+          images: [],
           styleCode: r.styleCode || undefined,
           weight: r.weight || undefined,
           shippingWeight: r.shipWeight || undefined,
@@ -1363,9 +1338,9 @@ export default function ProductsView() {
           gender: (r.gender || undefined) as ProductItem['gender'] | undefined,
           taxRate: r.tax !== '' ? parseFloat(r.tax) : undefined,
           attributes: [
-            { name: 'Color', values: r.colors, builtin: true, displayType: 'swatch', swatchHex: {}, visibleOn: ['pdp', 'admin'] },
-            { name: 'Size', values: r.sizes, builtin: true, displayType: 'pill', swatchHex: {}, visibleOn: ['pdp', 'admin'] },
-            { name: 'Placements', values: r.placements, builtin: true, displayType: 'radio', swatchHex: {}, visibleOn: ['admin'] },
+            { name: 'Color', values: r.colors, builtin: true, displayType: 'swatch', swatchHex: {} },
+            { name: 'Size', values: r.sizes, builtin: true, displayType: 'pill', swatchHex: {} },
+            { name: 'Placements', values: r.placements, builtin: true, displayType: 'radio', swatchHex: {} },
           ],
         },
         true
@@ -1381,17 +1356,12 @@ export default function ProductsView() {
     });
   };
 
-  // Customer-view gallery slides: uploaded reel previews live, else the
-  // persisted reel URL; then the ordered image list (persisted + previews).
-  // The reel obeys the visibility toggle; uploads never persist.
-  const galleryReelSrc = uploadReel ? uploadReel.url : formVideo !== '' ? formVideo : null;
-  const showReel = visibleSections.video && galleryReelSrc !== null;
-  const gallerySlides: Array<{ type: 'image' | 'video'; src: string; alt: string; poster?: string }> = [
-    ...(showReel && galleryReelSrc
-      ? [{ type: 'video' as const, src: galleryReelSrc, alt: `${formName || 'Product'} video reel`, poster: formImages[0]?.src }]
-      : []),
-    ...formImages.map((im) => ({ type: 'image' as const, src: im.src, alt: formName || 'Product image' })),
-  ];
+  // Customer-view gallery slides: the ordered image list (persisted + previews).
+  const gallerySlides: Array<{ type: 'image'; src: string; alt: string }> = formImages.map((im) => ({
+    type: 'image' as const,
+    src: im.src,
+    alt: formName || 'Product image',
+  }));
 
   // Bulk actions (table-view bar appears when rows are selected)
   const clearSelection = () => setSelectedIds(new Set());
@@ -1536,14 +1506,8 @@ export default function ProductsView() {
             aspectRatio: photoAspect,
           }}
         >
-          {s.type === 'video' ? (
-            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', fontSize: 10, fontWeight: 700, color: '#FFFFFF', backgroundColor: '#1A1A1A' }}>
-              REEL
-            </span>
-          ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={s.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          )}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={s.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </button>
       ))}
     </div>
@@ -1721,7 +1685,7 @@ export default function ProductsView() {
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
         <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-          Uploaded Assets & Reel
+          Uploaded Assets
         </span>
         <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={() => photoInputRef.current?.click()}>
           Add Media
@@ -1736,7 +1700,7 @@ export default function ProductsView() {
     <div
       role="button"
       tabIndex={0}
-      aria-label="Upload photos or video reel"
+      aria-label="Upload photos"
       className="tuw-stat-hover"
       onClick={() => photoInputRef.current?.click()}
       onKeyDown={(e) => {
@@ -1768,21 +1732,13 @@ export default function ProductsView() {
         <Upload size={20} />
       </span>
       <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginTop: 8 }}>
-        Click to upload photos or reel, or drag files here
+        Click to upload photos, or drag files here
       </div>
       <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', marginTop: 4 }}>
-        PNG, JPG, WEBP, or MP4 Video Reel (Max 25MB)
+        PNG, JPG, or WEBP (Max 25MB each)
       </div>
     </div>
   );
-  const reelUrlField = visibleSections.video ? (
-    <Input
-      label="Video Reel URL (persisted)"
-      placeholder="/products/4.mp4"
-      value={formVideo}
-      onChange={(e) => setFormVideo(e.target.value)}
-    />
-  ) : null;
   // Gallery presentation controls (P1a): layout toggle + ratio picker +
   // visibility switch. The stage above reflects every choice live.
   const presentationSection = (
@@ -2078,7 +2034,7 @@ export default function ProductsView() {
                 <div
                   className={styles.productThumbFrame}
                   style={{
-                    background: p.imageBg,
+                    background: 'var(--tuw-bg-canvas, #F7F8F9)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -2086,9 +2042,9 @@ export default function ProductsView() {
                     overflow: 'hidden',
                   }}
                 >
-                  {p.image ? (
+                  {p.images[0] ? (
                     <Image
-                      src={p.image}
+                      src={p.images[0]}
                       alt={p.name}
                       fill
                       sizes="(max-width: 768px) 100vw, 320px"
@@ -2098,28 +2054,6 @@ export default function ProductsView() {
                     <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)' }}>
                       {p.name.slice(0, 2).toUpperCase()}
                     </span>
-                  )}
-                  {p.video && (
-                    <div
-                      style={{
-                        position: 'absolute',
-                        bottom: 8,
-                        left: 8,
-                        background: 'rgba(0, 0, 0, 0.65)',
-                        backdropFilter: 'blur(4px)',
-                        color: '#FFFFFF',
-                        borderRadius: 4,
-                        padding: '2px 7px',
-                        fontSize: 10,
-                        fontWeight: 600,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 4,
-                        zIndex: 2,
-                      }}
-                    >
-                      ▶ Video Reel
-                    </div>
                   )}
                   <div style={{ position: 'absolute', top: 10, right: 10, zIndex: 2 }}>
                     <Badge
@@ -2267,9 +2201,9 @@ export default function ProductsView() {
                   </TableCell>
                   <TableCell style={{ padding: '14px 16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <div style={{ width: 40, height: 40, borderRadius: 8, overflow: 'hidden', position: 'relative', flexShrink: 0, background: p.imageBg, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--tuw-border-subtle, #E5E7EB)' }}>
-                        {p.image ? (
-                          <Image src={p.image} alt={p.name} fill sizes="80px" style={{ objectFit: 'cover' }} />
+                      <div style={{ width: 40, height: 40, borderRadius: 8, overflow: 'hidden', position: 'relative', flexShrink: 0, background: 'var(--tuw-bg-canvas, #F7F8F9)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--tuw-border-subtle, #E5E7EB)' }}>
+                        {p.images[0] ? (
+                          <Image src={p.images[0]} alt={p.name} fill sizes="80px" style={{ objectFit: 'cover' }} />
                         ) : (
                           <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)' }}>
                             {p.name.slice(0, 2).toUpperCase()}
@@ -2358,14 +2292,10 @@ export default function ProductsView() {
           setEditingProduct(null);
           setIsCreating(false);
           setDrawerView('compact');
-          preTableView.current = null;
+          autoExpandedRef.current = false;
           setFormImages((prev) => {
             revokeUploads(prev.filter((im) => !im.persisted).map((im) => ({ url: im.src })));
             return prev;
-          });
-          setUploadReel((prev) => {
-            if (prev) revokeUploads([{ url: prev.url }]);
-            return null;
           });
         }}
         title={editingProduct ? `Manage ${editingProduct.name}` : 'Add New Product'}
@@ -2400,14 +2330,13 @@ export default function ProductsView() {
               isCreating
                 ? [
                     { id: 'general', label: 'General' },
-                    { id: 'media', label: 'Media', badge: formImages.length + (uploadReel !== null || formVideo !== '' ? 1 : 0) },
+                    { id: 'media', label: 'Media', badge: formImages.length },
                   ]
                 : [
                     { id: 'general', label: 'General' },
-                    { id: 'media', label: 'Media', badge: formImages.length + (uploadReel !== null || formVideo !== '' ? 1 : 0) },
+                    { id: 'media', label: 'Media', badge: formImages.length },
                     { id: 'variants', label: 'Variants & Stock', badge: formVariants.length },
                     { id: 'specs', label: 'Clothing Specs' },
-                    { id: 'seo', label: 'SEO' },
                   ]
             }
             activeTab={productTab}
@@ -2476,9 +2405,9 @@ export default function ProductsView() {
             />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <Input
-                label="Base price ($ USD)"
-                type="number"
-                step="0.01"
+                label="Base price (₹)"
+                type="text"
+                inputMode="decimal"
                 value={formPrice}
                 onChange={(e) => writeBasePrice(e.target.value)}
                 required
@@ -2492,69 +2421,6 @@ export default function ProductsView() {
                 required
               />
             </div>
-            <Disclosure
-              title="Per-value price adjustments"
-              subtitle="Value upcharges added on top of the base price."
-              badge={
-                Object.keys(formAdjustments).length > 0 ? (
-                  <Badge variant="info">{Object.keys(formAdjustments).length}</Badge>
-                ) : undefined
-              }
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                {['Color', 'Size'].map((attrName) => {
-                  const attr = formAttributes.find((a) => a.name === attrName);
-                  if (!attr || attr.values.length === 0) return null;
-                  return (
-                    <div key={attrName} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                      <div
-                        style={{
-                          fontSize: 11,
-                          fontWeight: 600,
-                          letterSpacing: '0.06em',
-                          textTransform: 'uppercase',
-                          color: 'var(--tuw-text-secondary, #5D6772)',
-                        }}
-                      >
-                        {attrName}
-                      </div>
-                      {/* Two-column value grid (VPRICE-3): roughly halves the
-                          expanded height without losing the name → input rhythm. */}
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 16, rowGap: 8 }}>
-                        {attr.values.map((value) => {
-                          const key = adjustmentKey(attrName, value);
-                          const committed = formAdjustments[key];
-                          const draft = adjustmentDrafts[key];
-                          return (
-                            <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                              <span style={{ flex: 1, fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
-                                {value}
-                              </span>
-                              <div style={{ width: 110, flexShrink: 0 }}>
-                                <Input
-                                  aria-label={`${attrName} ${value} price adjustment`}
-                                  type="number"
-                                  step="0.01"
-                                  min={0}
-                                  placeholder="0"
-                                  value={draft !== undefined ? draft : committed !== undefined ? String(committed) : ''}
-                                  onChange={(e) => writeAdjustment(key, e.target.value)}
-                                  onBlur={() => clearAdjustmentDraft(key)}
-                                  style={{ height: 32, textAlign: 'right' }}
-                                />
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
-                <p style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0, lineHeight: 1.5 }}>
-                  Upcharges only. Clearing a field — or removing the value — drops its adjustment.
-                </p>
-              </div>
-            </Disclosure>
             <DrawerSection title="Pricing & Discounts" titleGap={10}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
@@ -2765,7 +2631,7 @@ export default function ProductsView() {
                     </div>
                   </div>
                 ) : null}
-                {formAttributes.filter((a) => a.name !== 'Placements').map((attr) => renderAttrCard(attr))}
+                {formAttributes.filter((a) => showsOnPdp(a)).map((attr) => renderAttrCard(attr))}
                 <div style={{ display: 'flex', gap: 8 }}>
                   <div style={{ flex: 1 }}>
                     <Input
@@ -2812,23 +2678,26 @@ export default function ProductsView() {
             <Disclosure
               title="Internal fields"
               subtitle="Internal data: weights, dimensions, print placements. Hidden from shoppers."
-              badge={<Badge variant="neutral" size="sm">{[formWeight, formShipWeight, formDims, formGender].filter(Boolean).length + formAttributes.filter((a) => a.name === 'Placements').reduce((n, a) => n + a.values.length, 0)} filled</Badge>}
+              badge={<Badge variant="neutral" size="sm">{[formWeight, formShipWeight, formDims, formGender].filter(Boolean).length + formAttributes.filter((a) => !showsOnPdp(a)).reduce((n, a) => n + a.values.length, 0)} filled</Badge>}
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                   <Input
-                    label="Weight"
-                    placeholder="e.g. 180g"
+                    label="Weight (g)"
+                    placeholder="e.g. 180"
                     value={formWeight}
                     onChange={(e) => setFormWeight(e.target.value)}
                   />
                   <Input
-                    label="Shipping Weight"
-                    placeholder="e.g. 250g"
+                    label="Shipping Weight (g)"
+                    placeholder="e.g. 250"
                     value={formShipWeight}
                     onChange={(e) => setFormShipWeight(e.target.value)}
                   />
                 </div>
+                <p style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
+                  Enter weights in whole grams — numbers only.
+                </p>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                   <Input
                     label="Package Dimensions"
@@ -2888,7 +2757,7 @@ export default function ProductsView() {
                   />
                   </div>
                 </div>
-                {formAttributes.filter((a) => a.name === 'Placements').map((attr) => renderAttrCard(attr, true))}
+                {formAttributes.filter((a) => !showsOnPdp(a)).map((attr) => renderAttrCard(attr, true))}
               </div>
             </Disclosure>
           </form>
@@ -2905,7 +2774,6 @@ export default function ProductsView() {
                 {mediaCards ? assetCards : assetRows}
                 {addUrlRow}
                 {dropzone}
-                {reelUrlField}
                 {presentationSection}
               </div>
             </div>
@@ -2917,7 +2785,6 @@ export default function ProductsView() {
               {mediaCards ? assetCards : assetRows}
               {addUrlRow}
               {dropzone}
-              {reelUrlField}
               {presentationSection}
             </div>
             )}
@@ -2927,17 +2794,6 @@ export default function ProductsView() {
               accept="image/*"
               multiple
               aria-label="Upload photos"
-              style={{ display: 'none' }}
-              onChange={(e) => {
-                handlePickedFiles(e.target.files);
-                e.target.value = '';
-              }}
-            />
-            <input
-              ref={videoInputRef}
-              type="file"
-              accept="video/*"
-              aria-label="Upload video reel"
               style={{ display: 'none' }}
               onChange={(e) => {
                 handlePickedFiles(e.target.files);
@@ -2961,7 +2817,7 @@ export default function ProductsView() {
                     className="tuw-tabular-nums"
                     title="Lowest variant price — the storefront lists this as “From”"
                   >
-                    From ${variantLowest.toFixed(2)}
+                    From ₹{variantLowest.toFixed(2)}
                   </Badge>
                 )}
                 <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={addVariant}>
@@ -2969,6 +2825,70 @@ export default function ProductsView() {
                 </Button>
               </div>
             </div>
+            {/* Upcharges strip (VPRICE-4): moved up from General so the
+                ladder's inputs sit beside the matrix they feed. */}
+            <Disclosure
+              title="Per-value price adjustments"
+              subtitle="Value upcharges added on top of the base price."
+              badge={
+                Object.keys(formAdjustments).length > 0 ? (
+                  <Badge variant="info">{Object.keys(formAdjustments).length}</Badge>
+                ) : undefined
+              }
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {['Color', 'Size'].map((attrName) => {
+                  const attr = formAttributes.find((a) => a.name === attrName);
+                  if (!attr || attr.values.length === 0) return null;
+                  return (
+                    <div key={attrName} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      <div
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 600,
+                          letterSpacing: '0.06em',
+                          textTransform: 'uppercase',
+                          color: 'var(--tuw-text-secondary, #5D6772)',
+                        }}
+                      >
+                        {attrName}
+                      </div>
+                      {/* Two-column value grid (VPRICE-3): roughly halves the
+                          expanded height without losing the name → input rhythm. */}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 16, rowGap: 8 }}>
+                        {attr.values.map((value) => {
+                          const key = adjustmentKey(attrName, value);
+                          const committed = formAdjustments[key];
+                          const draft = adjustmentDrafts[key];
+                          return (
+                            <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                              <span style={{ flex: 1, fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
+                                {value}
+                              </span>
+                              <div style={{ width: 110, flexShrink: 0 }}>
+                                <Input
+                                  aria-label={`${attrName} ${value} price adjustment`}
+                                  type="text"
+                                  inputMode="decimal"
+                                  placeholder="0"
+                                  value={draft !== undefined ? draft : committed !== undefined ? committed.toFixed(2) : ''}
+                                  onChange={(e) => writeAdjustment(key, e.target.value)}
+                                  onBlur={() => clearAdjustmentDraft(key)}
+                                  style={{ height: 32, textAlign: 'right' }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+                <p style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0, lineHeight: 1.5 }}>
+                  Upcharges only. Clearing a field — or removing the value — drops its adjustment.
+                </p>
+              </div>
+            </Disclosure>
             <Table>
               <TableHeader>
                 <TableRow hoverable={false}>
@@ -2984,7 +2904,7 @@ export default function ProductsView() {
               </TableHeader>
               <TableBody>
                 {formVariants.map((v) => (
-                  <TableRow key={v.id} hoverable={false}>
+                  <TableRow key={v.id}>
                     <TableCell style={{ padding: '10px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
                       {v.id.startsWith('tmp-') ? (
                         <Input
@@ -3026,15 +2946,21 @@ export default function ProductsView() {
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <Input
                             aria-label={`Price for ${v.color} ${v.size}`}
-                            type="number"
-                            step="0.01"
-                            value={String(v.price)}
+                            type="text"
+                            inputMode="decimal"
+                            value={priceDrafts[v.id] !== undefined ? priceDrafts[v.id] : v.price.toFixed(2)}
                             onChange={(e) => {
-                              const n = parseFloat(e.target.value);
+                              const raw = e.target.value;
+                              // Money keys only (VPRICE-4): digits + one dot,
+                              // so intermediate states like "61." type cleanly.
+                              if (!/^\d*\.?\d*$/.test(raw)) return;
+                              setPriceDrafts((prev) => ({ ...prev, [v.id]: raw }));
+                              const n = parseFloat(raw);
                               // Typing pins the cell (R1): the price survives
                               // base/attribute recomputes until reset.
                               if (!isNaN(n) && n >= 0) updateVariant(v.id, { price: roundPrice(n), priceOverridden: true });
                             }}
+                            onBlur={() => clearPriceDraft(v.id)}
                             style={{ height: 36, textAlign: 'right' }}
                           />
                         </div>
@@ -3074,7 +3000,7 @@ export default function ProductsView() {
                             <button
                               type="button"
                               aria-label={`Reset ${v.color} ${v.size} price to derived`}
-                              title={`Pinned override — reset to derived $${deriveVariantPrice(
+                              title={`Pinned override — reset to derived ₹${deriveVariantPrice(
                                 parseFloat(formPrice) || 0,
                                 formAdjustments,
                                 v.color,
@@ -3177,12 +3103,6 @@ export default function ProductsView() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <DrawerSection title="Display Options" titleGap={10}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <Switch
-                  label="Video Reel slot"
-                  description="Show the video block on the Media tab"
-                  checked={visibleSections.video}
-                  onChange={(v) => setVisibleSections((s) => ({ ...s, video: v }))}
-                />
                 <Switch
                   label="Monogram & embroidery"
                   description="Show the custom embroidery block below"
@@ -3439,7 +3359,7 @@ export default function ProductsView() {
                     onChange={(e) => setFormMonogramChars(e.target.value)}
                   />
                   <Input
-                    label="Upcharge ($ USD)"
+                    label="Upcharge (₹)"
                     type="number"
                     step="0.01"
                     value={formMonogramUpcharge}
@@ -3451,29 +3371,7 @@ export default function ProductsView() {
             </DrawerSection>
             ) : null}
           </div>
-          ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <Input
-              label="SEO Title"
-              placeholder={formName || 'Product name'}
-              value={formSeoTitle}
-              onChange={(e) => setFormSeoTitle(e.target.value)}
-            />
-            <FormTextarea
-              label="Meta Description"
-              rows={3}
-              placeholder="Search-result snippet for this product"
-              value={formSeoDescription}
-              onChange={(e) => setFormSeoDescription(e.target.value)}
-            />
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-              <span style={{ color: 'var(--tuw-text-secondary, #5D6772)' }}>Canonical slug</span>
-              <span style={{ fontFamily: 'monospace', color: 'var(--tuw-text-primary, #262626)' }}>
-                /products/{formSlug || '…'}
-              </span>
-            </div>
-          </div>
-          )
+          ) : null
         )}
       </Drawer>
 

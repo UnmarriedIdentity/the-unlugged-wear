@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Modal, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Select, Modal, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader } from '@/components/ui';
 import { UserPlus, Search, Filter, ShieldCheck, Mail, Trash2, AlertTriangle } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { TeamMember, StaffRole } from '@/mocks/fixtures';
@@ -173,24 +173,25 @@ export default function TeamPage() {
         />
       </ContentCard>
 
-      {/* Invite Member Modal */}
-      <Modal
+      {/* Invite Member Drawer */}
+      <Drawer
         isOpen={isInviteOpen}
         onClose={() => setIsInviteOpen(false)}
         title="Invite New Staff Member"
         subtitle="Sends a simulated invitation link with designated role scope"
+        width="540px"
         footer={
-          <div style={{ display: 'flex', gap: 10 }}>
-            <Button variant="secondary" size="md" onClick={() => setIsInviteOpen(false)}>
+          <>
+            <Button variant="secondary" size="md" type="button" onClick={() => setIsInviteOpen(false)}>
               Cancel
             </Button>
-            <Button variant="primary" size="md" onClick={handleInviteSubmit}>
+            <Button variant="primary" size="md" type="submit" form="team-invite-form">
               Dispatch Invitation
             </Button>
-          </div>
+          </>
         }
       >
-        <form onSubmit={handleInviteSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <form id="team-invite-form" onSubmit={handleInviteSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <Input
             label="Full Name"
             placeholder="e.g. Tariq Mansoor"
@@ -206,23 +207,19 @@ export default function TeamPage() {
             onChange={(e) => setFormEmail(e.target.value)}
             required
           />
-          <div>
-            <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
-              Role Scope
-            </label>
-            <select
-              value={formRole}
-              onChange={(e) => setFormRole(e.target.value as StaffRole)}
-              style={{ width: '100%', height: 40, borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '0 10px', fontSize: 13 }}
-            >
-              <option value="Owner">Owner — Full administrative authority</option>
-              <option value="Operations">Operations — Fulfillment, Orders, Shipments & Refunds</option>
-              <option value="Content">Content — Products, Collections, Media & CMS</option>
-              <option value="Read-only">Read-only — View all data without mutation capabilities</option>
-            </select>
-          </div>
+          <Select
+            label="Role Scope"
+            value={formRole}
+            onChange={(e) => setFormRole(e.target.value as StaffRole)}
+            options={[
+              { value: 'Owner', label: 'Owner — Full administrative authority' },
+              { value: 'Operations', label: 'Operations — Fulfillment, Orders, Shipments & Refunds' },
+              { value: 'Content', label: 'Content — Products, Collections, Media & CMS' },
+              { value: 'Read-only', label: 'Read-only — View all data without mutation capabilities' },
+            ]}
+          />
         </form>
-      </Modal>
+      </Drawer>
 
       {/* Removal Confirmation Dialog */}
       <Modal

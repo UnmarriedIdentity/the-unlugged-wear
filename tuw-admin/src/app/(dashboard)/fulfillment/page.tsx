@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Modal, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader, Checkbox } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader, Checkbox } from '@/components/ui';
 import { PackageCheck, Truck, RotateCcw, AlertTriangle, Printer, CheckCircle2, Clock } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { OrderItem } from '@/mocks/fixtures';
@@ -119,13 +119,6 @@ export default function FulfillmentPage() {
 
       {/* Live Metric Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
-        <StatCard
-          label="Wallet Credits"
-          value="₹12,500"
-          subtitle="Rs.1 = 1 credit · demo balance, live wallet connects at backend"
-          trendType="neutral"
-          hoverable
-        />
         <StatCard
           label="Submission Failed"
           value={String(failedOrders.length)}

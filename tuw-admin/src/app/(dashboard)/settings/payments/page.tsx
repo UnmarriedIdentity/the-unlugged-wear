@@ -8,7 +8,6 @@ import { CreditCard, Save, Check, ArrowLeft } from 'lucide-react';
 
 export default function PaymentSettingsPage() {
   const [stripeAccount, setStripeAccount] = useState('acct_1NZtuw9921849');
-  const [currency, setCurrency] = useState('USD ($)');
   const [saved, setSaved] = useState(false);
 
   const handleSave = () => {
@@ -39,7 +38,12 @@ export default function PaymentSettingsPage() {
           </h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
             <Input label="Connected Account ID" value={stripeAccount} onChange={(e) => setStripeAccount(e.target.value)} />
-            <Input label="Store Currency" value={currency} onChange={(e) => setCurrency(e.target.value)} />
+            <Input
+              label="Store Currency"
+              value="INR (₹) — Indian Rupee"
+              readOnly
+              helperText="Single-currency store — managed in Store Settings"
+            />
           </div>
         </div>
       </ContentCard>

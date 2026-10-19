@@ -3,7 +3,7 @@ export interface ProductItem {
   name: string;
   slug: string;
   category: 'T-Shirts' | 'Hoodies' | 'Jackets' | 'Pants' | 'Accessories';
-  price: number; // in USD (or formatted display)
+  price: number; // in INR (or formatted display)
   compareAtPrice?: number;
   /** Pricing anchor (R1). Derived cells = basePrice + Σ priceAdjustments;
    * absent means `price` itself is the anchor (simple products). Mirrors
@@ -21,16 +21,14 @@ export interface ProductItem {
   partner: 'Qikink Direct API' | 'Printrove Hub' | 'Custom Atelier';
   placement: 'Chest (45mm)' | 'Back Oversized' | 'Sleeve Length' | 'Interior Hem';
   soldCount: number;
-  imageBg: string;
-  image?: string;
-  video?: string;
+  /** Ordered gallery URLs. Index 0 is the cover (hero); reorder or
+   * Set Cover in the editor. Never optional — empty array means no image. */
+  images: string[];
   rating: number;
   /** Explicit per-variant inventory. Optional: absent means synthesize from
    * colors/sizes/price/stock (see resolveVariants) — every existing fixture
    * stays valid, and the future API returns explicit arrays. */
   variants?: ProductVariant[];
-  /** Gallery image URLs beyond the hero image. Default []. */
-  images?: string[];
   /** Admin attribute drafts (names, values, display types, swatch colors).
    * Optional: absent means the Color×Size builtins (see resolveVariants). */
   attributes?: ProductAttribute[];
@@ -55,8 +53,6 @@ export interface ProductItem {
    * Optional — absent means none. Mirrors product_discounts intent. */
   discounts?: ProductDiscount[];
   monogram?: { enabled: boolean; maxChars: number; upcharge: number };
-  seoTitle?: string;
-  seoDescription?: string;
   /** Gallery presentation (P1a): layout + ratio + visibility for the PDP
    * stage. Optional — absent means the drawer defaults (carousel/4:3/on). */
   photoSettings?: PhotoSettings;
@@ -107,13 +103,9 @@ export interface ProductAttribute {
   displayType: 'pill' | 'swatch' | 'radio';
   swatchHex: Record<string, string>;
   /** Library link (N1a): definition-level single record. Values stay
-   * strings (spelling may repeat); display/visibility/hex write through
-   * to the library at N1b. */
+   * strings (spelling may repeat); display/hex write through to the
+   * library at N1b. Visibility lives on the library record (global). */
   libraryId?: string;
-  /** Surfaces allowed to render this attribute (X1a): pdp (shopper
-   * choices), checkout (money-affecting), admin (internal). At least one
-   * always — the UI refuses an attribute visible nowhere. */
-  visibleOn: Array<'pdp' | 'checkout' | 'admin'>;
 }
 
 export interface OrderItemLine {
@@ -244,7 +236,8 @@ export interface CollectionItem {
   name: string;
   slug: string;
   season: string;
-  productCount: number;
+  /** Ordered product links — the single source of truth for count + content. */
+  productIds: string[];
   visibility: 'published' | 'draft' | 'scheduled';
   updatedAt: string;
   description: string;
@@ -300,8 +293,7 @@ export const initialProducts: ProductItem[] = [
     partner: 'Qikink Direct API',
     placement: 'Back Oversized',
     soldCount: 492,
-    imageBg: 'linear-gradient(135deg, #EBF4F8 0%, #D8EBF5 100%)',
-    image: '/products/1.jpeg',
+    images: ['/products/1.jpeg'],
     rating: 4.9,
   },
   {
@@ -319,9 +311,7 @@ export const initialProducts: ProductItem[] = [
     partner: 'Printrove Hub',
     placement: 'Chest (45mm)',
     soldCount: 369,
-    imageBg: 'linear-gradient(135deg, #FAF0EB 0%, #F5E2DA 100%)',
-    image: '/products/2.jpeg',
-    video: '/products/2.mp4',
+    images: ['/products/2.jpeg'],
     rating: 4.8,
   },
   {
@@ -338,8 +328,7 @@ export const initialProducts: ProductItem[] = [
     partner: 'Custom Atelier',
     placement: 'Interior Hem',
     soldCount: 215,
-    imageBg: 'linear-gradient(135deg, #F0F3F6 0%, #E3E7ED 100%)',
-    image: '/products/3.jpeg',
+    images: ['/products/3.jpeg'],
     rating: 4.7,
   },
   {
@@ -357,8 +346,7 @@ export const initialProducts: ProductItem[] = [
     partner: 'Custom Atelier',
     placement: 'Sleeve Length',
     soldCount: 140,
-    imageBg: 'linear-gradient(135deg, #F7EFE8 0%, #EDE1D5 100%)',
-    image: '/products/1.jpeg',
+    images: ['/products/1.jpeg'],
     rating: 5.0,
   },
   {
@@ -375,9 +363,7 @@ export const initialProducts: ProductItem[] = [
     partner: 'Custom Atelier',
     placement: 'Interior Hem',
     soldCount: 0,
-    imageBg: 'linear-gradient(135deg, #E6EEF5 0%, #D2DEEB 100%)',
-    image: '/products/2.jpeg',
-    video: '/products/2.mp4',
+    images: ['/products/2.jpeg'],
     rating: 0,
   },
   {
@@ -394,8 +380,7 @@ export const initialProducts: ProductItem[] = [
     partner: 'Qikink Direct API',
     placement: 'Back Oversized',
     soldCount: 520,
-    imageBg: 'linear-gradient(135deg, #FAF3F7 0%, #EFE1EB 100%)',
-    image: '/products/3.jpeg',
+    images: ['/products/3.jpeg'],
     rating: 4.9,
   },
   {
@@ -412,8 +397,7 @@ export const initialProducts: ProductItem[] = [
     partner: 'Custom Atelier',
     placement: 'Interior Hem',
     soldCount: 198,
-    imageBg: 'linear-gradient(135deg, #EBF4F8 0%, #D8EBF5 100%)',
-    image: '/products/1.jpeg',
+    images: ['/products/1.jpeg'],
     rating: 4.8,
   },
   {
@@ -430,9 +414,7 @@ export const initialProducts: ProductItem[] = [
     partner: 'Printrove Hub',
     placement: 'Chest (45mm)',
     soldCount: 260,
-    imageBg: 'linear-gradient(135deg, #F0F3F6 0%, #E3E7ED 100%)',
-    image: '/products/2.jpeg',
-    video: '/products/2.mp4',
+    images: ['/products/2.jpeg'],
     rating: 4.9,
   },
   {
@@ -449,8 +431,7 @@ export const initialProducts: ProductItem[] = [
     partner: 'Qikink Direct API',
     placement: 'Chest (45mm)',
     soldCount: 310,
-    imageBg: 'linear-gradient(135deg, #FAF0EB 0%, #F5E2DA 100%)',
-    image: '/products/3.jpeg',
+    images: ['/products/3.jpeg'],
     rating: 4.6,
   },
   {
@@ -467,8 +448,7 @@ export const initialProducts: ProductItem[] = [
     partner: 'Custom Atelier',
     placement: 'Interior Hem',
     soldCount: 88,
-    imageBg: 'linear-gradient(135deg, #F7EFE8 0%, #EDE1D5 100%)',
-    image: '/products/1.jpeg',
+    images: ['/products/1.jpeg'],
     rating: 4.9,
   },
 ];
@@ -1265,13 +1245,28 @@ export interface LibraryAttribute {
   values: string[];
   displayType: 'pill' | 'swatch' | 'radio';
   enabled: boolean;
+  /** Global surfaces (X1a): applies to every product using this definition.
+   * pdp = shopper choices; checkout = money-affecting; admin = internal ops.
+   * At least one stays on — the UI refuses an attribute visible nowhere. */
+  showOnPdp: boolean;
+  showOnCheckout: boolean;
+  showOnAdmin: boolean;
 }
 
+/** Visibility defaults for a definition: first-party shopper attributes
+ * show on PDP + Admin; internal operational attributes (Placements) are
+ * admin-only; checkout is opt-in. */
+export const defaultLibraryVisibility = (name: string) => ({
+  showOnPdp: name.trim().toLowerCase() !== 'placements',
+  showOnCheckout: false,
+  showOnAdmin: true,
+});
+
 export const initialLibraryAttributes: LibraryAttribute[] = [
-  { id: 'LIB-01', name: 'Color', values: ['Black', 'Onyx', 'Chalk White', 'Olive', 'Navy Blue', 'Maroon'], displayType: 'swatch', enabled: true },
-  { id: 'LIB-02', name: 'Size', values: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], displayType: 'pill', enabled: true },
-  { id: 'LIB-03', name: 'Placements', values: ['Front', 'Back', 'Left Pocket', 'Right Pocket', 'Left Sleeve', 'Right Sleeve'], displayType: 'radio', enabled: true },
-  { id: 'LIB-04', name: 'Fabric', values: ['Cotton', 'French Terry', 'Fleece', 'Linen'], displayType: 'pill', enabled: true },
+  { id: 'LIB-01', name: 'Color', values: ['Black', 'Onyx', 'Chalk White', 'Olive', 'Navy Blue', 'Maroon'], displayType: 'swatch', enabled: true, ...defaultLibraryVisibility('Color') },
+  { id: 'LIB-02', name: 'Size', values: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], displayType: 'pill', enabled: true, ...defaultLibraryVisibility('Size') },
+  { id: 'LIB-03', name: 'Placements', values: ['Front', 'Back', 'Left Pocket', 'Right Pocket', 'Left Sleeve', 'Right Sleeve'], displayType: 'radio', enabled: true, ...defaultLibraryVisibility('Placements') },
+  { id: 'LIB-04', name: 'Fabric', values: ['Cotton', 'French Terry', 'Fleece', 'Linen'], displayType: 'pill', enabled: true, ...defaultLibraryVisibility('Fabric') },
 ];
 
 export const initialDiscountCodes: DiscountCode[] = [
@@ -1486,7 +1481,7 @@ export const initialCollections: CollectionItem[] = [
     name: 'Autumn/Winter Urban Minimal',
     slug: 'aw-urban-minimal',
     season: 'AW26',
-    productCount: 24,
+    productIds: ['PRD-02', 'PRD-03', 'PRD-04', 'PRD-05'],
     visibility: 'published',
     updatedAt: '16 Apr 2026',
     description: 'Structured silhouettes in heavyweight cottons, gabardine wools, and muted slate palettes.',
@@ -1496,7 +1491,7 @@ export const initialCollections: CollectionItem[] = [
     name: 'Core Heavyweight Basics',
     slug: 'core-heavyweight-basics',
     season: 'Perennial',
-    productCount: 18,
+    productIds: ['PRD-01', 'PRD-02', 'PRD-09'],
     visibility: 'published',
     updatedAt: '12 Apr 2026',
     description: 'High-density French terry and combed jersey fundamentals designed to last seasons.',
@@ -1506,7 +1501,7 @@ export const initialCollections: CollectionItem[] = [
     name: 'Unplugged Monochrome Series',
     slug: 'unplugged-monochrome',
     season: 'Limited Edition',
-    productCount: 12,
+    productIds: ['PRD-06', 'PRD-07'],
     visibility: 'scheduled',
     updatedAt: '10 Apr 2026',
     description: 'Experimental audio-visual soundwave screenprints in pitch black and optical white.',
@@ -1516,7 +1511,7 @@ export const initialCollections: CollectionItem[] = [
     name: 'Summer Archival Restock',
     slug: 'summer-archival',
     season: 'SS26',
-    productCount: 9,
+    productIds: ['PRD-03', 'PRD-05'],
     visibility: 'draft',
     updatedAt: '05 Apr 2026',
     description: 'Archived lightweight resort silhouettes and relaxed drop-shoulder linen blends.',
@@ -1667,15 +1662,15 @@ export const initialSettings: StoreSettings = {
   storeName: 'The Unplugged Wear',
   legalEntity: 'The Unplugged Wear Apparel LLC',
   supportEmail: 'care@theunpluggedwear.com',
-  defaultCurrency: 'USD ($)',
+  defaultCurrency: 'INR (₹)',
   timezone: 'UTC+00:00 (London, Edinburgh)',
   brandTagline: 'Unplugged Luxury & Urban Minimalism',
   brandColor: '#7539FF',
   qikinkApiKey: 'qik_live_mock_connection_89172',
   qikinkEnvironment: 'sandbox',
   stripeLiveMode: false,
-  freeShippingThreshold: 150,
-  standardShippingFee: 12,
+  freeShippingThreshold: 3000,
+  standardShippingFee: 150,
   taxIncluded: true,
   orderNotificationEmail: 'orders@theunpluggedwear.com',
 };

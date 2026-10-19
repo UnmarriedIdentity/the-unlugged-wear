@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Modal, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader, HeroCard, KeyValueList } from '@/components/ui';
+import { ContentCard, StatCard, Badge, Button, Input, Select, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader, HeroCard, KeyValueList } from '@/components/ui';
 import { Palette, Plus, Search, Filter, Image as ImageIcon, UploadCloud, AlertCircle } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { DesignAsset } from '@/mocks/fixtures';
@@ -218,24 +218,25 @@ export default function DesignsPage() {
         )}
       </Drawer>
 
-      {/* Upload Asset Modal */}
-      <Modal
+      {/* Upload Asset Drawer */}
+      <Drawer
         isOpen={isUploadOpen}
         onClose={() => setIsUploadOpen(false)}
         title="Upload Apparel Artwork Spec"
         subtitle="Enforces documented size (<25MB) and vector format limits"
+        width="540px"
         footer={
-          <div style={{ display: 'flex', gap: 10 }}>
-            <Button variant="secondary" size="md" onClick={() => setIsUploadOpen(false)}>
+          <>
+            <Button variant="secondary" size="md" type="button" onClick={() => setIsUploadOpen(false)}>
               Cancel
             </Button>
-            <Button variant="primary" size="md" onClick={handleUploadSubmit}>
+            <Button variant="primary" size="md" type="submit" form="design-upload-form">
               Register Artwork
             </Button>
-          </div>
+          </>
         }
       >
-        <form onSubmit={handleUploadSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <form id="design-upload-form" onSubmit={handleUploadSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {fileError && (
             <div style={{ padding: 10, borderRadius: 8, backgroundColor: 'var(--tuw-bg-error, #FEF4F4)', color: 'var(--tuw-text-error, #C91818)', fontSize: 13 }}>
               {fileError}
@@ -275,38 +276,30 @@ export default function DesignsPage() {
           />
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
-                Category
-              </label>
-              <select
-                value={formCategory}
-                onChange={(e) => setFormCategory(e.target.value as DesignAsset['category'])}
-                style={{ width: '100%', height: 40, borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '0 10px', fontSize: 13 }}
-              >
-                <option value="Print Artwork">Print Artwork</option>
-                <option value="Embroidery">Embroidery</option>
-                <option value="Typography">Typography</option>
-                <option value="Label Spec">Label Spec</option>
-              </select>
-            </div>
+            <Select
+              label="Category"
+              value={formCategory}
+              onChange={(e) => setFormCategory(e.target.value as DesignAsset['category'])}
+              options={[
+                { value: 'Print Artwork', label: 'Print Artwork' },
+                { value: 'Embroidery', label: 'Embroidery' },
+                { value: 'Typography', label: 'Typography' },
+                { value: 'Label Spec', label: 'Label Spec' },
+              ]}
+            />
 
-            <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
-                Print Placement
-              </label>
-              <select
-                value={formPlacement}
-                onChange={(e) => setFormPlacement(e.target.value)}
-                style={{ width: '100%', height: 40, borderRadius: 8, border: '1px solid var(--tuw-border-control, #90979F)', padding: '0 10px', fontSize: 13 }}
-              >
-                <option value="Left Chest (45mm)">Left Chest (45mm)</option>
-                <option value="Back Oversized">Back Oversized</option>
-                <option value="Sleeve Length">Sleeve Length</option>
-                <option value="Interior Hem">Interior Hem</option>
-                <option value="Front Chest (220mm)">Front Chest (220mm)</option>
-              </select>
-            </div>
+            <Select
+              label="Print Placement"
+              value={formPlacement}
+              onChange={(e) => setFormPlacement(e.target.value)}
+              options={[
+                { value: 'Left Chest (45mm)', label: 'Left Chest (45mm)' },
+                { value: 'Back Oversized', label: 'Back Oversized' },
+                { value: 'Sleeve Length', label: 'Sleeve Length' },
+                { value: 'Interior Hem', label: 'Interior Hem' },
+                { value: 'Front Chest (220mm)', label: 'Front Chest (220mm)' },
+              ]}
+            />
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -325,7 +318,7 @@ export default function DesignsPage() {
             />
           </div>
         </form>
-      </Modal>
+      </Drawer>
     </DashboardShell>
   );
 }

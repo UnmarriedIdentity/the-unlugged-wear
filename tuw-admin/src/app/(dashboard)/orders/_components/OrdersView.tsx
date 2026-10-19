@@ -10,8 +10,9 @@ import {
   Badge,
   Checkbox,
   Input,
+  Select,
+  SearchableSelect,
   Drawer,
-  Modal,
   Pagination,
   FilterPills,
   Table,
@@ -716,24 +717,25 @@ export default function OrdersView() {
         )}
       </Drawer>
 
-      {/* Create Order Modal */}
-      <Modal
+      {/* Create Order Drawer */}
+      <Drawer
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
         title="Create New Demo Order"
         subtitle="Simulate an order creation in local memory"
+        width="540px"
         footer={
-          <div style={{ display: 'flex', gap: 10 }}>
-            <Button variant="secondary" size="md" onClick={() => setIsCreateOpen(false)}>
+          <>
+            <Button variant="secondary" size="md" type="button" onClick={() => setIsCreateOpen(false)}>
               Cancel
             </Button>
-            <Button variant="primary" size="md" onClick={handleCreateSubmit}>
+            <Button variant="primary" size="md" type="submit" form="order-create-form">
               Save & Create Order
             </Button>
-          </div>
+          </>
         }
       >
-        <form onSubmit={handleCreateSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <form id="order-create-form" onSubmit={handleCreateSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <Input
             label="Customer Full Name"
             placeholder="e.g. Liam Miller"
@@ -756,76 +758,58 @@ export default function OrdersView() {
             onChange={(e) => setNewShippingAddress(e.target.value)}
             required
           />
-          <div>
-            <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
-              Select Catalog Product
-            </label>
-            <select
-              value={selectedProductId}
-              onChange={(e) => setSelectedProductId(e.target.value)}
-              style={{
-                width: '100%',
-                height: 40,
-                borderRadius: 8,
-                border: '1px solid var(--tuw-border-control, #D1D5DB)',
-                padding: '0 12px',
-                fontSize: 14,
-              }}
-            >
-              {products.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name} — ${p.price.toFixed(2)} ({p.category})
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
-              Payment Status
-            </label>
-            <select
-              value={newOrderPayment}
-              onChange={(e) => setNewOrderPayment(e.target.value as PaymentStatus)}
-              style={{
-                width: '100%',
-                height: 40,
-                borderRadius: 8,
-                border: '1px solid var(--tuw-border-control, #D1D5DB)',
-                padding: '0 12px',
-                fontSize: 14,
-              }}
-            >
-              <option value="paid">Paid (Credit Card authorized)</option>
-              <option value="pending">Pending (Awaiting wire)</option>
-              <option value="failed">Failed Payment</option>
-            </select>
-          </div>
+          <SearchableSelect
+            label="Select Catalog Product"
+            options={products.map((p) => ({
+              value: p.id,
+              label: p.name,
+              description: p.category,
+              meta: `₹${p.price.toFixed(2)}`,
+              keywords: `${p.id} ${p.slug}`,
+            }))}
+            value={selectedProductId}
+            onChange={setSelectedProductId}
+            searchable
+            searchPlaceholder="Search products…"
+            emptyText="No products match your search."
+          />
+          <Select
+            label="Payment Status"
+            value={newOrderPayment}
+            onChange={(e) => setNewOrderPayment(e.target.value as PaymentStatus)}
+            options={[
+              { value: 'paid', label: 'Paid (Credit Card authorized)' },
+              { value: 'pending', label: 'Pending (Awaiting wire)' },
+              { value: 'failed', label: 'Failed Payment' },
+            ]}
+          />
         </form>
-      </Modal>
+      </Drawer>
 
-      {/* Validated Refund Dialog */}
-      <Modal
+      {/* Validated Refund Drawer */}
+      <Drawer
         isOpen={isRefundOpen}
         onClose={() => setIsRefundOpen(false)}
         title="Simulated Validated Refund"
-        subtitle={`Order ${selectedOrder?.id} · Total: $${selectedOrder?.total.toFixed(2)}`}
+        subtitle={`Order ${selectedOrder?.id} · Total: ₹${selectedOrder?.total.toFixed(2)}`}
+        width="540px"
         footer={
-          <div style={{ display: 'flex', gap: 10 }}>
-            <Button variant="secondary" size="md" onClick={() => setIsRefundOpen(false)}>
+          <>
+            <Button variant="secondary" size="md" type="button" onClick={() => setIsRefundOpen(false)}>
               Cancel
             </Button>
-            <Button variant="primary" size="md" onClick={handleRefundSubmit}>
+            <Button variant="primary" size="md" type="submit" form="order-refund-form">
               Process Validated Refund
             </Button>
-          </div>
+          </>
         }
       >
-        <form onSubmit={handleRefundSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <form id="order-refund-form" onSubmit={handleRefundSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {selectedOrder && (
             <div style={{ padding: 12, borderRadius: 8, backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)', fontSize: 13 }}>
-              <div>Max refundable balance: <strong>${(selectedOrder.paidAmount - selectedOrder.refundedAmount).toFixed(2)}</strong></div>
+              <div>Max refundable balance: <strong>₹{(selectedOrder.paidAmount - selectedOrder.refundedAmount).toFixed(2)}</strong></div>
               <div style={{ color: 'var(--tuw-text-secondary, #5D6772)', fontSize: 12, marginTop: 2 }}>
-                Already refunded: ${selectedOrder.refundedAmount.toFixed(2)} of ${selectedOrder.paidAmount.toFixed(2)}
+                Already refunded: ₹{selectedOrder.refundedAmount.toFixed(2)} of ₹{selectedOrder.paidAmount.toFixed(2)}
               </div>
             </div>
           )}
@@ -837,7 +821,7 @@ export default function OrdersView() {
           )}
 
           <Input
-            label="Refund Amount ($ USD)"
+            label="Refund Amount (₹)"
             type="number"
             step="0.01"
             value={refundAmount}
@@ -848,30 +832,19 @@ export default function OrdersView() {
             required
           />
 
-          <div>
-            <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
-              Reason for Refund
-            </label>
-            <select
-              value={refundReason}
-              onChange={(e) => setRefundReason(e.target.value)}
-              style={{
-                width: '100%',
-                height: 40,
-                borderRadius: 8,
-                border: '1px solid var(--tuw-border-control, #D1D5DB)',
-                padding: '0 12px',
-                fontSize: 14,
-              }}
-            >
-              <option value="Customer cancellation prior to printing">Customer cancellation prior to printing</option>
-              <option value="Defective stitching or fabric flaw">Defective stitching or fabric flaw</option>
-              <option value="Carrier delay goodwill compensation">Carrier delay goodwill compensation</option>
-              <option value="RMA return inspected and restocked">RMA return inspected and restocked</option>
-            </select>
-          </div>
+          <Select
+            label="Reason for Refund"
+            value={refundReason}
+            onChange={(e) => setRefundReason(e.target.value)}
+            options={[
+              { value: 'Customer cancellation prior to printing', label: 'Customer cancellation prior to printing' },
+              { value: 'Defective stitching or fabric flaw', label: 'Defective stitching or fabric flaw' },
+              { value: 'Carrier delay goodwill compensation', label: 'Carrier delay goodwill compensation' },
+              { value: 'RMA return inspected and restocked', label: 'RMA return inspected and restocked' },
+            ]}
+          />
         </form>
-      </Modal>
+      </Drawer>
     </DashboardShell>
   );
 }

@@ -71,7 +71,7 @@ kilobytes — never the risk. Detail: `10-Analytics.md`, `11-Storage.md`.
 
 | Date | Decision | Status |
 |---|---|---|
-| 2026-10-14 | Currency: admin UI prices in ₹ (INR) but source docs specify single-currency USD | **OPEN** — blocks money-column semantics |
+| 2026-10-19 | Currency: single-currency store — INR (₹) only across admin + storefront; USD/GBP/EUR controls removed; shipping demo defaults ₹3,000 / ₹150; existing demo amounts not re-based | RESOLVED (UI wave; DB money columns store integer paise at the boundary) |
 | 2026-10-14 | Analytics event collection start (which release lights up tracking) | OPEN |
 | 2026-10-14 | Brands launch scope (table ready, UI unbuilt) | OPEN, non-blocking |
 | 2026-10-17 | Household accounts: one household per profile, manager/member roles, any member orders for any — resolved into `17-Household-Accounts.md` | RESOLVED (file 17) |
