@@ -8,16 +8,16 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 228,
+    "total": 236,
     "done": 217,
-    "in_progress": 0,
-    "backlog": 11
+    "in_progress": 1,
+    "backlog": 18
   },
   "session": {
     "branch": "feat/search-modal",
     "tip": "09765b0",
     "unpushed": ["599716c", "09765b0", "34c7259", "73bd526", "c60ab7c", "3b335aa", "975d66e", "0845928", "6c0a940", "b7bb05b", "b257aa3", "3fd55f3", "b7e9f88", "cee9ef0", "b97e340"],
-    "next_up": "PEDIT cleanup wave shipped (INR-only, product SEO/video removed, gram labels, global attribute visibility, one ordered gallery with cover at index 0) — awaiting browser verification. Reconcile VPRICE-3/3B pushed flags: origin/feat/search-modal is at 5416b2b, but the tracker still marks them unpushed; flip only on human confirmation. Then attribute edge log (file 18) → N1b write-through (display/visibility/hex + disclosure) → design-system tail (FX1/SEL/CBX/IMG) → DW2 pass → anim re-run; styling engine (file 19) is the project's FINAL feature — build it only after the core e-commerce app is complete; shipments partner-sync reframe; household UI build reads file 17",
+    "next_up": "Wave-2 plan recorded 2026-10-19 (chat; awaiting go-ahead + compare-at decision). Order: TL-UI-FUL-KPI (drop Wallet Credits) → TL-UI-PEDIT-IA (product editor IA refactor — 4 domain tabs, collapsible sections, modular editor files; pure reorg, no logic change) → TL-UI-COL-EDIT (collection plug-and-play: ordered productIds + updateCollection, derived count/slug, slide-in Drawer, Select + SearchableMultiSelect, editable description). Parked: TL-UI-ADM-TABLES + TL-UI-ADM-INR + TL-UI-ADM-MONO (table selection/bulk + INR labels + identifier color), TL-UI-CMS-PERSIST, TL-UI-DESIGN-PLAN. PEDIT wave still awaiting browser verification. Then attribute edge log (file 18) → N1b write-through (display/visibility/hex + disclosure) → design-system tail (FX1/SEL/CBX/IMG) → DW2 pass → anim re-run; styling engine (file 19) is the project's FINAL feature — build it only after the core e-commerce app is complete; shipments partner-sync reframe; household UI build reads file 17",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
       "dashboard D-series: KPI tiers, range/sort menus, badge mapping, calendar pills, header tint (360/768/1024/1440)",
@@ -3716,6 +3716,100 @@
         "dashboard TopProduct demo data is a separate fixture and deliberately unchanged"
       ],
       "verified": true,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-PEDIT-IA",
+      "title": "Product editor IA refactor — collapsible sections + regrouped fields + modular split",
+      "status": "in_progress",
+      "owner": "agent",
+      "started": "2026-10-19",
+      "log": "Planned 2026-10-19: four domain tabs (Overview / Media / Pricing & Stock / Specs & Options), every heading a collapsible section with primary sections open, related fields regrouped by domain, modular files under products/_components/editor/; pure reorg — VPRICE matrix/media/size-chart/attribute logic moves verbatim",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [
+        "Decide compare-at price: surface the input (recommended) or delete the hidden state + stale discount copy",
+        "Clear tuw_admin_v2_product_editor in resetDemoData (monogram visibility pref survives reset today)"
+      ]
+    },
+    {
+      "id": "TL-UI-FUL-KPI",
+      "title": "Fulfillment KPI grid 5→4 — remove Wallet Credits",
+      "status": "backlog",
+      "owner": "unassigned",
+      "log": "Approved 2026-10-19: delete the hardcoded ₹12,500 card; keep Submission Failed / Printing on Floor / Awaiting Submission / Dispatched (Delivered)",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-COL-EDIT",
+      "title": "Collection editor plug-and-play — ordered productIds, derived fields, Drawer + searchable multi-select",
+      "status": "backlog",
+      "owner": "unassigned",
+      "log": "Approved 2026-10-19: CollectionItem.productIds replaces stored productCount; add updateCollection; derive productCount/slug/updatedAt/resolved product list; create modal → slide-in Drawer; Select primitive for visibility; SearchableMultiSelect (existing products only); editable description via detail drawer; removable _components/collections folder",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [
+        "Legacy saved collections hydrate productIds: [] — never fabricate links; fixture subsets replace the 24/18/12/9 counts"
+      ]
+    },
+    {
+      "id": "TL-UI-ADM-TABLES",
+      "title": "Row selection + bulk actions — shipments, refunds, payments, discounts, abandoned carts",
+      "status": "backlog",
+      "owner": "unassigned",
+      "log": "Approved 2026-10-19, parked: header select-all + indeterminate, selected-count action bar, row highlight, stopPropagation (Orders/Products pattern); bulk manifest export (shipments), selected-log export (refunds), selected-payout export (payments), activate/deactivate/delete (discounts), remind eligible (abandoned)",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-ADM-INR",
+      "title": "INR label sweep — remaining $ signs in refunds, orders refund dialog, shipments, customers",
+      "status": "backlog",
+      "owner": "unassigned",
+      "log": "Parked 2026-10-19 with the table wave: refunds/page.tsx, orders/_components/OrdersView.tsx (refund dialog + product picker), shipments/page.tsx order select, customers/_components/CustomersView.tsx; collections/page.tsx is covered by TL-UI-COL-EDIT",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-ADM-MONO",
+      "title": "Monospace identifier color alignment (five tables)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "log": "Parked 2026-10-19: shipments tracking IDs already use var(--tuw-text-info,#175CD3); decide whether discounts/carts (and collection slug/design IDs) match or stay default ink",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-CMS-PERSIST",
+      "title": "Content CMS persistence + live counts (Journal, Pages, Media, Navigation)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "log": "Decision 2026-10-19: keep all four sections as-is for now; parked fixes — edits live in component state (lost on nav/reload, outside Reset Demo) and overview badges are hardcoded/wrong (Journal 12 vs 4 fixture, Media 142 vs 6)",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-UI-DESIGN-PLAN",
+      "title": "Design Assets — revisit planning only (keep demo-only now)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "log": "Decision 2026-10-19: keep current page unplanned, no DB table (design_assets deliberately dropped in TL-DASH-DB1); revisit only if Qikink design upload is scoped",
+      "design_match": "pending",
+      "verified": false,
       "pushed": false,
       "follow_ups": []
     }
