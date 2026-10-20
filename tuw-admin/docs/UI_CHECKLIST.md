@@ -129,10 +129,10 @@
 
 - [x] Static audit: Fulfillment & shipping is General card 4, built on the collapsible `DrawerCard`; it starts collapsed, has independent `fulfillmentCardOpen` state, and resets when a create/edit drawer opens or closes.
 - [x] Static audit: Print partner and Print placement now surface as `SearchableSelect` fields; existing `formPartner`/`formPlacement` values and save paths are unchanged. Weight and Shipping weight pair below them, and Package dimensions is full width.
-- [x] Static audit: weight, shipping weight and package dimensions were moved out of the Internal disclosure without duplication; the disclosure is retitled “Internal attributes” and now counts only internal-only attribute values.
+- [x] Static audit: weight, shipping weight and package dimensions were moved out of the Internal disclosure without duplication; the disclosure was retitled “Internal attributes” in card 4 and is now replaced by card 5’s Internal only group.
 - [x] Static audit: the helper line below the weight fields is gone; all labels are linked, and no new DB columns or logic extraction were introduced. Partner/Placement remain demo-only pending SQL columns.
 - [x] `pnpm run typecheck` passes with no diagnostics; `pnpm run test` passes 71/71 admin + 7/7 website tests; `pnpm run build` prerenders all 40 admin routes and 27 website routes.
-- [ ] Browser visual pass at 360 / 768 / 1024 / 1440: default-collapsed card, partner/placement load/save, weight/dimension load/save, two-column alignment, Internal attributes count, Reset Demo. User verification pending.
+- [ ] Browser visual pass at 360 / 768 / 1024 / 1440: default-collapsed card, partner/placement load/save, weight/dimension load/save, two-column alignment, card 5 Internal only group, Reset Demo. User verification pending.
 
 ### Attributes & values card + library-owned display type (2026-10-20)
 
