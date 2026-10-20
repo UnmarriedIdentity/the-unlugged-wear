@@ -2180,6 +2180,39 @@
   appearance: textfield;
 }
 
+/* Circular native color swatch (PEDIT card 5): rounding only the input leaves
+   Chromium's shadow-DOM colour swatch square inside the ring. Both the input
+   and the browser swatch pseudo-elements must be rounded. Reusable for any
+   future circular colour control. */
+.tuw-color-swatch {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid var(--tuw-border-control, #D1D5DB);
+  border-radius: 50%;
+  overflow: hidden;
+  background: transparent;
+  cursor: pointer;
+}
+.tuw-color-swatch::-webkit-color-swatch-wrapper {
+  padding: 0;
+  border-radius: 50%;
+}
+.tuw-color-swatch::-webkit-color-swatch {
+  border: 0;
+  border-radius: 50%;
+}
+.tuw-color-swatch::-moz-color-swatch {
+  border: 0;
+  border-radius: 50%;
+}
+.tuw-color-swatch:focus-visible {
+  outline: 2px solid var(--tuw-action-primary, #7539FF);
+  outline-offset: 2px;
+}
+
 /* Shared 3D uplift surface (US1): white face + inset bottom edge, the same
    relief the sidebar gives its active nav item (shadow-nav-edge token).
    Sized entirely by the caller (width/height/radius props on UpliftSurface)

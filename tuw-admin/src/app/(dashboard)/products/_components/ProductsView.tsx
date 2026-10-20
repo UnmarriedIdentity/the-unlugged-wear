@@ -723,20 +723,12 @@ export default function ProductsView() {
         {!internal && displayType === 'swatch' ? (
           <input
             type="color"
+            className="tuw-color-swatch"
             aria-label={`Swatch color for ${value}`}
             title={`Pick the PDP swatch color for ${value}`}
             value={attr.swatchHex[value] ?? '#D1D5DB'}
             onChange={(e) => setSwatchHex(attr.name, value, e.target.value)}
-            style={{
-              width: 20,
-              height: 20,
-              padding: 0,
-              border: '1px solid var(--tuw-border-control)',
-              borderRadius: '50%',
-              backgroundColor: 'transparent',
-              cursor: 'pointer',
-              flexShrink: 0,
-            }}
+            style={{ flexShrink: 0 }}
           />
         ) : null}
         {!internal && displayType === 'radio' ? (
@@ -2812,9 +2804,9 @@ export default function ProductsView() {
               onToggle={setAttributesCardOpen}
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   {libraryAttributes.filter((a) => a.enabled).length > 0 ? (
-                    <div style={{ flex: '1 1 220px', minWidth: 0 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
                       <DropdownMenu
                         ariaLabel="Link attribute from library"
                         fullWidth
@@ -2858,40 +2850,42 @@ export default function ProductsView() {
                       />
                     </div>
                   ) : null}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: '2 1 280px', minWidth: 0 }}>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <Input
-                        aria-label="New attribute name"
-                        placeholder="New attribute name, e.g. Fabric"
-                        value={newAttrName}
-                        onChange={(e) => setNewAttrName(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            addAttribute();
-                          }
-                        }}
-                      />
-                    </div>
-                    <Button
-                      variant="secondary"
-                      size="md"
-                      icon={<Plus size={14} />}
-                      type="button"
-                      aria-label="Add attribute"
-                      onClick={addAttribute}
-                      disabled={newAttrName.trim() === ''}
-                    >
-                      Add
-                    </Button>
-                  </div>
+                  <LinkButton
+                    href="/settings/attributes"
+                    variant="outline"
+                    size="md"
+                    style={{ flexShrink: 0, color: 'var(--tuw-action-primary)', whiteSpace: 'nowrap' }}
+                  >
+                    Manage library
+                  </LinkButton>
                 </div>
-                <Link
-                  href="/settings/attributes"
-                  style={{ alignSelf: 'flex-start', fontSize: 12, fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)', textDecoration: 'none' }}
-                >
-                  Manage library
-                </Link>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <Input
+                      aria-label="New attribute name"
+                      placeholder="New attribute name, e.g. Fabric"
+                      value={newAttrName}
+                      onChange={(e) => setNewAttrName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          addAttribute();
+                        }
+                      }}
+                    />
+                  </div>
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    icon={<Plus size={14} />}
+                    type="button"
+                    aria-label="Add attribute"
+                    onClick={addAttribute}
+                    disabled={newAttrName.trim() === ''}
+                  >
+                    Add
+                  </Button>
+                </div>
               </div>
 
               {storefrontAttributes.length > 0 ? (
