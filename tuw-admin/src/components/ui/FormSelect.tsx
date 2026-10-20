@@ -43,7 +43,16 @@ export default function FormSelect({
   return (
     <div>
       {label ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6, minWidth: 0 }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            marginBottom: 6,
+            minWidth: 0,
+            minHeight: 'var(--tuw-field-label-row-height, 0px)',
+          }}
+        >
           <label
             htmlFor={selectId}
             style={{

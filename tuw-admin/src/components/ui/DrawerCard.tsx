@@ -127,10 +127,12 @@ export default function DrawerCard({
             padding: 16,
             backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
             // Card-scoped field-label context: Input, FormSelect and
-            // FormTextarea inherit 14/600 without per-call props. Outside a
-            // DrawerCard each primitive keeps its existing legacy fallback.
+            // FormTextarea inherit 14/600 without per-call props. The 24px
+            // row keeps a hinted field aligned with its paired field. Outside
+            // a DrawerCard each primitive keeps its existing legacy fallback.
             '--tuw-field-label-size': 'var(--tuw-type-label-control-size, 14px)',
             '--tuw-field-label-weight': '600',
+            '--tuw-field-label-row-height': '24px',
           } as React.CSSProperties
         }
       >

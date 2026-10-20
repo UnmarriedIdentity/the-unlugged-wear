@@ -68,7 +68,15 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         }}
       >
         {label && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              minWidth: 0,
+              minHeight: 'var(--tuw-field-label-row-height, 0px)',
+            }}
+          >
             <label
               htmlFor={inputId}
               style={{

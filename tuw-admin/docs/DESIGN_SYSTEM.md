@@ -67,7 +67,7 @@ The product editor General tab uses a stacked card layout. Basic Information is 
 
 Use a tooltip only for supplementary, non-blocking guidance. Do not hide validation, required instructions or essential copy inside a tooltip.
 
-- Trigger: a 24px `InfoTooltip` button beside the label, with a 14px Lucide `Info` icon. Default icon colour is secondary text; hover/focus uses primary action. Keep a visible focus ring and `type="button"`.
+- Trigger: a 24px `InfoTooltip` button beside the label, with a 14px Lucide `Info` icon. Default icon colour is secondary text; hover/focus uses primary action. Keep a visible focus ring and `type="button"`. The card label row reserves 24px, so a hinted field keeps the same baseline as its paired field.
 - Surface: white `--tuw-bg-surface`, 1px `--tuw-border-control` border, primary text, 12px/18px/500, 8px radius, 8px × 10px padding, maximum width 240px, `--shadow-popover` elevation. No arrow. Offset 8px from the trigger.
 - Behaviour: hover opens after 120ms; keyboard focus opens immediately; tap toggles; Escape, outside click, scroll or resize closes. Top placement is preferred, with automatic bottom flip and viewport clamping. Portal the tooltip to `document.body` so drawer/card `overflow: hidden` never clips it. Reduced motion follows the global rule.
 - Accessibility: the tooltip uses `role="tooltip"` with a unique id; the trigger gets `aria-describedby` and a descriptive `aria-label` such as “More information about Style Code”. The tooltip is not interactive and stays out of the tab order.
