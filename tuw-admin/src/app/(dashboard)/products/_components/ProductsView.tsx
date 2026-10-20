@@ -132,12 +132,15 @@ export default function ProductsView() {
   // Product-editor cards start collapsed; the state lives here so expanding a
   // card survives tab switches and resets for each product.
   const [basicCardOpen, setBasicCardOpen] = useState(false);
+  // Pricing & stock (PEDIT card 2) is independently collapsible.
+  const [pricingCardOpen, setPricingCardOpen] = useState(false);
 
   const openCreateDrawer = () => {
     if (!canPerformAction('products')) return;
     setEditingProduct(null);
     setIsCreating(true);
     setBasicCardOpen(false);
+    setPricingCardOpen(false);
     setProductTab('general');
     setDrawerView('compact');
     autoExpandedRef.current = false;
@@ -866,6 +869,7 @@ export default function ProductsView() {
     setIsCreating(false);
     setEditingProduct(product);
     setBasicCardOpen(false);
+    setPricingCardOpen(false);
     setProductTab('general');
     setFormCompareError(null);
     setDrawerView('compact');
@@ -958,6 +962,7 @@ export default function ProductsView() {
       const compare = parseCompareAtPrice(formComparePrice, priceNum);
       if (compare.error) {
         setFormCompareError(compare.error);
+        setPricingCardOpen(true);
         setProductTab('general');
         showToast({ type: 'warning', title: 'Check Compare-at Price', description: compare.error });
         return;
@@ -1035,6 +1040,7 @@ export default function ProductsView() {
     const compare = parseCompareAtPrice(formComparePrice, minPrice);
     if (compare.error) {
       setFormCompareError(compare.error);
+      setPricingCardOpen(true);
       setProductTab('general');
       showToast({ type: 'warning', title: 'Check Compare-at Price', description: compare.error });
       return;
@@ -2367,6 +2373,7 @@ export default function ProductsView() {
           setEditingProduct(null);
           setIsCreating(false);
           setBasicCardOpen(false);
+          setPricingCardOpen(false);
           setDrawerView('compact');
           autoExpandedRef.current = false;
           setFormImages((prev) => {
@@ -2523,40 +2530,63 @@ export default function ProductsView() {
                 />
               </div>
             </DrawerCard>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <Input
-                label="Base price (₹)"
-                type="text"
-                inputMode="decimal"
-                value={formPrice}
-                onChange={(e) => writeBasePrice(e.target.value)}
-                required
-                helperText="Every variant price starts at this base."
-              />
-              <Input
-                label="Stock Quantity"
-                type="number"
-                value={formStock}
-                onChange={(e) => writeStockTotal(e.target.value)}
-                required
-              />
-            </div>
-            <Input
-              label="Compare-at price (₹)"
-              type="text"
-              inputMode="decimal"
-              placeholder="Optional"
-              value={formComparePrice}
-              onChange={(e) => {
-                const raw = e.target.value;
-                if (!/^\d*\.?\d*$/.test(raw)) return;
-                setFormComparePrice(raw);
-                if (formCompareError) setFormCompareError(null);
-              }}
-              error={formCompareError ?? undefined}
-              helperText="Optional — shown struck through in the catalog as a reference price. Must be higher than the selling price."
-            />
-            <DrawerSection title="Pricing & Discounts" titleGap={10}>
+            <DrawerCard
+              title="2. Pricing & stock"
+              description="Selling price, compare-at reference, stock, and checkout tax"
+              collapsible
+              isOpen={pricingCardOpen}
+              onToggle={setPricingCardOpen}
+            >
+              <div style={pairedFieldGrid}>
+                <Input
+                  label="Base price (₹)"
+                  type="text"
+                  inputMode="decimal"
+                  value={formPrice}
+                  onChange={(e) => writeBasePrice(e.target.value)}
+                  required
+                  helperText="Every variant price starts at this base."
+                />
+                <Input
+                  label="Compare-at price (₹)"
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="Optional"
+                  value={formComparePrice}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    if (!/^\d*\.?\d*$/.test(raw)) return;
+                    setFormComparePrice(raw);
+                    if (formCompareError) setFormCompareError(null);
+                  }}
+                  error={formCompareError ?? undefined}
+                  labelTooltip="Optional catalog reference. Shown struck through only when it is higher than the current selling price; it does not affect the price charged."
+                  helperText="Must be higher than the selling price."
+                />
+              </div>
+              <div style={pairedFieldGrid}>
+                <Input
+                  label="Stock Quantity"
+                  type="number"
+                  min={0}
+                  value={formStock}
+                  onChange={(e) => writeStockTotal(e.target.value)}
+                  required
+                  helperText="Total across variants. Editing redistributes stock evenly."
+                />
+                <Input
+                  label="Tax Rate (%)"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="e.g. 18"
+                  value={formTax}
+                  onChange={(e) => setFormTax(e.target.value)}
+                  helperText="Applied at checkout — never shown on the product page."
+                />
+              </div>
+            </DrawerCard>
+            <DrawerSection title="Scheduled discounts" titleGap={10}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
                   Scheduled price cuts with a window and kill switch. The compare-at price above is a static catalog reference, separate from these scheduled cuts.
@@ -2746,22 +2776,6 @@ export default function ProductsView() {
               value={formDescription}
               onChange={(e) => setFormDescription(e.target.value)}
             />
-            <DrawerSection title="Checkout" titleGap={10}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <Input
-                  label="Tax Rate (%)"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="e.g. 18"
-                  value={formTax}
-                  onChange={(e) => setFormTax(e.target.value)}
-                />
-                <p style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
-                  Applied at checkout — never shown on the product page.
-                </p>
-              </div>
-            </DrawerSection>
             <Disclosure
               title="Internal fields"
               subtitle="Internal data: weights, dimensions, print placements. Hidden from shoppers."
