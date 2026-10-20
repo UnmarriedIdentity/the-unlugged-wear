@@ -3,14 +3,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive, GripVertical, Upload, Images, Focus, Library, RotateCcw } from 'lucide-react';
+import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive, GripVertical, Upload, Images, Focus, Library, RotateCcw, X } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, Input, Drawer, Modal, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection, DrawerCard, SearchableSelect, Disclosure, Carousel, LinkButton } from '@/components/ui';
+import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, IconButton, Input, Drawer, Modal, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection, DrawerCard, SearchableSelect, Disclosure, Carousel, LinkButton } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 import { resolveVariants, variantStockTotal, buildVariantSku, deriveVariantPrice, recomputeVariants, minFromPrice, pruneAdjustments, roundPrice, hasPriceSpread, adjustmentKey, sumAdjustments } from '@/mocks/variants';
 import type { ProductVariant, ProductAttribute, PhotoSettings, ProductDiscount, SizeChart } from '@/mocks/fixtures';
 import { parseCompareAtPrice } from '@/lib/productPricing';
+import { attributeDisplayLabel, normalizeAttributeDisplayType } from '@/lib/attributePresentation';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
 
@@ -65,6 +66,51 @@ const pairedFieldGrid: React.CSSProperties = {
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
   gap: 12,
+};
+
+// PEDIT card 5: flat attribute rows. Rows are bordered groups, not nested cards.
+const attributeRowStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 10,
+  minWidth: 0,
+  padding: 12,
+  border: '1px solid var(--tuw-border-subtle)',
+  borderRadius: 8,
+};
+
+const attributeChipStyle: React.CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 6,
+  minHeight: 28,
+  padding: '2px 4px 2px 8px',
+  borderRadius: 999,
+  border: '1px solid var(--tuw-border-subtle)',
+  backgroundColor: 'var(--tuw-bg-canvas)',
+  fontSize: 12,
+  lineHeight: '16px',
+  fontWeight: 500,
+  color: 'var(--tuw-text-primary)',
+};
+
+const attributeMetaStyle: React.CSSProperties = {
+  fontSize: 12,
+  lineHeight: '18px',
+  color: 'var(--tuw-text-secondary)',
+};
+
+const attributeGroupLabelStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 6,
+  margin: 0,
+  fontSize: 11,
+  lineHeight: '16px',
+  fontWeight: 600,
+  letterSpacing: '0.04em',
+  textTransform: 'uppercase',
+  color: 'var(--tuw-text-secondary)',
 };
 
 // Per-product attribute draft (A1/AX2). Shape lives on ProductAttribute
@@ -156,6 +202,8 @@ export default function ProductsView() {
   const [discountsCardOpen, setDiscountsCardOpen] = useState(false);
   // Fulfillment & shipping (PEDIT card 4) is independently collapsible.
   const [fulfillmentCardOpen, setFulfillmentCardOpen] = useState(false);
+  // Attributes & values (PEDIT card 5) is independently collapsible.
+  const [attributesCardOpen, setAttributesCardOpen] = useState(false);
   const addDiscountRef = useRef<HTMLDivElement>(null);
 
   const openCreateDrawer = () => {
@@ -166,6 +214,7 @@ export default function ProductsView() {
     setPricingCardOpen(false);
     setDiscountsCardOpen(false);
     setFulfillmentCardOpen(false);
+    setAttributesCardOpen(false);
     setProductTab('general');
     setDrawerView('compact');
     autoExpandedRef.current = false;
@@ -626,20 +675,14 @@ export default function ProductsView() {
       addDiscountRef.current?.querySelector<HTMLButtonElement>('button')?.focus();
     });
   };
-  const displayTypeLabel = (t: ProductAttribute['displayType']) =>
-    t === 'pill' ? 'Pill' : t === 'swatch' ? 'Color swatch' : 'Radio select';
-  const setDisplayType = (name: string, displayType: ProductAttribute['displayType']) => {
-    setFormAttributes((prev) => prev.map((a) => (a.name === name ? { ...a, displayType } : a)));
-  };
   const setSwatchHex = (name: string, value: string, hex: string) => {
     setFormAttributes((prev) =>
       prev.map((a) => (a.name === name ? { ...a, swatchHex: { ...a.swatchHex, [value]: hex } } : a))
     );
   };
-  // Shared attribute card (Y1b): PDP section and the Internal block render
-  // the same card. hideDisplay drops the storefront picker where it has no
-  // meaning (attributes not shown on the PDP). Visibility itself is global:
-  // the card reports the linked library record and links out to Settings.
+  // Shared attribute row (PEDIT card 5): flat bordered groups, value chips, and
+  // a read-only display type from the library. The library owns the showcase
+  // type; products only keep their own value list and swatch colours.
   const libraryOf = (attr: ProductAttribute) =>
     libraryAttributes.find((l) => l.id === attr.libraryId) ??
     libraryAttributes.find((l) => l.name.toLowerCase() === attr.name.toLowerCase());
@@ -647,250 +690,181 @@ export default function ProductsView() {
     const lib = libraryOf(attr);
     return lib ? lib.showOnPdp : attr.name !== 'Placements';
   };
-  const renderAttrCard = (attr: ProductAttribute, hideDisplay = false) => (
-    <SurfaceCard key={attr.name} padding="12px" gap="10px">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-          {attr.name}
-          {attr.libraryId ? (
-            <Badge variant="success" size="sm" title="Linked to the single library record">Linked</Badge>
-          ) : null}
-        </span>
-        {attr.builtin ? (
-          <Badge variant="info" size="sm">Default</Badge>
-        ) : (
-          <UpliftSurface active width={28} height={28} className="tuw-danger-hover" style={{ flexShrink: 0, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-            <button
-              type="button"
-              aria-label={`Remove attribute ${attr.name}`}
-              onClick={() => removeAttribute(attr.name)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, display: 'inline-flex' }}
-            >
-              <Trash2 size={14} />
-            </button>
-          </UpliftSurface>
-        )}
-      </div>
-      {hideDisplay ? null : (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-          Shows on storefront as
-        </span>
-        <DropdownMenu
-          ariaLabel={`${attr.name} storefront display`}
-          trigger={
-            <span
-              role="button"
-              tabIndex={0}
-              aria-label={`${attr.name} display, currently ${displayTypeLabel(attr.displayType)}`}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
-              }}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 8,
-                height: 32,
-                padding: '0 10px',
-                fontSize: 12,
-                fontWeight: 500,
-                fontFamily: 'var(--font-main)',
-                borderRadius: 8,
-                border: '1px solid var(--tuw-border-control, #D1D5DB)',
-                backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
-                color: 'var(--tuw-text-primary, #262626)',
-                cursor: 'pointer',
-                userSelect: 'none',
-              }}
-            >
-              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {displayTypeLabel(attr.displayType)}
-              </span>
-              <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
-            </span>
-          }
-          items={[
-            { value: 'pill', label: 'Pill' },
-            { value: 'swatch', label: 'Color swatch' },
-            { value: 'radio', label: 'Radio select' },
-          ]}
-          selectedValue={attr.displayType}
-          onSelect={(v) => setDisplayType(attr.name, v as ProductAttribute['displayType'])}
-        />
-      </div>
-      )}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-          Shown on
-        </span>
-        {(() => {
-          const lib = libraryOf(attr);
-          const surfaces = lib
-            ? [
-                lib.showOnPdp ? 'PDP' : null,
-                lib.showOnCheckout ? 'Checkout' : null,
-                lib.showOnAdmin ? 'Admin' : null,
-              ].filter((s): s is string => s !== null)
-            : [];
-          return surfaces.length > 0 ? (
-            surfaces.map((surface) => (
-              <Badge key={surface} variant="neutral" size="sm">{surface}</Badge>
-            ))
-          ) : (
-            <Badge variant="warning" size="sm">Unlinked</Badge>
-          );
-        })()}
-        <Link
-          href="/settings/attributes"
-          style={{
-            marginLeft: 'auto',
-            fontSize: 12,
-            fontWeight: 600,
-            color: 'var(--tuw-action-primary, #7539FF)',
-            textDecoration: 'none',
-          }}
-        >
-          Manage in Settings → Attributes
-        </Link>
-      </div>
-      {attr.values.length > 0 ? (
-        <Table>
-          <TableHeader>
-            <TableRow hoverable={false}>
-              <TableHead style={{ padding: '10px 16px' }}>Value</TableHead>
-              <TableHead style={{ padding: '10px 16px' }}>Storefront preview</TableHead>
-              <TableHead style={{ padding: '10px 16px', width: 48 }}><span className="sr-only">Remove</span></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {attr.values.map((val) => (
-              <TableRow key={val} hoverable={false}>
-                <TableCell style={{ padding: '10px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
-                  {val}
-                </TableCell>
-                <TableCell style={{ padding: '10px 16px' }}>
-                  {attr.displayType === 'pill' ? (
-                    <Badge variant="neutral" size="sm">{val}</Badge>
-                  ) : attr.displayType === 'swatch' ? (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
-                      <input
-                        type="color"
-                        aria-label={`Swatch color for ${val}`}
-                        title={`Pick the PDP swatch color for ${val}`}
-                        value={attr.swatchHex[val] ?? '#D1D5DB'}
-                        onChange={(e) => setSwatchHex(attr.name, val, e.target.value)}
-                        style={{ width: 28, height: 28, padding: 0, border: 'none', borderRadius: 8, background: 'none', cursor: 'pointer', flexShrink: 0 }}
-                      />
-                      {val}
-                      <span style={{ fontSize: 12, fontFamily: 'monospace', color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                        {attr.swatchHex[val] ?? '#D1D5DB'}
-                      </span>
-                    </span>
-                  ) : (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
-                      <span aria-hidden="true" style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid var(--tuw-border-control, #D1D5DB)', flexShrink: 0, boxSizing: 'border-box' }} />
-                      {val}
-                    </span>
-                  )}
-                </TableCell>
-                <TableCell style={{ padding: '10px 16px', width: 48 }}>
-                  <UpliftSurface active width={28} height={28} className="tuw-danger-hover" style={{ flexShrink: 0, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                    <button
-                      type="button"
-                      aria-label={`Remove ${val} from ${attr.name}`}
-                      onClick={() => removeAttrValue(attr.name, val)}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, display: 'inline-flex' }}
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </UpliftSurface>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      ) : (
-        <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-          No values yet — add the first one below.
-        </div>
-      )}
-      {/* Picker-first entry (VALPICK): known values for this attribute
-          (library row ∪ card, deduped) one click away; the text input
-          below stays for genuinely new values. Hidden when nothing new. */}
-      {(() => {
-        const lib = libraryAttributes.find((l) => l.id === attr.libraryId);
-        const known = [...new Set([...(lib?.values ?? []), ...attr.values])];
-        const missing = known.filter(
-          (v) => !attr.values.some((x) => x.toLowerCase() === v.toLowerCase())
-        );
-        if (missing.length === 0) return null;
-        return (
-          <div style={{ display: 'flex', gap: 8 }}>
-            <div style={{ flex: 1 }}>
-              <DropdownMenu
-                ariaLabel={`Pick known ${attr.name} value`}
-                trigger={
-                  <span
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`Pick a known ${attr.name} value, ${missing.length} available`}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
-                    }}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: 8,
-                      width: '100%',
-                      height: 40,
-                      padding: '0 12px',
-                      fontSize: 13,
-                      fontWeight: 500,
-                      fontFamily: 'var(--font-main)',
-                      borderRadius: 8,
-                      border: '1px dashed var(--tuw-border-control, #D1D5DB)',
-                      backgroundColor: 'transparent',
-                      color: 'var(--tuw-text-secondary, #5D6772)',
-                      cursor: 'pointer',
-                      userSelect: 'none',
-                    }}
-                  >
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      Pick known value… ({missing.length})
-                    </span>
-                    <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
-                  </span>
-                }
-                items={missing.map((v) => ({ value: v, label: v }))}
-                onSelect={(v) => commitAttrValue(attr.name, v)}
-              />
-            </div>
-          </div>
-        );
-      })()}
-      <div style={{ display: 'flex', gap: 8 }}>
-        <div style={{ flex: 1 }}>
-          <Input
-            aria-label={`Add ${attr.name} value`}
-            placeholder={`Add ${attr.name.toLowerCase()} value, then Add`}
-            value={attrDrafts[attr.name] ?? ''}
-            onChange={(e) => setAttrDrafts((prev) => ({ ...prev, [attr.name]: e.target.value }))}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                addAttrValue(attr.name);
-              }
+  const storefrontAttributes = formAttributes.filter((attr) => showsOnPdp(attr));
+  const internalAttributes = formAttributes.filter((attr) => !showsOnPdp(attr));
+
+  const attributeDisplayType = (attr: ProductAttribute) =>
+    normalizeAttributeDisplayType(libraryOf(attr)?.displayType);
+
+  const attributeSurfaces = (attr: ProductAttribute): string[] => {
+    const lib = libraryOf(attr);
+    if (!lib) return [];
+    return [
+      lib.showOnPdp ? 'PDP' : null,
+      lib.showOnCheckout ? 'Checkout' : null,
+      lib.showOnAdmin ? 'Admin' : null,
+    ].filter((surface): surface is string => surface !== null);
+  };
+
+  const attributeMeta = (attr: ProductAttribute, internal: boolean) => {
+    const lib = libraryOf(attr);
+    const valueLabel = `${attr.values.length} value${attr.values.length === 1 ? '' : 's'}`;
+    const surfaces = attributeSurfaces(attr);
+    if (internal) {
+      return `${valueLabel} · ${surfaces.length > 0 ? surfaces.join(' · ') : 'Internal'} · ${lib ? 'Linked' : 'Unlinked'}`;
+    }
+    return `${valueLabel} · ${surfaces.length > 0 ? surfaces.join(' · ') : 'PDP'} · ${lib ? 'Linked' : 'Unlinked'}`;
+  };
+
+  const renderAttributeChip = (attr: ProductAttribute, value: string, internal: boolean) => {
+    const displayType = attributeDisplayType(attr);
+    return (
+      <span key={value} style={attributeChipStyle}>
+        {!internal && displayType === 'swatch' ? (
+          <input
+            type="color"
+            aria-label={`Swatch color for ${value}`}
+            title={`Pick the PDP swatch color for ${value}`}
+            value={attr.swatchHex[value] ?? '#D1D5DB'}
+            onChange={(e) => setSwatchHex(attr.name, value, e.target.value)}
+            style={{
+              width: 20,
+              height: 20,
+              padding: 0,
+              border: '1px solid var(--tuw-border-control)',
+              borderRadius: '50%',
+              backgroundColor: 'transparent',
+              cursor: 'pointer',
+              flexShrink: 0,
             }}
           />
+        ) : null}
+        {!internal && displayType === 'radio' ? (
+          <span
+            aria-hidden="true"
+            style={{
+              width: 14,
+              height: 14,
+              borderRadius: '50%',
+              border: '2px solid var(--tuw-border-control)',
+              boxSizing: 'border-box',
+              flexShrink: 0,
+            }}
+          />
+        ) : null}
+        <span>{value}</span>
+        <IconButton
+          label={`Remove ${value} from ${attr.name}`}
+          icon={<X size={11} />}
+          size="sm"
+          variant="ghost"
+          className="tuw-danger-hover"
+          onClick={() => removeAttrValue(attr.name, value)}
+          style={{ width: 22, height: 22, borderRadius: 999, color: 'var(--tuw-text-secondary)' }}
+        />
+      </span>
+    );
+  };
+
+  const renderAttributeRow = (attr: ProductAttribute, internal = false) => {
+    const lib = libraryOf(attr);
+    const displayType = attributeDisplayType(attr);
+    const rowTitleId = `attribute-${attr.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase() || 'value'}-title`;
+    const known = [...new Set([...(lib?.values ?? []), ...attr.values])];
+    const missing = known.filter(
+      (value) => !attr.values.some((current) => current.toLowerCase() === value.toLowerCase())
+    );
+
+    return (
+      <div key={attr.name} role="group" aria-labelledby={rowTitleId} style={attributeRowStyle}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
+            <span
+              id={rowTitleId}
+              style={{ fontSize: 14, lineHeight: '22px', fontWeight: 600, color: 'var(--tuw-text-primary)' }}
+            >
+              {attr.name}
+            </span>
+            {attr.builtin ? <Badge variant="info" size="sm">Default</Badge> : null}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+            {internal ? (
+              !lib ? <Badge variant="warning" size="sm">Unlinked</Badge> : null
+            ) : lib ? (
+              <Badge variant="neutral" size="sm">{attributeDisplayLabel(displayType)}</Badge>
+            ) : (
+              <Badge variant="warning" size="sm">Unlinked · {attributeDisplayLabel(displayType)}</Badge>
+            )}
+            {!attr.builtin ? (
+              <IconButton
+                label={`Remove attribute ${attr.name}`}
+                icon={<Trash2 size={14} />}
+                size="sm"
+                variant="ghost"
+                className="tuw-danger-hover"
+                onClick={() => removeAttribute(attr.name)}
+                style={{ color: 'var(--tuw-text-secondary)' }}
+              />
+            ) : null}
+          </div>
         </div>
-        <Button variant="secondary" size="md" type="button" onClick={() => addAttrValue(attr.name)} disabled={(attrDrafts[attr.name] ?? '').trim() === ''}>
-          Add
-        </Button>
+        <span style={attributeMetaStyle}>{attributeMeta(attr, internal)}</span>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {attr.values.length > 0 ? (
+            attr.values.map((value) => renderAttributeChip(attr, value, internal))
+          ) : (
+            <span style={{ fontSize: 12, lineHeight: '18px', color: 'var(--tuw-text-secondary)' }}>
+              No values yet
+            </span>
+          )}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 180px', minWidth: 0 }}>
+            <Input
+              aria-label={`Add ${attr.name} value`}
+              placeholder={`Add ${attr.name.toLowerCase()} value…`}
+              value={attrDrafts[attr.name] ?? ''}
+              onChange={(e) => setAttrDrafts((prev) => ({ ...prev, [attr.name]: e.target.value }))}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  addAttrValue(attr.name);
+                }
+              }}
+            />
+          </div>
+          <Button
+            variant="secondary"
+            size="md"
+            type="button"
+            aria-label={`Add ${attr.name} value`}
+            onClick={() => addAttrValue(attr.name)}
+            disabled={(attrDrafts[attr.name] ?? '').trim() === ''}
+          >
+            Add
+          </Button>
+          {missing.length > 0 ? (
+            <DropdownMenu
+              ariaLabel={`Pick known ${attr.name} value`}
+              trigger={
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  type="button"
+                  aria-label={`Choose known ${attr.name} value`}
+                  icon={<ChevronDown size={14} />}
+                >
+                  Choose known value
+                </Button>
+              }
+              items={missing.map((value) => ({ value, label: value }))}
+              onSelect={(value) => commitAttrValue(attr.name, value)}
+            />
+          ) : null}
+        </div>
       </div>
-    </SurfaceCard>
-  );
+    );
+  };
 
   const openEditDrawer = (product: ProductItem) => {
     if (!canPerformAction('products')) return;
@@ -900,6 +874,7 @@ export default function ProductsView() {
     setPricingCardOpen(false);
     setDiscountsCardOpen(false);
     setFulfillmentCardOpen(false);
+    setAttributesCardOpen(false);
     setProductTab('general');
     setFormCompareError(null);
     setDrawerView('compact');
@@ -2406,6 +2381,7 @@ export default function ProductsView() {
           setPricingCardOpen(false);
           setDiscountsCardOpen(false);
           setFulfillmentCardOpen(false);
+          setAttributesCardOpen(false);
           setDrawerView('compact');
           autoExpandedRef.current = false;
           setFormImages((prev) => {
@@ -2828,17 +2804,20 @@ export default function ProductsView() {
                 onChange={(e) => setFormDims(e.target.value)}
               />
             </DrawerCard>
-            <DrawerSection title="Attributes & Values" titleGap={10}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
-                  Color and Size ship with every product. Add custom attributes (Fabric, Fit…) and define their values one by one.
-                  {' '}<Link href="/settings/attributes" style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)', textDecoration: 'none' }}>Manage library</Link>
-                </p>
-                {libraryAttributes.filter((a) => a.enabled).length > 0 ? (
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <div style={{ flex: 1 }}>
+            <DrawerCard
+              title="5. Attributes & values"
+              description="Storefront choices and internal production values"
+              collapsible
+              isOpen={attributesCardOpen}
+              onToggle={setAttributesCardOpen}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  {libraryAttributes.filter((a) => a.enabled).length > 0 ? (
+                    <div style={{ flex: '1 1 220px', minWidth: 0 }}>
                       <DropdownMenu
                         ariaLabel="Link attribute from library"
+                        fullWidth
                         trigger={
                           <span
                             role="button"
@@ -2878,39 +2857,73 @@ export default function ProductsView() {
                         onSelect={(v) => linkFromLibrary(v)}
                       />
                     </div>
+                  ) : null}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: '2 1 280px', minWidth: 0 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <Input
+                        aria-label="New attribute name"
+                        placeholder="New attribute name, e.g. Fabric"
+                        value={newAttrName}
+                        onChange={(e) => setNewAttrName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            addAttribute();
+                          }
+                        }}
+                      />
+                    </div>
+                    <Button
+                      variant="secondary"
+                      size="md"
+                      icon={<Plus size={14} />}
+                      type="button"
+                      aria-label="Add attribute"
+                      onClick={addAttribute}
+                      disabled={newAttrName.trim() === ''}
+                    >
+                      Add
+                    </Button>
                   </div>
-                ) : null}
-                {formAttributes.filter((a) => showsOnPdp(a)).map((attr) => renderAttrCard(attr))}
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <div style={{ flex: 1 }}>
-                    <Input
-                      aria-label="New attribute name"
-                      placeholder="New attribute name, e.g. Fabric"
-                      value={newAttrName}
-                      onChange={(e) => setNewAttrName(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          addAttribute();
-                        }
-                      }}
-                    />
-                  </div>
-                  <Button variant="secondary" size="md" icon={<Plus size={14} />} type="button" onClick={addAttribute} disabled={newAttrName.trim() === ''}>
-                    Add Attribute
-                  </Button>
                 </div>
+                <Link
+                  href="/settings/attributes"
+                  style={{ alignSelf: 'flex-start', fontSize: 12, fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)', textDecoration: 'none' }}
+                >
+                  Manage library
+                </Link>
               </div>
-            </DrawerSection>
-            <Disclosure
-              title="Internal attributes"
-              subtitle="Internal attribute values used for production. Hidden from shoppers."
-              badge={<Badge variant="neutral" size="sm">{formAttributes.filter((a) => !showsOnPdp(a)).reduce((n, a) => n + a.values.length, 0)} filled</Badge>}
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {formAttributes.filter((a) => !showsOnPdp(a)).map((attr) => renderAttrCard(attr, true))}
-              </div>
-            </Disclosure>
+
+              {storefrontAttributes.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <h5 style={attributeGroupLabelStyle}>Storefront</h5>
+                  {storefrontAttributes.map((attr) => renderAttributeRow(attr))}
+                </div>
+              ) : null}
+
+              {internalAttributes.length > 0 ? (
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 10,
+                    paddingTop: storefrontAttributes.length > 0 ? 12 : 0,
+                    borderTop: storefrontAttributes.length > 0 ? '1px solid var(--tuw-border-subtle)' : 'none',
+                  }}
+                >
+                  <h5 style={attributeGroupLabelStyle}>
+                    Internal only <span style={{ fontWeight: 500 }}>({internalAttributes.length})</span>
+                  </h5>
+                  {internalAttributes.map((attr) => renderAttributeRow(attr, true))}
+                </div>
+              ) : null}
+
+              {formAttributes.length === 0 ? (
+                <p style={{ margin: 0, fontSize: 13, lineHeight: '20px', color: 'var(--tuw-text-secondary)' }}>
+                  No attributes yet. Link one from the library or add one above.
+                </p>
+              ) : null}
+            </DrawerCard>
           </form>
           ) : productTab === 'media' ? (
           <div ref={mediaWrapRef} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

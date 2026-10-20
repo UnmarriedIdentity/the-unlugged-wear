@@ -134,3 +134,12 @@
 - [x] `pnpm run typecheck` passes with no diagnostics; `pnpm run test` passes 71/71 admin + 7/7 website tests; `pnpm run build` prerenders all 40 admin routes and 27 website routes.
 - [ ] Browser visual pass at 360 / 768 / 1024 / 1440: default-collapsed card, partner/placement load/save, weight/dimension load/save, two-column alignment, Internal attributes count, Reset Demo. User verification pending.
 
+### Attributes & values card + library-owned display type (2026-10-20)
+
+- [x] Static audit: the ATTR-DISPLAY drawer slice consumes the library-owned showcase type via `normalizeAttributeDisplayType(libraryOf(attr)?.displayType)`; the per-product display dropdown and `setDisplayType` are gone. Unlinked legacy attributes fall back to Pill and show an `Unlinked · Pill` warning; `ProductAttribute.displayType` remains persisted for compatibility but is ignored for rendering. No migration.
+- [x] Static audit: Attributes & values is General card 5, a collapsible `DrawerCard` with independent `attributesCardOpen` state, reset when a create/edit drawer opens or closes. The old flat section and separate Internal attributes disclosure are replaced by one card with Storefront and Internal only groups.
+- [x] Static audit: the top action strip keeps Link from library, new-attribute name + Add, and a Manage library link. Rows are flat bordered groups; values render as wrapping chips with inline remove; swatch chips keep the product-local color input and drop the hex text; radio chips show a dot preview. No value table or nested cards.
+- [x] Static audit: `linkFromLibrary`, `commitAttrValue`, `removeAttrValue`, `addAttribute`, `removeAttribute`, and `setSwatchHex` are unchanged; default Color/Size/Placements rows remain non-removable; the known-value picker remains when the library has unused values. No new DB columns, dependencies, auth, payment or fulfillment integration.
+- [x] `pnpm run typecheck` passes with no diagnostics; `pnpm run test` passes 71/71 admin + 7/7 website tests; `pnpm run build` prerenders all 40 admin routes and 27 website routes.
+- [ ] Browser visual pass at 360 / 768 / 1024 / 1440: card default-collapsed and independent, Storefront/Internal groups, chip wrapping, swatch and radio previews, add/remove value, known-value picker, default protection, library type reflected read-only, unlinked fallback, Reset Demo. User verification pending.
+
