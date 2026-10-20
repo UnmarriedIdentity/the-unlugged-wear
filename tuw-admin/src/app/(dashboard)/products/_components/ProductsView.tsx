@@ -2468,7 +2468,10 @@ export default function ProductsView() {
       >
         {(editingProduct || isCreating) && (
           productTab === 'general' ? (
-          <form onSubmit={handleEditSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <form
+            onSubmit={handleEditSubmit}
+            className={`tuw-pedit-general-grid${drawerView !== 'compact' ? ' is-expanded' : ''}`}
+          >
             <DrawerCard
               title="1. Basic Information"
               description="Core identity, storefront copy, and catalog classification"
@@ -2802,6 +2805,7 @@ export default function ProductsView() {
               collapsible
               isOpen={attributesCardOpen}
               onToggle={setAttributesCardOpen}
+              className="tuw-pedit-general-wide"
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -2891,7 +2895,9 @@ export default function ProductsView() {
               {storefrontAttributes.length > 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   <h5 style={attributeGroupLabelStyle}>Storefront</h5>
-                  {storefrontAttributes.map((attr) => renderAttributeRow(attr))}
+                  <div className="tuw-pedit-attribute-grid">
+                    {storefrontAttributes.map((attr) => renderAttributeRow(attr))}
+                  </div>
                 </div>
               ) : null}
 
