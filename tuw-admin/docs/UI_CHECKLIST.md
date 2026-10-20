@@ -116,3 +116,21 @@
 - [x] `pnpm run typecheck` passes with no diagnostics; `pnpm run test` passes 71/71 admin + 7/7 website tests; `pnpm run build` prerenders all 40 admin routes and 27 website routes.
 - [ ] Browser visual pass at 360 / 768 / 1024 / 1440: default-collapsed card with independent toggle, empty state, add/remove, type switch, value clamp, dates, active switch, save/reload, row focus return, Reset Demo. User verification pending.
 
+### Description folded into Basic Information (2026-10-20)
+
+- [x] Static audit: the standalone Description textarea is removed; Description now renders full-width inside Basic Information directly after URL Slug and before Style Code/Category.
+- [x] Static audit: `formDescription` load/save behaviour is unchanged, and no separate Description card or `descriptionCardOpen` state was added. The card subtitle now names storefront copy.
+- [x] Static audit: `FormTextarea` now associates its label with the control through a generated or caller-supplied `id`; no visual styling changes beyond the new card text treatment (`fontSize=14`, `10px 12px` padding).
+- [x] Static audit: Basic Information retains Product Title, URL Slug, Description, Style Code, Category, Gender and Publication status; no helper lines were added.
+- [x] `pnpm run typecheck` passes with no diagnostics; `pnpm run test` passes 71/71 admin + 7/7 website tests; `pnpm run build` prerenders all 40 admin routes and 27 website routes.
+- [ ] Browser visual pass at 360 / 768 / 1024 / 1440: Description load/save per product, full-width textarea alignment, label association, Basic collapse/reopen persistence, Reset Demo. User verification pending.
+
+### Fulfillment & shipping card (2026-10-20)
+
+- [x] Static audit: Fulfillment & shipping is General card 4, built on the collapsible `DrawerCard`; it starts collapsed, has independent `fulfillmentCardOpen` state, and resets when a create/edit drawer opens or closes.
+- [x] Static audit: Print partner and Print placement now surface as `SearchableSelect` fields; existing `formPartner`/`formPlacement` values and save paths are unchanged. Weight and Shipping weight pair below them, and Package dimensions is full width.
+- [x] Static audit: weight, shipping weight and package dimensions were moved out of the Internal disclosure without duplication; the disclosure is retitled “Internal attributes” and now counts only internal-only attribute values.
+- [x] Static audit: the helper line below the weight fields is gone; all labels are linked, and no new DB columns or logic extraction were introduced. Partner/Placement remain demo-only pending SQL columns.
+- [x] `pnpm run typecheck` passes with no diagnostics; `pnpm run test` passes 71/71 admin + 7/7 website tests; `pnpm run build` prerenders all 40 admin routes and 27 website routes.
+- [ ] Browser visual pass at 360 / 768 / 1024 / 1440: default-collapsed card, partner/placement load/save, weight/dimension load/save, two-column alignment, Internal attributes count, Reset Demo. User verification pending.
+

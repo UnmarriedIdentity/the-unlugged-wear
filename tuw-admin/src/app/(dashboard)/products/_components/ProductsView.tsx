@@ -48,6 +48,19 @@ const DISCOUNT_TYPE_OPTIONS = [
   { value: 'fixed', label: 'Fixed ₹' },
 ];
 
+const PARTNER_OPTIONS: Array<{ value: ProductItem['partner']; label: string }> = [
+  { value: 'Qikink Direct API', label: 'Qikink Direct API' },
+  { value: 'Printrove Hub', label: 'Printrove Hub' },
+  { value: 'Custom Atelier', label: 'Custom Atelier' },
+];
+
+const PLACEMENT_OPTIONS: Array<{ value: ProductItem['placement']; label: string }> = [
+  { value: 'Chest (45mm)', label: 'Chest (45mm)' },
+  { value: 'Back Oversized', label: 'Back Oversized' },
+  { value: 'Sleeve Length', label: 'Sleeve Length' },
+  { value: 'Interior Hem', label: 'Interior Hem' },
+];
+
 const pairedFieldGrid: React.CSSProperties = {
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
@@ -141,6 +154,8 @@ export default function ProductsView() {
   const [pricingCardOpen, setPricingCardOpen] = useState(false);
   // Scheduled discounts (PEDIT card 3) is independently collapsible.
   const [discountsCardOpen, setDiscountsCardOpen] = useState(false);
+  // Fulfillment & shipping (PEDIT card 4) is independently collapsible.
+  const [fulfillmentCardOpen, setFulfillmentCardOpen] = useState(false);
   const addDiscountRef = useRef<HTMLDivElement>(null);
 
   const openCreateDrawer = () => {
@@ -150,6 +165,7 @@ export default function ProductsView() {
     setBasicCardOpen(false);
     setPricingCardOpen(false);
     setDiscountsCardOpen(false);
+    setFulfillmentCardOpen(false);
     setProductTab('general');
     setDrawerView('compact');
     autoExpandedRef.current = false;
@@ -883,6 +899,7 @@ export default function ProductsView() {
     setBasicCardOpen(false);
     setPricingCardOpen(false);
     setDiscountsCardOpen(false);
+    setFulfillmentCardOpen(false);
     setProductTab('general');
     setFormCompareError(null);
     setDrawerView('compact');
@@ -2388,6 +2405,7 @@ export default function ProductsView() {
           setBasicCardOpen(false);
           setPricingCardOpen(false);
           setDiscountsCardOpen(false);
+          setFulfillmentCardOpen(false);
           setDrawerView('compact');
           autoExpandedRef.current = false;
           setFormImages((prev) => {
@@ -2485,7 +2503,7 @@ export default function ProductsView() {
           <form onSubmit={handleEditSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <DrawerCard
               title="1. Basic Information"
-              description="Core identity, storefront path, and catalog classification"
+              description="Core identity, storefront copy, and catalog classification"
               collapsible
               isOpen={basicCardOpen}
               onToggle={setBasicCardOpen}
@@ -2505,6 +2523,14 @@ export default function ProductsView() {
                 onChange={(e) => setFormSlug(e.target.value)}
                 maxLength={280}
                 required
+              />
+              <FormTextarea
+                label="Description"
+                rows={4}
+                fontSize={14}
+                pad="10px 12px"
+                value={formDescription}
+                onChange={(e) => setFormDescription(e.target.value)}
               />
               <div style={pairedFieldGrid}>
                 <Input
@@ -2756,6 +2782,52 @@ export default function ProductsView() {
                 </Button>
               </div>
             </DrawerCard>
+            <DrawerCard
+              title="4. Fulfillment & shipping"
+              description="Production partner, print placement, and parcel measurements"
+              collapsible
+              isOpen={fulfillmentCardOpen}
+              onToggle={setFulfillmentCardOpen}
+            >
+              <div style={pairedFieldGrid}>
+                <SearchableSelect
+                  label="Print partner"
+                  options={PARTNER_OPTIONS}
+                  value={formPartner}
+                  onChange={(value) => setFormPartner(value as ProductItem['partner'])}
+                  required
+                />
+                <SearchableSelect
+                  label="Print placement"
+                  options={PLACEMENT_OPTIONS}
+                  value={formPlacement}
+                  onChange={(value) => setFormPlacement(value as ProductItem['placement'])}
+                  required
+                />
+              </div>
+              <div style={pairedFieldGrid}>
+                <Input
+                  label="Weight (g)"
+                  placeholder="e.g. 180"
+                  inputMode="numeric"
+                  value={formWeight}
+                  onChange={(e) => setFormWeight(e.target.value)}
+                />
+                <Input
+                  label="Shipping weight (g)"
+                  placeholder="e.g. 250"
+                  inputMode="numeric"
+                  value={formShipWeight}
+                  onChange={(e) => setFormShipWeight(e.target.value)}
+                />
+              </div>
+              <Input
+                label="Package dimensions (cm)"
+                placeholder="e.g. 18 × 20 × 2.3"
+                value={formDims}
+                onChange={(e) => setFormDims(e.target.value)}
+              />
+            </DrawerCard>
             <DrawerSection title="Attributes & Values" titleGap={10}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
@@ -2830,41 +2902,12 @@ export default function ProductsView() {
                 </div>
               </div>
             </DrawerSection>
-            <FormTextarea
-              label="Description"
-              rows={4}
-              value={formDescription}
-              onChange={(e) => setFormDescription(e.target.value)}
-            />
             <Disclosure
-              title="Internal fields"
-              subtitle="Internal data: weights, dimensions, print placements. Hidden from shoppers."
-              badge={<Badge variant="neutral" size="sm">{[formWeight, formShipWeight, formDims].filter(Boolean).length + formAttributes.filter((a) => !showsOnPdp(a)).reduce((n, a) => n + a.values.length, 0)} filled</Badge>}
+              title="Internal attributes"
+              subtitle="Internal attribute values used for production. Hidden from shoppers."
+              badge={<Badge variant="neutral" size="sm">{formAttributes.filter((a) => !showsOnPdp(a)).reduce((n, a) => n + a.values.length, 0)} filled</Badge>}
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  <Input
-                    label="Weight (g)"
-                    placeholder="e.g. 180"
-                    value={formWeight}
-                    onChange={(e) => setFormWeight(e.target.value)}
-                  />
-                  <Input
-                    label="Shipping Weight (g)"
-                    placeholder="e.g. 250"
-                    value={formShipWeight}
-                    onChange={(e) => setFormShipWeight(e.target.value)}
-                  />
-                </div>
-                <p style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
-                  Enter weights in whole grams — numbers only.
-                </p>
-                <Input
-                  label="Package Dimensions"
-                  placeholder="e.g. 18x20x2.3"
-                  value={formDims}
-                  onChange={(e) => setFormDims(e.target.value)}
-                />
                 {formAttributes.filter((a) => !showsOnPdp(a)).map((attr) => renderAttrCard(attr, true))}
               </div>
             </Disclosure>
