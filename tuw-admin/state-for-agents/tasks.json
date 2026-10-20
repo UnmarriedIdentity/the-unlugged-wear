@@ -15,8 +15,9 @@
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "ac255fa",
+    "tip": "5e7e8b7",
     "unpushed": [
+      "5e7e8b7",
       "ac255fa",
       "a396de7",
       "71daaec",
@@ -35,7 +36,7 @@
       "f5c9cea",
       "e3e12f9"
     ],
-    "next_up": "PEDIT card 5 Attributes & values SHIPPED (ac255fa) together with the ATTR-DISPLAY drawer slice. All five General cards are done: Basic Information + Description, Pricing & stock, Scheduled discounts, Fulfillment & shipping, and Attributes & values. The drawer now reads the library-owned display type read-only and falls back to Pill with an Unlinked warning. Gates green: typecheck, 71 admin + 7 website tests, 40 admin + 27 website builds. NEXT: browser verification for cards 1-5 and the read-only type, then TL-UI-PEDIT-TABS-CARDS -> HOOK -> SPLIT -> SHELL -> RESET. Parked: TL-UI-PEDIT-ATTR-VALUES / ATTR-SWATCH, TL-UI-ADM-TABLES / ADM-INR / ADM-MONO, TL-UI-CMS-PERSIST, TL-UI-DESIGN-PLAN. Other waves awaiting browser verification: fulfillment KPI grid, collections, admin drawers, compare-at/CSV, and the PEDIT cleanup wave. Styling engine (file 19) remains the final feature after the core e-commerce app is complete; shipments partner-sync reframe and household UI (file 17) remain later.",
+    "next_up": "PEDIT card 5 Attributes & values SHIPPED (ac255fa) and polished (5e7e8b7) together with the ATTR-DISPLAY drawer slice. Manage library now sits beside the library dropdown; swatches use a fully circular shared input class. All five General cards are done: Basic Information + Description, Pricing & stock, Scheduled discounts, Fulfillment & shipping, and Attributes & values. The drawer now reads the library-owned display type read-only and falls back to Pill with an Unlinked warning. Gates green: typecheck, 71 admin + 7 website tests, 40 admin + 27 website builds. NEXT: browser verification for cards 1-5 and the read-only type, then TL-UI-PEDIT-TABS-CARDS -> HOOK -> SPLIT -> SHELL -> RESET. Parked: TL-UI-PEDIT-ATTR-VALUES / ATTR-SWATCH, TL-UI-ADM-TABLES / ADM-INR / ADM-MONO, TL-UI-CMS-PERSIST, TL-UI-DESIGN-PLAN. Other waves awaiting browser verification: fulfillment KPI grid, collections, admin drawers, compare-at/CSV, and the PEDIT cleanup wave. Styling engine (file 19) remains the final feature after the core e-commerce app is complete; shipments partner-sync reframe and household UI (file 17) remain later.",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
       "dashboard D-series: KPI tiers, range/sort menus, badge mapping, calendar pills, header tint (360/768/1024/1440)",
@@ -52,7 +53,7 @@
       "admin drawers wave: 12 form modals now side drawers — pages create / media / nav add+edit / journal (content), orders create + order refund + issue refund, shipments, customers, team invite, designs; footer submits via form attribute; searchable product/order pickers; ₹ in refund balances; media + nav Select onChange bug fixed; confirms still centered modals",
       "compare-at price: create starts empty (no ₹58), edit loads the existing compare; field rejects equal/below selling price with inline error + toast + jump to General, all input preserved; catalog grid/table strike through only when compare > listed price; clearing the field removes it on save",
       "CSV compare price: a sheet with Compare At Price / Compare Price / Was Price / Original Price imports it when above base; equal/lower/invalid rows are rejected with a row error; blank or absent column stages drafts with no compare price; preview shows 'compare ₹X'",
-      "attribute showcase + product drawer (eb198a1 + ac255fa): create/edit as Radio/Swatch persists; linked products show the library type read-only, unlinked rows show the Pill fallback warning, and two linked products update together; Reset Demo",
+      "attribute showcase + product drawer (eb198a1 + ac255fa + 5e7e8b7): create/edit as Radio/Swatch persists; linked products show the library type read-only, unlinked rows show the Pill fallback warning, and two linked products update together; Reset Demo",
       "PEDIT Basic Information card (912348b + 463acd1): edit fixtures at 360/768/1024/1440 — category loads per product, gender/status persist, Category is required, paired inputs and field rhythm align, Reset Demo restores; label/helper/tooltip details now covered by the a76c28e pass",
       "PEDIT DrawerCard v2 (1cb23d5): 18/26 white header + 14/22 subtitle 4px apart, full-bleed subtle divider matching the card border, 16px header/body rhythm, no shadow, General-tab #F7F8F9 canvas, required asterisks, no card-level Required chip or chevron, selected/warning tones unused — browser pass pending",
       "PEDIT labels + Style Code tooltip (a76c28e + 8657b23): 14/600 labels, 24px label rows keep Style Code/Category aligned, Basic helper lines removed, info icon only on Style Code, tooltip hover/focus/tap above the drawer without clipping, Escape/outside/scroll close, tab order — browser pass pending",
@@ -61,7 +62,7 @@
       "PEDIT Scheduled discounts card (71daaec): default-collapsed independent card, empty state, add/remove, type switch + percent clamp, dates, active switch, row focus return, save/reload, Reset Demo; 360/768/1024/1440 — browser pass pending",
       "PEDIT Description folded into Basic (a396de7): Description loads/saves per product from its new full-width position after URL Slug, label click focuses the textarea, Basic collapse/reopen preserves the draft, no separate Description card; 360/768/1024/1440 — browser pass pending",
       "PEDIT Fulfillment & shipping card (a396de7): default-collapsed independent card, Partner/Placement load/save, Weight/Shipping weight/Package dimensions load/save from the new card, Internal attributes count excludes moved fields, no helper lines; 360/768/1024/1440 — browser pass pending",
-      "PEDIT Attributes & values card (ac255fa): default-collapsed independent card, Storefront/Internal groups, chip wrapping, swatch/radio previews, add/remove value, known-value picker, default protection, read-only library type, unlinked fallback, Reset Demo; 360/768/1024/1440 - browser pass pending"
+      "PEDIT Attributes & values card (ac255fa + 5e7e8b7): default-collapsed independent card, Storefront/Internal groups, chip wrapping, Manage library beside the library dropdown, fully circular swatch picker, radio previews, add/remove value, known-value picker, default protection, read-only library type, unlinked fallback, Reset Demo; 360/768/1024/1440 - browser pass pending"
     ],
     "last_updated": "2026-10-20",
     "updated_by": "agent"
@@ -4610,19 +4611,20 @@
       "parent": "TL-UI-PEDIT-GENERAL-CARDS",
       "started": "2026-10-20",
       "finished": "2026-10-20",
-      "log": "ac255fa - General card 5 shipped as the fifth collapsible DrawerCard with independent attributesCardOpen state, collapsed by default and reset when a create/edit drawer opens or closes. The old flat Attributes section and separate Internal attributes Disclosure are replaced by one card: a top action strip (Link from library, new attribute name + Add, Manage library), a Storefront group, and an Internal only group. Rows are flat bordered groups, not nested cards; values are wrapping chips with inline remove, swatch chips keep the product-local color input without hex text, and radio chips show a dot preview. The per-product display dropdown is gone: the showcase type is read-only from the linked library record, unlinked attributes fall back to Pill with an Unlinked warning, and ProductAttribute.displayType is ignored for rendering but left persisted for compatibility. linkFromLibrary, commitAttrValue, removeAttrValue, addAttribute, removeAttribute, and setSwatchHex are unchanged; default attributes stay non-removable and the known-value picker remains. No new DB columns, dependencies, auth, payment or fulfillment integration. Typecheck, 71 admin + 7 website tests, 40 admin + 27 website builds green; browser pass pending.",
+      "log": "ac255fa - General card 5 shipped as the fifth collapsible DrawerCard with independent attributesCardOpen state, collapsed by default and reset when a create/edit drawer opens or closes. The old flat Attributes section and separate Internal attributes Disclosure are replaced by one card: a two-row top action strip (Link from library beside Manage library, then new attribute name + Add), a Storefront group, and an Internal only group. Rows are flat bordered groups, not nested cards; values are wrapping chips with inline remove, swatch chips keep the product-local color input without hex text, and radio chips show a dot preview. The per-product display dropdown is gone: the showcase type is read-only from the linked library record, unlinked attributes fall back to Pill with an Unlinked warning, and ProductAttribute.displayType is ignored for rendering but left persisted for compatibility. linkFromLibrary, commitAttrValue, removeAttrValue, addAttribute, removeAttribute, and setSwatchHex are unchanged; default attributes stay non-removable and the known-value picker remains. No new DB columns, dependencies, auth, payment or fulfillment integration. Typecheck, 71 admin + 7 website tests, 40 admin + 27 website builds green; browser pass pending. POLISH 2026-10-20 (5e7e8b7): Manage library moved beside the library dropdown as an outline LinkButton; new-attribute input + Add now form the second row. Swatch inputs use the shared .tuw-color-swatch class, which resets native appearance and rounds the WebKit/Firefox inner swatch to a true 20px circle with a focus-visible ring; setSwatchHex is unchanged. Typecheck, 71 admin + 7 website tests, 40 admin + 27 website builds green; headless Edge probe confirms the circular result.",
       "design_match": "yes",
       "key_decisions": [
         "One collapsible card replaces the flat section and the separate Internal attributes disclosure",
         "Storefront and Internal only groups use flat bordered rows and wrapping chips; no value table or nested cards",
         "Display type is library-owned and read-only in the product drawer; unlinked rows fall back to Pill with a warning",
         "Swatch colors remain product-local until TL-UI-PEDIT-ATTR-SWATCH; the known-value picker stays",
+        "Manage library uses an outline LinkButton beside the library dropdown; swatches use the shared circular .tuw-color-swatch CSS",
         "Keep attribute state inline in ProductsView; extraction remains TL-UI-PEDIT-HOOK / SPLIT"
       ],
       "verified": true,
       "pushed": false,
       "follow_ups": [
-        "Browser visual pass at 360/768/1024/1440 remains pending",
+        "Browser visual pass at 360/768/1024/1440 remains pending, including Manage library placement and the circular swatch picker",
         "Global swatch colors: TL-UI-PEDIT-ATTR-SWATCH",
         "Library-owned value catalogue: TL-UI-PEDIT-ATTR-VALUES"
       ]
