@@ -4,7 +4,7 @@ Maintain separate component implementations in each application's `src/component
 
 ## Foundations for both applications
 
-Button/link button; text field; textarea; select/combobox; checkbox; radio group; switch; badge; dialog; drawer; disclosure; tabs; tooltip; toast; pagination; breadcrumb; skeleton; empty/error state; image with fallback; accessible icon button.
+Button/link button; text field; textarea; select/combobox; checkbox; radio group; switch; badge; dialog; drawer; disclosure; tabs; tooltip / info hint; toast; pagination; breadcrumb; skeleton; empty/error state; image with fallback; accessible icon button.
 
 ## Website components
 
@@ -20,7 +20,7 @@ Button/link button; text field; textarea; select/combobox; checkbox; radio group
 - Layout: sidebar, mobile navigation, page header, breadcrumb and action bar.
 - Data: table, column header/sort, row selection, filter bar, bulk action bar and pagination.
 - Reporting: metric card, chart container with labels, date filter and equivalent summary table.
-- Forms: field wrapper, product/variant editor, media picker, upload preview, validation summary and unsaved-change notice.
+- Forms: field wrapper, collapsible drawer card (header/body/disclosure), product/variant editor, media picker, upload preview, validation summary and unsaved-change notice.
 - Operations: status badge, order timeline, customer summary, fulfillment issue card, payment/refund summary and activity entry.
 - Feedback: confirmation dialog, save indicator, permission preview and action result toast.
 

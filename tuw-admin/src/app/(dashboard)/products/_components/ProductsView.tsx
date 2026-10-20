@@ -3,16 +3,115 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive, GripVertical, Upload, Images, Focus, Library, RotateCcw } from 'lucide-react';
+import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive, GripVertical, Upload, Images, Focus, Library, RotateCcw, X } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, Input, Drawer, Modal, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection, Disclosure, Carousel, LinkButton } from '@/components/ui';
+import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, IconButton, Input, Drawer, Modal, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection, DrawerCard, SearchableSelect, Disclosure, Carousel, LinkButton } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 import { resolveVariants, variantStockTotal, buildVariantSku, deriveVariantPrice, recomputeVariants, minFromPrice, pruneAdjustments, roundPrice, hasPriceSpread, adjustmentKey, sumAdjustments } from '@/mocks/variants';
 import type { ProductVariant, ProductAttribute, PhotoSettings, ProductDiscount, SizeChart } from '@/mocks/fixtures';
 import { parseCompareAtPrice } from '@/lib/productPricing';
+import { attributeDisplayLabel, normalizeAttributeDisplayType } from '@/lib/attributePresentation';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
+
+const PRODUCT_CATEGORIES: ProductItem['category'][] = [
+  'T-Shirts',
+  'Hoodies',
+  'Jackets',
+  'Pants',
+  'Accessories',
+];
+
+const CATEGORY_OPTIONS = PRODUCT_CATEGORIES.map((category) => ({
+  value: category,
+  label: category,
+}));
+
+// SearchableSelect uses a real value for the selected row; keep the form's
+// empty-string "unspecified" state at the boundary only.
+const GENDER_OPTIONS = [
+  { value: 'unspecified', label: 'Unspecified' },
+  { value: 'Female', label: 'Female' },
+  { value: 'Male', label: 'Male' },
+  { value: 'Unisex', label: 'Unisex' },
+  { value: 'Kids', label: 'Kids' },
+];
+
+const PUBLICATION_OPTIONS: Array<{ value: ProductItem['publicationStatus']; label: string }> = [
+  { value: 'published', label: 'Published (Live)' },
+  { value: 'draft', label: 'Draft (Hidden)' },
+  { value: 'archived', label: 'Archived' },
+];
+
+const DISCOUNT_TYPE_OPTIONS = [
+  { value: 'percent', label: 'Percent %' },
+  { value: 'fixed', label: 'Fixed ₹' },
+];
+
+const PARTNER_OPTIONS: Array<{ value: ProductItem['partner']; label: string }> = [
+  { value: 'Qikink Direct API', label: 'Qikink Direct API' },
+  { value: 'Printrove Hub', label: 'Printrove Hub' },
+  { value: 'Custom Atelier', label: 'Custom Atelier' },
+];
+
+const PLACEMENT_OPTIONS: Array<{ value: ProductItem['placement']; label: string }> = [
+  { value: 'Chest (45mm)', label: 'Chest (45mm)' },
+  { value: 'Back Oversized', label: 'Back Oversized' },
+  { value: 'Sleeve Length', label: 'Sleeve Length' },
+  { value: 'Interior Hem', label: 'Interior Hem' },
+];
+
+const pairedFieldGrid: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+  gap: 12,
+};
+
+// PEDIT card 5: flat attribute rows. Rows are bordered groups, not nested cards.
+const attributeRowStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 10,
+  minWidth: 0,
+  padding: 12,
+  border: '1px solid var(--tuw-border-subtle)',
+  borderRadius: 8,
+};
+
+const attributeChipStyle: React.CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 6,
+  minHeight: 28,
+  padding: '2px 4px 2px 8px',
+  borderRadius: 999,
+  border: '1px solid var(--tuw-border-subtle)',
+  backgroundColor: 'var(--tuw-bg-canvas)',
+  fontSize: 12,
+  lineHeight: '16px',
+  fontWeight: 500,
+  color: 'var(--tuw-text-primary)',
+};
+
+const attributeMetaStyle: React.CSSProperties = {
+  fontSize: 12,
+  lineHeight: '18px',
+  color: 'var(--tuw-text-secondary)',
+};
+
+const attributeGroupLabelStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 6,
+  margin: 0,
+  fontSize: 11,
+  lineHeight: '16px',
+  fontWeight: 600,
+  letterSpacing: '0.04em',
+  textTransform: 'uppercase',
+  color: 'var(--tuw-text-secondary)',
+};
 
 // Per-product attribute draft (A1/AX2). Shape lives on ProductAttribute
 // (fixtures) so the seam persists it verbatim; see the REST note there.
@@ -94,11 +193,28 @@ export default function ProductsView() {
 
   // Drawer create mode (PE5): blank-draft editing; the modal retires next.
   const [isCreating, setIsCreating] = useState(false);
+  // Product-editor cards start collapsed; the state lives here so expanding a
+  // card survives tab switches and resets for each product.
+  const [basicCardOpen, setBasicCardOpen] = useState(false);
+  // Pricing & stock (PEDIT card 2) is independently collapsible.
+  const [pricingCardOpen, setPricingCardOpen] = useState(false);
+  // Scheduled discounts (PEDIT card 3) is independently collapsible.
+  const [discountsCardOpen, setDiscountsCardOpen] = useState(false);
+  // Fulfillment & shipping (PEDIT card 4) is independently collapsible.
+  const [fulfillmentCardOpen, setFulfillmentCardOpen] = useState(false);
+  // Attributes & values (PEDIT card 5) is independently collapsible.
+  const [attributesCardOpen, setAttributesCardOpen] = useState(false);
+  const addDiscountRef = useRef<HTMLDivElement>(null);
 
   const openCreateDrawer = () => {
     if (!canPerformAction('products')) return;
     setEditingProduct(null);
     setIsCreating(true);
+    setBasicCardOpen(false);
+    setPricingCardOpen(false);
+    setDiscountsCardOpen(false);
+    setFulfillmentCardOpen(false);
+    setAttributesCardOpen(false);
     setProductTab('general');
     setDrawerView('compact');
     autoExpandedRef.current = false;
@@ -555,21 +671,18 @@ export default function ProductsView() {
   };
   const removeDiscount = (id: string) => {
     setFormDiscounts((prev) => prev.filter((d) => d.id !== id));
-  };
-  const displayTypeLabel = (t: ProductAttribute['displayType']) =>
-    t === 'pill' ? 'Pill' : t === 'swatch' ? 'Color swatch' : 'Radio select';
-  const setDisplayType = (name: string, displayType: ProductAttribute['displayType']) => {
-    setFormAttributes((prev) => prev.map((a) => (a.name === name ? { ...a, displayType } : a)));
+    requestAnimationFrame(() => {
+      addDiscountRef.current?.querySelector<HTMLButtonElement>('button')?.focus();
+    });
   };
   const setSwatchHex = (name: string, value: string, hex: string) => {
     setFormAttributes((prev) =>
       prev.map((a) => (a.name === name ? { ...a, swatchHex: { ...a.swatchHex, [value]: hex } } : a))
     );
   };
-  // Shared attribute card (Y1b): PDP section and the Internal block render
-  // the same card. hideDisplay drops the storefront picker where it has no
-  // meaning (attributes not shown on the PDP). Visibility itself is global:
-  // the card reports the linked library record and links out to Settings.
+  // Shared attribute row (PEDIT card 5): flat bordered groups, value chips, and
+  // a read-only display type from the library. The library owns the showcase
+  // type; products only keep their own value list and swatch colours.
   const libraryOf = (attr: ProductAttribute) =>
     libraryAttributes.find((l) => l.id === attr.libraryId) ??
     libraryAttributes.find((l) => l.name.toLowerCase() === attr.name.toLowerCase());
@@ -577,255 +690,191 @@ export default function ProductsView() {
     const lib = libraryOf(attr);
     return lib ? lib.showOnPdp : attr.name !== 'Placements';
   };
-  const renderAttrCard = (attr: ProductAttribute, hideDisplay = false) => (
-    <SurfaceCard key={attr.name} padding="12px" gap="10px">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-          {attr.name}
-          {attr.libraryId ? (
-            <Badge variant="success" size="sm" title="Linked to the single library record">Linked</Badge>
-          ) : null}
-        </span>
-        {attr.builtin ? (
-          <Badge variant="info" size="sm">Default</Badge>
-        ) : (
-          <UpliftSurface active width={28} height={28} className="tuw-danger-hover" style={{ flexShrink: 0, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-            <button
-              type="button"
-              aria-label={`Remove attribute ${attr.name}`}
-              onClick={() => removeAttribute(attr.name)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, display: 'inline-flex' }}
-            >
-              <Trash2 size={14} />
-            </button>
-          </UpliftSurface>
-        )}
-      </div>
-      {hideDisplay ? null : (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-          Shows on storefront as
-        </span>
-        <DropdownMenu
-          ariaLabel={`${attr.name} storefront display`}
-          trigger={
-            <span
-              role="button"
-              tabIndex={0}
-              aria-label={`${attr.name} display, currently ${displayTypeLabel(attr.displayType)}`}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
-              }}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 8,
-                height: 32,
-                padding: '0 10px',
-                fontSize: 12,
-                fontWeight: 500,
-                fontFamily: 'var(--font-main)',
-                borderRadius: 8,
-                border: '1px solid var(--tuw-border-control, #D1D5DB)',
-                backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
-                color: 'var(--tuw-text-primary, #262626)',
-                cursor: 'pointer',
-                userSelect: 'none',
-              }}
-            >
-              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {displayTypeLabel(attr.displayType)}
-              </span>
-              <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
-            </span>
-          }
-          items={[
-            { value: 'pill', label: 'Pill' },
-            { value: 'swatch', label: 'Color swatch' },
-            { value: 'radio', label: 'Radio select' },
-          ]}
-          selectedValue={attr.displayType}
-          onSelect={(v) => setDisplayType(attr.name, v as ProductAttribute['displayType'])}
-        />
-      </div>
-      )}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-          Shown on
-        </span>
-        {(() => {
-          const lib = libraryOf(attr);
-          const surfaces = lib
-            ? [
-                lib.showOnPdp ? 'PDP' : null,
-                lib.showOnCheckout ? 'Checkout' : null,
-                lib.showOnAdmin ? 'Admin' : null,
-              ].filter((s): s is string => s !== null)
-            : [];
-          return surfaces.length > 0 ? (
-            surfaces.map((surface) => (
-              <Badge key={surface} variant="neutral" size="sm">{surface}</Badge>
-            ))
-          ) : (
-            <Badge variant="warning" size="sm">Unlinked</Badge>
-          );
-        })()}
-        <Link
-          href="/settings/attributes"
-          style={{
-            marginLeft: 'auto',
-            fontSize: 12,
-            fontWeight: 600,
-            color: 'var(--tuw-action-primary, #7539FF)',
-            textDecoration: 'none',
-          }}
-        >
-          Manage in Settings → Attributes
-        </Link>
-      </div>
-      {attr.values.length > 0 ? (
-        <Table>
-          <TableHeader>
-            <TableRow hoverable={false}>
-              <TableHead style={{ padding: '10px 16px' }}>Value</TableHead>
-              <TableHead style={{ padding: '10px 16px' }}>Storefront preview</TableHead>
-              <TableHead style={{ padding: '10px 16px', width: 48 }}><span className="sr-only">Remove</span></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {attr.values.map((val) => (
-              <TableRow key={val} hoverable={false}>
-                <TableCell style={{ padding: '10px 16px', fontSize: 14, color: 'var(--tuw-text-primary, #262626)' }}>
-                  {val}
-                </TableCell>
-                <TableCell style={{ padding: '10px 16px' }}>
-                  {attr.displayType === 'pill' ? (
-                    <Badge variant="neutral" size="sm">{val}</Badge>
-                  ) : attr.displayType === 'swatch' ? (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
-                      <input
-                        type="color"
-                        aria-label={`Swatch color for ${val}`}
-                        title={`Pick the PDP swatch color for ${val}`}
-                        value={attr.swatchHex[val] ?? '#D1D5DB'}
-                        onChange={(e) => setSwatchHex(attr.name, val, e.target.value)}
-                        style={{ width: 28, height: 28, padding: 0, border: 'none', borderRadius: 8, background: 'none', cursor: 'pointer', flexShrink: 0 }}
-                      />
-                      {val}
-                      <span style={{ fontSize: 12, fontFamily: 'monospace', color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                        {attr.swatchHex[val] ?? '#D1D5DB'}
-                      </span>
-                    </span>
-                  ) : (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
-                      <span aria-hidden="true" style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid var(--tuw-border-control, #D1D5DB)', flexShrink: 0, boxSizing: 'border-box' }} />
-                      {val}
-                    </span>
-                  )}
-                </TableCell>
-                <TableCell style={{ padding: '10px 16px', width: 48 }}>
-                  <UpliftSurface active width={28} height={28} className="tuw-danger-hover" style={{ flexShrink: 0, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                    <button
-                      type="button"
-                      aria-label={`Remove ${val} from ${attr.name}`}
-                      onClick={() => removeAttrValue(attr.name, val)}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, display: 'inline-flex' }}
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </UpliftSurface>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      ) : (
-        <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-          No values yet — add the first one below.
-        </div>
-      )}
-      {/* Picker-first entry (VALPICK): known values for this attribute
-          (library row ∪ card, deduped) one click away; the text input
-          below stays for genuinely new values. Hidden when nothing new. */}
-      {(() => {
-        const lib = libraryAttributes.find((l) => l.id === attr.libraryId);
-        const known = [...new Set([...(lib?.values ?? []), ...attr.values])];
-        const missing = known.filter(
-          (v) => !attr.values.some((x) => x.toLowerCase() === v.toLowerCase())
-        );
-        if (missing.length === 0) return null;
-        return (
-          <div style={{ display: 'flex', gap: 8 }}>
-            <div style={{ flex: 1 }}>
-              <DropdownMenu
-                ariaLabel={`Pick known ${attr.name} value`}
-                trigger={
-                  <span
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`Pick a known ${attr.name} value, ${missing.length} available`}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
-                    }}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: 8,
-                      width: '100%',
-                      height: 40,
-                      padding: '0 12px',
-                      fontSize: 13,
-                      fontWeight: 500,
-                      fontFamily: 'var(--font-main)',
-                      borderRadius: 8,
-                      border: '1px dashed var(--tuw-border-control, #D1D5DB)',
-                      backgroundColor: 'transparent',
-                      color: 'var(--tuw-text-secondary, #5D6772)',
-                      cursor: 'pointer',
-                      userSelect: 'none',
-                    }}
-                  >
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      Pick known value… ({missing.length})
-                    </span>
-                    <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
-                  </span>
-                }
-                items={missing.map((v) => ({ value: v, label: v }))}
-                onSelect={(v) => commitAttrValue(attr.name, v)}
-              />
-            </div>
-          </div>
-        );
-      })()}
-      <div style={{ display: 'flex', gap: 8 }}>
-        <div style={{ flex: 1 }}>
-          <Input
-            aria-label={`Add ${attr.name} value`}
-            placeholder={`Add ${attr.name.toLowerCase()} value, then Add`}
-            value={attrDrafts[attr.name] ?? ''}
-            onChange={(e) => setAttrDrafts((prev) => ({ ...prev, [attr.name]: e.target.value }))}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                addAttrValue(attr.name);
-              }
+  const storefrontAttributes = formAttributes.filter((attr) => showsOnPdp(attr));
+  const internalAttributes = formAttributes.filter((attr) => !showsOnPdp(attr));
+
+  const attributeDisplayType = (attr: ProductAttribute) =>
+    normalizeAttributeDisplayType(libraryOf(attr)?.displayType);
+
+  const attributeSurfaces = (attr: ProductAttribute): string[] => {
+    const lib = libraryOf(attr);
+    if (!lib) return [];
+    return [
+      lib.showOnPdp ? 'PDP' : null,
+      lib.showOnCheckout ? 'Checkout' : null,
+      lib.showOnAdmin ? 'Admin' : null,
+    ].filter((surface): surface is string => surface !== null);
+  };
+
+  const attributeMeta = (attr: ProductAttribute, internal: boolean) => {
+    const lib = libraryOf(attr);
+    const valueLabel = `${attr.values.length} value${attr.values.length === 1 ? '' : 's'}`;
+    const surfaces = attributeSurfaces(attr);
+    if (internal) {
+      return `${valueLabel} · ${surfaces.length > 0 ? surfaces.join(' · ') : 'Internal'} · ${lib ? 'Linked' : 'Unlinked'}`;
+    }
+    return `${valueLabel} · ${surfaces.length > 0 ? surfaces.join(' · ') : 'PDP'} · ${lib ? 'Linked' : 'Unlinked'}`;
+  };
+
+  const renderAttributeChip = (attr: ProductAttribute, value: string, internal: boolean) => {
+    const displayType = attributeDisplayType(attr);
+    return (
+      <span key={value} style={attributeChipStyle}>
+        {!internal && displayType === 'swatch' ? (
+          <input
+            type="color"
+            aria-label={`Swatch color for ${value}`}
+            title={`Pick the PDP swatch color for ${value}`}
+            value={attr.swatchHex[value] ?? '#D1D5DB'}
+            onChange={(e) => setSwatchHex(attr.name, value, e.target.value)}
+            style={{
+              width: 20,
+              height: 20,
+              padding: 0,
+              border: '1px solid var(--tuw-border-control)',
+              borderRadius: '50%',
+              backgroundColor: 'transparent',
+              cursor: 'pointer',
+              flexShrink: 0,
             }}
           />
+        ) : null}
+        {!internal && displayType === 'radio' ? (
+          <span
+            aria-hidden="true"
+            style={{
+              width: 14,
+              height: 14,
+              borderRadius: '50%',
+              border: '2px solid var(--tuw-border-control)',
+              boxSizing: 'border-box',
+              flexShrink: 0,
+            }}
+          />
+        ) : null}
+        <span>{value}</span>
+        <IconButton
+          label={`Remove ${value} from ${attr.name}`}
+          icon={<X size={11} />}
+          size="sm"
+          variant="ghost"
+          className="tuw-danger-hover"
+          onClick={() => removeAttrValue(attr.name, value)}
+          style={{ width: 22, height: 22, borderRadius: 999, color: 'var(--tuw-text-secondary)' }}
+        />
+      </span>
+    );
+  };
+
+  const renderAttributeRow = (attr: ProductAttribute, internal = false) => {
+    const lib = libraryOf(attr);
+    const displayType = attributeDisplayType(attr);
+    const rowTitleId = `attribute-${attr.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase() || 'value'}-title`;
+    const known = [...new Set([...(lib?.values ?? []), ...attr.values])];
+    const missing = known.filter(
+      (value) => !attr.values.some((current) => current.toLowerCase() === value.toLowerCase())
+    );
+
+    return (
+      <div key={attr.name} role="group" aria-labelledby={rowTitleId} style={attributeRowStyle}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
+            <span
+              id={rowTitleId}
+              style={{ fontSize: 14, lineHeight: '22px', fontWeight: 600, color: 'var(--tuw-text-primary)' }}
+            >
+              {attr.name}
+            </span>
+            {attr.builtin ? <Badge variant="info" size="sm">Default</Badge> : null}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+            {internal ? (
+              !lib ? <Badge variant="warning" size="sm">Unlinked</Badge> : null
+            ) : lib ? (
+              <Badge variant="neutral" size="sm">{attributeDisplayLabel(displayType)}</Badge>
+            ) : (
+              <Badge variant="warning" size="sm">Unlinked · {attributeDisplayLabel(displayType)}</Badge>
+            )}
+            {!attr.builtin ? (
+              <IconButton
+                label={`Remove attribute ${attr.name}`}
+                icon={<Trash2 size={14} />}
+                size="sm"
+                variant="ghost"
+                className="tuw-danger-hover"
+                onClick={() => removeAttribute(attr.name)}
+                style={{ color: 'var(--tuw-text-secondary)' }}
+              />
+            ) : null}
+          </div>
         </div>
-        <Button variant="secondary" size="md" type="button" onClick={() => addAttrValue(attr.name)} disabled={(attrDrafts[attr.name] ?? '').trim() === ''}>
-          Add
-        </Button>
+        <span style={attributeMetaStyle}>{attributeMeta(attr, internal)}</span>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {attr.values.length > 0 ? (
+            attr.values.map((value) => renderAttributeChip(attr, value, internal))
+          ) : (
+            <span style={{ fontSize: 12, lineHeight: '18px', color: 'var(--tuw-text-secondary)' }}>
+              No values yet
+            </span>
+          )}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 180px', minWidth: 0 }}>
+            <Input
+              aria-label={`Add ${attr.name} value`}
+              placeholder={`Add ${attr.name.toLowerCase()} value…`}
+              value={attrDrafts[attr.name] ?? ''}
+              onChange={(e) => setAttrDrafts((prev) => ({ ...prev, [attr.name]: e.target.value }))}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  addAttrValue(attr.name);
+                }
+              }}
+            />
+          </div>
+          <Button
+            variant="secondary"
+            size="md"
+            type="button"
+            aria-label={`Add ${attr.name} value`}
+            onClick={() => addAttrValue(attr.name)}
+            disabled={(attrDrafts[attr.name] ?? '').trim() === ''}
+          >
+            Add
+          </Button>
+          {missing.length > 0 ? (
+            <DropdownMenu
+              ariaLabel={`Pick known ${attr.name} value`}
+              trigger={
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  type="button"
+                  aria-label={`Choose known ${attr.name} value`}
+                  icon={<ChevronDown size={14} />}
+                >
+                  Choose known value
+                </Button>
+              }
+              items={missing.map((value) => ({ value, label: value }))}
+              onSelect={(value) => commitAttrValue(attr.name, value)}
+            />
+          ) : null}
+        </div>
       </div>
-    </SurfaceCard>
-  );
+    );
+  };
 
   const openEditDrawer = (product: ProductItem) => {
     if (!canPerformAction('products')) return;
     setIsCreating(false);
     setEditingProduct(product);
+    setBasicCardOpen(false);
+    setPricingCardOpen(false);
+    setDiscountsCardOpen(false);
+    setFulfillmentCardOpen(false);
+    setAttributesCardOpen(false);
     setProductTab('general');
     setFormCompareError(null);
     setDrawerView('compact');
@@ -918,6 +967,7 @@ export default function ProductsView() {
       const compare = parseCompareAtPrice(formComparePrice, priceNum);
       if (compare.error) {
         setFormCompareError(compare.error);
+        setPricingCardOpen(true);
         setProductTab('general');
         showToast({ type: 'warning', title: 'Check Compare-at Price', description: compare.error });
         return;
@@ -995,6 +1045,7 @@ export default function ProductsView() {
     const compare = parseCompareAtPrice(formComparePrice, minPrice);
     if (compare.error) {
       setFormCompareError(compare.error);
+      setPricingCardOpen(true);
       setProductTab('general');
       showToast({ type: 'warning', title: 'Check Compare-at Price', description: compare.error });
       return;
@@ -2326,6 +2377,11 @@ export default function ProductsView() {
         onClose={() => {
           setEditingProduct(null);
           setIsCreating(false);
+          setBasicCardOpen(false);
+          setPricingCardOpen(false);
+          setDiscountsCardOpen(false);
+          setFulfillmentCardOpen(false);
+          setAttributesCardOpen(false);
           setDrawerView('compact');
           autoExpandedRef.current = false;
           setFormImages((prev) => {
@@ -2355,6 +2411,7 @@ export default function ProductsView() {
           )
         }
         expandable
+        bodyTone={productTab === 'general' ? 'canvas' : 'surface'}
         view={drawerView}
         onViewChange={setDrawerView}
         headerExtra={
@@ -2420,226 +2477,347 @@ export default function ProductsView() {
         {(editingProduct || isCreating) && (
           productTab === 'general' ? (
           <form onSubmit={handleEditSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <Input
-              label="Product Title"
-              value={formName}
-              onChange={(e) => setFormName(e.target.value)}
-              required
-            />
-            <Input
-              label="URL Slug"
-              value={formSlug}
-              onChange={(e) => setFormSlug(e.target.value)}
-              required
-            />
-            <Input
-              label="Style Code"
-              placeholder="e.g. FC34"
-              value={formStyleCode}
-              onChange={(e) => setFormStyleCode(e.target.value)}
-            />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <DrawerCard
+              title="1. Basic Information"
+              description="Core identity, storefront copy, and catalog classification"
+              collapsible
+              isOpen={basicCardOpen}
+              onToggle={setBasicCardOpen}
+            >
               <Input
-                label="Base price (₹)"
-                type="text"
-                inputMode="decimal"
-                value={formPrice}
-                onChange={(e) => writeBasePrice(e.target.value)}
-                required
-                helperText="Every variant price starts at this base."
-              />
-              <Input
-                label="Stock Quantity"
-                type="number"
-                value={formStock}
-                onChange={(e) => writeStockTotal(e.target.value)}
+                label="Product Title"
+                placeholder="e.g. Urbanist Heavyweight Tee"
+                value={formName}
+                onChange={(e) => setFormName(e.target.value)}
+                maxLength={255}
                 required
               />
-            </div>
-            <Input
-              label="Compare-at price (₹)"
-              type="text"
-              inputMode="decimal"
-              placeholder="Optional"
-              value={formComparePrice}
-              onChange={(e) => {
-                const raw = e.target.value;
-                if (!/^\d*\.?\d*$/.test(raw)) return;
-                setFormComparePrice(raw);
-                if (formCompareError) setFormCompareError(null);
-              }}
-              error={formCompareError ?? undefined}
-              helperText="Optional — shown struck through in the catalog as a reference price. Must be higher than the selling price."
-            />
-            <DrawerSection title="Pricing & Discounts" titleGap={10}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
-                  Scheduled price cuts with a window and kill switch. The compare-at price above is a static catalog reference, separate from these scheduled cuts.
+              <Input
+                label="URL Slug"
+                placeholder="e.g. urbanist-heavyweight-tee"
+                value={formSlug}
+                onChange={(e) => setFormSlug(e.target.value)}
+                maxLength={280}
+                required
+              />
+              <FormTextarea
+                label="Description"
+                rows={4}
+                fontSize={14}
+                pad="10px 12px"
+                value={formDescription}
+                onChange={(e) => setFormDescription(e.target.value)}
+              />
+              <div style={pairedFieldGrid}>
+                <Input
+                  label="Style Code"
+                  placeholder="e.g. FC34"
+                  value={formStyleCode}
+                  onChange={(e) => setFormStyleCode(e.target.value)}
+                  maxLength={50}
+                  labelTooltip="Internal production reference — not shown to customers."
+                />
+                <SearchableSelect
+                  label="Category"
+                  options={CATEGORY_OPTIONS}
+                  value={formCategory}
+                  onChange={(value) => setFormCategory(value as ProductItem['category'])}
+                  required
+                />
+              </div>
+              <div style={pairedFieldGrid}>
+                <SearchableSelect
+                  label="Gender"
+                  options={GENDER_OPTIONS}
+                  value={formGender || 'unspecified'}
+                  onChange={(value) =>
+                    setFormGender(
+                      value === 'unspecified' ? '' : (value as ProductItem['gender'])
+                    )
+                  }
+                />
+                <SearchableSelect
+                  label="Publication status"
+                  options={PUBLICATION_OPTIONS}
+                  value={formStatus}
+                  onChange={(value) =>
+                    setFormStatus(value as ProductItem['publicationStatus'])
+                  }
+                />
+              </div>
+            </DrawerCard>
+            <DrawerCard
+              title="2. Pricing & stock"
+              description="Selling price, compare-at reference, stock, and checkout tax"
+              collapsible
+              isOpen={pricingCardOpen}
+              onToggle={setPricingCardOpen}
+            >
+              <div style={pairedFieldGrid}>
+                <Input
+                  label="Base price (₹)"
+                  type="text"
+                  inputMode="decimal"
+                  value={formPrice}
+                  onChange={(e) => writeBasePrice(e.target.value)}
+                  required
+                />
+                <Input
+                  label="Compare-at price (₹)"
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="Optional"
+                  value={formComparePrice}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    if (!/^\d*\.?\d*$/.test(raw)) return;
+                    setFormComparePrice(raw);
+                    if (formCompareError) setFormCompareError(null);
+                  }}
+                  error={formCompareError ?? undefined}
+                  labelTooltip="Optional catalog reference. Shown struck through only when it is higher than the current selling price; it does not affect the price charged."
+                />
+              </div>
+              <div style={pairedFieldGrid}>
+                <Input
+                  label="Stock Quantity"
+                  type="number"
+                  min={0}
+                  value={formStock}
+                  onChange={(e) => writeStockTotal(e.target.value)}
+                  required
+                />
+                <Input
+                  label="Tax Rate (%)"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="e.g. 18"
+                  value={formTax}
+                  onChange={(e) => setFormTax(e.target.value)}
+                />
+              </div>
+            </DrawerCard>
+            <DrawerCard
+              title="3. Scheduled discounts"
+              description="Time-boxed price cuts with a start, end, and active switch"
+              collapsible
+              isOpen={discountsCardOpen}
+              onToggle={setDiscountsCardOpen}
+              badge={
+                formDiscounts.length > 0 ? (
+                  <Badge variant="neutral" size="sm">
+                    {formDiscounts.length} {formDiscounts.length === 1 ? 'discount' : 'discounts'}
+                  </Badge>
+                ) : undefined
+              }
+            >
+              {formDiscounts.length === 0 ? (
+                <p style={{ margin: 0, fontSize: 13, lineHeight: '20px', color: 'var(--tuw-text-secondary)' }}>
+                  No scheduled discounts. The product uses its normal selling price.
                 </p>
-                {formDiscounts.map((d) => (
-                  <SurfaceCard key={d.id} padding="10px" gap="8px">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <div style={{ width: 130, flexShrink: 0 }}>
-                        <DropdownMenu
-                          ariaLabel="Discount type"
-                          trigger={
-                            <span
-                              role="button"
-                              tabIndex={0}
-                              aria-label={`Discount type, currently ${d.discountType}`}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
-                              }}
-                              style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                gap: 8,
-                                width: '100%',
-                                height: 36,
-                                padding: '0 10px',
-                                fontSize: 13,
-                                fontWeight: 500,
-                                fontFamily: 'var(--font-main)',
-                                borderRadius: 8,
-                                border: '1px solid var(--tuw-border-control, #D1D5DB)',
-                                backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
-                                color: 'var(--tuw-text-primary, #262626)',
-                                cursor: 'pointer',
-                                userSelect: 'none',
-                              }}
-                            >
-                              <span>{d.discountType === 'percent' ? 'Percent %' : 'Fixed ₹'}</span>
-                              <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
-                            </span>
-                          }
-                          items={[
-                            { value: 'percent', label: 'Percent %' },
-                            { value: 'fixed', label: 'Fixed ₹' },
-                          ]}
-                          selectedValue={d.discountType}
-                          onSelect={(v) => patchDiscount(d.id, { discountType: v as ProductDiscount['discountType'] })}
-                        />
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <Input
-                          aria-label="Discount value"
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          max={d.discountType === 'percent' ? '100' : undefined}
-                          value={String(d.value)}
-                          onChange={(e) => {
-                            const n = parseFloat(e.target.value);
-                            if (isNaN(n)) return;
-                            patchDiscount(d.id, {
-                              value: d.discountType === 'percent' ? Math.min(100, Math.max(0, n)) : Math.max(0, n),
-                            });
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {formDiscounts.map((d, index) => {
+                    const rowTitleId = `discount-${d.id}-title`;
+                    return (
+                      <div
+                        key={d.id}
+                        role="group"
+                        aria-labelledby={rowTitleId}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 12,
+                          padding: 12,
+                          border: '1px solid var(--tuw-border-subtle)',
+                          borderRadius: 8,
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: 8,
+                            flexWrap: 'wrap',
                           }}
-                          style={{ height: 36 }}
-                        />
-                      </div>
-                      <Switch
-                        label=""
-                        ariaLabel={'Toggle ' + (d.discountType === 'percent' ? d.value + '%' : '₹' + d.value) + ' discount active'}
-                        checked={d.isActive}
-                        onChange={(v) => patchDiscount(d.id, { isActive: v })}
-                      />
-                      <UpliftSurface active width={28} height={28} className="tuw-danger-hover" style={{ flexShrink: 0, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                        <button
-                          type="button"
-                          aria-label="Remove discount"
-                          onClick={() => removeDiscount(d.id)}
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, display: 'inline-flex' }}
                         >
-                          <Trash2 size={14} />
-                        </button>
-                      </UpliftSurface>
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                      <Input
-                        aria-label="Discount starts"
-                        type="date"
-                        value={d.startsAt}
-                        onChange={(e) => patchDiscount(d.id, { startsAt: e.target.value })}
-                        style={{ height: 36 }}
-                      />
-                      <Input
-                        aria-label="Discount ends"
-                        type="date"
-                        value={d.endsAt}
-                        onChange={(e) => patchDiscount(d.id, { endsAt: e.target.value })}
-                        style={{ height: 36 }}
-                      />
-                    </div>
-                  </SurfaceCard>
-                ))}
-                <div>
-                  <Button variant="secondary" size="sm" icon={<Plus size={14} />} type="button" onClick={addDiscount}>
-                    Add Discount
-                  </Button>
+                          <h5
+                            id={rowTitleId}
+                            style={{
+                              margin: 0,
+                              fontSize: 14,
+                              lineHeight: '22px',
+                              fontWeight: 600,
+                              color: 'var(--tuw-text-primary)',
+                            }}
+                          >
+                            Discount {index + 1}
+                          </h5>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <Switch
+                              label="Active"
+                              ariaLabel={`Discount ${index + 1} active`}
+                              checked={d.isActive}
+                              onChange={(v) => patchDiscount(d.id, { isActive: v })}
+                            />
+                            <UpliftSurface
+                              active
+                              width={32}
+                              height={32}
+                              className="tuw-danger-hover"
+                              style={{ flexShrink: 0, color: 'var(--tuw-text-secondary)' }}
+                            >
+                              <button
+                                type="button"
+                                aria-label={`Remove discount ${index + 1}`}
+                                onClick={() => removeDiscount(d.id)}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  width: '100%',
+                                  height: '100%',
+                                  padding: 0,
+                                  border: 'none',
+                                  borderRadius: 'inherit',
+                                  background: 'transparent',
+                                  color: 'inherit',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </UpliftSurface>
+                          </div>
+                        </div>
+                        <div style={pairedFieldGrid}>
+                          <SearchableSelect
+                            label="Type"
+                            ariaLabel={`Discount ${index + 1} type`}
+                            options={DISCOUNT_TYPE_OPTIONS}
+                            value={d.discountType}
+                            onChange={(value) => {
+                              const discountType = value as ProductDiscount['discountType'];
+                              patchDiscount(d.id, {
+                                discountType,
+                                value:
+                                  discountType === 'percent'
+                                    ? Math.min(100, Math.max(0, d.value))
+                                    : Math.max(0, d.value),
+                              });
+                            }}
+                            searchable={false}
+                          />
+                          <Input
+                            id={`discount-${d.id}-value`}
+                            label={d.discountType === 'percent' ? 'Value (%)' : 'Value (₹)'}
+                            type="number"
+                            inputMode="decimal"
+                            step="0.01"
+                            min={0}
+                            max={d.discountType === 'percent' ? 100 : undefined}
+                            value={String(d.value)}
+                            onChange={(e) => {
+                              const n = parseFloat(e.target.value);
+                              if (Number.isNaN(n)) return;
+                              patchDiscount(d.id, {
+                                value:
+                                  d.discountType === 'percent'
+                                    ? Math.min(100, Math.max(0, n))
+                                    : Math.max(0, n),
+                              });
+                            }}
+                          />
+                        </div>
+                        <div style={pairedFieldGrid}>
+                          <Input
+                            id={`discount-${d.id}-starts`}
+                            label="Starts"
+                            type="date"
+                            value={d.startsAt}
+                            onChange={(e) => patchDiscount(d.id, { startsAt: e.target.value })}
+                          />
+                          <Input
+                            id={`discount-${d.id}-ends`}
+                            label="Ends"
+                            type="date"
+                            value={d.endsAt}
+                            onChange={(e) => patchDiscount(d.id, { endsAt: e.target.value })}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
+              )}
+              <div ref={addDiscountRef} style={{ display: 'flex' }}>
+                <Button variant="secondary" size="sm" icon={<Plus size={14} />} type="button" onClick={addDiscount}>
+                  Add Discount
+                </Button>
               </div>
-            </DrawerSection>
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', marginBottom: 6 }}>
-                Publication Status
+            </DrawerCard>
+            <DrawerCard
+              title="4. Fulfillment & shipping"
+              description="Production partner, print placement, and parcel measurements"
+              collapsible
+              isOpen={fulfillmentCardOpen}
+              onToggle={setFulfillmentCardOpen}
+            >
+              <div style={pairedFieldGrid}>
+                <SearchableSelect
+                  label="Print partner"
+                  options={PARTNER_OPTIONS}
+                  value={formPartner}
+                  onChange={(value) => setFormPartner(value as ProductItem['partner'])}
+                  required
+                />
+                <SearchableSelect
+                  label="Print placement"
+                  options={PLACEMENT_OPTIONS}
+                  value={formPlacement}
+                  onChange={(value) => setFormPlacement(value as ProductItem['placement'])}
+                  required
+                />
               </div>
-              <DropdownMenu
-                ariaLabel="Publication status"
-                trigger={
-                  <span
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`Publication status, currently ${formStatus === 'published' ? 'Published (Live on website)' : formStatus === 'draft' ? 'Draft (Hidden)' : 'Archived'}`}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
-                    }}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: 8,
-                      width: '100%',
-                      height: 40,
-                      padding: '0 12px',
-                      fontSize: 13,
-                      fontWeight: 500,
-                      fontFamily: 'var(--font-main)',
-                      borderRadius: 8,
-                      border: '1px solid var(--tuw-border-control, #D1D5DB)',
-                      backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
-                      color: 'var(--tuw-text-primary, #262626)',
-                      cursor: 'pointer',
-                      userSelect: 'none',
-                    }}
-                  >
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {formStatus === 'published' ? 'Published (Live on website)' : formStatus === 'draft' ? 'Draft (Hidden)' : 'Archived'}
-                    </span>
-                    <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
-                  </span>
-                }
-                items={[
-                  { value: 'published', label: 'Published (Live on website)' },
-                  { value: 'draft', label: 'Draft (Hidden)' },
-                  { value: 'archived', label: 'Archived' },
-                ]}
-                selectedValue={formStatus}
-                onSelect={(v) => setFormStatus(v as ProductItem['publicationStatus'])}
+              <div style={pairedFieldGrid}>
+                <Input
+                  label="Weight (g)"
+                  placeholder="e.g. 180"
+                  inputMode="numeric"
+                  value={formWeight}
+                  onChange={(e) => setFormWeight(e.target.value)}
+                />
+                <Input
+                  label="Shipping weight (g)"
+                  placeholder="e.g. 250"
+                  inputMode="numeric"
+                  value={formShipWeight}
+                  onChange={(e) => setFormShipWeight(e.target.value)}
+                />
+              </div>
+              <Input
+                label="Package dimensions (cm)"
+                placeholder="e.g. 18 × 20 × 2.3"
+                value={formDims}
+                onChange={(e) => setFormDims(e.target.value)}
               />
-            </div>
-            <DrawerSection title="Attributes & Values" titleGap={10}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
-                  Color and Size ship with every product. Add custom attributes (Fabric, Fit…) and define their values one by one.
-                  {' '}<Link href="/settings/attributes" style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)', textDecoration: 'none' }}>Manage library</Link>
-                </p>
-                {libraryAttributes.filter((a) => a.enabled).length > 0 ? (
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <div style={{ flex: 1 }}>
+            </DrawerCard>
+            <DrawerCard
+              title="5. Attributes & values"
+              description="Storefront choices and internal production values"
+              collapsible
+              isOpen={attributesCardOpen}
+              onToggle={setAttributesCardOpen}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  {libraryAttributes.filter((a) => a.enabled).length > 0 ? (
+                    <div style={{ flex: '1 1 220px', minWidth: 0 }}>
                       <DropdownMenu
                         ariaLabel="Link attribute from library"
+                        fullWidth
                         trigger={
                           <span
                             role="button"
@@ -2679,137 +2857,73 @@ export default function ProductsView() {
                         onSelect={(v) => linkFromLibrary(v)}
                       />
                     </div>
-                  </div>
-                ) : null}
-                {formAttributes.filter((a) => showsOnPdp(a)).map((attr) => renderAttrCard(attr))}
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <div style={{ flex: 1 }}>
-                    <Input
-                      aria-label="New attribute name"
-                      placeholder="New attribute name, e.g. Fabric"
-                      value={newAttrName}
-                      onChange={(e) => setNewAttrName(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          addAttribute();
-                        }
-                      }}
-                    />
-                  </div>
-                  <Button variant="secondary" size="md" icon={<Plus size={14} />} type="button" onClick={addAttribute} disabled={newAttrName.trim() === ''}>
-                    Add Attribute
-                  </Button>
-                </div>
-              </div>
-            </DrawerSection>
-            <FormTextarea
-              label="Description"
-              rows={4}
-              value={formDescription}
-              onChange={(e) => setFormDescription(e.target.value)}
-            />
-            <DrawerSection title="Checkout" titleGap={10}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <Input
-                  label="Tax Rate (%)"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="e.g. 18"
-                  value={formTax}
-                  onChange={(e) => setFormTax(e.target.value)}
-                />
-                <p style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
-                  Applied at checkout — never shown on the product page.
-                </p>
-              </div>
-            </DrawerSection>
-            <Disclosure
-              title="Internal fields"
-              subtitle="Internal data: weights, dimensions, print placements. Hidden from shoppers."
-              badge={<Badge variant="neutral" size="sm">{[formWeight, formShipWeight, formDims, formGender].filter(Boolean).length + formAttributes.filter((a) => !showsOnPdp(a)).reduce((n, a) => n + a.values.length, 0)} filled</Badge>}
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  <Input
-                    label="Weight (g)"
-                    placeholder="e.g. 180"
-                    value={formWeight}
-                    onChange={(e) => setFormWeight(e.target.value)}
-                  />
-                  <Input
-                    label="Shipping Weight (g)"
-                    placeholder="e.g. 250"
-                    value={formShipWeight}
-                    onChange={(e) => setFormShipWeight(e.target.value)}
-                  />
-                </div>
-                <p style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
-                  Enter weights in whole grams — numbers only.
-                </p>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  <Input
-                    label="Package Dimensions"
-                    placeholder="e.g. 18x20x2.3"
-                    value={formDims}
-                    onChange={(e) => setFormDims(e.target.value)}
-                  />
-                  <div>
-                    <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
-                      Gender
-                    </span>
-                  <DropdownMenu
-                    ariaLabel="Gender"
-                    fullWidth
-                    trigger={
-                      <span
-                        role="button"
-                        tabIndex={0}
-                        aria-label={`Gender, currently ${formGender || 'Unspecified'}`}
+                  ) : null}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: '2 1 280px', minWidth: 0 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <Input
+                        aria-label="New attribute name"
+                        placeholder="New attribute name, e.g. Fabric"
+                        value={newAttrName}
+                        onChange={(e) => setNewAttrName(e.target.value)}
                         onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            addAttribute();
+                          }
                         }}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          gap: 8,
-                          width: '100%',
-                          height: 40,
-                          padding: '0 12px',
-                          fontSize: 13,
-                          fontWeight: 500,
-                          fontFamily: 'var(--font-main)',
-                          borderRadius: 8,
-                          border: '1px solid var(--tuw-border-control, #D1D5DB)',
-                          backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
-                          color: 'var(--tuw-text-primary, #262626)',
-                          cursor: 'pointer',
-                          userSelect: 'none',
-                        }}
-                      >
-                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {formGender || 'Select gender'}
-                        </span>
-                        <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
-                      </span>
-                    }
-                    items={[
-                      { value: '', label: 'Unspecified' },
-                      { value: 'Female', label: 'Female' },
-                      { value: 'Male', label: 'Male' },
-                      { value: 'Unisex', label: 'Unisex' },
-                      { value: 'Kids', label: 'Kids' },
-                    ]}
-                    selectedValue={formGender}
-                    onSelect={(v) => setFormGender(v as ProductItem['gender'] | '')}
-                  />
+                      />
+                    </div>
+                    <Button
+                      variant="secondary"
+                      size="md"
+                      icon={<Plus size={14} />}
+                      type="button"
+                      aria-label="Add attribute"
+                      onClick={addAttribute}
+                      disabled={newAttrName.trim() === ''}
+                    >
+                      Add
+                    </Button>
                   </div>
                 </div>
-                {formAttributes.filter((a) => !showsOnPdp(a)).map((attr) => renderAttrCard(attr, true))}
+                <Link
+                  href="/settings/attributes"
+                  style={{ alignSelf: 'flex-start', fontSize: 12, fontWeight: 600, color: 'var(--tuw-action-primary, #7539FF)', textDecoration: 'none' }}
+                >
+                  Manage library
+                </Link>
               </div>
-            </Disclosure>
+
+              {storefrontAttributes.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <h5 style={attributeGroupLabelStyle}>Storefront</h5>
+                  {storefrontAttributes.map((attr) => renderAttributeRow(attr))}
+                </div>
+              ) : null}
+
+              {internalAttributes.length > 0 ? (
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 10,
+                    paddingTop: storefrontAttributes.length > 0 ? 12 : 0,
+                    borderTop: storefrontAttributes.length > 0 ? '1px solid var(--tuw-border-subtle)' : 'none',
+                  }}
+                >
+                  <h5 style={attributeGroupLabelStyle}>
+                    Internal only <span style={{ fontWeight: 500 }}>({internalAttributes.length})</span>
+                  </h5>
+                  {internalAttributes.map((attr) => renderAttributeRow(attr, true))}
+                </div>
+              ) : null}
+
+              {formAttributes.length === 0 ? (
+                <p style={{ margin: 0, fontSize: 13, lineHeight: '20px', color: 'var(--tuw-text-secondary)' }}>
+                  No attributes yet. Link one from the library or add one above.
+                </p>
+              ) : null}
+            </DrawerCard>
           </form>
           ) : productTab === 'media' ? (
           <div ref={mediaWrapRef} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

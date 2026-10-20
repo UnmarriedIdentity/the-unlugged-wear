@@ -44,6 +44,7 @@ import {
   variantStockTotal,
 } from './variants';
 import { normalizeCollection, nextCollectionId, type LegacyCollection } from '@/lib/collections';
+import { normalizeAttributeDisplayType } from '@/lib/attributePresentation';
 
 export interface ToastMessage {
   id: string;
@@ -135,9 +136,10 @@ interface AdminStateContextType {
   removeSizeChartRow: (chartId: string, size: string) => boolean;
   patchSizeChartCell: (chartId: string, size: string, key: string, raw: string) => boolean;
 
-  createLibraryAttribute: (name: string) => string | false;
+  createLibraryAttribute: (name: string, displayType?: LibraryAttribute['displayType']) => string | false;
   deleteLibraryAttribute: (id: string) => boolean;
   toggleLibraryAttribute: (id: string) => boolean;
+  setLibraryDisplayType: (id: string, displayType: LibraryAttribute['displayType']) => boolean;
   setLibraryVisibility: (id: string, surface: 'pdp' | 'checkout' | 'admin', on: boolean) => boolean;
   addLibraryValue: (id: string, value: string) => boolean;
   removeLibraryValue: (id: string, value: string) => boolean;
@@ -240,6 +242,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
             (parsed.libraryAttributes as LibraryAttribute[]).map((a) => ({
               ...defaultLibraryVisibility(a.name),
               ...a,
+              displayType: normalizeAttributeDisplayType(a.displayType),
             }))
           );
         }
@@ -1018,7 +1021,10 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
   // Attribute library (settings manager): copy-source for drawer drafts.
   // Delete guards read persisted products (real check, not theater);
   // disable always allowed — data preserved, picker hides it.
-  const createLibraryAttribute = (name: string): string | false => {
+  const createLibraryAttribute = (
+    name: string,
+    displayType: LibraryAttribute['displayType'] = 'pill'
+  ): string | false => {
     if (!canPerformAction('products')) return false;
     const trimmed = name.trim();
     if (!trimmed) return false;
@@ -1029,7 +1035,14 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     const id = `LIB-${Date.now()}`;
     const next = [
       ...libraryAttributes,
-      { id, name: trimmed, values: [], displayType: 'pill' as const, enabled: true, ...defaultLibraryVisibility(trimmed) },
+      {
+        id,
+        name: trimmed,
+        values: [],
+        displayType: normalizeAttributeDisplayType(displayType),
+        enabled: true,
+        ...defaultLibraryVisibility(trimmed),
+      },
     ];
     setLibraryAttributes(next);
     persistState({ libraryAttributes: next });
@@ -1066,6 +1079,24 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
   const toggleLibraryAttribute = (id: string) => {
     if (!canPerformAction('products')) return false;
     const next = libraryAttributes.map((a) => (a.id === id ? { ...a, enabled: !a.enabled } : a));
+    setLibraryAttributes(next);
+    persistState({ libraryAttributes: next });
+    return true;
+  };
+  // Global showcase type: the definition controls how linked products render.
+  // Individual products still choose which attributes/values they offer.
+  const setLibraryDisplayType = (
+    id: string,
+    displayType: LibraryAttribute['displayType']
+  ) => {
+    if (!canPerformAction('products')) return false;
+    const target = libraryAttributes.find((a) => a.id === id);
+    if (!target) return false;
+    const normalized = normalizeAttributeDisplayType(displayType);
+    if (target.displayType === normalized) return true;
+    const next = libraryAttributes.map((a) =>
+      a.id === id ? { ...a, displayType: normalized } : a
+    );
     setLibraryAttributes(next);
     persistState({ libraryAttributes: next });
     return true;
@@ -1301,6 +1332,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         createLibraryAttribute,
         deleteLibraryAttribute,
         toggleLibraryAttribute,
+        setLibraryDisplayType,
         setLibraryVisibility,
         addLibraryValue,
         removeLibraryValue,

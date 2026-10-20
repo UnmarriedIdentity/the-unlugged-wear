@@ -23,6 +23,9 @@ export interface DrawerProps {
   expandable?: boolean;
   /** Extra header row under the title (tabs, visibility controls). */
   headerExtra?: React.ReactNode;
+  /** Drawer body field. 'surface' preserves existing drawers; 'canvas' gives
+   * white cards a quiet #F7F8F9 field in the product editor. */
+  bodyTone?: 'surface' | 'canvas';
   /** Controlled workspace size. Omit for internal state (existing behavior). */
   view?: DrawerView;
   onViewChange?: (view: DrawerView) => void;
@@ -38,6 +41,7 @@ export default function Drawer({
   width = '520px',
   expandable = false,
   headerExtra,
+  bodyTone = 'surface',
   view,
   onViewChange,
 }: DrawerProps) {
@@ -138,7 +142,10 @@ export default function Drawer({
           width: '100%',
           maxWidth: effectiveView === 'full' ? '100vw' : effectiveView === 'matrix' ? 880 : width,
           height: '100%',
-          backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
+          backgroundColor:
+            bodyTone === 'canvas'
+              ? 'var(--tuw-bg-canvas, #F7F8F9)'
+              : 'var(--tuw-bg-surface, #FFFFFF)',
           boxShadow: '-10px 0 25px -5px rgba(0, 0, 0, 0.1)',
           borderLeft: effectiveView === 'full'
             ? 'none'

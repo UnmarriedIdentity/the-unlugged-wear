@@ -1,9 +1,14 @@
 'use client';
 
 import React, { forwardRef, useState } from 'react';
+import InfoTooltip from './InfoTooltip';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
+  /** Optional label-size override. DrawerCard field labels inherit 14px from the card body. */
+  labelSize?: number;
+  /** Supplementary label hint rendered as an info icon + tooltip. */
+  labelTooltip?: string;
   error?: string;
   helperText?: string;
   iconPrefix?: React.ReactNode;
@@ -16,12 +21,15 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
   (
     {
       label,
+      labelSize,
+      labelTooltip,
       error,
       helperText,
       iconPrefix,
       prefixIcon,
       iconSuffix,
       fullWidth = true,
+      required,
       className = '',
       style = {},
       id,
@@ -60,17 +68,48 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         }}
       >
         {label && (
-          <label
-            htmlFor={inputId}
+          <div
             style={{
-              fontSize: '14px',
-              fontWeight: 500,
-              color: 'var(--tuw-text-primary, #262626)',
-              fontFamily: 'var(--font-main)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              minWidth: 0,
+              minHeight: 'var(--tuw-field-label-row-height, 0px)',
             }}
           >
-            {label}
-          </label>
+            <label
+              htmlFor={inputId}
+              style={{
+                fontSize:
+                  labelSize !== undefined
+                    ? `${labelSize}px`
+                    : 'var(--tuw-field-label-size, var(--tuw-type-label-control-size, 14px))',
+                fontWeight: 'var(--tuw-field-label-weight, 500)',
+                color: 'var(--tuw-text-primary, #262626)',
+                fontFamily: 'var(--font-main)',
+              }}
+            >
+              {label}
+              {required ? (
+                <span
+                  aria-hidden="true"
+                  style={{
+                    marginLeft: 4,
+                    color: 'var(--tuw-text-secondary, #5D6772)',
+                    fontWeight: 'var(--tuw-field-label-weight, 500)',
+                  }}
+                >
+                  *
+                </span>
+              ) : null}
+            </label>
+            {labelTooltip ? (
+              <InfoTooltip
+                label={`More information about ${label}`}
+                content={labelTooltip}
+              />
+            ) : null}
+          </div>
         )}
 
         <div
@@ -106,6 +145,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             ref={ref}
             type={type}
+            required={required}
             onFocus={handleFocus}
             onBlur={handleBlur}
             style={{

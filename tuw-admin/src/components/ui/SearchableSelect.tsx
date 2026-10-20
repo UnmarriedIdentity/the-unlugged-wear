@@ -29,6 +29,8 @@ interface CommonProps {
   label?: string;
   helperText?: string;
   error?: string;
+  /** Marks the label and exposes aria-required on the combobox. */
+  required?: boolean;
   placeholder?: string;
   /** Placeholder while the field itself is acting as the search box. */
   searchPlaceholder?: string;
@@ -49,8 +51,8 @@ interface CoreProps extends CommonProps {
 }
 
 const labelStyle: React.CSSProperties = {
-  fontSize: 14,
-  fontWeight: 500,
+  fontSize: 'var(--tuw-field-label-size, 14px)',
+  fontWeight: 'var(--tuw-field-label-weight, 500)',
   color: 'var(--tuw-text-primary, #262626)',
   fontFamily: 'var(--font-main)',
 };
@@ -76,6 +78,7 @@ function SearchableSelectCore({
   label,
   helperText,
   error,
+  required = false,
   placeholder = 'Select…',
   searchPlaceholder = 'Search…',
   emptyText = 'No matches found.',
@@ -107,7 +110,10 @@ function SearchableSelectCore({
   const popoverRef = useRef<HTMLDivElement>(null);
   const optionRefs = useRef<Array<HTMLDivElement | null>>([]);
   const generatedId = React.useId();
+  const fieldId = `${generatedId}-field`;
+  const messageId = `${generatedId}-message`;
   const listId = `${generatedId}-listbox`;
+  const message = error ?? helperText;
 
   const anim = usePopoverAnimation(open, () => {
     setQuery('');
@@ -232,6 +238,9 @@ function SearchableSelectCore({
     if (event.key === 'Escape') {
       if (open) {
         event.preventDefault();
+        // Close the listbox first; the surrounding Drawer also listens for
+        // Escape on window and must not close while a menu is open.
+        event.stopPropagation();
         setOpen(false);
       }
       return;
@@ -348,7 +357,33 @@ function SearchableSelectCore({
         minWidth: 0,
       }}
     >
-      {label && <label style={labelStyle}>{label}</label>}
+      {label ? (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            minWidth: 0,
+            minHeight: 'var(--tuw-field-label-row-height, 0px)',
+          }}
+        >
+          <label htmlFor={fieldId} style={labelStyle}>
+            {label}
+            {required ? (
+              <span
+                aria-hidden="true"
+                style={{
+                  marginLeft: 4,
+                  color: 'var(--tuw-text-secondary, #5D6772)',
+                  fontWeight: 'var(--tuw-field-label-weight, 500)',
+                }}
+              >
+                *
+              </span>
+            ) : null}
+          </label>
+        </div>
+      ) : null}
 
       <div
         ref={triggerRef}
@@ -467,6 +502,7 @@ function SearchableSelectCore({
           ) : null}
 
           <input
+            id={fieldId}
             ref={fieldRef}
             value={
               multiple
@@ -498,6 +534,9 @@ function SearchableSelectCore({
             aria-controls={listId}
             aria-autocomplete={searchable ? 'list' : undefined}
             aria-label={ariaLabel || label || placeholder}
+            aria-required={required || undefined}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={message ? messageId : undefined}
             aria-activedescendant={
               open && filtered[activeIndex] ? `${listId}-option-${activeIndex}` : undefined
             }
@@ -545,9 +584,9 @@ function SearchableSelectCore({
       </div>
 
       {error ? (
-        <span style={errorStyle}>{error}</span>
+        <span id={messageId} style={errorStyle}>{error}</span>
       ) : helperText ? (
-        <span style={hintStyle}>{helperText}</span>
+        <span id={messageId} style={hintStyle}>{helperText}</span>
       ) : null}
 
       {anim.visible && (

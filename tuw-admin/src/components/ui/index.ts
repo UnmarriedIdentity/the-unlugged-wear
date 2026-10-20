@@ -67,6 +67,10 @@ export type { EmptyStateProps } from './EmptyState';
 
 export { default as Tooltip } from './Tooltip';
 export type { TooltipProps } from './Tooltip';
+export type { TooltipSide } from '@/lib/tooltipPosition';
+
+export { default as InfoTooltip } from './InfoTooltip';
+export type { InfoTooltipProps } from './InfoTooltip';
 
 export { default as RadioGroup } from './RadioGroup';
 export type { RadioGroupProps, RadioOption } from './RadioGroup';
@@ -106,6 +110,9 @@ export type { PanelFooterProps } from './PanelFooter';
 
 export { default as DrawerSection } from './DrawerSection';
 export type { DrawerSectionProps } from './DrawerSection';
+
+export { default as DrawerCard } from './DrawerCard';
+export type { DrawerCardProps, DrawerCardTone } from './DrawerCard';
 
 export { default as KeyValueList } from './KeyValueList';
 export type { KeyValueListProps, KeyValueItem } from './KeyValueList';
