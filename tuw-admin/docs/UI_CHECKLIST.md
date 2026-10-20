@@ -85,3 +85,13 @@
 - [x] `pnpm run typecheck` passes and `pnpm run build` prerenders all 40 routes.
 - [ ] Browser visual pass at 360 / 768 / 1024 / 1440: 14/600 labels, helper lines gone, info icon only on Style Code, hover/focus/tap tooltip, no clipping by card/drawer, Escape/outside close, tab order. User verification pending.
 
+### Collapsible Basic Information + house dropdowns (2026-10-20)
+
+- [x] Static audit: `DrawerCard` supports opt-in controlled/uncontrolled collapse. Basic Information starts collapsed, uses a real `<button type="button">` with `aria-expanded`, `aria-controls`, `aria-labelledby`, and a labelled body region; Enter/Space toggle and closing returns focus to the header.
+- [x] Static audit: the body is mounted only while open, so collapsed fields are not tab stops and cannot contribute hidden required controls or a stale SearchableSelect popover. Field values live in `ProductsView` and survive collapse/reopen.
+- [x] Static audit: the collapsed header has no internal divider; the outer card border remains. The chevron rotates and is `aria-hidden`; optional badge/action stay outside the toggle.
+- [x] Static audit: Category, Gender and Publication status use `SearchableSelect` instead of native `<select>`. Category is marked required; Gender maps the `unspecified` sentinel back to the form's empty string; all three render 44px triggers.
+- [x] Static audit: `SearchableSelect` labels consume the card-scoped 14/600 label context with a 24px row, link `htmlFor`/input `id`, expose `aria-required`, and close on Escape without propagating that Escape to the drawer.
+- [x] `pnpm run typecheck` passes with no diagnostics; `pnpm run test` passes 71/71 admin tests; `pnpm run build` prerenders all 40 admin routes.
+- [ ] Browser visual pass at 360 / 768 / 1024 / 1440: default-collapsed card, expand/collapse by mouse and keyboard, no tab stops while collapsed, values preserved across tab switches, dropdown open/select/save, popover clipping, Escape closes only the dropdown, Style Code tooltip, Reset Demo. User verification pending.
+

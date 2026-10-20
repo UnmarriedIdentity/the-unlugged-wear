@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive, GripVertical, Upload, Images, Focus, Library, RotateCcw } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, Input, Drawer, Modal, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection, DrawerCard, FormSelect, Disclosure, Carousel, LinkButton } from '@/components/ui';
+import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, Input, Drawer, Modal, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection, DrawerCard, SearchableSelect, Disclosure, Carousel, LinkButton } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 import { resolveVariants, variantStockTotal, buildVariantSku, deriveVariantPrice, recomputeVariants, minFromPrice, pruneAdjustments, roundPrice, hasPriceSpread, adjustmentKey, sumAdjustments } from '@/mocks/variants';
@@ -22,8 +22,15 @@ const PRODUCT_CATEGORIES: ProductItem['category'][] = [
   'Accessories',
 ];
 
-const GENDER_OPTIONS: Array<{ value: ProductItem['gender'] | ''; label: string }> = [
-  { value: '', label: 'Unspecified' },
+const CATEGORY_OPTIONS = PRODUCT_CATEGORIES.map((category) => ({
+  value: category,
+  label: category,
+}));
+
+// SearchableSelect uses a real value for the selected row; keep the form's
+// empty-string "unspecified" state at the boundary only.
+const GENDER_OPTIONS = [
+  { value: 'unspecified', label: 'Unspecified' },
   { value: 'Female', label: 'Female' },
   { value: 'Male', label: 'Male' },
   { value: 'Unisex', label: 'Unisex' },
@@ -122,11 +129,15 @@ export default function ProductsView() {
 
   // Drawer create mode (PE5): blank-draft editing; the modal retires next.
   const [isCreating, setIsCreating] = useState(false);
+  // Product-editor cards start collapsed; the state lives here so expanding a
+  // card survives tab switches and resets for each product.
+  const [basicCardOpen, setBasicCardOpen] = useState(false);
 
   const openCreateDrawer = () => {
     if (!canPerformAction('products')) return;
     setEditingProduct(null);
     setIsCreating(true);
+    setBasicCardOpen(false);
     setProductTab('general');
     setDrawerView('compact');
     autoExpandedRef.current = false;
@@ -854,6 +865,7 @@ export default function ProductsView() {
     if (!canPerformAction('products')) return;
     setIsCreating(false);
     setEditingProduct(product);
+    setBasicCardOpen(false);
     setProductTab('general');
     setFormCompareError(null);
     setDrawerView('compact');
@@ -2354,6 +2366,7 @@ export default function ProductsView() {
         onClose={() => {
           setEditingProduct(null);
           setIsCreating(false);
+          setBasicCardOpen(false);
           setDrawerView('compact');
           autoExpandedRef.current = false;
           setFormImages((prev) => {
@@ -2452,6 +2465,9 @@ export default function ProductsView() {
             <DrawerCard
               title="1. Basic Information"
               description="Core identity, storefront path, and catalog classification"
+              collapsible
+              isOpen={basicCardOpen}
+              onToggle={setBasicCardOpen}
             >
               <Input
                 label="Product Title"
@@ -2478,47 +2494,33 @@ export default function ProductsView() {
                   maxLength={50}
                   labelTooltip="Internal production reference — not shown to customers."
                 />
-                <FormSelect
+                <SearchableSelect
                   label="Category"
+                  options={CATEGORY_OPTIONS}
                   value={formCategory}
-                  onChange={(e) => setFormCategory(e.target.value as ProductItem['category'])}
-                  style={{ height: 44 }}
+                  onChange={(value) => setFormCategory(value as ProductItem['category'])}
                   required
-                >
-                  {PRODUCT_CATEGORIES.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
-                    </option>
-                  ))}
-                </FormSelect>
+                />
               </div>
               <div style={pairedFieldGrid}>
-                <FormSelect
+                <SearchableSelect
                   label="Gender"
-                  value={formGender}
-                  onChange={(e) => setFormGender(e.target.value as ProductItem['gender'] | '')}
-                  style={{ height: 44 }}
-                >
-                  {GENDER_OPTIONS.map((option) => (
-                    <option key={option.value || 'unspecified'} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </FormSelect>
-                <FormSelect
-                  label="Publication status"
-                  value={formStatus}
-                  onChange={(e) =>
-                    setFormStatus(e.target.value as ProductItem['publicationStatus'])
+                  options={GENDER_OPTIONS}
+                  value={formGender || 'unspecified'}
+                  onChange={(value) =>
+                    setFormGender(
+                      value === 'unspecified' ? '' : (value as ProductItem['gender'])
+                    )
                   }
-                  style={{ height: 44 }}
-                >
-                  {PUBLICATION_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </FormSelect>
+                />
+                <SearchableSelect
+                  label="Publication status"
+                  options={PUBLICATION_OPTIONS}
+                  value={formStatus}
+                  onChange={(value) =>
+                    setFormStatus(value as ProductItem['publicationStatus'])
+                  }
+                />
               </div>
             </DrawerCard>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
