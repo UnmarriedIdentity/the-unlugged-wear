@@ -4159,7 +4159,7 @@
       "status": "backlog",
       "owner": "unassigned",
       "parent": "TL-UI-PEDIT-IA",
-      "log": "Planned 2026-10-20 as the first General card and first DrawerCard consumer. Header exactly '1. Basic Information' + 'Core identity and catalog placement.' Fields (all already saved): Product title (required, full width); URL slug (required, full width, helper shows /products/{slug}); Style code (optional, full width or half); Category (required select — currently hidden; default T-Shirts); Gender (optional select — moved out of Internal fields; blank = Unspecified); Publication status (Published / Draft / Archived). Layout: title + slug full width; Style code/Category two-up; Gender/Status two-up; use repeat(auto-fit, minmax(180px, 1fr)) so rows stack at narrow widths. Keep existing validation, required marks, header Live/draft badge, and existing defaults. Do NOT include price/stock/tax (Pricing & stock), description (own card), attributes (Attributes & values), or Partner/Placement/weights/dims (Fulfillment & shipping). No new state, no logic extraction, no SQL. Verify create/edit load every field, category/gender/status persist, compact/expanded + 360/768/1024/1440, Reset Demo. Follow-up: slug auto-generation/format validation remains separate.",
+      "log": "Planned 2026-10-20 as the first General card and first DrawerCard consumer. Header exactly '1. Basic Information' + 'Core identity and catalog placement.' Fields (all already saved): Product title (required, full width); URL slug (required, full width, helper shows /products/{slug}); Style code (optional, half); Category (required select — currently hidden; default T-Shirts); Gender (optional select — moved out of Internal fields; blank = Unspecified); Publication status (Published / Draft / Archived). Layout: title + slug full width; Style code/Category two-up; Gender/Status two-up; use repeat(auto-fit, minmax(180px, 1fr)) so rows stack at narrow widths. Keep existing validation, required marks, header Live/draft badge, and existing defaults. Do NOT include price/stock/tax (Pricing & stock), description (own card), attributes (Attributes & values), or Partner/Placement/weights/dims (Fulfillment & shipping). No new state, no logic extraction, no new SQL columns. DB AUDIT (002-catalog.sql): products.name (255 NOT NULL), slug (280 NOT NULL UNIQUE), style_code (50), category_id (uuid FK → categories, nullable), gender (20 CHECK), status (draft/active/archived) all exist. App's category is a label string, not the FK; backend maps label → categories.id. App Published maps to DB active. categories table exists but has no seed/category-management UI — this card selects from the fixed five labels only. products.sku (NOT NULL UNIQUE), short_description, and brand_id exist in DB but are outside this card; product-level SKU/generation remains a separate integration decision. Verify create/edit load every field, category/gender/status persist, compact/expanded + 360/768/1024/1440, Reset Demo. FOLLOW-UP: slug auto-generation/format validation remains separate.",
       "design_match": "pending",
       "verified": false,
       "pushed": false,
@@ -4168,11 +4168,14 @@
         "Description stays a separate card for long-form copy",
         "Category and Gender are surfaced here; Partner/Placement move to Fulfillment & shipping",
         "Status lives here to avoid a one-field Publishing card",
+        "Category selects an existing catalog label; category creation/management is not inline",
         "title + slug are the only required text fields; category defaults to T-Shirts"
       ],
       "follow_ups": [
         "Slug auto-generation/format validation is not in this slice",
-        "DrawerCard primitive ships in TL-UI-PEDIT-DRAWER-CARD before this"
+        "DrawerCard primitive ships in TL-UI-PEDIT-DRAWER-CARD before this",
+        "Category management/seed (Settings → Categories) is separate; the DB categories table currently has no seed/UI",
+        "Product-level SKU exposure/generation is a backend-integration decision; style code is not a SKU"
       ]
     },
     {

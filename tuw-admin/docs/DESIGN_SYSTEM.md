@@ -49,6 +49,17 @@ Use white and light neutral backgrounds, dark text and subdued borders. Use dark
 
 Spacing scale: 4, 8, 12, 16, 24, 32, 48, 64px. Admin radii: 4px small elements, 8px controls, 12px cards, 16px modals and fully rounded pills. Standard controls are 44px high; dense desktop rows may be shorter when their interactive targets remain usable. Use subtle borders rather than excessive shadows. Modal elevation may use a restrained shadow and scrim.
 
+## Product editor drawer cards (PEDIT pattern)
+
+The product editor General tab uses a stacked card layout. Basic Information is the first card.
+
+- Container: `DrawerCard` built on `SurfaceCard`; white surface, 12px radius, 1px subtle border, 16px padding. Do not nest cards inside cards.
+- Header: numbered title (`1. Basic Information`) at 14px/20px/600 primary; description at 13px/20px/regular secondary, 4px below. Optional badge or action aligns right on wide cards and wraps below on narrow ones.
+- Body: 14px column gap. Full-width fields for title and slug; paired fields use `repeat(auto-fit, minmax(180px, 1fr))` with a 12px gap, collapsing to one column below roughly 420px of content width.
+- Controls: `Input` remains 44px high; inline selects use the existing 40px drawer trigger pattern. Labels are 13px/500 primary; helper and error text are 12px/18px secondary/error.
+- Card rhythm: 16px between cards, 14px between header and body. No extra shadow or collapsible behaviour in the first slice.
+- Required fields: product title, URL slug, and category. Gender is optional; publication status has a default. Required and invalid states must remain visible without relying on colour alone.
+
 ## Component states
 
 Every interactive component needs default, hover, focus-visible, active, disabled and applicable loading states. Fields additionally support populated, required, invalid and read-only states. Focus must remain visible against adjacent surfaces. Disabled controls should explain why when the reason is not obvious.
