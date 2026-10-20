@@ -1,11 +1,14 @@
 'use client';
 
 import React, { forwardRef, useState } from 'react';
+import InfoTooltip from './InfoTooltip';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
-  /** Label size. Default 14 (legacy Input); drawer cards use 13 to match FormSelect. */
+  /** Optional label-size override. DrawerCard field labels inherit 14px from the card body. */
   labelSize?: number;
+  /** Supplementary label hint rendered as an info icon + tooltip. */
+  labelTooltip?: string;
   error?: string;
   helperText?: string;
   iconPrefix?: React.ReactNode;
@@ -18,7 +21,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
   (
     {
       label,
-      labelSize = 14,
+      labelSize,
+      labelTooltip,
       error,
       helperText,
       iconPrefix,
@@ -64,29 +68,40 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         }}
       >
         {label && (
-          <label
-            htmlFor={inputId}
-            style={{
-              fontSize: `${labelSize}px`,
-              fontWeight: 500,
-              color: 'var(--tuw-text-primary, #262626)',
-              fontFamily: 'var(--font-main)',
-            }}
-          >
-            {label}
-            {required ? (
-              <span
-                aria-hidden="true"
-                style={{
-                  marginLeft: 4,
-                  color: 'var(--tuw-text-secondary, #5D6772)',
-                  fontWeight: 500,
-                }}
-              >
-                *
-              </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+            <label
+              htmlFor={inputId}
+              style={{
+                fontSize:
+                  labelSize !== undefined
+                    ? `${labelSize}px`
+                    : 'var(--tuw-field-label-size, var(--tuw-type-label-control-size, 14px))',
+                fontWeight: 'var(--tuw-field-label-weight, 500)',
+                color: 'var(--tuw-text-primary, #262626)',
+                fontFamily: 'var(--font-main)',
+              }}
+            >
+              {label}
+              {required ? (
+                <span
+                  aria-hidden="true"
+                  style={{
+                    marginLeft: 4,
+                    color: 'var(--tuw-text-secondary, #5D6772)',
+                    fontWeight: 'var(--tuw-field-label-weight, 500)',
+                  }}
+                >
+                  *
+                </span>
+              ) : null}
+            </label>
+            {labelTooltip ? (
+              <InfoTooltip
+                label={`More information about ${label}`}
+                content={labelTooltip}
+              />
             ) : null}
-          </label>
+          </div>
         )}
 
         <div

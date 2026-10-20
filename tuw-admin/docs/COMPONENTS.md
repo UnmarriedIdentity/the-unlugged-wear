@@ -4,7 +4,7 @@ Maintain separate component implementations in each application's `src/component
 
 ## Foundations for both applications
 
-Button/link button; text field; textarea; select/combobox; checkbox; radio group; switch; badge; dialog; drawer; disclosure; tabs; tooltip; toast; pagination; breadcrumb; skeleton; empty/error state; image with fallback; accessible icon button.
+Button/link button; text field; textarea; select/combobox; checkbox; radio group; switch; badge; dialog; drawer; disclosure; tabs; tooltip / info hint; toast; pagination; breadcrumb; skeleton; empty/error state; image with fallback; accessible icon button.
 
 ## Website components
 

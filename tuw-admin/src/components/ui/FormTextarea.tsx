@@ -3,7 +3,7 @@
 import React from 'react';
 
 export interface FormTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
-  /** Label above the control (13/500/primary, shared drawer-form treatment). */
+  /** Label above the control. Inside DrawerCard it inherits 14/600; legacy default 13/500. */
   label?: string;
   /** Inner padding. Sites use '8px 12px' (default) or '10px 12px'. */
   pad?: string;
@@ -27,8 +27,8 @@ export default function FormTextarea({
       {label ? (
         <label
           style={{
-            fontSize: 13,
-            fontWeight: 500,
+            fontSize: 'var(--tuw-field-label-size, 13px)',
+            fontWeight: 'var(--tuw-field-label-weight, 500)',
             color: 'var(--tuw-text-primary, #262626)',
             display: 'block',
             marginBottom: 6,

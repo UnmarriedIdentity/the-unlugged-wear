@@ -58,10 +58,20 @@ The product editor General tab uses a stacked card layout. Basic Information is 
 - Header: 16px padding, white by default. Title is the card-heading scale (18px/26px/600) using the `--tuw-type-heading-card-*` tokens; description is body-default (14px/22px/400) secondary text, 4px below. A full-bleed 1px `--tuw-border-subtle` divider separates header from body.
 - Header emphasis: neutral is the default. A `selected` or `warning` tone may tint the header with the matching semantic background and show an 8px semantic dot; use it only for a real selected or attention state, never to colour-code sections.
 - Body: 16px padding, 14px column gap. Full-width fields for title and slug; paired fields use `repeat(auto-fit, minmax(180px, 1fr))` with a 12px gap, collapsing to one column below roughly 420px of content width.
-- Controls: `Input` and `FormSelect` stay 44px high when paired in a card row; the 40px `FormSelect` treatment remains for dense standalone drawer rows. Labels are 13px/500 primary; helper and error text are 12px/18px secondary/error, with generated ids wiring helper copy to the control.
+- Controls: `Input` and `FormSelect` stay 44px high when paired in a card row; the 40px `FormSelect` treatment remains for dense standalone drawer rows. Field labels inside a `DrawerCard` are 14px/600 primary, inherited from the card body; outside-card labels keep their legacy 13–14px/500 treatments. Basic Information keeps its required asterisks but carries no helper lines; the Style Code label owns the only info hint. Helper and error text remain 12px/18px secondary/error elsewhere, with generated ids wiring helper copy to the control.
 - Required fields: no card-level “Required” label or badge. Required controls keep native `required` and show a quiet trailing `*` on their field label; invalid states must remain visible without relying on colour alone.
 - Header actions: optional badge/action align right on wide cards and wrap below on narrow ones. A chevron or collapse control is not rendered until collapsing actually works (PEDIT-SHELL); no dead affordances.
 - Card rhythm: 16px between cards, 14px between fields, 16px inside header and body. No extra shadow or collapsible behaviour in this slice.
+
+## Tooltip and label hints
+
+Use a tooltip only for supplementary, non-blocking guidance. Do not hide validation, required instructions or essential copy inside a tooltip.
+
+- Trigger: a 24px `InfoTooltip` button beside the label, with a 14px Lucide `Info` icon. Default icon colour is secondary text; hover/focus uses primary action. Keep a visible focus ring and `type="button"`.
+- Surface: white `--tuw-bg-surface`, 1px `--tuw-border-control` border, primary text, 12px/18px/500, 8px radius, 8px × 10px padding, maximum width 240px, `--shadow-popover` elevation. No arrow. Offset 8px from the trigger.
+- Behaviour: hover opens after 120ms; keyboard focus opens immediately; tap toggles; Escape, outside click, scroll or resize closes. Top placement is preferred, with automatic bottom flip and viewport clamping. Portal the tooltip to `document.body` so drawer/card `overflow: hidden` never clips it. Reduced motion follows the global rule.
+- Accessibility: the tooltip uses `role="tooltip"` with a unique id; the trigger gets `aria-describedby` and a descriptive `aria-label` such as “More information about Style Code”. The tooltip is not interactive and stays out of the tab order.
+- Current use: only the product editor’s Style Code label. Other Basic Information fields use labels alone.
 
 ## Component states
 

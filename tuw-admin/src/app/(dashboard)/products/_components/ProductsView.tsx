@@ -2455,7 +2455,6 @@ export default function ProductsView() {
             >
               <Input
                 label="Product Title"
-                labelSize={13}
                 placeholder="e.g. Urbanist Heavyweight Tee"
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
@@ -2464,29 +2463,25 @@ export default function ProductsView() {
               />
               <Input
                 label="URL Slug"
-                labelSize={13}
                 placeholder="e.g. urbanist-heavyweight-tee"
                 value={formSlug}
                 onChange={(e) => setFormSlug(e.target.value)}
                 maxLength={280}
-                helperText={`Storefront path: /products/${formSlug || '…'}`}
                 required
               />
               <div style={pairedFieldGrid}>
                 <Input
                   label="Style Code"
-                  labelSize={13}
                   placeholder="e.g. FC34"
                   value={formStyleCode}
                   onChange={(e) => setFormStyleCode(e.target.value)}
                   maxLength={50}
-                  helperText="Internal production reference — not shown to customers."
+                  labelTooltip="Internal production reference — not shown to customers."
                 />
                 <FormSelect
                   label="Category"
                   value={formCategory}
                   onChange={(e) => setFormCategory(e.target.value as ProductItem['category'])}
-                  helperText="Used by catalog filters and product organization."
                   style={{ height: 44 }}
                   required
                 >
@@ -2502,7 +2497,6 @@ export default function ProductsView() {
                   label="Gender"
                   value={formGender}
                   onChange={(e) => setFormGender(e.target.value as ProductItem['gender'] | '')}
-                  helperText="Optional; used by storefront filters."
                   style={{ height: 44 }}
                 >
                   {GENDER_OPTIONS.map((option) => (
@@ -2517,7 +2511,6 @@ export default function ProductsView() {
                   onChange={(e) =>
                     setFormStatus(e.target.value as ProductItem['publicationStatus'])
                   }
-                  helperText="Published is live; Draft and Archived stay hidden."
                   style={{ height: 44 }}
                 >
                   {PUBLICATION_OPTIONS.map((option) => (

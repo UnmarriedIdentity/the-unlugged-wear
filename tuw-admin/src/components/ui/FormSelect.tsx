@@ -1,10 +1,13 @@
 'use client';
 
 import React, { useId } from 'react';
+import InfoTooltip from './InfoTooltip';
 
 export interface FormSelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
-  /** Label above the control (13/500/primary, shared treatment). */
+  /** Label above the control. Inside DrawerCard it inherits 14/600; legacy default 13/500. */
   label?: string;
+  /** Supplementary label hint rendered as an info icon + tooltip. */
+  labelTooltip?: string;
   /** Helper copy below the control (12/18/secondary). */
   helperText?: React.ReactNode;
   /** Control font size. Sites use 13 (default) or 14. */
@@ -21,6 +24,7 @@ export interface FormSelectProps extends React.SelectHTMLAttributes<HTMLSelectEl
 // may override height through style so labels and helper copy stay aligned.
 export default function FormSelect({
   label,
+  labelTooltip,
   helperText,
   fontSize = 13,
   padX = 10,
@@ -39,31 +43,37 @@ export default function FormSelect({
   return (
     <div>
       {label ? (
-        <label
-          htmlFor={selectId}
-          style={{
-            fontSize: 13,
-            fontWeight: 500,
-            color: 'var(--tuw-text-primary, #262626)',
-            fontFamily: 'var(--font-main)',
-            display: 'block',
-            marginBottom: 6,
-          }}
-        >
-          {label}
-          {required ? (
-            <span
-              aria-hidden="true"
-              style={{
-                marginLeft: 4,
-                color: 'var(--tuw-text-secondary, #5D6772)',
-                fontWeight: 500,
-              }}
-            >
-              *
-            </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6, minWidth: 0 }}>
+          <label
+            htmlFor={selectId}
+            style={{
+              fontSize: 'var(--tuw-field-label-size, 13px)',
+              fontWeight: 'var(--tuw-field-label-weight, 500)',
+              color: 'var(--tuw-text-primary, #262626)',
+              fontFamily: 'var(--font-main)',
+            }}
+          >
+            {label}
+            {required ? (
+              <span
+                aria-hidden="true"
+                style={{
+                  marginLeft: 4,
+                  color: 'var(--tuw-text-secondary, #5D6772)',
+                  fontWeight: 'var(--tuw-field-label-weight, 500)',
+                }}
+              >
+                *
+              </span>
+            ) : null}
+          </label>
+          {labelTooltip ? (
+            <InfoTooltip
+              label={`More information about ${label}`}
+              content={labelTooltip}
+            />
           ) : null}
-        </label>
+        </div>
       ) : null}
       <select
         id={selectId}

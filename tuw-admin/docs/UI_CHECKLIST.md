@@ -61,7 +61,7 @@
 ### Basic Information card + DrawerCard primitive (2026-10-20)
 
 - [x] `pnpm run typecheck` passes with no diagnostics.
-- [x] `pnpm run test` passes 66/66 tests.
+- [x] `pnpm run test` passed 66/66 tests at this slice (now 71/71 after the tooltip position suite).
 - [x] `pnpm run build` completes with all 40 routes prerendered.
 - [x] Static audit: all six Basic Information fields load and save; Category is required from the existing five labels; Gender and Publication status moved without dropping fields; the Internal fields count no longer includes Gender.
 - [x] Static audit: `FormSelect` labels are linked and helper copy is wired through `aria-describedby`; required `Input`/`FormSelect` labels show a quiet trailing asterisk while retaining native `required`.
@@ -74,4 +74,14 @@
 - [x] Static audit: product editor General opts into `Drawer bodyTone="canvas"` (`--tuw-bg-canvas` #F7F8F9) so white cards separate from the drawer; other drawers and non-cardified tabs keep the surface default.
 - [x] Static audit: no card-level “Required” chip; selected/warning header tones are opt-in and use existing semantic tokens only. No per-section colours.
 - [ ] Browser visual pass at 360 / 768 / 1024 / 1440: header divider, drawer canvas, title/subtitle spacing, required asterisks, no dead chevron, focus order. User verification pending.
+
+### Basic Information labels + Style Code info tooltip (2026-10-20)
+
+- [x] Static audit: `DrawerCard` body establishes a 14px/600 field-label context; `Input`, `FormSelect` and `FormTextarea` consume it with their existing legacy fallbacks outside cards. The three explicit `labelSize={13}` overrides are removed from Basic Information.
+- [x] Static audit: helper lines are removed from URL Slug, Style Code, Category, Gender and Publication status; all six fields and required asterisks remain. The Style Code internal-reference copy is preserved as the tooltip body.
+- [x] Static audit: only Style Code renders `InfoTooltip`; the icon is a 24px `type="button"` with a Lucide `Info` glyph and an accessible “More information about Style Code” name.
+- [x] Static audit: `Tooltip` portals to `document.body`, uses semantic surface/border/text/shadow tokens, exposes `role="tooltip"` plus `aria-describedby`, prefers top placement with flip/clamp, and closes on Escape/outside click/scroll/resize.
+- [x] `pnpm run test` includes five tooltip-position cases covering top placement, bottom flip, preferred-side flip, horizontal clamping and oversized content.
+- [x] `pnpm run typecheck` passes and `pnpm run build` prerenders all 40 routes.
+- [ ] Browser visual pass at 360 / 768 / 1024 / 1440: 14/600 labels, helper lines gone, info icon only on Style Code, hover/focus/tap tooltip, no clipping by card/drawer, Escape/outside close, tab order. User verification pending.
 

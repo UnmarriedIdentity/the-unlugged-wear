@@ -67,6 +67,10 @@ export type { EmptyStateProps } from './EmptyState';
 
 export { default as Tooltip } from './Tooltip';
 export type { TooltipProps } from './Tooltip';
+export type { TooltipSide } from '@/lib/tooltipPosition';
+
+export { default as InfoTooltip } from './InfoTooltip';
+export type { InfoTooltipProps } from './InfoTooltip';
 
 export { default as RadioGroup } from './RadioGroup';
 export type { RadioGroupProps, RadioOption } from './RadioGroup';
