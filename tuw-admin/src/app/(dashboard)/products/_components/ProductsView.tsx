@@ -2545,7 +2545,6 @@ export default function ProductsView() {
                   value={formPrice}
                   onChange={(e) => writeBasePrice(e.target.value)}
                   required
-                  helperText="Every variant price starts at this base."
                 />
                 <Input
                   label="Compare-at price (₹)"
@@ -2561,7 +2560,6 @@ export default function ProductsView() {
                   }}
                   error={formCompareError ?? undefined}
                   labelTooltip="Optional catalog reference. Shown struck through only when it is higher than the current selling price; it does not affect the price charged."
-                  helperText="Must be higher than the selling price."
                 />
               </div>
               <div style={pairedFieldGrid}>
@@ -2572,7 +2570,6 @@ export default function ProductsView() {
                   value={formStock}
                   onChange={(e) => writeStockTotal(e.target.value)}
                   required
-                  helperText="Total across variants. Editing redistributes stock evenly."
                 />
                 <Input
                   label="Tax Rate (%)"
@@ -2582,7 +2579,6 @@ export default function ProductsView() {
                   placeholder="e.g. 18"
                   value={formTax}
                   onChange={(e) => setFormTax(e.target.value)}
-                  helperText="Applied at checkout — never shown on the product page."
                 />
               </div>
             </DrawerCard>
