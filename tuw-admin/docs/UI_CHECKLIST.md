@@ -55,3 +55,15 @@
 - [x] Verify primary customer and staff flows in a browser.
 - [x] No unexplained console errors, broken routes or missing assets.
 - [x] Record the checks actually run and any remaining limitations.
+
+## Recent PEDIT evidence
+
+### Basic Information card + DrawerCard primitive (2026-10-20)
+
+- [x] `pnpm run typecheck` passes with no diagnostics.
+- [x] `pnpm run test` passes 66/66 tests.
+- [x] `pnpm run build` completes with all 40 routes prerendered.
+- [x] Static audit: all six Basic Information fields load and save; Category is required from the existing five labels; Gender and Publication status moved without dropping fields; the Internal fields count no longer includes Gender.
+- [x] Static audit: `DrawerCard` renders 16px padding, 14px header/body rhythm and semantic `--tuw-*` tokens; `FormSelect` labels are linked and helper copy is wired through `aria-describedby`.
+- [ ] Browser visual pass at 360 / 768 / 1024 / 1440: card rhythm, paired Input/FormSelect alignment, keyboard focus order, Category/Gender/Status persistence, Reset Demo. User verification pending.
+

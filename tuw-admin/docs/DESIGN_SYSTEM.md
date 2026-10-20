@@ -56,7 +56,7 @@ The product editor General tab uses a stacked card layout. Basic Information is 
 - Container: `DrawerCard` built on `SurfaceCard`; white surface, 12px radius, 1px subtle border, 16px padding. Do not nest cards inside cards.
 - Header: numbered title (`1. Basic Information`) at 14px/20px/600 primary; description at 13px/20px/regular secondary, 4px below. Optional badge or action aligns right on wide cards and wraps below on narrow ones.
 - Body: 14px column gap. Full-width fields for title and slug; paired fields use `repeat(auto-fit, minmax(180px, 1fr))` with a 12px gap, collapsing to one column below roughly 420px of content width.
-- Controls: `Input` remains 44px high; inline selects use the existing 40px drawer trigger pattern. Labels are 13px/500 primary; helper and error text are 12px/18px secondary/error.
+- Controls: `Input` and `FormSelect` stay 44px high when paired in a card row; the 40px `FormSelect` treatment remains for dense standalone drawer rows. Labels are 13px/500 primary; helper and error text are 12px/18px secondary/error, with generated ids wiring helper copy to the control.
 - Card rhythm: 16px between cards, 14px between header and body. No extra shadow or collapsible behaviour in the first slice.
 - Required fields: product title, URL slug, and category. Gender is optional; publication status has a default. Required and invalid states must remain visible without relying on colour alone.
 

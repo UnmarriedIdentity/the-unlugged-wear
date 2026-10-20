@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive, GripVertical, Upload, Images, Focus, Library, RotateCcw } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, Input, Drawer, Modal, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection, Disclosure, Carousel, LinkButton } from '@/components/ui';
+import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, Input, Drawer, Modal, Pagination, FilterPills, PageHeader, ViewToggle, DropdownMenu, Checkbox, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, MediaFrame, FormTextarea, Tabs, Stepper, Switch, DrawerSection, DrawerCard, FormSelect, Disclosure, Carousel, LinkButton } from '@/components/ui';
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 import { resolveVariants, variantStockTotal, buildVariantSku, deriveVariantPrice, recomputeVariants, minFromPrice, pruneAdjustments, roundPrice, hasPriceSpread, adjustmentKey, sumAdjustments } from '@/mocks/variants';
@@ -13,6 +13,34 @@ import type { ProductVariant, ProductAttribute, PhotoSettings, ProductDiscount, 
 import { parseCompareAtPrice } from '@/lib/productPricing';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
+
+const PRODUCT_CATEGORIES: ProductItem['category'][] = [
+  'T-Shirts',
+  'Hoodies',
+  'Jackets',
+  'Pants',
+  'Accessories',
+];
+
+const GENDER_OPTIONS: Array<{ value: ProductItem['gender'] | ''; label: string }> = [
+  { value: '', label: 'Unspecified' },
+  { value: 'Female', label: 'Female' },
+  { value: 'Male', label: 'Male' },
+  { value: 'Unisex', label: 'Unisex' },
+  { value: 'Kids', label: 'Kids' },
+];
+
+const PUBLICATION_OPTIONS: Array<{ value: ProductItem['publicationStatus']; label: string }> = [
+  { value: 'published', label: 'Published (Live)' },
+  { value: 'draft', label: 'Draft (Hidden)' },
+  { value: 'archived', label: 'Archived' },
+];
+
+const pairedFieldGrid: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+  gap: 12,
+};
 
 // Per-product attribute draft (A1/AX2). Shape lives on ProductAttribute
 // (fixtures) so the seam persists it verbatim; see the REST note there.
@@ -2420,24 +2448,82 @@ export default function ProductsView() {
         {(editingProduct || isCreating) && (
           productTab === 'general' ? (
           <form onSubmit={handleEditSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <Input
-              label="Product Title"
-              value={formName}
-              onChange={(e) => setFormName(e.target.value)}
-              required
-            />
-            <Input
-              label="URL Slug"
-              value={formSlug}
-              onChange={(e) => setFormSlug(e.target.value)}
-              required
-            />
-            <Input
-              label="Style Code"
-              placeholder="e.g. FC34"
-              value={formStyleCode}
-              onChange={(e) => setFormStyleCode(e.target.value)}
-            />
+            <DrawerCard
+              title="1. Basic Information"
+              description="Core identity and catalog placement."
+            >
+              <Input
+                label="Product Title"
+                placeholder="e.g. Urbanist Heavyweight Tee"
+                value={formName}
+                onChange={(e) => setFormName(e.target.value)}
+                maxLength={255}
+                required
+              />
+              <Input
+                label="URL Slug"
+                placeholder="e.g. urbanist-heavyweight-tee"
+                value={formSlug}
+                onChange={(e) => setFormSlug(e.target.value)}
+                maxLength={280}
+                helperText={`Storefront path: /products/${formSlug || '…'}`}
+                required
+              />
+              <div style={pairedFieldGrid}>
+                <Input
+                  label="Style Code"
+                  placeholder="e.g. FC34"
+                  value={formStyleCode}
+                  onChange={(e) => setFormStyleCode(e.target.value)}
+                  maxLength={50}
+                  helperText="Internal production reference — not shown to customers."
+                />
+                <FormSelect
+                  label="Category"
+                  value={formCategory}
+                  onChange={(e) => setFormCategory(e.target.value as ProductItem['category'])}
+                  helperText="Used by catalog filters and product organization."
+                  style={{ height: 44 }}
+                  required
+                >
+                  {PRODUCT_CATEGORIES.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </FormSelect>
+              </div>
+              <div style={pairedFieldGrid}>
+                <FormSelect
+                  label="Gender"
+                  value={formGender}
+                  onChange={(e) => setFormGender(e.target.value as ProductItem['gender'] | '')}
+                  helperText="Optional; used by storefront filters."
+                  style={{ height: 44 }}
+                >
+                  {GENDER_OPTIONS.map((option) => (
+                    <option key={option.value || 'unspecified'} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </FormSelect>
+                <FormSelect
+                  label="Publication status"
+                  value={formStatus}
+                  onChange={(e) =>
+                    setFormStatus(e.target.value as ProductItem['publicationStatus'])
+                  }
+                  helperText="Published is live; Draft and Archived stay hidden."
+                  style={{ height: 44 }}
+                >
+                  {PUBLICATION_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </FormSelect>
+              </div>
+            </DrawerCard>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <Input
                 label="Base price (₹)"
@@ -2581,54 +2667,6 @@ export default function ProductsView() {
                 </div>
               </div>
             </DrawerSection>
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', marginBottom: 6 }}>
-                Publication Status
-              </div>
-              <DropdownMenu
-                ariaLabel="Publication status"
-                trigger={
-                  <span
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`Publication status, currently ${formStatus === 'published' ? 'Published (Live on website)' : formStatus === 'draft' ? 'Draft (Hidden)' : 'Archived'}`}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
-                    }}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: 8,
-                      width: '100%',
-                      height: 40,
-                      padding: '0 12px',
-                      fontSize: 13,
-                      fontWeight: 500,
-                      fontFamily: 'var(--font-main)',
-                      borderRadius: 8,
-                      border: '1px solid var(--tuw-border-control, #D1D5DB)',
-                      backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
-                      color: 'var(--tuw-text-primary, #262626)',
-                      cursor: 'pointer',
-                      userSelect: 'none',
-                    }}
-                  >
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {formStatus === 'published' ? 'Published (Live on website)' : formStatus === 'draft' ? 'Draft (Hidden)' : 'Archived'}
-                    </span>
-                    <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
-                  </span>
-                }
-                items={[
-                  { value: 'published', label: 'Published (Live on website)' },
-                  { value: 'draft', label: 'Draft (Hidden)' },
-                  { value: 'archived', label: 'Archived' },
-                ]}
-                selectedValue={formStatus}
-                onSelect={(v) => setFormStatus(v as ProductItem['publicationStatus'])}
-              />
-            </div>
             <DrawerSection title="Attributes & Values" titleGap={10}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
@@ -2728,7 +2766,7 @@ export default function ProductsView() {
             <Disclosure
               title="Internal fields"
               subtitle="Internal data: weights, dimensions, print placements. Hidden from shoppers."
-              badge={<Badge variant="neutral" size="sm">{[formWeight, formShipWeight, formDims, formGender].filter(Boolean).length + formAttributes.filter((a) => !showsOnPdp(a)).reduce((n, a) => n + a.values.length, 0)} filled</Badge>}
+              badge={<Badge variant="neutral" size="sm">{[formWeight, formShipWeight, formDims].filter(Boolean).length + formAttributes.filter((a) => !showsOnPdp(a)).reduce((n, a) => n + a.values.length, 0)} filled</Badge>}
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -2748,65 +2786,12 @@ export default function ProductsView() {
                 <p style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
                   Enter weights in whole grams — numbers only.
                 </p>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  <Input
-                    label="Package Dimensions"
-                    placeholder="e.g. 18x20x2.3"
-                    value={formDims}
-                    onChange={(e) => setFormDims(e.target.value)}
-                  />
-                  <div>
-                    <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
-                      Gender
-                    </span>
-                  <DropdownMenu
-                    ariaLabel="Gender"
-                    fullWidth
-                    trigger={
-                      <span
-                        role="button"
-                        tabIndex={0}
-                        aria-label={`Gender, currently ${formGender || 'Unspecified'}`}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
-                        }}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          gap: 8,
-                          width: '100%',
-                          height: 40,
-                          padding: '0 12px',
-                          fontSize: 13,
-                          fontWeight: 500,
-                          fontFamily: 'var(--font-main)',
-                          borderRadius: 8,
-                          border: '1px solid var(--tuw-border-control, #D1D5DB)',
-                          backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
-                          color: 'var(--tuw-text-primary, #262626)',
-                          cursor: 'pointer',
-                          userSelect: 'none',
-                        }}
-                      >
-                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {formGender || 'Select gender'}
-                        </span>
-                        <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
-                      </span>
-                    }
-                    items={[
-                      { value: '', label: 'Unspecified' },
-                      { value: 'Female', label: 'Female' },
-                      { value: 'Male', label: 'Male' },
-                      { value: 'Unisex', label: 'Unisex' },
-                      { value: 'Kids', label: 'Kids' },
-                    ]}
-                    selectedValue={formGender}
-                    onSelect={(v) => setFormGender(v as ProductItem['gender'] | '')}
-                  />
-                  </div>
-                </div>
+                <Input
+                  label="Package Dimensions"
+                  placeholder="e.g. 18x20x2.3"
+                  value={formDims}
+                  onChange={(e) => setFormDims(e.target.value)}
+                />
                 {formAttributes.filter((a) => !showsOnPdp(a)).map((attr) => renderAttrCard(attr, true))}
               </div>
             </Disclosure>
