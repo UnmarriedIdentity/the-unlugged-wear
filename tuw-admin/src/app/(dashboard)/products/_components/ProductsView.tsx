@@ -43,6 +43,11 @@ const PUBLICATION_OPTIONS: Array<{ value: ProductItem['publicationStatus']; labe
   { value: 'archived', label: 'Archived' },
 ];
 
+const DISCOUNT_TYPE_OPTIONS = [
+  { value: 'percent', label: 'Percent %' },
+  { value: 'fixed', label: 'Fixed ₹' },
+];
+
 const pairedFieldGrid: React.CSSProperties = {
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
@@ -134,6 +139,9 @@ export default function ProductsView() {
   const [basicCardOpen, setBasicCardOpen] = useState(false);
   // Pricing & stock (PEDIT card 2) is independently collapsible.
   const [pricingCardOpen, setPricingCardOpen] = useState(false);
+  // Scheduled discounts (PEDIT card 3) is independently collapsible.
+  const [discountsCardOpen, setDiscountsCardOpen] = useState(false);
+  const addDiscountRef = useRef<HTMLDivElement>(null);
 
   const openCreateDrawer = () => {
     if (!canPerformAction('products')) return;
@@ -141,6 +149,7 @@ export default function ProductsView() {
     setIsCreating(true);
     setBasicCardOpen(false);
     setPricingCardOpen(false);
+    setDiscountsCardOpen(false);
     setProductTab('general');
     setDrawerView('compact');
     autoExpandedRef.current = false;
@@ -597,6 +606,9 @@ export default function ProductsView() {
   };
   const removeDiscount = (id: string) => {
     setFormDiscounts((prev) => prev.filter((d) => d.id !== id));
+    requestAnimationFrame(() => {
+      addDiscountRef.current?.querySelector<HTMLButtonElement>('button')?.focus();
+    });
   };
   const displayTypeLabel = (t: ProductAttribute['displayType']) =>
     t === 'pill' ? 'Pill' : t === 'swatch' ? 'Color swatch' : 'Radio select';
@@ -870,6 +882,7 @@ export default function ProductsView() {
     setEditingProduct(product);
     setBasicCardOpen(false);
     setPricingCardOpen(false);
+    setDiscountsCardOpen(false);
     setProductTab('general');
     setFormCompareError(null);
     setDrawerView('compact');
@@ -2374,6 +2387,7 @@ export default function ProductsView() {
           setIsCreating(false);
           setBasicCardOpen(false);
           setPricingCardOpen(false);
+          setDiscountsCardOpen(false);
           setDrawerView('compact');
           autoExpandedRef.current = false;
           setFormImages((prev) => {
@@ -2582,116 +2596,166 @@ export default function ProductsView() {
                 />
               </div>
             </DrawerCard>
-            <DrawerSection title="Scheduled discounts" titleGap={10}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
-                  Scheduled price cuts with a window and kill switch. The compare-at price above is a static catalog reference, separate from these scheduled cuts.
+            <DrawerCard
+              title="3. Scheduled discounts"
+              description="Time-boxed price cuts with a start, end, and active switch"
+              collapsible
+              isOpen={discountsCardOpen}
+              onToggle={setDiscountsCardOpen}
+              badge={
+                formDiscounts.length > 0 ? (
+                  <Badge variant="neutral" size="sm">
+                    {formDiscounts.length} {formDiscounts.length === 1 ? 'discount' : 'discounts'}
+                  </Badge>
+                ) : undefined
+              }
+            >
+              {formDiscounts.length === 0 ? (
+                <p style={{ margin: 0, fontSize: 13, lineHeight: '20px', color: 'var(--tuw-text-secondary)' }}>
+                  No scheduled discounts. The product uses its normal selling price.
                 </p>
-                {formDiscounts.map((d) => (
-                  <SurfaceCard key={d.id} padding="10px" gap="8px">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <div style={{ width: 130, flexShrink: 0 }}>
-                        <DropdownMenu
-                          ariaLabel="Discount type"
-                          trigger={
-                            <span
-                              role="button"
-                              tabIndex={0}
-                              aria-label={`Discount type, currently ${d.discountType}`}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
-                              }}
-                              style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                gap: 8,
-                                width: '100%',
-                                height: 36,
-                                padding: '0 10px',
-                                fontSize: 13,
-                                fontWeight: 500,
-                                fontFamily: 'var(--font-main)',
-                                borderRadius: 8,
-                                border: '1px solid var(--tuw-border-control, #D1D5DB)',
-                                backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
-                                color: 'var(--tuw-text-primary, #262626)',
-                                cursor: 'pointer',
-                                userSelect: 'none',
-                              }}
-                            >
-                              <span>{d.discountType === 'percent' ? 'Percent %' : 'Fixed ₹'}</span>
-                              <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
-                            </span>
-                          }
-                          items={[
-                            { value: 'percent', label: 'Percent %' },
-                            { value: 'fixed', label: 'Fixed ₹' },
-                          ]}
-                          selectedValue={d.discountType}
-                          onSelect={(v) => patchDiscount(d.id, { discountType: v as ProductDiscount['discountType'] })}
-                        />
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <Input
-                          aria-label="Discount value"
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          max={d.discountType === 'percent' ? '100' : undefined}
-                          value={String(d.value)}
-                          onChange={(e) => {
-                            const n = parseFloat(e.target.value);
-                            if (isNaN(n)) return;
-                            patchDiscount(d.id, {
-                              value: d.discountType === 'percent' ? Math.min(100, Math.max(0, n)) : Math.max(0, n),
-                            });
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {formDiscounts.map((d, index) => {
+                    const rowTitleId = `discount-${d.id}-title`;
+                    return (
+                      <div
+                        key={d.id}
+                        role="group"
+                        aria-labelledby={rowTitleId}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 12,
+                          padding: 12,
+                          border: '1px solid var(--tuw-border-subtle)',
+                          borderRadius: 8,
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: 8,
+                            flexWrap: 'wrap',
                           }}
-                          style={{ height: 36 }}
-                        />
-                      </div>
-                      <Switch
-                        label=""
-                        ariaLabel={'Toggle ' + (d.discountType === 'percent' ? d.value + '%' : '₹' + d.value) + ' discount active'}
-                        checked={d.isActive}
-                        onChange={(v) => patchDiscount(d.id, { isActive: v })}
-                      />
-                      <UpliftSurface active width={28} height={28} className="tuw-danger-hover" style={{ flexShrink: 0, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                        <button
-                          type="button"
-                          aria-label="Remove discount"
-                          onClick={() => removeDiscount(d.id)}
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, display: 'inline-flex' }}
                         >
-                          <Trash2 size={14} />
-                        </button>
-                      </UpliftSurface>
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                      <Input
-                        aria-label="Discount starts"
-                        type="date"
-                        value={d.startsAt}
-                        onChange={(e) => patchDiscount(d.id, { startsAt: e.target.value })}
-                        style={{ height: 36 }}
-                      />
-                      <Input
-                        aria-label="Discount ends"
-                        type="date"
-                        value={d.endsAt}
-                        onChange={(e) => patchDiscount(d.id, { endsAt: e.target.value })}
-                        style={{ height: 36 }}
-                      />
-                    </div>
-                  </SurfaceCard>
-                ))}
-                <div>
-                  <Button variant="secondary" size="sm" icon={<Plus size={14} />} type="button" onClick={addDiscount}>
-                    Add Discount
-                  </Button>
+                          <h5
+                            id={rowTitleId}
+                            style={{
+                              margin: 0,
+                              fontSize: 14,
+                              lineHeight: '22px',
+                              fontWeight: 600,
+                              color: 'var(--tuw-text-primary)',
+                            }}
+                          >
+                            Discount {index + 1}
+                          </h5>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <Switch
+                              label="Active"
+                              ariaLabel={`Discount ${index + 1} active`}
+                              checked={d.isActive}
+                              onChange={(v) => patchDiscount(d.id, { isActive: v })}
+                            />
+                            <UpliftSurface
+                              active
+                              width={32}
+                              height={32}
+                              className="tuw-danger-hover"
+                              style={{ flexShrink: 0, color: 'var(--tuw-text-secondary)' }}
+                            >
+                              <button
+                                type="button"
+                                aria-label={`Remove discount ${index + 1}`}
+                                onClick={() => removeDiscount(d.id)}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  width: '100%',
+                                  height: '100%',
+                                  padding: 0,
+                                  border: 'none',
+                                  borderRadius: 'inherit',
+                                  background: 'transparent',
+                                  color: 'inherit',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </UpliftSurface>
+                          </div>
+                        </div>
+                        <div style={pairedFieldGrid}>
+                          <SearchableSelect
+                            label="Type"
+                            ariaLabel={`Discount ${index + 1} type`}
+                            options={DISCOUNT_TYPE_OPTIONS}
+                            value={d.discountType}
+                            onChange={(value) => {
+                              const discountType = value as ProductDiscount['discountType'];
+                              patchDiscount(d.id, {
+                                discountType,
+                                value:
+                                  discountType === 'percent'
+                                    ? Math.min(100, Math.max(0, d.value))
+                                    : Math.max(0, d.value),
+                              });
+                            }}
+                            searchable={false}
+                          />
+                          <Input
+                            id={`discount-${d.id}-value`}
+                            label={d.discountType === 'percent' ? 'Value (%)' : 'Value (₹)'}
+                            type="number"
+                            inputMode="decimal"
+                            step="0.01"
+                            min={0}
+                            max={d.discountType === 'percent' ? 100 : undefined}
+                            value={String(d.value)}
+                            onChange={(e) => {
+                              const n = parseFloat(e.target.value);
+                              if (Number.isNaN(n)) return;
+                              patchDiscount(d.id, {
+                                value:
+                                  d.discountType === 'percent'
+                                    ? Math.min(100, Math.max(0, n))
+                                    : Math.max(0, n),
+                              });
+                            }}
+                          />
+                        </div>
+                        <div style={pairedFieldGrid}>
+                          <Input
+                            id={`discount-${d.id}-starts`}
+                            label="Starts"
+                            type="date"
+                            value={d.startsAt}
+                            onChange={(e) => patchDiscount(d.id, { startsAt: e.target.value })}
+                          />
+                          <Input
+                            id={`discount-${d.id}-ends`}
+                            label="Ends"
+                            type="date"
+                            value={d.endsAt}
+                            onChange={(e) => patchDiscount(d.id, { endsAt: e.target.value })}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
+              )}
+              <div ref={addDiscountRef} style={{ display: 'flex' }}>
+                <Button variant="secondary" size="sm" icon={<Plus size={14} />} type="button" onClick={addDiscount}>
+                  Add Discount
+                </Button>
               </div>
-            </DrawerSection>
+            </DrawerCard>
             <DrawerSection title="Attributes & Values" titleGap={10}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>

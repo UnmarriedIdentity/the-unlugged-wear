@@ -105,3 +105,14 @@
 - [x] `pnpm run typecheck` passes with no diagnostics; `pnpm run test` passes 71/71 admin + 7/7 website tests; `pnpm run build` prerenders all 40 admin routes and 27 website routes.
 - [ ] Browser visual pass at 360 / 768 / 1024 / 1440: card default-collapsed and independent, base/compare and stock/tax alignment, helper lines absent, compare-at tooltip hover/focus/tap without clipping, auto-open on validation failure, tax save/reload, Reset Demo. User verification pending.
 
+### Scheduled discounts card (2026-10-20)
+
+- [x] Static audit: Scheduled discounts is General card 3, built on the same collapsible `DrawerCard`; it starts collapsed, has independent `discountsCardOpen` state, survives tab switches, and resets when a create/edit drawer opens or closes.
+- [x] Static audit: the old flat section and nested `SurfaceCard` rows are replaced by flat bordered rows inside the card; Type, Value, Starts, Ends, Active, remove, and Add Discount are all retained.
+- [x] Static audit: Type uses `SearchableSelect`; Value, Starts, and Ends use native `Input`; Active uses `Switch`; each row has a visible heading and a row-scoped remove button with a specific accessible name.
+- [x] Static audit: every row input has a unique id, row groups are labelled by their heading, and removing a row returns focus to Add Discount.
+- [x] Static audit: the header count badge appears only when rows exist and uses singular/plural copy; the empty state explains that the normal selling price applies. No helper lines are rendered.
+- [x] Static audit: switching to Percent clamps the value to 100; date-window requiredness and `endsAt >= startsAt` validation remain a separate follow-up.
+- [x] `pnpm run typecheck` passes with no diagnostics; `pnpm run test` passes 71/71 admin + 7/7 website tests; `pnpm run build` prerenders all 40 admin routes and 27 website routes.
+- [ ] Browser visual pass at 360 / 768 / 1024 / 1440: default-collapsed card with independent toggle, empty state, add/remove, type switch, value clamp, dates, active switch, save/reload, row focus return, Reset Demo. User verification pending.
+
