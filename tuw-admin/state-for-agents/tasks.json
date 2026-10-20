@@ -8,16 +8,16 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 266,
-    "done": 240,
+    "total": 267,
+    "done": 241,
     "in_progress": 1,
     "backlog": 25
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "8657b23",
-    "unpushed": ["8657b23", "a76c28e", "1cb23d5", "463acd1", "912348b", "8eea694", "b8f80f8", "eb198a1", "f5c9cea", "e3e12f9"],
-    "next_up": "Wave-2 in user order: Section 1 Fulfillment — TL-UI-FUL-KPI done (7234b6d, awaiting browser check). Section 2 Collections — COMPLETE: parent TL-UI-COL-EDIT + children all done (DATA 87a0e67, TEST 96f4e9b, PICK 5bce91b, FORM 642627f, ED + ACT d573776) — create/edit drawer, custom SearchableSelect/MultiSelect dropdowns, searchable product picker, detail with real products, edit/duplicate/delete row actions; awaiting browser verification. Section 3a Admin drawers — COMPLETE: TL-UI-ADM-DRAWERS + all 6 children done (CONTENT 4f58885, COMMERCE f72763e, SHIPPING 9f8219d, PEOPLE 7b9d650, STUDIO 1c41713, CLEAN fced651) — 12 form modals now right-side drawers, confirms stayed modals, raw selects swapped to house primitives, $→₹ in touched lines, 3 latent Select onChange bugs fixed. Side fix TL-UI-PICK-RV — COMPLETE (4e9d5c5 scroll containment in SearchableSelect + DropdownMenu; aa9fe21 field-as-search trigger rework — no dedicated search bar, single-select seeds label select-all on open, multi inline input after chips) — browser-confirmed by user 2026-10-20. Compare-at price COMPLETE (1b832a9): TL-UI-ADM-CMP done + PEDIT-CMP executed ahead of its parent — input surfaced in General, validation above the selling price on create/edit, accidental ₹58 default removed, strikethrough hidden when compare ≤ listed price, stale copy fixed; awaiting browser verification; CSV compare-at COMPLETE (d26929f): Compare At Price/Compare Price/Was Price/Original Price columns honored, validated above the row base price, previewed; awaiting browser verification. Section 3b Product changes — re-planned 2026-10-20 as card-stack IA. TL-UI-PEDIT-ATTR-DISPLAY remains in_progress — Settings slice shipped (eb198a1); next: product drawer consumes the global type read-only. PEDIT card foundation shipped (912348b + 463acd1): DRAWER-CARD + BASIC-CARD done — General card 1 now contains title/slug/style code/category/gender/status inside a DrawerCard, with FormSelect primitives and no field loss; its initial 13px labels/helper copy were superseded by LABEL-HINT. PEDIT card header/body v2 shipped (1cb23d5): CARD-HDR done — white 18/26 header + 14/22 subtitle with a 4px gap, full-bleed 1px --tuw-border-subtle divider matching the card border, 16px body rhythm, no card shadow, General-tab canvas #F7F8F9, quiet required asterisks, no card-level Required chip, no dead chevron; selected/warning header tones are opt-in only. PEDIT label/tooltip polish shipped (a76c28e + 8657b23): LABEL-HINT done — card labels 14/600, 24px label rows keep hinted and plain pairs aligned, Basic helper lines removed, only Style Code has an InfoTooltip; portal + flip/clamp, light token surface, role=tooltip/aria-describedby, 71 admin tests. Next after ATTR-DISPLAY: GENERAL-CARDS (cards 2–6) → TABS-CARDS (replaces old HEAD) → HOOK → SPLIT → SHELL → RESET; CMP done; ATTR-VALUES / ATTR-SWATCH parked after the card pass. Parked after: TL-UI-ADM-TABLES / ADM-INR / ADM-MONO, TL-UI-CMS-PERSIST, TL-UI-DESIGN-PLAN. One in_progress: ATTR-DISPLAY (drawer slice next). PEDIT cleanup wave + fulfillment grid + collections wave + admin drawers wave pending browser verification. Then attribute edge log (file 18) → N1b write-through (display/visibility/hex + disclosure) → design-system tail (FX1/SEL/CBX/IMG) → DW2 pass → anim re-run; styling engine (file 19) is the project's FINAL feature — build it only after the core e-commerce app is complete; shipments partner-sync reframe; household UI build reads file 17",
+    "tip": "1bf3c68",
+    "unpushed": ["1bf3c68", "8657b23", "a76c28e", "1cb23d5", "463acd1", "912348b", "8eea694", "b8f80f8", "eb198a1", "f5c9cea", "e3e12f9"],
+    "next_up": "Wave-2 in user order: Section 1 Fulfillment — TL-UI-FUL-KPI done (7234b6d, awaiting browser check). Section 2 Collections — COMPLETE: parent TL-UI-COL-EDIT + children all done (DATA 87a0e67, TEST 96f4e9b, PICK 5bce91b, FORM 642627f, ED + ACT d573776) — create/edit drawer, custom SearchableSelect/MultiSelect dropdowns, searchable product picker, detail with real products, edit/duplicate/delete row actions; awaiting browser verification. Section 3a Admin drawers — COMPLETE: TL-UI-ADM-DRAWERS + all 6 children done (CONTENT 4f58885, COMMERCE f72763e, SHIPPING 9f8219d, PEOPLE 7b9d650, STUDIO 1c41713, CLEAN fced651) — 12 form modals now right-side drawers, confirms stayed modals, raw selects swapped to house primitives, $→₹ in touched lines, 3 latent Select onChange bugs fixed. Side fix TL-UI-PICK-RV — COMPLETE (4e9d5c5 scroll containment in SearchableSelect + DropdownMenu; aa9fe21 field-as-search trigger rework — no dedicated search bar, single-select seeds label select-all on open, multi inline input after chips) — browser-confirmed by user 2026-10-20. Compare-at price COMPLETE (1b832a9): TL-UI-ADM-CMP done + PEDIT-CMP executed ahead of its parent — input surfaced in General, validation above the selling price on create/edit, accidental ₹58 default removed, strikethrough hidden when compare ≤ listed price, stale copy fixed; awaiting browser verification; CSV compare-at COMPLETE (d26929f): Compare At Price/Compare Price/Was Price/Original Price columns honored, validated above the row base price, previewed; awaiting browser verification. Section 3b Product changes — re-planned 2026-10-20 as card-stack IA. TL-UI-PEDIT-ATTR-DISPLAY remains in_progress — Settings slice shipped (eb198a1); next: product drawer consumes the global type read-only. PEDIT card foundation shipped (912348b + 463acd1): DRAWER-CARD + BASIC-CARD done — General card 1 now contains title/slug/style code/category/gender/status inside a DrawerCard, with FormSelect primitives and no field loss; its initial 13px labels/helper copy were superseded by LABEL-HINT. PEDIT card header/body v2 shipped (1cb23d5): CARD-HDR done — white 18/26 header + 14/22 subtitle with a 4px gap, full-bleed 1px --tuw-border-subtle divider matching the card border, 16px body rhythm, no card shadow, General-tab canvas #F7F8F9, quiet required asterisks, no card-level Required chip, no dead chevron; selected/warning header tones are opt-in only. PEDIT label/tooltip polish shipped (a76c28e + 8657b23): LABEL-HINT done — card labels 14/600, 24px label rows keep hinted and plain pairs aligned, Basic helper lines removed, only Style Code has an InfoTooltip; portal + flip/clamp, light token surface, role=tooltip/aria-describedby, 71 admin tests. Next after ATTR-DISPLAY: GENERAL-CARDS (cards 2–6) → TABS-CARDS (replaces old HEAD) → HOOK → SPLIT → SHELL → RESET; CMP done; ATTR-VALUES / ATTR-SWATCH parked after the card pass. Parked after: TL-UI-ADM-TABLES / ADM-INR / ADM-MONO, TL-UI-CMS-PERSIST, TL-UI-DESIGN-PLAN. PEDIT collapsible Basic card + house dropdowns shipped (1bf3c68): CARD-COLLAPSE done — Basic starts collapsed, header button/chevron, body unmounted when closed, controlled state across tab switches; Category/Gender/Status now use SearchableSelect with 14/600 labels, required semantics and Escape containment; browser pass pending. One in_progress: ATTR-DISPLAY (drawer slice next). PEDIT cleanup wave + fulfillment grid + collections wave + admin drawers wave pending browser verification. Then attribute edge log (file 18) → N1b write-through (display/visibility/hex + disclosure) → design-system tail (FX1/SEL/CBX/IMG) → DW2 pass → anim re-run; styling engine (file 19) is the project's FINAL feature — build it only after the core e-commerce app is complete; shipments partner-sync reframe; household UI build reads file 17",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
       "dashboard D-series: KPI tiers, range/sort menus, badge mapping, calendar pills, header tint (360/768/1024/1440)",
@@ -37,7 +37,8 @@
       "attribute showcase settings slice (eb198a1): create as Radio/Swatch persists, per-card selector updates the badge + value preview, swatch note appears, read-only role refuses, Reset Demo restores; product drawer still shows the old per-product control until the next slice",
       "PEDIT Basic Information card (912348b + 463acd1): edit fixtures at 360/768/1024/1440 — category loads per product, gender/status persist, Category is required, paired inputs and field rhythm align, Reset Demo restores; label/helper/tooltip details now covered by the a76c28e pass",
       "PEDIT DrawerCard v2 (1cb23d5): 18/26 white header + 14/22 subtitle 4px apart, full-bleed subtle divider matching the card border, 16px header/body rhythm, no shadow, General-tab #F7F8F9 canvas, required asterisks, no card-level Required chip or chevron, selected/warning tones unused — browser pass pending",
-      "PEDIT labels + Style Code tooltip (a76c28e + 8657b23): 14/600 labels, 24px label rows keep Style Code/Category aligned, Basic helper lines removed, info icon only on Style Code, tooltip hover/focus/tap above the drawer without clipping, Escape/outside/scroll close, tab order — browser pass pending"
+      "PEDIT labels + Style Code tooltip (a76c28e + 8657b23): 14/600 labels, 24px label rows keep Style Code/Category aligned, Basic helper lines removed, info icon only on Style Code, tooltip hover/focus/tap above the drawer without clipping, Escape/outside/scroll close, tab order — browser pass pending",
+      "PEDIT collapsible Basic card + house dropdowns (1bf3c68): Basic starts collapsed, header mouse/keyboard expand-collapse with visible focus and no tab stops while closed, values persist across collapse/reopen and tab switches, Category/Gender/Status SearchableSelect open/select/save without clipping, Escape closes only the listbox, Reset Demo; 360/768/1024/1440 — browser pass pending"
     ],
     "last_updated": "2026-10-20",
     "updated_by": "agent"
@@ -4099,7 +4100,7 @@
       "parent": "TL-UI-PEDIT-IA",
       "started": "2026-10-20",
       "finished": null,
-      "log": "Planned 2026-10-20 (first PEDIT slice, narrowed by user clarification). Products keep individual control of WHICH attributes they show and which values they offer; only the PDP showcase type moves global. Scope: Settings → Attributes gets an editable Pill / Color swatch / Radio select control per library card (currently the create dropdown is ignored and no edit control exists); createLibraryAttribute(name, displayType) persists it; a small value preview renders in the chosen style. Product drawer: remove the per-product 'Shows on storefront as' dropdown, render a read-only badge + 'Change in Settings' link from libraryOf(attr), and use the global type for value previews. State: LibraryAttribute.displayType stays the single source; ProductAttribute.displayType is removed/ignored (library wins for linked attrs; unlinked legacy falls back to pill + Unlinked warning); swatch colors and values stay product-local in this slice. SQL: no DDL — attribute_definitions.display_type already models the global setting. Verification: create/edit/switch type, two linked products update together, read-only drawer, unlinked fallback, reset demo; typecheck + tests + build. SETTINGS SLICE SHIPPED 2026-10-20 (eb198a1): shared attributePresentation helpers; createLibraryAttribute now persists the chosen type; setLibraryDisplayType added with role gate + persistence; hydration normalizes missing/stale display types; each library card has a PDP showcase selector, global helper copy, and live pill/swatch/radio value previews. Gates green: typecheck, 66 tests, build. REMAINING: product drawer read-only consumption (linked library type wins; unlinked falls back to pill).",
+      "log": "Planned 2026-10-20 (first PEDIT slice, narrowed by user clarification). Products keep individual control of WHICH attributes they show and which values they offer; only the PDP showcase type moves global. Scope: Settings → Attributes gets an editable Pill / Color swatch / Radio select control per library card (currently the create dropdown is ignored and no edit control exists); createLibraryAttribute(name, displayType) persists it; a small value preview renders in the chosen style. Product drawer: remove the per-product 'Shows on storefront as' dropdown, render a read-only badge + 'Change in Settings' link from libraryOf(attr), and use the global type for value previews. State: LibraryAttribute.displayType stays the single source; ProductAttribute.displayType is removed/ignored (library wins for linked attrs; unlinked legacy falls back to pill + Unlinked warning); swatch colors and values stay product-local in this slice. SQL: no DDL — attribute_definitions.display_type already models the global setting. Verification: create/edit/switch type, two linked products update together, read-only drawer, unlinked fallback, reset demo; typecheck + tests + build. SETTINGS SLICE SHIPPED 2026-10-20 (eb198a1): shared attributePresentation helpers; createLibraryAttribute now persists the chosen type; setLibraryDisplayType added with role gate + persistence; hydration normalizes missing/stale display types; each library card has a PDP showcase selector, global helper copy, and live pill/swatch/radio value previews. Gates green: typecheck, 66 tests, build. REMAINING: product drawer read-only consumption (linked library type wins; unlinked falls back to pill). RESUMED 2026-10-20 after TL-UI-PEDIT-CARD-COLLAPSE (1bf3c68).",
       "design_match": "pending",
       "verified": false,
       "pushed": false,
@@ -4218,7 +4219,7 @@
         "Browser visual pass at 360/768/1024/1440 remains pending",
         "Extend the canvas/card header treatment to Media, Variants, and Clothing Specs in TL-UI-PEDIT-TABS-CARDS",
         "Selected/warning header tones currently have no consumer; add only when a real state exists",
-        "Collapse/chevron remains in TL-UI-PEDIT-SHELL"
+        "Collapse/chevron shipped in TL-UI-PEDIT-CARD-COLLAPSE (1bf3c68)"
       ]
     },
     {
@@ -4246,6 +4247,32 @@
         "Browser visual pass at 360/768/1024/1440 remains pending",
         "Currently a single tooltip consumer; coordinate multiple pinned hints if a second one appears",
         "Style Code helper copy is preserved only in the tooltip — keep validation/essential copy outside tooltips"
+      ]
+    },
+    {
+      "id": "TL-UI-PEDIT-CARD-COLLAPSE",
+      "title": "Collapsible DrawerCard sections + house dropdowns in Basic Information",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-UI-PEDIT-IA",
+      "started": "2026-10-20",
+      "finished": "2026-10-20",
+      "log": "1bf3c68 — Pulled the collapse half of TL-UI-PEDIT-SHELL forward and completed Basic Information. DrawerCard gained opt-in controlled/uncontrolled collapse (collapsible/defaultOpen/isOpen/onToggle), default-collapsed product cards, an h4>button header with 18px rotating chevron, aria-expanded/aria-controls, a labelled body region, focus return on close, and a conditionally mounted body so collapsed fields cannot become tab stops, trap validation, or leave a listbox open. Basic Information's open state lives in ProductsView, survives tab switches, and resets for each create/edit drawer. Category, Gender, and Publication status moved from native FormSelect to SearchableSelect (searchable=false); Category is required, Gender maps the 'unspecified' sentinel back to the empty form value, and all three use 44px triggers. SearchableSelect labels now inherit card-scoped 14/600 with a 24px row, optional required asterisk, htmlFor/id association, aria-required, helper/error description ids, and Escape stopPropagation so the drawer does not close with the listbox. Labels/docs/checklist updated. No SQL/backend changes; values and save logic unchanged. Root typecheck, 71/71 admin + 7/7 website tests, 40-route admin build green; browser pass pending.",
+      "design_match": "yes",
+      "verified": true,
+      "pushed": false,
+      "key_decisions": [
+        "Product cards start collapsed; cards are independent disclosures, not an exclusive accordion",
+        "Collapsed bodies unmount while field values live in ProductsView state",
+        "Header is a real button with a labelled region; optional actions stay outside the toggle",
+        "Basic category/gender/status use SearchableSelect, not native FormSelect",
+        "SearchableSelect labels inherit the card 14/600 context and expose required semantics",
+        "Validation auto-open/focus remains a separate SHELL task"
+      ],
+      "follow_ups": [
+        "Browser pass at 360/768/1024/1440 remains pending",
+        "Validation auto-open/focus remains in TL-UI-PEDIT-SHELL",
+        "Cards 2–6 will consume the same collapsible DrawerCard when built"
       ]
     },
     {
@@ -4303,11 +4330,11 @@
     },
     {
       "id": "TL-UI-PEDIT-SHELL",
-      "title": "Validation auto-open/focus + optional DrawerCard collapse",
+      "title": "Validation auto-open/focus for collapsed DrawerCard sections",
       "status": "backlog",
       "owner": "unassigned",
       "parent": "TL-UI-PEDIT-IA",
-      "log": "Controlled open state for DrawerCard sections (optional collapse; General can stay fully expanded), data-anchors, and first-invalid-field-on-save opens + scrolls to + focuses the owning card. Render unchanged otherwise.",
+      "log": "Collapse shipped ahead in TL-UI-PEDIT-CARD-COLLAPSE (1bf3c68): controlled DrawerCard open state, header disclosure, conditional body. Remaining: data-anchors and first-invalid-field-on-save opens + scrolls to + focuses the owning card. Render unchanged otherwise.",
       "design_match": "pending",
       "verified": false,
       "pushed": false,
