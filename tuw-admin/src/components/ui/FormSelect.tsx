@@ -26,6 +26,7 @@ export default function FormSelect({
   padX = 10,
   style = {},
   id,
+  required,
   'aria-describedby': ariaDescribedBy,
   children,
   ...props
@@ -50,11 +51,24 @@ export default function FormSelect({
           }}
         >
           {label}
+          {required ? (
+            <span
+              aria-hidden="true"
+              style={{
+                marginLeft: 4,
+                color: 'var(--tuw-text-secondary, #5D6772)',
+                fontWeight: 500,
+              }}
+            >
+              *
+            </span>
+          ) : null}
         </label>
       ) : null}
       <select
         id={selectId}
         aria-describedby={describedBy}
+        required={required}
         style={{
           width: '100%',
           height: 40,

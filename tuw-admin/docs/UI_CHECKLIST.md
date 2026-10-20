@@ -64,6 +64,14 @@
 - [x] `pnpm run test` passes 66/66 tests.
 - [x] `pnpm run build` completes with all 40 routes prerendered.
 - [x] Static audit: all six Basic Information fields load and save; Category is required from the existing five labels; Gender and Publication status moved without dropping fields; the Internal fields count no longer includes Gender.
-- [x] Static audit: `DrawerCard` renders 16px padding, 14px header/body rhythm and semantic `--tuw-*` tokens; `FormSelect` labels are linked and helper copy is wired through `aria-describedby`.
+- [x] Static audit: `FormSelect` labels are linked and helper copy is wired through `aria-describedby`; required `Input`/`FormSelect` labels show a quiet trailing asterisk while retaining native `required`.
 - [ ] Browser visual pass at 360 / 768 / 1024 / 1440: card rhythm, paired Input/FormSelect alignment, keyboard focus order, Category/Gender/Status persistence, Reset Demo. User verification pending.
+
+### DrawerCard v2 header + drawer canvas (2026-10-20)
+
+- [x] Static audit: `DrawerCard` header uses 16px padding, 18/26/600 title tokens, 14/22/400 secondary description, 4px title/subtitle gap, and a full-bleed 1px `--tuw-border-subtle` divider; body uses 16px padding and 14px field rhythm.
+- [x] Static audit: card outer border and header divider use the same `--tuw-border-subtle` token; card shadow is removed and the card clips the header with `overflow: hidden`.
+- [x] Static audit: product editor General opts into `Drawer bodyTone="canvas"` (`--tuw-bg-canvas` #F7F8F9) so white cards separate from the drawer; other drawers and non-cardified tabs keep the surface default.
+- [x] Static audit: no card-level “Required” chip; selected/warning header tones are opt-in and use existing semantic tokens only. No per-section colours.
+- [ ] Browser visual pass at 360 / 768 / 1024 / 1440: header divider, drawer canvas, title/subtitle spacing, required asterisks, no dead chevron, focus order. User verification pending.
 

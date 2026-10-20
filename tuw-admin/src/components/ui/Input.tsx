@@ -25,6 +25,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       prefixIcon,
       iconSuffix,
       fullWidth = true,
+      required,
       className = '',
       style = {},
       id,
@@ -73,6 +74,18 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             }}
           >
             {label}
+            {required ? (
+              <span
+                aria-hidden="true"
+                style={{
+                  marginLeft: 4,
+                  color: 'var(--tuw-text-secondary, #5D6772)',
+                  fontWeight: 500,
+                }}
+              >
+                *
+              </span>
+            ) : null}
           </label>
         )}
 
@@ -109,6 +122,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             ref={ref}
             type={type}
+            required={required}
             onFocus={handleFocus}
             onBlur={handleBlur}
             style={{

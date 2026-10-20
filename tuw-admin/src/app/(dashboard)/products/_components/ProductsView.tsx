@@ -2383,6 +2383,7 @@ export default function ProductsView() {
           )
         }
         expandable
+        bodyTone={productTab === 'general' ? 'canvas' : 'surface'}
         view={drawerView}
         onViewChange={setDrawerView}
         headerExtra={
@@ -2450,7 +2451,7 @@ export default function ProductsView() {
           <form onSubmit={handleEditSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <DrawerCard
               title="1. Basic Information"
-              description="Core identity and catalog placement."
+              description="Core identity, storefront path, and catalog classification"
             >
               <Input
                 label="Product Title"
