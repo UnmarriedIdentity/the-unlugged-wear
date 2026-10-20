@@ -4,6 +4,8 @@ import React, { forwardRef, useState } from 'react';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
+  /** Label size. Default 14 (legacy Input); drawer cards use 13 to match FormSelect. */
+  labelSize?: number;
   error?: string;
   helperText?: string;
   iconPrefix?: React.ReactNode;
@@ -16,6 +18,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
   (
     {
       label,
+      labelSize = 14,
       error,
       helperText,
       iconPrefix,
@@ -63,7 +66,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           <label
             htmlFor={inputId}
             style={{
-              fontSize: '14px',
+              fontSize: `${labelSize}px`,
               fontWeight: 500,
               color: 'var(--tuw-text-primary, #262626)',
               fontFamily: 'var(--font-main)',

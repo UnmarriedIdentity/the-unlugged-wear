@@ -2454,6 +2454,7 @@ export default function ProductsView() {
             >
               <Input
                 label="Product Title"
+                labelSize={13}
                 placeholder="e.g. Urbanist Heavyweight Tee"
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
@@ -2462,6 +2463,7 @@ export default function ProductsView() {
               />
               <Input
                 label="URL Slug"
+                labelSize={13}
                 placeholder="e.g. urbanist-heavyweight-tee"
                 value={formSlug}
                 onChange={(e) => setFormSlug(e.target.value)}
@@ -2472,6 +2474,7 @@ export default function ProductsView() {
               <div style={pairedFieldGrid}>
                 <Input
                   label="Style Code"
+                  labelSize={13}
                   placeholder="e.g. FC34"
                   value={formStyleCode}
                   onChange={(e) => setFormStyleCode(e.target.value)}

@@ -75,7 +75,7 @@ export default function FormSelect({
         <p
           id={helperId}
           style={{
-            margin: '6px 0 0',
+            margin: '8px 0 0',
             fontSize: 12,
             lineHeight: '18px',
             color: 'var(--tuw-text-secondary, #5D6772)',
