@@ -6,6 +6,69 @@ import DashboardShell from '@/components/layout/DashboardShell';
 import { ContentCard, SurfaceCard, Badge, Button, Input, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader, Switch, UpliftSurface, DropdownMenu } from '@/components/ui';
 import { Plus, Trash2, ArrowLeft, ChevronDown, X } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
+import type { LibraryAttribute } from '@/mocks/fixtures';
+import {
+  ATTRIBUTE_DISPLAY_OPTIONS,
+  attributeDisplayLabel,
+  type AttributeDisplayType,
+} from '@/lib/attributePresentation';
+
+const previewChipStyle: React.CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 6,
+  padding: '3px 9px',
+  borderRadius: 999,
+  border: '1px solid var(--tuw-border-subtle, #E5E7EB)',
+  backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)',
+  fontSize: 12,
+  fontWeight: 500,
+  color: 'var(--tuw-text-primary, #262626)',
+};
+
+function ValuePreview({ attr, value }: { attr: LibraryAttribute; value: string }) {
+  if (attr.displayType === 'swatch') {
+    return (
+      <span style={previewChipStyle}>
+        <span
+          aria-hidden="true"
+          style={{
+            width: 14,
+            height: 14,
+            borderRadius: '50%',
+            backgroundColor: '#D1D5DB',
+            border: '1px solid var(--tuw-border-control, #D1D5DB)',
+            flexShrink: 0,
+          }}
+        />
+        {value}
+      </span>
+    );
+  }
+  if (attr.displayType === 'radio') {
+    return (
+      <span style={previewChipStyle}>
+        <span
+          aria-hidden="true"
+          style={{
+            width: 14,
+            height: 14,
+            borderRadius: '50%',
+            border: '2px solid var(--tuw-border-control, #9CA3AF)',
+            boxSizing: 'border-box',
+            flexShrink: 0,
+          }}
+        />
+        {value}
+      </span>
+    );
+  }
+  return (
+    <Badge variant="neutral" size="sm">
+      {value}
+    </Badge>
+  );
+}
 
 // Attribute library (settings manager): global starter definitions that
 // product drafts copy values from. Copy semantics — drafts diverge after
@@ -16,21 +79,19 @@ export default function AttributesSettingsPage() {
     createLibraryAttribute,
     deleteLibraryAttribute,
     toggleLibraryAttribute,
+    setLibraryDisplayType,
     setLibraryVisibility,
     addLibraryValue,
     removeLibraryValue,
   } = useAdminState();
   const [searchTerm, setSearchTerm] = useState('');
   const [newAttrName, setNewAttrName] = useState('');
-  const [newAttrType, setNewAttrType] = useState<'pill' | 'swatch' | 'radio'>('pill');
+  const [newAttrType, setNewAttrType] = useState<AttributeDisplayType>('pill');
   const [valueDrafts, setValueDrafts] = useState<Record<string, string>>({});
 
   const filtered = libraryAttributes.filter((a) =>
     a.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const displayLabel = (t: string) =>
-    t === 'pill' ? 'Pill' : t === 'swatch' ? 'Color swatch' : 'Radio select';
 
   return (
     <DashboardShell pageTitle="Attribute Library" activeNav="settings">
@@ -63,7 +124,7 @@ export default function AttributesSettingsPage() {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
-                    if (createLibraryAttribute(newAttrName)) setNewAttrName('');
+                    if (createLibraryAttribute(newAttrName, newAttrType)) setNewAttrName('');
                   }
                 }}
               />
@@ -75,7 +136,7 @@ export default function AttributesSettingsPage() {
                   <span
                     role="button"
                     tabIndex={0}
-                    aria-label={`New attribute display, currently ${displayLabel(newAttrType)}`}
+                    aria-label={`New attribute display, currently ${attributeDisplayLabel(newAttrType)}`}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
                     }}
@@ -98,17 +159,13 @@ export default function AttributesSettingsPage() {
                       userSelect: 'none',
                     }}
                   >
-                    <span>{displayLabel(newAttrType)}</span>
+                    <span>{attributeDisplayLabel(newAttrType)}</span>
                     <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
                   </span>
                 }
-                items={[
-                  { value: 'pill', label: 'Pill' },
-                  { value: 'swatch', label: 'Color swatch' },
-                  { value: 'radio', label: 'Radio select' },
-                ]}
+                items={ATTRIBUTE_DISPLAY_OPTIONS.map((option) => ({ ...option }))}
                 selectedValue={newAttrType}
-                onSelect={(v) => setNewAttrType(v as typeof newAttrType)}
+                onSelect={(v) => setNewAttrType(v as AttributeDisplayType)}
               />
             </div>
             <Button
@@ -118,7 +175,7 @@ export default function AttributesSettingsPage() {
               type="button"
               disabled={newAttrName.trim() === ''}
               onClick={() => {
-                if (createLibraryAttribute(newAttrName)) setNewAttrName('');
+                if (createLibraryAttribute(newAttrName, newAttrType)) setNewAttrName('');
               }}
             >
               Add Attribute
@@ -127,8 +184,8 @@ export default function AttributesSettingsPage() {
 
           <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: 0 }}>
             Starter values products copy from. Disabled attributes hide from the product picker.
-            Visibility applies to every product using the attribute; deletes are blocked while any
-            product uses the name or value.
+            Visibility and PDP showcase apply to every product using the attribute; deletes are
+            blocked while any product uses the name or value.
           </p>
 
           {filtered.length === 0 ? (
@@ -142,7 +199,7 @@ export default function AttributesSettingsPage() {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
                       {attr.name}
-                      <Badge variant="info" size="sm">{displayLabel(attr.displayType)}</Badge>
+                      <Badge variant="info" size="sm">{attributeDisplayLabel(attr.displayType)}</Badge>
                       {!attr.enabled ? (
                         <Badge variant="neutral" size="sm">Disabled</Badge>
                       ) : null}
@@ -194,11 +251,61 @@ export default function AttributesSettingsPage() {
                       Applies to every product using {attr.name}; at least one surface stays on.
                     </span>
                   </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingTop: 10, borderTop: '1px solid var(--tuw-border-subtle, #E5E7EB)' }}>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                      PDP showcase
+                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                      <div style={{ width: 170, flex: '0 1 170px' }}>
+                        <DropdownMenu
+                          ariaLabel={`${attr.name} PDP showcase`}
+                          trigger={
+                            <span
+                              role="button"
+                              tabIndex={0}
+                              aria-label={`${attr.name} PDP showcase, currently ${attributeDisplayLabel(attr.displayType)}`}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+                              }}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                gap: 8,
+                                width: '100%',
+                                height: 36,
+                                padding: '0 12px',
+                                fontSize: 13,
+                                fontWeight: 500,
+                                fontFamily: 'var(--font-main)',
+                                borderRadius: 8,
+                                border: '1px solid var(--tuw-border-control, #D1D5DB)',
+                                backgroundColor: 'var(--tuw-bg-surface, #FFFFFF)',
+                                color: 'var(--tuw-text-primary, #262626)',
+                                cursor: 'pointer',
+                                userSelect: 'none',
+                              }}
+                            >
+                              <span>{attributeDisplayLabel(attr.displayType)}</span>
+                              <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
+                            </span>
+                          }
+                          items={ATTRIBUTE_DISPLAY_OPTIONS.map((option) => ({ ...option }))}
+                          selectedValue={attr.displayType}
+                          onSelect={(v) => setLibraryDisplayType(attr.id, v as AttributeDisplayType)}
+                        />
+                      </div>
+                      <span style={{ fontSize: 11, color: 'var(--tuw-text-secondary, #5D6772)', flex: '1 1 150px' }}>
+                        Applies to every product using {attr.name}.
+                        {attr.displayType === 'swatch' ? ' Swatch colors are still set per product.' : ''}
+                      </span>
+                    </div>
+                  </div>
                   {attr.values.length > 0 ? (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                       {attr.values.map((val) => (
                         <span key={val} style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}>
-                          <Badge variant="neutral" size="sm">{val}</Badge>
+                          <ValuePreview attr={attr} value={val} />
                           <button
                             type="button"
                             aria-label={`Remove ${val} from ${attr.name}`}
