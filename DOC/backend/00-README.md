@@ -1,6 +1,6 @@
 # The Unplugged Wear — Backend Project Overview
 
-> Status: Draft | Last Updated: 2026-10-17
+> Status: Draft | Last Updated: 2026-10-21
 > Single-URL monolith: one Next.js app, one PostgreSQL, R2 for bytes.
 
 ## 1. What this is
@@ -26,13 +26,13 @@ constraints, not application-code promises — and one migration history. Primar
 merge-safe). Depth: `12-UI-Merge-Single-Deploy.md`, `13-API-Contracts.md`,
 `14-Single-URL-Gating.md`.
 
-## 3. Data at a glance (77 tables, one Postgres)
+## 3. Data at a glance (75 planned tables: 41 implemented DDL + 34 specified)
 
 | Domain | Tables | Notes |
 |---|---|---|
 | Auth & RBAC | users, profiles, roles, permissions, role_permissions, user_roles, refresh_tokens, customer_notes, staff_invitations, audit_logs | Two-row identity (credential + person); normalized roles; the gate reads `users → user_roles → roles.slug` |
 | Household & family | households, household_members, profile_size_preferences, household_invitations, addresses | Family profiles (dependents need no email); proxy ordering + per-order size edits (file 17) |
-| Catalog | categories, brands*, products, product_source_rows, product_variants, product_images, product_attributes, product_attribute_values, stock_movements, product_discounts, reviews, collections, collection_products, size_charts, attribute_definitions, attribute_values, product_attribute_links, product_attribute_link_values, product_variant_attribute_values | *brands defined but unbuilt |
+| Catalog | categories, brands*, products, product_source_rows, product_variants, product_images, stock_movements, product_discounts, reviews, collections, collection_products, size_charts, attribute_definitions, attribute_values, product_attribute_links, product_attribute_link_values, product_variant_attribute_values | *brands defined but unbuilt; the attribute library is the single attribute system |
 | Cart & wishlist | carts, cart_items, wishlists, wishlist_items | Snapshot display fields; one-active-cart partial unique |
 | Orders & money | orders, order_items, order_status_history, payments, refunds, returns, return_items, discount_codes, shipments | Dual status axes; immutable snapshots; DECIMAL(12,2) |
 | Platform | import_jobs, email_logs, notification_templates | CSV pipeline reports; delivery states |
@@ -47,7 +47,7 @@ covers it. Full inventory: `02-Data-Tables.md`.
 
 ## 4. Conventions (one line each, detail in `01-Conventions.md`)
 
-UUIDv7 PKs · `timestamptz` created/updated pair · money `DECIMAL(12,2)` +
+UUIDv7 PKs · `timestamptz` created/updated pair on mutable entity tables · money `DECIMAL(12,2)` +
 `CHECK >= 0` · statuses as `varchar` + `CHECK IN (...)` · soft deletes on
 catalog entities only · explicit index on every FK · snake_case, plural names.
 
@@ -104,3 +104,4 @@ kilobytes — never the risk. Detail: `10-Analytics.md`, `11-Storage.md`.
 | 16-Partner-Qikink.md | POD partner seam + wallet | Draft |
 | 17-Household-Accounts.md | Family groups, profiles, proxy ordering | Filling |
 | 19-Styling-Recommendations.md | Complete the Look: slots, rules, refinement roadmap | Draft |
+| 20-Schema-Decisions.md | Retired systems, controlled duplication, vocabulary | Active |

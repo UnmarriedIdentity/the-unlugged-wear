@@ -1,9 +1,10 @@
 # Data Tables — Full Inventory (single PostgreSQL)
 
-> Status: Filling | Last Updated: 2026-10-17
-> 77 tables + 1 deferred footnote (`search_documents`). Column detail lives in files 03–10,
+> Status: Filling | Last Updated: 2026-10-21
+> 75 tables (41 implemented DDL + 34 specified) + 1 deferred footnote (`search_documents`). Column detail lives in files 03–10,
 > 15, 17, and 19; this file is the index, ending with the full relationship diagram.
 > Conventions (UUIDv7, money, indexes): `01-Conventions.md`.
+> Retired systems and controlled duplication: `20-Schema-Decisions.md`.
 
 ## Design rules (apply to every table below)
 
@@ -41,18 +42,16 @@ The single-URL gate reads `users → user_roles → roles.slug`
 | household_invitations | Join (email) + claim (profile) modes, one table, `staff_invitations` grammar | households, profiles, users (inviter) |
 | addresses | Family + personal book, household-level one-default partial uniques | households, profiles |
 
-## Catalog (19) → detail: `04-Catalog.md`
+## Catalog (17) → detail: `04-Catalog.md`
 
 | Table | Purpose | Key links |
 |---|---|---|
 | categories | Tree (`parent_id` self-FK), nav flags, slug, tsvector | self |
 | brands | **Defined but unbuilt in v1** — no seed, no UI (see footnote) | — |
-| products | Core row: sku/slug unique, style name/code, internal S.No + source group key, base_price anchor + materialized min price ("From"), compare, stock balance, status, tags, HSN, Clothing Specs, `attributes` jsonb, `photo_settings` jsonb, source/external import ids, soft-delete, tsvector | categories, brands (nullable), size_charts (nullable) |
+| products | Core row: sku/slug unique, style name/code, internal S.No + source group key, base_price anchor + materialized min price ("From"), compare, stock balance, status, tags, HSN, Clothing Specs, `photo_settings` jsonb, source/external import ids, soft-delete, tsvector | categories, brands (nullable), size_charts (nullable) |
 | product_source_rows | One row per legacy workbook listing row: S.No, spreadsheet row number, raw snapshot; preserves rows that group into one product | products (cascade) |
 | product_variants | SKU-unique rows, source row, variant key, materialized effective price + override flag, stock, variant shipping overrides, active flag | products (cascade), product_source_rows (set null) |
 | product_images | Gallery order, one-primary partial unique, optional variant scope | products, variants |
-| product_attributes | Compare/spec definitions (name/slug/type/unit) | — |
-| product_attribute_values | One value per (product, attribute), unique pair | products, attributes |
 | stock_movements | Ledger: signed delta, reason, balance snapshot | products, variants |
 | product_discounts | Scheduled percent/fixed, active-range index | products |
 | reviews | Optional; approval queue | products, users |
@@ -206,8 +205,6 @@ erDiagram
     product_attribute_links ||--o{ product_attribute_link_values : chooses
     product_variants ||--o{ product_variant_attribute_values : selected-as
     attribute_values ||--o{ product_variant_attribute_values : chosen-value
-    products ||--o{ product_attribute_values : specifies
-    product_attributes ||--o{ product_attribute_values : valued-by
     products ||--o{ product_views : viewed-in
     products ||--o{ stock_movements : tracks
     products ||--o{ product_discounts : prices

@@ -1,8 +1,10 @@
 # Catalog — Columns, Constraints, Indexes
 
-> Status: Filling | Last Updated: 2026-10-17
-> 19 tables. Conventions: `01-Conventions.md`. Money semantics follow the
+> Status: Filling | Last Updated: 2026-10-21
+> 17 tables. Conventions: `01-Conventions.md`. Money semantics follow the
 > open currency decision (`00-README.md` §7) — DECIMAL(12,2) shape is final.
+> The attribute library is the single attribute system; the retired compare
+> engine and `products.attributes` are recorded in `20-Schema-Decisions.md`.
 > Mermaid slice for this domain sits at the end.
 
 ## categories
@@ -67,7 +69,6 @@ No seed, no UI, no queries in v1 — launch is seed + UI only.
 | stock | integer | NOT NULL DEFAULT 0, CHECK (stock >= 0) | Balance; ledger in stock_movements |
 | status | varchar(20) | NOT NULL DEFAULT 'draft', CHECK IN ('draft','active','archived') | Publish lifecycle |
 | tags | varchar(50)[] | NULL | 1NF exception (documented): flat facet list, GIN-indexed; split to a junction if tag writes ever need history |
-| attributes | jsonb | NOT NULL DEFAULT '{}' | Freeform specs ONLY (placement notes, MarCom flags) — structured attribute data lives in link tables, never here |
 | photo_settings | jsonb | NOT NULL DEFAULT '{}' | Per-product gallery overrides (ratio, layout, blend) |
 | source | varchar(20) | NOT NULL DEFAULT 'local', CHECK IN ('local','csv','shopify','bigcommerce','odoo') | Import provenance; idempotent re-syncs |
 | external_id | varchar(255) | NULL | Source row id for re-import matching; the Excel ID is deliberately not used |
@@ -255,23 +256,6 @@ library by definition, so no register call is issued and no duplicate
 error can fire. Register-through happens only when a typed value's
 spelling is absent from the library row.
 
-## product_attributes + product_attribute_values (compare engine)
-
-| Table | Column | Type | Constraints | Reason |
-|---|---|---|---|---|
-| product_attributes | id | uuid | PK | Compare-table headers |
-| product_attributes | name | varchar(100) | NOT NULL | Material, Fit… |
-| product_attributes | slug | varchar(120) | NOT NULL, UNIQUE | Code reference |
-| product_attributes | type | varchar(20) | NOT NULL, CHECK IN ('text','number','boolean') | Compare column typing |
-| product_attributes | unit | varchar(20) | NULL | in, kg, gsm |
-| product_attribute_values | id | uuid | PK | |
-| product_attribute_values | product_id | uuid | NOT NULL, FK → products(id) ON DELETE CASCADE | |
-| product_attribute_values | attribute_id | uuid | NOT NULL, FK → product_attributes(id) ON DELETE CASCADE | |
-| product_attribute_values | value | varchar(255) | NOT NULL | One value per (product, attribute) |
-
-Indexes: PKs · unique slug · unique `(product_id, attribute_id)` ·
-`idx_pav_attribute_id` (compare assembly).
-
 ## size_charts
 
 | Column | Type | Constraints | Reason |
@@ -358,8 +342,6 @@ erDiagram
     products ||--o{ product_variants : offers
     product_source_rows ||--o{ product_variants : generates
     products ||--o{ product_images : shows
-    products ||--o{ product_attribute_values : specifies
-    product_attributes ||--o{ product_attribute_values : valued-by
     products ||--o{ product_attribute_links : assigns
     product_attribute_links ||--o{ product_attribute_link_values : chooses
     product_variants ||--o{ product_variant_attribute_values : selected-as

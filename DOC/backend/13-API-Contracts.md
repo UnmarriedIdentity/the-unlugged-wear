@@ -1,6 +1,6 @@
 # API Contracts — Monolith Routes
 
-> Status: Filling | Last Updated: 2026-10-17
+> Status: Filling | Last Updated: 2026-10-21
 > One API serving one first-party client — **no `/v1` segment** (versioning
 > retro-added only on a second client or breaking change). Handlers are
 > thin delegators to `server/<domain>` (file 01 §4); this file describes
@@ -57,15 +57,15 @@ Line-level size edits are cart-local and never call these routes
 | Method | Path | Auth | Purpose |
 |---|---|---|---|
 | GET | `/products` | – | cursor + `category/brand/minPrice/maxPrice/tag/q/sort` |
-| GET | `/products/:slug` | – | PDP: product + images + options/values + variants + active discount + attributes |
+| GET | `/products/:slug` | – | PDP: product + images + attribute links/values + variants + active discount |
 | POST / PATCH / DELETE | `/products` (+`/:id`) | A | create / partial / soft-delete |
 | POST / PATCH / DELETE | `/products/:id/variants`, `/variants/:id` | A | variant CRUD |
-| POST / PATCH | `/products/:id/options`, `/options/:id` | A | option + values write |
+| POST / PATCH / DELETE | `/products/:id/attribute-links`, `/attribute-links/:id` | A | attribute link + chosen values write (library is the single source) |
 | POST / PATCH / DELETE | `/products/:id/images`, `/images/:id` | A | gallery write (R2 URLs) |
 | POST | `/products/:id/stock` | A | `{delta, reason: 'admin_adjustment'}` → movement row |
 | GET | `/products/:id/stock-movements` | A | ledger timeline (TL-UI-STOCKHIST reads this) |
 | POST / PATCH / DELETE | `/products/:id/discounts`, `/discounts/:id` | A | scheduled discounts |
-| GET | `/attributes` | – | compare-attribute defs |
+| GET | `/attributes` | – | attribute library definitions (facets; PDP compare only if scoped later) |
 | GET / POST / PATCH | `/reviews…` | –/C/A | list / write / approve (ships with PDP stars) |
 | GET | `/categories`, `/brands` | – | trees and brand pages (brands UI later) |
 | GET | `/collections/:slug` | – | collection page (junction read) |

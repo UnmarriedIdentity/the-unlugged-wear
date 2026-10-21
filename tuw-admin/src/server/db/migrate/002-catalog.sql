@@ -1,4 +1,4 @@
--- 002-catalog.sql — Catalog (14 tables; options trio removed for library)
+-- 002-catalog.sql — Catalog (12 tables; options trio + compare pair removed for library)
 -- Source of truth: DOC/backend/04-Catalog.md (transcribed 1:1).
 -- Order: parents before children (categories/brands/charts/collections
 -- before products; products before everything referencing it).
@@ -72,7 +72,6 @@ CREATE TABLE products (
   status             varchar(20)   NOT NULL DEFAULT 'draft'
     CHECK (status IN ('draft','active','archived')),
   tags               varchar(50)[],
-  attributes         jsonb         NOT NULL DEFAULT '{}',
   photo_settings     jsonb         NOT NULL DEFAULT '{}',
   source             varchar(20)   NOT NULL DEFAULT 'local'
     CHECK (source IN ('local','csv','shopify','bigcommerce','odoo')),
@@ -185,28 +184,9 @@ CREATE UNIQUE INDEX one_primary_per_product ON product_images (product_id)
 
 -- product_options trio REMOVED (single-record library replaces per-product
 -- copies; see 010-attr-library.sql). Nothing was ever built on them.
-
--- ------------------------------------------------------ product_attributes
-CREATE TABLE product_attributes (
-  id         uuid         PRIMARY KEY,
-  name       varchar(100) NOT NULL,
-  slug       varchar(120) NOT NULL UNIQUE,
-  type       varchar(20)  NOT NULL CHECK (type IN ('text','number','boolean')),
-  unit       varchar(20),
-  created_at timestamptz  NOT NULL DEFAULT now(),
-  updated_at timestamptz  NOT NULL DEFAULT now()
-);
-
--- ------------------------------------------------ product_attribute_values
-CREATE TABLE product_attribute_values (
-  id           uuid         PRIMARY KEY,
-  product_id   uuid         NOT NULL REFERENCES products (id) ON DELETE CASCADE,
-  attribute_id uuid         NOT NULL REFERENCES product_attributes (id) ON DELETE CASCADE,
-  value        varchar(255) NOT NULL,
-  created_at   timestamptz  NOT NULL DEFAULT now(),
-  UNIQUE (product_id, attribute_id)
-);
-CREATE INDEX idx_pav_attribute_id ON product_attribute_values (attribute_id);
+-- compare engine REMOVED (2026-10-21): product_attributes +
+-- product_attribute_values had no UI/import/API consumer; the attribute
+-- library is the single definition system.
 
 -- -------------------------------------------------------------- collections
 CREATE TABLE collections (

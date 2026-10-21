@@ -1,6 +1,6 @@
 # Backend Conventions — Laws, Not Maps
 
-> Status: Filling | Last Updated: 2026-10-14
+> Status: Filling | Last Updated: 2026-10-21
 > Everything here is a **rule**. For *where code lives* see `00-README.md`;
 > for *migration order* see the domain files. If a rule needs an exception,
 > the exception is recorded here with its reason — never silently.
@@ -11,8 +11,9 @@
   only as fallback). Time-ordered (index-friendly inserts), unguessable,
   merge-safe for future Shopify/external syncs. Never sequential integers,
   never slugs, as PKs.
-- **Every table carries `created_at` + `updated_at`**, `timestamptz
-  NOT NULL DEFAULT now()`. UTC everywhere; no timezone-naive columns.
+- **Every mutable entity table carries `created_at` + `updated_at`**,
+  `timestamptz NOT NULL DEFAULT now()`. Immutable and junction rows carry
+  only the timestamps they need. UTC everywhere; no timezone-naive columns.
 - Junction tables use **composite PKs** (`role_permissions(role_id,
   permission_id)`) — the PK *is* the dedupe constraint.
 
