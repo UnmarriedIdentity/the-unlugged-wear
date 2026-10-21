@@ -1,4 +1,4 @@
--- 002-catalog.sql — Catalog (13 tables; options trio removed for library)
+-- 002-catalog.sql — Catalog (14 tables; options trio removed for library)
 -- Source of truth: DOC/backend/04-Catalog.md (transcribed 1:1).
 -- Order: parents before children (categories/brands/charts/collections
 -- before products; products before everything referencing it).
@@ -77,11 +77,27 @@ CREATE TABLE products (
   source             varchar(20)   NOT NULL DEFAULT 'local'
     CHECK (source IN ('local','csv','shopify','bigcommerce','odoo')),
   external_id        varchar(255),
+  -- Internal workbook reference (Excel S.No). Nullable; a display/reference
+  -- field, never the product identity. Re-import identity is source_group_key.
+  internal_serial_no integer       CHECK (internal_serial_no > 0),
+  -- Deterministic import group: style code when present, otherwise
+  -- name + gender (+ HSN when a conflicting group is split). Internal only.
+  source_group_key   varchar(255),
   weight_g           integer       CHECK (weight_g >= 0),
   shipping_weight_g  integer       CHECK (shipping_weight_g >= 0),
   dimensions         varchar(50),
-  gender             varchar(20)   CHECK (gender IN ('Female','Male','Unisex','Kids')),
+  -- Apparel specification fields (Clothing Specs tab). Product-level because
+  -- they describe the style, not an individual variant.
+  fabric_spec        varchar(255),
+  cut                varchar(255),
+  model_dims         varchar(255),
+  care_instructions  text,
+  gender             varchar(20)   CHECK (gender IN ('Female','Male','Unisex','Kids','Boy','Girl')),
   tax_rate           DECIMAL(5,2)  CHECK (tax_rate >= 0),
+  hsn_code           varchar(12)   CHECK (hsn_code IS NULL OR hsn_code ~ '^[0-9]{4,8}$'),
+  monogram_enabled   boolean       NOT NULL DEFAULT false,
+  monogram_max_chars smallint      NOT NULL DEFAULT 3 CHECK (monogram_max_chars >= 1),
+  monogram_upcharge  DECIMAL(12,2) NOT NULL DEFAULT 0 CHECK (monogram_upcharge >= 0),
   deleted_at         timestamptz,
   search_vector      tsvector      GENERATED ALWAYS AS
     (to_tsvector('english', name || ' ' || coalesce(short_description, '') || ' ' || coalesce(description, ''))) STORED,
@@ -97,23 +113,58 @@ CREATE UNIQUE INDEX products_source_external_key ON products (source, external_i
   WHERE external_id IS NOT NULL;
 CREATE INDEX idx_products_active_price ON products (status, price)
   WHERE status = 'active';
+CREATE INDEX idx_products_internal_serial_no ON products (internal_serial_no)
+  WHERE internal_serial_no IS NOT NULL;
+CREATE UNIQUE INDEX products_source_group_key ON products (source, source_group_key)
+  WHERE source_group_key IS NOT NULL;
+
+-- --------------------------------------------------- product_source_rows
+-- Preserves one row per workbook listing row. A product can be assembled from
+-- several rows (size cohorts); variants point at the row that produced them.
+-- Excel ID is deliberately not stored here; S.No + row number are the audit
+-- reference. raw_data excludes the Excel ID.
+CREATE TABLE product_source_rows (
+  id                uuid        PRIMARY KEY,
+  product_id        uuid        NOT NULL REFERENCES products (id) ON DELETE CASCADE,
+  source_serial_no  integer     NOT NULL CHECK (source_serial_no > 0),
+  source_row_no     integer     NOT NULL CHECK (source_row_no > 0),
+  raw_data          jsonb       NOT NULL DEFAULT '{}',
+  imported_at       timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (product_id, source_serial_no)
+);
+CREATE INDEX idx_product_source_rows_product_id
+  ON product_source_rows (product_id);
+CREATE INDEX idx_product_source_rows_serial
+  ON product_source_rows (source_serial_no);
 
 -- ------------------------------------------------------- product_variants
 CREATE TABLE product_variants (
   id               uuid          PRIMARY KEY,
   product_id       uuid          NOT NULL REFERENCES products (id) ON DELETE CASCADE,
+  source_row_id    uuid          REFERENCES product_source_rows (id) ON DELETE SET NULL,
   sku              varchar(64)   NOT NULL UNIQUE,
+  variant_key      varchar(255),
   price            DECIMAL(12,2) NOT NULL CHECK (price >= 0),
   price_overridden boolean       NOT NULL DEFAULT false,
   stock            integer       NOT NULL DEFAULT 0 CHECK (stock >= 0),
+  weight_g         integer       CHECK (weight_g >= 0),
+  shipping_weight_g integer      CHECK (shipping_weight_g >= 0),
+  dimensions       varchar(50),
   image_url        varchar(2048),
   is_active        boolean       NOT NULL DEFAULT true,
   created_at       timestamptz   NOT NULL DEFAULT now(),
-  updated_at       timestamptz   NOT NULL DEFAULT now()
+  updated_at       timestamptz   NOT NULL DEFAULT now(),
+  -- Composite key for the variant→attribute-value FK in 010.
+  UNIQUE (id, product_id),
+  -- Prevents two variants representing the same option combination.
+  -- Null is allowed until the writer computes a key.
+  UNIQUE (product_id, variant_key)
 );
 CREATE INDEX idx_product_variants_product_id ON product_variants (product_id);
 CREATE INDEX idx_product_variants_active ON product_variants (product_id)
   WHERE is_active;
+CREATE INDEX idx_product_variants_source_row_id
+  ON product_variants (source_row_id);
 
 -- --------------------------------------------------------- product_images
 CREATE TABLE product_images (

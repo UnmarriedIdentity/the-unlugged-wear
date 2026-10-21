@@ -26,13 +26,13 @@ constraints, not application-code promises — and one migration history. Primar
 merge-safe). Depth: `12-UI-Merge-Single-Deploy.md`, `13-API-Contracts.md`,
 `14-Single-URL-Gating.md`.
 
-## 3. Data at a glance (75 tables, one Postgres)
+## 3. Data at a glance (77 tables, one Postgres)
 
 | Domain | Tables | Notes |
 |---|---|---|
 | Auth & RBAC | users, profiles, roles, permissions, role_permissions, user_roles, refresh_tokens, customer_notes, staff_invitations, audit_logs | Two-row identity (credential + person); normalized roles; the gate reads `users → user_roles → roles.slug` |
 | Household & family | households, household_members, profile_size_preferences, household_invitations, addresses | Family profiles (dependents need no email); proxy ordering + per-order size edits (file 17) |
-| Catalog | categories, brands*, products, product_variants, product_images, product_attributes, product_attribute_values, stock_movements, product_discounts, reviews, collections, collection_products, size_charts, attribute_definitions, attribute_values, product_attribute_links, product_attribute_link_values | *brands defined but unbuilt |
+| Catalog | categories, brands*, products, product_source_rows, product_variants, product_images, product_attributes, product_attribute_values, stock_movements, product_discounts, reviews, collections, collection_products, size_charts, attribute_definitions, attribute_values, product_attribute_links, product_attribute_link_values, product_variant_attribute_values | *brands defined but unbuilt |
 | Cart & wishlist | carts, cart_items, wishlists, wishlist_items | Snapshot display fields; one-active-cart partial unique |
 | Orders & money | orders, order_items, order_status_history, payments, refunds, returns, return_items, discount_codes, shipments | Dual status axes; immutable snapshots; DECIMAL(12,2) |
 | Platform | import_jobs, email_logs, notification_templates | CSV pipeline reports; delivery states |
@@ -53,12 +53,15 @@ catalog entities only · explicit index on every FK · snake_case, plural names.
 
 ## 5. Import story
 
-The `Final Listing` workbook (Style, sizes, Colors, Weight, Base Price,
-Placements, Dimensions, Tax Rate) is re-saved as CSV and imported into
-**draft** products: scalars map to product columns, multi-valued columns
-become `attributes[]` entries with PDP/checkout/admin visibility, swatch
-colors persist per value. The `.xls` binary itself is never parsed
-(no dependency for it — honest limitation). Detail: `07-Import-Jobs.md`.
+The `Final Listing` workbook (ID, S.No, Gender, Style, sizes, Colors, Weight,
+Shipping Weight, Base Price, Placements, Dimensions, Tax Rate, HSN) is
+re-saved as CSV and imported into **draft** products. Rows group by style code
+(or style name + gender when no code exists) into one product with variants;
+the internal S.No is preserved per source row. Scalars map to product or
+variant overrides, multi-valued columns become linked attribute values, and
+Color/Size are marked as variant axes. HSN is product-level; conflicting HSN
+rows split the group. The `.xls` binary itself is never parsed (no dependency
+for it — honest limitation). Detail: `07-Import-Jobs.md`.
 
 ## 6. Free-tier operating box
 

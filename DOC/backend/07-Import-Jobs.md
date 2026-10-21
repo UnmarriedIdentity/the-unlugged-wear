@@ -24,22 +24,44 @@ Indexes: PK · `idx_import_jobs_status` (admin list filter) ·
 
 ## Canonical column contract (Final Listing)
 
-Style (`name | code`) · sizes · Colors (comma lists) · Weight ·
-Shipping Weight · Base Price · Placements (comma list) · Package
-Dimensions (`LxBxH`) · Tax Rate. Mapping: name→products.name,
-code→products.style_code, Base Price→base_price (derived cells follow
-the ladder), sizes/Colors→option values, Placements→attribute values,
-Dimensions/Weight→scalars, Tax→tax_rate.
-Unknown columns are ignored with notice (forward-compatible sheets).
+ID (ignored) · S.No · Gender · Style (`name | code`) · sizes · Colors
+(comma lists) · Weight · Shipping Weight · Base Price · Placements
+(comma list) · Package Dimensions (`LxBxH`) · Tax Rate · HSN.
+Mapping: name→products.name, code→products.style_code, S.No→
+products.internal_serial_no + product_source_rows.source_serial_no,
+Base Price→variant price override (product base_price = anchor),
+sizes/Colors→variant axes, Placements→attribute values,
+Dimensions/Weight/Shipping Weight→product defaults + variant overrides,
+Tax→tax_rate, HSN→products.hsn_code. Unknown columns are ignored with
+notice (forward-compatible sheets).
+
+## Grouping and variant generation
+
+A product is one style group, not one spreadsheet row:
+
+1. Group by style code when present.
+2. Otherwise group by style name + gender, so no-code rows such as
+   `Classic Crew T-Shirt` do not merge Boy/Girl/Female/Male listings.
+3. Split a group when non-empty HSN values conflict; flag the split.
+4. Preserve every source row in `product_source_rows`.
+5. Create variants from the group's axis values (Color × Size by default,
+   arbitrary axes supported) and link each variant to its source row.
+6. Set variant price/weight/shipping/dimensions from the row; fall back to
+   product defaults only where the row is blank.
+7. Generate product and variant SKUs/slugs deterministically; the workbook
+   has neither.
+
+Category is an explicit import column. The legacy workbook predates it, so
+the first import uses a one-time Style Type → Category mapping; unmapped rows
+stage as `Uncategorized`, never `T-Shirts`.
 
 ## Row pipeline (one bad row never aborts the batch)
 
 1. Upload → job row (`pending`), file to R2, IB1 stub hands off here.
-2. `processing`: per-row validate — Style + Base Price required, numerics
-   guarded, duplicate codes flagged against `products.sku`.
-3. Valid rows create **draft** products with `attributes[]` prebuilt
-   (colors/sizes + customs with visibility defaults) via the same seam
-   the drawer uses — import and UI can never disagree on shape.
+2. `processing`: parse header row (skip the workbook title row), validate
+   Style + Base Price, numerics, HSN digits, gender values, and axis values.
+3. Valid rows group into **draft** products; the same seam the drawer uses
+   builds attributes, axes and variants — import and UI cannot disagree.
 4. Per applied product, exactly **one** `audit_logs` row
    (`action='stock.import'`, diff = qty inserted + job id) — the import
    summary. Per-variant deltas go to `stock_movements` as usual.
@@ -48,10 +70,11 @@ Unknown columns are ignored with notice (forward-compatible sheets).
 
 ## Idempotency
 
-Re-import matches on `(source, external_id)` / `sku`: same file twice =
-updates + fresh report, never duplicates. `.xls` binaries get the
-Save-as-CSV guidance (recorded limitation — binary BIFF parsing would
-buy a dependency for one legacy format).
+Re-import matches on `products.source_group_key` (style code, else name +
+gender, plus HSN when split): same file twice = updates + fresh report, never
+duplicates. `product_source_rows` preserves the row-level S.No history.
+`.xls` binaries get the Save-as-CSV guidance (recorded limitation — binary
+BIFF parsing would buy a dependency for one legacy format).
 
 ## Import relationship slice
 
@@ -59,4 +82,6 @@ buy a dependency for one legacy format).
 erDiagram
     users ||--o{ import_jobs : runs
     import_jobs ||--o{ products : creates
+    products ||--o{ product_source_rows : preserves
+    product_source_rows ||--o{ product_variants : generates
 ```
