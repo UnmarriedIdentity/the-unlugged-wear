@@ -2180,17 +2180,20 @@
   appearance: textfield;
 }
 
-/* PEDIT General layout: Compact stays one column. Expanded matrix / full
-   canvas becomes a two-column card grid on wide canvases; card 5 spans both
-   columns. Storefront attribute rows inside card 5 use three columns at the
-   same breakpoint, while Internal only stays a separate group below. */
-.tuw-pedit-general-grid {
+/* PEDIT card layouts: Card stacks (General and Clothing Specs) keep one card
+   per row on Compact. Expanded matrix / full canvas becomes a two-column card
+   grid on wide canvases; General card 5 spans both columns. Storefront
+   attribute rows inside card 5 use three columns at the same breakpoint,
+   while Internal only stays a separate group below. */
+.tuw-pedit-general-grid,
+.tuw-pedit-specs-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   align-items: start;
   gap: 16px;
 }
-.tuw-pedit-general-grid > * {
+.tuw-pedit-general-grid > *,
+.tuw-pedit-specs-grid > * {
   min-width: 0;
 }
 .tuw-pedit-general-wide {
@@ -2206,7 +2209,8 @@
   min-width: 0;
 }
 @media (min-width: 900px) {
-  .tuw-pedit-general-grid.is-expanded {
+  .tuw-pedit-general-grid.is-expanded,
+  .tuw-pedit-specs-grid.is-expanded {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .tuw-pedit-general-grid.is-expanded .tuw-pedit-attribute-grid {

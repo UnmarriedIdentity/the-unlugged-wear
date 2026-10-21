@@ -74,8 +74,9 @@ const pairedFieldGrid: React.CSSProperties = {
   gap: 12,
 };
 
-// PEDIT card 5: flat attribute rows. Rows are bordered groups, not nested cards.
-const attributeRowStyle: React.CSSProperties = {
+// Flat bordered groups used inside PEDIT cards (attribute rows, size-chart
+// entries). Groups are not nested cards.
+const flatGroupStyle: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
   gap: 10,
@@ -219,6 +220,12 @@ export default function ProductsView() {
   const [fulfillmentCardOpen, setFulfillmentCardOpen] = useState(false);
   // Attributes & values (PEDIT card 5) is independently collapsible.
   const [attributesCardOpen, setAttributesCardOpen] = useState(false);
+  // Clothing Specs cards follow the same independent, per-product collapse
+  // contract as the General cards.
+  const [specsDisplayCardOpen, setSpecsDisplayCardOpen] = useState(false);
+  const [specsClothingCardOpen, setSpecsClothingCardOpen] = useState(false);
+  const [specsSizeChartCardOpen, setSpecsSizeChartCardOpen] = useState(false);
+  const [specsMonogramCardOpen, setSpecsMonogramCardOpen] = useState(false);
   const addDiscountRef = useRef<HTMLDivElement>(null);
 
   const openCreateDrawer = () => {
@@ -230,6 +237,10 @@ export default function ProductsView() {
     setDiscountsCardOpen(false);
     setFulfillmentCardOpen(false);
     setAttributesCardOpen(false);
+    setSpecsDisplayCardOpen(false);
+    setSpecsClothingCardOpen(false);
+    setSpecsSizeChartCardOpen(false);
+    setSpecsMonogramCardOpen(false);
     setProductTab('general');
     setDrawerView('compact');
     autoExpandedRef.current = false;
@@ -785,7 +796,7 @@ export default function ProductsView() {
     );
 
     return (
-      <div key={attr.name} role="group" aria-labelledby={rowTitleId} style={attributeRowStyle}>
+      <div key={attr.name} role="group" aria-labelledby={rowTitleId} style={flatGroupStyle}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
             <span
@@ -884,6 +895,10 @@ export default function ProductsView() {
     setDiscountsCardOpen(false);
     setFulfillmentCardOpen(false);
     setAttributesCardOpen(false);
+    setSpecsDisplayCardOpen(false);
+    setSpecsClothingCardOpen(false);
+    setSpecsSizeChartCardOpen(false);
+    setSpecsMonogramCardOpen(false);
     setProductTab('general');
     setFormCompareError(null);
     setDrawerView('compact');
@@ -2503,6 +2518,10 @@ export default function ProductsView() {
           setDiscountsCardOpen(false);
           setFulfillmentCardOpen(false);
           setAttributesCardOpen(false);
+          setSpecsDisplayCardOpen(false);
+          setSpecsClothingCardOpen(false);
+          setSpecsSizeChartCardOpen(false);
+          setSpecsMonogramCardOpen(false);
           setDrawerView('compact');
           autoExpandedRef.current = false;
           setFormImages((prev) => {
@@ -2532,7 +2551,7 @@ export default function ProductsView() {
           )
         }
         expandable
-        bodyTone={productTab === 'general' ? 'canvas' : 'surface'}
+        bodyTone={productTab === 'general' || productTab === 'specs' ? 'canvas' : 'surface'}
         view={drawerView}
         onViewChange={setDrawerView}
         headerExtra={
@@ -3415,19 +3434,32 @@ export default function ProductsView() {
             </Disclosure>
           </div>
           ) : productTab === 'specs' ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <DrawerSection title="Display Options" titleGap={10}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <Switch
-                  label="Monogram & embroidery"
-                  description="Show the custom embroidery block below"
-                  checked={visibleSections.monogram}
-                  onChange={(v) => setVisibleSections((s) => ({ ...s, monogram: v }))}
-                />
-              </div>
-            </DrawerSection>
-            <DrawerSection title="Clothing Specifications" titleGap={10}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div
+            className={`tuw-pedit-specs-grid${drawerView !== 'compact' ? ' is-expanded' : ''}`}
+          >
+            <DrawerCard
+              title="1. Display options"
+              description="Choose which specification blocks appear in this editor"
+              collapsible
+              isOpen={specsDisplayCardOpen}
+              onToggle={setSpecsDisplayCardOpen}
+              bodyGap={12}
+            >
+              <Switch
+                label="Monogram & embroidery"
+                description="Show the custom embroidery block below"
+                checked={visibleSections.monogram}
+                onChange={(v) => setVisibleSections((s) => ({ ...s, monogram: v }))}
+              />
+            </DrawerCard>
+            <DrawerCard
+              title="2. Clothing specifications"
+              description="Fabric, cut, fit, and care copy shown on the product page"
+              collapsible
+              isOpen={specsClothingCardOpen}
+              onToggle={setSpecsClothingCardOpen}
+              bodyGap={16}
+            >
                 <Input
                   label="Fabric Composition & GSM"
                   placeholder="460 GSM Heavyweight French Terry Cotton"
@@ -3453,6 +3485,15 @@ export default function ProductsView() {
                   value={formCare}
                   onChange={(e) => setFormCare(e.target.value)}
                 />
+            </DrawerCard>
+            <DrawerCard
+              title="3. Size chart"
+              description="Reusable measuring set and the linked fit guide"
+              collapsible
+              isOpen={specsSizeChartCardOpen}
+              onToggle={setSpecsSizeChartCardOpen}
+              bodyGap={16}
+            >
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
                   <span style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
                     Associated Size Chart Template
@@ -3517,7 +3558,7 @@ export default function ProductsView() {
                     {sizeCharts.map((chart) => {
                       const cols = chartColumns(chart);
                       return (
-                        <SurfaceCard key={chart.id} padding="12px" gap="10px">
+                        <div key={chart.id} style={flatGroupStyle}>
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
                             <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
                               {chart.name}
@@ -3621,7 +3662,7 @@ export default function ProductsView() {
                               Add
                             </Button>
                           </div>
-                        </SurfaceCard>
+                        </div>
                       );
                     })}
                     <div style={{ display: 'flex', gap: 8 }}>
@@ -3654,11 +3695,16 @@ export default function ProductsView() {
                     </div>
                   </div>
                 </Disclosure>
-              </div>
-            </DrawerSection>
+            </DrawerCard>
             {visibleSections.monogram ? (
-            <DrawerSection title="Monogram & Custom Embroidery" titleGap={10}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <DrawerCard
+              title="4. Monogram & custom embroidery"
+              description="On-demand chest initials and their upcharge"
+              collapsible
+              isOpen={specsMonogramCardOpen}
+              onToggle={setSpecsMonogramCardOpen}
+              bodyGap={16}
+            >
                 <Switch
                   label="Offer monogramming"
                   description="On-demand chest initials with upcharge"
@@ -3666,7 +3712,7 @@ export default function ProductsView() {
                   onChange={setFormMonogramEnabled}
                 />
                 {formMonogramEnabled ? (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div style={pairedFieldGrid}>
                   <Input
                     label="Max Characters"
                     type="number"
@@ -3682,8 +3728,7 @@ export default function ProductsView() {
                   />
                 </div>
                 ) : null}
-              </div>
-            </DrawerSection>
+            </DrawerCard>
             ) : null}
           </div>
           ) : null

@@ -51,9 +51,9 @@ Spacing scale: 4, 8, 12, 16, 24, 32, 48, 64px. Admin radii: 4px small elements, 
 
 ## Product editor drawer cards (PEDIT pattern)
 
-The product editor General tab uses a stacked card layout. Basic Information (including Description) is the first card, Pricing & stock is the second, Scheduled discounts is the third, Fulfillment & shipping is the fourth, and Attributes & values is the fifth. The card header and body are one shared `DrawerCard` pattern, not per-card markup.
+The product editor General tab uses a stacked card layout. Basic Information (including Description) is the first card, Pricing & stock is the second, Scheduled discounts is the third, Fulfillment & shipping is the fourth, and Attributes & values is the fifth. The Clothing Specs tab uses the same `DrawerCard` pattern; its four cards are documented in the Clothing Specs drawer cards section below. The card header and body are one shared `DrawerCard` pattern, not per-card markup.
 
-- Drawer field: the product editor General tab opts into `Drawer bodyTone="canvas"`. The body uses `--tuw-bg-canvas` (`#F7F8F9`), so white cards separate without a second neutral token or extra shadows. Other drawers and the not-yet-cardified product tabs keep the surface background until reviewed.
+- Drawer field: the product editor General and Clothing Specs tabs opt into `Drawer bodyTone="canvas"`. The body uses `--tuw-bg-canvas` (`#F7F8F9`), so white cards separate without a second neutral token or extra shadows. Other drawers and the not-yet-cardified product tabs (Media, Variants & Stock) keep the surface background until reviewed.
 - Container: `DrawerCard` built on `SurfaceCard`; white surface, 12px radius, 1px `--tuw-border-subtle` border, no shadow, `overflow: hidden`, zero outer padding. Do not nest cards inside cards.
 - Header: 16px padding, white by default. Title is the card-heading scale (18px/26px/600) using the `--tuw-type-heading-card-*` tokens; description is body-default (14px/22px/400) secondary text, 4px below. A full-bleed 1px `--tuw-border-subtle` divider separates header from body while expanded; a collapsed card has no internal divider.
 - Header emphasis: neutral is the default. A `selected` or `warning` tone may tint the header with the matching semantic background and show an 8px semantic dot; use it only for a real selected or attention state, never to colour-code sections.
@@ -70,6 +70,17 @@ The product editor General tab uses a stacked card layout. Basic Information (in
 - Collapse: product-editor cards are collapsible through `DrawerCard` and start collapsed. The heading/description area is one `h4 > button` with a trailing 18px chevron; optional badge/action stay outside the toggle. `aria-expanded`/`aria-controls` and a labelled `region` wire the body; Enter/Space toggle and closing returns focus to the header. The body mounts only while open, so collapsed fields are not tab stops, cannot trap native validation, and cannot leave a listbox open. Open state is controlled by the editor, survives tab switches, and resets when a product/create drawer opens.
 - Header actions: optional badge/action align right on wide cards and wrap below on narrow ones; actions remain outside the collapse button. The chevron is rendered only for collapsible cards.
 - Card rhythm: 16px between cards, 14px between fields, 16px inside header and body. No extra shadow. Expanded bodies mount with the shared 180ms `popoverIn` opacity fade; reduced motion follows the global rule.
+
+## Clothing Specs drawer cards
+
+Clothing Specs reuses the same `DrawerCard` stack and responsive contract as General:
+
+- Cards: 1 Display options, 2 Clothing specifications, 3 Size chart, and 4 Monogram & custom embroidery. Card 4 mounts only while the Display options switch is on. Each card is independently collapsible, starts collapsed, resets when a create/edit drawer opens or closes, and keeps its open state across tab switches.
+- Display options: the “Monogram & embroidery” switch continues to control whether the monogram card is shown; it stays a quiet single-control card so turning the monogram card off never hides the switch that brings it back.
+- Clothing specifications: Fabric Composition & GSM, Cut & Silhouette, Model Dimensions, and Care & Wash Instructions. Size-chart assignment moved out to card 3. Fields use the card body rhythm and `repeat(auto-fit, minmax(180px, 1fr))` where paired.
+- Size chart: the Associated Size Chart Template link, the Size Chart `DropdownMenu`, and the size-charts `Disclosure` live here. Size-chart entries are flat bordered groups inside the card, not nested cards; the measurement table scrolls horizontally inside its card when the column is narrow. Chart create, rename-free row add/remove, cell editing, and the “chart in use” guard are unchanged.
+- Monogram & custom embroidery: the Offer monogramming switch, then Max Characters and Upcharge paired with the auto-fit grid while enabled.
+- Expanded layout: Compact keeps one card per row. Expanded matrix and Full canvas switch to two columns at 900px and above, pairing 1+2 and 3+4 (Display options + Clothing specifications, then Size chart + Monogram & custom embroidery). `align-items: start` and `minmax(0, 1fr)` keep collapsed cards top-aligned and overflow-free; below 900px everything returns to one column. DOM order remains 1–4.
 
 ## Tooltip and label hints
 
