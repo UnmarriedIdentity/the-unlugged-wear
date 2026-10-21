@@ -8,15 +8,17 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 276,
-    "done": 252,
+    "total": 278,
+    "done": 254,
     "in_progress": 0,
     "backlog": 24
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "c86e718",
+    "tip": "28eccec",
     "unpushed": [
+      "28eccec",
+      "1ed268d",
       "c86e718",
       "67bdf97",
       "f9de18b",
@@ -40,7 +42,7 @@
       "f5c9cea",
       "e3e12f9"
     ],
-    "next_up": "Clothing Specs card stack SHIPPED (c86e718): the tab is now a `.tuw-pedit-specs-grid` with four collapsible DrawerCards (Display options / Clothing specifications / Size chart / Monogram & custom embroidery), size-chart assignment split into its own card, chart entries flattened out of nested SurfaceCards, and the canvas body tone enabled for specs. Compact stays one card per row; Expanded/Full pairs 1+2 and 3+4 at 900px+. NEXT: apply the same DrawerCard stack to Media and Variants & Stock (TL-UI-PEDIT-TABS-CARDS), then dynamic variant-axis UI. Browser verification for General cards 1-5, the import, and Clothing Specs remains pending.",
+    "next_up": "Schema redundancy cleanup SHIPPED (1ed268d + 28eccec): the compare pair and `products.attributes` are gone, the counts are now 41 implemented DDL + 34 specified = 75 planned, and `tests/schema-integrity.test.mjs` guards inventory, FK order, retired names and docs counts. NEXT: PEDIT slice choice — variant shipping overrides in Variants & Stock vs identity/import-lineage in Basic Information; then dynamic variant-axis UI. Browser passes for General cards, the import, and Clothing Specs remain pending.",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
       "dashboard D-series: KPI tiers, range/sort menus, badge mapping, calendar pills, header tint (360/768/1024/1440)",
@@ -70,7 +72,7 @@
       "PEDIT expanded card layout (2645eb0): Compact stays one card per row; Expanded matrix / Full canvas shows two cards per row at 1024/1440; card 5 spans both columns; Storefront attributes show three per row when expanded/wide; Internal only stays a separate group; open-card neighbours stay top-aligned; no horizontal overflow; tab order stays 1-5; 360/768/1024/1440 - browser pass pending",
       "Workbook import (67bdf97): header-row detection, 155-group preview, one-commit staging, HSN validation, internal S.No display, Uncategorized category filter, edit/reload preservation, 305-variant product table, Reset Demo; 360/768/1024/1440 - browser pass pending",
       "PEDIT Clothing Specs cards (c86e718): Compact one card per row; Expanded/Full pairs Display options+Clothing specs and Size chart+Monogram at 1024/1440; Display options switch hides/shows the monogram card; independent collapse survives tab switches; size-chart table scrolls inside a half-width card; monogram pair collapses to one column at 360; chart add/remove + in-use guard feedback; Reset Demo; 360/768/1024/1440 - browser pass pending",
-      "SQL dry-run (f9de18b): psql is not installed; validate 002 + 010 against a real Postgres instance before the first migration run"
+      "SQL dry-run (f9de18b): psql is not installed; validate 002 + 010 against a real Postgres instance before the first migration run. The static schema guard (28eccec) checks inventory/FK order/retired names but does not replace a real parser."
     ],
     "last_updated": "2026-10-21",
     "updated_by": "agent"
@@ -4710,6 +4712,49 @@
       "follow_ups": [
         "Dynamic variant-axis UI from product_attribute_links metadata",
         "Browser visual pass for workbook import at 360/768/1024/1440"
+      ]
+    },
+    {
+      "id": "TL-DB-SCHEMA-REDUNDANCY",
+      "title": "Retire compare engine + dead products.attributes column",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-21",
+      "finished": "2026-10-21",
+      "log": "1ed268d — Confirmed the compare engine had zero UI/import/API consumers and retired product_attributes + product_attribute_values; dropped products.attributes; the attribute library is now the only attribute system. 002-catalog.sql edited in place (no ALTER because no database exists). Synced 00-README, 01-Conventions, 02-Data-Tables, 04-Catalog, 13-API-Contracts and 16-Partner-Qikink; added 20-Schema-Decisions.md and migrate/README.md. Counts: 41 implemented DDL + 34 specified = 75 planned; catalog 19 -> 17. Typecheck both apps, 84 admin + 7 website tests, 40 admin routes build green; website untouched.",
+      "design_match": "n/a",
+      "key_decisions": [
+        "The compare pair had no UI/import/API consumer; the attribute library is the single attribute system",
+        "products.attributes JSONB dropped; structured values live in product_attribute_links/link_values",
+        "No ALTER: 002-catalog.sql is edited in place while no database exists",
+        "PDP compare, if scoped later, builds on attribute_definitions — never a second definition table"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "Run the migrations against a real Postgres instance once provisioned (psql is unavailable)",
+        "If PDP compare is scoped later, add typed spec fields then; do not reintroduce the retired pair"
+      ]
+    },
+    {
+      "id": "TL-DB-SCHEMA-GUARD",
+      "title": "Static schema integrity guard + migration status docs",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-DB-SCHEMA-REDUNDANCY",
+      "started": "2026-10-21",
+      "finished": "2026-10-21",
+      "log": "28eccec — Added tests/schema-integrity.test.mjs (pure Node, no dependency): exact 41-table inventory per file, duplicate-name guard, parent-before-child REFERENCES check with the explicit 009 -> orders allowlist, retired-table/products.attributes guard, docs count check (41 + 34 = 75), and migration README check. 84 admin + 7 website tests green; full typecheck and the 40-route admin build green. Runtime SQL validation still pending because psql is unavailable.",
+      "design_match": "n/a",
+      "key_decisions": [
+        "Static guard, not a SQL parser: inventory/FK order/retired names/docs counts only",
+        "009 -> orders stays an explicit external allowlist until 004-orders.sql exists",
+        "No new dependency; the test runs under the existing node --test glob"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "Runtime SQL validation still requires a real PostgreSQL instance"
       ]
     }
   ],
