@@ -6,6 +6,24 @@ export function buildVariantSku(productId: string, colorIdx: number, size: strin
   return `${productId}-${colorIdx}-${size}`;
 }
 
+const skuToken = (value: string, fallback: string): string =>
+  value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || fallback;
+
+/** Deterministic SKU for explicit variants, where the color index is not
+ * meaningful (imported workbook rows). */
+export function buildVariantSkuFromOption(productId: string, color: string, size: string): string {
+  return `${productId}-${skuToken(color, 'default')}-${skuToken(size, 'standard')}`;
+}
+
+/** Sorted axis signature used by the DB's UNIQUE (product_id, variant_key). */
+export function buildVariantKey(color: string, size: string): string {
+  return `${skuToken(color, 'default')}::${skuToken(size, 'standard')}`;
+}
+
 /** Even stock distribution (floor + remainder to the first rows).
  * Conserves the total exactly: sum == stock always. */
 export function distributeStock(stock: number, count: number): number[] {
@@ -41,6 +59,7 @@ export function synthesizeVariants(p: {
     color: c.color,
     size: c.size,
     sku: buildVariantSku(p.id, c.colorIdx, c.size),
+    variantKey: buildVariantKey(c.color, c.size),
     price: deriveVariantPrice(base, p.priceAdjustments, c.color, c.size),
     stock: stocks[i],
   }));

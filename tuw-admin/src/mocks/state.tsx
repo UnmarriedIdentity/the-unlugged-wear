@@ -42,6 +42,8 @@ import {
   deriveColors,
   deriveSizes,
   variantStockTotal,
+  buildVariantSkuFromOption,
+  buildVariantKey,
 } from './variants';
 import { normalizeCollection, nextCollectionId, type LegacyCollection } from '@/lib/collections';
 import { normalizeAttributeDisplayType } from '@/lib/attributePresentation';
@@ -88,6 +90,12 @@ interface AdminStateContextType {
 
   // Mutations
   createProduct: (product: Omit<ProductItem, 'id' | 'soldCount' | 'rating'>, silent?: boolean) => boolean;
+  /** Batch create in one state commit — import staging needs this so a 150-row
+   * workbook does not overwrite itself through stale closures. */
+  createProducts: (
+    products: Array<Omit<ProductItem, 'id' | 'soldCount' | 'rating'>>,
+    silent?: boolean
+  ) => number;
   updateProduct: (id: string, updates: Partial<ProductItem>, silent?: boolean) => boolean;
   deleteProduct: (id: string, silent?: boolean) => boolean;
 
@@ -361,16 +369,66 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
   // MUTATION IMPLEMENTATIONS
   // -------------------------------------------------------------
 
-  const createProduct = (p: Omit<ProductItem, 'id' | 'soldCount' | 'rating' | 'variants'>, silent = false) => {
-    if (!canPerformAction('products')) return false;
-    const id = `PRD-${Math.floor(10 + Math.random() * 90)}`;
-    const newProduct: ProductItem = {
+  // Stable, collision-free ID. The old random 10–99 range duplicated quickly
+  // once a workbook staged more than a handful of products.
+  const nextProductId = (list: ProductItem[]): string => {
+    let nextNumber =
+      list.reduce((max, product) => {
+        const match = /^PRD-(\d+)$/.exec(product.id);
+        return match ? Math.max(max, Number(match[1])) : max;
+      }, 0) + 1;
+    let id = `PRD-${String(nextNumber).padStart(2, '0')}`;
+    while (list.some((product) => product.id === id)) {
+      nextNumber += 1;
+      id = `PRD-${String(nextNumber).padStart(2, '0')}`;
+    }
+    return id;
+  };
+
+  // Explicit variants (import) win; manual creates synthesize from the flat
+  // color×size fields. IDs and SKUs are always regenerated in the seam so
+  // callers cannot persist placeholder or duplicate identities.
+  const buildProduct = (
+    p: Omit<ProductItem, 'id' | 'soldCount' | 'rating'>,
+    id: string
+  ): ProductItem => {
+    const sourceVariants =
+      p.variants && p.variants.length > 0
+        ? p.variants
+        : synthesizeVariants({ id, price: p.price, stock: p.stock, colors: p.colors, sizes: p.sizes });
+    const usedSkus = new Set<string>();
+    const variants = sourceVariants.map((variant, index) => {
+      const baseSku = variant.sku || buildVariantSkuFromOption(id, variant.color, variant.size);
+      let sku = baseSku;
+      let suffix = 2;
+      while (usedSkus.has(sku)) {
+        sku = `${baseSku}-${suffix}`;
+        suffix += 1;
+      }
+      usedSkus.add(sku);
+      return {
+        ...variant,
+        id: `${id}-V${index + 1}`,
+        sku,
+        variantKey: variant.variantKey ?? buildVariantKey(variant.color, variant.size),
+      };
+    });
+
+    return {
       ...p,
       id,
-      variants: synthesizeVariants({ id, price: p.price, stock: p.stock, colors: p.colors, sizes: p.sizes }),
+      variants,
+      colors: deriveColors(variants),
+      sizes: deriveSizes(variants),
+      stock: p.variants && p.variants.length > 0 ? variantStockTotal(variants) : p.stock,
       soldCount: 0,
       rating: 5.0,
     };
+  };
+
+  const createProduct = (p: Omit<ProductItem, 'id' | 'soldCount' | 'rating'>, silent = false) => {
+    if (!canPerformAction('products')) return false;
+    const newProduct = buildProduct(p, nextProductId(products));
     const next = [newProduct, ...products];
     setProducts(next);
     persistState({ products: next });
@@ -382,6 +440,31 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
       });
     }
     return true;
+  };
+
+  const createProducts = (
+    drafts: Array<Omit<ProductItem, 'id' | 'soldCount' | 'rating'>>,
+    silent = false
+  ) => {
+    if (!canPerformAction('products') || drafts.length === 0) return 0;
+
+    // One commit for the whole workbook. Calling createProduct in a loop reads
+    // the same pre-import `products` closure every time, so only the last row
+    // would survive.
+    let list = products;
+    for (const draft of drafts) {
+      list = [buildProduct(draft, nextProductId(list)), ...list];
+    }
+    setProducts(list);
+    persistState({ products: list });
+    if (!silent) {
+      showToast({
+        type: 'success',
+        title: 'Products Created',
+        description: `${drafts.length} draft${drafts.length === 1 ? '' : 's'} added to the local catalog.`,
+      });
+    }
+    return drafts.length;
   };
 
   const updateProduct = (id: string, updates: Partial<ProductItem>, silent = false) => {
@@ -1302,6 +1385,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         showToast,
         dismissToast,
         createProduct,
+        createProducts,
         updateProduct,
         deleteProduct,
         createOrder,

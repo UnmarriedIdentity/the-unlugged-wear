@@ -51,9 +51,10 @@ A product is one style group, not one spreadsheet row:
 7. Generate product and variant SKUs/slugs deterministically; the workbook
    has neither.
 
-Category is an explicit import column. The legacy workbook predates it, so
-the first import uses a one-time Style Type → Category mapping; unmapped rows
-stage as `Uncategorized`, never `T-Shirts`.
+Category is an explicit import column. The supplied workbook predates it, so
+rows without a Category value stage as `Uncategorized`, never `T-Shirts`.
+A later mapping can assign groups before publish; the importer does not guess
+a category from the style name.
 
 ## Row pipeline (one bad row never aborts the batch)
 
