@@ -19,6 +19,7 @@ import {
   AbandonedCart,
   SizeChart,
   LibraryAttribute,
+  ProductAttribute,
   initialProducts,
   initialOrders,
   initialShipments,
@@ -47,6 +48,23 @@ import {
 } from './variants';
 import { normalizeCollection, nextCollectionId, type LegacyCollection } from '@/lib/collections';
 import { normalizeAttributeDisplayType } from '@/lib/attributePresentation';
+
+/** Legacy single-value print placement → the workbook's multi-select
+ * Placements attribute. Unknown values are preserved as product-local values
+ * rather than dropped. */
+const LEGACY_PLACEMENT_VALUES: Record<string, string[]> = {
+  'Chest (45mm)': ['Front'],
+  'Back Oversized': ['Back'],
+  'Sleeve Length': ['Left Sleeve', 'Right Sleeve'],
+  'Interior Hem': ['Interior Hem'],
+};
+
+function legacyPlacementValues(placement: unknown): string[] {
+  if (typeof placement !== 'string') return [];
+  const value = placement.trim();
+  if (!value) return [];
+  return LEGACY_PLACEMENT_VALUES[value] ?? [value];
+}
 
 export interface ToastMessage {
   id: string;
@@ -190,16 +208,52 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         const parsed = JSON.parse(saved);
         if (parsed.activeRole) setActiveRoleState(parsed.activeRole);
         if (parsed.products) {
-          // One-time gallery migration: legacy hero `image` becomes the first
-          // ordered gallery entry (cover). Drop the old gradient field.
+          // One-time gallery + placement migration: legacy hero `image`
+          // becomes the first ordered gallery entry (cover); the old
+          // single-value `placement` folds into the Placements attribute.
           setProducts(
-            (parsed.products as Array<ProductItem & { image?: string }>).map((p) => {
-              const legacy = p as ProductItem & { image?: string; imageBg?: string };
+            (parsed.products as Array<ProductItem & { image?: string; placement?: string }>).map((p) => {
+              const legacy = p as ProductItem & {
+                image?: string;
+                imageBg?: string;
+                placement?: string;
+              };
               const rest = { ...legacy };
               delete rest.image;
               delete rest.imageBg;
+              delete rest.placement;
+              const savedAttributes = rest.attributes;
+              delete rest.attributes;
+
+              const attributes: ProductAttribute[] = (savedAttributes ?? []).map((a) => ({
+                ...a,
+                values: [...a.values],
+                swatchHex: { ...(a.swatchHex ?? {}) },
+              }));
+              const placementValues = legacyPlacementValues(legacy.placement);
+              if (placementValues.length > 0) {
+                const existing = attributes.find(
+                  (a) => a.name.toLowerCase() === 'placements'
+                );
+                if (existing) {
+                  if (existing.values.length === 0) existing.values = placementValues;
+                } else {
+                  attributes.push({
+                    name: 'Placements',
+                    values: placementValues,
+                    builtin: true,
+                    displayType: 'radio',
+                    swatchHex: {},
+                    libraryId: 'LIB-03',
+                  });
+                }
+              }
+
               return {
                 ...rest,
+                ...(savedAttributes !== undefined || placementValues.length > 0
+                  ? { attributes }
+                  : {}),
                 images:
                   Array.isArray(p.images) && p.images.length > 0
                     ? [...p.images]

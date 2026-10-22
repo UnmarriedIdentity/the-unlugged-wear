@@ -199,6 +199,21 @@ describe('Workbook import grouping', () => {
     assert.equal(groups[0].sourceRows.length, 2);
   });
 
+  test('keeps Placements product-level, never variant axes', () => {
+    const { groups, errors } = groupImportRows([
+      row({ rowNo: 2, serialNo: 1, styleCode: 'PL1', colors: ['Black'], sizes: ['M'], placements: ['Front', 'Back'] }),
+      row({ rowNo: 3, serialNo: 2, styleCode: 'PL1', colors: ['White'], sizes: ['L'], placements: ['Left Pocket'] }),
+    ]);
+
+    assert.equal(errors.length, 0);
+    assert.equal(groups.length, 1);
+    assert.deepEqual(groups[0].placements, ['Front', 'Back', 'Left Pocket']);
+    assert.deepEqual(
+      groups[0].variants.map((variant) => `${variant.color}/${variant.size}`),
+      ['Black/M', 'White/L']
+    );
+  });
+
   test('no-code rows group by name + gender, so Boy and Girl stay separate', () => {
     const { groups } = groupImportRows([
       row({ rowNo: 2, serialNo: 1, gender: 'Boy' }),

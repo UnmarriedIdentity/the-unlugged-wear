@@ -61,13 +61,6 @@ const PARTNER_OPTIONS: Array<{ value: ProductItem['partner']; label: string }> =
   { value: 'Custom Atelier', label: 'Custom Atelier' },
 ];
 
-const PLACEMENT_OPTIONS: Array<{ value: ProductItem['placement']; label: string }> = [
-  { value: 'Chest (45mm)', label: 'Chest (45mm)' },
-  { value: 'Back Oversized', label: 'Back Oversized' },
-  { value: 'Sleeve Length', label: 'Sleeve Length' },
-  { value: 'Interior Hem', label: 'Interior Hem' },
-];
-
 const pairedFieldGrid: React.CSSProperties = {
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
@@ -189,7 +182,8 @@ export default function ProductsView() {
   // Per-product attributes (A1): the single source behind colors/sizes.
   // REST: GET/PUT /products/:id/attributes → [{ name, values[], builtin }].
   // Color + Size + Placements ship builtin (locked); customs append here.
-  // The matrix still cross-products Color×Size until A2 generalizes it.
+  // Placements is the only print-location source; card 4 has no duplicate
+  // select. The matrix still cross-products Color×Size until A2 generalizes it.
   const [formAttributes, setFormAttributes] = useState<ProductAttribute[]>([]);
   const attrValues = (name: string) => formAttributes.find((a) => a.name === name)?.values ?? [];
   const colorValues = attrValues('Color');
@@ -203,7 +197,6 @@ export default function ProductsView() {
   const [formSizeChartId, setFormSizeChartId] = useState('');
   const chartColumns = (chart: SizeChart) => [...new Set(chart.rows.flatMap((r) => Object.keys(r.measures)))];
   const [formPartner, setFormPartner] = useState<ProductItem['partner']>('Qikink Direct API');
-  const [formPlacement, setFormPlacement] = useState<ProductItem['placement']>('Chest (45mm)');
   const [formStatus, setFormStatus] = useState<ProductItem['publicationStatus']>('published');
   const [formDescription, setFormDescription] = useState('Pre-shrunk premium heavyweight combed cotton with reinforced seams.');
 
@@ -265,10 +258,9 @@ export default function ProductsView() {
     setFormAttributes([
       { name: 'Color', values: ['Black', 'Chalk White', 'Olive'], builtin: true, displayType: 'swatch', swatchHex: {}, libraryId: 'LIB-01' },
       { name: 'Size', values: ['S', 'M', 'L', 'XL'], builtin: true, displayType: 'pill', swatchHex: {}, libraryId: 'LIB-02' },
-      { name: 'Placements', values: [], builtin: true, displayType: 'radio', swatchHex: {}, libraryId: 'LIB-03' },
+      { name: 'Placements', values: ['Front'], builtin: true, displayType: 'radio', swatchHex: {}, libraryId: 'LIB-03' },
     ]);
     setFormPartner('Qikink Direct API');
-    setFormPlacement('Chest (45mm)');
     setFormStatus('published');
     setFormDescription('Pre-shrunk premium heavyweight combed cotton with reinforced seams.');
     setFormPhoto({ layout: 'carousel', ratio: '4:3', showPhotos: true });
@@ -920,30 +912,41 @@ export default function ProductsView() {
     // Attribute draft (N1a link match) — built once: the ladder load below
     // prunes adjustment keys against these values, and the drawer renders
     // the same copy.
-    const loadedAttributes =
-      product.attributes && product.attributes.length > 0
-        ? product.attributes.map((a) => {
-            // N1a link: match persisted attrs to the library by name once,
-            // so every card carries its single-record id from here on.
-            const lib = libraryAttributes.find(
-              (l) => l.name.toLowerCase() === a.name.toLowerCase()
-            );
-            return {
-              ...(() => {
-                const copy = { ...a } as ProductAttribute & { visibleOn?: unknown };
-                delete copy.visibleOn;
-                return copy;
-              })(),
-              libraryId: a.libraryId ?? lib?.id,
-              values: [...a.values],
-              swatchHex: { ...(a.swatchHex ?? {}) },
-            };
-          })
-        : [
-            { name: 'Color', values: [...product.colors], builtin: true, displayType: 'swatch' as const, swatchHex: {}, libraryId: 'LIB-01' },
-            { name: 'Size', values: [...product.sizes], builtin: true, displayType: 'pill' as const, swatchHex: {}, libraryId: 'LIB-02' },
-            { name: 'Placements', values: [], builtin: true, displayType: 'radio' as const, swatchHex: {}, libraryId: 'LIB-03' },
-          ];
+    // Persisted rows may carry only overrides (for example a Placements
+    // attribute added to a fixture); Color, Size and Placements are always
+    // rebuilt from the product so the drawer never loses a builtin row.
+    const savedAttributes: ProductAttribute[] = (product.attributes ?? []).map((a) => {
+      // N1a link: match persisted attrs to the library by name once, so
+      // every card carries its single-record id from here on.
+      const lib = libraryAttributes.find((l) => l.name.toLowerCase() === a.name.toLowerCase());
+      const copy = { ...a } as ProductAttribute & { visibleOn?: unknown };
+      delete copy.visibleOn;
+      return {
+        ...copy,
+        libraryId: a.libraryId ?? lib?.id,
+        values: [...a.values],
+        swatchHex: { ...(a.swatchHex ?? {}) },
+      };
+    });
+    const builtinAttributes: ProductAttribute[] = [
+      { name: 'Color', values: [...product.colors], builtin: true, displayType: 'swatch', swatchHex: {}, libraryId: 'LIB-01' },
+      { name: 'Size', values: [...product.sizes], builtin: true, displayType: 'pill', swatchHex: {}, libraryId: 'LIB-02' },
+      { name: 'Placements', values: [], builtin: true, displayType: 'radio', swatchHex: {}, libraryId: 'LIB-03' },
+    ];
+    const loadedAttributes: ProductAttribute[] = [
+      ...builtinAttributes.map((base) => {
+        const saved = savedAttributes.find(
+          (a) => a.name.toLowerCase() === base.name.toLowerCase()
+        );
+        return saved ? { ...base, ...saved } : base;
+      }),
+      ...savedAttributes.filter(
+        (a) =>
+          !builtinAttributes.some(
+            (base) => base.name.toLowerCase() === a.name.toLowerCase()
+          )
+      ),
+    ];
 
     // Pricing ladder load (R1): sanitize the sidecar against these values;
     // legacy cells whose price differs from the derived value become pinned
@@ -980,7 +983,6 @@ export default function ProductsView() {
     setFormSizeChartId(product.sizeChartId ?? '');
     setFormAttributes(loadedAttributes);
     setFormPartner(product.partner);
-    setFormPlacement(product.placement);
     setFormStatus(product.publicationStatus);
     setFormDescription(product.description);
   };
@@ -1028,7 +1030,6 @@ export default function ProductsView() {
         hsnCode: formHsn.trim() || undefined,
         sizeChartId: formSizeChartId || undefined,
         partner: formPartner,
-        placement: formPlacement,
         publicationStatus: formStatus,
         description: formDescription,
         photoSettings: formPhoto,
@@ -1100,7 +1101,6 @@ export default function ProductsView() {
       priceAdjustments: Object.keys(cleanAdjustments).length > 0 ? cleanAdjustments : undefined,
       compareAtPrice: compare.value,
       partner: formPartner,
-      placement: formPlacement,
       publicationStatus: formStatus,
       description: formDescription,
       styleCode: formStyleCode.trim() || undefined,
@@ -1516,7 +1516,6 @@ export default function ProductsView() {
         colors: group.colors.length > 0 ? group.colors : ['Default'],
         sizes: group.sizes.length > 0 ? group.sizes : ['Standard'],
         partner: 'Qikink Direct API' as const,
-        placement: 'Chest (45mm)' as const,
         publicationStatus: 'draft' as const,
         description: '',
         images: [],
@@ -2925,7 +2924,7 @@ export default function ProductsView() {
             </DrawerCard>
             <DrawerCard
               title="4. Fulfillment & shipping"
-              description="Production partner, print placement, and parcel measurements"
+              description="Production partner and parcel measurements; print locations live under Attributes & values"
               collapsible
               isOpen={fulfillmentCardOpen}
               onToggle={setFulfillmentCardOpen}
@@ -2936,13 +2935,6 @@ export default function ProductsView() {
                   options={PARTNER_OPTIONS}
                   value={formPartner}
                   onChange={(value) => setFormPartner(value as ProductItem['partner'])}
-                  required
-                />
-                <SearchableSelect
-                  label="Print placement"
-                  options={PLACEMENT_OPTIONS}
-                  value={formPlacement}
-                  onChange={(value) => setFormPlacement(value as ProductItem['placement'])}
                   required
                 />
               </div>

@@ -128,11 +128,20 @@
 ### Fulfillment & shipping card (2026-10-20)
 
 - [x] Static audit: Fulfillment & shipping is General card 4, built on the collapsible `DrawerCard`; it starts collapsed, has independent `fulfillmentCardOpen` state, and resets when a create/edit drawer opens or closes.
-- [x] Static audit: Print partner and Print placement now surface as `SearchableSelect` fields; existing `formPartner`/`formPlacement` values and save paths are unchanged. Weight and Shipping weight pair below them, and Package dimensions is full width.
+- [x] Static audit: Print partner surfaces as a `SearchableSelect`; the legacy Print placement select was removed on 2026-10-22. Print locations are now the internal `Placements` attribute in card 5, the single source for product placement data. Weight and Shipping weight pair below the partner field, and Package dimensions is full width.
 - [x] Static audit: weight, shipping weight and package dimensions were moved out of the Internal disclosure without duplication; the disclosure was retitled “Internal attributes” in card 4 and is now replaced by card 5’s Internal only group.
-- [x] Static audit: the helper line below the weight fields is gone; all labels are linked, and no new DB columns or logic extraction were introduced. Partner/Placement remain demo-only pending SQL columns.
-- [x] `pnpm run typecheck` passes with no diagnostics; `pnpm run test` passes 71/71 admin + 7/7 website tests; `pnpm run build` prerenders all 40 admin routes and 27 website routes.
-- [ ] Browser visual pass at 360 / 768 / 1024 / 1440: default-collapsed card, partner/placement load/save, weight/dimension load/save, two-column alignment, card 5 Internal only group, Reset Demo. User verification pending.
+- [x] Static audit: the helper line below the weight fields is gone; all labels are linked, and no new DB columns or logic extraction were introduced. Partner remains demo-only pending a SQL column; Placements remains demo data on the attribute library.
+- [x] `pnpm run typecheck` passes with no diagnostics; `pnpm run test` passes 86/86 admin + 7/7 website tests; `pnpm run build` prerenders all 40 admin routes and 27 website routes.
+- [ ] Browser visual pass at 360 / 768 / 1024 / 1440: default-collapsed card, partner load/save, no Print placement select, weight/dimension load/save, two-column alignment, card 5 Internal only group, Reset Demo. User verification pending.
+
+### Placements single source (2026-10-22)
+
+- [x] Static audit: removed `ProductItem.placement`, `PLACEMENT_OPTIONS`, `formPlacement`, the create/save/import writes, and the Print placement `SearchableSelect`. `Placements` (`LIB-03`) is the only product-level source, edited in General card 5’s Internal only group.
+- [x] Static audit: create mode seeds the Placements attribute with `Front`; imported workbook groups map their Placements column into the same attribute; baseline product fixtures carry canonical six-value selections instead of the old four-value field.
+- [x] Static audit: localStorage hydration migrates legacy rows into the attribute — `Chest (45mm)` → `Front`, `Back Oversized` → `Back`, `Sleeve Length` → `Left Sleeve` + `Right Sleeve`, and `Interior Hem` is preserved as a product-local value. Existing non-empty Placements values win.
+- [x] Static audit: the product drawer always rebuilds Color, Size and Placements builtins from the product and overlays persisted values, so a fixture carrying only a Placements attribute still shows all three rows.
+- [x] Automated verification: `pnpm run typecheck` passes with no diagnostics; `pnpm run test` passes 86/86 admin + 7/7 website tests, including the new import test that keeps Placements product-level and out of variant axes; `pnpm run build` prerenders all 40 admin routes and 27 website routes.
+- [ ] Browser visual pass at 360 / 768 / 1024 / 1440: card 4 has no Print placement control, card 5 Placements values load/save, a legacy localStorage product migrates without losing its placement, import stages workbook Placements, create defaults to Front, Reset Demo. User verification pending.
 
 ### Attributes & values card + library-owned display type (2026-10-20)
 
