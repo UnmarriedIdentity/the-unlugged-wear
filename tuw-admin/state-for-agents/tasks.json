@@ -8,15 +8,16 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 278,
-    "done": 254,
+    "total": 279,
+    "done": 255,
     "in_progress": 0,
     "backlog": 24
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "28eccec",
+    "tip": "04f31ec",
     "unpushed": [
+      "04f31ec",
       "28eccec",
       "1ed268d",
       "c86e718",
@@ -42,7 +43,7 @@
       "f5c9cea",
       "e3e12f9"
     ],
-    "next_up": "Schema redundancy cleanup SHIPPED (1ed268d + 28eccec): the compare pair and `products.attributes` are gone, the counts are now 41 implemented DDL + 34 specified = 75 planned, and `tests/schema-integrity.test.mjs` guards inventory, FK order, retired names and docs counts. NEXT: PEDIT slice choice — variant shipping overrides in Variants & Stock vs identity/import-lineage in Basic Information; then dynamic variant-axis UI. Browser passes for General cards, the import, and Clothing Specs remain pending.",
+    "next_up": "Semantic variant-label schema SHIPPED (04f31ec): `attribute_definitions.slug` is the stable filter/URL key and `product_attribute_links.display_position` orders non-axis specs; the canonical types are Size/Model/Dimensions/Capacity/Shape/Style, and new types remain data rows. No table-count change (41 implemented + 34 specified = 75). The static guard now checks the new columns and rejects `products.sizes`/definition value arrays. NEXT: Phase 2 importer classifier + editable preview label, then Phase 3 dynamic N-axis admin matrix/search, then Phase 4 storefront generic options. Browser passes for General cards, the import, and Clothing Specs remain pending.",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
       "dashboard D-series: KPI tiers, range/sort menus, badge mapping, calendar pills, header tint (360/768/1024/1440)",
@@ -72,9 +73,9 @@
       "PEDIT expanded card layout (2645eb0): Compact stays one card per row; Expanded matrix / Full canvas shows two cards per row at 1024/1440; card 5 spans both columns; Storefront attributes show three per row when expanded/wide; Internal only stays a separate group; open-card neighbours stay top-aligned; no horizontal overflow; tab order stays 1-5; 360/768/1024/1440 - browser pass pending",
       "Workbook import (67bdf97): header-row detection, 155-group preview, one-commit staging, HSN validation, internal S.No display, Uncategorized category filter, edit/reload preservation, 305-variant product table, Reset Demo; 360/768/1024/1440 - browser pass pending",
       "PEDIT Clothing Specs cards (c86e718): Compact one card per row; Expanded/Full pairs Display options+Clothing specs and Size chart+Monogram at 1024/1440; Display options switch hides/shows the monogram card; independent collapse survives tab switches; size-chart table scrolls inside a half-width card; monogram pair collapses to one column at 360; chart add/remove + in-use guard feedback; Reset Demo; 360/768/1024/1440 - browser pass pending",
-      "SQL dry-run (f9de18b): psql is not installed; validate 002 + 010 against a real Postgres instance before the first migration run. The static schema guard (28eccec) checks inventory/FK order/retired names but does not replace a real parser."
+      "SQL dry-run (f9de18b + 04f31ec): psql is not installed; validate 002 + 010 against a real Postgres instance before the first migration run. The static schema guard (28eccec + 04f31ec) checks inventory/FK order/retired names/semantic columns but does not replace a real parser."
     ],
-    "last_updated": "2026-10-21",
+    "last_updated": "2026-10-22",
     "updated_by": "agent"
   },
   "tasks": [
@@ -4755,6 +4756,32 @@
       "pushed": false,
       "follow_ups": [
         "Runtime SQL validation still requires a real PostgreSQL instance"
+      ]
+    },
+    {
+      "id": "TL-DB-SEMANTIC-LABELS",
+      "title": "Semantic variant-label schema — definition slug + per-product display order",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-DB-WORKBOOK-SCHEMA",
+      "started": "2026-10-22",
+      "finished": "2026-10-22",
+      "log": "04f31ec — Added attribute_definitions.slug (NOT NULL UNIQUE, lowercase-kebab CHECK) as the stable filter/URL key and product_attribute_links.display_position (nullable, >= 0) for non-axis spec order. Documented the semantic type registry (Size, Model, Dimensions, Capacity, Shape, Style), per-product axis_label presentation, definition-scoped search, and the data-only growth rule across 00/02/04/07/20 + migrate README. Extended tests/schema-integrity.test.mjs: slug/check/display_position presence, no definition-level value array, and no products.sizes regression. No new tables; counts remain 41 implemented + 34 specified = 75. Typecheck both apps, 85 admin + 7 website tests, 40 admin + 27 website route builds green.",
+      "design_match": "n/a",
+      "key_decisions": [
+        "attribute_definitions is the semantic type registry; the name is the canonical type label and slug is the stable key",
+        "product_attribute_links.axis_label is the per-product shopper-facing label; values stay shared per definition",
+        "New option types are definition/value rows, never tables, per-size columns, or JSON value arrays",
+        "Search and facets join through the definition so identical spellings under different types cannot cross-match",
+        "No seed file: migrate/ remains schema-only; the importer/library creates the six definitions at runtime"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "Phase 2: importer token classifier + editable preview label + mixed-cell flags",
+        "Phase 3: admin N-axis matrix, dynamic attribute card, definition-scoped search",
+        "Phase 4: storefront generic options/selector/PDP/cart/filters + representative fixtures",
+        "Runtime SQL validation of 010 still requires a real PostgreSQL instance"
       ]
     }
   ],
