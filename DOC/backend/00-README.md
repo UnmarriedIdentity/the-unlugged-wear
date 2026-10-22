@@ -59,9 +59,12 @@ re-saved as CSV and imported into **draft** products. Rows group by style code
 (or style name + gender when no code exists) into one product with variants;
 the internal S.No is preserved per source row. Scalars map to product or
 variant overrides, multi-valued columns become linked attribute values, and
-Color/Size are marked as variant axes. HSN is product-level; conflicting HSN
-rows split the group. The `.xls` binary itself is never parsed (no dependency
-for it — honest limitation). Detail: `07-Import-Jobs.md`.
+Color plus the group's semantic option axis (Size, Model, Dimensions,
+Capacity, Shape, or Style) are marked as variant axes. HSN is product-level;
+conflicting HSN rows split the group. A new option type is a data row in the
+attribute library, not a schema change. The `.xls` binary itself is never
+parsed (no dependency for it — honest limitation). Detail:
+`07-Import-Jobs.md`.
 
 ## 6. Free-tier operating box
 

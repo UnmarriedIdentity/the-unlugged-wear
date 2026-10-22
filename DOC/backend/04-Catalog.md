@@ -1,6 +1,6 @@
 # Catalog — Columns, Constraints, Indexes
 
-> Status: Filling | Last Updated: 2026-10-21
+> Status: Filling | Last Updated: 2026-10-22
 > 17 tables. Conventions: `01-Conventions.md`. Money semantics follow the
 > open currency decision (`00-README.md` §7) — DECIMAL(12,2) shape is final.
 > The attribute library is the single attribute system; the retired compare
@@ -190,8 +190,9 @@ to `images[0]` on hydration, while an existing saved gallery order wins.
 
 | Table | Column | Type | Constraints | Reason |
 |---|---|---|---|---|
-| attribute_definitions | id | uuid | PK | Single record per attribute — the normalized source |
-| attribute_definitions | name | varchar(100) | NOT NULL, UNIQUE | One row per name, enforced (no duplicates by construction) |
+| attribute_definitions | id | uuid | PK | Single record per semantic type — the normalized source |
+| attribute_definitions | name | varchar(100) | NOT NULL, UNIQUE | Canonical type label (`Size`, `Model`); one row per type, enforced |
+| attribute_definitions | slug | varchar(100) | NOT NULL, UNIQUE, CHECK `^[a-z0-9]+(-[a-z0-9]+)*$` | Stable key for filters/URLs; survives a display-name change |
 | attribute_definitions | display_type | varchar(20) | NOT NULL DEFAULT 'pill', CHECK IN ('pill','swatch','radio') | PDP widget, owned once |
 | attribute_definitions | show_on_pdp | boolean | NOT NULL DEFAULT true | Explicit booleans — indexable, no array operators in hot reads |
 | attribute_definitions | show_on_checkout | boolean | NOT NULL DEFAULT false | |
@@ -205,7 +206,8 @@ to `images[0]` on hydration, while an existing saved gallery order wins.
 | product_attribute_links | definition_id | uuid | NOT NULL, FK → attribute_definitions(id) ON DELETE RESTRICT | Restrict: deleting a referenced definition fails loudly |
 | product_attribute_links | is_variant_axis | boolean | NOT NULL DEFAULT false | Per-product: this attribute is a variant axis |
 | product_attribute_links | variant_axis_position | smallint | NULL, CHECK (>= 0), CHECK (is_variant_axis → NOT NULL) | Axis order; Color/Size are positions 0/1 for apparel |
-| product_attribute_links | axis_label | varchar(50) | NULL | Per-product display label (`Model`, `Dimensions`, `Capacity`) without duplicating the definition |
+| product_attribute_links | axis_label | varchar(50) | NULL | Per-product display label (`Phone model`, `Print size`, `Capacity`) without duplicating the definition |
+| product_attribute_links | display_position | smallint | NULL, CHECK (>= 0) | Per-product order for non-axis spec attributes; axes use `variant_axis_position` |
 | product_attribute_link_values | product_id | uuid | NOT NULL, composite PK (product_id, definition_id, value_id) | Chosen values as rows — queryable ("products using Onyx"), never arrays |
 | product_attribute_link_values | definition_id | uuid | NOT NULL | Part of the composite PK (scoped lookup) |
 | product_attribute_link_values | value_id | uuid | NOT NULL, FK → attribute_values(id) ON DELETE RESTRICT | Restrict: deleting a chosen value fails loudly |
@@ -216,21 +218,36 @@ to `images[0]` on hydration, while an existing saved gallery order wins.
 | product_variant_attribute_values | value_id | uuid | NOT NULL | Exact value selected for this variant |
 
 Indexes: PKs · unique `attribute_definitions.name` · unique
-`(definition_id, value)` on values · composite link PKs serve both join
-directions (product→definitions, definition→products) · partial unique
-`idx_pal_variant_axis_position (product_id, variant_axis_position) WHERE
-is_variant_axis` · `idx_pvav_product_id` · `idx_pvav_value_id`.
+`attribute_definitions.slug` · unique `(definition_id, value)` on values ·
+composite link PKs serve both join directions (product→definitions,
+definition→products) · partial unique `idx_pal_variant_axis_position
+(product_id, variant_axis_position) WHERE is_variant_axis` ·
+`idx_pvav_product_id` · `idx_pvav_value_id`.
 
 **Variant axes (A2):** the product-level library stays the single source of
 attribute definitions and values. A product marks one or more linked
-attributes as variant axes; the workbook uses Color and Size, while a phone
-case can label its second axis `Model` and a poster can label it
-`Dimensions`. `product_variant_attribute_values` completes the chain:
-variant → product + definition + value. Composite FKs guarantee that the
-variant belongs to the product, the attribute is linked to that product, and
-the value is one of the product's chosen values. `product_variants.variant_key`
-is the sorted axis-value signature, unique per product, so the same
-combination cannot be created twice.
+attributes as variant axes; the workbook's generic `sizes` column is
+classified per product group into the semantic type it actually represents:
+`Size` for apparel, `Model` for phone cases, `Dimensions` for posters,
+`Capacity` for drinkware, `Shape` for ornaments, or `Style` for
+construction/format. A product can also override the shopper-facing label
+per product (`axis_label`: "Phone model", "Print size"). The definition name
+stays canonical; the label is presentation. `product_variant_attribute_values`
+completes the chain: variant → product + definition + value. Composite FKs
+guarantee that the variant belongs to the product, the attribute is linked
+to that product, and the value is one of the product's chosen values.
+`product_variants.variant_key` is the sorted axis-value signature, unique per
+product, so the same combination cannot be created twice.
+
+**Semantic types scale as data.** `attribute_definitions` is the label/type
+registry, not a bag of ad-hoc names. The canonical types are `Size`, `Model`,
+`Dimensions`, `Capacity`, `Shape`, and `Style`. A future type (for example
+`Mattress Size`) is one definition row plus its `attribute_values` rows — no
+new table, no per-size column, no JSON array of values. `slug` is the stable
+filter/URL key; `display_position` orders non-axis specs on the PDP. Search
+and facets join through the definition, so the same spelling under two types
+(`13` as a Size and `13` as a Model) is two distinct values and never
+cross-matches.
 
 **Visibility is global (UI wave):** `show_on_pdp` / `show_on_checkout` /
 `show_on_admin` live on the definition and apply to every product linked to

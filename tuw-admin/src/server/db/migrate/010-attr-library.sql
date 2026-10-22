@@ -1,6 +1,9 @@
 -- 010-attr-library.sql — Global attribute library (5 tables)
 -- Source of truth: DOC/backend/04-Catalog.md (library section).
--- One attribute = one row; products hold references, never copies.
+-- One attribute definition = one row; products hold references, never copies.
+-- Definitions are semantic types (Size, Model, Dimensions, Capacity, Shape,
+-- Style). Adding a type is an INSERT, never a new table/column or a values
+-- array. Per-product display labels live on product_attribute_links.
 -- product_variant_attribute_values completes the chain: product → linked
 -- attribute value → exact variant combination.
 
@@ -8,6 +11,11 @@
 CREATE TABLE attribute_definitions (
   id           uuid         PRIMARY KEY,
   name         varchar(100) NOT NULL UNIQUE,
+  -- Stable machine key for filters/URLs. The name is the canonical type
+  -- label ("Model"); the slug lets the storefront link to a definition
+  -- without relying on a mutable display label.
+  slug         varchar(100) NOT NULL UNIQUE
+    CHECK (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'),
   display_type varchar(20)  NOT NULL DEFAULT 'pill'
     CHECK (display_type IN ('pill','swatch','radio')),
   show_on_pdp      boolean  NOT NULL DEFAULT true,
@@ -42,6 +50,11 @@ CREATE TABLE product_attribute_links (
   -- Optional per-product display label ("Model", "Dimensions", "Capacity")
   -- without duplicating the shared attribute definition.
   axis_label            varchar(50),
+  -- Per-product order for linked non-axis attributes (specs). Variant axes
+  -- use variant_axis_position; NULL falls back to the definition name.
+  display_position      smallint CHECK (
+    display_position IS NULL OR display_position >= 0
+  ),
   PRIMARY KEY (product_id, definition_id),
   CHECK (NOT is_variant_axis OR variant_axis_position IS NOT NULL)
 );

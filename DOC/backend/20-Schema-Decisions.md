@@ -1,6 +1,6 @@
 # Schema Decisions — Retired Systems & Controlled Duplication
 
-> Status: Active | Last Updated: 2026-10-21
+> Status: Active | Last Updated: 2026-10-22
 > Companion to `02-Data-Tables.md`. These decisions bind the SQL in
 > `tuw-admin/src/server/db/migrate/` and the docs in this folder.
 
@@ -22,6 +22,25 @@ database exists, every change below becomes a normal forward migration.
 The attribute library is the single attribute system. If a PDP compare
 feature is ever scoped, build it on `attribute_definitions` (add typed spec
 columns only then); never reintroduce a second definition table.
+
+### Semantic variant labels (2026-10-22)
+
+`attribute_definitions` is the semantic type registry. The canonical types
+are `Size`, `Model`, `Dimensions`, `Capacity`, `Shape`, and `Style`; the
+workbook's single `sizes` column is classified per product group at import,
+not treated as apparel size everywhere. The definition name is the type
+(`Model`); `product_attribute_links.axis_label` is the per-product display
+label (`Phone model`); values such as `13 Pro Max` live once in
+`attribute_values` under that definition. `attribute_definitions.slug` is
+the stable filter/URL key, and `product_attribute_links.display_position`
+orders non-axis specs on the PDP.
+
+Adding a future type is one definition row plus value rows — never a table
+per type, a per-size column, or a JSON array of values. Search/facets join
+through the definition, so a spelling under two types is two values and
+cannot cross-match. Measured impact of splitting the workbook's mixed
+dictionary: +5 definition rows and +2 value rows; product-link and variant
+row counts are unchanged.
 
 ## 3. Controlled duplication (keep, do not "normalize" away)
 

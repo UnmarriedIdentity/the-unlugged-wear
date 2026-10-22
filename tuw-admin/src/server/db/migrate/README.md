@@ -19,6 +19,10 @@
 written as SQL. See `DOC/backend/20-Schema-Decisions.md` §5 for the
 implemented-vs-specified split.
 
+`010-attr-library.sql` now carries `attribute_definitions.slug` (stable
+filter/URL key) and `product_attribute_links.display_position` (non-axis
+spec order). Both are column additions; the table count stays 5.
+
 ## Do not apply 009 alone
 
 `009-partner.sql` references `orders(id)`; there is no `004-orders.sql` yet.

@@ -203,6 +203,26 @@ describe('schema integrity', () => {
     const productsBlock = all.match(/CREATE\s+TABLE\s+products\s*\(([\s\S]*?)\n\);/i)?.[1] ?? '';
     assert.ok(productsBlock.length > 0, 'products CREATE TABLE block not found');
     assert.equal(/\battributes\b/i.test(productsBlock), false, 'products.attributes is back; use the attribute library links');
+    assert.equal(/\bsizes\b/i.test(productsBlock), false, 'products.sizes is back; use the attribute library links');
+  });
+
+  test('semantic attribute metadata is present and values stay normalized', () => {
+    const library = code('010-attr-library.sql');
+    const definitions = library.match(/CREATE\s+TABLE\s+attribute_definitions\s*\(([\s\S]*?)\n\);/i)?.[1] ?? '';
+    const links = library.match(/CREATE\s+TABLE\s+product_attribute_links\s*\(([\s\S]*?)\n\);/i)?.[1] ?? '';
+
+    assert.ok(definitions.length > 0, 'attribute_definitions CREATE TABLE block not found');
+    assert.match(definitions, /\bslug\b\s+varchar\(100\)\s+NOT NULL UNIQUE/i);
+    assert.match(definitions, /slug\s*~\s*'\^\[a-z0-9\]\+\(-\[a-z0-9\]\+\)\*\$'/i);
+    assert.equal(
+      /\bvalues\b/i.test(definitions),
+      false,
+      'attribute_definitions.values is back; values belong in attribute_values',
+    );
+
+    assert.ok(links.length > 0, 'product_attribute_links CREATE TABLE block not found');
+    assert.match(links, /\baxis_label\b\s+varchar\(50\)/i);
+    assert.match(links, /\bdisplay_position\b\s+smallint/i);
   });
 
   test('docs counts match 41 implemented + 34 specified = 75', () => {

@@ -58,9 +58,9 @@ The single-URL gate reads `users → user_roles → roles.slug`
 | collections | Storefront collection pages (name/slug/season/visibility) | — |
 | collection_products | Junction, composite PK (collection, product) + position | collections, products |
 | size_charts | Measurement sets by garment type (`rows` jsonb — columns vary: shirts need shoulder/sleeve, skirts waist/hip); linked from products | — |
-| attribute_definitions | Global single-record definitions: name UNIQUE, display_type — the one place attributes are defined | — |
+| attribute_definitions | Global semantic definitions: name UNIQUE, slug UNIQUE, display_type — the one place attributes are defined; a new type is a data row, not DDL | — |
 | attribute_values | Global values + swatch_hex, UNIQUE(definition, value) | definitions |
-| product_attribute_links | Assignment: (product, definition) composite PK; variant-axis flag, order, optional display label | products, definitions |
+| product_attribute_links | Assignment: (product, definition) composite PK; variant-axis flag/order, optional per-product label, non-axis display order | products, definitions |
 | product_attribute_link_values | Chosen values as rows + optional per-value price adjustment (NULL/0 = no effect; additive upcharges); queryable, never arrays | products, definitions, values |
 | product_variant_attribute_values | One value per variant axis; composite FKs guarantee variant/product/attribute/value consistency | variants, products, links, values |
 
@@ -74,6 +74,11 @@ compositely, so a variant can only use a value already chosen for its product.
 `product_variants.variant_key` is the sorted axis-value signature and is
 unique per product. The admin draft matrix still carries combinations in
 memory; the DB shape is ready for the API seam.
+
+Note — semantic labels: `attribute_definitions` is the type registry
+(`Size`, `Model`, `Dimensions`, `Capacity`, `Shape`, `Style`);
+`attribute_values` holds the shared spellings; `axis_label` is the
+per-product shopper-facing label. New types are rows, not tables.
 
 ## Cart & wishlist (4) → detail: `05-Cart-Wishlist.md`
 

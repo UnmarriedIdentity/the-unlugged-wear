@@ -1,6 +1,6 @@
 # Import Jobs — CSV Pipeline, Row Errors
 
-> Status: Filling | Last Updated: 2026-10-15
+> Status: Filling | Last Updated: 2026-10-22
 > 1 table + the pipeline contract. Imports create **drafts**, never live
 > products — a human publishes. Conventions: `01-Conventions.md`.
 
@@ -30,10 +30,26 @@ ID (ignored) · S.No · Gender · Style (`name | code`) · sizes · Colors
 Mapping: name→products.name, code→products.style_code, S.No→
 products.internal_serial_no + product_source_rows.source_serial_no,
 Base Price→variant price override (product base_price = anchor),
-sizes/Colors→variant axes, Placements→attribute values,
+sizes→one semantic option axis per group (Size / Model / Dimensions /
+Capacity / Shape / Style, human-confirmed), Colors→Color axis,
+Placements→attribute values,
 Dimensions/Weight/Shipping Weight→product defaults + variant overrides,
 Tax→tax_rate, HSN→products.hsn_code. Unknown columns are ignored with
 notice (forward-compatible sheets).
+
+## Semantic label mapping (planned with the generic-axis UI)
+
+The workbook's `sizes` column is a generic option column, not apparel-only.
+At preview, each product group gets an editable **variant label**; the
+importer suggests `Size`, `Model`, `Dimensions`, `Capacity`, `Shape`, or
+`Style` from the token patterns. Values are registered under the chosen
+definition in `attribute_values`. A label absent from the library can be
+created in the preview — definitions and values are data rows, so no schema
+change is required. Mixed cells (for example capacity + colour in one token)
+are flagged for a human choice; the importer never silently classifies them.
+The chosen type is attached to the product through `product_attribute_links`
+(`is_variant_axis`, `variant_axis_position`, optional `axis_label`), and
+search/facets scope by that definition.
 
 ## Grouping and variant generation
 
@@ -44,8 +60,10 @@ A product is one style group, not one spreadsheet row:
    `Classic Crew T-Shirt` do not merge Boy/Girl/Female/Male listings.
 3. Split a group when non-empty HSN values conflict; flag the split.
 4. Preserve every source row in `product_source_rows`.
-5. Create variants from the group's axis values (Color × Size by default,
-   arbitrary axes supported) and link each variant to its source row.
+5. Create variants from the group's axis values (Color plus the group's
+   `sizes`-column semantic axis: Size, Model, Dimensions, Capacity, Shape,
+   or Style; arbitrary axes remain supported) and link each variant to its
+   source row.
 6. Set variant price/weight/shipping/dimensions from the row; fall back to
    product defaults only where the row is blank.
 7. Generate product and variant SKUs/slugs deterministically; the workbook
