@@ -8,15 +8,16 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 279,
-    "done": 255,
+    "total": 280,
+    "done": 256,
     "in_progress": 0,
     "backlog": 24
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "04f31ec",
+    "tip": "d4c42ad",
     "unpushed": [
+      "d4c42ad",
       "04f31ec",
       "28eccec",
       "1ed268d",
@@ -43,7 +44,7 @@
       "f5c9cea",
       "e3e12f9"
     ],
-    "next_up": "Semantic variant-label schema SHIPPED (04f31ec): `attribute_definitions.slug` is the stable filter/URL key and `product_attribute_links.display_position` orders non-axis specs; the canonical types are Size/Model/Dimensions/Capacity/Shape/Style, and new types remain data rows. No table-count change (41 implemented + 34 specified = 75). The static guard now checks the new columns and rejects `products.sizes`/definition value arrays. NEXT: Phase 2 importer classifier + editable preview label, then Phase 3 dynamic N-axis admin matrix/search, then Phase 4 storefront generic options. Browser passes for General cards, the import, and Clothing Specs remain pending.",
+    "next_up": "Placements single-source SHIPPED (d4c42ad): `ProductItem.placement`, `PLACEMENT_OPTIONS`, `formPlacement`, and the card-4 Print placement select are gone; `Placements` (`LIB-03`) is the only product placement source in card 5, and legacy localStorage values migrate into it. Semantic variant-label schema remains shipped (04f31ec): `attribute_definitions.slug` is the stable filter/URL key and `product_attribute_links.display_position` orders non-axis specs; canonical types are Size/Model/Dimensions/Capacity/Shape/Style. No table-count change (41 implemented + 34 specified = 75). NEXT: Phase 2 importer classifier + editable preview label, then Phase 3 dynamic N-axis admin matrix/search, then Phase 4 storefront generic options. Browser passes for General cards, the import, Clothing Specs, and the Placements single-source fix remain pending.",
     "pending_verifications": [
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
       "dashboard D-series: KPI tiers, range/sort menus, badge mapping, calendar pills, header tint (360/768/1024/1440)",
@@ -68,7 +69,8 @@
       "PEDIT Pricing & stock card (3ee3844 + 4e36f1e): default-collapsed independent card, no helper text below inputs, Base/Compare + Stock/Tax alignment, Compare-at tooltip hover/focus/tap, auto-open on compare error, tax save/reload, Reset Demo; 360/768/1024/1440 — browser pass pending",
       "PEDIT Scheduled discounts card (71daaec): default-collapsed independent card, empty state, add/remove, type switch + percent clamp, dates, active switch, row focus return, save/reload, Reset Demo; 360/768/1024/1440 — browser pass pending",
       "PEDIT Description folded into Basic (a396de7): Description loads/saves per product from its new full-width position after URL Slug, label click focuses the textarea, Basic collapse/reopen preserves the draft, no separate Description card; 360/768/1024/1440 — browser pass pending",
-      "PEDIT Fulfillment & shipping card (a396de7): default-collapsed independent card, Partner/Placement load/save, Weight/Shipping weight/Package dimensions load/save from the new card, Internal attributes count excludes moved fields, no helper lines; 360/768/1024/1440 — browser pass pending",
+      "PEDIT Fulfillment & shipping card (a396de7 + d4c42ad): default-collapsed independent card, Partner load/save, no Print placement select, Weight/Shipping weight/Package dimensions load/save from the new card, Internal attributes count excludes moved fields, no helper lines; 360/768/1024/1440 — browser pass pending",
+      "PEDIT Placements single source (d4c42ad): card 4 has no Print placement control; card 5 Placements values load/save; legacy localStorage placement migrates (Chest (45mm)->Front, Back Oversized->Back, Sleeve Length->Left+Right Sleeve, Interior Hem preserved); import stages workbook Placements; create defaults to Front; Reset Demo; 360/768/1024/1440 — browser pass pending",
       "PEDIT Attributes & values card (ac255fa + 5e7e8b7): default-collapsed independent card, Storefront/Internal groups, chip wrapping, Manage library beside the library dropdown, fully circular swatch picker, radio previews, add/remove value, known-value picker, default protection, read-only library type, unlinked fallback, Reset Demo; 360/768/1024/1440 - browser pass pending",
       "PEDIT expanded card layout (2645eb0): Compact stays one card per row; Expanded matrix / Full canvas shows two cards per row at 1024/1440; card 5 spans both columns; Storefront attributes show three per row when expanded/wide; Internal only stays a separate group; open-card neighbours stay top-aligned; no horizontal overflow; tab order stays 1-5; 360/768/1024/1440 - browser pass pending",
       "Workbook import (67bdf97): header-row detection, 155-group preview, one-commit staging, HSN validation, internal S.No display, Uncategorized category filter, edit/reload preservation, 305-variant product table, Reset Demo; 360/768/1024/1440 - browser pass pending",
@@ -4624,11 +4626,12 @@
       "parent": "TL-UI-PEDIT-GENERAL-CARDS",
       "started": "2026-10-20",
       "finished": "2026-10-20",
-      "log": "a396de7 — General card 4 shipped as a collapsible DrawerCard with independent fulfillmentCardOpen state, collapsed by default and reset when the drawer opens/closes. Print partner and Print placement are now surfaced as required SearchableSelect controls backed by the existing formPartner/formPlacement state and save path. Weight and Shipping weight pair below them as Input controls with inputMode='numeric'; Package dimensions is full width. Weight, Shipping weight, and Package dimensions were removed from the Internal fields disclosure without duplication; that disclosure is retitled 'Internal attributes' and counts only internal-only attribute values. No helper lines, no header badge, no SQL columns, no dependency changes, and no logic extraction. Typecheck, 71 admin + 7 website tests, 40 admin + 27 website builds green. DESIGN_SYSTEM + UI_CHECKLIST updated; browser pass pending.",
+      "log": "a396de7 — General card 4 shipped as a collapsible DrawerCard with independent fulfillmentCardOpen state, collapsed by default and reset when the drawer opens/closes. Print partner and Print placement are now surfaced as required SearchableSelect controls backed by the existing formPartner/formPlacement state and save path. Weight and Shipping weight pair below them as Input controls with inputMode='numeric'; Package dimensions is full width. Weight, Shipping weight, and Package dimensions were removed from the Internal fields disclosure without duplication; that disclosure is retitled 'Internal attributes' and counts only internal-only attribute values. No helper lines, no header badge, no SQL columns, no dependency changes, and no logic extraction. Typecheck, 71 admin + 7 website tests, 40 admin + 27 website builds green. DESIGN_SYSTEM + UI_CHECKLIST updated; browser pass pending. PLACEMENTS RECONCILED 2026-10-22 (d4c42ad): removed the Print placement SearchableSelect and formPlacement; card 4 now carries Partner plus Weight/Shipping weight/Package dimensions, and Placements (LIB-03) in card 5 is the only product placement source. Typecheck, 86 admin + 7 website tests, 40 admin + 27 website builds green; browser pass pending.",
       "design_match": "yes",
       "key_decisions": [
         "Fulfillment & shipping is General card 4, after Scheduled discounts and before Attributes & values",
-        "Partner/Placement surface from existing product state; they remain demo-only until the fulfillment schema decision",
+        "Partner surfaces from existing product state and remains demo-only until the fulfillment schema decision",
+        "Card 4 no longer owns print locations; card 5's Placements attribute is the single placement source",
         "Weight/Shipping weight/Package dimensions belong with fulfillment, not the Internal attribute disclosure",
         "Card is independently collapsible and starts collapsed; no header badge",
         "No helper lines; weight/dimension fields keep text inputs with numeric inputMode and no new validation"
@@ -4637,7 +4640,7 @@
       "pushed": false,
       "follow_ups": [
         "Browser visual pass at 360/768/1024/1440 remains pending",
-        "Partner/Placement need SQL columns before a real fulfillment integration",
+        "Partner needs a SQL column before a real fulfillment integration; Placements is modeled through the attribute library",
         "Weight/dimension format validation and unit conversion remain separate follow-ups"
       ]
     },
@@ -4649,10 +4652,11 @@
       "parent": "TL-UI-PEDIT-GENERAL-CARDS",
       "started": "2026-10-20",
       "finished": "2026-10-20",
-      "log": "ac255fa - General card 5 shipped as the fifth collapsible DrawerCard with independent attributesCardOpen state, collapsed by default and reset when a create/edit drawer opens or closes. The old flat Attributes section and separate Internal attributes Disclosure are replaced by one card: a two-row top action strip (Link from library beside Manage library, then new attribute name + Add), a Storefront group, and an Internal only group. Rows are flat bordered groups, not nested cards; values are wrapping chips with inline remove, swatch chips keep the product-local color input without hex text, and radio chips show a dot preview. The per-product display dropdown is gone: the showcase type is read-only from the linked library record, unlinked attributes fall back to Pill with an Unlinked warning, and ProductAttribute.displayType is ignored for rendering but left persisted for compatibility. linkFromLibrary, commitAttrValue, removeAttrValue, addAttribute, removeAttribute, and setSwatchHex are unchanged; default attributes stay non-removable and the known-value picker remains. No new DB columns, dependencies, auth, payment or fulfillment integration. Typecheck, 71 admin + 7 website tests, 40 admin + 27 website builds green; browser pass pending. POLISH 2026-10-20 (5e7e8b7): Manage library moved beside the library dropdown as an outline LinkButton; new-attribute input + Add now form the second row. Swatch inputs use the shared .tuw-color-swatch class, which resets native appearance and rounds the WebKit/Firefox inner swatch to a true 20px circle with a focus-visible ring; setSwatchHex is unchanged. Typecheck, 71 admin + 7 website tests, 40 admin + 27 website builds green; headless Edge probe confirms the circular result. EXPANDED LAYOUT 2026-10-20 (2645eb0): Storefront rows now use a three-column grid when the drawer is expanded and the canvas is at least 900px; Internal only stays its own separate group below. Compact/narrow stays one column.",
+      "log": "ac255fa - General card 5 shipped as the fifth collapsible DrawerCard with independent attributesCardOpen state, collapsed by default and reset when a create/edit drawer opens or closes. The old flat Attributes section and separate Internal attributes Disclosure are replaced by one card: a two-row top action strip (Link from library beside Manage library, then new attribute name + Add), a Storefront group, and an Internal only group. Rows are flat bordered groups, not nested cards; values are wrapping chips with inline remove, swatch chips keep the product-local color input without hex text, and radio chips show a dot preview. The per-product display dropdown is gone: the showcase type is read-only from the linked library record, unlinked attributes fall back to Pill with an Unlinked warning, and ProductAttribute.displayType is ignored for rendering but left persisted for compatibility. linkFromLibrary, commitAttrValue, removeAttrValue, addAttribute, removeAttribute, and setSwatchHex are unchanged; default attributes stay non-removable and the known-value picker remains. No new DB columns, dependencies, auth, payment or fulfillment integration. Typecheck, 71 admin + 7 website tests, 40 admin + 27 website builds green; browser pass pending. POLISH 2026-10-20 (5e7e8b7): Manage library moved beside the library dropdown as an outline LinkButton; new-attribute input + Add now form the second row. Swatch inputs use the shared .tuw-color-swatch class, which resets native appearance and rounds the WebKit/Firefox inner swatch to a true 20px circle with a focus-visible ring; setSwatchHex is unchanged. Typecheck, 71 admin + 7 website tests, 40 admin + 27 website builds green; headless Edge probe confirms the circular result. EXPANDED LAYOUT 2026-10-20 (2645eb0): Storefront rows now use a three-column grid when the drawer is expanded and the canvas is at least 900px; Internal only stays its own separate group below. Compact/narrow stays one column. PLACEMENTS SINGLE SOURCE 2026-10-22 (d4c42ad): the internal Placements row is now the only product placement source; the legacy ProductItem.placement field and card-4 select were removed, create seeds Front, fixtures use canonical six-value selections, and legacy localStorage values migrate into this attribute.",
       "design_match": "yes",
       "key_decisions": [
         "One collapsible card replaces the flat section and the separate Internal attributes disclosure",
+        "Placements is the single product placement source; the old ProductItem.placement field was removed on 2026-10-22",
         "Storefront and Internal only groups use flat bordered rows and wrapping chips; Storefront becomes three columns when expanded/wide, while Internal only stays separate; no value table or nested cards",
         "Display type is library-owned and read-only in the product drawer; unlinked rows fall back to Pill with a warning",
         "Swatch colors remain product-local until TL-UI-PEDIT-ATTR-SWATCH; the known-value picker stays",
@@ -4662,9 +4666,34 @@
       "verified": true,
       "pushed": false,
       "follow_ups": [
-        "Browser visual pass at 360/768/1024/1440 remains pending, including Manage library placement, the circular swatch picker, and the three-column Storefront grid",
+        "Browser visual pass at 360/768/1024/1440 remains pending, including Manage library placement, the circular swatch picker, the three-column Storefront grid, and Placements load/save from card 5",
         "Global swatch colors: TL-UI-PEDIT-ATTR-SWATCH",
         "Library-owned value catalogue: TL-UI-PEDIT-ATTR-VALUES"
+      ]
+    },
+    {
+      "id": "TL-UI-PEDIT-PLACEMENTS",
+      "title": "Placements single source - retire legacy product placement",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-UI-PEDIT-GENERAL-CARDS",
+      "started": "2026-10-22",
+      "finished": "2026-10-22",
+      "log": "d4c42ad — Removed ProductItem.placement, PLACEMENT_OPTIONS, formPlacement, and the card-4 Print placement SearchableSelect; create/save/import no longer write the legacy field. Placements (LIB-03) in General card 5 is the only product placement source. Create seeds Front; fixtures carry canonical six-value selections. Legacy localStorage values migrate into the attribute (Chest (45mm)->Front, Back Oversized->Back, Sleeve Length->Left+Right Sleeve, Interior Hem preserved as a product-local value), with existing non-empty Placements values winning. The drawer rebuilds Color/Size/Placements builtins and overlays persisted values. Added an import test keeping Placements product-level. Typecheck, 86 admin + 7 website tests, 40 admin + 27 website builds green; browser pass pending.",
+      "design_match": "yes",
+      "key_decisions": [
+        "Placements is a multi-select attribute value set, not a separate product column; the four-value ProductItem.placement field and PLACEMENT_OPTIONS are retired",
+        "Card 4 keeps partner and parcel measurements; print locations are edited only in card 5's Internal only group",
+        "Legacy migration preserves unknown values as product-local values rather than dropping data; existing new-model values win",
+        "Create defaults to Front; fixtures and imports carry workbook-compatible Placements values",
+        "The product drawer always rebuilds Color, Size and Placements builtin rows so partial persisted overrides cannot hide them"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "Browser visual pass at 360/768/1024/1440: no Print placement select, card 5 Placements load/save, legacy localStorage migration, import staging, create default Front, Reset Demo",
+        "Placements values remain editable in Settings -> Attributes; no product-level placement SQL column is planned",
+        "The Phase 2 importer classifier still owns semantic sizes-token splitting"
       ]
     },
     {
