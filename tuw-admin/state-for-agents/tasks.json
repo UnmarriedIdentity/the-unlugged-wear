@@ -8,15 +8,30 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 281,
-    "done": 257,
+    "total": 282,
+    "done": 258,
     "in_progress": 0,
     "backlog": 24
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "7e3a14d",
+    "tip": "52a8216",
     "unpushed": [
+      "52a8216",
+      "6c3f82f",
+      "4cf0a30",
+      "4f40103",
+      "344be18",
+      "7c7a3f5",
+      "1e4955a",
+      "3edfb26",
+      "080837d",
+      "bec4d63",
+      "159181b",
+      "15c48b4",
+      "d77f9ed",
+      "fee3c6e",
+      "fd1812e",
       "7e3a14d",
       "8d6d500",
       "f286600",
@@ -51,8 +66,9 @@
       "f5c9cea",
       "e3e12f9"
     ],
-    "next_up": "CMS blog schema SHIPPED (7e3a14d): 006-cms.sql implements the normalized blog slice — media, blog_categories, blog_authors, blog_tags, blogs, blog_post_tags, blog_revisions, blog_slug_history, and blog_post_media. One primary category + many normalized tags; one primary author; ProseMirror/Tiptap-compatible JSON; revisions from day one; scheduled publishing; slug history redirects; inline-media FK ledger. No blog_statuses lookup, no content_html, and no fabricated views column. Table counts are now 50 implemented + 31 specified = 81. NEXT: Phase 2 admin authoring — blog state/taxonomy persistence, DB-driven categories, and a full-page Tiptap editor with preview, publish/schedule, revisions, media picker, and SEO fields.",
+    "next_up": "Editorial admin authoring foundation SHIPPED (52a8216): the Journal list is state-driven, the Content overview shows live counts, and /content/journal/new + /content/journal/[id]/edit use a full-page Tiptap editor. The admin state persists categories, authors, tags, media, posts, revisions and slug history with Reset Demo. Publishing validates cover, content length, inline media and scheduled date. NEXT: Phase 3 storefront journal rendering — DB-shaped fixtures, safe JSON renderer, filters/search, reading time, Urbanist italic prose CSS and charcoal/gold accents.",
     "pending_verifications": [
+      "editor + journal list browser pass at 360/768/1024/1440 (keyboard, focus, Reset Demo, empty/loading/error states)",
       "SQL dry-run: apply 001 + 002 + 006-cms.sql against a real PostgreSQL instance; verify generated blogs.search_vector, slug/CHECK constraints, FK RESTRICT/CASCADE behavior, and partial indexes. psql remains unavailable locally.",
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
       "dashboard D-series: KPI tiers, range/sort menus, badge mapping, calendar pills, header tint (360/768/1024/1440)",
@@ -2193,6 +2209,30 @@
       "follow_ups": [
         "runtime SQL dry-run on a real PostgreSQL instance (006-cms.sql, incl. generated column + check constraints)",
         "Phase 2: admin blog state + taxonomy + full-page Tiptap editor"
+      ]
+    },
+    {
+      "id": "TL-UI-CMS-BLOG",
+      "title": "Editorial admin authoring foundation (state, taxonomy, editor)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-27",
+      "finished": "2026-10-27",
+      "log": "feat/search-modal: fee3c6e + d77f9ed Tiptap deps, 15c48b4 blog model, 159181b fixtures, bec4d63 model tests, 080837d admin state, 3edfb26 rich-text editor, 1e4955a JSON preview, 7c7a3f5 full-page editor, 344be18 new route, 4f40103 edit route, 4cf0a30 state-driven list, 6c3f82f live overview counts, 52a8216 publishable-content guard",
+      "design_match": "partial",
+      "key_decisions": [
+        "admin Journal state is persisted in AdminState/localStorage and restored by Reset Demo",
+        "canonical categories: Craft, Slow Living, Sustainability, Design, Culture; Lookbook is a tag",
+        "full-page editor uses Tiptap JSON; no raw HTML and no content_html",
+        "publishing validates cover, content length, inline media and scheduled date",
+        "revision restore copies an immutable snapshot into a new draft version"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "browser pass for editor + list at 360/768/1024/1440, keyboard and Reset Demo",
+        "media-library unification and richer inline media metadata",
+        "taxonomy management UI (category/author/tag CRUD)"
       ]
     },
     {
