@@ -1,7 +1,7 @@
 # Data Tables — Full Inventory (single PostgreSQL)
 
-> Status: Filling | Last Updated: 2026-10-21
-> 75 tables (41 implemented DDL + 34 specified) + 1 deferred footnote (`search_documents`). Column detail lives in files 03–10,
+> Status: Filling | Last Updated: 2026-10-26
+> 81 tables (50 implemented DDL + 31 specified) + 1 deferred footnote (`search_documents`). Column detail lives in files 03–10,
 > 15, 17, and 19; this file is the index, ending with the full relationship diagram.
 > Conventions (UUIDv7, money, indexes): `01-Conventions.md`.
 > Retired systems and controlled duplication: `20-Schema-Decisions.md`.
@@ -111,14 +111,27 @@ per-product shopper-facing label. New types are rows, not tables.
 | email_logs | Delivery states, retry scans | — |
 | notification_templates | Optional keyed `{{variable}}` bodies | — |
 
-## CMS in PG, jsonb (8, no Mongo) → detail: `09-CMS-Media.md`
+## CMS in PG, jsonb (14, no Mongo) → detail: `09-CMS-Media.md`
 
-cms_sections · cms_settings · navigation_settings · pages · blogs ·
-blog_categories · media (R2 URLs — provider-agnostic, see `11-Storage.md`).
-Whole-document reads; app-layer Zod validation.
+`media` · `blog_categories` · `blog_authors` · `blog_tags` · `blogs` ·
+`blog_post_tags` · `blog_revisions` · `blog_slug_history` ·
+`blog_post_media` (blog slice, implemented in `006-cms.sql`) ·
+`cms_sections` · `cms_settings` · `navigation_settings` · `pages` ·
+`store_settings` (still specified).
+Whole-document reads; app-layer Zod validation. No `content_html`, no
+`blog_statuses` lookup, no `views` column — analytics owns views.
 
 | Table | Purpose | Key links |
 |---|---|---|
+| media | R2 asset metadata; covers, OG images, avatars, inline images | users (uploader) |
+| blog_categories | One primary category per post; editorial pillars | blogs |
+| blog_authors | Public bylines; optional staff-user link | users, media (avatar), blogs |
+| blog_tags | Cross-cutting editorial tags | blog_post_tags |
+| blogs | Post metadata, JSON content, publish state, search vector | blog_categories, blog_authors, media, users |
+| blog_post_tags | Post↔tag junction, composite PK | blogs, blog_tags |
+| blog_revisions | Immutable revision snapshots | blogs, users (author) |
+| blog_slug_history | Retired slugs → `301` redirect targets | blogs |
+| blog_post_media | FK ledger for inline JSON media | blogs, media |
 | store_settings | Operational config key-value (key UNIQUE, value jsonb): brand, payments, shipping, taxes, notifications tabs | — |
 
 ## Analytics, partitioned (7) → detail: `10-Analytics.md`
@@ -210,6 +223,17 @@ erDiagram
     product_attribute_links ||--o{ product_attribute_link_values : chooses
     product_variants ||--o{ product_variant_attribute_values : selected-as
     attribute_values ||--o{ product_variant_attribute_values : chosen-value
+    users ||--o| blog_authors : staff-link
+    media ||--o| blog_authors : avatars
+    blog_categories ||--o{ blogs : groups
+    blog_authors ||--o{ blogs : writes
+    media ||--o{ blogs : covers
+    blogs ||--o{ blog_post_tags : tags
+    blog_tags ||--o{ blog_post_tags : used-by
+    blogs ||--o{ blog_revisions : snapshots
+    blogs ||--o{ blog_slug_history : retired-slugs
+    blogs ||--o{ blog_post_media : inline-media
+    media ||--o{ blog_post_media : used-by
     products ||--o{ product_views : viewed-in
     products ||--o{ stock_movements : tracks
     products ||--o{ product_discounts : prices
