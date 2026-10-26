@@ -141,7 +141,12 @@ export interface BlogSlugHistoryEntry {
 
 export type BlogDraft = Omit<
   BlogPost,
-  'contentText' | 'readingTimeMinutes' | 'inlineMediaIds' | 'version'
+  | 'contentText'
+  | 'readingTimeMinutes'
+  | 'inlineMediaIds'
+  | 'version'
+  | 'createdAt'
+  | 'updatedAt'
 >;
 
 export interface BlogValidationResult {
