@@ -26,7 +26,7 @@ constraints, not application-code promises — and one migration history. Primar
 merge-safe). Depth: `12-UI-Merge-Single-Deploy.md`, `13-API-Contracts.md`,
 `14-Single-URL-Gating.md`.
 
-## 3. Data at a glance (75 planned tables: 41 implemented DDL + 34 specified)
+## 3. Data at a glance (81 planned tables: 50 implemented DDL + 31 specified)
 
 | Domain | Tables | Notes |
 |---|---|---|
@@ -36,7 +36,7 @@ merge-safe). Depth: `12-UI-Merge-Single-Deploy.md`, `13-API-Contracts.md`,
 | Cart & wishlist | carts, cart_items, wishlists, wishlist_items | Snapshot display fields; one-active-cart partial unique |
 | Orders & money | orders, order_items, order_status_history, payments, refunds, returns, return_items, discount_codes, shipments | Dual status axes; immutable snapshots; DECIMAL(12,2) |
 | Platform | import_jobs, email_logs, notification_templates | CSV pipeline reports; delivery states |
-| CMS (jsonb, no Mongo) | cms_sections, cms_settings, navigation_settings, pages, blogs, blog_categories, media, store_settings | Whole-document reads; app-layer Zod validation |
+| CMS (jsonb, no Mongo) | media, blog_categories, blog_authors, blog_tags, blogs, blog_post_tags, blog_revisions, blog_slug_history, blog_post_media, cms_sections, cms_settings, navigation_settings, pages, store_settings | Blog slice implemented in `006-cms.sql`; no `content_html`, no `blog_statuses`, no `views` column |
 | Analytics (partitioned) | page_views, sessions, cart_events, abandoned_carts, daily_stats, product_views, search_terms | Monthly partitions; raw events drop >30d, rollups kept |
 | Operations | support_tickets, support_messages, notifications | Threads + staff replies; in-app bell (email stays in logs) |
 | Partner seam | partner_orders, partner_wallet_ledger | Qikink sync + wallet trail (file 16) |
