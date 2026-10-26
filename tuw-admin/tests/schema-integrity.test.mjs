@@ -18,6 +18,7 @@ const DOCS_DIR = join(HERE, '..', '..', 'DOC', 'backend');
 const FILES = [
   '001-auth.sql',
   '002-catalog.sql',
+  '006-cms.sql',
   '009-partner.sql',
   '010-attr-library.sql',
   '011-household.sql',
@@ -50,6 +51,17 @@ const IMPLEMENTED = {
     'stock_movements',
     'product_discounts',
     'reviews',
+  ],
+  '006-cms.sql': [
+    'media',
+    'blog_categories',
+    'blog_authors',
+    'blog_tags',
+    'blogs',
+    'blog_post_tags',
+    'blog_revisions',
+    'blog_slug_history',
+    'blog_post_media',
   ],
   '009-partner.sql': ['partner_orders', 'partner_wallet_ledger'],
   '010-attr-library.sql': [
@@ -97,14 +109,11 @@ const DOCUMENTED_ONLY = [
   'import_jobs',
   'email_logs',
   'notification_templates',
-  // CMS (8)
+  // CMS (14; blog slice implemented in 006, settings/pages still pending)
   'cms_sections',
   'cms_settings',
   'navigation_settings',
   'pages',
-  'blogs',
-  'blog_categories',
-  'media',
   'store_settings',
   // Analytics (7)
   'page_views',
@@ -148,14 +157,14 @@ const createTableRe = /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?([a-z_]+)/gi;
 const tablesIn = (sql) => [...sql.matchAll(createTableRe)].map((m) => m[1].toLowerCase());
 
 describe('schema integrity', () => {
-  test('inventory matches the 41 implemented tables, file by file', () => {
+  test('inventory matches the 50 implemented tables, file by file', () => {
     const actual = {};
     for (const file of FILES) actual[file] = tablesIn(code(file));
 
     assert.deepEqual(actual, IMPLEMENTED);
-    assert.equal(EXPECTED_IMPLEMENTED, 41);
-    assert.equal(DOCUMENTED_ONLY.length, 34);
-    assert.equal(EXPECTED_TOTAL, 75);
+    assert.equal(EXPECTED_IMPLEMENTED, 50);
+    assert.equal(DOCUMENTED_ONLY.length, 31);
+    assert.equal(EXPECTED_TOTAL, 81);
   });
 
   test('no duplicate CREATE TABLE names across files', () => {
@@ -225,25 +234,51 @@ describe('schema integrity', () => {
     assert.match(links, /\bdisplay_position\b\s+smallint/i);
   });
 
-  test('docs counts match 41 implemented + 34 specified = 75', () => {
+  test('docs counts match 50 implemented + 31 specified = 81', () => {
     const readme = read(join(DOCS_DIR, '00-README.md'));
     const dataTables = read(join(DOCS_DIR, '02-Data-Tables.md'));
     const catalog = read(join(DOCS_DIR, '04-Catalog.md'));
 
-    assert.match(readme, /Data at a glance \(75 planned tables: 41 implemented DDL \+ 34 specified\)/);
-    assert.match(dataTables, /> 75 tables \(41 implemented DDL \+ 34 specified\)/);
+    assert.match(readme, /Data at a glance \(81 planned tables: 50 implemented DDL \+ 31 specified\)/);
+    assert.match(dataTables, /> 81 tables \(50 implemented DDL \+ 31 specified\)/);
     assert.match(catalog, /> 17 tables\./);
 
-    // Catalog = 002 (12) + 010 (5).
+    // Catalog = 002 (12) + 010 (5); CMS blog slice = 006 (9).
     assert.equal(IMPLEMENTED['002-catalog.sql'].length, 12);
     assert.equal(IMPLEMENTED['010-attr-library.sql'].length, 5);
+    assert.equal(IMPLEMENTED['006-cms.sql'].length, 9);
     assert.equal(IMPLEMENTED['002-catalog.sql'].length + IMPLEMENTED['010-attr-library.sql'].length, 17);
+  });
+
+  test('CMS blog slice is normalized and durable', () => {
+    const cms = code('006-cms.sql');
+    const blogsBlock = cms.match(/CREATE\s+TABLE\s+blogs\s*\(([\s\S]*?)\n\);/i)?.[1] ?? '';
+
+    assert.ok(blogsBlock.length > 0, 'blogs CREATE TABLE block not found');
+    // One primary category + many tags; no M:N category junction.
+    assert.match(cms, /CREATE\s+TABLE\s+blog_post_tags\b/i);
+    assert.equal(/CREATE\s+TABLE\s+blog_post_categories\b/i.test(cms), false);
+    // Status is a scalar state, not a lookup table.
+    assert.match(blogsBlock, /status\s+varchar\(20\)\s+NOT NULL DEFAULT 'draft'/i);
+    assert.match(blogsBlock, /CHECK \(status IN \('draft','scheduled','published','archived'\)\)/i);
+    assert.equal(/CREATE\s+TABLE\s+blog_statuses\b/i.test(cms), false);
+    // JSON document stays the single editable source.
+    assert.match(blogsBlock, /content\s+jsonb\s+NOT NULL DEFAULT '\[\]'/i);
+    assert.equal(/\bcontent_html\b/i.test(cms), false);
+    // Derived caches and search.
+    assert.match(blogsBlock, /content_text\s+text\s+NOT NULL DEFAULT ''/i);
+    assert.match(blogsBlock, /reading_time_minutes\s+smallint/i);
+    assert.match(blogsBlock, /search_vector\s+tsvector\s+GENERATED ALWAYS AS/i);
+    // Inline media ledger and slug history exist; views do not.
+    assert.match(cms, /CREATE\s+TABLE\s+blog_post_media\b/i);
+    assert.match(cms, /CREATE\s+TABLE\s+blog_slug_history\b/i);
+    assert.equal(/\bviews\b/i.test(blogsBlock), false);
   });
 
   test('migration README declares the 009 -> 004 dependency', () => {
     const readme = read(join(MIGRATE_DIR, 'README.md'));
     assert.match(readme, /004-orders\.sql/);
     assert.match(readme, /blocked/i);
-    assert.match(readme, /41/);
+    assert.match(readme, /Total.*\*\*50\*\*/);
   });
 });
