@@ -472,7 +472,7 @@ export function validateBlogDraft(
     }
   }
 
-  if (context.mode === 'publish') {
+  if (input.status === 'published' || input.status === 'scheduled') {
     if (content.length === 0) errors.content = 'Publishing requires article content.';
     if (contentText.trim().length < 80)
       errors.content = 'Article content is too short to publish.';
