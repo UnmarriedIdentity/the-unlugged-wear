@@ -267,27 +267,27 @@ function normalizeInlineNodes(value: unknown): BlogInlineNode[] | undefined {
     if (!isRecord(raw) || raw.type !== 'text' || typeof raw.text !== 'string') {
       continue;
     }
-    const marks: BlogInlineMark[] = Array.isArray(raw.marks)
-      ? raw.marks
-          .filter(isRecord)
-          .filter(
-            (mark): mark is BlogInlineMark =>
-              typeof mark.type === 'string' &&
-              [
-                'bold',
-                'italic',
-                'underline',
-                'strikethrough',
-                'link',
-              ].includes(mark.type)
-          )
-          .map((mark) => ({
-            type: mark.type as BlogInlineMarkType,
-            ...(isRecord(mark.attrs) && typeof mark.attrs.href === 'string'
-              ? { attrs: { href: mark.attrs.href } }
-              : {}),
-          }))
-      : [];
+  const marks: BlogInlineMark[] = Array.isArray(raw.marks)
+    ? (raw.marks as unknown[])
+        .filter(isRecord)
+        .filter(
+          (mark) =>
+            typeof mark.type === 'string' &&
+            [
+              'bold',
+              'italic',
+              'underline',
+              'strikethrough',
+              'link',
+            ].includes(mark.type)
+        )
+        .map((mark) => ({
+          type: mark.type as BlogInlineMarkType,
+          ...(isRecord(mark.attrs) && typeof mark.attrs.href === 'string'
+            ? { attrs: { href: mark.attrs.href } }
+            : {}),
+        }))
+    : [];
     nodes.push({ type: 'text', text: raw.text, ...(marks.length ? { marks } : {}) });
   }
   return nodes.length > 0 ? nodes : undefined;
