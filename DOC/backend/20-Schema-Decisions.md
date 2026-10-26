@@ -55,7 +55,43 @@ row counts are unchanged.
 | `photo_settings` JSONB | Whole-document gallery presentation, not relational state. |
 | `order_items` snapshots | Immutable purchase record, not live catalog data. |
 
-## 4. Vocabulary and known gaps
+## 4. Blog schema (2026-10-26)
+
+The blog slice is the final model, not a temporary v1:
+
+- **Status stays `varchar + CHECK`** (`draft | scheduled | published |
+  archived`). There is deliberately **no `blog_statuses` lookup table**:
+  status is a finite scalar state, not an entity. A lookup would force a
+  join on every read and require seed rows without adding integrity over
+  the CHECK. Labels, colors and legal transitions belong to the service
+  layer.
+- **`blogs.content` is the single editable source.** It is a
+  ProseMirror/Tiptap-compatible JSON document. **No `content_html` column
+  exists**: sanitized HTML for RSS/email is generated on demand, never
+  stored as a second editable source.
+- **Derived caches are owned by the save transaction.** `content_text`
+  and `reading_time_minutes` are extracted from the validated document;
+  `search_vector` is a generated column. They are never independently
+  editable.
+- **One primary category + many tags.** `blogs.category_id` is a single
+  FK; tags are the `blog_post_tags` junction. No `blog_post_categories`
+  table is created.
+- **One primary author + future co-author path.** `blogs.author_id`
+  points at `blog_authors`; co-authoring later adds a junction, it does
+  not retrofit this column.
+- **Cover/OG are direct FKs on `blogs`.** `blog_post_media` is the FK
+  ledger for **inline media inside JSON only**, not a second document and
+  not a cover store.
+- **`blog_slug_history` is required**, not optional. Published slug
+  changes insert the retired slug and resolve to a `301` redirect.
+- **Revisions are immutable snapshots** in `blog_revisions.snapshot`;
+  restore copies a snapshot into a draft rather than mutating a published
+  row.
+- **No `views` column on `blogs`.** Views come from the analytics
+  `page_views` domain; a blog counter would be unauditable fabricated
+  data.
+
+## 5. Vocabulary and known gaps
 
 - DB `products.status` uses `draft | active | archived`; the admin UI uses
   `draft | published | archived`. The API seam maps `published` → `active`;
@@ -71,7 +107,7 @@ row counts are unchanged.
   `product_source_rows`, `stock_movements`, junction tables) carry only the
   timestamps they need.
 
-## 5. Implementation status
+## 6. Implementation status
 
 | Status | Tables | Where |
 |---|---:|---|
