@@ -8,15 +8,22 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 280,
-    "done": 256,
+    "total": 281,
+    "done": 257,
     "in_progress": 0,
     "backlog": 24
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "d4c42ad",
+    "tip": "7e3a14d",
     "unpushed": [
+      "7e3a14d",
+      "8d6d500",
+      "f286600",
+      "8147632",
+      "33396a3",
+      "806fee6",
+      "8164bc6",
       "d4c42ad",
       "04f31ec",
       "28eccec",
@@ -44,8 +51,9 @@
       "f5c9cea",
       "e3e12f9"
     ],
-    "next_up": "Placements single-source SHIPPED (d4c42ad): `ProductItem.placement`, `PLACEMENT_OPTIONS`, `formPlacement`, and the card-4 Print placement select are gone; `Placements` (`LIB-03`) is the only product placement source in card 5, and legacy localStorage values migrate into it. Semantic variant-label schema remains shipped (04f31ec): `attribute_definitions.slug` is the stable filter/URL key and `product_attribute_links.display_position` orders non-axis specs; canonical types are Size/Model/Dimensions/Capacity/Shape/Style. No table-count change (41 implemented + 34 specified = 75). NEXT: Phase 2 importer classifier + editable preview label, then Phase 3 dynamic N-axis admin matrix/search, then Phase 4 storefront generic options. Browser passes for General cards, the import, Clothing Specs, and the Placements single-source fix remain pending.",
+    "next_up": "CMS blog schema SHIPPED (7e3a14d): 006-cms.sql implements the normalized blog slice — media, blog_categories, blog_authors, blog_tags, blogs, blog_post_tags, blog_revisions, blog_slug_history, and blog_post_media. One primary category + many normalized tags; one primary author; ProseMirror/Tiptap-compatible JSON; revisions from day one; scheduled publishing; slug history redirects; inline-media FK ledger. No blog_statuses lookup, no content_html, and no fabricated views column. Table counts are now 50 implemented + 31 specified = 81. NEXT: Phase 2 admin authoring — blog state/taxonomy persistence, DB-driven categories, and a full-page Tiptap editor with preview, publish/schedule, revisions, media picker, and SEO fields.",
     "pending_verifications": [
+      "SQL dry-run: apply 001 + 002 + 006-cms.sql against a real PostgreSQL instance; verify generated blogs.search_vector, slug/CHECK constraints, FK RESTRICT/CASCADE behavior, and partial indexes. psql remains unavailable locally.",
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
       "dashboard D-series: KPI tiers, range/sort menus, badge mapping, calendar pills, header tint (360/768/1024/1440)",
       "trunk continuous-dark + elbow-only on 1st-4th actives (post Antigravity+z-lift)",
@@ -77,7 +85,7 @@
       "PEDIT Clothing Specs cards (c86e718): Compact one card per row; Expanded/Full pairs Display options+Clothing specs and Size chart+Monogram at 1024/1440; Display options switch hides/shows the monogram card; independent collapse survives tab switches; size-chart table scrolls inside a half-width card; monogram pair collapses to one column at 360; chart add/remove + in-use guard feedback; Reset Demo; 360/768/1024/1440 - browser pass pending",
       "SQL dry-run (f9de18b + 04f31ec): psql is not installed; validate 002 + 010 against a real Postgres instance before the first migration run. The static schema guard (28eccec + 04f31ec) checks inventory/FK order/retired names/semantic columns but does not replace a real parser."
     ],
-    "last_updated": "2026-10-22",
+    "last_updated": "2026-10-27",
     "updated_by": "agent"
   },
   "tasks": [
@@ -2161,6 +2169,30 @@
         "feature build is the project's final step: P1 (seed + scorer + API + PDP rail + events) → P2 (admin screens + Styling report + co-purchase job) → P3 (personalization, size-aware via profile_size_preferences)",
         "styling_events doubles as the shadow-mode harness (variant + contributors columns) — no schema change needed at any stage",
         "file 18 is free again for the queued attribute edge log"
+      ]
+    },
+    {
+      "id": "TL-DB-CMS-BLOG",
+      "title": "Normalized CMS blog schema (006: media + 8 blog tables)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-26",
+      "finished": "2026-10-27",
+      "log": "feat/search-modal: 8164bc6 file-09 final model + 806fee6 file-20 decisions + 33396a3 006-cms.sql + 8147632 inventory + f286600 overview counts + 8d6d500 migration README + 7e3a14d schema guard; 41→50 implemented, 75→81 planned",
+      "design_match": "yes",
+      "key_decisions": [
+        "status stays varchar + CHECK (draft/scheduled/published/archived); no blog_statuses lookup",
+        "content JSONB is the single editable source; no content_html; content_text + reading time + generated search_vector are derived caches",
+        "one primary category + normalized tags; one primary author with a later co-author junction path",
+        "cover/OG are direct media FKs; blog_post_media is the inline-media FK ledger (inline images only)",
+        "blog_slug_history is required for 301 redirects; blog_revisions are immutable snapshots",
+        "no views column — analytics page_views owns that data"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "runtime SQL dry-run on a real PostgreSQL instance (006-cms.sql, incl. generated column + check constraints)",
+        "Phase 2: admin blog state + taxonomy + full-page Tiptap editor"
       ]
     },
     {
