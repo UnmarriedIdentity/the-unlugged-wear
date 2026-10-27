@@ -8,15 +8,32 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 282,
-    "done": 258,
+    "total": 284,
+    "done": 259,
     "in_progress": 0,
-    "backlog": 24
+    "backlog": 25
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "52a8216",
+    "tip": "6c7e124",
     "unpushed": [
+      "6c7e124",
+      "c344fea",
+      "dca4e76",
+      "c081f00",
+      "90c3526",
+      "5f24d18",
+      "325999b",
+      "0b9a554",
+      "639ead5",
+      "d657564",
+      "da55a2c",
+      "491a39d",
+      "cde5e5f",
+      "1da9df2",
+      "777198a",
+      "cc93003",
+      "75363c6",
       "52a8216",
       "6c3f82f",
       "4cf0a30",
@@ -66,9 +83,9 @@
       "f5c9cea",
       "e3e12f9"
     ],
-    "next_up": "Editorial admin authoring foundation SHIPPED (52a8216): the Journal list is state-driven, the Content overview shows live counts, and /content/journal/new + /content/journal/[id]/edit use a full-page Tiptap editor. The admin state persists categories, authors, tags, media, posts, revisions and slug history with Reset Demo. Publishing validates cover, content length, inline media and scheduled date. NEXT: Phase 3 storefront journal rendering — DB-shaped fixtures, safe JSON renderer, filters/search, reading time, Urbanist italic prose CSS and charcoal/gold accents.",
+    "next_up": "Phase 3 storefront Journal SHIPPED (75363c6..6c7e124): validated block-JSON rendering, URL-driven category/author/tag/search/sort filters, pagination and empty states, SEO-rich article pages with one BlogPosting JSON-LD block, related essays, real reading time, Urbanist italic prose, charcoal/gold styling and a Culture-aligned taxonomy. The admin Journal editor runtime crash was fixed at the Tiptap boundary (90c3526: compact block JSON -> full ProseMirror doc and back; media URLs resolve from mediaId) and deterministic timestamps removed the hydration mismatch (c081f00 + dca4e76). NEXT: Phase 4 live CMS backend — PostgreSQL reads/writes, public/admin API, publish transaction, slug redirects, revision retention, R2 media, cache revalidation, analytics-backed views, and fixture retirement. Awaiting approval before implementation.",
     "pending_verifications": [
-      "editor + journal list browser pass at 360/768/1024/1440 (keyboard, focus, Reset Demo, empty/loading/error states)",
+      "admin journal editor + list full keyboard/focus/Reset Demo pass at 360/768/1024/1440 (CDP route-load check passed; interactive pass pending)",
       "SQL dry-run: apply 001 + 002 + 006-cms.sql against a real PostgreSQL instance; verify generated blogs.search_vector, slug/CHECK constraints, FK RESTRICT/CASCADE behavior, and partial indexes. psql remains unavailable locally.",
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
       "dashboard D-series: KPI tiers, range/sort menus, badge mapping, calendar pills, header tint (360/768/1024/1440)",
@@ -2233,6 +2250,49 @@
         "browser pass for editor + list at 360/768/1024/1440, keyboard and Reset Demo",
         "media-library unification and richer inline media metadata",
         "taxonomy management UI (category/author/tag CRUD)"
+      ]
+    },
+    {
+      "id": "TL-UI-CMS-JOURNAL",
+      "title": "Storefront Journal (renderer, filters, SEO, taxonomy, tests)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-27",
+      "finished": "2026-10-27",
+      "log": "feat/search-modal: 75363c6..6c7e124 — 75363c6 storefront model/fixtures, cc93003/777198a filter + card primitives, 1da9df2/cde5e5f prose styles + Urbanist italic, 491a39d post card, da55a2c safe JSON renderer, d657564 listing, 639ead5 article, 0b9a554 homepage, 325999b/5f24d18 legacy cleanup, 90c3526 editor boundary fix, c081f00/dca4e76 stable timestamps, c344fea Culture taxonomy, 6c7e124 journal tests",
+      "design_match": "yes",
+      "key_decisions": [
+        "the article body renders validated block JSON to React elements; no HTML string is stored or injected",
+        "listing is server-rendered from URL-driven category/author/tag/search/sort filters with pagination and empty states",
+        "article routes use generateStaticParams + generateMetadata, canonical/OG/Twitter metadata and one sanitized BlogPosting JSON-LD block",
+        "admin editor converts compact block JSON to/from a full ProseMirror document at the Tiptap boundary, fixing the undefined schema crash without storing media URLs in content",
+        "storefront taxonomy now mirrors the admin canonical categories, including Culture; Culture has no published fixture yet and exercises the empty state",
+        "website journal helpers are covered by native Node tests"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "Phase 4 replaces fixtures with live API/PostgreSQL queries",
+        "full admin journal keyboard/focus/Reset Demo browser pass",
+        "publish a Culture post so the Culture filter has content"
+      ]
+    },
+    {
+      "id": "TL-API-CMS-BLOG",
+      "title": "Phase 4: live CMS blog API, publishing pipeline and storefront integration",
+      "status": "backlog",
+      "owner": "unassigned",
+      "log": "Planned 2026-10-27: provision PostgreSQL; add server/cms repositories + zod validation; expose public read and admin write APIs; implement publish transaction, slug-history 301s, revision retention, R2 presign, version concurrency, cache revalidation and analytics-backed views; retire both fixture stores after parity proof.",
+      "design_match": "pending",
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [
+        "1. Runtime DB: apply 001 + 002 + 006-cms.sql, seed taxonomy/media, verify generated search_vector + constraints + partial indexes",
+        "2. server/cms: typed read/write repository, content validation, derived content_text/reading time, tag/inline-media sync, publish transaction and slug-history writes",
+        "3. API: public listing/detail with cursor pagination + retired-slug 301 lookup; admin CRUD/publish/revisions/media presign; shared error envelope and RBAC",
+        "4. Storefront: replace JOURNAL_POSTS with API reads, ISR + revalidateTag on publish, noindex/draft hiding, analytics views; keep metadata and JSON-LD contracts",
+        "5. Admin: replace localStorage journal state with API, add R2 upload confirmation, optimistic concurrency via version, revision retention and scheduled-publish worker",
+        "6. Verification: seeded DB tests, redirect/cache/revalidation proof, cross-app typecheck/build, 360/768/1024/1440 a11y pass, zero fixture fallback in production"
       ]
     },
     {

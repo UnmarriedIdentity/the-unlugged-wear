@@ -5,7 +5,7 @@
 - [x] Website and admin run independently with documented commands (`pnpm dev:admin` / `pnpm dev:website`).
 - [x] Each application has its own routing, components, styling and configuration without cross-app imports.
 - [x] UI uses mock adapters (`src/mocks/`); no real service credentials or live transactions.
-- [x] Actual implemented routes are listed; missing screens are recorded (35 admin routes + 27 website routes fully built and pre-rendered).
+- [x] Actual implemented routes are listed; missing screens are recorded (41 admin routes + 31 website routes fully built and pre-rendered).
 
 ## Design
 
@@ -180,3 +180,19 @@
 - [x] Static audit: Compact keeps one card per row. Expanded matrix / Full canvas switches `.tuw-pedit-specs-grid` to two columns at 900px and above, pairing 1+2 and 3+4; below 900px it stays one column. DOM order remains 1–4 and no card spans columns.
 - [x] Automated verification: `pnpm run typecheck` passes; `pnpm run test` passes 78/78 admin + 7/7 website tests; `pnpm run build` prerenders all 40 admin routes. Compiled admin CSS contains `.tuw-pedit-specs-grid`, the shared min-width guard, and the `.tuw-pedit-specs-grid.is-expanded` two-column rule.
 - [ ] Browser visual pass at 360 / 768 / 1024 / 1440: Compact one card per row; Expanded/Full two columns at 1024/1440 pairing Display+Clothing and Size chart+Monogram; Display options switch hides/shows card 4; each card collapses independently and keeps state across tab switches; size-chart table scrolls inside a half-width card; monogram pair collapses to one column at 360; feedback for chart add/remove and in-use guard; Reset Demo. User verification pending.
+
+## Recent Journal / CMS evidence
+
+### Admin authoring runtime + Phase 3 storefront journal (2026-10-27)
+
+- [x] Admin `/content/journal/BLOG-001/edit` loads through headless Chrome/CDP with no runtime exceptions. The original `Cannot read properties of undefined (reading 'schema')` is fixed by converting the persisted compact block array to a full ProseMirror document at the Tiptap boundary and converting the editor result back to block JSON (`90c3526`).
+- [x] Editor image nodes resolve `src` from `mediaId` for display, then strip URL data on save; the stored body stays media-id-only. Lists and blockquotes are wrapped/unwrapped between the compact model and Tiptap's paragraph/list-item schema.
+- [x] Admin editor timestamps use a deterministic `en-IN` / `Asia/Kolkata` formatter (`c081f00`, `dca4e76`); the prior server/client hydration mismatch is gone.
+- [x] Storefront `/journal` renders at 360, 768 and 1440 with URL-driven category, author, tag, search and sort controls, result counts and an empty state. CDP reports no console errors and no horizontal overflow.
+- [x] `/journal/[slug]` renders the cover, metadata, validated block JSON, tags, author card and three related essays. CDP reports one BlogPosting JSON-LD block, the expected canonical URL, `og:type=article`, Urbanist italic available, no console errors and no horizontal overflow at 360/1440.
+- [x] The homepage featured story reads from the same journal model; the legacy `JOURNAL_ARTICLES` fixture and `JournalArticle` type are removed.
+- [x] Storefront taxonomy mirrors the admin canonical categories, including `Culture`; there is no published Culture fixture yet, so that pill intentionally reaches the empty state until Phase 4 content exists.
+- [x] Storefront journal helpers are covered by native Node tests for reading-time formatting, UTC date formatting, publication gating and related-post ranking (`6c7e124`).
+- [x] `pnpm run typecheck` passes with no diagnostics; `pnpm run test` passes 99/99 admin + 11/11 website tests; `pnpm run build` prerenders all 41 admin routes and 31 website routes, with the four journal articles statically generated.
+- [ ] Full admin journal list/editor keyboard, focus, empty/loading/error and Reset Demo browser pass at 360/768/1024/1440 remains pending.
+- [ ] Runtime PostgreSQL validation remains blocked because `psql`/PostgreSQL is not installed locally; the static schema guard is the current substitute.
