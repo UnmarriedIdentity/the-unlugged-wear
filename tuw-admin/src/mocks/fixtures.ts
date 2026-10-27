@@ -1,8 +1,18 @@
+export type ProductGender = 'Female' | 'Male' | 'Unisex' | 'Kids' | 'Boy' | 'Girl';
+
+/** One preserved workbook row. Mirrors product_source_rows. */
+export interface ProductSourceRow {
+  sourceSerialNo?: number;
+  sourceRowNo: number;
+  raw: Record<string, string>;
+}
+
 export interface ProductItem {
   id: string;
   name: string;
   slug: string;
-  category: 'T-Shirts' | 'Hoodies' | 'Jackets' | 'Pants' | 'Accessories';
+  /** Category names are data, not a hard-coded enum — imports can add them. */
+  category: string;
   price: number; // in INR (or formatted display)
   compareAtPrice?: number;
   /** Pricing anchor (R1). Derived cells = basePrice + Σ priceAdjustments;
@@ -19,7 +29,6 @@ export interface ProductItem {
   colors: string[];
   sizes: string[];
   partner: 'Qikink Direct API' | 'Printrove Hub' | 'Custom Atelier';
-  placement: 'Chest (45mm)' | 'Back Oversized' | 'Sleeve Length' | 'Interior Hem';
   soldCount: number;
   /** Ordered gallery URLs. Index 0 is the cover (hero); reorder or
    * Set Cover in the editor. Never optional — empty array means no image. */
@@ -41,11 +50,19 @@ export interface ProductItem {
   // Single-valued import columns live here; multi-valued ones live in
   // attributes[] (see ProductAttribute). REST: same names on the API.
   styleCode?: string;
+  /** Internal workbook S.No — display/reference only, never the identity. */
+  internalSerialNo?: number;
+  /** Deterministic workbook group key; re-import identity. */
+  sourceGroupKey?: string;
   weight?: string;
   shippingWeight?: string;
   dimensions?: string;
-  gender?: 'Female' | 'Male' | 'Unisex' | 'Kids';
+  gender?: ProductGender;
   taxRate?: number;
+  /** HSN/SAC classification; admin/checkout only, never storefront copy. */
+  hsnCode?: string;
+  /** Preserved workbook rows that assembled this product. */
+  sourceRows?: ProductSourceRow[];
   /** Linked measuring set (size-chart manager). Optional — absent means
    * the legacy hardcoded guide. */
   sizeChartId?: string;
@@ -80,16 +97,25 @@ export interface ProductDiscount {
 /** Per-size/color inventory unit. Prices follow ProductItem.price convention
  * (floats — matches the product domain; AGENTS minor-unit tension recorded
  * for later reconciliation, not silently converted). */
-export interface ProductVariant {  id: string;
+export interface ProductVariant {
+  id: string;
   color: string;
   size: string;
   sku: string;
+  /** Sorted axis-value signature; unique per product in the DB. */
+  variantKey?: string;
   price: number;
   /** Explicit cell override (R1): true pins this price through recomputes
    * until reset. Absent = derived pipeline value. Mirrors
    * product_variants.price_overridden (DOC/backend/04-Catalog.md). */
   priceOverridden?: boolean;
   stock: number;
+  /** Row-level shipping overrides; absent falls back to product defaults. */
+  weight?: string;
+  shippingWeight?: string;
+  dimensions?: string;
+  /** Workbook S.No of the row that generated this variant. */
+  sourceSerialNo?: number;
 }
 
 /** Admin-defined product attribute (AX3). Color + Size ship builtin;
@@ -272,6 +298,17 @@ export interface TeamMember {
 // BASELINE DETERMINISTIC FIXTURES
 // -------------------------------------------------------------
 
+/** Builtin Placements attribute carried by demo products. The library owns
+ * the allowed values; each product keeps only its selected subset. */
+const placementAttribute = (values: string[]): ProductAttribute => ({
+  name: 'Placements',
+  values,
+  builtin: true,
+  displayType: 'radio',
+  swatchHex: {},
+  libraryId: 'LIB-03',
+});
+
 export const initialProducts: ProductItem[] = [
   {
     id: 'PRD-01',
@@ -291,7 +328,7 @@ export const initialProducts: ProductItem[] = [
     colors: ['Jet Black', 'Bone Chalk', 'Washed Olive'],
     sizes: ['S', 'M', 'L', 'XL'],
     partner: 'Qikink Direct API',
-    placement: 'Back Oversized',
+    attributes: [placementAttribute(['Back'])],
     soldCount: 492,
     images: ['/products/1.jpeg'],
     rating: 4.9,
@@ -309,7 +346,7 @@ export const initialProducts: ProductItem[] = [
     colors: ['Onyx', 'Heather Grey', 'Vintage Clay'],
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
     partner: 'Printrove Hub',
-    placement: 'Chest (45mm)',
+    attributes: [placementAttribute(['Front'])],
     soldCount: 369,
     images: ['/products/2.jpeg'],
     rating: 4.8,
@@ -326,7 +363,7 @@ export const initialProducts: ProductItem[] = [
     colors: ['Dark Charcoal', 'Earth Sand'],
     sizes: ['30', '32', '34', '36'],
     partner: 'Custom Atelier',
-    placement: 'Interior Hem',
+    attributes: [placementAttribute(['Back'])],
     soldCount: 215,
     images: ['/products/3.jpeg'],
     rating: 4.7,
@@ -344,7 +381,7 @@ export const initialProducts: ProductItem[] = [
     colors: ['Obsidian Black', 'Midnight Navy'],
     sizes: ['M', 'L', 'XL'],
     partner: 'Custom Atelier',
-    placement: 'Sleeve Length',
+    attributes: [placementAttribute(['Left Sleeve', 'Right Sleeve'])],
     soldCount: 140,
     images: ['/products/1.jpeg'],
     rating: 5.0,
@@ -361,7 +398,7 @@ export const initialProducts: ProductItem[] = [
     colors: ['Camel Khaki', 'Black'],
     sizes: ['S', 'M', 'L'],
     partner: 'Custom Atelier',
-    placement: 'Interior Hem',
+    attributes: [placementAttribute(['Back'])],
     soldCount: 0,
     images: ['/products/2.jpeg'],
     rating: 0,
@@ -378,7 +415,7 @@ export const initialProducts: ProductItem[] = [
     colors: ['Vintage White', 'Faded Charcoal'],
     sizes: ['XS', 'S', 'M', 'L', 'XL'],
     partner: 'Qikink Direct API',
-    placement: 'Back Oversized',
+    attributes: [placementAttribute(['Back'])],
     soldCount: 520,
     images: ['/products/3.jpeg'],
     rating: 4.9,
@@ -395,7 +432,7 @@ export const initialProducts: ProductItem[] = [
     colors: ['Heather Grey', 'Pure Black', 'Oatmeal'],
     sizes: ['One Size'],
     partner: 'Custom Atelier',
-    placement: 'Interior Hem',
+    attributes: [placementAttribute(['Front'])],
     soldCount: 198,
     images: ['/products/1.jpeg'],
     rating: 4.8,
@@ -412,7 +449,7 @@ export const initialProducts: ProductItem[] = [
     colors: ['Matte Black', 'Tactical Slate'],
     sizes: ['One Size'],
     partner: 'Printrove Hub',
-    placement: 'Chest (45mm)',
+    attributes: [placementAttribute(['Front'])],
     soldCount: 260,
     images: ['/products/2.jpeg'],
     rating: 4.9,
@@ -429,7 +466,7 @@ export const initialProducts: ProductItem[] = [
     colors: ['Dust Sage', 'Jet Black'],
     sizes: ['S', 'M', 'L'],
     partner: 'Qikink Direct API',
-    placement: 'Chest (45mm)',
+    attributes: [placementAttribute(['Front'])],
     soldCount: 310,
     images: ['/products/3.jpeg'],
     rating: 4.6,
@@ -446,7 +483,7 @@ export const initialProducts: ProductItem[] = [
     colors: ['Raw Indigo'],
     sizes: ['30', '32', '34', '36'],
     partner: 'Custom Atelier',
-    placement: 'Interior Hem',
+    attributes: [placementAttribute(['Right Pocket'])],
     soldCount: 88,
     images: ['/products/1.jpeg'],
     rating: 4.9,

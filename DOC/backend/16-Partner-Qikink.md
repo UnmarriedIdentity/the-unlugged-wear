@@ -1,6 +1,6 @@
 # Partner — Qikink Print on Demand
 
-> Status: Draft | Last Updated: 2026-10-16
+> Status: Draft | Last Updated: 2026-10-21
 > Qikink prints + ships everything; we hold no warehouse and run no floor.
 > Our fulfillment statuses **mirror partner state**, never our own operations.
 > Reference: Qikink API 08-23 (Postman public docs) + Qikink help center.
@@ -30,8 +30,9 @@ Embroidery=3, DTF=17…, qty 1–100, `sku`, `designs`) ·
 ## Money: wallet credits
 
 Rs.1 = 1 credit, no expiry. Every placed order deducts; recharges are
-manual (dashboard). **Zero wallet halts all placement** — hence the
-admin wallet-balance card with low-balance warning. COD: customer pays
+manual (dashboard). **Zero wallet halts all placement** — the balance is
+an operational pre-flight check; the admin wallet-balance card is not
+built in the UI-only phase. COD: customer pays
 courier at delivery; courier remits to Qikink in 4–5 working days
 (tracked as a note on the order, not a ledger entry — the ledger records
 *our* credit movements only). Every debit/refund lands in
@@ -48,7 +49,9 @@ availability renders from `is_active`. Edit/cancel supported pre-print.
 ## Tracking sync (poll-first)
 
 AWB + courier + status stored on `partner_orders` (`synced_at` per row);
-`shipments.tracking_number` carries the AWB (no new column needed).
+`shipments.tracking_number` carries the customer-facing AWB projection.
+`partner_orders.awb` is the raw sync value; if they disagree, the partner
+seam is the audit source and `shipments` is what the customer sees.
 Strategy is **poll + AWB store** until sandbox proves webhook push —
 polling is the cheaper assumption to be wrong about. Per-row **Sync now**
 button in admin is the honest manual fallback from day one.

@@ -9,8 +9,11 @@ import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, IconB
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 import { resolveVariants, variantStockTotal, buildVariantSku, deriveVariantPrice, recomputeVariants, minFromPrice, pruneAdjustments, roundPrice, hasPriceSpread, adjustmentKey, sumAdjustments } from '@/mocks/variants';
-import type { ProductVariant, ProductAttribute, PhotoSettings, ProductDiscount, SizeChart } from '@/mocks/fixtures';
+import type { ProductVariant, ProductAttribute, PhotoSettings, ProductDiscount, SizeChart, ProductGender } from '@/mocks/fixtures';
 import { parseCompareAtPrice } from '@/lib/productPricing';
+import { groupImportRows, isValidHsnCode, UNCATEGORIZED_CATEGORY } from '@/lib/productImport';
+import type { ImportProductGroup, ImportSourceRow } from '@/lib/productImport';
+import { slugify } from '@/lib/collections';
 import { attributeDisplayLabel, normalizeAttributeDisplayType } from '@/lib/attributePresentation';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
@@ -21,12 +24,11 @@ const PRODUCT_CATEGORIES: ProductItem['category'][] = [
   'Jackets',
   'Pants',
   'Accessories',
+  'Home & Living',
+  'Stationery',
+  'Phone Accessories',
+  UNCATEGORIZED_CATEGORY,
 ];
-
-const CATEGORY_OPTIONS = PRODUCT_CATEGORIES.map((category) => ({
-  value: category,
-  label: category,
-}));
 
 // SearchableSelect uses a real value for the selected row; keep the form's
 // empty-string "unspecified" state at the boundary only.
@@ -36,7 +38,11 @@ const GENDER_OPTIONS = [
   { value: 'Male', label: 'Male' },
   { value: 'Unisex', label: 'Unisex' },
   { value: 'Kids', label: 'Kids' },
+  { value: 'Boy', label: 'Boy' },
+  { value: 'Girl', label: 'Girl' },
 ];
+
+const IMPORT_GENDERS = ['Female', 'Male', 'Unisex', 'Kids', 'Boy', 'Girl'] as const;
 
 const PUBLICATION_OPTIONS: Array<{ value: ProductItem['publicationStatus']; label: string }> = [
   { value: 'published', label: 'Published (Live)' },
@@ -55,21 +61,15 @@ const PARTNER_OPTIONS: Array<{ value: ProductItem['partner']; label: string }> =
   { value: 'Custom Atelier', label: 'Custom Atelier' },
 ];
 
-const PLACEMENT_OPTIONS: Array<{ value: ProductItem['placement']; label: string }> = [
-  { value: 'Chest (45mm)', label: 'Chest (45mm)' },
-  { value: 'Back Oversized', label: 'Back Oversized' },
-  { value: 'Sleeve Length', label: 'Sleeve Length' },
-  { value: 'Interior Hem', label: 'Interior Hem' },
-];
-
 const pairedFieldGrid: React.CSSProperties = {
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
   gap: 12,
 };
 
-// PEDIT card 5: flat attribute rows. Rows are bordered groups, not nested cards.
-const attributeRowStyle: React.CSSProperties = {
+// Flat bordered groups used inside PEDIT cards (attribute rows, size-chart
+// entries). Groups are not nested cards.
+const flatGroupStyle: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
   gap: 10,
@@ -118,7 +118,14 @@ const attributeGroupLabelStyle: React.CSSProperties = {
 // swatch dots stay neutral until a value→hex map lands (recorded follow-up).
 
 export default function ProductsView() {
-  const { products, createProduct, updateProduct, deleteProduct, canPerformAction, showToast, stockMovements, sizeCharts, createSizeChart, deleteSizeChart, addSizeChartRow, removeSizeChartRow, patchSizeChartCell, libraryAttributes, createLibraryAttribute, addLibraryValue } = useAdminState();
+  const { products, createProduct, createProducts, updateProduct, deleteProduct, canPerformAction, showToast, stockMovements, sizeCharts, createSizeChart, deleteSizeChart, addSizeChartRow, removeSizeChartRow, patchSizeChartCell, libraryAttributes, createLibraryAttribute, addLibraryValue } = useAdminState();
+
+  // Base categories plus any category an import brought in. Keeping this
+  // derived means a Category column value never disappears from the picker.
+  const categoryOptions = React.useMemo(() => {
+    const categories = [...new Set([...PRODUCT_CATEGORIES, ...products.map((product) => product.category)])];
+    return categories.filter(Boolean).map((category) => ({ value: category, label: category }));
+  }, [products]);
 
   const [selectedCat, setSelectedCat] = useState<string>('All');
   const [publicationFilter, setPublicationFilter] = useState<'all' | 'published' | 'draft' | 'archived'>('all');
@@ -163,17 +170,20 @@ export default function ProductsView() {
   const [formStock, setFormStock] = useState('30');
   // Catalog scalars (Y1): single-valued fields, Input/picker-edited.
   const [formStyleCode, setFormStyleCode] = useState('');
+  const [formSerialNo, setFormSerialNo] = useState('');
   const [formWeight, setFormWeight] = useState('');
   const [formShipWeight, setFormShipWeight] = useState('');
   const [formDims, setFormDims] = useState('');
-  const [formGender, setFormGender] = useState<ProductItem['gender'] | ''>('');
+  const [formGender, setFormGender] = useState<ProductGender | ''>('');
   const [formTax, setFormTax] = useState('');
+  const [formHsn, setFormHsn] = useState('');
   // Scheduled discounts draft (P1d): rows with type/value/window/switch.
   const [formDiscounts, setFormDiscounts] = useState<ProductDiscount[]>([]);
   // Per-product attributes (A1): the single source behind colors/sizes.
   // REST: GET/PUT /products/:id/attributes → [{ name, values[], builtin }].
   // Color + Size + Placements ship builtin (locked); customs append here.
-  // The matrix still cross-products Color×Size until A2 generalizes it.
+  // Placements is the only print-location source; card 4 has no duplicate
+  // select. The matrix still cross-products Color×Size until A2 generalizes it.
   const [formAttributes, setFormAttributes] = useState<ProductAttribute[]>([]);
   const attrValues = (name: string) => formAttributes.find((a) => a.name === name)?.values ?? [];
   const colorValues = attrValues('Color');
@@ -187,7 +197,6 @@ export default function ProductsView() {
   const [formSizeChartId, setFormSizeChartId] = useState('');
   const chartColumns = (chart: SizeChart) => [...new Set(chart.rows.flatMap((r) => Object.keys(r.measures)))];
   const [formPartner, setFormPartner] = useState<ProductItem['partner']>('Qikink Direct API');
-  const [formPlacement, setFormPlacement] = useState<ProductItem['placement']>('Chest (45mm)');
   const [formStatus, setFormStatus] = useState<ProductItem['publicationStatus']>('published');
   const [formDescription, setFormDescription] = useState('Pre-shrunk premium heavyweight combed cotton with reinforced seams.');
 
@@ -204,6 +213,12 @@ export default function ProductsView() {
   const [fulfillmentCardOpen, setFulfillmentCardOpen] = useState(false);
   // Attributes & values (PEDIT card 5) is independently collapsible.
   const [attributesCardOpen, setAttributesCardOpen] = useState(false);
+  // Clothing Specs cards follow the same independent, per-product collapse
+  // contract as the General cards.
+  const [specsDisplayCardOpen, setSpecsDisplayCardOpen] = useState(false);
+  const [specsClothingCardOpen, setSpecsClothingCardOpen] = useState(false);
+  const [specsSizeChartCardOpen, setSpecsSizeChartCardOpen] = useState(false);
+  const [specsMonogramCardOpen, setSpecsMonogramCardOpen] = useState(false);
   const addDiscountRef = useRef<HTMLDivElement>(null);
 
   const openCreateDrawer = () => {
@@ -215,6 +230,10 @@ export default function ProductsView() {
     setDiscountsCardOpen(false);
     setFulfillmentCardOpen(false);
     setAttributesCardOpen(false);
+    setSpecsDisplayCardOpen(false);
+    setSpecsClothingCardOpen(false);
+    setSpecsSizeChartCardOpen(false);
+    setSpecsMonogramCardOpen(false);
     setProductTab('general');
     setDrawerView('compact');
     autoExpandedRef.current = false;
@@ -227,20 +246,21 @@ export default function ProductsView() {
     setFormCompareError(null);
     setFormStock('25');
     setFormStyleCode('');
+    setFormSerialNo('');
     setFormWeight('');
     setFormShipWeight('');
     setFormDims('');
     setFormGender('');
     setFormTax('');
+    setFormHsn('');
     setFormDiscounts([]);
     setFormSizeChartId('');
     setFormAttributes([
       { name: 'Color', values: ['Black', 'Chalk White', 'Olive'], builtin: true, displayType: 'swatch', swatchHex: {}, libraryId: 'LIB-01' },
       { name: 'Size', values: ['S', 'M', 'L', 'XL'], builtin: true, displayType: 'pill', swatchHex: {}, libraryId: 'LIB-02' },
-      { name: 'Placements', values: [], builtin: true, displayType: 'radio', swatchHex: {}, libraryId: 'LIB-03' },
+      { name: 'Placements', values: ['Front'], builtin: true, displayType: 'radio', swatchHex: {}, libraryId: 'LIB-03' },
     ]);
     setFormPartner('Qikink Direct API');
-    setFormPlacement('Chest (45mm)');
     setFormStatus('published');
     setFormDescription('Pre-shrunk premium heavyweight combed cotton with reinforced seams.');
     setFormPhoto({ layout: 'carousel', ratio: '4:3', showPhotos: true });
@@ -768,7 +788,7 @@ export default function ProductsView() {
     );
 
     return (
-      <div key={attr.name} role="group" aria-labelledby={rowTitleId} style={attributeRowStyle}>
+      <div key={attr.name} role="group" aria-labelledby={rowTitleId} style={flatGroupStyle}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
             <span
@@ -867,6 +887,10 @@ export default function ProductsView() {
     setDiscountsCardOpen(false);
     setFulfillmentCardOpen(false);
     setAttributesCardOpen(false);
+    setSpecsDisplayCardOpen(false);
+    setSpecsClothingCardOpen(false);
+    setSpecsSizeChartCardOpen(false);
+    setSpecsMonogramCardOpen(false);
     setProductTab('general');
     setFormCompareError(null);
     setDrawerView('compact');
@@ -888,30 +912,41 @@ export default function ProductsView() {
     // Attribute draft (N1a link match) — built once: the ladder load below
     // prunes adjustment keys against these values, and the drawer renders
     // the same copy.
-    const loadedAttributes =
-      product.attributes && product.attributes.length > 0
-        ? product.attributes.map((a) => {
-            // N1a link: match persisted attrs to the library by name once,
-            // so every card carries its single-record id from here on.
-            const lib = libraryAttributes.find(
-              (l) => l.name.toLowerCase() === a.name.toLowerCase()
-            );
-            return {
-              ...(() => {
-                const copy = { ...a } as ProductAttribute & { visibleOn?: unknown };
-                delete copy.visibleOn;
-                return copy;
-              })(),
-              libraryId: a.libraryId ?? lib?.id,
-              values: [...a.values],
-              swatchHex: { ...(a.swatchHex ?? {}) },
-            };
-          })
-        : [
-            { name: 'Color', values: [...product.colors], builtin: true, displayType: 'swatch' as const, swatchHex: {}, libraryId: 'LIB-01' },
-            { name: 'Size', values: [...product.sizes], builtin: true, displayType: 'pill' as const, swatchHex: {}, libraryId: 'LIB-02' },
-            { name: 'Placements', values: [], builtin: true, displayType: 'radio' as const, swatchHex: {}, libraryId: 'LIB-03' },
-          ];
+    // Persisted rows may carry only overrides (for example a Placements
+    // attribute added to a fixture); Color, Size and Placements are always
+    // rebuilt from the product so the drawer never loses a builtin row.
+    const savedAttributes: ProductAttribute[] = (product.attributes ?? []).map((a) => {
+      // N1a link: match persisted attrs to the library by name once, so
+      // every card carries its single-record id from here on.
+      const lib = libraryAttributes.find((l) => l.name.toLowerCase() === a.name.toLowerCase());
+      const copy = { ...a } as ProductAttribute & { visibleOn?: unknown };
+      delete copy.visibleOn;
+      return {
+        ...copy,
+        libraryId: a.libraryId ?? lib?.id,
+        values: [...a.values],
+        swatchHex: { ...(a.swatchHex ?? {}) },
+      };
+    });
+    const builtinAttributes: ProductAttribute[] = [
+      { name: 'Color', values: [...product.colors], builtin: true, displayType: 'swatch', swatchHex: {}, libraryId: 'LIB-01' },
+      { name: 'Size', values: [...product.sizes], builtin: true, displayType: 'pill', swatchHex: {}, libraryId: 'LIB-02' },
+      { name: 'Placements', values: [], builtin: true, displayType: 'radio', swatchHex: {}, libraryId: 'LIB-03' },
+    ];
+    const loadedAttributes: ProductAttribute[] = [
+      ...builtinAttributes.map((base) => {
+        const saved = savedAttributes.find(
+          (a) => a.name.toLowerCase() === base.name.toLowerCase()
+        );
+        return saved ? { ...base, ...saved } : base;
+      }),
+      ...savedAttributes.filter(
+        (a) =>
+          !builtinAttributes.some(
+            (base) => base.name.toLowerCase() === a.name.toLowerCase()
+          )
+      ),
+    ];
 
     // Pricing ladder load (R1): sanitize the sidecar against these values;
     // legacy cells whose price differs from the derived value become pinned
@@ -937,22 +972,33 @@ export default function ProductsView() {
     setFormComparePrice(product.compareAtPrice ? product.compareAtPrice.toFixed(2) : '');
     setFormStock(String(product.stock));
     setFormStyleCode(product.styleCode || '');
+    setFormSerialNo(product.internalSerialNo !== undefined ? String(product.internalSerialNo) : '');
     setFormWeight(product.weight || '');
     setFormShipWeight(product.shippingWeight || '');
     setFormDims(product.dimensions || '');
     setFormGender(product.gender || '');
     setFormTax(product.taxRate !== undefined ? String(product.taxRate) : '');
+    setFormHsn(product.hsnCode || '');
     setFormDiscounts((product.discounts ?? []).map((d) => ({ ...d })));
     setFormSizeChartId(product.sizeChartId ?? '');
     setFormAttributes(loadedAttributes);
     setFormPartner(product.partner);
-    setFormPlacement(product.placement);
     setFormStatus(product.publicationStatus);
     setFormDescription(product.description);
   };
 
   const handleEditSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isValidHsnCode(formHsn)) {
+      setPricingCardOpen(true);
+      setProductTab('general');
+      showToast({
+        type: 'warning',
+        title: 'Check HSN Code',
+        description: 'HSN/SAC must be 4–8 digits, or left blank.',
+      });
+      return;
+    }
     if (isCreating) {
       const priceNum = parseFloat(formPrice) || 0;
       const stockNum = parseInt(formStock, 10) || 0;
@@ -975,14 +1021,15 @@ export default function ProductsView() {
         colors: colorValues,
         sizes: sizeValues,
         styleCode: formStyleCode.trim() || undefined,
+        internalSerialNo: formSerialNo.trim() !== '' ? Number(formSerialNo) : undefined,
         weight: formWeight.trim() || undefined,
         shippingWeight: formShipWeight.trim() || undefined,
         dimensions: formDims.trim() || undefined,
         gender: formGender || undefined,
         taxRate: formTax.trim() !== '' && !isNaN(parseFloat(formTax)) ? parseFloat(formTax) : undefined,
-      sizeChartId: formSizeChartId || undefined,
+        hsnCode: formHsn.trim() || undefined,
+        sizeChartId: formSizeChartId || undefined,
         partner: formPartner,
-        placement: formPlacement,
         publicationStatus: formStatus,
         description: formDescription,
         photoSettings: formPhoto,
@@ -1054,15 +1101,16 @@ export default function ProductsView() {
       priceAdjustments: Object.keys(cleanAdjustments).length > 0 ? cleanAdjustments : undefined,
       compareAtPrice: compare.value,
       partner: formPartner,
-      placement: formPlacement,
       publicationStatus: formStatus,
       description: formDescription,
       styleCode: formStyleCode.trim() || undefined,
+      internalSerialNo: formSerialNo.trim() !== '' ? Number(formSerialNo) : undefined,
       weight: formWeight.trim() || undefined,
       shippingWeight: formShipWeight.trim() || undefined,
       dimensions: formDims.trim() || undefined,
       gender: formGender || undefined,
       taxRate: formTax.trim() !== '' && !isNaN(parseFloat(formTax)) ? parseFloat(formTax) : undefined,
+      hsnCode: formHsn.trim() || undefined,
       sizeChartId: formSizeChartId || undefined,
       photoSettings: formPhoto,
       discounts: formDiscounts,
@@ -1225,29 +1273,18 @@ export default function ProductsView() {
   };
 
   // CSV import pipeline (X1b): Final Listing workbooks re-saved as CSV.
-  // Quoted-field-aware parse (no dependency); unknown columns ignored;
-  // an optional compare-at column must beat the row's base price; valid
-  // rows stage as drafts, failures preserve file + error list.
-  interface ImportRow {
-    name: string;
-    styleCode: string;
-    colors: string[];
-    sizes: string[];
-    placements: string[];
-    price: number;
-    compareAtPrice?: number;
-    weight: string;
-    shipWeight: string;
-    dims: string;
-    tax: string;
-    gender: string;
-  }
+  // Parses the workbook title row, groups listing rows into products, and
+  // stages one draft per group (not one per row). Row errors preserve the
+  // file + error list; no valid row is mutated on rejection.
   const [importPreview, setImportPreview] = useState<{
     fileName: string;
-    valid: ImportRow[];
+    groups: ImportProductGroup[];
     errors: Array<{ row: number; message: string }>;
+    hasCategoryColumn: boolean;
   } | null>(null);
   const csvInputRef = useRef<HTMLInputElement>(null);
+  const importVariantTotal =
+    importPreview?.groups.reduce((total, group) => total + group.variants.length, 0) ?? 0;
 
   const parseCsv = (text: string): string[][] => {
     const rows: string[][] = [];
@@ -1301,7 +1338,27 @@ export default function ProductsView() {
         showToast({ type: 'warning', title: 'Empty Sheet', description: `"${file.name}" has no data rows.` });
         return;
       }
-      const headers = grid[0].map((h) => h.trim().toLowerCase());
+
+      // Workbook header is row 2 (row 1 is the sheet title). Find the first
+      // row that actually carries the canonical columns instead of assuming
+      // headers are row 1.
+      const headerRowIndex = grid.findIndex((cells) => {
+        const normalized = cells.map((cell) => cell.trim().toLowerCase());
+        return (
+          normalized.includes('style') &&
+          normalized.some((cell) => ['sizes', 'size', 'base price', 'price'].includes(cell))
+        );
+      });
+      if (headerRowIndex < 0) {
+        showToast({
+          type: 'warning',
+          title: 'Header Row Not Found',
+          description: 'Expected a Style column plus sizes or Base Price. Re-save the Final Listing sheet as CSV.',
+        });
+        return;
+      }
+
+      const headers = grid[headerRowIndex].map((h) => h.trim().toLowerCase());
       const col = (names: string[]) => {
         for (const n of names) {
           const i = headers.indexOf(n);
@@ -1310,6 +1367,7 @@ export default function ProductsView() {
         return -1;
       };
       const cStyle = col(['style']);
+      const cSerial = col(['s.no', 's no', 'serial no', 'serial number', 'sno']);
       const cSizes = col(['sizes', 'size']);
       const cColors = col(['colors', 'color']);
       const cWeight = col(['weight']);
@@ -1317,18 +1375,21 @@ export default function ProductsView() {
       const cPrice = col(['base price', 'price']);
       const cCompare = col(['compare at price', 'compare price', 'compare-at price', 'was price', 'original price']);
       const cPlace = col(['placements', 'placement']);
-      const cDims = col(['package dimensions', 'dimensions']);
+      const cDims = col(['package dimensions (lxbxh)', 'package dimensions', 'dimensions', 'package dimension']);
       const cTax = col(['tax rate', 'tax']);
       const cGender = col(['gender']);
-      const valid: ImportRow[] = [];
+      const cHsn = col(['hsn', 'hsn code', 'hsn/sac']);
+      const cCategory = col(['category', 'product category']);
+      const rows: ImportSourceRow[] = [];
       const errors: Array<{ row: number; message: string }> = [];
-      const seenCodes = new Set<string>();
-      grid.slice(1).forEach((cells, i) => {
-        const rowNo = i + 2;
+
+      grid.slice(headerRowIndex + 1).forEach((cells, i) => {
+        const rowNo = headerRowIndex + i + 2;
         const get = (c: number) => (c >= 0 ? (cells[c] ?? '').trim() : '');
         const styleRaw = get(cStyle);
-        const name = styleRaw.split('|')[0]?.trim() ?? '';
-        const styleCode = styleRaw.split('|')[1]?.trim() ?? '';
+        const [namePart, ...codeParts] = styleRaw.split('|');
+        const name = namePart?.trim() ?? '';
+        const styleCode = codeParts.join('|').trim();
         const priceRaw = get(cPrice);
         if (!name) {
           errors.push({ row: rowNo, message: 'Style is required.' });
@@ -1352,12 +1413,14 @@ export default function ProductsView() {
           }
           compareAtPrice = parsedCompare.value;
         }
-        if (styleCode !== '') {
-          if (seenCodes.has(styleCode.toLowerCase())) {
-            errors.push({ row: rowNo, message: `"${name}": duplicate style code "${styleCode}" in this file.` });
+        const serialRaw = get(cSerial);
+        let serialNo: number | undefined;
+        if (serialRaw !== '') {
+          serialNo = Number(serialRaw);
+          if (!Number.isInteger(serialNo) || serialNo <= 0) {
+            errors.push({ row: rowNo, message: `"${name}": S.No must be a positive whole number.` });
             return;
           }
-          seenCodes.add(styleCode.toLowerCase());
         }
         const taxRaw = get(cTax);
         if (taxRaw !== '' && (isNaN(parseFloat(taxRaw)) || parseFloat(taxRaw) < 0)) {
@@ -1365,72 +1428,137 @@ export default function ProductsView() {
           return;
         }
         const genderRaw = get(cGender);
-        if (genderRaw !== '' && !['Female', 'Male', 'Unisex', 'Kids'].includes(genderRaw)) {
-          errors.push({ row: rowNo, message: `"${name}": Gender must be Female, Male, Unisex, or Kids.` });
+        const canonicalGender = IMPORT_GENDERS.find(
+          (gender) => gender.toLowerCase() === genderRaw.toLowerCase()
+        );
+        if (genderRaw !== '' && !canonicalGender) {
+          errors.push({
+            row: rowNo,
+            message: `"${name}": Gender must be Female, Male, Unisex, Kids, Boy, or Girl.`,
+          });
           return;
         }
-        valid.push({
+        const hsnRaw = get(cHsn);
+        if (!isValidHsnCode(hsnRaw)) {
+          errors.push({ row: rowNo, message: `"${name}": HSN must be 4–8 digits, or blank.` });
+          return;
+        }
+
+        const raw: Record<string, string> = {};
+        headers.forEach((header, index) => {
+          if (header && header !== 'id') raw[header] = (cells[index] ?? '').trim();
+        });
+
+        rows.push({
+          rowNo,
+          serialNo,
           name,
           styleCode,
+          gender: canonicalGender ?? '',
           colors: splitList(get(cColors)),
           sizes: splitList(get(cSizes)),
           placements: splitList(get(cPlace)),
           price,
           compareAtPrice,
           weight: get(cWeight),
-          shipWeight: get(cShip),
-          dims: get(cDims),
+          shippingWeight: get(cShip),
+          dimensions: get(cDims),
           tax: taxRaw,
-          gender: genderRaw,
+          hsnCode: hsnRaw,
+          category: get(cCategory),
+          raw,
         });
       });
-      setImportPreview({ fileName: file.name, valid, errors });
+
+      const grouped = groupImportRows(rows);
+      setImportPreview({
+        fileName: file.name,
+        groups: grouped.groups,
+        errors: [...errors, ...grouped.errors],
+        hasCategoryColumn: cCategory >= 0,
+      });
     };
     reader.readAsText(file);
   };
 
   const applyImport = () => {
-    if (!importPreview || importPreview.valid.length === 0) return;
+    if (!importPreview || importPreview.groups.length === 0) return;
+    if (!canPerformAction('products')) return;
     const stamp = Date.now().toString(36);
-    let staged = 0;
-    importPreview.valid.forEach((r, i) => {
-      const ok = createProduct(
-        {
-          name: r.name,
-          slug: `${r.name.toLowerCase().replace(/\s+/g, '-')}-imp-${stamp}-${i}`,
-          category: 'T-Shirts',
-          price: r.price,
-          compareAtPrice: r.compareAtPrice,
-          stock: 0,
-          colors: r.colors.length > 0 ? r.colors : ['Default'],
-          sizes: r.sizes.length > 0 ? r.sizes : ['Standard'],
-          partner: 'Qikink Direct API',
-          placement: 'Chest (45mm)',
-          publicationStatus: 'draft',
-          description: '',
-          images: [],
-          styleCode: r.styleCode || undefined,
-          weight: r.weight || undefined,
-          shippingWeight: r.shipWeight || undefined,
-          dimensions: r.dims || undefined,
-          gender: (r.gender || undefined) as ProductItem['gender'] | undefined,
-          taxRate: r.tax !== '' ? parseFloat(r.tax) : undefined,
-          attributes: [
-            { name: 'Color', values: r.colors, builtin: true, displayType: 'swatch', swatchHex: {} },
-            { name: 'Size', values: r.sizes, builtin: true, displayType: 'pill', swatchHex: {} },
-            { name: 'Placements', values: r.placements, builtin: true, displayType: 'radio', swatchHex: {} },
-          ],
-        },
-        true
+    const stagedVariants = importPreview.groups.reduce(
+      (total, group) => total + group.variants.length,
+      0
+    );
+
+    const drafts = importPreview.groups.map((group, i) => {
+      const minPrice =
+        group.variants.length > 0 ? Math.min(...group.variants.map((variant) => variant.price)) : 0;
+      const lowestVariant = group.variants.reduce<ImportProductGroup['variants'][number] | undefined>(
+        (lowest, variant) => (!lowest || variant.price < lowest.price ? variant : lowest),
+        undefined
       );
-      if (ok) staged++;
+      const compareAtPrice =
+        lowestVariant?.compareAtPrice !== undefined && lowestVariant.compareAtPrice > minPrice
+          ? lowestVariant.compareAtPrice
+          : undefined;
+      const gender = IMPORT_GENDERS.find(
+        (value) => value.toLowerCase() === group.gender.toLowerCase()
+      );
+
+      return {
+        name: group.name || 'Untitled Garment',
+        slug: `${slugify(group.name) || 'product'}-imp-${stamp}-${i}`,
+        category: group.category || UNCATEGORIZED_CATEGORY,
+        price: minPrice,
+        basePrice: minPrice,
+        compareAtPrice,
+        stock: 0,
+        colors: group.colors.length > 0 ? group.colors : ['Default'],
+        sizes: group.sizes.length > 0 ? group.sizes : ['Standard'],
+        partner: 'Qikink Direct API' as const,
+        publicationStatus: 'draft' as const,
+        description: '',
+        images: [],
+        styleCode: group.styleCode || undefined,
+        internalSerialNo: group.serialNo,
+        sourceGroupKey: group.key,
+        weight: group.weight || undefined,
+        shippingWeight: group.shippingWeight || undefined,
+        dimensions: group.dimensions || undefined,
+        gender,
+        taxRate: group.taxRate,
+        hsnCode: group.hsnCode || undefined,
+        sourceRows: group.sourceRows,
+        variants: group.variants.map((variant) => ({
+          id: '',
+          sku: '',
+          color: variant.color,
+          size: variant.size,
+          price: variant.price,
+          priceOverridden: true,
+          stock: 0,
+          weight: variant.weight,
+          shippingWeight: variant.shippingWeight,
+          dimensions: variant.dimensions,
+          sourceSerialNo: variant.sourceSerialNo,
+        })),
+        attributes: [
+          { name: 'Color', values: group.colors, builtin: true, displayType: 'swatch' as const, swatchHex: {} },
+          { name: 'Size', values: group.sizes, builtin: true, displayType: 'pill' as const, swatchHex: {} },
+          { name: 'Placements', values: group.placements, builtin: true, displayType: 'radio' as const, swatchHex: {} },
+        ],
+      };
     });
+
+    const staged = createProducts(drafts, true);
     setImportPreview(null);
     if (csvInputRef.current) csvInputRef.current.value = '';
     showToast({
       type: 'success',
       title: 'Import Staged',
-      description: `${staged} draft${staged === 1 ? '' : 's'} added — review and publish each from the catalog. Demo catalog persists locally.`,
+      description: `${staged} draft product${staged === 1 ? '' : 's'} with ${stagedVariants} variant${
+        stagedVariants === 1 ? '' : 's'
+      } added — review and publish each from the catalog. Demo catalog persists locally.`,
     });
   };
 
@@ -1447,12 +1575,27 @@ export default function ProductsView() {
   const handleExportSelected = () => {
     const selected = products.filter((p) => selectedIds.has(p.id));
     if (selected.length === 0) return;
-    const headers = ['Product ID', 'Name', 'Slug', 'Category', 'Price', 'Stock', 'Sold', 'Status'];
+    const headers = [
+      'Product ID',
+      'Name',
+      'Slug',
+      'Category',
+      'Style Code',
+      'Internal S.No',
+      'HSN',
+      'Price',
+      'Stock',
+      'Sold',
+      'Status',
+    ];
     const rows = selected.map((p) => [
       p.id,
       `"${p.name}"`,
       p.slug,
       p.category,
+      p.styleCode ?? '',
+      p.internalSerialNo !== undefined ? String(p.internalSerialNo) : '',
+      p.hsnCode ?? '',
       p.price.toFixed(2),
       String(p.stock),
       String(p.soldCount),
@@ -2078,10 +2221,10 @@ export default function ProductsView() {
                     <ChevronDown size={14} color="var(--tuw-text-secondary, #5D6772)" />
                   </span>
                 }
-                items={['All', 'T-Shirts', 'Hoodies', 'Jackets', 'Pants', 'Accessories'].map((cat) => ({
-                  value: cat,
-                  label: cat === 'All' ? 'All Categories' : cat,
-                }))}
+                items={[
+                  { value: 'All', label: 'All Categories' },
+                  ...categoryOptions,
+                ]}
                 selectedValue={selectedCat}
                 onSelect={(v) => setSelectedCat(v)}
               />
@@ -2374,6 +2517,10 @@ export default function ProductsView() {
           setDiscountsCardOpen(false);
           setFulfillmentCardOpen(false);
           setAttributesCardOpen(false);
+          setSpecsDisplayCardOpen(false);
+          setSpecsClothingCardOpen(false);
+          setSpecsSizeChartCardOpen(false);
+          setSpecsMonogramCardOpen(false);
           setDrawerView('compact');
           autoExpandedRef.current = false;
           setFormImages((prev) => {
@@ -2403,7 +2550,7 @@ export default function ProductsView() {
           )
         }
         expandable
-        bodyTone={productTab === 'general' ? 'canvas' : 'surface'}
+        bodyTone={productTab === 'general' || productTab === 'specs' ? 'canvas' : 'surface'}
         view={drawerView}
         onViewChange={setDrawerView}
         headerExtra={
@@ -2514,12 +2661,25 @@ export default function ProductsView() {
                 />
                 <SearchableSelect
                   label="Category"
-                  options={CATEGORY_OPTIONS}
+                  options={categoryOptions}
                   value={formCategory}
-                  onChange={(value) => setFormCategory(value as ProductItem['category'])}
+                  onChange={(value) => setFormCategory(value)}
                   required
                 />
               </div>
+              {formSerialNo ? (
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 12,
+                    lineHeight: '18px',
+                    color: 'var(--tuw-text-secondary)',
+                  }}
+                >
+                  Internal S.No <strong style={{ color: 'var(--tuw-text-primary)' }}>{formSerialNo}</strong>{' '}
+                  — workbook reference only, never shown to customers.
+                </p>
+              ) : null}
               <div style={pairedFieldGrid}>
                 <SearchableSelect
                   label="Gender"
@@ -2527,7 +2687,7 @@ export default function ProductsView() {
                   value={formGender || 'unspecified'}
                   onChange={(value) =>
                     setFormGender(
-                      value === 'unspecified' ? '' : (value as ProductItem['gender'])
+                      value === 'unspecified' ? '' : (value as ProductGender)
                     )
                   }
                 />
@@ -2592,6 +2752,15 @@ export default function ProductsView() {
                   onChange={(e) => setFormTax(e.target.value)}
                 />
               </div>
+              <Input
+                label="HSN code"
+                inputMode="numeric"
+                placeholder="e.g. 61091000"
+                value={formHsn}
+                onChange={(e) => setFormHsn(e.target.value.replace(/[^0-9]/g, ''))}
+                maxLength={8}
+                labelTooltip="HSN/SAC classification for checkout and tax reports. 4–8 digits; never shown on the storefront."
+              />
             </DrawerCard>
             <DrawerCard
               title="3. Scheduled discounts"
@@ -2755,7 +2924,7 @@ export default function ProductsView() {
             </DrawerCard>
             <DrawerCard
               title="4. Fulfillment & shipping"
-              description="Production partner, print placement, and parcel measurements"
+              description="Production partner and parcel measurements; print locations live under Attributes & values"
               collapsible
               isOpen={fulfillmentCardOpen}
               onToggle={setFulfillmentCardOpen}
@@ -2766,13 +2935,6 @@ export default function ProductsView() {
                   options={PARTNER_OPTIONS}
                   value={formPartner}
                   onChange={(value) => setFormPartner(value as ProductItem['partner'])}
-                  required
-                />
-                <SearchableSelect
-                  label="Print placement"
-                  options={PLACEMENT_OPTIONS}
-                  value={formPlacement}
-                  onChange={(value) => setFormPlacement(value as ProductItem['placement'])}
                   required
                 />
               </div>
@@ -3264,19 +3426,32 @@ export default function ProductsView() {
             </Disclosure>
           </div>
           ) : productTab === 'specs' ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <DrawerSection title="Display Options" titleGap={10}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <Switch
-                  label="Monogram & embroidery"
-                  description="Show the custom embroidery block below"
-                  checked={visibleSections.monogram}
-                  onChange={(v) => setVisibleSections((s) => ({ ...s, monogram: v }))}
-                />
-              </div>
-            </DrawerSection>
-            <DrawerSection title="Clothing Specifications" titleGap={10}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div
+            className={`tuw-pedit-specs-grid${drawerView !== 'compact' ? ' is-expanded' : ''}`}
+          >
+            <DrawerCard
+              title="1. Display options"
+              description="Choose which specification blocks appear in this editor"
+              collapsible
+              isOpen={specsDisplayCardOpen}
+              onToggle={setSpecsDisplayCardOpen}
+              bodyGap={12}
+            >
+              <Switch
+                label="Monogram & embroidery"
+                description="Show the custom embroidery block below"
+                checked={visibleSections.monogram}
+                onChange={(v) => setVisibleSections((s) => ({ ...s, monogram: v }))}
+              />
+            </DrawerCard>
+            <DrawerCard
+              title="2. Clothing specifications"
+              description="Fabric, cut, fit, and care copy shown on the product page"
+              collapsible
+              isOpen={specsClothingCardOpen}
+              onToggle={setSpecsClothingCardOpen}
+              bodyGap={16}
+            >
                 <Input
                   label="Fabric Composition & GSM"
                   placeholder="460 GSM Heavyweight French Terry Cotton"
@@ -3302,6 +3477,15 @@ export default function ProductsView() {
                   value={formCare}
                   onChange={(e) => setFormCare(e.target.value)}
                 />
+            </DrawerCard>
+            <DrawerCard
+              title="3. Size chart"
+              description="Reusable measuring set and the linked fit guide"
+              collapsible
+              isOpen={specsSizeChartCardOpen}
+              onToggle={setSpecsSizeChartCardOpen}
+              bodyGap={16}
+            >
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
                   <span style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
                     Associated Size Chart Template
@@ -3366,7 +3550,7 @@ export default function ProductsView() {
                     {sizeCharts.map((chart) => {
                       const cols = chartColumns(chart);
                       return (
-                        <SurfaceCard key={chart.id} padding="12px" gap="10px">
+                        <div key={chart.id} style={flatGroupStyle}>
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
                             <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
                               {chart.name}
@@ -3470,7 +3654,7 @@ export default function ProductsView() {
                               Add
                             </Button>
                           </div>
-                        </SurfaceCard>
+                        </div>
                       );
                     })}
                     <div style={{ display: 'flex', gap: 8 }}>
@@ -3503,11 +3687,16 @@ export default function ProductsView() {
                     </div>
                   </div>
                 </Disclosure>
-              </div>
-            </DrawerSection>
+            </DrawerCard>
             {visibleSections.monogram ? (
-            <DrawerSection title="Monogram & Custom Embroidery" titleGap={10}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <DrawerCard
+              title="4. Monogram & custom embroidery"
+              description="On-demand chest initials and their upcharge"
+              collapsible
+              isOpen={specsMonogramCardOpen}
+              onToggle={setSpecsMonogramCardOpen}
+              bodyGap={16}
+            >
                 <Switch
                   label="Offer monogramming"
                   description="On-demand chest initials with upcharge"
@@ -3515,7 +3704,7 @@ export default function ProductsView() {
                   onChange={setFormMonogramEnabled}
                 />
                 {formMonogramEnabled ? (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div style={pairedFieldGrid}>
                   <Input
                     label="Max Characters"
                     type="number"
@@ -3531,8 +3720,7 @@ export default function ProductsView() {
                   />
                 </div>
                 ) : null}
-              </div>
-            </DrawerSection>
+            </DrawerCard>
             ) : null}
           </div>
           ) : null
@@ -3546,7 +3734,13 @@ export default function ProductsView() {
         title={`Import Preview — ${importPreview?.fileName ?? ''}`}
         subtitle={
           importPreview
-            ? `${importPreview.valid.length} valid · ${importPreview.errors.length} rejected. Valid rows stage as drafts.`
+            ? `${importPreview.groups.length} product${
+                importPreview.groups.length === 1 ? '' : 's'
+              } · ${importVariantTotal} variant${
+                importVariantTotal === 1 ? '' : 's'
+              } · ${importPreview.errors.length} issue${
+                importPreview.errors.length === 1 ? '' : 's'
+              }. Valid groups stage as drafts.`
             : ''
         }
         footer={
@@ -3558,40 +3752,55 @@ export default function ProductsView() {
               variant="primary"
               size="md"
               type="button"
-              disabled={!importPreview || importPreview.valid.length === 0}
+              disabled={!importPreview || importPreview.groups.length === 0}
               onClick={applyImport}
             >
-              Stage {importPreview?.valid.length ?? 0} Drafts
+              Stage {importPreview?.groups.length ?? 0} Product
+              {(importPreview?.groups.length ?? 0) === 1 ? '' : 's'}
             </Button>
           </>
         }
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {importPreview && importPreview.valid.length > 0 ? (
+          {importPreview && importPreview.groups.length > 0 ? (
             <div>
               <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginBottom: 6 }}>
-                Ready to stage ({importPreview.valid.length})
+                Ready to stage ({importPreview.groups.length})
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 180, overflowY: 'auto' }}>
-                {importPreview.valid.slice(0, 20).map((r, i) => (
-                  <div key={i} style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                    {r.name} · ₹{r.price.toLocaleString()}
-                    {r.compareAtPrice ? ` · compare ₹${r.compareAtPrice.toFixed(2)}` : ''}
-                    {r.styleCode ? ` · ${r.styleCode}` : ''}
-                  </div>
-                ))}
-                {importPreview.valid.length > 20 ? (
+                {importPreview.groups.slice(0, 20).map((group, i) => {
+                  const fromPrice =
+                    group.variants.length > 0
+                      ? Math.min(...group.variants.map((variant) => variant.price))
+                      : 0;
+                  return (
+                    <div key={i} style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                      {group.name} · {group.variants.length} variant
+                      {group.variants.length === 1 ? '' : 's'} · ₹{fromPrice.toLocaleString()}
+                      {group.styleCode ? ` · ${group.styleCode}` : ''}
+                      {group.gender ? ` · ${group.gender}` : ''}
+                    </div>
+                  );
+                })}
+                {importPreview.groups.length > 20 ? (
                   <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                    …and {importPreview.valid.length - 20} more
+                    …and {importPreview.groups.length - 20} more
                   </div>
                 ) : null}
               </div>
+              {!importPreview.hasCategoryColumn ? (
+                <div style={{ marginTop: 8, fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                  No Category column found — these drafts stage as {UNCATEGORIZED_CATEGORY}. Assign
+                  categories from the catalog before publishing.
+                </div>
+              ) : null}
             </div>
           ) : null}
           {importPreview && importPreview.errors.length > 0 ? (
             <div>
               <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-text-error, #C91818)', marginBottom: 6 }}>
-                Rejected ({importPreview.errors.length}) — fix the sheet and re-drop
+                Issues ({importPreview.errors.length}) — rows are rejected; group conflicts keep the
+                first value
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 180, overflowY: 'auto' }}>
                 {importPreview.errors.map((e, i) => (
@@ -3602,7 +3811,7 @@ export default function ProductsView() {
               </div>
             </div>
           ) : null}
-          {importPreview && importPreview.valid.length === 0 && importPreview.errors.length === 0 ? (
+          {importPreview && importPreview.groups.length === 0 && importPreview.errors.length === 0 ? (
             <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
               No rows found.
             </div>

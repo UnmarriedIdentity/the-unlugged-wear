@@ -1,8 +1,10 @@
 # Catalog — Columns, Constraints, Indexes
 
-> Status: Filling | Last Updated: 2026-10-17
+> Status: Filling | Last Updated: 2026-10-22
 > 17 tables. Conventions: `01-Conventions.md`. Money semantics follow the
 > open currency decision (`00-README.md` §7) — DECIMAL(12,2) shape is final.
+> The attribute library is the single attribute system; the retired compare
+> engine and `products.attributes` are recorded in `20-Schema-Decisions.md`.
 > Mermaid slice for this domain sits at the end.
 
 ## categories
@@ -53,9 +55,9 @@ No seed, no UI, no queries in v1 — launch is seed + UI only.
 |---|---|---|---|
 | id | uuid | PK | |
 | sku | varchar(64) | NOT NULL, UNIQUE | External identity; import upsert key |
-| name | varchar(255) | NOT NULL | PDP title (= listing Style name) |
+| name | varchar(255) | NOT NULL | PDP title (= first part of listing Style cell) |
 | slug | varchar(280) | NOT NULL, UNIQUE | PDP route — hottest catalog query |
-| style_code | varchar(50) | NULL | Listing Style code (`FC34`); shown in identity zone |
+| style_code | varchar(50) | NULL | Second part of listing Style cell after `\|` (`FC34`); shown in identity zone |
 | short_description | varchar(500) | NULL | Card text |
 | description | text | NULL | PDP rich text |
 | category_id | uuid | NULL, FK → categories(id) ON DELETE SET NULL | Unassigned allowed; deleting a category must not delete products |
@@ -67,15 +69,24 @@ No seed, no UI, no queries in v1 — launch is seed + UI only.
 | stock | integer | NOT NULL DEFAULT 0, CHECK (stock >= 0) | Balance; ledger in stock_movements |
 | status | varchar(20) | NOT NULL DEFAULT 'draft', CHECK IN ('draft','active','archived') | Publish lifecycle |
 | tags | varchar(50)[] | NULL | 1NF exception (documented): flat facet list, GIN-indexed; split to a junction if tag writes ever need history |
-| attributes | jsonb | NOT NULL DEFAULT '{}' | Freeform specs ONLY (placement notes, MarCom flags) — structured attribute data lives in link tables, never here |
 | photo_settings | jsonb | NOT NULL DEFAULT '{}' | Per-product gallery overrides (ratio, layout, blend) |
 | source | varchar(20) | NOT NULL DEFAULT 'local', CHECK IN ('local','csv','shopify','bigcommerce','odoo') | Import provenance; idempotent re-syncs |
-| external_id | varchar(255) | NULL | Source row id for re-import matching |
+| external_id | varchar(255) | NULL | Source row id for re-import matching; the Excel ID is deliberately not used |
+| internal_serial_no | integer | NULL, CHECK (internal_serial_no > 0) | Internal Excel `S.No` reference; display only, never the product identity |
+| source_group_key | varchar(255) | NULL | Deterministic import group: style code, else name + gender (+ HSN when split); unique per source |
 | weight_g | integer | NULL, CHECK (weight_g >= 0) | Grams — shipping math needs a number, not "180g" |
 | shipping_weight_g | integer | NULL, CHECK (shipping_weight_g >= 0) | Packed weight; defaults to weight_g in logic |
 | dimensions | varchar(50) | NULL | `LxBxH` package string (`18x20x2.3`) |
-| gender | varchar(20) | NULL, CHECK IN ('Female','Male','Unisex','Kids') | Listing Gender column |
+| fabric_spec | varchar(255) | NULL | Clothing Specs free text (composition + GSM) |
+| cut | varchar(255) | NULL | Clothing Specs silhouette/cut |
+| model_dims | varchar(255) | NULL | Clothing Specs model dimensions |
+| care_instructions | text | NULL | Clothing Specs care copy |
+| gender | varchar(20) | NULL, CHECK IN ('Female','Male','Unisex','Kids','Boy','Girl') | Listing Gender column |
 | tax_rate | DECIMAL(5,2) | NULL, CHECK (tax_rate >= 0) | Percent; applied at checkout, never on PDP |
+| hsn_code | varchar(12) | NULL, CHECK (hsn_code ~ '^[0-9]{4,8}$') | HSN/SAC tax classification; admin/checkout only, never PDP |
+| monogram_enabled | boolean | NOT NULL DEFAULT false | Clothing Specs monogram offer |
+| monogram_max_chars | smallint | NOT NULL DEFAULT 3, CHECK (monogram_max_chars >= 1) | Monogram character limit |
+| monogram_upcharge | DECIMAL(12,2) | NOT NULL DEFAULT 0, CHECK (monogram_upcharge >= 0) | Monogram add-on price |
 | deleted_at | timestamptz | NULL | Soft-delete |
 | search_vector | tsvector | GENERATED STORED (name + short_description + description) | |
 | created_at / updated_at | timestamptz | NOT NULL | |
@@ -84,11 +95,31 @@ Indexes: PK · unique sku · unique slug · `idx_products_category_id` ·
 `idx_products_brand_id` · GIN search_vector · partial
 `idx_products_active WHERE status='active'` (all storefront lists) · GIN
 tags · unique partial `products_source_external_key (source, external_id)
-WHERE external_id IS NOT NULL` (idempotent re-imports) · partial
-`idx_products_active_price (status, price) WHERE status='active'`.
+WHERE external_id IS NOT NULL` (source re-imports) · partial
+`idx_products_active_price (status, price) WHERE status='active'` ·
+`idx_products_internal_serial_no WHERE internal_serial_no IS NOT NULL` ·
+unique partial `products_source_group_key (source, source_group_key) WHERE
+source_group_key IS NOT NULL` (workbook re-import identity).
 
 **UI draft units:** `weight` / `shippingWeight` are typed in whole grams and
 map to `weight_g` / `shipping_weight_g`; CSV import keeps the same headers.
+`internal_serial_no`, `source_group_key`, `hsn_code` and the Clothing Specs
+fields are admin/import data. The storefront DTO omits serial and HSN.
+
+## product_source_rows
+
+| Column | Type | Constraints | Reason |
+|---|---|---|---|
+| id | uuid | PK | |
+| product_id | uuid | NOT NULL, FK → products(id) ON DELETE CASCADE | Product assembled from this row |
+| source_serial_no | integer | NOT NULL, CHECK (source_serial_no > 0) | Workbook `S.No`; unique within the product |
+| source_row_no | integer | NOT NULL, CHECK (source_row_no > 0) | Physical spreadsheet row for audit |
+| raw_data | jsonb | NOT NULL DEFAULT '{}' | Row snapshot, excluding the Excel ID |
+| imported_at | timestamptz | NOT NULL DEFAULT now() | Import timestamp |
+
+Indexes: PK · `(product_id, source_serial_no)` unique · `product_id` lookup
+· `source_serial_no` reference. One row can generate several variants; the
+row serial is preserved here rather than repeated on each variant.
 
 ## product_variants
 
@@ -96,16 +127,28 @@ map to `weight_g` / `shipping_weight_g`; CSV import keeps the same headers.
 |---|---|---|---|
 | id | uuid | PK | |
 | product_id | uuid | NOT NULL, FK → products(id) ON DELETE CASCADE | Owned child |
+| source_row_id | uuid | NULL, FK → product_source_rows(id) ON DELETE SET NULL | Workbook row that generated this variant |
 | sku | varchar(64) | NOT NULL, UNIQUE | Variant inventory identity; import upsert |
+| variant_key | varchar(255) | NULL, UNIQUE (product_id, variant_key) | Sorted axis-value signature; blocks duplicate combinations |
 | price | DECIMAL(12,2) | NOT NULL, CHECK (price >= 0) | Effective price, materialized on write — override ?? base_price + Σ adjustments |
 | price_overridden | boolean | NOT NULL DEFAULT false | true = explicit cell override (survives recomputes until cleared); false = derived, pipeline rewrites |
 | stock | integer | NOT NULL DEFAULT 0, CHECK (stock >= 0) | Variant balance |
+| weight_g | integer | NULL, CHECK (weight_g >= 0) | Variant override; falls back to products.weight_g |
+| shipping_weight_g | integer | NULL, CHECK (shipping_weight_g >= 0) | Variant override; falls back to products.shipping_weight_g |
+| dimensions | varchar(50) | NULL | Variant override; falls back to products.dimensions |
 | image_url | varchar(2048) | NULL | Variant-scoped image |
 | is_active | boolean | NOT NULL DEFAULT true | Hide without deleting (sold-out configs) |
 | created_at / updated_at | timestamptz | NOT NULL | |
 
-Indexes: PK · unique sku · `idx_product_variants_product_id` (PDP
-selector) · partial `(product_id) WHERE is_active`.
+Indexes: PK · unique sku · unique `(id, product_id)` (composite FK target) ·
+unique `(product_id, variant_key)` · `idx_product_variants_product_id`
+(PDP selector) · partial `(product_id) WHERE is_active` ·
+`idx_product_variants_source_row_id`.
+
+Variant axes resolve through `product_variant_attribute_values` (file 010).
+A source row may produce several variants (for example, one size cohort with
+two colours); all of them point at the same `source_row_id`. Shipping fields
+are nullable overrides — read the variant first, then the product.
 
 **Pricing ladder (base is an anchor; the listed price is derived).**
 `effective variant price = explicit override ?? base_price + Σ(price adjustments
@@ -147,8 +190,9 @@ to `images[0]` on hydration, while an existing saved gallery order wins.
 
 | Table | Column | Type | Constraints | Reason |
 |---|---|---|---|---|
-| attribute_definitions | id | uuid | PK | Single record per attribute — the normalized source |
-| attribute_definitions | name | varchar(100) | NOT NULL, UNIQUE | One row per name, enforced (no duplicates by construction) |
+| attribute_definitions | id | uuid | PK | Single record per semantic type — the normalized source |
+| attribute_definitions | name | varchar(100) | NOT NULL, UNIQUE | Canonical type label (`Size`, `Model`); one row per type, enforced |
+| attribute_definitions | slug | varchar(100) | NOT NULL, UNIQUE, CHECK `^[a-z0-9]+(-[a-z0-9]+)*$` | Stable key for filters/URLs; survives a display-name change |
 | attribute_definitions | display_type | varchar(20) | NOT NULL DEFAULT 'pill', CHECK IN ('pill','swatch','radio') | PDP widget, owned once |
 | attribute_definitions | show_on_pdp | boolean | NOT NULL DEFAULT true | Explicit booleans — indexable, no array operators in hot reads |
 | attribute_definitions | show_on_checkout | boolean | NOT NULL DEFAULT false | |
@@ -160,14 +204,50 @@ to `images[0]` on hydration, while an existing saved gallery order wins.
 | attribute_values | position | integer | NOT NULL DEFAULT 0 | Display order |
 | product_attribute_links | product_id | uuid | NOT NULL, FK → products(id) ON DELETE CASCADE, composite PK (product_id, definition_id) | The assignment — reference, never copy |
 | product_attribute_links | definition_id | uuid | NOT NULL, FK → attribute_definitions(id) ON DELETE RESTRICT | Restrict: deleting a referenced definition fails loudly |
+| product_attribute_links | is_variant_axis | boolean | NOT NULL DEFAULT false | Per-product: this attribute is a variant axis |
+| product_attribute_links | variant_axis_position | smallint | NULL, CHECK (>= 0), CHECK (is_variant_axis → NOT NULL) | Axis order; Color/Size are positions 0/1 for apparel |
+| product_attribute_links | axis_label | varchar(50) | NULL | Per-product display label (`Phone model`, `Print size`, `Capacity`) without duplicating the definition |
+| product_attribute_links | display_position | smallint | NULL, CHECK (>= 0) | Per-product order for non-axis spec attributes; axes use `variant_axis_position` |
 | product_attribute_link_values | product_id | uuid | NOT NULL, composite PK (product_id, definition_id, value_id) | Chosen values as rows — queryable ("products using Onyx"), never arrays |
 | product_attribute_link_values | definition_id | uuid | NOT NULL | Part of the composite PK (scoped lookup) |
 | product_attribute_link_values | value_id | uuid | NOT NULL, FK → attribute_values(id) ON DELETE RESTRICT | Restrict: deleting a chosen value fails loudly |
 | product_attribute_link_values | price_adjustment | DECIMAL(12,2) | NULL, CHECK (price_adjustment >= 0) | Additive upcharge for this product+value; NULL/0 = no effect (base path); mirrors the draft priceAdjustments sidecar 1:1. ≥ 0 only — per-value discounts deferred |
+| product_variant_attribute_values | variant_id | uuid | NOT NULL, composite PK (variant_id, definition_id) | One value per axis per variant |
+| product_variant_attribute_values | product_id | uuid | NOT NULL | Scopes the two composite FKs |
+| product_variant_attribute_values | definition_id | uuid | NOT NULL | Axis definition |
+| product_variant_attribute_values | value_id | uuid | NOT NULL | Exact value selected for this variant |
 
 Indexes: PKs · unique `attribute_definitions.name` · unique
-`(definition_id, value)` on values · composite link PKs serve both join
-directions (product→definitions, definition→products).
+`attribute_definitions.slug` · unique `(definition_id, value)` on values ·
+composite link PKs serve both join directions (product→definitions,
+definition→products) · partial unique `idx_pal_variant_axis_position
+(product_id, variant_axis_position) WHERE is_variant_axis` ·
+`idx_pvav_product_id` · `idx_pvav_value_id`.
+
+**Variant axes (A2):** the product-level library stays the single source of
+attribute definitions and values. A product marks one or more linked
+attributes as variant axes; the workbook's generic `sizes` column is
+classified per product group into the semantic type it actually represents:
+`Size` for apparel, `Model` for phone cases, `Dimensions` for posters,
+`Capacity` for drinkware, `Shape` for ornaments, or `Style` for
+construction/format. A product can also override the shopper-facing label
+per product (`axis_label`: "Phone model", "Print size"). The definition name
+stays canonical; the label is presentation. `product_variant_attribute_values`
+completes the chain: variant → product + definition + value. Composite FKs
+guarantee that the variant belongs to the product, the attribute is linked
+to that product, and the value is one of the product's chosen values.
+`product_variants.variant_key` is the sorted axis-value signature, unique per
+product, so the same combination cannot be created twice.
+
+**Semantic types scale as data.** `attribute_definitions` is the label/type
+registry, not a bag of ad-hoc names. The canonical types are `Size`, `Model`,
+`Dimensions`, `Capacity`, `Shape`, and `Style`. A future type (for example
+`Mattress Size`) is one definition row plus its `attribute_values` rows — no
+new table, no per-size column, no JSON array of values. `slug` is the stable
+filter/URL key; `display_position` orders non-axis specs on the PDP. Search
+and facets join through the definition, so the same spelling under two types
+(`13` as a Size and `13` as a Model) is two distinct values and never
+cross-matches.
 
 **Visibility is global (UI wave):** `show_on_pdp` / `show_on_checkout` /
 `show_on_admin` live on the definition and apply to every product linked to
@@ -192,23 +272,6 @@ The admin drawer picker only ever assigns — a picked value exists in the
 library by definition, so no register call is issued and no duplicate
 error can fire. Register-through happens only when a typed value's
 spelling is absent from the library row.
-
-## product_attributes + product_attribute_values (compare engine)
-
-| Table | Column | Type | Constraints | Reason |
-|---|---|---|---|---|
-| product_attributes | id | uuid | PK | Compare-table headers |
-| product_attributes | name | varchar(100) | NOT NULL | Material, Fit… |
-| product_attributes | slug | varchar(120) | NOT NULL, UNIQUE | Code reference |
-| product_attributes | type | varchar(20) | NOT NULL, CHECK IN ('text','number','boolean') | Compare column typing |
-| product_attributes | unit | varchar(20) | NULL | in, kg, gsm |
-| product_attribute_values | id | uuid | PK | |
-| product_attribute_values | product_id | uuid | NOT NULL, FK → products(id) ON DELETE CASCADE | |
-| product_attribute_values | attribute_id | uuid | NOT NULL, FK → product_attributes(id) ON DELETE CASCADE | |
-| product_attribute_values | value | varchar(255) | NOT NULL | One value per (product, attribute) |
-
-Indexes: PKs · unique slug · unique `(product_id, attribute_id)` ·
-`idx_pav_attribute_id` (compare assembly).
 
 ## size_charts
 
@@ -292,10 +355,14 @@ erDiagram
     categories ||--o{ products : lists
     brands ||--o{ products : labels
     size_charts ||--o{ products : sizes
+    products ||--o{ product_source_rows : imported-from
     products ||--o{ product_variants : offers
+    product_source_rows ||--o{ product_variants : generates
     products ||--o{ product_images : shows
-    products ||--o{ product_attribute_values : specifies
-    product_attributes ||--o{ product_attribute_values : valued-by
+    products ||--o{ product_attribute_links : assigns
+    product_attribute_links ||--o{ product_attribute_link_values : chooses
+    product_variants ||--o{ product_variant_attribute_values : selected-as
+    attribute_values ||--o{ product_variant_attribute_values : chosen-value
     products ||--o{ stock_movements : tracks
     products ||--o{ product_discounts : prices
     products ||--o{ reviews : rated-by

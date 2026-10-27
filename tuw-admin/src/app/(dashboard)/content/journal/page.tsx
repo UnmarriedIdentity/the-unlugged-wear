@@ -1,235 +1,346 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { ContentCard, StatCard, Badge, Button, Input, Select, Textarea, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, PageHeader, HeroCard, DrawerSection } from '@/components/ui';
-import { BookOpen, Plus, ArrowLeft, Search, Eye, Edit3 } from 'lucide-react';
+import {
+  Badge,
+  ContentCard,
+  EmptyState,
+  Input,
+  LinkButton,
+  PageHeader,
+  Pagination,
+  Select,
+  StatCard,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui';
+import { ArrowLeft, BookOpen, Plus, Search } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
-
-interface StoryItem {
-  id: string;
-  title: string;
-  slug: string;
-  category: 'Lookbook' | 'Culture' | 'Sustainability' | 'Design Notes';
-  author: string;
-  views: number;
-  readTime: string;
-  status: 'published' | 'draft';
-  publishedAt: string;
-  excerpt: string;
-}
-
-const initialStories: StoryItem[] = [
-  {
-    id: 'ART-01',
-    title: 'The Weight of Fabric: Why 280 GSM Changes Streetwear',
-    slug: 'the-weight-of-fabric-280gsm',
-    category: 'Design Notes',
-    author: 'Elena Rostova',
-    views: 14200,
-    readTime: '4 min',
-    status: 'published',
-    publishedAt: '12 Apr 2026',
-    excerpt: 'An investigation into organic combed cotton density and structured drapery for timeless silhouettes.',
-  },
-  {
-    id: 'ART-02',
-    title: 'Autumn/Winter 26 Editorial Lookbook: Echoes in Silence',
-    slug: 'aw26-editorial-lookbook',
-    category: 'Lookbook',
-    author: 'Sora Tanaka',
-    views: 22400,
-    readTime: '6 min',
-    status: 'published',
-    publishedAt: '08 Apr 2026',
-    excerpt: 'Captured across brutalist concrete landscapes in Berlin, exploring industrial minimalism and tonal textures.',
-  },
-  {
-    id: 'ART-03',
-    title: 'Zero-Waste Waterless Dyeing: Our Sustainable Transition',
-    slug: 'zero-waste-waterless-dyeing',
-    category: 'Sustainability',
-    author: 'Ronan Vance',
-    views: 8900,
-    readTime: '3 min',
-    status: 'published',
-    publishedAt: '01 Apr 2026',
-    excerpt: 'How on-demand print manufacturing drastically reduces textile runoff and microplastic contamination.',
-  },
-  {
-    id: 'ART-04',
-    title: 'Soundwave Resonance: The Typography of Acoustics',
-    slug: 'soundwave-resonance-typography',
-    category: 'Culture',
-    author: 'Sora Tanaka',
-    views: 2700,
-    readTime: '5 min',
-    status: 'draft',
-    publishedAt: 'Draft',
-    excerpt: 'Visualizing analog vinyl waveforms as functional vector screenprint artwork for limited run garments.',
-  },
-];
+import {
+  blogStatusBadgeVariant,
+  formatReadingTime,
+  type BlogStatus,
+} from '@/lib/blog';
 
 export default function JournalPage() {
-  const { canPerformAction, showToast } = useAdminState();
-  const [stories, setStories] = useState<StoryItem[]>(initialStories);
+  const { blogAuthors, blogCategories, blogPosts, blogTags } = useAdminState();
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | BlogStatus>('all');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [authorFilter, setAuthorFilter] = useState('all');
+  const [tagFilter, setTagFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
 
-  // Modals & Drawers
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [selectedStory, setSelectedStory] = useState<StoryItem | null>(null);
-
-  // Form State
-  const [formTitle, setFormTitle] = useState('');
-  const [formSlug, setFormSlug] = useState('');
-  const [formCategory, setFormCategory] = useState<StoryItem['category']>('Design Notes');
-  const [formAuthor, setFormAuthor] = useState('Elena Rostova');
-  const [formExcerpt, setFormExcerpt] = useState('');
-  const [formStatus, setFormStatus] = useState<StoryItem['status']>('published');
-
-  React.useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm]);
-
-  const filteredStories = stories.filter(
-    (s) =>
-      s.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.author.toLowerCase().includes(searchTerm.toLowerCase())
+  const categoryById = useMemo(
+    () => new Map(blogCategories.map((category) => [category.id, category])),
+    [blogCategories]
+  );
+  const authorById = useMemo(
+    () => new Map(blogAuthors.map((author) => [author.id, author])),
+    [blogAuthors]
+  );
+  const tagById = useMemo(
+    () => new Map(blogTags.map((tag) => [tag.id, tag])),
+    [blogTags]
   );
 
-  const totalPages = Math.max(1, Math.ceil(filteredStories.length / pageSize));
-  const paginatedStories = filteredStories.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, categoryFilter, authorFilter, tagFilter, pageSize]);
 
-  const handleCreateSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!canPerformAction('products')) return;
+  const filteredPosts = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase();
+    return blogPosts
+      .filter((post) => {
+        if (statusFilter !== 'all' && post.status !== statusFilter) return false;
+        if (categoryFilter !== 'all' && post.categoryId !== categoryFilter) return false;
+        if (authorFilter !== 'all' && post.authorId !== authorFilter) return false;
+        if (tagFilter !== 'all' && !post.tagIds.includes(tagFilter)) return false;
+        if (!query) return true;
+        const haystack = [
+          post.title,
+          post.subtitle,
+          post.excerpt,
+          post.slug,
+          categoryById.get(post.categoryId ?? '')?.name,
+          authorById.get(post.authorId)?.name,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        return haystack.includes(query);
+      })
+      .sort(
+        (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+      );
+  }, [
+    blogPosts,
+    categoryById,
+    authorById,
+    searchTerm,
+    statusFilter,
+    categoryFilter,
+    authorFilter,
+    tagFilter,
+  ]);
 
-    const newStory: StoryItem = {
-      id: `ART-${Math.floor(10 + Math.random() * 90)}`,
-      title: formTitle || 'Untitled Editorial',
-      slug: formSlug || formTitle.toLowerCase().replace(/\s+/g, '-'),
-      category: formCategory,
-      author: formAuthor,
-      views: 0,
-      readTime: '4 min',
-      status: formStatus,
-      publishedAt: formStatus === 'published' ? 'Just now' : 'Draft',
-      excerpt: formExcerpt || 'Editorial reflection on contemporary fashion and urban design.',
-    };
+  const totalPages = Math.max(1, Math.ceil(filteredPosts.length / pageSize));
+  const paginatedPosts = filteredPosts.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
-    setStories([newStory, ...stories]);
-    setIsCreateOpen(false);
-    setFormTitle('');
-    setFormSlug('');
-    setFormExcerpt('');
-    showToast({
-      type: 'success',
-      title: 'Story Created',
-      description: `"${newStory.title}" saved to editorial CMS.`,
-    });
-  };
+  const categoryOptions = [
+    { value: 'all', label: 'All categories' },
+    ...blogCategories
+      .filter((category) => category.isActive)
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .map((category) => ({ value: category.id, label: category.name })),
+  ];
+
+  const authorOptions = [
+    { value: 'all', label: 'All authors' },
+    ...blogAuthors
+      .filter((author) => author.isActive)
+      .map((author) => ({ value: author.id, label: author.name })),
+  ];
+
+  const tagOptions = [
+    { value: 'all', label: 'All tags' },
+    ...blogTags.map((tag) => ({ value: tag.id, label: tag.name })),
+  ];
+
+  const statusOptions = [
+    { value: 'all', label: 'All statuses' },
+    { value: 'draft', label: 'Drafts' },
+    { value: 'scheduled', label: 'Scheduled' },
+    { value: 'published', label: 'Published' },
+    { value: 'archived', label: 'Archived' },
+  ];
+
+  const publishedCount = blogPosts.filter((post) => post.status === 'published').length;
+  const scheduledCount = blogPosts.filter((post) => post.status === 'scheduled').length;
+  const draftCount = blogPosts.filter((post) => post.status === 'draft').length;
+  const archivedCount = blogPosts.filter((post) => post.status === 'archived').length;
 
   return (
     <DashboardShell pageTitle="Journal & Stories">
       <PageHeader
         title="Editorial Journal & Stories"
         eyebrow={
-          <Link href="/content" style={{ color: 'var(--tuw-text-secondary, #5D6772)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4, fontSize: 13 }}>
+          <Link
+            href="/content"
+            style={{
+              color: 'var(--tuw-text-secondary, #5D6772)',
+              textDecoration: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+              fontSize: 13,
+            }}
+          >
             <ArrowLeft size={14} /> Back to Content
           </Link>
         }
         actions={
-          <Button
+          <LinkButton
+            href="/content/journal/new"
             variant="primary"
             size="md"
             icon={<Plus size={16} />}
-            onClick={() => {
-              if (canPerformAction('products')) setIsCreateOpen(true);
-            }}
           >
             New Story
-          </Button>
+          </LinkButton>
         }
       />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
-        <StatCard label="Published Articles" value={`${stories.filter((s) => s.status === 'published').length} Posts`} subtitle="Live on blog" trendType="up" hoverable />
-        <StatCard label="Draft Stories" value={`${stories.filter((s) => s.status === 'draft').length} Drafts`} subtitle="In editorial review" trendType="neutral" hoverable />
-        <StatCard label="Total Story Views" value="48,200" trend="↑ 24% vs last month" trendType="up" hoverable />
-        <StatCard label="Avg. Reading Time" value="4m 15s" subtitle="High reader retention" trendType="up" hoverable />
+        <StatCard
+          label="Published Articles"
+          value={`${publishedCount} Posts`}
+          subtitle="Live on blog"
+          trendType="up"
+          hoverable
+        />
+        <StatCard
+          label="Scheduled Articles"
+          value={`${scheduledCount} Posts`}
+          subtitle="Queued for future release"
+          trendType="neutral"
+          hoverable
+        />
+        <StatCard
+          label="Draft Stories"
+          value={`${draftCount} Drafts`}
+          subtitle="In editorial review"
+          trendType="neutral"
+          hoverable
+        />
+        <StatCard
+          label="Archived Articles"
+          value={`${archivedCount} Posts`}
+          subtitle="Retired from the storefront"
+          trendType="neutral"
+          hoverable
+        />
       </div>
 
       <ContentCard>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16, marginBottom: 20 }}>
-          <div style={{ maxWidth: 360, width: '100%' }}>
-            <Input
-              placeholder="Search editorial stories..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              prefixIcon={<Search size={16} />}
-            />
-          </div>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'minmax(220px, 1.4fr) repeat(4, minmax(140px, 1fr))',
+            gap: 12,
+            marginBottom: 20,
+          }}
+        >
+          <Input
+            placeholder="Search editorial stories…"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            prefixIcon={<Search size={16} />}
+          />
+          <Select
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value as BlogStatus | 'all')}
+            options={statusOptions}
+          />
+          <Select
+            value={categoryFilter}
+            onChange={(event) => setCategoryFilter(event.target.value)}
+            options={categoryOptions}
+          />
+          <Select
+            value={authorFilter}
+            onChange={(event) => setAuthorFilter(event.target.value)}
+            options={authorOptions}
+          />
+          <Select
+            value={tagFilter}
+            onChange={(event) => setTagFilter(event.target.value)}
+            options={tagOptions}
+          />
         </div>
 
-        <Table>
-          <TableHeader style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
-            <TableRow hoverable={false}>
-              <TableHead style={{ padding: '12px 16px' }}>Article</TableHead>
-              <TableHead style={{ padding: '12px 16px' }}>Category</TableHead>
-              <TableHead style={{ padding: '12px 16px' }}>Author</TableHead>
-              <TableHead style={{ padding: '12px 16px' }}>Views</TableHead>
-              <TableHead style={{ padding: '12px 16px' }}>Status</TableHead>
-              <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {paginatedStories.map((story) => (
-              <TableRow
-                key={story.id}
-                onClick={() => setSelectedStory(story)}
-                style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', cursor: 'pointer' }}
-              >
-                <TableCell style={{ padding: '14px 16px' }}>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-                    {story.title}
-                  </div>
-                  <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                    /{story.slug} · {story.readTime} read
-                  </div>
-                </TableCell>
-                <TableCell style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                  {story.category}
-                </TableCell>
-                <TableCell style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-primary, #262626)' }}>
-                  {story.author}
-                </TableCell>
-                <TableCell style={{ padding: '14px 16px', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                  {story.views.toLocaleString()}
-                </TableCell>
-                <TableCell style={{ padding: '14px 16px' }}>
-                  <Badge variant={story.status === 'published' ? 'success' : 'neutral'}>
-                    {story.status}
-                  </Badge>
-                </TableCell>
-                <TableCell style={{ padding: '14px 16px', textAlign: 'right' }}>
-                  <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedStory(story); }}>
-                    Edit
-                  </Button>
-                </TableCell>
+        {paginatedPosts.length === 0 ? (
+          <EmptyState
+            icon={<BookOpen size={24} />}
+            title="No editorial stories match your filters"
+            description="Try a different status, category, author or tag."
+          />
+        ) : (
+          <Table>
+            <TableHeader style={{ borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
+              <TableRow hoverable={false}>
+                <TableHead style={{ padding: '12px 16px' }}>Article</TableHead>
+                <TableHead style={{ padding: '12px 16px' }}>Category</TableHead>
+                <TableHead style={{ padding: '12px 16px' }}>Author</TableHead>
+                <TableHead style={{ padding: '12px 16px' }}>Reading time</TableHead>
+                <TableHead style={{ padding: '12px 16px' }}>Status</TableHead>
+                <TableHead style={{ padding: '12px 16px', textAlign: 'right' }}>Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {paginatedPosts.map((post) => {
+                const category = post.categoryId
+                  ? categoryById.get(post.categoryId)
+                  : undefined;
+                const author = authorById.get(post.authorId);
+                const publishedAt = post.publishedAt
+                  ? new Date(post.publishedAt).toLocaleDateString()
+                  : '—';
+                return (
+                  <TableRow
+                    key={post.id}
+                    style={{
+                      borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <TableCell style={{ padding: '14px 16px' }}>
+                      <div
+                        style={{
+                          fontSize: 14,
+                          fontWeight: 600,
+                          color: 'var(--tuw-text-primary, #262626)',
+                        }}
+                      >
+                        {post.title}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: 'var(--tuw-text-secondary, #5D6772)',
+                          marginTop: 2,
+                        }}
+                      >
+                        /{post.slug} · {formatReadingTime(post.readingTimeMinutes)}
+                      </div>
+                    </TableCell>
+                    <TableCell
+                      style={{
+                        padding: '14px 16px',
+                        fontSize: 13,
+                        color: 'var(--tuw-text-secondary, #5D6772)',
+                      }}
+                    >
+                      {category?.name ?? '—'}
+                    </TableCell>
+                    <TableCell
+                      style={{
+                        padding: '14px 16px',
+                        fontSize: 13,
+                        color: 'var(--tuw-text-primary, #262626)',
+                      }}
+                    >
+                      {author?.name ?? '—'}
+                    </TableCell>
+                    <TableCell
+                      style={{
+                        padding: '14px 16px',
+                        fontSize: 13,
+                        color: 'var(--tuw-text-secondary, #5D6772)',
+                      }}
+                    >
+                      {publishedAt}
+                    </TableCell>
+                    <TableCell style={{ padding: '14px 16px' }}>
+                      <Badge variant={blogStatusBadgeVariant(post.status)}>
+                        {post.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell style={{ padding: '14px 16px', textAlign: 'right' }}>
+                      <Link
+                        href={`/content/journal/${post.id}/edit`}
+                        style={{
+                          textDecoration: 'none',
+                          fontSize: 13,
+                          fontWeight: 600,
+                          color: 'var(--tuw-action-primary, #7539FF)',
+                        }}
+                      >
+                        Edit
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        )}
 
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={setCurrentPage}
-          totalItems={filteredStories.length}
+          totalItems={filteredPosts.length}
           pageSize={pageSize}
           pageSizeOptions={[5, 10, 20]}
           onPageSizeChange={(newSize) => {
@@ -238,107 +349,6 @@ export default function JournalPage() {
           }}
         />
       </ContentCard>
-
-      {/* Story Detail Drawer */}
-      <Drawer
-        isOpen={Boolean(selectedStory)}
-        onClose={() => setSelectedStory(null)}
-        title={selectedStory ? selectedStory.title : 'Article Details'}
-        subtitle={selectedStory ? `By ${selectedStory.author} · ${selectedStory.publishedAt}` : ''}
-      >
-        {selectedStory && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            <HeroCard
-              badge={
-                <Badge variant={selectedStory.status === 'published' ? 'success' : 'neutral'}>
-                  {selectedStory.status}
-                </Badge>
-              }
-            >
-              <div>
-                <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>Category</span>
-                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginTop: 2 }}>{selectedStory.category}</div>
-              </div>
-            </HeroCard>
-
-            <DrawerSection title="Article Lead Excerpt" titleGap={8}>
-              <p style={{ fontSize: 14, color: 'var(--tuw-text-secondary, #5D6772)', lineHeight: 1.6 }}>
-                {selectedStory.excerpt}
-              </p>
-            </DrawerSection>
-          </div>
-        )}
-      </Drawer>
-
-      {/* New Story Drawer */}
-      <Drawer
-        isOpen={isCreateOpen}
-        onClose={() => setIsCreateOpen(false)}
-        title="Compose Editorial Story"
-        subtitle="Publish lookbook reflections and brand journalism to storefront"
-        width="540px"
-        footer={
-          <>
-            <Button variant="secondary" size="md" type="button" onClick={() => setIsCreateOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="primary" size="md" type="submit" form="journal-create-form">
-              Save Story
-            </Button>
-          </>
-        }
-      >
-        <form id="journal-create-form" onSubmit={handleCreateSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <Input
-            label="Story Title"
-            placeholder="e.g. Architectural Tailoring in Minimalist Apparel"
-            value={formTitle}
-            onChange={(e) => {
-              setFormTitle(e.target.value);
-              if (!formSlug) setFormSlug(e.target.value.toLowerCase().replace(/\s+/g, '-'));
-            }}
-            required
-          />
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <Input
-              label="URL Slug"
-              value={formSlug}
-              onChange={(e) => setFormSlug(e.target.value)}
-              required
-            />
-            <Select
-              label="Category"
-              value={formCategory}
-              onChange={(e) => setFormCategory(e.target.value as StoryItem['category'])}
-              options={[
-                { value: 'Design Notes', label: 'Design Notes' },
-                { value: 'Lookbook', label: 'Lookbook' },
-                { value: 'Sustainability', label: 'Sustainability' },
-                { value: 'Culture', label: 'Culture' },
-              ]}
-            />
-          </div>
-
-          <Select
-            label="Publication Status"
-            value={formStatus}
-            onChange={(e) => setFormStatus(e.target.value as StoryItem['status'])}
-            options={[
-              { value: 'published', label: 'Published (Live on blog)' },
-              { value: 'draft', label: 'Draft (Editorial review)' },
-            ]}
-          />
-
-          <Textarea
-            label="Story Summary / Excerpt"
-            rows={4}
-            value={formExcerpt}
-            onChange={(e) => setFormExcerpt(e.target.value)}
-            placeholder="Lead narrative summary..."
-          />
-        </form>
-      </Drawer>
     </DashboardShell>
   );
 }

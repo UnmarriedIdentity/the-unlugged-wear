@@ -19,6 +19,7 @@ import {
   AbandonedCart,
   SizeChart,
   LibraryAttribute,
+  ProductAttribute,
   initialProducts,
   initialOrders,
   initialShipments,
@@ -38,13 +39,56 @@ import {
   defaultLibraryVisibility,
 } from './fixtures';
 import {
+  initialBlogAuthors,
+  initialBlogCategories,
+  initialBlogMedia,
+  initialBlogPosts,
+  initialBlogRevisions,
+  initialBlogSlugHistory,
+  initialBlogTags,
+} from './blogFixtures';
+import {
   synthesizeVariants,
   deriveColors,
   deriveSizes,
   variantStockTotal,
+  buildVariantSkuFromOption,
+  buildVariantKey,
 } from './variants';
+import {
+  type BlogAuthor,
+  type BlogCategory,
+  type BlogDraft,
+  type BlogMediaAsset,
+  type BlogPost,
+  type BlogRevision,
+  type BlogSlugHistoryEntry,
+  type BlogTag,
+  nextBlogId,
+  nextRevisionNo,
+  slugify,
+  uniqueBlogSlug,
+  validateBlogDraft,
+} from '@/lib/blog';
 import { normalizeCollection, nextCollectionId, type LegacyCollection } from '@/lib/collections';
 import { normalizeAttributeDisplayType } from '@/lib/attributePresentation';
+
+/** Legacy single-value print placement → the workbook's multi-select
+ * Placements attribute. Unknown values are preserved as product-local values
+ * rather than dropped. */
+const LEGACY_PLACEMENT_VALUES: Record<string, string[]> = {
+  'Chest (45mm)': ['Front'],
+  'Back Oversized': ['Back'],
+  'Sleeve Length': ['Left Sleeve', 'Right Sleeve'],
+  'Interior Hem': ['Interior Hem'],
+};
+
+function legacyPlacementValues(placement: unknown): string[] {
+  if (typeof placement !== 'string') return [];
+  const value = placement.trim();
+  if (!value) return [];
+  return LEGACY_PLACEMENT_VALUES[value] ?? [value];
+}
 
 export interface ToastMessage {
   id: string;
@@ -58,7 +102,7 @@ export type DemoScenario = 'normal' | 'loading' | 'empty' | 'error' | 'long_cont
 interface AdminStateContextType {
   activeRole: StaffRole;
   setActiveRole: (role: StaffRole) => void;
-  canPerformAction: (actionCategory: 'orders' | 'products' | 'refunds' | 'team' | 'settings' | 'fulfillment') => boolean;
+  canPerformAction: (actionCategory: 'orders' | 'products' | 'refunds' | 'team' | 'settings' | 'fulfillment' | 'cms') => boolean;
 
   scenario: DemoScenario;
   setScenario: (scenario: DemoScenario) => void;
@@ -82,12 +126,26 @@ interface AdminStateContextType {
   sizeCharts: SizeChart[];
   libraryAttributes: LibraryAttribute[];
 
+  blogCategories: BlogCategory[];
+  blogAuthors: BlogAuthor[];
+  blogTags: BlogTag[];
+  blogMedia: BlogMediaAsset[];
+  blogPosts: BlogPost[];
+  blogRevisions: BlogRevision[];
+  blogSlugHistory: BlogSlugHistoryEntry[];
+
   toasts: ToastMessage[];
   showToast: (toast: Omit<ToastMessage, 'id'>) => void;
   dismissToast: (id: string) => void;
 
   // Mutations
   createProduct: (product: Omit<ProductItem, 'id' | 'soldCount' | 'rating'>, silent?: boolean) => boolean;
+  /** Batch create in one state commit — import staging needs this so a 150-row
+   * workbook does not overwrite itself through stale closures. */
+  createProducts: (
+    products: Array<Omit<ProductItem, 'id' | 'soldCount' | 'rating'>>,
+    silent?: boolean
+  ) => number;
   updateProduct: (id: string, updates: Partial<ProductItem>, silent?: boolean) => boolean;
   deleteProduct: (id: string, silent?: boolean) => boolean;
 
@@ -144,6 +202,13 @@ interface AdminStateContextType {
   addLibraryValue: (id: string, value: string) => boolean;
   removeLibraryValue: (id: string, value: string) => boolean;
 
+  saveBlogPost: (draft: BlogDraft, mode: 'draft' | 'publish') => { ok: boolean; errors?: Partial<Record<keyof BlogDraft | 'content', string>> };
+  deleteBlogPost: (id: string) => boolean;
+  archiveBlogPost: (id: string) => boolean;
+  restoreBlogRevision: (revisionId: string) => boolean;
+  createBlogTag: (name: string) => string | false;
+  createBlogCategory: (name: string) => string | false;
+
   resetDemoData: () => void;
 }
 
@@ -173,6 +238,13 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
   const [abandonedCarts, setAbandonedCarts] = useState<AbandonedCart[]>(initialAbandonedCarts);
   const [sizeCharts, setSizeCharts] = useState<SizeChart[]>(initialSizeCharts);
   const [libraryAttributes, setLibraryAttributes] = useState<LibraryAttribute[]>(initialLibraryAttributes);
+  const [blogCategories, setBlogCategories] = useState<BlogCategory[]>(initialBlogCategories);
+  const [blogAuthors, setBlogAuthors] = useState<BlogAuthor[]>(initialBlogAuthors);
+  const [blogTags, setBlogTags] = useState<BlogTag[]>(initialBlogTags);
+  const [blogMedia, setBlogMedia] = useState<BlogMediaAsset[]>(initialBlogMedia);
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>(initialBlogPosts);
+  const [blogRevisions, setBlogRevisions] = useState<BlogRevision[]>(initialBlogRevisions);
+  const [blogSlugHistory, setBlogSlugHistory] = useState<BlogSlugHistoryEntry[]>(initialBlogSlugHistory);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -182,16 +254,52 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         const parsed = JSON.parse(saved);
         if (parsed.activeRole) setActiveRoleState(parsed.activeRole);
         if (parsed.products) {
-          // One-time gallery migration: legacy hero `image` becomes the first
-          // ordered gallery entry (cover). Drop the old gradient field.
+          // One-time gallery + placement migration: legacy hero `image`
+          // becomes the first ordered gallery entry (cover); the old
+          // single-value `placement` folds into the Placements attribute.
           setProducts(
-            (parsed.products as Array<ProductItem & { image?: string }>).map((p) => {
-              const legacy = p as ProductItem & { image?: string; imageBg?: string };
+            (parsed.products as Array<ProductItem & { image?: string; placement?: string }>).map((p) => {
+              const legacy = p as ProductItem & {
+                image?: string;
+                imageBg?: string;
+                placement?: string;
+              };
               const rest = { ...legacy };
               delete rest.image;
               delete rest.imageBg;
+              delete rest.placement;
+              const savedAttributes = rest.attributes;
+              delete rest.attributes;
+
+              const attributes: ProductAttribute[] = (savedAttributes ?? []).map((a) => ({
+                ...a,
+                values: [...a.values],
+                swatchHex: { ...(a.swatchHex ?? {}) },
+              }));
+              const placementValues = legacyPlacementValues(legacy.placement);
+              if (placementValues.length > 0) {
+                const existing = attributes.find(
+                  (a) => a.name.toLowerCase() === 'placements'
+                );
+                if (existing) {
+                  if (existing.values.length === 0) existing.values = placementValues;
+                } else {
+                  attributes.push({
+                    name: 'Placements',
+                    values: placementValues,
+                    builtin: true,
+                    displayType: 'radio',
+                    swatchHex: {},
+                    libraryId: 'LIB-03',
+                  });
+                }
+              }
+
               return {
                 ...rest,
+                ...(savedAttributes !== undefined || placementValues.length > 0
+                  ? { attributes }
+                  : {}),
                 images:
                   Array.isArray(p.images) && p.images.length > 0
                     ? [...p.images]
@@ -246,6 +354,13 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
             }))
           );
         }
+        if (parsed.blogCategories) setBlogCategories(parsed.blogCategories);
+        if (parsed.blogAuthors) setBlogAuthors(parsed.blogAuthors);
+        if (parsed.blogTags) setBlogTags(parsed.blogTags);
+        if (parsed.blogMedia) setBlogMedia(parsed.blogMedia);
+        if (parsed.blogPosts) setBlogPosts(parsed.blogPosts);
+        if (parsed.blogRevisions) setBlogRevisions(parsed.blogRevisions);
+        if (parsed.blogSlugHistory) setBlogSlugHistory(parsed.blogSlugHistory);
       }
     } catch {
       // Local storage fallback
@@ -272,6 +387,13 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
       abandonedCarts?: AbandonedCart[];
       sizeCharts?: SizeChart[];
       libraryAttributes?: LibraryAttribute[];
+      blogCategories?: BlogCategory[];
+      blogAuthors?: BlogAuthor[];
+      blogTags?: BlogTag[];
+      blogMedia?: BlogMediaAsset[];
+      blogPosts?: BlogPost[];
+      blogRevisions?: BlogRevision[];
+      blogSlugHistory?: BlogSlugHistoryEntry[];
     }) => {
       try {
         const current = {
@@ -292,6 +414,13 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
           abandonedCarts,
           sizeCharts,
           libraryAttributes,
+          blogCategories,
+          blogAuthors,
+          blogTags,
+          blogMedia,
+          blogPosts,
+          blogRevisions,
+          blogSlugHistory,
           ...newState,
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
@@ -299,7 +428,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         // Storage quota / privacy protection
       }
     },
-    [activeRole, products, orders, shipments, refunds, returns, customers, supportTickets, collections, designs, team, settings, stockMovements, discountCodes, abandonedCarts, sizeCharts, libraryAttributes]
+    [activeRole, products, orders, shipments, refunds, returns, customers, supportTickets, collections, designs, team, settings, stockMovements, discountCodes, abandonedCarts, sizeCharts, libraryAttributes, blogCategories, blogAuthors, blogTags, blogMedia, blogPosts, blogRevisions, blogSlugHistory]
   );
 
   const showToast = useCallback((toast: Omit<ToastMessage, 'id'>) => {
@@ -325,7 +454,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
   };
 
   // Role check helper
-  const canPerformAction = (actionCategory: 'orders' | 'products' | 'refunds' | 'team' | 'settings' | 'fulfillment'): boolean => {
+  const canPerformAction = (actionCategory: 'orders' | 'products' | 'refunds' | 'team' | 'settings' | 'fulfillment' | 'cms'): boolean => {
     if (activeRole === 'Read-only') {
       showToast({
         type: 'warning',
@@ -361,16 +490,66 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
   // MUTATION IMPLEMENTATIONS
   // -------------------------------------------------------------
 
-  const createProduct = (p: Omit<ProductItem, 'id' | 'soldCount' | 'rating' | 'variants'>, silent = false) => {
-    if (!canPerformAction('products')) return false;
-    const id = `PRD-${Math.floor(10 + Math.random() * 90)}`;
-    const newProduct: ProductItem = {
+  // Stable, collision-free ID. The old random 10–99 range duplicated quickly
+  // once a workbook staged more than a handful of products.
+  const nextProductId = (list: ProductItem[]): string => {
+    let nextNumber =
+      list.reduce((max, product) => {
+        const match = /^PRD-(\d+)$/.exec(product.id);
+        return match ? Math.max(max, Number(match[1])) : max;
+      }, 0) + 1;
+    let id = `PRD-${String(nextNumber).padStart(2, '0')}`;
+    while (list.some((product) => product.id === id)) {
+      nextNumber += 1;
+      id = `PRD-${String(nextNumber).padStart(2, '0')}`;
+    }
+    return id;
+  };
+
+  // Explicit variants (import) win; manual creates synthesize from the flat
+  // color×size fields. IDs and SKUs are always regenerated in the seam so
+  // callers cannot persist placeholder or duplicate identities.
+  const buildProduct = (
+    p: Omit<ProductItem, 'id' | 'soldCount' | 'rating'>,
+    id: string
+  ): ProductItem => {
+    const sourceVariants =
+      p.variants && p.variants.length > 0
+        ? p.variants
+        : synthesizeVariants({ id, price: p.price, stock: p.stock, colors: p.colors, sizes: p.sizes });
+    const usedSkus = new Set<string>();
+    const variants = sourceVariants.map((variant, index) => {
+      const baseSku = variant.sku || buildVariantSkuFromOption(id, variant.color, variant.size);
+      let sku = baseSku;
+      let suffix = 2;
+      while (usedSkus.has(sku)) {
+        sku = `${baseSku}-${suffix}`;
+        suffix += 1;
+      }
+      usedSkus.add(sku);
+      return {
+        ...variant,
+        id: `${id}-V${index + 1}`,
+        sku,
+        variantKey: variant.variantKey ?? buildVariantKey(variant.color, variant.size),
+      };
+    });
+
+    return {
       ...p,
       id,
-      variants: synthesizeVariants({ id, price: p.price, stock: p.stock, colors: p.colors, sizes: p.sizes }),
+      variants,
+      colors: deriveColors(variants),
+      sizes: deriveSizes(variants),
+      stock: p.variants && p.variants.length > 0 ? variantStockTotal(variants) : p.stock,
       soldCount: 0,
       rating: 5.0,
     };
+  };
+
+  const createProduct = (p: Omit<ProductItem, 'id' | 'soldCount' | 'rating'>, silent = false) => {
+    if (!canPerformAction('products')) return false;
+    const newProduct = buildProduct(p, nextProductId(products));
     const next = [newProduct, ...products];
     setProducts(next);
     persistState({ products: next });
@@ -382,6 +561,31 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
       });
     }
     return true;
+  };
+
+  const createProducts = (
+    drafts: Array<Omit<ProductItem, 'id' | 'soldCount' | 'rating'>>,
+    silent = false
+  ) => {
+    if (!canPerformAction('products') || drafts.length === 0) return 0;
+
+    // One commit for the whole workbook. Calling createProduct in a loop reads
+    // the same pre-import `products` closure every time, so only the last row
+    // would survive.
+    let list = products;
+    for (const draft of drafts) {
+      list = [buildProduct(draft, nextProductId(list)), ...list];
+    }
+    setProducts(list);
+    persistState({ products: list });
+    if (!silent) {
+      showToast({
+        type: 'success',
+        title: 'Products Created',
+        description: `${drafts.length} draft${drafts.length === 1 ? '' : 's'} added to the local catalog.`,
+      });
+    }
+    return drafts.length;
   };
 
   const updateProduct = (id: string, updates: Partial<ProductItem>, silent = false) => {
@@ -1166,6 +1370,272 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     return true;
   };
 
+  // Blog authoring (demo-backed model mirrors 006-cms.sql):
+  // validation/normalization live in one seam, so the editor and state
+  // cannot drift. Publishes snapshot a revision; slug changes on published
+  // posts append history for future 301 redirects.
+  const saveBlogPost = (
+    draft: BlogDraft,
+    mode: 'draft' | 'publish'
+  ): { ok: boolean; errors?: Partial<Record<keyof BlogDraft | 'content', string>> } => {
+    if (!canPerformAction('cms')) return { ok: false };
+    const validation = validateBlogDraft(draft, {
+      mode,
+      posts: blogPosts,
+      categories: blogCategories,
+      authors: blogAuthors,
+      tags: blogTags,
+      media: blogMedia,
+    });
+    if (!validation.ok) return { ok: false, errors: validation.errors };
+
+    const now = new Date().toISOString();
+    const existing = draft.id ? blogPosts.find((p) => p.id === draft.id) : undefined;
+    const slugChanged = Boolean(existing && existing.slug !== validation.draft.slug);
+
+    if (slugChanged && existing) {
+      const retired = existing.slug;
+      const target = validation.draft.slug;
+      if (
+        (existing.status === 'published' || existing.status === 'archived') &&
+        blogSlugHistory.some(
+          (entry) => entry.slug.toLowerCase() === target.toLowerCase() && entry.blogId !== existing.id
+        )
+      ) {
+        return {
+          ok: false,
+          errors: { slug: 'This slug was previously used by another article.' },
+        };
+      }
+    }
+
+    if (!existing) {
+      const id = nextBlogId(blogPosts);
+      const next: BlogPost = {
+        ...validation.draft,
+        id,
+        contentText: validation.contentText,
+        readingTimeMinutes: validation.readingTimeMinutes,
+        inlineMediaIds: validation.inlineMediaIds,
+        version: 1,
+        createdBy: activeRole,
+        updatedBy: activeRole,
+        createdAt: now,
+        updatedAt: now,
+      };
+      const nextPosts = [next, ...blogPosts];
+      let nextRevisions = blogRevisions;
+      if (mode === 'publish') {
+        const { id: _postId, createdAt: _createdAt, updatedAt: _updatedAt, version: _version, inlineMediaIds: _mediaIds, ...snapshot } = next;
+        nextRevisions = [
+          {
+            id: `BREV-${Date.now()}-${id}`,
+            blogId: id,
+            revisionNo: 1,
+            title: next.title,
+            snapshot,
+            createdBy: activeRole,
+            createdAt: now,
+          },
+          ...blogRevisions,
+        ];
+      }
+      setBlogPosts(nextPosts);
+      setBlogRevisions(nextRevisions);
+      persistState({ blogPosts: nextPosts, blogRevisions: nextRevisions });
+      showToast({
+        type: 'success',
+        title: mode === 'publish' ? 'Article Published' : 'Draft Saved',
+        description: `"${next.title}" saved to the editorial journal.`,
+      });
+      return { ok: true };
+    }
+
+    const next: BlogPost = {
+      ...existing,
+      ...validation.draft,
+      id: existing.id,
+      contentText: validation.contentText,
+      readingTimeMinutes: validation.readingTimeMinutes,
+      inlineMediaIds: validation.inlineMediaIds,
+      version: existing.version + 1,
+      createdAt: existing.createdAt,
+      updatedAt: now,
+      updatedBy: activeRole,
+    };
+    const nextPosts = blogPosts.map((p) => (p.id === existing.id ? next : p));
+    let nextRevisions = blogRevisions;
+    let nextSlugHistory = blogSlugHistory;
+
+    if (
+      slugChanged &&
+      (existing.status === 'published' || existing.status === 'archived') &&
+      !blogSlugHistory.some((entry) => entry.slug.toLowerCase() === existing.slug.toLowerCase())
+    ) {
+      nextSlugHistory = [
+        {
+          slug: existing.slug,
+          blogId: existing.id,
+          retiredAt: now,
+        },
+        ...blogSlugHistory,
+      ];
+    }
+
+    if (mode === 'publish') {
+      const { id: _postId, createdAt: _createdAt, updatedAt: _updatedAt, version: _version, inlineMediaIds: _mediaIds, ...snapshot } = next;
+      nextRevisions = [
+        {
+          id: `BREV-${Date.now()}-${next.id}`,
+          blogId: next.id,
+          revisionNo: nextRevisionNo(blogRevisions, next.id),
+          title: next.title,
+          snapshot,
+          createdBy: activeRole,
+          createdAt: now,
+        },
+        ...blogRevisions,
+      ];
+    }
+
+    setBlogPosts(nextPosts);
+    setBlogRevisions(nextRevisions);
+    setBlogSlugHistory(nextSlugHistory);
+    persistState({
+      blogPosts: nextPosts,
+      blogRevisions: nextRevisions,
+      blogSlugHistory: nextSlugHistory,
+    });
+    showToast({
+      type: 'success',
+      title: mode === 'publish' ? 'Article Published' : 'Draft Saved',
+      description: `"${next.title}" updated in the editorial journal.`,
+    });
+    return { ok: true };
+  };
+
+  const deleteBlogPost = (id: string) => {
+    if (!canPerformAction('cms')) return false;
+    const target = blogPosts.find((post) => post.id === id);
+    if (!target) return false;
+    if (target.status === 'published' || target.status === 'scheduled') {
+      showToast({
+        type: 'warning',
+        title: 'Use Archive Instead',
+        description: 'Published and scheduled articles should be archived, not deleted.',
+      });
+      return false;
+    }
+    const next = blogPosts.filter((post) => post.id !== id);
+    setBlogPosts(next);
+    persistState({ blogPosts: next });
+    showToast({
+      type: 'info',
+      title: 'Draft Deleted',
+      description: `"${target.title}" removed from the editorial journal.`,
+    });
+    return true;
+  };
+
+  const archiveBlogPost = (id: string) => {
+    if (!canPerformAction('cms')) return false;
+    const target = blogPosts.find((post) => post.id === id);
+    if (!target || target.status === 'archived') return false;
+    const next = blogPosts.map((post) =>
+      post.id === id
+        ? {
+            ...post,
+            status: 'archived' as const,
+            version: post.version + 1,
+            updatedAt: new Date().toISOString(),
+            updatedBy: activeRole,
+          }
+        : post
+    );
+    setBlogPosts(next);
+    persistState({ blogPosts: next });
+    showToast({
+      type: 'info',
+      title: 'Article Archived',
+      description: `"${target.title}" is no longer live on the storefront.`,
+    });
+    return true;
+  };
+
+  const restoreBlogRevision = (revisionId: string) => {
+    if (!canPerformAction('cms')) return false;
+    const revision = blogRevisions.find((r) => r.id === revisionId);
+    if (!revision) return false;
+    const target = blogPosts.find((post) => post.id === revision.blogId);
+    if (!target) return false;
+    const now = new Date().toISOString();
+    const next: BlogPost = {
+      ...target,
+      ...revision.snapshot,
+      id: target.id,
+      version: target.version + 1,
+      createdAt: target.createdAt,
+      updatedAt: now,
+      updatedBy: activeRole,
+    };
+    const nextPosts = blogPosts.map((post) => (post.id === target.id ? next : post));
+    setBlogPosts(nextPosts);
+    persistState({ blogPosts: nextPosts });
+    showToast({
+      type: 'success',
+      title: 'Revision Restored',
+      description: `Revision ${revision.revisionNo} copied into a new draft version.`,
+    });
+    return true;
+  };
+
+  const createBlogTag = (name: string): string | false => {
+    if (!canPerformAction('cms')) return false;
+    const trimmed = name.trim();
+    if (!trimmed) return false;
+    if (blogTags.some((tag) => tag.name.toLowerCase() === trimmed.toLowerCase())) {
+      showToast({
+        type: 'warning',
+        title: 'Duplicate Tag',
+        description: `"${trimmed}" already exists in the editorial tag library.`,
+      });
+      return false;
+    }
+    const id = `BTAG-${Date.now()}`;
+    const next = [...blogTags, { id, name: trimmed, slug: slugify(trimmed) || 'tag' }];
+    setBlogTags(next);
+    persistState({ blogTags: next });
+    return id;
+  };
+
+  const createBlogCategory = (name: string): string | false => {
+    if (!canPerformAction('cms')) return false;
+    const trimmed = name.trim();
+    if (!trimmed) return false;
+    if (blogCategories.some((category) => category.name.toLowerCase() === trimmed.toLowerCase())) {
+      showToast({
+        type: 'warning',
+        title: 'Duplicate Category',
+        description: `"${trimmed}" already exists as an editorial category.`,
+      });
+      return false;
+    }
+    const id = `BCAT-${Date.now()}`;
+    const next = [
+      ...blogCategories,
+      {
+        id,
+        name: trimmed,
+        slug: slugify(trimmed) || 'category',
+        sortOrder: blogCategories.length,
+        isActive: true,
+      },
+    ];
+    setBlogCategories(next);
+    persistState({ blogCategories: next });
+    return id;
+  };
+
   const setScenario = (sc: DemoScenario) => {
     setScenarioState(sc);
     if (sc === 'empty') {
@@ -1218,6 +1688,22 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
       setReturns(initialReturns);
       setCustomers(initialCustomers);
       setSupportTickets(initialSupportTickets);
+      setCollections(initialCollections);
+      setDesigns(initialDesigns);
+      setTeam(initialTeam);
+      setSettings(initialSettings);
+      setStockMovements(initialStockMovements);
+      setDiscountCodes(initialDiscountCodes);
+      setAbandonedCarts(initialAbandonedCarts);
+      setSizeCharts(initialSizeCharts);
+      setLibraryAttributes(initialLibraryAttributes);
+      setBlogCategories(initialBlogCategories);
+      setBlogAuthors(initialBlogAuthors);
+      setBlogTags(initialBlogTags);
+      setBlogMedia(initialBlogMedia);
+      setBlogPosts(initialBlogPosts);
+      setBlogRevisions(initialBlogRevisions);
+      setBlogSlugHistory(initialBlogSlugHistory);
       setSimulatedError(null);
       showToast({
         type: 'success',
@@ -1264,6 +1750,13 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     setAbandonedCarts(initialAbandonedCarts);
     setSizeCharts(initialSizeCharts);
     setLibraryAttributes(initialLibraryAttributes);
+    setBlogCategories(initialBlogCategories);
+    setBlogAuthors(initialBlogAuthors);
+    setBlogTags(initialBlogTags);
+    setBlogMedia(initialBlogMedia);
+    setBlogPosts(initialBlogPosts);
+    setBlogRevisions(initialBlogRevisions);
+    setBlogSlugHistory(initialBlogSlugHistory);
 
     showToast({
       type: 'info',
@@ -1298,10 +1791,18 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         abandonedCarts,
         sizeCharts,
         libraryAttributes,
+        blogCategories,
+        blogAuthors,
+        blogTags,
+        blogMedia,
+        blogPosts,
+        blogRevisions,
+        blogSlugHistory,
         toasts,
         showToast,
         dismissToast,
         createProduct,
+        createProducts,
         updateProduct,
         deleteProduct,
         createOrder,
@@ -1336,6 +1837,12 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         setLibraryVisibility,
         addLibraryValue,
         removeLibraryValue,
+        saveBlogPost,
+        deleteBlogPost,
+        archiveBlogPost,
+        restoreBlogRevision,
+        createBlogTag,
+        createBlogCategory,
         resetDemoData,
       }}
     >

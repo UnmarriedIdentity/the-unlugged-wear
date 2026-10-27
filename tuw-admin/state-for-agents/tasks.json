@@ -8,15 +8,44 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 273,
-    "done": 249,
+    "total": 282,
+    "done": 258,
     "in_progress": 0,
     "backlog": 24
   },
   "session": {
     "branch": "feat/search-modal",
-    "tip": "2645eb0",
+    "tip": "52a8216",
     "unpushed": [
+      "52a8216",
+      "6c3f82f",
+      "4cf0a30",
+      "4f40103",
+      "344be18",
+      "7c7a3f5",
+      "1e4955a",
+      "3edfb26",
+      "080837d",
+      "bec4d63",
+      "159181b",
+      "15c48b4",
+      "d77f9ed",
+      "fee3c6e",
+      "fd1812e",
+      "7e3a14d",
+      "8d6d500",
+      "f286600",
+      "8147632",
+      "33396a3",
+      "806fee6",
+      "8164bc6",
+      "d4c42ad",
+      "04f31ec",
+      "28eccec",
+      "1ed268d",
+      "c86e718",
+      "67bdf97",
+      "f9de18b",
       "2645eb0",
       "5e7e8b7",
       "ac255fa",
@@ -37,8 +66,10 @@
       "f5c9cea",
       "e3e12f9"
     ],
-    "next_up": "PEDIT card 5 Attributes & values SHIPPED (ac255fa) and polished (5e7e8b7), and the General tab now uses an expanded two-column card grid (2645eb0) with card 5 full width and three-column Storefront attribute rows. Manage library sits beside the library dropdown; swatches use a fully circular shared input class. All five General cards are done: Basic Information + Description, Pricing & stock, Scheduled discounts, Fulfillment & shipping, and Attributes & values. The drawer now reads the library-owned display type read-only and falls back to Pill with an Unlinked warning. Gates green: typecheck, 71 admin + 7 website tests, 40 admin + 27 website builds. NEXT: browser verification for cards 1-5, the expanded two-column grid with three-column Storefront rows, and the read-only type, then TL-UI-PEDIT-TABS-CARDS -> HOOK -> SPLIT -> SHELL -> RESET. Parked: TL-UI-PEDIT-ATTR-VALUES / ATTR-SWATCH, TL-UI-ADM-TABLES / ADM-INR / ADM-MONO, TL-UI-CMS-PERSIST, TL-UI-DESIGN-PLAN. Other waves awaiting browser verification: fulfillment KPI grid, collections, admin drawers, compare-at/CSV, and the PEDIT cleanup wave. Styling engine (file 19) remains the final feature after the core e-commerce app is complete; shipments partner-sync reframe and household UI (file 17) remain later.",
+    "next_up": "Editorial admin authoring foundation SHIPPED (52a8216): the Journal list is state-driven, the Content overview shows live counts, and /content/journal/new + /content/journal/[id]/edit use a full-page Tiptap editor. The admin state persists categories, authors, tags, media, posts, revisions and slug history with Reset Demo. Publishing validates cover, content length, inline media and scheduled date. NEXT: Phase 3 storefront journal rendering — DB-shaped fixtures, safe JSON renderer, filters/search, reading time, Urbanist italic prose CSS and charcoal/gold accents.",
     "pending_verifications": [
+      "editor + journal list browser pass at 360/768/1024/1440 (keyboard, focus, Reset Demo, empty/loading/error states)",
+      "SQL dry-run: apply 001 + 002 + 006-cms.sql against a real PostgreSQL instance; verify generated blogs.search_vector, slug/CHECK constraints, FK RESTRICT/CASCADE behavior, and partial indexes. psql remains unavailable locally.",
       "anim probe: end-Out events appear with 180ms buffer (post e533db4)",
       "dashboard D-series: KPI tiers, range/sort menus, badge mapping, calendar pills, header tint (360/768/1024/1440)",
       "trunk continuous-dark + elbow-only on 1st-4th actives (post Antigravity+z-lift)",
@@ -62,11 +93,15 @@
       "PEDIT Pricing & stock card (3ee3844 + 4e36f1e): default-collapsed independent card, no helper text below inputs, Base/Compare + Stock/Tax alignment, Compare-at tooltip hover/focus/tap, auto-open on compare error, tax save/reload, Reset Demo; 360/768/1024/1440 — browser pass pending",
       "PEDIT Scheduled discounts card (71daaec): default-collapsed independent card, empty state, add/remove, type switch + percent clamp, dates, active switch, row focus return, save/reload, Reset Demo; 360/768/1024/1440 — browser pass pending",
       "PEDIT Description folded into Basic (a396de7): Description loads/saves per product from its new full-width position after URL Slug, label click focuses the textarea, Basic collapse/reopen preserves the draft, no separate Description card; 360/768/1024/1440 — browser pass pending",
-      "PEDIT Fulfillment & shipping card (a396de7): default-collapsed independent card, Partner/Placement load/save, Weight/Shipping weight/Package dimensions load/save from the new card, Internal attributes count excludes moved fields, no helper lines; 360/768/1024/1440 — browser pass pending",
+      "PEDIT Fulfillment & shipping card (a396de7 + d4c42ad): default-collapsed independent card, Partner load/save, no Print placement select, Weight/Shipping weight/Package dimensions load/save from the new card, Internal attributes count excludes moved fields, no helper lines; 360/768/1024/1440 — browser pass pending",
+      "PEDIT Placements single source (d4c42ad): card 4 has no Print placement control; card 5 Placements values load/save; legacy localStorage placement migrates (Chest (45mm)->Front, Back Oversized->Back, Sleeve Length->Left+Right Sleeve, Interior Hem preserved); import stages workbook Placements; create defaults to Front; Reset Demo; 360/768/1024/1440 — browser pass pending",
       "PEDIT Attributes & values card (ac255fa + 5e7e8b7): default-collapsed independent card, Storefront/Internal groups, chip wrapping, Manage library beside the library dropdown, fully circular swatch picker, radio previews, add/remove value, known-value picker, default protection, read-only library type, unlinked fallback, Reset Demo; 360/768/1024/1440 - browser pass pending",
-      "PEDIT expanded card layout (2645eb0): Compact stays one card per row; Expanded matrix / Full canvas shows two cards per row at 1024/1440; card 5 spans both columns; Storefront attributes show three per row when expanded/wide; Internal only stays a separate group; open-card neighbours stay top-aligned; no horizontal overflow; tab order stays 1-5; 360/768/1024/1440 - browser pass pending"
+      "PEDIT expanded card layout (2645eb0): Compact stays one card per row; Expanded matrix / Full canvas shows two cards per row at 1024/1440; card 5 spans both columns; Storefront attributes show three per row when expanded/wide; Internal only stays a separate group; open-card neighbours stay top-aligned; no horizontal overflow; tab order stays 1-5; 360/768/1024/1440 - browser pass pending",
+      "Workbook import (67bdf97): header-row detection, 155-group preview, one-commit staging, HSN validation, internal S.No display, Uncategorized category filter, edit/reload preservation, 305-variant product table, Reset Demo; 360/768/1024/1440 - browser pass pending",
+      "PEDIT Clothing Specs cards (c86e718): Compact one card per row; Expanded/Full pairs Display options+Clothing specs and Size chart+Monogram at 1024/1440; Display options switch hides/shows the monogram card; independent collapse survives tab switches; size-chart table scrolls inside a half-width card; monogram pair collapses to one column at 360; chart add/remove + in-use guard feedback; Reset Demo; 360/768/1024/1440 - browser pass pending",
+      "SQL dry-run (f9de18b + 04f31ec): psql is not installed; validate 002 + 010 against a real Postgres instance before the first migration run. The static schema guard (28eccec + 04f31ec) checks inventory/FK order/retired names/semantic columns but does not replace a real parser."
     ],
-    "last_updated": "2026-10-20",
+    "last_updated": "2026-10-27",
     "updated_by": "agent"
   },
   "tasks": [
@@ -2150,6 +2185,54 @@
         "feature build is the project's final step: P1 (seed + scorer + API + PDP rail + events) → P2 (admin screens + Styling report + co-purchase job) → P3 (personalization, size-aware via profile_size_preferences)",
         "styling_events doubles as the shadow-mode harness (variant + contributors columns) — no schema change needed at any stage",
         "file 18 is free again for the queued attribute edge log"
+      ]
+    },
+    {
+      "id": "TL-DB-CMS-BLOG",
+      "title": "Normalized CMS blog schema (006: media + 8 blog tables)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-26",
+      "finished": "2026-10-27",
+      "log": "feat/search-modal: 8164bc6 file-09 final model + 806fee6 file-20 decisions + 33396a3 006-cms.sql + 8147632 inventory + f286600 overview counts + 8d6d500 migration README + 7e3a14d schema guard; 41→50 implemented, 75→81 planned",
+      "design_match": "yes",
+      "key_decisions": [
+        "status stays varchar + CHECK (draft/scheduled/published/archived); no blog_statuses lookup",
+        "content JSONB is the single editable source; no content_html; content_text + reading time + generated search_vector are derived caches",
+        "one primary category + normalized tags; one primary author with a later co-author junction path",
+        "cover/OG are direct media FKs; blog_post_media is the inline-media FK ledger (inline images only)",
+        "blog_slug_history is required for 301 redirects; blog_revisions are immutable snapshots",
+        "no views column — analytics page_views owns that data"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "runtime SQL dry-run on a real PostgreSQL instance (006-cms.sql, incl. generated column + check constraints)",
+        "Phase 2: admin blog state + taxonomy + full-page Tiptap editor"
+      ]
+    },
+    {
+      "id": "TL-UI-CMS-BLOG",
+      "title": "Editorial admin authoring foundation (state, taxonomy, editor)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-27",
+      "finished": "2026-10-27",
+      "log": "feat/search-modal: fee3c6e + d77f9ed Tiptap deps, 15c48b4 blog model, 159181b fixtures, bec4d63 model tests, 080837d admin state, 3edfb26 rich-text editor, 1e4955a JSON preview, 7c7a3f5 full-page editor, 344be18 new route, 4f40103 edit route, 4cf0a30 state-driven list, 6c3f82f live overview counts, 52a8216 publishable-content guard",
+      "design_match": "partial",
+      "key_decisions": [
+        "admin Journal state is persisted in AdminState/localStorage and restored by Reset Demo",
+        "canonical categories: Craft, Slow Living, Sustainability, Design, Culture; Lookbook is a tag",
+        "full-page editor uses Tiptap JSON; no raw HTML and no content_html",
+        "publishing validates cover, content length, inline media and scheduled date",
+        "revision restore copies an immutable snapshot into a new draft version"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "browser pass for editor + list at 360/768/1024/1440, keyboard and Reset Demo",
+        "media-library unification and richer inline media metadata",
+        "taxonomy management UI (category/author/tag CRUD)"
       ]
     },
     {
@@ -4295,13 +4378,13 @@
         "No card-level Required label; field labels get a quiet asterisk plus native required semantics",
         "No chevron/collapse affordance until PEDIT-SHELL makes it functional",
         "Selected/warning header tones only when meaningful; neutral is the default",
-        "Canvas is scoped to the General tab until TABS-CARDS cardifies the other product tabs"
+        "Canvas is scoped to the General and Clothing Specs tabs until TABS-CARDS cardifies Media and Variants"
       ],
       "verified": true,
       "pushed": false,
       "follow_ups": [
         "Browser visual pass at 360/768/1024/1440 remains pending",
-        "Extend the canvas/card header treatment to Media, Variants, and Clothing Specs in TL-UI-PEDIT-TABS-CARDS",
+        "Extend the canvas/card header treatment to Media and Variants in TL-UI-PEDIT-TABS-CARDS",
         "Selected/warning header tones currently have no consumer; add only when a real state exists",
         "Collapse/chevron shipped in TL-UI-PEDIT-CARD-COLLAPSE (1bf3c68)"
       ]
@@ -4384,15 +4467,41 @@
     },
     {
       "id": "TL-UI-PEDIT-TABS-CARDS",
-      "title": "Media, Variants & Stock, Clothing Specs — apply the DrawerCard stack",
+      "title": "Media and Variants & Stock — apply the DrawerCard stack",
       "status": "backlog",
       "owner": "unassigned",
       "parent": "TL-UI-PEDIT-IA",
-      "log": "After the General pilot: Media → Gallery & cover / Presentation cards; Variants & Stock → Matrix / Price adjustments / Stock history cards; Clothing Specs → Clothing specifications / Size chart / Monogram & embroidery cards. Preserve VPRICE pin/draft, expand-once width, media wide layout, size-chart CRUD, attribute linking exactly. Replaces the old TL-UI-PEDIT-HEAD heading pass.",
+      "log": "General (2645eb0) and Clothing Specs (c86e718) card stacks shipped. Remaining: Media → Gallery & cover / Presentation cards; Variants & Stock → Matrix / Price adjustments / Stock history cards. Preserve VPRICE pin/draft, expand-once width, media wide layout, size-chart CRUD, attribute linking exactly. Replaces the old TL-UI-PEDIT-HEAD heading pass.",
       "design_match": "pending",
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [
+        "Media tab card stack",
+        "Variants & Stock tab card stack"
+      ]
+    },
+    {
+      "id": "TL-UI-PEDIT-SPECS-CARDS",
+      "title": "Clothing Specs card stack + responsive grid",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-UI-PEDIT-IA",
+      "started": "2026-10-21",
+      "finished": "2026-10-21",
+      "log": "c86e718 - Replaced the three DrawerSections with four collapsible DrawerCards on a new .tuw-pedit-specs-grid: 1 Display options, 2 Clothing specifications, 3 Size chart, 4 Monogram & custom embroidery (mounted only while the display switch is on). Size-chart assignment moved out of Clothing specifications into its own card; size-chart entries flattened from SurfaceCard to flat bordered groups so no card nests inside a card; the measurement table keeps its internal horizontal scroll. Monogram fields now use the shared auto-fit pair grid. Drawer bodyTone now uses canvas for specs as well as General. Compact stays one card per row; Expanded/Full switches to two columns at 900px+ pairing 1+2 and 3+4. Chart CRUD, the in-use guard, row drafts, cell editing, and the Display options toggle semantics are unchanged. Typecheck, 78 admin + 7 website tests, 40 admin-route build green; browser pass pending.",
+      "design_match": "yes",
+      "key_decisions": [
+        "Four cards rather than three: Display options stays a quiet single-control card so its switch can never hide itself",
+        "Size-chart assignment is its own card; the size-chart list is a disclosure of flat groups, not nested cards",
+        "Same responsive contract as General: one column on Compact, two columns at 900px+ when expanded",
+        "Specs drawer body uses the canvas tone so white cards separate without new tokens"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "Browser visual pass for Clothing Specs at 360/768/1024/1440",
+        "Dynamic variant-axis UI from product_attribute_links metadata"
+      ]
     },
     {
       "id": "TL-UI-PEDIT-HOOK",
@@ -4589,11 +4698,12 @@
       "parent": "TL-UI-PEDIT-GENERAL-CARDS",
       "started": "2026-10-20",
       "finished": "2026-10-20",
-      "log": "a396de7 — General card 4 shipped as a collapsible DrawerCard with independent fulfillmentCardOpen state, collapsed by default and reset when the drawer opens/closes. Print partner and Print placement are now surfaced as required SearchableSelect controls backed by the existing formPartner/formPlacement state and save path. Weight and Shipping weight pair below them as Input controls with inputMode='numeric'; Package dimensions is full width. Weight, Shipping weight, and Package dimensions were removed from the Internal fields disclosure without duplication; that disclosure is retitled 'Internal attributes' and counts only internal-only attribute values. No helper lines, no header badge, no SQL columns, no dependency changes, and no logic extraction. Typecheck, 71 admin + 7 website tests, 40 admin + 27 website builds green. DESIGN_SYSTEM + UI_CHECKLIST updated; browser pass pending.",
+      "log": "a396de7 — General card 4 shipped as a collapsible DrawerCard with independent fulfillmentCardOpen state, collapsed by default and reset when the drawer opens/closes. Print partner and Print placement are now surfaced as required SearchableSelect controls backed by the existing formPartner/formPlacement state and save path. Weight and Shipping weight pair below them as Input controls with inputMode='numeric'; Package dimensions is full width. Weight, Shipping weight, and Package dimensions were removed from the Internal fields disclosure without duplication; that disclosure is retitled 'Internal attributes' and counts only internal-only attribute values. No helper lines, no header badge, no SQL columns, no dependency changes, and no logic extraction. Typecheck, 71 admin + 7 website tests, 40 admin + 27 website builds green. DESIGN_SYSTEM + UI_CHECKLIST updated; browser pass pending. PLACEMENTS RECONCILED 2026-10-22 (d4c42ad): removed the Print placement SearchableSelect and formPlacement; card 4 now carries Partner plus Weight/Shipping weight/Package dimensions, and Placements (LIB-03) in card 5 is the only product placement source. Typecheck, 86 admin + 7 website tests, 40 admin + 27 website builds green; browser pass pending.",
       "design_match": "yes",
       "key_decisions": [
         "Fulfillment & shipping is General card 4, after Scheduled discounts and before Attributes & values",
-        "Partner/Placement surface from existing product state; they remain demo-only until the fulfillment schema decision",
+        "Partner surfaces from existing product state and remains demo-only until the fulfillment schema decision",
+        "Card 4 no longer owns print locations; card 5's Placements attribute is the single placement source",
         "Weight/Shipping weight/Package dimensions belong with fulfillment, not the Internal attribute disclosure",
         "Card is independently collapsible and starts collapsed; no header badge",
         "No helper lines; weight/dimension fields keep text inputs with numeric inputMode and no new validation"
@@ -4602,7 +4712,7 @@
       "pushed": false,
       "follow_ups": [
         "Browser visual pass at 360/768/1024/1440 remains pending",
-        "Partner/Placement need SQL columns before a real fulfillment integration",
+        "Partner needs a SQL column before a real fulfillment integration; Placements is modeled through the attribute library",
         "Weight/dimension format validation and unit conversion remain separate follow-ups"
       ]
     },
@@ -4614,10 +4724,11 @@
       "parent": "TL-UI-PEDIT-GENERAL-CARDS",
       "started": "2026-10-20",
       "finished": "2026-10-20",
-      "log": "ac255fa - General card 5 shipped as the fifth collapsible DrawerCard with independent attributesCardOpen state, collapsed by default and reset when a create/edit drawer opens or closes. The old flat Attributes section and separate Internal attributes Disclosure are replaced by one card: a two-row top action strip (Link from library beside Manage library, then new attribute name + Add), a Storefront group, and an Internal only group. Rows are flat bordered groups, not nested cards; values are wrapping chips with inline remove, swatch chips keep the product-local color input without hex text, and radio chips show a dot preview. The per-product display dropdown is gone: the showcase type is read-only from the linked library record, unlinked attributes fall back to Pill with an Unlinked warning, and ProductAttribute.displayType is ignored for rendering but left persisted for compatibility. linkFromLibrary, commitAttrValue, removeAttrValue, addAttribute, removeAttribute, and setSwatchHex are unchanged; default attributes stay non-removable and the known-value picker remains. No new DB columns, dependencies, auth, payment or fulfillment integration. Typecheck, 71 admin + 7 website tests, 40 admin + 27 website builds green; browser pass pending. POLISH 2026-10-20 (5e7e8b7): Manage library moved beside the library dropdown as an outline LinkButton; new-attribute input + Add now form the second row. Swatch inputs use the shared .tuw-color-swatch class, which resets native appearance and rounds the WebKit/Firefox inner swatch to a true 20px circle with a focus-visible ring; setSwatchHex is unchanged. Typecheck, 71 admin + 7 website tests, 40 admin + 27 website builds green; headless Edge probe confirms the circular result. EXPANDED LAYOUT 2026-10-20 (2645eb0): Storefront rows now use a three-column grid when the drawer is expanded and the canvas is at least 900px; Internal only stays its own separate group below. Compact/narrow stays one column.",
+      "log": "ac255fa - General card 5 shipped as the fifth collapsible DrawerCard with independent attributesCardOpen state, collapsed by default and reset when a create/edit drawer opens or closes. The old flat Attributes section and separate Internal attributes Disclosure are replaced by one card: a two-row top action strip (Link from library beside Manage library, then new attribute name + Add), a Storefront group, and an Internal only group. Rows are flat bordered groups, not nested cards; values are wrapping chips with inline remove, swatch chips keep the product-local color input without hex text, and radio chips show a dot preview. The per-product display dropdown is gone: the showcase type is read-only from the linked library record, unlinked attributes fall back to Pill with an Unlinked warning, and ProductAttribute.displayType is ignored for rendering but left persisted for compatibility. linkFromLibrary, commitAttrValue, removeAttrValue, addAttribute, removeAttribute, and setSwatchHex are unchanged; default attributes stay non-removable and the known-value picker remains. No new DB columns, dependencies, auth, payment or fulfillment integration. Typecheck, 71 admin + 7 website tests, 40 admin + 27 website builds green; browser pass pending. POLISH 2026-10-20 (5e7e8b7): Manage library moved beside the library dropdown as an outline LinkButton; new-attribute input + Add now form the second row. Swatch inputs use the shared .tuw-color-swatch class, which resets native appearance and rounds the WebKit/Firefox inner swatch to a true 20px circle with a focus-visible ring; setSwatchHex is unchanged. Typecheck, 71 admin + 7 website tests, 40 admin + 27 website builds green; headless Edge probe confirms the circular result. EXPANDED LAYOUT 2026-10-20 (2645eb0): Storefront rows now use a three-column grid when the drawer is expanded and the canvas is at least 900px; Internal only stays its own separate group below. Compact/narrow stays one column. PLACEMENTS SINGLE SOURCE 2026-10-22 (d4c42ad): the internal Placements row is now the only product placement source; the legacy ProductItem.placement field and card-4 select were removed, create seeds Front, fixtures use canonical six-value selections, and legacy localStorage values migrate into this attribute.",
       "design_match": "yes",
       "key_decisions": [
         "One collapsible card replaces the flat section and the separate Internal attributes disclosure",
+        "Placements is the single product placement source; the old ProductItem.placement field was removed on 2026-10-22",
         "Storefront and Internal only groups use flat bordered rows and wrapping chips; Storefront becomes three columns when expanded/wide, while Internal only stays separate; no value table or nested cards",
         "Display type is library-owned and read-only in the product drawer; unlinked rows fall back to Pill with a warning",
         "Swatch colors remain product-local until TL-UI-PEDIT-ATTR-SWATCH; the known-value picker stays",
@@ -4627,9 +4738,151 @@
       "verified": true,
       "pushed": false,
       "follow_ups": [
-        "Browser visual pass at 360/768/1024/1440 remains pending, including Manage library placement, the circular swatch picker, and the three-column Storefront grid",
+        "Browser visual pass at 360/768/1024/1440 remains pending, including Manage library placement, the circular swatch picker, the three-column Storefront grid, and Placements load/save from card 5",
         "Global swatch colors: TL-UI-PEDIT-ATTR-SWATCH",
         "Library-owned value catalogue: TL-UI-PEDIT-ATTR-VALUES"
+      ]
+    },
+    {
+      "id": "TL-UI-PEDIT-PLACEMENTS",
+      "title": "Placements single source - retire legacy product placement",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-UI-PEDIT-GENERAL-CARDS",
+      "started": "2026-10-22",
+      "finished": "2026-10-22",
+      "log": "d4c42ad — Removed ProductItem.placement, PLACEMENT_OPTIONS, formPlacement, and the card-4 Print placement SearchableSelect; create/save/import no longer write the legacy field. Placements (LIB-03) in General card 5 is the only product placement source. Create seeds Front; fixtures carry canonical six-value selections. Legacy localStorage values migrate into the attribute (Chest (45mm)->Front, Back Oversized->Back, Sleeve Length->Left+Right Sleeve, Interior Hem preserved as a product-local value), with existing non-empty Placements values winning. The drawer rebuilds Color/Size/Placements builtins and overlays persisted values. Added an import test keeping Placements product-level. Typecheck, 86 admin + 7 website tests, 40 admin + 27 website builds green; browser pass pending.",
+      "design_match": "yes",
+      "key_decisions": [
+        "Placements is a multi-select attribute value set, not a separate product column; the four-value ProductItem.placement field and PLACEMENT_OPTIONS are retired",
+        "Card 4 keeps partner and parcel measurements; print locations are edited only in card 5's Internal only group",
+        "Legacy migration preserves unknown values as product-local values rather than dropping data; existing new-model values win",
+        "Create defaults to Front; fixtures and imports carry workbook-compatible Placements values",
+        "The product drawer always rebuilds Color, Size and Placements builtin rows so partial persisted overrides cannot hide them"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "Browser visual pass at 360/768/1024/1440: no Print placement select, card 5 Placements load/save, legacy localStorage migration, import staging, create default Front, Reset Demo",
+        "Placements values remain editable in Settings -> Attributes; no product-level placement SQL column is planned",
+        "The Phase 2 importer classifier still owns semantic sizes-token splitting"
+      ]
+    },
+    {
+      "id": "TL-DB-WORKBOOK-SCHEMA",
+      "title": "Workbook-ready catalog schema (serials, HSN, source rows, variant axes)",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-21",
+      "finished": "2026-10-21",
+      "log": "f9de18b — Added products.internal_serial_no/source_group_key/HSN/Clothing Specs/monogram fields and Boy/Girl to the gender CHECK; added product_source_rows (S.No + spreadsheet row + raw snapshot) before product_variants; added product_variants.source_row_id, variant_key, weight/shipping/dimensions overrides, UNIQUE (id, product_id) and UNIQUE (product_id, variant_key). 010 now marks product_attribute_links with is_variant_axis/position/label and adds product_variant_attribute_values with composite FKs to the variant, product link and selected value. Synced 00-README, 02-Data-Tables, 04-Catalog and 07-Import-Jobs (77 total tables, 19 catalog). No ALTER because the DB does not exist yet; no UI or importer changes in this slice.",
+      "design_match": "n/a",
+      "key_decisions": [
+        "S.No is a source-row/display reference, not the product identity; source_group_key is the re-import key",
+        "HSN remains product-level; conflicting groups split rather than gaining a variant-level override",
+        "Variant shipping/price values are row-derived overrides with product-level fallbacks",
+        "Variant axes are per-product metadata over the shared attribute library, never fixed color/size columns",
+        "Clothing Specs columns ship in the same schema pass because the DB is greenfield",
+        "No ALTER: 002 and 010 are edited at creation time"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "Run the migrations against a real Postgres instance once provisioned (psql is not installed in this environment)",
+        "Add dynamic variant-axis UI from product_attribute_links metadata"
+      ]
+    },
+    {
+      "id": "TL-DB-WORKBOOK-IMPORT",
+      "title": "Workbook importer grouping + serial/HSN admin mapping",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-DB-WORKBOOK-SCHEMA",
+      "started": "2026-10-21",
+      "finished": "2026-10-21",
+      "log": "67bdf97 - Replaced row-per-draft CSV staging with a pure productImport helper: header-row detection, canonical column map (S.No through HSN + optional Category), style-code grouping else name+gender, HSN conflict split, source-row preservation, and explicit Color x Size variants carrying row price/weight/shipping/dimensions/source S.No. Added createProducts for one-commit batch staging with sequential product IDs and regenerated variant IDs/SKUs/keys; the old createProduct loop was a stale-closure overwrite bug. Extended ProductItem/ProductVariant with internalSerialNo, sourceGroupKey, sourceRows, hsnCode, Boy/Girl gender and variant shipping overrides. Pricing & stock now exposes optional 4-8 digit HSN with save validation; Basic shows a display-only S.No line; category options and the filter include imported values; missing Category stages as Uncategorized, never T-Shirts. Synced DESIGN_SYSTEM, UI_CHECKLIST and 07-Import-Jobs. Dataset audit against the supplied workbook: 321 rows -> 155 drafts / 2,792 variants, 321 source rows and serials preserved, MP25 split 7+1, Boy/Girl separate, zero row/group errors. Typecheck, 78 admin + 7 website tests, 40 admin + 27 website builds green; browser pass pending.",
+      "design_match": "yes",
+      "key_decisions": [
+        "One product per style group; S.No is a source-row reference, never identity",
+        "HSN conflicts split the product because HSN is product-level",
+        "Batch import commits once; variant IDs/SKUs are regenerated in the state seam",
+        "Category is data, not an enum; the supplied workbook has no Category column so every draft is Uncategorized",
+        "Variant shipping fields are row-derived overrides with product-level fallbacks"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "Dynamic variant-axis UI from product_attribute_links metadata",
+        "Browser visual pass for workbook import at 360/768/1024/1440"
+      ]
+    },
+    {
+      "id": "TL-DB-SCHEMA-REDUNDANCY",
+      "title": "Retire compare engine + dead products.attributes column",
+      "status": "done",
+      "owner": "agent",
+      "started": "2026-10-21",
+      "finished": "2026-10-21",
+      "log": "1ed268d — Confirmed the compare engine had zero UI/import/API consumers and retired product_attributes + product_attribute_values; dropped products.attributes; the attribute library is now the only attribute system. 002-catalog.sql edited in place (no ALTER because no database exists). Synced 00-README, 01-Conventions, 02-Data-Tables, 04-Catalog, 13-API-Contracts and 16-Partner-Qikink; added 20-Schema-Decisions.md and migrate/README.md. Counts: 41 implemented DDL + 34 specified = 75 planned; catalog 19 -> 17. Typecheck both apps, 84 admin + 7 website tests, 40 admin routes build green; website untouched.",
+      "design_match": "n/a",
+      "key_decisions": [
+        "The compare pair had no UI/import/API consumer; the attribute library is the single attribute system",
+        "products.attributes JSONB dropped; structured values live in product_attribute_links/link_values",
+        "No ALTER: 002-catalog.sql is edited in place while no database exists",
+        "PDP compare, if scoped later, builds on attribute_definitions — never a second definition table"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "Run the migrations against a real Postgres instance once provisioned (psql is unavailable)",
+        "If PDP compare is scoped later, add typed spec fields then; do not reintroduce the retired pair"
+      ]
+    },
+    {
+      "id": "TL-DB-SCHEMA-GUARD",
+      "title": "Static schema integrity guard + migration status docs",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-DB-SCHEMA-REDUNDANCY",
+      "started": "2026-10-21",
+      "finished": "2026-10-21",
+      "log": "28eccec — Added tests/schema-integrity.test.mjs (pure Node, no dependency): exact 41-table inventory per file, duplicate-name guard, parent-before-child REFERENCES check with the explicit 009 -> orders allowlist, retired-table/products.attributes guard, docs count check (41 + 34 = 75), and migration README check. 84 admin + 7 website tests green; full typecheck and the 40-route admin build green. Runtime SQL validation still pending because psql is unavailable.",
+      "design_match": "n/a",
+      "key_decisions": [
+        "Static guard, not a SQL parser: inventory/FK order/retired names/docs counts only",
+        "009 -> orders stays an explicit external allowlist until 004-orders.sql exists",
+        "No new dependency; the test runs under the existing node --test glob"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "Runtime SQL validation still requires a real PostgreSQL instance"
+      ]
+    },
+    {
+      "id": "TL-DB-SEMANTIC-LABELS",
+      "title": "Semantic variant-label schema — definition slug + per-product display order",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-DB-WORKBOOK-SCHEMA",
+      "started": "2026-10-22",
+      "finished": "2026-10-22",
+      "log": "04f31ec — Added attribute_definitions.slug (NOT NULL UNIQUE, lowercase-kebab CHECK) as the stable filter/URL key and product_attribute_links.display_position (nullable, >= 0) for non-axis spec order. Documented the semantic type registry (Size, Model, Dimensions, Capacity, Shape, Style), per-product axis_label presentation, definition-scoped search, and the data-only growth rule across 00/02/04/07/20 + migrate README. Extended tests/schema-integrity.test.mjs: slug/check/display_position presence, no definition-level value array, and no products.sizes regression. No new tables; counts remain 41 implemented + 34 specified = 75. Typecheck both apps, 85 admin + 7 website tests, 40 admin + 27 website route builds green.",
+      "design_match": "n/a",
+      "key_decisions": [
+        "attribute_definitions is the semantic type registry; the name is the canonical type label and slug is the stable key",
+        "product_attribute_links.axis_label is the per-product shopper-facing label; values stay shared per definition",
+        "New option types are definition/value rows, never tables, per-size columns, or JSON value arrays",
+        "Search and facets join through the definition so identical spellings under different types cannot cross-match",
+        "No seed file: migrate/ remains schema-only; the importer/library creates the six definitions at runtime"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "Phase 2: importer token classifier + editable preview label + mixed-cell flags",
+        "Phase 3: admin N-axis matrix, dynamic attribute card, definition-scoped search",
+        "Phase 4: storefront generic options/selector/PDP/cart/filters + representative fixtures",
+        "Runtime SQL validation of 010 still requires a real PostgreSQL instance"
       ]
     }
   ],
