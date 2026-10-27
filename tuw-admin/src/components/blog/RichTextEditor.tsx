@@ -1,7 +1,11 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useEditor, EditorContent, type Editor } from '@tiptap/react';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  useEditor,
+  EditorContent,
+  type JSONContent,
+} from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import ImageExtension from '@tiptap/extension-image';
 import {
@@ -22,7 +26,14 @@ import {
   X,
 } from 'lucide-react';
 import { ImageWithFallback, Modal } from '@/components/ui';
-import type { BlogContent, BlogMediaAsset } from '@/lib/blog';
+import type {
+  BlogBlockNode,
+  BlogContent,
+  BlogInlineMark,
+  BlogInlineNode,
+  BlogListItem,
+  BlogMediaAsset,
+} from '@/lib/blog';
 
 const EditorImage = ImageExtension.extend({
   addAttributes() {
@@ -34,6 +45,173 @@ const EditorImage = ImageExtension.extend({
     };
   },
 });
+
+const MODEL_MARK_TYPES = new Set<BlogInlineMark['type']>([
+  'bold',
+  'italic',
+  'underline',
+  'strikethrough',
+  'link',
+]);
+
+type TiptapMark = NonNullable<JSONContent['marks']>[number];
+
+function markToTiptap(mark: BlogInlineMark): TiptapMark {
+  return {
+    type: mark.type === 'strikethrough' ? 'strike' : mark.type,
+    ...(mark.attrs?.href ? { attrs: { href: mark.attrs.href } } : {}),
+  };
+}
+
+function markFromTiptap(mark: TiptapMark): BlogInlineMark | null {
+  const type = mark.type === 'strike' ? 'strikethrough' : mark.type;
+  if (!type || !MODEL_MARK_TYPES.has(type as BlogInlineMark['type'])) return null;
+  const href = typeof mark.attrs?.href === 'string' ? mark.attrs.href : undefined;
+  return {
+    type: type as BlogInlineMark['type'],
+    ...(href ? { attrs: { href } } : {}),
+  };
+}
+
+function inlineToTiptap(nodes: BlogInlineNode[] | undefined): JSONContent[] {
+  return (nodes ?? []).map((node) => ({
+    type: 'text',
+    text: node.text,
+    ...(node.marks?.length
+      ? { marks: node.marks.map((mark) => markToTiptap(mark)) }
+      : {}),
+  }));
+}
+
+function inlineFromTiptap(nodes: JSONContent[] | undefined): BlogInlineNode[] {
+  return (nodes ?? []).flatMap((node) => {
+    if (node.type === 'hardBreak') {
+      return [{ type: 'text', text: ' ' }];
+    }
+    if (node.type !== 'text') return [];
+    const marks = (node.marks ?? [])
+      .map((mark) => markFromTiptap(mark))
+      .filter((mark): mark is BlogInlineMark => Boolean(mark));
+    return [{
+      type: 'text',
+      text: node.text ?? '',
+      ...(marks.length ? { marks } : {}),
+    }];
+  });
+}
+
+function listToTiptap(items: BlogListItem[] | undefined): JSONContent[] {
+  return (items ?? []).map((item) => ({
+    type: 'listItem',
+    content: [{ type: 'paragraph', content: inlineToTiptap(item.content) }],
+  }));
+}
+
+function listFromTiptap(nodes: JSONContent[] | undefined): BlogListItem[] {
+  return (nodes ?? []).map((node) => {
+    const paragraphs = (node.content ?? []).flatMap((child) =>
+      child.type === 'paragraph' ? child.content ?? [] : []
+    );
+    return { type: 'listItem', content: inlineFromTiptap(paragraphs) };
+  });
+}
+
+function blockToTiptap(block: BlogBlockNode, mediaById: Map<string, BlogMediaAsset>): JSONContent | null {
+  switch (block.type) {
+    case 'paragraph':
+      return { type: 'paragraph', content: inlineToTiptap(block.content) };
+    case 'heading':
+      return {
+        type: 'heading',
+        attrs: { level: block.attrs.level },
+        content: inlineToTiptap(block.content),
+      };
+    case 'bulletList':
+      return { type: 'bulletList', content: listToTiptap(block.content) };
+    case 'orderedList':
+      return { type: 'orderedList', content: listToTiptap(block.content) };
+    case 'blockquote':
+      return {
+        type: 'blockquote',
+        content: [{ type: 'paragraph', content: inlineToTiptap(block.content) }],
+      };
+    case 'image': {
+      const asset = mediaById.get(block.attrs.mediaId);
+      return {
+        type: 'image',
+        attrs: {
+          src: asset?.url ?? '',
+          alt: block.attrs.alt,
+          mediaId: block.attrs.mediaId,
+          caption: block.attrs.caption ?? null,
+          credit: block.attrs.credit ?? null,
+        },
+      };
+    }
+    case 'horizontalRule':
+      return { type: 'horizontalRule' };
+    default:
+      return null;
+  }
+}
+
+/**
+ * Our persisted body is a compact block array. Tiptap expects a full
+ * ProseMirror document (`{ type: 'doc', content: [...] }`), so convert at the
+ * editor boundary and keep media URLs out of the stored JSON.
+ */
+function toTiptapDoc(content: BlogContent, mediaAssets: BlogMediaAsset[]): JSONContent {
+  const mediaById = new Map(mediaAssets.map((asset) => [asset.id, asset]));
+  return {
+    type: 'doc',
+    content: content
+      .map((block) => blockToTiptap(block, mediaById))
+      .filter((block): block is JSONContent => Boolean(block)),
+  };
+}
+
+function toBlogContent(doc: JSONContent): BlogContent {
+  return (doc.content ?? []).flatMap((node): BlogBlockNode[] => {
+    switch (node.type) {
+      case 'paragraph':
+        return [{ type: 'paragraph', content: inlineFromTiptap(node.content) }];
+      case 'heading': {
+        const level = node.attrs?.level === 3 ? 3 : 2;
+        return [{ type: 'heading', attrs: { level }, content: inlineFromTiptap(node.content) }];
+      }
+      case 'bulletList':
+        return [{ type: 'bulletList', content: listFromTiptap(node.content) }];
+      case 'orderedList':
+        return [{ type: 'orderedList', content: listFromTiptap(node.content) }];
+      case 'blockquote': {
+        const paragraphs = (node.content ?? []).flatMap((child) =>
+          child.type === 'paragraph' ? child.content ?? [] : []
+        );
+        return [{ type: 'blockquote', content: inlineFromTiptap(paragraphs) }];
+      }
+      case 'image': {
+        const mediaId = typeof node.attrs?.mediaId === 'string' ? node.attrs.mediaId : '';
+        if (!mediaId) return [];
+        const alt = typeof node.attrs?.alt === 'string' ? node.attrs.alt : '';
+        const caption = typeof node.attrs?.caption === 'string' ? node.attrs.caption : undefined;
+        const credit = typeof node.attrs?.credit === 'string' ? node.attrs.credit : undefined;
+        return [{
+          type: 'image',
+          attrs: {
+            mediaId,
+            alt,
+            ...(caption ? { caption } : {}),
+            ...(credit ? { credit } : {}),
+          },
+        }];
+      }
+      case 'horizontalRule':
+        return [{ type: 'horizontalRule' }];
+      default:
+        return [];
+    }
+  });
+}
 
 interface RichTextEditorProps {
   content: BlogContent;
@@ -76,6 +254,11 @@ export default function RichTextEditor({
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
   const [linkHref, setLinkHref] = useState('');
 
+  const initialContent = useMemo(
+    () => toTiptapDoc(content, mediaAssets),
+    [content, mediaAssets]
+  );
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -91,7 +274,7 @@ export default function RichTextEditor({
       }),
       EditorImage.configure({ inline: false }),
     ],
-    content: content as unknown as Record<string, unknown>,
+    content: initialContent,
     editable: !disabled,
     immediatelyRender: false,
     editorProps: {
@@ -102,7 +285,7 @@ export default function RichTextEditor({
       },
     },
     onUpdate: ({ editor: nextEditor }) => {
-      onChange(nextEditor.getJSON() as unknown as BlogContent);
+      onChange(toBlogContent(nextEditor.getJSON()));
     },
   });
 
@@ -113,9 +296,9 @@ export default function RichTextEditor({
 
   useEffect(() => {
     if (!editor) return;
-    if (JSON.stringify(editor.getJSON()) === JSON.stringify(content)) return;
-    editor.commands.setContent(content as unknown as Record<string, unknown>);
-  }, [content, editor]);
+    if (JSON.stringify(editor.getJSON()) === JSON.stringify(initialContent)) return;
+    editor.commands.setContent(initialContent, { emitUpdate: false });
+  }, [initialContent, editor]);
 
   const insertMedia = (asset: BlogMediaAsset) => {
     if (!editor) return;
