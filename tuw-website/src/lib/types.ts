@@ -121,20 +121,6 @@ export type ReturnRequest = {
   createdAt: string;
 };
 
-export type JournalArticle = {
-  id: string;
-  slug: string;
-  title: string;
-  subtitle: string;
-  excerpt: string;
-  category: 'Craft' | 'Slow Living' | 'Sustainability' | 'Design';
-  coverImage: string;
-  author: string;
-  readTime: string;
-  publishedAt: string;
-  content: string[];
-};
-
 export type FaqItem = {
   id: string;
   category: 'Ordering & Sizing' | 'Shipping & Tracking' | 'Sustainable POD' | 'Returns & Care';
