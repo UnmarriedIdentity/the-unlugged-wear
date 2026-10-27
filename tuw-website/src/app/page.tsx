@@ -9,13 +9,27 @@ import ProductCard from '@/components/commerce/ProductCard';
 import CollectionCard from '@/components/commerce/CollectionCard';
 import Button from '@/components/ui/Button';
 import { useStore } from '@/mocks/store';
-import { STORE_COLLECTIONS, JOURNAL_ARTICLES } from '@/mocks/fixtures';
+import { STORE_COLLECTIONS } from '@/mocks/fixtures';
+import {
+  JOURNAL_CATEGORIES,
+  JOURNAL_MEDIA,
+  JOURNAL_POSTS,
+} from '@/mocks/blog';
+import { formatReadingTime, isPublishedJournalPost } from '@/lib/blog';
 
 export default function HomePage() {
   const { products } = useStore();
 
   const essentials = products.slice(0, 4);
-  const featuredArticle = JOURNAL_ARTICLES[0];
+  const featuredArticle =
+    JOURNAL_POSTS.find((post) => post.isFeatured && isPublishedJournalPost(post)) ??
+    JOURNAL_POSTS.find(isPublishedJournalPost);
+  const featuredCategory = featuredArticle?.categoryId
+    ? JOURNAL_CATEGORIES.find((category) => category.id === featuredArticle.categoryId)
+    : undefined;
+  const featuredCover = featuredArticle?.coverMediaId
+    ? JOURNAL_MEDIA.find((asset) => asset.id === featuredArticle.coverMediaId)
+    : undefined;
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF9F6] text-[#1A1A1A]">
@@ -159,13 +173,14 @@ export default function HomePage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center bg-white rounded-3xl p-6 sm:p-12 border border-[#E2DDCF] shadow-xs">
               <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-[#F4F1EA]">
                 <img
-                  src={featuredArticle.coverImage}
-                  alt={featuredArticle.title}
+                  src={featuredCover?.url}
+                  alt={featuredCover?.alt ?? featuredArticle.title}
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute top-4 left-4">
                   <span className="px-3 py-1 rounded-full bg-black/80 backdrop-blur-xs text-white text-[10px] font-bold uppercase tracking-wider">
-                    {featuredArticle.category} • {featuredArticle.readTime}
+                    {featuredCategory?.name ?? 'Journal'} •{' '}
+                    {formatReadingTime(featuredArticle.readingTimeMinutes)}
                   </span>
                 </div>
               </div>

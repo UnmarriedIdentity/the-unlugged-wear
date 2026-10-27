@@ -46,6 +46,14 @@ export const JOURNAL_CATEGORIES: JournalCategory[] = [
     sortOrder: 3,
     isActive: true,
   },
+  {
+    id: 'JCAT-05',
+    name: 'Culture',
+    slug: 'culture',
+    description: 'People, places and the cultural side of dressing well.',
+    sortOrder: 4,
+    isActive: true,
+  },
 ];
 
 export const JOURNAL_AUTHORS: JournalAuthor[] = [

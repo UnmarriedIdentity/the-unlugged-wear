@@ -29,6 +29,7 @@ import {
 import BlogContentPreview from '@/components/blog/BlogContentPreview';
 import RichTextEditor from '@/components/blog/RichTextEditor';
 import { useAdminState } from '@/mocks/state';
+import { formatDateTime } from '@/lib/format';
 import {
   type BlogContent,
   type BlogDraft,
@@ -259,7 +260,7 @@ export default function BlogEditor({ mode, postId }: BlogEditorProps) {
         }
         subtitle={
           mode === 'edit'
-            ? `Version ${post?.version ?? 1} · ${post?.updatedAt ? new Date(post.updatedAt).toLocaleString() : 'Unsaved'}`
+            ? `Version ${post?.version ?? 1} · ${post?.updatedAt ? formatDateTime(post.updatedAt) : 'Unsaved'}`
             : 'Draft a new article for the storefront journal.'
         }
         actions={
@@ -560,7 +561,7 @@ export default function BlogEditor({ mode, postId }: BlogEditorProps) {
                       Revision {revision.revisionNo}
                     </div>
                     <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', marginTop: 2 }}>
-                      {new Date(revision.createdAt).toLocaleString()}
+                      {formatDateTime(revision.createdAt)}
                     </div>
                     <div style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', marginTop: 4 }}>
                       {revision.snapshot.contentText.slice(0, 120)}…
