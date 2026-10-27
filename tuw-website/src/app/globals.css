@@ -143,6 +143,107 @@ body {
   font-feature-settings: "tnum" 1;
 }
 
+/* Journal prose styles — JSON blocks only, never raw HTML.
+   Gold accents stay restrained; body copy stays charcoal on ivory. */
+.tuw-journal-prose {
+  color: var(--tuw-store-text-primary);
+  font-size: 1.0625rem;
+  line-height: 1.8;
+}
+
+.tuw-journal-prose > * + * {
+  margin-top: 1.25rem;
+}
+
+.tuw-journal-prose h2 {
+  font-size: 1.75rem;
+  line-height: 2.25rem;
+  font-weight: 600;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.tuw-journal-prose h3 {
+  font-size: 1.375rem;
+  line-height: 1.875rem;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.tuw-journal-prose a {
+  color: var(--tuw-store-text-primary);
+  text-decoration: underline;
+  text-decoration-color: var(--tuw-store-accent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+
+.tuw-journal-prose a:hover {
+  color: var(--tuw-store-accent);
+}
+
+.tuw-journal-prose strong {
+  font-weight: 600;
+}
+
+.tuw-journal-prose em {
+  font-style: italic;
+}
+
+.tuw-journal-prose ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+}
+
+.tuw-journal-prose ol {
+  list-style: decimal;
+  padding-left: 1.5rem;
+}
+
+.tuw-journal-prose li + li {
+  margin-top: 0.5rem;
+}
+
+.tuw-journal-prose blockquote {
+  border-left: 3px solid var(--tuw-store-accent);
+  padding-left: 1.25rem;
+  font-style: italic;
+  color: var(--tuw-store-text-secondary);
+}
+
+.tuw-journal-prose figure img {
+  border-radius: 1.5rem;
+  border: 1px solid var(--tuw-store-border);
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.tuw-journal-prose figcaption {
+  margin-top: 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  color: var(--tuw-store-text-secondary);
+}
+
+.tuw-journal-prose-credit {
+  font-style: normal;
+}
+
+.tuw-journal-prose hr {
+  border: 0;
+  border-top: 1px solid var(--tuw-store-border);
+}
+
+@media (min-width: 640px) {
+  .tuw-journal-prose {
+    font-size: 1.125rem;
+    line-height: 1.85;
+  }
+}
+
 /* ---------- Utilities (keep at bottom) ---------- */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
