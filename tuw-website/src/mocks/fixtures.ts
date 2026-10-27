@@ -1,4 +1,4 @@
-import { Product, Collection, Order, JournalArticle, FaqItem, Address } from '../lib/types';
+import { Product, Collection, Order, FaqItem, Address } from '../lib/types';
 
 export const STORE_PRODUCTS: Product[] = [
   {
@@ -1275,63 +1275,6 @@ export const INITIAL_ORDERS: Order[] = [
     paymentMethod: 'Card',
     trackingNumber: 'BLR-33445566',
     carrier: 'BlueDart Express',
-  },
-];
-
-export const JOURNAL_ARTICLES: JournalArticle[] = [
-  {
-    id: 'art-1',
-    slug: 'the-anatomy-of-500-gsm-cotton',
-    title: 'The Weight of Stillness: Why We Chose 500 GSM French Terry',
-    subtitle: 'An uncompromising look at yarn tension, loopback architecture, and garment longevity.',
-    excerpt:
-      'In a market obsessed with ephemeral trends and paper-thin fabrics, we turned toward structural weight. Here is how dense organic cotton redefines everyday ease.',
-    category: 'Craft',
-    coverImage: 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=1200&auto=format&fit=crop&q=80',
-    author: 'Kavita Menon, Textile Design Lead',
-    readTime: '4 min read',
-    publishedAt: 'September 24, 2026',
-    content: [
-      'Fabric weight is not merely a number on a spec sheet — it is the physics of how a garment behaves around the human body. When you pick up a hoodie knitted at 500 grams per square meter, there is an immediate tactile recognition: this was made to endure.',
-      'Most commercial sweatshirts rely on 260 to 320 GSM fleece, heavily brushed on the inside with polyester fluff to simulate warmth. Within six washes, that synthetic fluff pills, mats, and washes down the drain as microplastics.',
-      'Our Monolith terry takes the opposing path: 100% long-staple organic cotton knitted on low-speed circular looms in Tiruppur. The unbrushed diagonal loops on the interior circulate air during movement while maintaining a clean, structured silhouette when stationary.',
-      'The result is apparel that feels like protective architecture — grounded, quiet, and getting softer with every single monsoon season.',
-    ],
-  },
-  {
-    id: 'art-2',
-    slug: 'zero-deadstock-print-on-demand',
-    title: 'Printing on Demand: Eliminating the 92-Million-Ton Graveyard',
-    subtitle: 'How intentional, just-in-time manufacturing creates better garments with zero surplus inventory.',
-    excerpt:
-      'Overproduction is the fundamental flaw of the apparel industry. We refuse to manufacture garments that have no designated wearer.',
-    category: 'Sustainability',
-    coverImage: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=1200&auto=format&fit=crop&q=80',
-    author: 'Dev Sharma, Co-Founder',
-    readTime: '6 min read',
-    publishedAt: 'September 12, 2026',
-    content: [
-      'Every single second, the equivalent of one garbage truck full of clothes is burned or buried in landfills. The root cause is simple: traditional fashion brands guess how many items you will buy six months in advance. When they guess wrong, surplus stock is slashed, liquidated, or destroyed.',
-      'At The Unplugged Wear, no roll of cotton is printed until an order is placed by an actual person. Our partner ateliers in Tamil Nadu hold organic blank garments in temperature-controlled chambers.',
-      'When your order arrives, water-based, certified non-toxic pigment inks are cured directly into the fabric fibers using solar-powered curing tunnels. You wait a few days longer, but your garment leaves zero waste in its wake.',
-    ],
-  },
-  {
-    id: 'art-3',
-    slug: 'unplugging-the-digital-noise',
-    title: 'The Art of Being Unavailable',
-    subtitle: 'Reclaiming personal sanctuary in an era of continuous digital pinging.',
-    excerpt:
-      'We designed The Unplugged Wear as an invitation to close your tabs, step outside, and immerse yourself in the tactile present.',
-    category: 'Slow Living',
-    coverImage: 'https://images.unsplash.com/photo-1506630448388-4e683c67ddb0?w=1200&auto=format&fit=crop&q=80',
-    author: 'Ananya Varma, Editorial',
-    readTime: '3 min read',
-    publishedAt: 'August 28, 2026',
-    content: [
-      'Our phones vibrate with notifications from people we have never met about emergencies that do not exist. In response, slow living is not an aesthetic — it is a deliberate survival strategy.',
-      'When we created the Monolith hoodie, we omitted drawstrings deliberately. Why? Because unnecessary cords dangle, tangle, and demand adjustment. In minimalism, restraint is an act of deep kindness.',
-    ],
   },
 ];
 
