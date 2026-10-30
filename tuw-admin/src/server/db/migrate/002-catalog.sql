@@ -71,6 +71,15 @@ CREATE TABLE products (
   stock              integer       NOT NULL DEFAULT 0 CHECK (stock >= 0),
   status             varchar(20)   NOT NULL DEFAULT 'draft'
     CHECK (status IN ('draft','active','archived')),
+  -- Fulfillment partner for this style. This is a catalog attribute (the
+  -- product drawer's Partner field, and the storefront's partner filter),
+  -- NOT the Qikink order-sync seam in 009-partner.sql. NULL = produced
+  -- in-house. Values are slugs; the UI labels ("Qikink Direct API",
+  -- "Printrove Hub", "Custom Atelier") are a display concern.
+  partner_provider     varchar(20)
+    CHECK (partner_provider IN ('qikink','printrove','custom_atelier')),
+  partner_availability varchar(20)
+    CHECK (partner_availability IN ('ready_to_print','partner_delayed','discontinued')),
   tags               varchar(50)[],
   photo_settings     jsonb         NOT NULL DEFAULT '{}',
   source             varchar(20)   NOT NULL DEFAULT 'local'
@@ -112,6 +121,9 @@ CREATE UNIQUE INDEX products_source_external_key ON products (source, external_i
   WHERE external_id IS NOT NULL;
 CREATE INDEX idx_products_active_price ON products (status, price)
   WHERE status = 'active';
+-- Storefront partner filter (one whitelisted pair, no scan).
+CREATE INDEX idx_products_partner ON products (partner_provider, partner_availability)
+  WHERE status = 'active' AND partner_provider IS NOT NULL;
 CREATE INDEX idx_products_internal_serial_no ON products (internal_serial_no)
   WHERE internal_serial_no IS NOT NULL;
 CREATE UNIQUE INDEX products_source_group_key ON products (source, source_group_key)
@@ -189,17 +201,29 @@ CREATE UNIQUE INDEX one_primary_per_product ON product_images (product_id)
 -- library is the single definition system.
 
 -- -------------------------------------------------------------- collections
+-- cover_image_url is a URL (like categories.image_url / product_images.url),
+-- not a media FK: 002 is applied before 006-cms.sql, which owns `media`.
 CREATE TABLE collections (
-  id          uuid         PRIMARY KEY,
-  name        varchar(150) NOT NULL,
-  slug        varchar(180) NOT NULL UNIQUE,
-  season      varchar(50),
-  visibility  varchar(20)  NOT NULL DEFAULT 'draft'
+  id              uuid         PRIMARY KEY,
+  name            varchar(150) NOT NULL,
+  slug            varchar(180) NOT NULL UNIQUE,
+  season          varchar(50),
+  visibility      varchar(20)  NOT NULL DEFAULT 'draft'
     CHECK (visibility IN ('published','draft','scheduled')),
-  description text,
-  created_at  timestamptz  NOT NULL DEFAULT now(),
-  updated_at  timestamptz  NOT NULL DEFAULT now()
+  -- The go-live moment. Required for 'scheduled' (a schedule without a date
+  -- is a label with no scheduler behind it); optional for 'published',
+  -- which has no publish event to recover. Single date, never a range.
+  published_at    timestamptz,
+  tagline         varchar(150),
+  description     text,
+  cover_image_url varchar(2048),
+  created_at      timestamptz  NOT NULL DEFAULT now(),
+  updated_at      timestamptz  NOT NULL DEFAULT now(),
+  CHECK (visibility <> 'scheduled' OR published_at IS NOT NULL)
 );
+-- The publish scheduler's only scan.
+CREATE INDEX idx_collections_scheduled ON collections (published_at)
+  WHERE visibility = 'scheduled';
 
 -- ---------------------------------------------------- collection_products
 CREATE TABLE collection_products (
@@ -258,3 +282,6 @@ CREATE TABLE reviews (
 CREATE INDEX idx_reviews_product_approved ON reviews (product_id)
   WHERE is_approved;
 CREATE INDEX idx_reviews_user_id ON reviews (user_id);
+-- One review per customer per product: a double-submitted form cannot create
+-- a second row (idempotency at the data layer, not only in the handler).
+CREATE UNIQUE INDEX one_review_per_user_product ON reviews (product_id, user_id);
