@@ -1,10 +1,11 @@
 # Data Tables — Full Inventory (single PostgreSQL)
 
-> Status: Filling | Last Updated: 2026-10-26
-> 81 tables (50 implemented DDL + 31 specified) + 1 deferred footnote (`search_documents`). Column detail lives in files 03–10,
+> Status: Filling | Last Updated: 2026-10-30
+> 88 tables (88 implemented DDL + 0 specified) + 1 deferred footnote (`search_documents`). Column detail lives in files 03–10,
 > 15, 17, and 19; this file is the index, ending with the full relationship diagram.
 > Conventions (UUIDv7, money, indexes): `01-Conventions.md`.
 > Retired systems and controlled duplication: `20-Schema-Decisions.md`.
+> Duplicate-proofing constraints: `21-Idempotency.md`.
 
 ## Design rules (apply to every table below)
 
@@ -14,23 +15,28 @@
 2. **UUIDv7 PKs, `timestamptz` created/updated pair** on every table.
 3. Money `DECIMAL(12,2)` + `CHECK >= 0`; statuses `varchar` + `CHECK IN`.
 
-## Auth & RBAC (10) → detail: `03-Auth-RBAC.md`
+## Auth & RBAC (13) → detail: `03-Auth-RBAC.md`
 
 | Table | Purpose | Key links |
 |---|---|---|
-| users | Login credentials only (email/password/status); person fields live on profiles | — |
+| users | Login credentials only (email/password/status); `password_hash` NULL + status `pending` = invited customer who never set a password; `locked_until` for the lockout window | — |
 | profiles | The person you shop for: names, phone, DOB; `user_id` NULL = managed member with no login (file 17) | users (nullable) |
-| roles | `admin` / `customer` (+ future) referenced by `slug` | — |
+| roles | `admin` / `support` / `warehouse` / `customer` referenced by `slug` | — |
 | permissions | Granular grants (`product.create`, `order.refund`) | — |
 | role_permissions | Grant map, composite PK (role, permission) | roles, permissions |
 | user_roles | Multi-role map, composite PK (user, role) | users, roles |
 | refresh_tokens | Hashed rotation tokens, revocation, expiry cleanup | users |
+| password_reset_tokens | Hashed single-use reset tokens (also the "set your password" invite for a `pending` account) | users |
+| email_verification_tokens | Hashed verify tokens; carries its own `email` so an invite can precede a profile | users |
+| login_attempts | Append-only brute-force evidence: email, inet, success flag; read by the lockout policy, swept at 90d | users (nullable) |
 | customer_notes | Staff notes with author + timestamp (tier stays computed, never stored) | profiles, users (author) |
 | staff_invitations | Invite flow: email, role, token hash, expiry, status (members *are* users) | users (inviter) |
 | audit_logs | Stock-edit summaries only: one row per product per import job (qty inserted, job ref) — variant deltas live in stock_movements; nothing else is recorded here | users (actor) |
 
 The single-URL gate reads `users → user_roles → roles.slug`
-(see `14-Single-URL-Gating.md`).
+(see `14-Single-URL-Gating.md`). Auth is **custom Argon2id**, never
+Supabase Auth: `users.password_hash` holds an Argon2id hash, refresh tokens
+are stored hashed, and the app owns rotation + reuse detection.
 
 ## Household & family (5) → detail: `17-Household-Accounts.md`
 
@@ -40,7 +46,7 @@ The single-URL gate reads `users → user_roles → roles.slug`
 | household_members | Composite PK (household, profile) + UNIQUE(profile) = one household per profile; roles manager/member | households, profiles |
 | profile_size_preferences | Per-person, per-category size (references Size library values, RESTRICT) | profiles, categories, attribute_values |
 | household_invitations | Join (email) + claim (profile) modes, one table, `staff_invitations` grammar | households, profiles, users (inviter) |
-| addresses | Family + personal book, household-level one-default partial uniques | households, profiles |
+| addresses | Family + personal book, household-level one-default partial uniques; `recipient_name` + `phone` travel with the row (a parcel label must survive a profile rename) | households, profiles |
 
 ## Catalog (17) → detail: `04-Catalog.md`
 
@@ -48,14 +54,14 @@ The single-URL gate reads `users → user_roles → roles.slug`
 |---|---|---|
 | categories | Tree (`parent_id` self-FK), nav flags, slug, tsvector | self |
 | brands | **Defined but unbuilt in v1** — no seed, no UI (see footnote) | — |
-| products | Core row: sku/slug unique, style name/code, internal S.No + source group key, base_price anchor + materialized min price ("From"), compare, stock balance, status, tags, HSN, Clothing Specs, `photo_settings` jsonb, source/external import ids, soft-delete, tsvector | categories, brands (nullable), size_charts (nullable) |
+| products | Core row: sku/slug unique, style name/code, internal S.No + source group key, base_price anchor + materialized min price ("From"), compare, stock balance, status, tags, HSN, Clothing Specs, `photo_settings` jsonb, source/external import ids, `partner_provider` + `partner_availability` (who produces it and whether they can), soft-delete, tsvector | categories, brands (nullable), size_charts (nullable) |
 | product_source_rows | One row per legacy workbook listing row: S.No, spreadsheet row number, raw snapshot; preserves rows that group into one product | products (cascade) |
 | product_variants | SKU-unique rows, source row, variant key, materialized effective price + override flag, stock, variant shipping overrides, active flag | products (cascade), product_source_rows (set null) |
 | product_images | Gallery order, one-primary partial unique, optional variant scope | products, variants |
 | stock_movements | Ledger: signed delta, reason, balance snapshot | products, variants |
 | product_discounts | Scheduled percent/fixed, active-range index | products |
 | reviews | Optional; approval queue | products, users |
-| collections | Storefront collection pages (name/slug/season/visibility) | — |
+| collections | Storefront collection pages (name/slug/season/visibility) + `cover_image_url`, `tagline`, `published_at` (required when `visibility='scheduled'`) | — |
 | collection_products | Junction, composite PK (collection, product) + position | collections, products |
 | size_charts | Measurement sets by garment type (`rows` jsonb — columns vary: shirts need shoulder/sleeve, skirts waist/hip); linked from products | — |
 | attribute_definitions | Global semantic definitions: name UNIQUE, slug UNIQUE, display_type — the one place attributes are defined; a new type is a data row, not DDL | — |
@@ -89,41 +95,45 @@ per-product shopper-facing label. New types are rows, not tables.
 | wishlists | One per user (unique) | users |
 | wishlist_items | Unique (wishlist, product) | wishlists |
 
-## Orders & money (9) → detail: `06-Orders-Payments.md`
+## Orders & money (10) → detail: `06-Orders-Payments.md`
 
 | Table | Purpose | Key links |
 |---|---|---|
-| orders | Number-unique, dual status axes, stored totals, address snapshots; placed-by + for-profile | users (placed-by), profiles (for), discount_codes |
+| orders | Number-unique, dual status axes, stored totals, address snapshots; placed-by + for-profile (both NOT NULL — checkout requires login); `idempotency_key` + partial unique so a retried checkout returns the same order | users (placed-by), profiles (for), discount_codes |
 | order_items | Immutable snapshots (name/sku/price/line, options jsonb) | orders (cascade) |
 | order_status_history | Status timeline + actor | orders |
-| payments | Provider lifecycle, unique transaction ref | orders |
+| payments | Provider lifecycle, `method` (upi/card/netbanking/wallet/cod), unique transaction ref | orders |
 | refunds | Refund records: amount, reason, method, status, actor (one open refund per order partial unique) | orders, users (actor) |
 | returns | RMA stages (in_transit/inspected/restocked/disputed), carrier, tracking, reason | orders |
 | return_items | Per-line qty + disposition | returns, order_items |
 | discount_codes | Code-unique coupons, caps, expiry | — |
-| shipments | Optional carrier/tracking/status | orders |
+| shipments | Carrier/tracking/status + `pieces`, `shipped_at`, `estimated_delivery_at`, `delivered_at` | orders |
+| shipment_events | Tracking timeline rows (status/location/description/occurred_at); unique (shipment, occurred_at, status) so a repeated carrier sync cannot append the same scan twice | shipments (cascade) |
 
-## Platform (3) → detail: `07-Import-Jobs.md`, `08-Notify.md`
+## Platform (5) → detail: `07-Import-Jobs.md`, `08-Notify.md`, `21-Idempotency.md`
 
 | Table | Purpose | Key links |
 |---|---|---|
 | import_jobs | CSV pipeline: source/status/counters/row-errors | users (created_by) |
-| email_logs | Delivery states, retry scans | — |
+| email_logs | Delivery states, retry scans, `dedupe_key` (partial unique) so a retried producer sends once | — |
 | notification_templates | Optional keyed `{{variable}}` bodies | — |
+| idempotency_keys | One row per mutating request carrying `Idempotency-Key`; `UNIQUE (scope, key)` replays the stored response instead of re-executing | users (actor) |
+| webhook_events | Provider delivery log + replay guard; `UNIQUE (provider, provider_event_id)` makes double-applied payments impossible | — |
 
-## CMS in PG, jsonb (14, no Mongo) → detail: `09-CMS-Media.md`
+## CMS in PG, jsonb (15, no Mongo) → detail: `09-CMS-Media.md`
 
 `media` · `blog_categories` · `blog_authors` · `blog_tags` · `blogs` ·
 `blog_post_tags` · `blog_revisions` · `blog_slug_history` ·
-`blog_post_media` (blog slice, implemented in `006-cms.sql`) ·
+`blog_post_media` · `design_assets` (implemented in `006-cms.sql`) ·
 `cms_sections` · `cms_settings` · `navigation_settings` · `pages` ·
-`store_settings` (still specified).
+`store_settings` (implemented in `007-cms-pages.sql`).
 Whole-document reads; app-layer Zod validation. No `content_html`, no
 `blog_statuses` lookup, no `views` column — analytics owns views.
 
 | Table | Purpose | Key links |
 |---|---|---|
-| media | R2 asset metadata; covers, OG images, avatars, inline images | users (uploader) |
+| media | R2 asset metadata (+ `filename`, `size_bytes` for the library list); covers, OG images, avatars, inline images; `usage` ∈ product/section/blog/design | users (uploader) |
+| design_assets | Print-artwork library: name, category (print_artwork/embroidery/typography/label_spec), designer, placement, dimensions, file format/size, status; optional `media_id` | media, users (uploader) |
 | blog_categories | One primary category per post; editorial pillars | blogs |
 | blog_authors | Public bylines; optional staff-user link | users, media (avatar), blogs |
 | blog_tags | Cross-cutting editorial tags | blog_post_tags |
@@ -136,12 +146,16 @@ Whole-document reads; app-layer Zod validation. No `content_html`, no
 
 ## Analytics, partitioned (7) → detail: `10-Analytics.md`
 
-page_views · sessions · cart_events · abandoned_carts · daily_stats ·
+page_views · analytics_sessions · cart_events · abandoned_carts · daily_stats ·
 product_views · search_terms.
-Monthly partitions; raw events drop >30d, rollups kept forever.
+Monthly partitions on the four raw event tables (`ts`), each with a
+`_default` partition so inserts work before the monthly ones attach; raw
+events drop >30d, rollups kept forever. The session table is
+`analytics_sessions`, never plain `sessions`.
 
 | Table | Purpose | Key links |
 |---|---|---|
+| analytics_sessions | One row per browsing session, upserted by unique `session_id` on heartbeat; embedded page path for funnels | users (nullable) |
 | product_views | PDP views with product FK (top-viewed, viewed-but-OOS) — never parsed from URLs | products, users (nullable) |
 | search_terms | Term, hits, result count (zero-result → import guidance) | — |
 
@@ -149,9 +163,9 @@ Monthly partitions; raw events drop >30d, rollups kept forever.
 
 | Table | Purpose | Key links |
 |---|---|---|
-| support_tickets | Threads: customer, subject, priority, status | users (nullable customer) |
-| support_messages | Normalized replies with sender + timestamp | support_tickets |
-| notifications | In-app bell: kind/title/body/link, read_at (email stays in `email_logs`) | users |
+| support_tickets | Threads: subject, priority, status; a guest thread carries `guest_name` + `guest_email` (CHECK: user *or* both guest fields) | users (nullable customer) |
+| support_messages | Normalized replies with sender + timestamp; `UNIQUE (ticket_id, created_at, sender)` collapses a retried send | support_tickets (cascade) |
+| notifications | In-app bell: `kind` ∈ order/cart/inventory/payment/system/marketing/refund, title/body/link, read_at; `dedupe_key` + partial unique so the same event never rings twice (email stays in `email_logs`) | users |
 
 ## Partner seam (2) → detail: `16-Partner-Qikink.md`
 
@@ -178,9 +192,18 @@ core e-commerce app (file 19 §1).
 
 ## Deferred, not dropped
 
-- `search_documents` — `tsvector` + GIN on products/categories covers v1;
-  revisit only if ranked cross-entity search outgrows it.
+Every table the spec asked for is now in the DDL — the count is 88
+implemented, 0 specified. What remains deferred is *behaviour*, not shape:
+
+- `search_documents` — `tsvector` + GIN on `products` and `categories`
+  covers v1 (one ranked query, two entity types); revisit only if
+  cross-entity ranking outgrows it.
 - `brands` UI/seed — schema ready (above), build deferred.
+- Admin UI + mock rewiring — the tables and columns exist; screen work
+  tracks separately (`state-for-agents/pending-component-work.md`).
+- Lockout + analytics writers — `users.locked_until`, `login_attempts`
+  and the event tables are DDL-only; the app code that writes them lands
+  with the backend build.
 
 ## Relationship diagram (full map; per-domain slices live in files 03–10, 15, 17, 19)
 
@@ -192,6 +215,9 @@ erDiagram
     permissions ||--o{ role_permissions : granted-by
     users ||--o| profiles : credential-of
     users ||--o{ refresh_tokens : holds
+    users ||--o{ password_reset_tokens : resets
+    users ||--o{ email_verification_tokens : verifies
+    users |o--o{ login_attempts : attempted-by
     profiles ||--o{ customer_notes : annotated
     users ||--o{ staff_invitations : invited-by
     users ||--o{ notifications : receives
@@ -234,7 +260,15 @@ erDiagram
     blogs ||--o{ blog_slug_history : retired-slugs
     blogs ||--o{ blog_post_media : inline-media
     media ||--o{ blog_post_media : used-by
+    users ||--o{ design_assets : uploads
+    media ||--o| design_assets : file-of
+    users ||--o{ store_settings : edits
     products ||--o{ product_views : viewed-in
+    carts ||--o{ cart_events : emits
+    carts ||--o| abandoned_carts : flags
+    users |o--o{ analytics_sessions : browses-in
+    users |o--o{ page_views : seen-in
+    users |o--o{ idempotency_keys : retries
     products ||--o{ stock_movements : tracks
     products ||--o{ product_discounts : prices
     products ||--o{ reviews : rated-by
@@ -251,8 +285,11 @@ erDiagram
     orders ||--o{ returns : takes-back
     returns ||--o{ return_items : inspects
     orders ||--o{ shipments : ships
+    shipments ||--o{ shipment_events : reports
     discount_codes ||--o{ orders : applied-to
+    users |o--o{ support_tickets : opens
     support_tickets ||--o{ support_messages : threads
+    users |o--o{ support_messages : answers
     orders ||--o{ partner_orders : synced-to
     orders ||--o{ partner_wallet_ledger : debits
     styling_slots ||--o{ styling_category_slots : role-of
