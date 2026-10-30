@@ -1,6 +1,6 @@
 # Schema Decisions — Retired Systems & Controlled Duplication
 
-> Status: Active | Last Updated: 2026-10-22
+> Status: Active | Last Updated: 2026-10-30
 > Companion to `02-Data-Tables.md`. These decisions bind the SQL in
 > `tuw-admin/src/server/db/migrate/` and the docs in this folder.
 
@@ -10,6 +10,13 @@ No PostgreSQL instance exists yet. Until the first provisioned database,
 the `CREATE TABLE` files are the source of truth and are edited directly.
 No `ALTER TABLE` migrations are written for these decisions. Once a
 database exists, every change below becomes a normal forward migration.
+
+**One deliberate exception:** `004-orders.sql` ends with
+`ALTER TABLE stock_movements ADD COLUMN order_id …`, because
+`002-catalog.sql` (which owns the ledger) is applied before `004` (which
+owns `orders`). This is a from-scratch column arriving in the correct file
+order, not a forward migration of a live schema — the `CREATE TABLE` for
+`stock_movements` is unchanged in `002`.
 
 ## 2. Retired systems
 
@@ -54,6 +61,9 @@ row counts are unchanged.
 | `size_charts.rows` / `product_variants` | Display measurements; sellable combinations. |
 | `photo_settings` JSONB | Whole-document gallery presentation, not relational state. |
 | `order_items` snapshots | Immutable purchase record, not live catalog data. |
+| `orders.idempotency_key` / `idempotency_keys` | The generic table expires in 24h; the order's own key never does, so a retry a week later still cannot fork the order. |
+| `media.filename` / `size_bytes` / R2 object | The library list must render without a HEAD request per row; R2 stays the byte authority. |
+| `store_settings` / env | Operational config in rows, secrets in env — the boundary is a rule, not a comment (`09-CMS-Media.md`). |
 
 ## 4. Blog schema (2026-10-26)
 
@@ -91,17 +101,36 @@ The blog slice is the final model, not a temporary v1:
   `page_views` domain; a blog counter would be unauditable fabricated
   data.
 
-## 5. Vocabulary and known gaps
+## 5. Vocabulary decisions (resolved, no longer gaps)
 
 - DB `products.status` uses `draft | active | archived`; the admin UI uses
   `draft | published | archived`. The API seam maps `published` → `active`;
   do not add a second status column.
-- `collections.visibility` allows `scheduled` but no date column exists yet.
-  The UI has no date input. Add `published_at` when the scheduled-release UI
-  is built; until then `scheduled` is a label, not a scheduler.
-- Analytics `sessions` (specified, not yet in SQL) is a visit session; auth
-  uses `refresh_tokens`. Rename to `analytics_sessions` when
-  `013-analytics.sql` is written to avoid the collision.
+- **Fulfillment status is the spec's eight values**, exactly:
+  `pending, confirmed, processing, shipped, delivered, cancelled, failed,
+  refunded`. The admin screens' extra words are UI labels, not new states.
+  `shipments.status` is a separate, wider carrier projection (§8).
+- **`sessions` is `analytics_sessions`.** The spec's visit-session table is
+  implemented as `analytics_sessions` (`013-analytics.sql`) — `sessions`
+  collides with every session middleware and with auth's `refresh_tokens`.
+- **`payments.method` is not `payments.provider`.** `provider` = who
+  processed it (`mock | razorpay | stripe`); `method` = how the customer
+  paid (`upi | card | netbanking | wallet | cod`). `cod` is a real method,
+  not a missing provider.
+- **Staff roles are four seeded slugs:** `admin`, `support`, `warehouse`,
+  `customer`. The admin sidebar's personas (Owner/Operations/Content/
+  Read-only) map onto them in `03-Auth-RBAC.md` §4 — they are labels, never
+  role rows, and the invented `manager` slug is retired.
+- **Guest cart, never guest order.** `carts.session_id` stays (anonymous
+  add-to-cart is real), but `orders.placed_by_user_id` is `NOT NULL`: the
+  login gate sits at checkout. See `05-Cart-Wishlist.md`.
+- **`media.usage` is the only category vocabulary.** The admin library's
+  chips map onto it (`photoshoot` → `section`, `brand` → `section`,
+  `banner` → `section`, `design` → `design`); there is no parallel
+  `media.category` column to drift.
+- **`collections.published_at` exists** and is required when
+  `visibility = 'scheduled'` (CHECK). One timestamp, one date, chosen in
+  the project's own calendar component.
 - `01-Conventions.md`'s "created/updated pair on every table" applies to
   mutable entity tables. Immutable/join rows (`product_images`,
   `product_source_rows`, `stock_movements`, junction tables) carry only the
@@ -111,10 +140,62 @@ The blog slice is the final model, not a temporary v1:
 
 | Status | Tables | Where |
 |---|---:|---|
-| Implemented DDL | 41 | `001`, `002`, `009`, `010`, `011`, `012` |
-| Specified, migration pending | 34 | Cart 4, Orders 9, Platform 3, CMS 8, Analytics 7, Operations 3 |
-| Planned total | 75 | |
+| Implemented DDL | 88 | all 13 files, `001`–`014` minus `008` |
+| Specified, migration pending | 0 | — |
+| Planned total | 88 | |
 
-`009-partner.sql` forward-references `orders` from the pending Orders
-domain. It is correct DDL but cannot be applied until `004-orders.sql`
-exists. See `tuw-admin/src/server/db/migrate/README.md`.
+`009-partner.sql` forward-references `orders` and now applies cleanly
+because `004-orders.sql` precedes it in the apply order. No file is
+blocked; see `tuw-admin/src/server/db/migrate/README.md`.
+
+## 7. Derived, never stored
+
+Values that look like columns and are deliberately computed at read time:
+
+| Value | Derived from | Why no column |
+|---|---|---|
+| `soldCount` | `SUM(order_items.qty)` over `orders.status NOT IN ('cancelled','failed')` | A cancellation corrects the number by existing; a stored counter drifts the moment a refund lands |
+| `rating` / `reviewCount` | `AVG(reviews.rating)` / `COUNT(*)` where `is_approved` | Rejecting a review must retract its stars immediately |
+| customer tier | order count + lifetime value | A tier column is a cache with no owner; the rule can change without a backfill |
+| blog views | `page_views` rows | A counter on `blogs` would be fabricated, unauditable data (`09-CMS-Media.md`) |
+
+Rule: if a number can be recomputed from rows that already exist and the
+recompute is cheap enough at read time (one indexed aggregate per page),
+it is not a column. Materialize only when a measured read cost forces it,
+and then record that decision here.
+
+## 8. Shipment timeline is a child table
+
+`shipment_events` exists because the tracking timeline is a **list of
+scans with their own times**, not three mutable fields on `shipments`.
+Storing it as `jsonb` on the shipment row would make "append a scan"
+a read-modify-write, and two concurrent carrier syncs would lose one.
+
+- `UNIQUE (shipment_id, occurred_at, status)` makes a repeated sync a
+  no-op instead of a duplicate line.
+- `occurred_at` is the carrier's time; `created_at` is ours. They differ
+  by exactly the sync lag — worth keeping separate.
+- `shipments.status` is the current projection; `shipment_events` is the
+  history that explains it. `orders.status` is coarser still (8 values)
+  and is never derived from the carrier.
+
+## 9. Idempotency is a schema concern
+
+Duplicate prevention is **not** only application logic. Three layers live
+in the DDL (`21-Idempotency.md`):
+
+1. `idempotency_keys` — `UNIQUE (scope, key)` plus a stored response and
+   an in-flight lease. A retried HTTP request replays; a concurrent one
+   gets `409`.
+2. `webhook_events` — `UNIQUE (provider, provider_event_id)`. Providers
+   retry until they get a 2xx and replay after outages; deduping on
+   **their** event id makes a double-applied payment structurally
+   impossible.
+3. Natural keys on the business tables (`orders.idempotency_key`,
+   `reviews`, `email_logs.dedupe_key`, `notifications.dedupe_key`,
+   `shipment_events`, `support_messages`, event-table `(id, ts)` PKs) —
+   these outlive the TTL sweep in layer 1.
+
+Consequences that bind future work: every mutating route needs a scope
+name, every event id and its `ts` are stamped once client-side, and a new
+"producer" table needs a dedupe key **before** its job is written.
