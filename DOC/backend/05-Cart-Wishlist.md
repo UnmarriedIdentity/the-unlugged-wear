@@ -1,8 +1,10 @@
 # Cart & Wishlist — Lines, Snapshots, Merge
 
-> Status: Filling | Last Updated: 2026-10-17
+> Status: Filling | Last Updated: 2026-10-30
 > 4 tables. The cart is a hot path — every design choice below serves the
 > P99 <100ms contract in §5. Conventions: `01-Conventions.md`.
+> Duplicate-proofing (re-add, merge, retried checkout) is in
+> `21-Idempotency.md`.
 
 ## carts
 
@@ -72,6 +74,17 @@ checkout shows a household member selector, an **Edit member** affordance
 (explicit profile write — the only checkout path that saves sizes to a
 profile), and per-line size chips that affect **that order only**. Line
 edits never write `profile_size_preferences`; autofill only reads it.
+
+## Guest cart, never a guest order
+
+`carts.session_id` keeps anonymous browsing real: a visitor adds items and
+keeps them in a signed-cookie session cart. The gate is at **checkout**,
+not at add-to-cart — `orders.placed_by_user_id` is `NOT NULL`, so placing
+an order requires login. A guest hitting checkout is sent to `/login` with
+a return path, and the merge rule below runs on success. The ownership
+CHECK (`user_id IS NOT NULL OR session_id IS NOT NULL`) makes an ownerless
+cart impossible, and the partial unique on active user carts makes the
+merge target unambiguous.
 
 ## Merge rule (guest → user on login)
 

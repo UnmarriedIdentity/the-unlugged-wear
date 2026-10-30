@@ -1,9 +1,9 @@
--- 006-cms.sql — CMS blog & media (9 tables)
+-- 006-cms.sql — CMS assets & blog (10 tables)
 -- Source of truth: DOC/backend/09-CMS-Media.md (transcribed 1:1).
 -- Order: parents before children (media/categories/authors/tags before
--- blogs; blogs before every owned child). The five remaining CMS tables
--- (cms_sections, cms_settings, navigation_settings, pages,
--- store_settings) stay in their later settings/pages migration.
+-- blogs; blogs before every owned child; media before design_assets).
+-- The five page/settings tables (cms_sections, cms_settings,
+-- navigation_settings, pages, store_settings) live in 007-cms-pages.sql.
 
 -- ------------------------------------------------------------------ media
 -- R2 asset metadata. Provider-agnostic: swapping object storage never
@@ -11,12 +11,19 @@
 CREATE TABLE media (
   id          uuid          PRIMARY KEY,
   url         varchar(2048) NOT NULL UNIQUE,
+  -- Library display metadata: the asset browser must not need an R2 HEAD
+  -- round-trip per card to render name + weight.
+  filename    varchar(255),
+  size_bytes  bigint        CHECK (size_bytes > 0),
   alt         varchar(255),
   width       integer       CHECK (width > 0),
   height      integer       CHECK (height > 0),
   mime_type   varchar(100),
+  -- usage is the storage whitelist (what an asset is for); the admin
+  -- library's four categories map onto it: photoshoot -> section,
+  -- banner -> section, product -> product, brand -> section.
   usage       varchar(20)   NOT NULL
-    CHECK (usage IN ('product','section','blog')),
+    CHECK (usage IN ('product','section','blog','design')),
   uploaded_by uuid          REFERENCES users (id) ON DELETE SET NULL,
   created_at  timestamptz   NOT NULL DEFAULT now(),
   updated_at  timestamptz   NOT NULL DEFAULT now()
@@ -202,3 +209,38 @@ CREATE TABLE blog_post_media (
 );
 CREATE INDEX idx_blog_post_media_media_id
   ON blog_post_media (media_id, blog_id);
+
+-- ---------------------------------------------------------- design_assets
+-- The /designs library: print artwork, embroidery files, typography specs
+-- and label sheets handed to the production partner. CMS owns it because
+-- it is asset metadata next to `media`, not catalog data — a design is
+-- reusable across many products and never owned by one.
+-- `media_id` is optional: a design can be registered as a row with its
+-- spec fields before (or without) the binary ever being uploaded; when it
+-- is set, the partial unique keeps two rows from pointing at one file.
+CREATE TABLE design_assets (
+  id              uuid          PRIMARY KEY,
+  name            varchar(255)  NOT NULL,
+  category        varchar(20)   NOT NULL
+    CHECK (category IN ('print_artwork','embroidery','typography','label_spec')),
+  designer        varchar(150),
+  placement       varchar(100),
+  dimensions      varchar(50),
+  file_format     varchar(30),
+  -- Mirrors the upload cap enforced in the UI (25 MB); a larger row is a
+  -- bug, not a bigger file.
+  file_size_bytes bigint        CHECK (file_size_bytes > 0 AND file_size_bytes <= 26214400),
+  status          varchar(20)   NOT NULL DEFAULT 'in_review'
+    CHECK (status IN ('approved','in_review','archived')),
+  media_id        uuid          REFERENCES media (id) ON DELETE RESTRICT,
+  notes           text,
+  uploaded_by     uuid          REFERENCES users (id) ON DELETE SET NULL,
+  created_at      timestamptz   NOT NULL DEFAULT now(),
+  updated_at      timestamptz   NOT NULL DEFAULT now()
+);
+CREATE INDEX idx_design_assets_category ON design_assets (category);
+CREATE INDEX idx_design_assets_status ON design_assets (status);
+CREATE INDEX idx_design_assets_media_id ON design_assets (media_id);
+CREATE INDEX idx_design_assets_uploaded_by ON design_assets (uploaded_by);
+CREATE UNIQUE INDEX one_design_per_media ON design_assets (media_id)
+  WHERE media_id IS NOT NULL;

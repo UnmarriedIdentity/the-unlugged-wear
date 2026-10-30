@@ -1,10 +1,12 @@
 # API Contracts — Monolith Routes
 
-> Status: Filling | Last Updated: 2026-10-21
+> Status: Filling | Last Updated: 2026-10-30
 > One API serving one first-party client — **no `/v1` segment** (versioning
 > retro-added only on a second client or breaking change). Handlers are
 > thin delegators to `server/<domain>` (file 01 §4); this file describes
 > HTTP, never logic. Validation: zod in `server/validation`.
+> Retry semantics (what the `Idempotency-Key` header actually guarantees)
+> are in `21-Idempotency.md`.
 
 ## Base rules
 
@@ -13,20 +15,33 @@
 - **Pagination:** storefront cursor (`?cursor=base64(ts|id)&limit=24` →
   `{data, nextCursor}`); admin offset (`?page=&perPage=25` →
   `{data, page, perPage, total}`).
-- **Idempotency:** `x-idempotency-key` required on checkout + cart
-  mutations (24h server map; replay returns stored response).
+- **Idempotency:** every mutating `POST`/`PATCH` carries an
+  `Idempotency-Key` header (a client-generated UUIDv7), stored in
+  `idempotency_keys` under a route scope (`checkout`, `payment.capture`,
+  `refund.create`, `return.create`, `cart.merge`, `import.apply`,
+  `support.create`, `household.invite`, `auth.signup`, `auth.invite`,
+  `auth.reset`, `cms.publish`). Replay returns the **stored** status +
+  body; a concurrent duplicate gets `409 REQUEST_IN_PROGRESS`; the same key
+  with a different body gets `422 IDEMPOTENCY_KEY_REUSED`. Missing key is
+  `400` on `/api/order/*`, `/api/payment/*`, `/api/refund/*`,
+  `/api/import/*`, `/api/household/invite`. Detail: `21-Idempotency.md`.
 - **Rate limits (per IP):** login/refresh 10/s · checkout 5/s ·
   beacon ingest 30/s · reads 30/s per route.
 - **Identity:** `Authorization: Bearer` (15m JWT) or session cookie for
-  guests (`x-session-id` on cart). Auth marks: `–` public, `C` customer,
-  `A` admin.
+  guests (`x-session-id` on cart) — guest carts are allowed, guest
+  **checkout is not** (`orders.placed_by_user_id` is `NOT NULL`). Auth
+  marks: `–` public, `C` customer, `A` admin.
 
 ## Auth `/api/auth`
 
 | Method | Path | Auth | Purpose |
 |---|---|---|---|
-| POST | `/register` | – | `{email, password, firstName, lastName}` → 201 user + profile + solo household + tokens |
-| POST | `/login` | – | credentials → tokens; 401 on bad |
+| POST | `/register` | – | `{email, password, firstName, lastName}` → 201 user + profile + solo household + tokens. Scope `auth.signup` |
+| GET | `/verify` | – | `?token=` → confirms the address (`email_verification_tokens`), single use |
+| POST | `/reset/request` | – | `{email}` → always 204 (never reveals existence); writes a `password_reset_tokens` row. Scope `auth.reset` |
+| POST | `/reset/confirm` | – | `{token, password}` → sets `password_hash`, activates a `pending` user, revokes sessions |
+| POST | `/invite` | A | `{email, roleSlug, firstName, lastName}` → `users(status='pending', password_hash=NULL)` + a reset token used as the "set your password" link. Scope `auth.invite` |
+| POST | `/login` | – | credentials → tokens; 401 on bad, 423 while `locked_until` is in the future |
 | POST | `/logout` | C | revoke family → 204 |
 | POST | `/refresh` | – | rotate by hash → new pair; reuse revokes family |
 | GET / PATCH | `/me` | C | my profile read / partial update (name/phone/DOB) |
@@ -37,6 +52,10 @@
 | PATCH | `/users/:id/status` | A | disable/enable |
 | GET/POST | `/roles` | A | list / create with permission slugs |
 | PATCH | `/users/:id/roles` | A | assign role slugs |
+
+Login writes a `login_attempts` row on **every** attempt (success included)
+and sets `users.locked_until` when the failure window trips — the endpoint
+reads that column rather than recounting on each request.
 
 ## Household `/api/household`
 
@@ -89,11 +108,17 @@ switches it to per-session re-ranking).
 `DELETE /cart` (clear) · `POST /cart/merge` (guest→user on login) ·
 wishlist `GET / POST / DELETE` trio. Side effects fire-and-forget.
 
+Cart writes are naturally idempotent — a re-add lands on the
+`(cart_id, product_id, variant_id) NULLS NOT DISTINCT` unique and bumps
+qty instead of duplicating a line, and `POST /cart/merge` carries an
+`Idempotency-Key` (scope `cart.merge`) so a double-triggered login merge
+cannot merge twice.
+
 ## Order `/api/order`
 
 | Method | Path | Auth | Purpose |
 |---|---|---|---|
-| POST | `/checkout` | C + idempotency key | full TX scope (file 06); copies `for_profile_id` from cart; 409 on stock, 422 on coupon |
+| POST | `/checkout` | C + `Idempotency-Key` | full TX scope (file 06); copies `for_profile_id` from cart; 409 on stock, 422 on coupon. The key lands in `orders.idempotency_key` as well, so a retry after the 24h map expires still returns the same order |
 | GET | `/orders/:id` | C: placed-by or for-me / A | order + items + payments |
 | GET | `/me/orders` | C | cursor history (placed by me ∪ for me) |
 | GET | `/orders` | A | `?page=&status=&from=&to=&q=` |
@@ -121,11 +146,31 @@ Pre-tracking: empty states, never fabricated numbers (file 10 honesty rule).
 - Notify (A): `GET /admin/emails`, `POST /admin/test-email`,
   templates GET/PUT (optional table).
 - Search (–): `GET /suggest?q=` (debounced typeahead) ·
-  `GET /search` (ranked, tsvector now, dedicated index later).
+  `GET /search` (ranked). One query over two `tsvector` + GIN indexes:
+  `products.search_vector` (name + short_description + description) and
+  `categories.search_vector` (name + description), merged and ranked in SQL.
+  There is no `search_documents` table — the per-entity vectors cover
+  products **and** categories, and a dedicated cross-entity index is a
+  later decision, not a missing table.
+
+## Derived read models (computed in SQL, never stored)
+
+Two dashboard/PDP values look like columns and deliberately are not
+(`20-Schema-Decisions.md` §7):
+
+| Value | Query shape | Why never stored |
+|---|---|---|
+| `soldCount` | `SUM(order_items.qty)` over `orders.status NOT IN ('cancelled','failed')`, grouped per product | A cancellation or refund corrects the number by existing; a column would need a reconciliation job and could drift |
+| `rating` / `reviewCount` | `AVG(reviews.rating)` / `COUNT(*)` where `is_approved` | A rejected review must retract its stars immediately |
+
+Product lists fetch both with one `LATERAL` aggregate per product (or a
+single grouped join), so N products stay one round trip; PDP fetches them
+once. No cache table, no trigger, no nightly recompute.
 
 ## Error codes (shared)
 
-`VALIDATION_FAILED` 400 · `UNAUTHENTICATED` 401 · `FORBIDDEN` 403 ·
-`*_NOT_FOUND` 404 · `DUPLICATE_SKU` / `STOCK_INSUFFICIENT` /
-`IDEMPOTENCY_CONFLICT` 409 · `COUPON_EXPIRED` / `COUPON_USED` 422 ·
+`VALIDATION_FAILED` 400 · `AUTH_LOCKED` 423 · `UNAUTHENTICATED` 401 ·
+`FORBIDDEN` 403 · `*_NOT_FOUND` 404 · `DUPLICATE_SKU` /
+`STOCK_INSUFFICIENT` / `IDEMPOTENCY_CONFLICT` / `REQUEST_IN_PROGRESS` 409 ·
+`COUPON_EXPIRED` / `COUPON_USED` / `IDEMPOTENCY_KEY_REUSED` 422 ·
 `RATE_LIMITED` 429 · `INTERNAL_ERROR` 500.

@@ -1,14 +1,15 @@
 # CMS & Media — Content Tables, R2 URLs, Store Settings
 
-> Status: Filling | Last Updated: 2026-10-26
-> 14 tables. The blog slice (9 tables: `media`, `blog_categories`,
+> Status: Filling | Last Updated: 2026-10-30
+> 15 tables. The blog slice (9 tables: `media`, `blog_categories`,
 > `blog_authors`, `blog_tags`, `blogs`, `blog_post_tags`, `blog_revisions`,
-> `blog_slug_history`, `blog_post_media`) is implemented in
-> `006-cms.sql`; the remaining five CMS tables stay specified until their
-> pages/settings phase. Content is documents, not rows — `jsonb` with
-> app-layer Zod validation, no migrations for new settings. No Mongo:
-> whole-document reads work identically in PG. Conventions:
-> `01-Conventions.md`.
+> `blog_slug_history`, `blog_post_media`) plus `design_assets` is
+> implemented in `006-cms.sql`; the five page/settings tables
+> (`cms_sections`, `cms_settings`, `navigation_settings`, `pages`,
+> `store_settings`) are implemented in `007-cms-pages.sql`. Content is
+> documents, not rows — `jsonb` with app-layer Zod validation, no
+> migrations for new settings. No Mongo: whole-document reads work
+> identically in PG. Conventions: `01-Conventions.md`.
 
 ## Blog model decisions (binding)
 
@@ -52,11 +53,19 @@
 | alt | varchar(255) | NULL | SEO + a11y; upload UI requires it for blog/product images |
 | width / height | integer | NULL, CHECK (> 0) | CMS ratio math |
 | mime_type | varchar(100) | NULL | Upload validation |
-| usage | varchar(20) | NOT NULL, CHECK IN ('product','section','blog') | Asset-browser filter |
+| filename | varchar(255) | NULL | Original upload name — the library's "File" column; stored so a rename on R2 never rewrites the schema |
+| size_bytes | bigint | NULL, CHECK (size_bytes > 0) | Library "Size" column, captured at upload instead of a HEAD request per row |
+| usage | varchar(20) | NOT NULL, CHECK IN ('product','section','blog','design') | Asset-browser filter. The admin's `photoshoot` and `brand` categories map to `section`; `design` covers print artwork |
 | uploaded_by | uuid | NULL, FK → users(id) ON DELETE SET NULL | Uploader audit |
 | created_at / updated_at | timestamptz | NOT NULL | |
 
 Indexes: PK · unique url · `idx_media_usage` · `idx_media_uploaded_by`.
+
+**Category mapping (admin → DB):** there is no `media.category` column.
+The library's five chips resolve to the `usage` whitelist —
+`product → product`, `photoshoot → section`, `banner → section`,
+`brand → section`, `design → design`. One column, one CHECK, no second
+vocabulary to drift.
 
 ## blog_categories
 
@@ -238,11 +247,43 @@ a usage ledger, not a second editable document. Cover and OG media are
 **not** duplicated here — they are direct FKs on `blogs`. Media deletion is
 therefore blocked by FK while any current post still uses it.
 
-## Remaining CMS tables (specified, pending)
+## design_assets (print-artwork library)
 
-The following five tables keep their existing definitions and are not part
-of the blog slice: `cms_sections`, `cms_settings`, `navigation_settings`,
-`pages`, `store_settings`. See their original sections below.
+The `/designs` screen: print artwork, embroidery files, typography specs
+and label sheets handed to the production partner. CMS owns it because it
+is asset metadata sitting next to `media`, not catalog data — one design
+is reusable across many products and owned by none.
+
+| Column | Type | Constraints | Reason |
+|---|---|---|---|
+| id | uuid | PK, UUIDv7 | |
+| name | varchar(255) | NOT NULL | Design title in the library list |
+| category | varchar(20) | NOT NULL, CHECK IN ('print_artwork','embroidery','typography','label_spec') | The list's four tabs — a real column, never parsed from the filename |
+| designer | varchar(150) | NULL | Who drew it; free text, no designer table in v1 |
+| placement | varchar(100) | NULL | Front / back / sleeve / label |
+| dimensions | varchar(50) | NULL | Print area (`A3`, `12x16in`) |
+| file_format | varchar(30) | NULL | `AI`, `PNG`, `DST`, `PDF` |
+| file_size_bytes | bigint | NULL, CHECK (> 0 AND <= 26214400) | 25 MB UI cap mirrored in the DB — a bigger row is a bug, not a bigger file |
+| status | varchar(20) | NOT NULL DEFAULT 'in_review', CHECK IN ('approved','in_review','archived') | Approval queue for production hand-off |
+| media_id | uuid | NULL, FK → media(id) ON DELETE RESTRICT | Optional binary link: a design can be registered with its spec before the file is uploaded |
+| notes | text | NULL | Production remarks |
+| uploaded_by | uuid | NULL, FK → users(id) ON DELETE SET NULL | Uploader audit |
+| created_at / updated_at | timestamptz | NOT NULL | |
+
+Indexes: PK · `idx_design_assets_category` · `idx_design_assets_status` ·
+`idx_design_assets_media_id` · `idx_design_assets_uploaded_by` · partial
+unique `one_design_per_media (media_id) WHERE media_id IS NOT NULL` (two
+rows cannot point at one file).
+
+Files go to R2 through the same `media` pipeline (`usage='design'`), so
+deleting an in-use file is blocked by FK, never by a code review.
+
+## Page & settings tables (implemented in `007-cms-pages.sql`)
+
+The five tables below are **in the DDL**, not pending: `007-cms-pages.sql`
+applies immediately after `006`. No table here references catalog rows by
+FK — ids inside `jsonb` are resolved by the renderer, so a deleted
+category cannot break a published page.
 
 ## cms_sections
 
@@ -259,17 +300,17 @@ of the blog slice: `cms_sections`, `cms_settings`, `navigation_settings`,
 | is_active | boolean | NOT NULL DEFAULT true | Show/hide without delete |
 | created_at / updated_at | timestamptz | NOT NULL | |
 
-Indexes: PK · unique key · `(page_key, sort_order)` (page render = one
-ordered read).
+Indexes: PK · unique key · partial `(page_key, sort_order) WHERE is_active`
+(page render = one ordered read of the active chain).
 
 ## cms_settings (single-row theme)
 
 | Column | Type | Constraints | Reason |
 |---|---|---|---|
 | id | uuid | PK | |
-| scope | varchar(50) | NOT NULL, UNIQUE | `global` — exactly one row |
+| scope | varchar(50) | NOT NULL, UNIQUE | `global` — "exactly one row" is a constraint, not a convention |
 | theme | jsonb | NOT NULL DEFAULT '{}' | colors, radii, ratios, typography — arbitrary nesting, never migrated |
-| version | integer | NOT NULL DEFAULT 1 | Cache-buster: storefront compares cached version, re-fetches on change |
+| version | integer | NOT NULL DEFAULT 1, CHECK (version > 0) | Cache-buster: storefront compares cached version, re-fetches on change |
 | created_at / updated_at | timestamptz | NOT NULL | |
 
 Indexes: PK · unique scope.
@@ -279,10 +320,11 @@ Indexes: PK · unique scope.
 | Column | Type | Constraints | Reason |
 |---|---|---|---|
 | id | uuid | PK | |
+| scope | varchar(20) | NOT NULL, UNIQUE DEFAULT 'global' | Mirrors `cms_settings.scope`; a second nav set later is a row, not a migration |
 | navbar | jsonb | NOT NULL DEFAULT '{}' | `{categoryIds[], megamenuEnabled, megamenuShowImages, megamenuColumns}` — references catalog category ids |
-| updated_at | timestamptz | NOT NULL | Invalidation signal (bumped on every write) |
+| created_at / updated_at | timestamptz | NOT NULL | Invalidation signal (bumped on every write) |
 
-Single row, read whole, no index beyond PK.
+Read whole, never queried by field — PK plus the scope unique are enough.
 
 ## pages
 
@@ -291,9 +333,10 @@ Single row, read whole, no index beyond PK.
 | id | uuid | PK | |
 | slug | varchar(180) | NOT NULL, UNIQUE | Route (`about`, `shipping`) |
 | title | varchar(255) | NOT NULL | |
-| blocks | jsonb | NOT NULL DEFAULT '[]' | Content blocks, shapes vary per block type |
+| blocks | jsonb | NOT NULL DEFAULT '[]', CHECK (`jsonb_typeof(blocks) = 'array'`) | Content blocks, shapes vary per block type — the array check catches the one mistake that would break every renderer |
 | seo | jsonb | NULL | `{title, description}` |
 | is_active | boolean | NOT NULL DEFAULT true | |
+| created_at / updated_at | timestamptz | NOT NULL | Mutable entity — the created/updated pair is mandatory here |
 
 ## store_settings (operational config, not content)
 
@@ -308,6 +351,8 @@ Rule, not hope: **secrets never land here** (gateway keys, webhook
 secrets live in env). Any value matching secret shape is rejected in app
 validation. All seven settings tabs (brand/fulfillment/general/
 notifications/payments/shipping/taxes) persist through this one table.
+Index on `updated_by` (audit lookup); `updated_at` defaults to `now()`, so
+a row is never written without a change signal.
 
 ## CMS relationship slice
 
@@ -324,6 +369,9 @@ erDiagram
     blogs ||--o{ blog_slug_history : retired-slugs
     blogs ||--o{ blog_post_media : inline-media
     media ||--o{ blog_post_media : used-by
+    users ||--o{ design_assets : uploads
+    media ||--o| design_assets : file-of
+    users ||--o{ store_settings : edits
     pages ||--o{ media : illustrates
     cms_sections ||--o{ media : displays
 ```

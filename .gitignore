@@ -45,3 +45,9 @@ figma_*.png
 assets/
 .agent/
 .agents/
+
+session-*
+1 0 *
+
+tuw-admin/Figma*
+tuw-admin/Final*

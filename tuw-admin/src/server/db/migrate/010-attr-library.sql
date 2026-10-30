@@ -18,6 +18,10 @@ CREATE TABLE attribute_definitions (
     CHECK (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'),
   display_type varchar(20)  NOT NULL DEFAULT 'pill'
     CHECK (display_type IN ('pill','swatch','radio')),
+  -- The library's on/off switch. Orthogonal to the visibility flags below:
+  -- is_active false retires a definition from the library list and every
+  -- product form while the three show_on_* flags stay exactly as they were.
+  is_active        boolean  NOT NULL DEFAULT true,
   show_on_pdp      boolean  NOT NULL DEFAULT true,
   show_on_checkout boolean  NOT NULL DEFAULT false,
   show_on_admin    boolean  NOT NULL DEFAULT true,

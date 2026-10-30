@@ -1,11 +1,12 @@
 # Catalog — Columns, Constraints, Indexes
 
-> Status: Filling | Last Updated: 2026-10-22
+> Status: Filling | Last Updated: 2026-10-30
 > 17 tables. Conventions: `01-Conventions.md`. Money semantics follow the
 > open currency decision (`00-README.md` §7) — DECIMAL(12,2) shape is final.
 > The attribute library is the single attribute system; the retired compare
 > engine and `products.attributes` are recorded in `20-Schema-Decisions.md`.
-> Mermaid slice for this domain sits at the end.
+> Duplicate-proofing (reviews, source rows, value assignment) is in
+> `21-Idempotency.md`. Mermaid slice for this domain sits at the end.
 
 ## categories
 
@@ -87,6 +88,8 @@ No seed, no UI, no queries in v1 — launch is seed + UI only.
 | monogram_enabled | boolean | NOT NULL DEFAULT false | Clothing Specs monogram offer |
 | monogram_max_chars | smallint | NOT NULL DEFAULT 3, CHECK (monogram_max_chars >= 1) | Monogram character limit |
 | monogram_upcharge | DECIMAL(12,2) | NOT NULL DEFAULT 0, CHECK (monogram_upcharge >= 0) | Monogram add-on price |
+| partner_provider | varchar(20) | NULL, CHECK IN ('qikink','printrove','custom_atelier') | Who produces this item — the drawer's Partner field, filterable |
+| partner_availability | varchar(20) | NULL, CHECK IN ('ready_to_print','partner_delayed','discontinued') | Can the partner print it right now; storefront filters/badges read this, nothing else |
 | deleted_at | timestamptz | NULL | Soft-delete |
 | search_vector | tsvector | GENERATED STORED (name + short_description + description) | |
 | created_at / updated_at | timestamptz | NOT NULL | |
@@ -99,7 +102,9 @@ WHERE external_id IS NOT NULL` (source re-imports) · partial
 `idx_products_active_price (status, price) WHERE status='active'` ·
 `idx_products_internal_serial_no WHERE internal_serial_no IS NOT NULL` ·
 unique partial `products_source_group_key (source, source_group_key) WHERE
-source_group_key IS NOT NULL` (workbook re-import identity).
+source_group_key IS NOT NULL` (workbook re-import identity) · partial
+`idx_products_partner (partner_provider, partner_availability) WHERE
+status='active' AND partner_provider IS NOT NULL` (partner filter).
 
 **UI draft units:** `weight` / `shippingWeight` are typed in whole grams and
 map to `weight_g` / `shipping_weight_g`; CSV import keeps the same headers.
@@ -197,6 +202,7 @@ to `images[0]` on hydration, while an existing saved gallery order wins.
 | attribute_definitions | show_on_pdp | boolean | NOT NULL DEFAULT true | Explicit booleans — indexable, no array operators in hot reads |
 | attribute_definitions | show_on_checkout | boolean | NOT NULL DEFAULT false | |
 | attribute_definitions | show_on_admin | boolean | NOT NULL DEFAULT true | |
+| attribute_definitions | is_active | boolean | NOT NULL DEFAULT true | Enable toggle for the library list; orthogonal to the ≥1 `show_on_*` CHECK — a definition can be paused without losing its surfaces |
 | attribute_values | id | uuid | PK | |
 | attribute_values | definition_id | uuid | NOT NULL, FK → attribute_definitions(id) ON DELETE CASCADE | |
 | attribute_values | value | varchar(150) | NOT NULL | Stored once per definition |
@@ -293,12 +299,17 @@ Indexes: PK. Linked from `products.size_chart_id` (nullable SET NULL).
 | collections | slug | varchar(180) | NOT NULL, UNIQUE | Route |
 | collections | season | varchar(50) | NULL | Drop/season label |
 | collections | visibility | varchar(20) | NOT NULL DEFAULT 'draft', CHECK IN ('published','draft','scheduled') | |
+| collections | published_at | timestamptz | NULL, CHECK (visibility <> 'scheduled' OR published_at IS NOT NULL) | The schedule date. One timestamp, one picker — the admin drawer uses the project's own calendar component and accepts a single date; the CHECK makes "scheduled with no date" impossible |
+| collections | cover_image_url | varchar(2048) | NULL | Collection hero; a URL because `002` is applied before `006` (same pattern as `categories.image_url`) |
+| collections | tagline | varchar(150) | NULL | One-line subhead under the name |
 | collections | description | text | NULL | |
 | collection_products | collection_id | uuid | NOT NULL, FK → collections(id) ON DELETE CASCADE, composite PK (collection_id, product_id) | |
 | collection_products | product_id | uuid | NOT NULL, FK → products(id) ON DELETE CASCADE | |
 | collection_products | position | integer | NOT NULL DEFAULT 0 | Manual ordering |
 
-Indexes: PKs · unique slug · composite PK (serves both join directions).
+Indexes: PKs · unique slug · composite PK (serves both join directions) ·
+partial `idx_collections_scheduled (published_at) WHERE
+visibility='scheduled'` (the scheduler's only query).
 
 ## stock_movements (ledger)
 
@@ -345,7 +356,15 @@ partial `(starts_at, ends_at) WHERE is_active` (scheduler).
 | created_at | timestamptz | NOT NULL | |
 
 Indexes: PK · partial `(product_id) WHERE is_approved` (PDP read) ·
-`idx_reviews_user_id`.
+`idx_reviews_user_id` · unique `one_review_per_user_product
+(product_id, user_id)` — a double-clicked "Post review" cannot create a
+second row (`21-Idempotency.md`).
+
+**Rating and sold count are derived, never stored.** The PDP reads
+`AVG(rating)` / `COUNT(*)` over `is_approved` rows and
+`SUM(order_items.qty)` joined to non-cancelled orders; no `products.rating`
+or `products.sold_count` column exists, so a refund or a rejected review
+corrects the number by existing (`20-Schema-Decisions.md` §7).
 
 ## Catalog relationship slice
 
