@@ -64,22 +64,28 @@ CREATE UNIQUE INDEX one_pending_claim_per_profile
 -- ------------------------------------------------------------- addresses
 -- Moved from 001-auth.sql — the book is household-scoped, not login-scoped.
 -- profile_id NULL = family-shared row; set = personal row.
+-- The recipient is a plain column, not a profile FK: a shared row can be
+-- delivered to someone who has no profile (a parent, a gift recipient, a
+-- courier contact), and the label on the parcel must survive a profile
+-- rename. Phone is the courier's contact string, stored as entered.
 CREATE TABLE addresses (
-  id           uuid         PRIMARY KEY,
-  household_id uuid         NOT NULL REFERENCES households (id) ON DELETE CASCADE,
-  profile_id   uuid         REFERENCES profiles (id) ON DELETE CASCADE,
-  type         varchar(10)  NOT NULL DEFAULT 'shipping'
+  id             uuid         PRIMARY KEY,
+  household_id   uuid         NOT NULL REFERENCES households (id) ON DELETE CASCADE,
+  profile_id     uuid         REFERENCES profiles (id) ON DELETE CASCADE,
+  type           varchar(10)  NOT NULL DEFAULT 'shipping'
     CHECK (type IN ('shipping','billing')),
-  label        varchar(50),
-  line1        varchar(255) NOT NULL,
-  line2        varchar(255),
-  city         varchar(100) NOT NULL,
-  state        varchar(100),
-  postal_code  varchar(20)  NOT NULL,
-  country      varchar(2)   NOT NULL DEFAULT 'IN',
-  is_default   boolean      NOT NULL DEFAULT false,
-  created_at   timestamptz  NOT NULL DEFAULT now(),
-  updated_at   timestamptz  NOT NULL DEFAULT now()
+  label          varchar(50),
+  recipient_name varchar(120) NOT NULL,
+  phone          varchar(30),
+  line1          varchar(255) NOT NULL,
+  line2          varchar(255),
+  city           varchar(100) NOT NULL,
+  state          varchar(100),
+  postal_code    varchar(20)  NOT NULL,
+  country        varchar(2)   NOT NULL DEFAULT 'IN',
+  is_default     boolean      NOT NULL DEFAULT false,
+  created_at     timestamptz  NOT NULL DEFAULT now(),
+  updated_at     timestamptz  NOT NULL DEFAULT now()
 );
 CREATE INDEX idx_addresses_household_id ON addresses (household_id);
 CREATE INDEX idx_addresses_profile_id ON addresses (profile_id);
