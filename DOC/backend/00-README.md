@@ -26,24 +26,25 @@ constraints, not application-code promises — and one migration history. Primar
 merge-safe). Depth: `12-UI-Merge-Single-Deploy.md`, `13-API-Contracts.md`,
 `14-Single-URL-Gating.md`.
 
-## 3. Data at a glance (81 planned tables: 50 implemented DDL + 31 specified)
+## 3. Data at a glance (88 tables, all implemented in DDL)
 
 | Domain | Tables | Notes |
 |---|---|---|
-| Auth & RBAC | users, profiles, roles, permissions, role_permissions, user_roles, refresh_tokens, customer_notes, staff_invitations, audit_logs | Two-row identity (credential + person); normalized roles; the gate reads `users → user_roles → roles.slug` |
+| Auth & RBAC | users, profiles, roles, permissions, role_permissions, user_roles, refresh_tokens, password_reset_tokens, email_verification_tokens, login_attempts, customer_notes, staff_invitations, audit_logs | Two-row identity (credential + person); normalized roles; the gate reads `users → user_roles → roles.slug`; custom Argon2id auth, never Supabase Auth |
 | Household & family | households, household_members, profile_size_preferences, household_invitations, addresses | Family profiles (dependents need no email); proxy ordering + per-order size edits (file 17) |
 | Catalog | categories, brands*, products, product_source_rows, product_variants, product_images, stock_movements, product_discounts, reviews, collections, collection_products, size_charts, attribute_definitions, attribute_values, product_attribute_links, product_attribute_link_values, product_variant_attribute_values | *brands defined but unbuilt; the attribute library is the single attribute system |
 | Cart & wishlist | carts, cart_items, wishlists, wishlist_items | Snapshot display fields; one-active-cart partial unique |
-| Orders & money | orders, order_items, order_status_history, payments, refunds, returns, return_items, discount_codes, shipments | Dual status axes; immutable snapshots; DECIMAL(12,2) |
-| Platform | import_jobs, email_logs, notification_templates | CSV pipeline reports; delivery states |
-| CMS (jsonb, no Mongo) | media, blog_categories, blog_authors, blog_tags, blogs, blog_post_tags, blog_revisions, blog_slug_history, blog_post_media, cms_sections, cms_settings, navigation_settings, pages, store_settings | Blog slice implemented in `006-cms.sql`; no `content_html`, no `blog_statuses`, no `views` column |
-| Analytics (partitioned) | page_views, sessions, cart_events, abandoned_carts, daily_stats, product_views, search_terms | Monthly partitions; raw events drop >30d, rollups kept |
+| Orders & money | orders, order_items, order_status_history, payments, refunds, returns, return_items, discount_codes, shipments, shipment_events | Dual status axes; immutable snapshots; DECIMAL(12,2); the tracking timeline is a child table |
+| Platform | import_jobs, email_logs, notification_templates, idempotency_keys, webhook_events | CSV pipeline reports; delivery states; HTTP-retry and provider-replay dedupe (file 21) |
+| CMS (jsonb, no Mongo) | media, blog_categories, blog_authors, blog_tags, blogs, blog_post_tags, blog_revisions, blog_slug_history, blog_post_media, design_assets, cms_sections, cms_settings, navigation_settings, pages, store_settings | No `content_html`, no `blog_statuses`, no `views` column; `design_assets` is the print-artwork library |
+| Analytics (partitioned) | page_views, analytics_sessions, cart_events, abandoned_carts, daily_stats, product_views, search_terms | Monthly partitions; raw events drop >30d, rollups kept; never plain `sessions` |
 | Operations | support_tickets, support_messages, notifications | Threads + staff replies; in-app bell (email stays in logs) |
 | Partner seam | partner_orders, partner_wallet_ledger | Qikink sync + wallet trail (file 16) |
 | Styling — Complete the Look | styling_slots, styling_category_slots, styling_slot_rules, styling_value_affinity, styling_overrides, styling_co_purchase, styling_events | Module-owned (file 19); **ships last — after the core store** |
 
 Search has **no table** in v1 — `tsvector` + GIN on products/categories
-covers it. Full inventory: `02-Data-Tables.md`.
+covers it (one ranked query, two entity types). Full inventory:
+`02-Data-Tables.md`.
 
 ## 4. Conventions (one line each, detail in `01-Conventions.md`)
 
@@ -108,3 +109,15 @@ kilobytes — never the risk. Detail: `10-Analytics.md`, `11-Storage.md`.
 | 17-Household-Accounts.md | Family groups, profiles, proxy ordering | Filling |
 | 19-Styling-Recommendations.md | Complete the Look: slots, rules, refinement roadmap | Draft |
 | 20-Schema-Decisions.md | Retired systems, controlled duplication, vocabulary | Active |
+| 21-Idempotency.md | Duplicate-proofing: idempotency keys, webhooks, natural keys | Active |
+
+### Superseded documents
+
+- **`3.Database-Schema.md`** (repo root, 917 lines) describes a
+  microservice split with MongoDB + Redis and no cross-schema foreign keys.
+  That is the opposite of the current doctrine: **one PostgreSQL, real FKs
+  everywhere, cross-domain references as true constraints.** It is kept for
+  history only — do not implement from it. Redis can return later as a cache
+  if and when the infrastructure leaves Vercel; it is not part of v1.
+- The SQL files in `tuw-admin/src/server/db/migrate/` are the schema source
+  of truth. A doc that disagrees with them is the bug.
