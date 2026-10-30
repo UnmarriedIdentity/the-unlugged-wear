@@ -1,9 +1,10 @@
 # Operations — Support, Notifications
 
-> Status: Filling | Last Updated: 2026-10-15
+> Status: Filling | Last Updated: 2026-10-30
 > Human-facing ops: threads staff actually answer, bells customers actually
 > read. Email delivery stays in `08-Notify.md` — different lifecycle,
-> different table. Conventions: `01-Conventions.md`.
+> different table. Conventions: `01-Conventions.md`; send-once rules in
+> `21-Idempotency.md`.
 
 ## support_tickets
 
@@ -20,9 +21,11 @@
 | created_at / updated_at | timestamptz | NOT NULL | updated_at = last activity (list sort key) |
 
 Indexes: PK · `(status, updated_at DESC)` (the queue itself) ·
-`idx_tickets_assignee` · `idx_tickets_user_id` (customer history).
-CHECK: guest columns required iff user_id IS NULL (app-enforced;
-documented here so the rule survives rewrites).
+`idx_support_tickets_assignee` · `idx_support_tickets_user_id` (customer
+history) · partial `(guest_email) WHERE guest_email IS NOT NULL` (guest
+lookup). **CHECK, not app-enforced:**
+`user_id IS NOT NULL OR (guest_name IS NOT NULL AND guest_email IS NOT
+NULL)` — a thread always has someone to answer.
 
 ## support_messages (normalized — the embedded array dies here)
 
@@ -35,7 +38,10 @@ documented here so the rule survives rewrites).
 | body | text | NOT NULL | |
 | created_at | timestamptz | NOT NULL | Per-message times — multi-agent safe |
 
-Indexes: PK · `idx_messages_ticket_id` (thread read, chronological).
+Indexes: PK · `(ticket_id, created_at)` (thread read, chronological) ·
+partial `(staff_id) WHERE staff_id IS NOT NULL`. Unique
+`(ticket_id, created_at, sender)` — a double-clicked or retried reply
+posts once.
 
 ## Reply flow rule (state machine, stated not assumed)
 
@@ -51,15 +57,19 @@ Indexes: PK · `idx_messages_ticket_id` (thread read, chronological).
 |---|---|---|---|
 | id | uuid | PK | |
 | user_id | uuid | NOT NULL, FK → users(id) ON DELETE CASCADE | Bell dies with the account |
-| kind | varchar(20) | NOT NULL, CHECK IN ('order','cart','system') | Icon + routing per kind |
+| kind | varchar(20) | NOT NULL, CHECK IN ('order','cart','inventory','payment','system','marketing','refund') | The bell's own vocabulary — the admin filter chips map 1:1; `cart` = abandonment, `refund` = money back, `inventory` = low stock |
 | title | varchar(150) | NOT NULL | Badge-line text |
 | body | text | NULL | Expanded text |
 | link | varchar(500) | NULL | Deep link (`/account/orders/…`) — nullable, never broken-window |
 | read_at | timestamptz | NULL | NULL = unread. No boolean + timestamp dual-source, ever |
+| dedupe_key | varchar(255) | NULL | `order.shipped:<order_id>`, `cart.abandoned:<cart_id>` — one ring per event, even if the producer job retries |
 | created_at | timestamptz | NOT NULL | |
 
 Indexes: PK · `(user_id, read_at)` (unread badge count = one narrow
-index read) · `idx_notifications_kind` (admin broadcast lists).
+index read) · `idx_notifications_kind` (admin broadcast lists) · partial
+unique `one_notification_per_dedupe_key (dedupe_key) WHERE dedupe_key IS
+NOT NULL`. Producing code inserts with `ON CONFLICT DO NOTHING` and treats
+"0 rows" as "already rang".
 
 ## Producers (tables never sit empty by accident)
 
