@@ -4,18 +4,10 @@
   "private": true,
   "packageManager": "pnpm@10.34.6",
   "scripts": {
-    "dev:admin": "pnpm --dir tuw-admin dev",
-    "build:admin": "pnpm --dir tuw-admin build",
-    "start:admin": "pnpm --dir tuw-admin start",
-    "typecheck:admin": "pnpm --dir tuw-admin typecheck",
-    "dev:website": "pnpm --dir tuw-website dev",
-    "build:website": "pnpm --dir tuw-website build",
-    "start:website": "pnpm --dir tuw-website start",
-    "typecheck:website": "pnpm --dir tuw-website typecheck",
-    "typecheck": "pnpm run typecheck:admin && pnpm run typecheck:website",
-    "test:admin": "pnpm --dir tuw-admin test",
-    "test:website": "pnpm --dir tuw-website test",
-    "test": "pnpm run test:admin && pnpm run test:website",
-    "build": "pnpm run build:admin && pnpm run build:website"
+    "dev": "pnpm --dir tuw-website dev",
+    "build": "pnpm --dir tuw-website build",
+    "start": "pnpm --dir tuw-website start",
+    "typecheck": "pnpm --dir tuw-website typecheck",
+    "test": "pnpm --dir tuw-website test"
   }
 }
