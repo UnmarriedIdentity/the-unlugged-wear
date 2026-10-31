@@ -1,0 +1,15 @@
+{
+  "name": "The Unplugged Wear \u2014 V2 Urbanist",
+  "id": "tuw-admin-v2-urbanist-local",
+  "api": "1.0.0",
+  "main": "code.js",
+  "editorType": [
+    "figma"
+  ],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": [
+      "none"
+    ]
+  }
+}

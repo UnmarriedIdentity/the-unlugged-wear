@@ -1,0 +1,221 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="2780" viewBox="0 0 1600 2780">
+<rect width="1600" height="2780" fill="#F7F8F9"/>
+<rect x="48" y="48" width="1504" height="244" rx="20" fill="#FFFFFF"/>
+<rect x="80" y="78" width="210" height="32" rx="16" fill="#F8F5FF"/>
+<text x="94" y="99" font-family="Urbanist, sans-serif" font-size="12" font-weight="600" fill="#7539FF">TUW / DESIGN SYSTEM</text>
+<rect x="1340" y="78" width="180" height="32" rx="16" fill="#262626"/>
+<text x="1354" y="99" font-family="Urbanist, sans-serif" font-size="12" font-weight="600" fill="#FFFFFF">VERSION 02</text>
+<text x="80" y="174" font-family="Urbanist, sans-serif" font-size="48" font-weight="600" fill="#262626">Designed for clarity.</text>
+<text x="80" y="218" font-family="Urbanist, sans-serif" font-size="20" font-weight="400" fill="#5D6772">Urbanist / Admin foundations / Light mode</text>
+<text x="80" y="254" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#5D6772">A refined operational workspace for The Unplugged Wear.</text>
+<rect x="48" y="316" width="1504" height="150" rx="20" fill="#262626"/>
+<text x="80" y="355" font-family="Urbanist, sans-serif" font-size="12" font-weight="600" fill="#CFCBFF">01</text>
+<text x="80" y="394" font-family="Urbanist, sans-serif" font-size="22" font-weight="600" fill="#FFFFFF">Neutral first</text>
+<text x="80" y="430" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#E2E4E6">White surfaces and clear dark text</text>
+<text x="580" y="355" font-family="Urbanist, sans-serif" font-size="12" font-weight="600" fill="#CFCBFF">02</text>
+<text x="580" y="394" font-family="Urbanist, sans-serif" font-size="22" font-weight="600" fill="#FFFFFF">Purposeful accent</text>
+<text x="580" y="430" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#E2E4E6">Purple for actions and selection</text>
+<text x="1080" y="355" font-family="Urbanist, sans-serif" font-size="12" font-weight="600" fill="#CFCBFF">03</text>
+<text x="1080" y="394" font-family="Urbanist, sans-serif" font-size="22" font-weight="600" fill="#FFFFFF">One type family</text>
+<text x="1080" y="430" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#E2E4E6">Urbanist at every interface level</text>
+<text x="64" y="522" font-family="Urbanist, sans-serif" font-size="12" font-weight="600" fill="#7539FF">01</text>
+<text x="105" y="522" font-family="Urbanist, sans-serif" font-size="24" font-weight="600" fill="#262626">Semantic colour system</text>
+<text x="64" y="554" font-family="Urbanist, sans-serif" font-size="13" font-weight="400" fill="#5D6772">Use colour by purpose. Reserve saturated fills for actions and meaningful feedback.</text>
+<rect x="64" y="578" width="232" height="137" rx="12" fill="#FFFFFF" stroke="#E2E4E6"/>
+<rect x="76" y="590" width="208" height="48" rx="8" fill="#F7F8F9" stroke="#E2E4E6"/>
+<text x="76" y="662" font-family="Urbanist, sans-serif" font-size="14" font-weight="600" fill="#262626">Canvas</text>
+<text x="76" y="686" font-family="Urbanist, sans-serif" font-size="12" font-weight="500" fill="#5D6772">#F7F8F9</text>
+<text x="76" y="703" font-family="Urbanist, sans-serif" font-size="11" font-weight="400" fill="#5D6772">bg / canvas</text>
+<rect x="312" y="578" width="232" height="137" rx="12" fill="#FFFFFF" stroke="#E2E4E6"/>
+<rect x="324" y="590" width="208" height="48" rx="8" fill="#FFFFFF" stroke="#E2E4E6"/>
+<text x="324" y="662" font-family="Urbanist, sans-serif" font-size="14" font-weight="600" fill="#262626">Surface</text>
+<text x="324" y="686" font-family="Urbanist, sans-serif" font-size="12" font-weight="500" fill="#5D6772">#FFFFFF</text>
+<text x="324" y="703" font-family="Urbanist, sans-serif" font-size="11" font-weight="400" fill="#5D6772">bg / surface</text>
+<rect x="560" y="578" width="232" height="137" rx="12" fill="#FFFFFF" stroke="#E2E4E6"/>
+<rect x="572" y="590" width="208" height="48" rx="8" fill="#262626" stroke="#E2E4E6"/>
+<text x="572" y="662" font-family="Urbanist, sans-serif" font-size="14" font-weight="600" fill="#262626">Primary text</text>
+<text x="572" y="686" font-family="Urbanist, sans-serif" font-size="12" font-weight="500" fill="#5D6772">#262626</text>
+<text x="572" y="703" font-family="Urbanist, sans-serif" font-size="11" font-weight="400" fill="#5D6772">text / primary</text>
+<rect x="808" y="578" width="232" height="137" rx="12" fill="#FFFFFF" stroke="#E2E4E6"/>
+<rect x="820" y="590" width="208" height="48" rx="8" fill="#5D6772" stroke="#E2E4E6"/>
+<text x="820" y="662" font-family="Urbanist, sans-serif" font-size="14" font-weight="600" fill="#262626">Secondary text</text>
+<text x="820" y="686" font-family="Urbanist, sans-serif" font-size="12" font-weight="500" fill="#5D6772">#5D6772</text>
+<text x="820" y="703" font-family="Urbanist, sans-serif" font-size="11" font-weight="400" fill="#5D6772">text / secondary</text>
+<rect x="1056" y="578" width="232" height="137" rx="12" fill="#FFFFFF" stroke="#E2E4E6"/>
+<rect x="1068" y="590" width="208" height="48" rx="8" fill="#E2E4E6" stroke="#E2E4E6"/>
+<text x="1068" y="662" font-family="Urbanist, sans-serif" font-size="14" font-weight="600" fill="#262626">Subtle border</text>
+<text x="1068" y="686" font-family="Urbanist, sans-serif" font-size="12" font-weight="500" fill="#5D6772">#E2E4E6</text>
+<text x="1068" y="703" font-family="Urbanist, sans-serif" font-size="11" font-weight="400" fill="#5D6772">border / subtle</text>
+<rect x="1304" y="578" width="232" height="137" rx="12" fill="#FFFFFF" stroke="#E2E4E6"/>
+<rect x="1316" y="590" width="208" height="48" rx="8" fill="#90979F" stroke="#E2E4E6"/>
+<text x="1316" y="662" font-family="Urbanist, sans-serif" font-size="14" font-weight="600" fill="#262626">Control border</text>
+<text x="1316" y="686" font-family="Urbanist, sans-serif" font-size="12" font-weight="500" fill="#5D6772">#90979F</text>
+<text x="1316" y="703" font-family="Urbanist, sans-serif" font-size="11" font-weight="400" fill="#5D6772">border / control</text>
+<rect x="64" y="731" width="232" height="137" rx="12" fill="#FFFFFF" stroke="#E2E4E6"/>
+<rect x="76" y="743" width="208" height="48" rx="8" fill="#7539FF" stroke="#E2E4E6"/>
+<text x="76" y="815" font-family="Urbanist, sans-serif" font-size="14" font-weight="600" fill="#262626">Primary action</text>
+<text x="76" y="839" font-family="Urbanist, sans-serif" font-size="12" font-weight="500" fill="#5D6772">#7539FF</text>
+<text x="76" y="856" font-family="Urbanist, sans-serif" font-size="11" font-weight="400" fill="#5D6772">action / primary</text>
+<rect x="312" y="731" width="232" height="137" rx="12" fill="#FFFFFF" stroke="#E2E4E6"/>
+<rect x="324" y="743" width="208" height="48" rx="8" fill="#6025DB" stroke="#E2E4E6"/>
+<text x="324" y="815" font-family="Urbanist, sans-serif" font-size="14" font-weight="600" fill="#262626">Hover action</text>
+<text x="324" y="839" font-family="Urbanist, sans-serif" font-size="12" font-weight="500" fill="#5D6772">#6025DB</text>
+<text x="324" y="856" font-family="Urbanist, sans-serif" font-size="11" font-weight="400" fill="#5D6772">action / hover</text>
+<rect x="560" y="731" width="232" height="137" rx="12" fill="#FFFFFF" stroke="#E2E4E6"/>
+<rect x="572" y="743" width="208" height="48" rx="8" fill="#F8F5FF" stroke="#E2E4E6"/>
+<text x="572" y="815" font-family="Urbanist, sans-serif" font-size="14" font-weight="600" fill="#262626">Selected surface</text>
+<text x="572" y="839" font-family="Urbanist, sans-serif" font-size="12" font-weight="500" fill="#5D6772">#F8F5FF</text>
+<text x="572" y="856" font-family="Urbanist, sans-serif" font-size="11" font-weight="400" fill="#5D6772">bg / selected</text>
+<rect x="808" y="731" width="232" height="137" rx="12" fill="#FFFFFF" stroke="#E2E4E6"/>
+<rect x="820" y="743" width="208" height="48" rx="8" fill="#175CD3" stroke="#E2E4E6"/>
+<text x="820" y="815" font-family="Urbanist, sans-serif" font-size="14" font-weight="600" fill="#262626">Link &amp; info</text>
+<text x="820" y="839" font-family="Urbanist, sans-serif" font-size="12" font-weight="500" fill="#5D6772">#175CD3</text>
+<text x="820" y="856" font-family="Urbanist, sans-serif" font-size="11" font-weight="400" fill="#5D6772">text / info</text>
+<rect x="1056" y="731" width="232" height="137" rx="12" fill="#FFFFFF" stroke="#E2E4E6"/>
+<rect x="1068" y="743" width="208" height="48" rx="8" fill="#FFFFFF" stroke="#E2E4E6"/>
+<text x="1068" y="815" font-family="Urbanist, sans-serif" font-size="14" font-weight="600" fill="#262626">On primary</text>
+<text x="1068" y="839" font-family="Urbanist, sans-serif" font-size="12" font-weight="500" fill="#5D6772">#FFFFFF</text>
+<text x="1068" y="856" font-family="Urbanist, sans-serif" font-size="11" font-weight="400" fill="#5D6772">text / on-primary</text>
+<rect x="1304" y="731" width="232" height="137" rx="12" fill="#FFFFFF" stroke="#E2E4E6"/>
+<rect x="1316" y="743" width="208" height="48" rx="8" fill="#F4F9FE" stroke="#E2E4E6"/>
+<text x="1316" y="815" font-family="Urbanist, sans-serif" font-size="14" font-weight="600" fill="#262626">Info surface</text>
+<text x="1316" y="839" font-family="Urbanist, sans-serif" font-size="12" font-weight="500" fill="#5D6772">#F4F9FE</text>
+<text x="1316" y="856" font-family="Urbanist, sans-serif" font-size="11" font-weight="400" fill="#5D6772">bg / info</text>
+<text x="64" y="931" font-family="Urbanist, sans-serif" font-size="12" font-weight="600" fill="#7539FF">02</text>
+<text x="105" y="931" font-family="Urbanist, sans-serif" font-size="24" font-weight="600" fill="#262626">Feedback that reads clearly</text>
+<text x="64" y="963" font-family="Urbanist, sans-serif" font-size="13" font-weight="400" fill="#5D6772">Status labels carry meaning alongside colour, including in order lists and payment alerts.</text>
+<rect x="64" y="987" width="356" height="112" rx="12" fill="#FFFFFF"/>
+<text x="84" y="1016" font-family="Urbanist, sans-serif" font-size="14" font-weight="600" fill="#262626">Success</text>
+<rect x="84" y="1032" width="170" height="32" rx="16" fill="#F4FBF7"/>
+<text x="98" y="1053" font-family="Urbanist, sans-serif" font-size="12" font-weight="600" fill="#187343">Fulfilled</text>
+<text x="268" y="1053" font-family="Urbanist, sans-serif" font-size="12" font-weight="500" fill="#5D6772">#187343</text>
+<rect x="436" y="987" width="356" height="112" rx="12" fill="#FFFFFF"/>
+<text x="456" y="1016" font-family="Urbanist, sans-serif" font-size="14" font-weight="600" fill="#262626">Warning</text>
+<rect x="456" y="1032" width="170" height="32" rx="16" fill="#FEFBF5"/>
+<text x="470" y="1053" font-family="Urbanist, sans-serif" font-size="12" font-weight="600" fill="#856300">Pending</text>
+<text x="640" y="1053" font-family="Urbanist, sans-serif" font-size="12" font-weight="500" fill="#5D6772">#856300</text>
+<rect x="808" y="987" width="356" height="112" rx="12" fill="#FFFFFF"/>
+<text x="828" y="1016" font-family="Urbanist, sans-serif" font-size="14" font-weight="600" fill="#262626">Error</text>
+<rect x="828" y="1032" width="170" height="32" rx="16" fill="#FEF4F4"/>
+<text x="842" y="1053" font-family="Urbanist, sans-serif" font-size="12" font-weight="600" fill="#C91818">Payment failed</text>
+<text x="1012" y="1053" font-family="Urbanist, sans-serif" font-size="12" font-weight="500" fill="#5D6772">#C91818</text>
+<rect x="1180" y="987" width="356" height="112" rx="12" fill="#FFFFFF"/>
+<text x="1200" y="1016" font-family="Urbanist, sans-serif" font-size="14" font-weight="600" fill="#262626">Information</text>
+<rect x="1200" y="1032" width="170" height="32" rx="16" fill="#F4F9FE"/>
+<text x="1214" y="1053" font-family="Urbanist, sans-serif" font-size="12" font-weight="600" fill="#175CD3">Processing</text>
+<text x="1384" y="1053" font-family="Urbanist, sans-serif" font-size="12" font-weight="500" fill="#5D6772">#175CD3</text>
+<text x="64" y="1155" font-family="Urbanist, sans-serif" font-size="12" font-weight="600" fill="#7539FF">03</text>
+<text x="105" y="1155" font-family="Urbanist, sans-serif" font-size="24" font-weight="600" fill="#262626">Urbanist typography</text>
+<text x="64" y="1187" font-family="Urbanist, sans-serif" font-size="13" font-weight="400" fill="#5D6772">A consistent family across headings, navigation, forms, tables and numeric data.</text>
+<rect x="64" y="1211" width="720" height="325" rx="12" fill="#FFFFFF"/>
+<rect x="808" y="1211" width="728" height="325" rx="12" fill="#FFFFFF"/>
+<text x="88" y="1262" font-family="Urbanist, sans-serif" font-size="40" font-weight="600" fill="#262626">Urbanist</text>
+<text x="88" y="1307" font-family="Urbanist, sans-serif" font-size="28" font-weight="400" fill="#262626">Aa Bb Cc 0123456789</text>
+<text x="88" y="1354" font-family="Urbanist, sans-serif" font-size="20" font-weight="400" fill="#262626">Regular 400</text>
+<text x="88" y="1396" font-family="Urbanist, sans-serif" font-size="20" font-weight="500" fill="#262626">Medium 500</text>
+<text x="88" y="1438" font-family="Urbanist, sans-serif" font-size="20" font-weight="600" fill="#262626">Semi Bold 600</text>
+<text x="88" y="1480" font-family="Urbanist, sans-serif" font-size="20" font-weight="700" fill="#262626">Bold 700</text>
+<text x="832" y="1255" font-family="Urbanist, sans-serif" font-size="15" font-weight="500" fill="#262626">Page title</text>
+<text x="1210" y="1255" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#5D6772">32 / 40 / 600</text>
+<path d="M832 1272 L1512 1272" stroke="#E2E4E6"/>
+<text x="832" y="1300" font-family="Urbanist, sans-serif" font-size="15" font-weight="500" fill="#262626">Section</text>
+<text x="1210" y="1300" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#5D6772">24 / 32 / 600</text>
+<path d="M832 1317 L1512 1317" stroke="#E2E4E6"/>
+<text x="832" y="1345" font-family="Urbanist, sans-serif" font-size="15" font-weight="500" fill="#262626">Card heading</text>
+<text x="1210" y="1345" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#5D6772">18 / 26 / 600</text>
+<path d="M832 1362 L1512 1362" stroke="#E2E4E6"/>
+<text x="832" y="1390" font-family="Urbanist, sans-serif" font-size="15" font-weight="500" fill="#262626">Body</text>
+<text x="1210" y="1390" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#5D6772">16 / 24 / 400</text>
+<path d="M832 1407 L1512 1407" stroke="#E2E4E6"/>
+<text x="832" y="1435" font-family="Urbanist, sans-serif" font-size="15" font-weight="500" fill="#262626">Table / control</text>
+<text x="1210" y="1435" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#5D6772">14 / 22 / 500</text>
+<path d="M832 1452 L1512 1452" stroke="#E2E4E6"/>
+<text x="832" y="1480" font-family="Urbanist, sans-serif" font-size="15" font-weight="500" fill="#262626">Metadata</text>
+<text x="1210" y="1480" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#5D6772">12 / 18 / 400</text>
+<path d="M832 1497 L1512 1497" stroke="#E2E4E6"/>
+<text x="64" y="1592" font-family="Urbanist, sans-serif" font-size="12" font-weight="600" fill="#7539FF">04</text>
+<text x="105" y="1592" font-family="Urbanist, sans-serif" font-size="24" font-weight="600" fill="#262626">Controls, spacing &amp; shape</text>
+<text x="64" y="1624" font-family="Urbanist, sans-serif" font-size="13" font-weight="400" fill="#5D6772">44px controls. A 4px spacing grid. Consistent radii keep the interface composed.</text>
+<rect x="64" y="1648" width="720" height="202" rx="12" fill="#FFFFFF"/>
+<rect x="808" y="1648" width="728" height="202" rx="12" fill="#FFFFFF"/>
+<rect x="88" y="1672" width="195" height="44" rx="8" fill="#7539FF"/>
+<text x="106" y="1700" font-family="Urbanist, sans-serif" font-size="13" font-weight="600" fill="#FFFFFF">Create product</text>
+<rect x="303" y="1672" width="195" height="44" rx="8" fill="#FFFFFF" stroke="#90979F"/>
+<text x="321" y="1700" font-family="Urbanist, sans-serif" font-size="13" font-weight="600" fill="#262626">Export orders</text>
+<rect x="88" y="1732" width="195" height="44" rx="8" fill="#6025DB"/>
+<text x="106" y="1760" font-family="Urbanist, sans-serif" font-size="13" font-weight="600" fill="#FFFFFF">Hover</text>
+<rect x="303" y="1732" width="195" height="44" rx="8" fill="#E2E4E6"/>
+<text x="321" y="1760" font-family="Urbanist, sans-serif" font-size="13" font-weight="600" fill="#5D6772">Unavailable</text>
+<text x="88" y="1823" font-family="Urbanist, sans-serif" font-size="13" font-weight="400" fill="#5D6772">Control radius: 8px / Card: 12px / Modal: 16px</text>
+<text x="832" y="1681" font-family="Urbanist, sans-serif" font-size="13" font-weight="500" fill="#262626">Focused input</text>
+<rect x="832" y="1695" width="325" height="44" rx="8" fill="#FFFFFF" stroke="#7539FF"/>
+<text x="846" y="1723" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#5D6772">Product name</text>
+<text x="1185" y="1681" font-family="Urbanist, sans-serif" font-size="13" font-weight="500" fill="#262626">Error input</text>
+<rect x="1185" y="1695" width="325" height="44" rx="8" fill="#FFFFFF" stroke="#C91818"/>
+<text x="1185" y="1765" font-family="Urbanist, sans-serif" font-size="12" font-weight="500" fill="#C91818">Enter a product name.</text>
+<text x="832" y="1823" font-family="Urbanist, sans-serif" font-size="14" font-weight="500" fill="#5D6772">Spacing: 4 / 8 / 12 / 16 / 24 / 32 / 48 / 64px</text>
+<text x="64" y="1912" font-family="Urbanist, sans-serif" font-size="12" font-weight="600" fill="#7539FF">05</text>
+<text x="105" y="1912" font-family="Urbanist, sans-serif" font-size="24" font-weight="600" fill="#262626">The system in practice</text>
+<text x="64" y="1944" font-family="Urbanist, sans-serif" font-size="13" font-weight="400" fill="#5D6772">A realistic dashboard specimen combines neutral surfaces, Urbanist and focused purple actions.</text>
+<rect x="64" y="1968" width="1472" height="670" rx="16" fill="#FFFFFF" stroke="#E2E4E6"/>
+<rect x="64" y="1968" width="230" height="670" rx="16" fill="#FAFAFB"/>
+<path d="M294 1968 L294 2638" stroke="#E2E4E6"/>
+<text x="88" y="2015" font-family="Urbanist, sans-serif" font-size="16" font-weight="700" fill="#262626">THE UNPLUGGED</text>
+<text x="88" y="2038" font-family="Urbanist, sans-serif" font-size="11" font-weight="600" fill="#5D6772">WEAR / ADMIN</text>
+<rect x="80" y="2081" width="198" height="42" rx="8" fill="#F8F5FF"/>
+<text x="100" y="2108" font-family="Urbanist, sans-serif" font-size="15" font-weight="600" fill="#7539FF">Overview</text>
+<text x="100" y="2166" font-family="Urbanist, sans-serif" font-size="15" font-weight="500" fill="#5D6772">Orders</text>
+<text x="100" y="2224" font-family="Urbanist, sans-serif" font-size="15" font-weight="500" fill="#5D6772">Products</text>
+<text x="100" y="2282" font-family="Urbanist, sans-serif" font-size="15" font-weight="500" fill="#5D6772">Customers</text>
+<text x="100" y="2340" font-family="Urbanist, sans-serif" font-size="15" font-weight="500" fill="#5D6772">Reports</text>
+<text x="100" y="2398" font-family="Urbanist, sans-serif" font-size="15" font-weight="500" fill="#5D6772">Settings</text>
+<text x="326" y="2025" font-family="Urbanist, sans-serif" font-size="32" font-weight="600" fill="#262626">Overview</text>
+<text x="326" y="2057" font-family="Urbanist, sans-serif" font-size="16" font-weight="400" fill="#5D6772">Your store, at a glance.</text>
+<rect x="1292" y="1999" width="212" height="44" rx="8" fill="#7539FF"/>
+<text x="1310" y="2027" font-family="Urbanist, sans-serif" font-size="13" font-weight="600" fill="#FFFFFF">Create product</text>
+<rect x="326" y="2091" width="372" height="139" rx="12" fill="#FFFFFF" stroke="#E2E4E6"/>
+<text x="346" y="2125" font-family="Urbanist, sans-serif" font-size="14" font-weight="500" fill="#5D6772">Revenue</text>
+<text x="346" y="2173" font-family="Urbanist, sans-serif" font-size="32" font-weight="600" fill="#262626">₹24,980</text>
+<text x="346" y="2205" font-family="Urbanist, sans-serif" font-size="12" font-weight="400" fill="#5D6772">This month</text>
+<rect x="722" y="2091" width="372" height="139" rx="12" fill="#FFFFFF" stroke="#E2E4E6"/>
+<text x="742" y="2125" font-family="Urbanist, sans-serif" font-size="14" font-weight="500" fill="#5D6772">Orders</text>
+<text x="742" y="2173" font-family="Urbanist, sans-serif" font-size="32" font-weight="600" fill="#262626">42</text>
+<text x="742" y="2205" font-family="Urbanist, sans-serif" font-size="12" font-weight="400" fill="#5D6772">Across all products</text>
+<rect x="1118" y="2091" width="372" height="139" rx="12" fill="#FFFFFF" stroke="#E2E4E6"/>
+<text x="1138" y="2125" font-family="Urbanist, sans-serif" font-size="14" font-weight="500" fill="#5D6772">In fulfillment</text>
+<text x="1138" y="2173" font-family="Urbanist, sans-serif" font-size="32" font-weight="600" fill="#262626">8</text>
+<text x="1138" y="2205" font-family="Urbanist, sans-serif" font-size="12" font-weight="400" fill="#5D6772">Printing and shipping</text>
+<text x="326" y="2283" font-family="Urbanist, sans-serif" font-size="20" font-weight="600" fill="#262626">Recent orders</text>
+<text x="1390" y="2283" font-family="Urbanist, sans-serif" font-size="14" font-weight="500" fill="#7539FF">View all</text>
+<path d="M326 2303 L1504 2303" stroke="#E2E4E6"/>
+<text x="326" y="2332" font-family="Urbanist, sans-serif" font-size="11" font-weight="600" fill="#5D6772">ORDER</text>
+<text x="546" y="2332" font-family="Urbanist, sans-serif" font-size="11" font-weight="600" fill="#5D6772">CUSTOMER</text>
+<text x="890" y="2332" font-family="Urbanist, sans-serif" font-size="11" font-weight="600" fill="#5D6772">STATUS</text>
+<text x="1230" y="2332" font-family="Urbanist, sans-serif" font-size="11" font-weight="600" fill="#5D6772">PAYMENT</text>
+<text x="1410" y="2332" font-family="Urbanist, sans-serif" font-size="11" font-weight="600" fill="#5D6772">AMOUNT</text>
+<text x="326" y="2390" font-family="Urbanist, sans-serif" font-size="14" font-weight="500" fill="#262626">#TUW-1042</text>
+<text x="546" y="2390" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#262626">Sample customer A</text>
+<rect x="890" y="2370" width="144" height="32" rx="16" fill="#F4F9FE"/>
+<text x="904" y="2391" font-family="Urbanist, sans-serif" font-size="12" font-weight="600" fill="#175CD3">Processing</text>
+<text x="1230" y="2390" font-family="Urbanist, sans-serif" font-size="14" font-weight="500" fill="#187343">Paid</text>
+<text x="1410" y="2390" font-family="Urbanist, sans-serif" font-size="14" font-weight="600" fill="#262626">₹1,499</text>
+<path d="M326 2415 L1504 2415" stroke="#E2E4E6"/>
+<text x="326" y="2456" font-family="Urbanist, sans-serif" font-size="14" font-weight="500" fill="#262626">#TUW-1041</text>
+<text x="546" y="2456" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#262626">Sample customer B</text>
+<rect x="890" y="2436" width="144" height="32" rx="16" fill="#F4FBF7"/>
+<text x="904" y="2457" font-family="Urbanist, sans-serif" font-size="12" font-weight="600" fill="#187343">Fulfilled</text>
+<text x="1230" y="2456" font-family="Urbanist, sans-serif" font-size="14" font-weight="500" fill="#187343">Paid</text>
+<text x="1410" y="2456" font-family="Urbanist, sans-serif" font-size="14" font-weight="600" fill="#262626">₹2,299</text>
+<path d="M326 2481 L1504 2481" stroke="#E2E4E6"/>
+<text x="326" y="2522" font-family="Urbanist, sans-serif" font-size="14" font-weight="500" fill="#262626">#TUW-1040</text>
+<text x="546" y="2522" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#262626">Sample customer C</text>
+<rect x="890" y="2502" width="144" height="32" rx="16" fill="#FEFBF5"/>
+<text x="904" y="2523" font-family="Urbanist, sans-serif" font-size="12" font-weight="600" fill="#856300">Pending</text>
+<text x="1230" y="2522" font-family="Urbanist, sans-serif" font-size="14" font-weight="500" fill="#187343">Paid</text>
+<text x="1410" y="2522" font-family="Urbanist, sans-serif" font-size="14" font-weight="600" fill="#262626">₹999</text>
+<path d="M326 2547 L1504 2547" stroke="#E2E4E6"/>
+<text x="326" y="2612" font-family="Urbanist, sans-serif" font-size="12" font-weight="400" fill="#5D6772">Sample data shown for layout reference.</text>
+<text x="64" y="2692" font-family="Urbanist, sans-serif" font-size="11" font-weight="600" fill="#7539FF">USAGE NOTES</text>
+<text x="64" y="2723" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#5D6772">Body: 14–16px. Metadata: 12px. Use visible focus outlines and labels for every status.</text>
+<text x="64" y="2755" font-family="Urbanist, sans-serif" font-size="11" font-weight="600" fill="#5D6772">THE UNPLUGGED WEAR / DESIGN SYSTEM V2 / URBANIST</text>
+</svg>

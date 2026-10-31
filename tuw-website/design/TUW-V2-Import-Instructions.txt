@@ -1,0 +1,9 @@
+THE UNPLUGGED WEAR — VERSION 2 / URBANIST
+
+Install Urbanist from https://fonts.google.com/specimen/Urbanist . Make Regular, Medium, SemiBold and Bold available to Figma.
+
+Drag both V2 SVG files onto your Figma canvas. The design system sheet includes a dashboard specimen with sample data. SVG text may import as outlines rather than editable text.
+
+To create native editable text, variables and shared styles: unzip this package; in Figma desktop use Plugins > Development > Import plugin from manifest, select tuw-v2-urbanist-plugin/manifest.json, then run The Unplugged Wear — V2 Urbanist.
+
+V2 uses separate TUW V2 collections, styles and a separate specimen page, preserving V1. The native plugin creates the foundations sheet; the enhanced dashboard layout is included in the SVG reference. Plugin syntax checked locally; execution in Figma unverified due to the tool quota.

@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1580" viewBox="0 0 1440 1580">
+<rect width="1440" height="1580" fill="#F7F8F9"/>
+<text x="64" y="70" font-family="Urbanist, sans-serif" font-size="14" font-weight="600" fill="#5D6772">THE UNPLUGGED WEAR / ADMIN FOUNDATIONS V2</text>
+<text x="64" y="133" font-family="Urbanist, sans-serif" font-size="40" font-weight="700" fill="#262626">Typography</text>
+<text x="64" y="185" font-family="Urbanist, sans-serif" font-size="64" font-weight="700" fill="#262626">Urbanist</text>
+<text x="64" y="224" font-family="Urbanist, sans-serif" font-size="16" font-weight="400" fill="#5D6772">Version 2 / Urbanist / One family across the complete admin interface.</text>
+<text x="64" y="290" font-family="Urbanist, sans-serif" font-size="24" font-weight="600" fill="#262626">01  Font weights</text>
+<rect x="64" y="320" width="312" height="190" rx="12" fill="#FFFFFF" stroke="#E2E4E6"/>
+<text x="88" y="407" font-family="Urbanist, sans-serif" font-size="64" font-weight="400" fill="#262626">Aa</text>
+<text x="88" y="456" font-family="Urbanist, sans-serif" font-size="18" font-weight="400" fill="#262626">Regular</text>
+<text x="88" y="483" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#5D6772">400</text>
+<rect x="392" y="320" width="312" height="190" rx="12" fill="#FFFFFF" stroke="#E2E4E6"/>
+<text x="416" y="407" font-family="Urbanist, sans-serif" font-size="64" font-weight="500" fill="#262626">Aa</text>
+<text x="416" y="456" font-family="Urbanist, sans-serif" font-size="18" font-weight="500" fill="#262626">Medium</text>
+<text x="416" y="483" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#5D6772">500</text>
+<rect x="720" y="320" width="312" height="190" rx="12" fill="#FFFFFF" stroke="#E2E4E6"/>
+<text x="744" y="407" font-family="Urbanist, sans-serif" font-size="64" font-weight="600" fill="#262626">Aa</text>
+<text x="744" y="456" font-family="Urbanist, sans-serif" font-size="18" font-weight="600" fill="#262626">Semi Bold</text>
+<text x="744" y="483" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#5D6772">600</text>
+<rect x="1048" y="320" width="312" height="190" rx="12" fill="#FFFFFF" stroke="#E2E4E6"/>
+<text x="1072" y="407" font-family="Urbanist, sans-serif" font-size="64" font-weight="700" fill="#262626">Aa</text>
+<text x="1072" y="456" font-family="Urbanist, sans-serif" font-size="18" font-weight="700" fill="#262626">Bold</text>
+<text x="1072" y="483" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#5D6772">700</text>
+<text x="64" y="574" font-family="Urbanist, sans-serif" font-size="24" font-weight="600" fill="#262626">02  Admin type scale</text>
+<path d="M64 672 H1376" stroke="#E2E4E6"/>
+<text x="64" y="630" font-family="Urbanist, sans-serif" font-size="14" font-weight="500" fill="#5D6772">Display</text>
+<text x="350" y="630" font-family="Urbanist, sans-serif" font-size="40" font-weight="700" fill="#262626">Store overview</text>
+<text x="1120" y="630" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#5D6772">40px / 44px / 700</text>
+<path d="M64 748 H1376" stroke="#E2E4E6"/>
+<text x="64" y="706" font-family="Urbanist, sans-serif" font-size="14" font-weight="500" fill="#5D6772">Heading 1</text>
+<text x="350" y="706" font-family="Urbanist, sans-serif" font-size="32" font-weight="600" fill="#262626">Orders &amp; fulfillment</text>
+<text x="1120" y="706" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#5D6772">32px / 40px / 600</text>
+<path d="M64 824 H1376" stroke="#E2E4E6"/>
+<text x="64" y="782" font-family="Urbanist, sans-serif" font-size="14" font-weight="500" fill="#5D6772">Heading 2</text>
+<text x="350" y="782" font-family="Urbanist, sans-serif" font-size="24" font-weight="600" fill="#262626">Product performance</text>
+<text x="1120" y="782" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#5D6772">24px / 32px / 600</text>
+<path d="M64 900 H1376" stroke="#E2E4E6"/>
+<text x="64" y="858" font-family="Urbanist, sans-serif" font-size="14" font-weight="500" fill="#5D6772">Heading 3</text>
+<text x="350" y="858" font-family="Urbanist, sans-serif" font-size="20" font-weight="600" fill="#262626">Recent orders</text>
+<text x="1120" y="858" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#5D6772">20px / 28px / 600</text>
+<path d="M64 976 H1376" stroke="#E2E4E6"/>
+<text x="64" y="934" font-family="Urbanist, sans-serif" font-size="14" font-weight="500" fill="#5D6772">Heading 4</text>
+<text x="350" y="934" font-family="Urbanist, sans-serif" font-size="18" font-weight="600" fill="#262626">Shipping details</text>
+<text x="1120" y="934" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#5D6772">18px / 26px / 600</text>
+<path d="M64 1052 H1376" stroke="#E2E4E6"/>
+<text x="64" y="1010" font-family="Urbanist, sans-serif" font-size="14" font-weight="500" fill="#5D6772">Body / Large</text>
+<text x="350" y="1010" font-family="Urbanist, sans-serif" font-size="16" font-weight="400" fill="#262626">Timeless essentials. Thoughtful design.</text>
+<text x="1120" y="1010" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#5D6772">16px / 24px / 400</text>
+<path d="M64 1128 H1376" stroke="#E2E4E6"/>
+<text x="64" y="1086" font-family="Urbanist, sans-serif" font-size="14" font-weight="500" fill="#5D6772">Body / Default</text>
+<text x="350" y="1086" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#262626">Review orders, payments and fulfillment.</text>
+<text x="1120" y="1086" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#5D6772">14px / 22px / 400</text>
+<path d="M64 1204 H1376" stroke="#E2E4E6"/>
+<text x="64" y="1162" font-family="Urbanist, sans-serif" font-size="14" font-weight="500" fill="#5D6772">Label / Control</text>
+<text x="350" y="1162" font-family="Urbanist, sans-serif" font-size="14" font-weight="500" fill="#262626">Create product</text>
+<text x="1120" y="1162" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#5D6772">14px / 20px / 500</text>
+<path d="M64 1280 H1376" stroke="#E2E4E6"/>
+<text x="64" y="1238" font-family="Urbanist, sans-serif" font-size="14" font-weight="500" fill="#5D6772">Caption / Metadata</text>
+<text x="350" y="1238" font-family="Urbanist, sans-serif" font-size="12" font-weight="400" fill="#262626">Updated today at 10:30 AM</text>
+<text x="1120" y="1238" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#5D6772">12px / 18px / 400</text>
+<text x="64" y="1375" font-family="Urbanist, sans-serif" font-size="24" font-weight="600" fill="#262626">03  Typography rules</text>
+<text x="64" y="1414" font-family="Urbanist, sans-serif" font-size="16" font-weight="400" fill="#262626">Use sentence case. Use 14–16px for body text and 12px only for supporting metadata.</text>
+<text x="64" y="1447" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#5D6772">Keep body letter spacing at 0. Use the listed line heights. Avoid mixing Urbanist or Inter in admin UI.</text>
+<text x="64" y="1480" font-family="Urbanist, sans-serif" font-size="14" font-weight="400" fill="#5D6772">For amounts and quantities, use tabular numerals where supported and align numeric columns to the right.</text>
+<text x="64" y="1519" font-family="Urbanist, sans-serif" font-size="12" font-weight="400" fill="#5D6772">Install Urbanist before import. SVG text editability depends on Figma’s SVG importer.</text>
+</svg>
