@@ -14,34 +14,16 @@ export const DEMO_ACCOUNT = {
   password: 'uktuw1115',
 } as const;
 
-/**
- * Seeded demo admin. The storefront login is the single sign-in: this account is
- * routed straight to the admin panel at /admin/dashboard.
- */
-export const ADMIN_DEMO_ACCOUNT = {
-  name: 'Store Admin',
-  email: 'admin@tuw.co',
-  password: 'tuwadmin123',
-  role: 'admin',
-} as const;
-
-export type DemoRole = 'admin' | 'customer';
-
 export interface DemoSession {
   name: string;
   email: string;
-  /** Absent on self-registered sessions and on sessions stored before the split. */
-  role?: DemoRole;
 }
 
-/** Returns the demo session when the email and password match a demo account. */
+/** Returns the demo session when the email and password match the demo account. */
 export function checkDemoCredentials(email: string, password: string): DemoSession | null {
   const address = email.trim().toLowerCase();
-  if (address === ADMIN_DEMO_ACCOUNT.email && password === ADMIN_DEMO_ACCOUNT.password) {
-    return { name: ADMIN_DEMO_ACCOUNT.name, email: ADMIN_DEMO_ACCOUNT.email, role: 'admin' };
-  }
   const matches = address === DEMO_ACCOUNT.email && password === DEMO_ACCOUNT.password;
-  return matches ? { name: DEMO_ACCOUNT.name, email: DEMO_ACCOUNT.email, role: 'customer' } : null;
+  return matches ? { name: DEMO_ACCOUNT.name, email: DEMO_ACCOUNT.email } : null;
 }
 
 function parseSession(raw: string | null): DemoSession | null {
@@ -52,7 +34,6 @@ function parseSession(raw: string | null): DemoSession | null {
     return {
       name: value.name || value.email,
       email: value.email,
-      role: value.role === 'admin' ? 'admin' : 'customer',
     };
   } catch {
     return null;
