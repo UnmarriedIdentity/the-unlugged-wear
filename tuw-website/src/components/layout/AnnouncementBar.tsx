@@ -17,7 +17,7 @@ export default function AnnouncementBar() {
         <button
           type="button"
           onClick={retryConnection}
-          className="bg-white text-[#C91818] px-2.5 py-0.5 rounded text-[11px] font-bold hover:bg-[#F3F4F6] transition-colors"
+          className="bg-white text-[#C91818] px-2.5 py-0.5 rounded text-xs font-bold hover:bg-[#F3F4F6] transition-colors"
         >
           Retry Connection
         </button>
@@ -37,7 +37,7 @@ export default function AnnouncementBar() {
         </span>
       ) : (
         <span>
-          Complimentary domestic delivery over ₹3,000 • 500 GSM Heavyweight Architectural Cotton
+          Complimentary domestic delivery over ₹3,000 • Printed to order in Tiruppur
         </span>
       )}
     </div>
