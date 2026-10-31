@@ -9,22 +9,22 @@ const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 describe('Server Route & Asset Coverage Invariants', () => {
   const requiredRoutes = [
-    'src/app/(storefront)/checkout/success/page.tsx',
-    'src/app/(storefront)/account/orders/page.tsx',
-    'src/app/(storefront)/account/orders/[id]/page.tsx',
-    'src/app/(storefront)/about/page.tsx',
-    'src/app/(storefront)/journal/page.tsx',
-    'src/app/(storefront)/journal/[slug]/page.tsx',
-    'src/app/(storefront)/faq/page.tsx',
-    'src/app/(storefront)/policies/shipping/page.tsx',
-    'src/app/(storefront)/policies/returns/page.tsx',
-    'src/app/(storefront)/policies/privacy/page.tsx',
-    'src/app/(storefront)/policies/terms/page.tsx',
-    'src/app/(storefront)/api/checkout/route.ts',
-    'src/app/(storefront)/api/orders/[id]/route.ts',
-    'src/app/(storefront)/api/contact/route.ts',
-    'src/app/(storefront)/api/webhooks/razorpay/route.ts',
-    'src/app/(storefront)/api/fulfillment/qikink/route.ts',
+    'src/app/checkout/success/page.tsx',
+    'src/app/account/orders/page.tsx',
+    'src/app/account/orders/[id]/page.tsx',
+    'src/app/about/page.tsx',
+    'src/app/journal/page.tsx',
+    'src/app/journal/[slug]/page.tsx',
+    'src/app/faq/page.tsx',
+    'src/app/policies/shipping/page.tsx',
+    'src/app/policies/returns/page.tsx',
+    'src/app/policies/privacy/page.tsx',
+    'src/app/policies/terms/page.tsx',
+    'src/app/api/checkout/route.ts',
+    'src/app/api/orders/[id]/route.ts',
+    'src/app/api/contact/route.ts',
+    'src/app/api/webhooks/razorpay/route.ts',
+    'src/app/api/fulfillment/qikink/route.ts',
     'src/storefront/lib/razorpay.ts',
     'src/storefront/lib/qikink.ts',
   ];
@@ -56,7 +56,7 @@ describe('Server Route & Asset Coverage Invariants', () => {
       );
       const legacyPage = join(
         repoRoot,
-        'src/app/(storefront)',
+        'src/app',
         source.replace('/:slug', '/[slug]'),
         'page.tsx',
       );

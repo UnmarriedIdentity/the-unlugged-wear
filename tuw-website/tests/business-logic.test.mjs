@@ -112,15 +112,15 @@ describe('Tracking Reference & Carrier Lookup', () => {
 
 describe('Deterministic local fonts (Windows == macOS)', () => {
   test('layout vendors Outfit 300-900 via next/font/local with zero Google fetch', () => {
-    const layout = readFileSync(join(repoRoot, 'src/app/(storefront)/layout.tsx'), 'utf8');
+    const layout = readFileSync(join(repoRoot, 'src/app/layout.tsx'), 'utf8');
     for (const weight of ['300', '400', '500', '600', '700', '800', '900']) {
       assert.ok(
         layout.includes(`outfit-latin-${weight}-normal.woff2`) && layout.includes(`weight: '${weight}'`),
-        `missing vendored Outfit weight ${weight} in src/app/(storefront)/layout.tsx`,
+        `missing vendored Outfit weight ${weight} in src/app/layout.tsx`,
       );
       assert.ok(
-        existsSync(join(repoRoot, `src/app/(storefront)/fonts/outfit-latin-${weight}-normal.woff2`)),
-        `missing file src/app/(storefront)/fonts/outfit-latin-${weight}-normal.woff2`,
+        existsSync(join(repoRoot, `src/app/fonts/outfit-latin-${weight}-normal.woff2`)),
+        `missing file src/app/fonts/outfit-latin-${weight}-normal.woff2`,
       );
     }
     assert.ok(!layout.includes("from 'next/font/google'"), 'layout must not import next/font/google');
@@ -131,7 +131,7 @@ describe('Deterministic local fonts (Windows == macOS)', () => {
   });
 
   test('body stack resolves Outfit first on every OS', () => {
-    const css = readFileSync(join(repoRoot, 'src/app/(storefront)/globals.css'), 'utf8');
+    const css = readFileSync(join(repoRoot, 'src/app/globals.css'), 'utf8');
     const bodyDefs = [...css.matchAll(/--font-body:\s*([^;]+);/g)].map((m) => m[1].trim());
     assert.ok(bodyDefs.length >= 2, 'expected @theme and :root --font-body definitions');
     for (const def of bodyDefs) {
@@ -143,7 +143,7 @@ describe('Deterministic local fonts (Windows == macOS)', () => {
   });
 
   test('heading stack resolves Outfit first on every OS (no named-fallback divergence)', () => {
-    const css = readFileSync(join(repoRoot, 'src/app/(storefront)/globals.css'), 'utf8');
+    const css = readFileSync(join(repoRoot, 'src/app/globals.css'), 'utf8');
     const headingDefs = [...css.matchAll(/--font-heading:\s*([^;]+);/g)].map((m) => m[1].trim());
     assert.ok(headingDefs.length >= 2, 'expected @theme and :root --font-heading definitions');
     const banned = ['Jost', 'Futura', 'Playfair', 'Trebuchet', 'Segoe', 'San Francisco', 'Helvetica', 'Arial', 'Tahoma', 'Verdana'];
@@ -225,7 +225,7 @@ describe('Deterministic local fonts (Windows == macOS)', () => {
     assert.ok(filterContent.includes('Bottle Green'), 'FilterBar must include Bottle Green in Figma colors');
     assert.ok(filterContent.includes('Light Baby Pink'), 'FilterBar must include Light Baby Pink in Figma colors');
     // Rolls-Royce luxury typography reveal invariants
-    const cssContent = readFileSync(join(repoRoot, 'src/app/(storefront)/globals.css'), 'utf8');
+    const cssContent = readFileSync(join(repoRoot, 'src/app/globals.css'), 'utf8');
     assert.ok(cssContent.includes('tuw-stagger-reveal'), 'globals.css must define tuw-stagger-reveal keyframes');
     assert.ok(cssContent.includes('.tuw-reveal-item'), 'globals.css must define .tuw-reveal-item');
     assert.ok(filterContent.includes('tuw-reveal-item'), 'FilterBar must apply tuw-reveal-item to drawer elements');
@@ -247,7 +247,7 @@ describe('Deterministic local fonts (Windows == macOS)', () => {
     assert.ok(cssContent.includes('.tuw-droplet-swatch'), 'globals.css must define .tuw-droplet-swatch');
 
     // Figma Canonical Checkout Invariants (media_1793276628297_7100bb4c.png)
-    const checkoutContent = readFileSync(join(repoRoot, 'src/app/(storefront)/checkout/page.tsx'), 'utf8');
+    const checkoutContent = readFileSync(join(repoRoot, 'src/app/checkout/page.tsx'), 'utf8');
     const paymentContent = readFileSync(join(repoRoot, 'src/storefront/components/commerce/PaymentSimulationPanel.tsx'), 'utf8');
 
     assert.ok(!checkoutContent.includes('#7539FF'), 'checkout/page.tsx must not contain admin purple #7539FF');
@@ -267,8 +267,8 @@ describe('Demo sign-in and checkout flow', () => {
 
   test('login only accepts the seeded demo account and account pages need a session', () => {
     const auth = read('src/storefront/mocks/auth.ts');
-    const login = read('src/app/(storefront)/login/page.tsx');
-    const accountLayout = read('src/app/(storefront)/account/layout.tsx');
+    const login = read('src/app/login/page.tsx');
+    const accountLayout = read('src/app/account/layout.tsx');
     assert.ok(/export const DEMO_ACCOUNT = \{[\s\S]*email: '[^']+@[^']+',[\s\S]*password: '[^']+'/.test(auth), 'demo account is seeded in src/storefront/mocks/auth.ts');
     assert.ok(login.includes('checkDemoCredentials(email, password)'), 'login checks the demo credentials');
     assert.ok(!login.includes('any email and password will work'), 'login no longer accepts any credentials');
@@ -276,7 +276,7 @@ describe('Demo sign-in and checkout flow', () => {
   });
 
   test('express delivery replaces the standard fee instead of adding to it', () => {
-    const checkout = read('src/app/(storefront)/checkout/page.tsx');
+    const checkout = read('src/app/checkout/page.tsx');
     assert.ok(checkout.includes("deliverySpeed === 'express' ? EXPRESS_FEE : shippingFee"), 'one delivery fee is chosen');
     assert.ok(!/total \+ \(deliverySpeed/.test(checkout), 'express must not be added on top of the total');
     // Same arithmetic as the page: ₹2,399 tee below the free-shipping threshold.
@@ -287,9 +287,9 @@ describe('Demo sign-in and checkout flow', () => {
 
   test('order amounts stored in rupees are converted to paise before formatting', () => {
     const files = [
-      'src/app/(storefront)/checkout/success/page.tsx',
-      'src/app/(storefront)/account/orders/page.tsx',
-      'src/app/(storefront)/account/orders/[id]/page.tsx',
+      'src/app/checkout/success/page.tsx',
+      'src/app/account/orders/page.tsx',
+      'src/app/account/orders/[id]/page.tsx',
     ];
     for (const file of files) {
       const calls = [...read(file).matchAll(/formatINR\(([^)]*)\)/g)].map((m) => m[1]);

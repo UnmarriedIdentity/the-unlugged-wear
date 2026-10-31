@@ -23,7 +23,7 @@ import { fileURLToPath } from 'node:url';
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 const SECTION_FILES = [
-  'src/app/(storefront)/page.tsx',
+  'src/app/page.tsx',
   'src/storefront/components/commerce/OurPhilosophy.tsx',
   'src/storefront/components/commerce/VirtualFittingRoom.tsx',
   'src/storefront/components/layout/BrandIntro.tsx',
@@ -75,7 +75,7 @@ describe('Homepage typography roles (weight & size only)', () => {
 
   test('every section eyebrow is 16px / weight 500', () => {
     assert.ok(
-      !read('src/app/(storefront)/page.tsx').includes('SS26 • Slow-Living Atelier'),
+      !read('src/app/page.tsx').includes('SS26 • Slow-Living Atelier'),
       'hero must not bring back the SS26 kicker above the headline'
     );
 
@@ -107,7 +107,7 @@ describe('Homepage typography roles (weight & size only)', () => {
   });
 
   test('product names and prices keep their agreed sizes and weights', () => {
-    const page = read('src/app/(storefront)/page.tsx');
+    const page = read('src/app/page.tsx');
     const card = read('src/storefront/components/commerce/ProductCard.tsx');
     const vfr = read('src/storefront/components/commerce/VirtualFittingRoom.tsx');
 
@@ -137,7 +137,7 @@ describe('Homepage typography roles (weight & size only)', () => {
   });
 
   test('section descriptions keep their agreed sizes at weight 400', () => {
-    const page = read('src/app/(storefront)/page.tsx');
+    const page = read('src/app/page.tsx');
     const vfr = read('src/storefront/components/commerce/VirtualFittingRoom.tsx');
 
     const descriptions = [
@@ -164,7 +164,7 @@ describe('Homepage typography roles (weight & size only)', () => {
   });
 
   test('documented exceptions stay intact: hero display, hero subtitle, footer signature', () => {
-    const page = read('src/app/(storefront)/page.tsx');
+    const page = read('src/app/page.tsx');
     const footer = read('src/storefront/components/layout/Footer.tsx');
 
     assert.ok(
@@ -181,7 +181,7 @@ describe('Homepage typography roles (weight & size only)', () => {
     const usage = read('DESIGN_SYSTEM_USAGE.md');
     // Agent state lives at the repo root, split per surface.
     const skill = read('../state-for-agents/storefront/skills/design-system/SKILL.md');
-    const specimen = read('src/app/(storefront)/design-system/page.tsx');
+    const specimen = read('src/app/design-system/page.tsx');
 
     for (const doc of [designSystem, usage, skill]) {
       assert.ok(doc.includes('28–48px'), 'docs must publish the 28-48px section H2 range');
@@ -202,8 +202,8 @@ describe('Homepage typography roles (weight & size only)', () => {
 
 describe('Honest demo authentication', () => {
   test('login and register state demo status and fake no third-party sign-in', () => {
-    const login = read('src/app/(storefront)/login/page.tsx');
-    const register = read('src/app/(storefront)/register/page.tsx');
+    const login = read('src/app/login/page.tsx');
+    const register = read('src/app/register/page.tsx');
     assert.ok(login.includes('demoNotice="Demo sign-in'), 'login must state it is a demo sign-in');
     assert.ok(register.includes('demoNotice="Demo sign-up'), 'register must state it is a demo sign-up');
     for (const src of [login, register]) {
