@@ -12,7 +12,7 @@ import {
   AboutCraftHighlight,
   AboutCustomerReviews,
   InstagramFeedSection,
-} from '@/components/editorial';
+} from '@storefront/components/editorial';
 
 // Stats are computed from the live catalog so they can never go stale.
 const STYLE_COUNT = STORE_PRODUCTS.length;

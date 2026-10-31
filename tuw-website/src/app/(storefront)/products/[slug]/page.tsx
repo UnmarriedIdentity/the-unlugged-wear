@@ -14,7 +14,7 @@ import DynamicDataTable from '@storefront/components/commerce/DynamicDataTable';
 import DynamicAccordionFaq from '@storefront/components/commerce/DynamicAccordionFaq';
 import ProductReviews from '@storefront/components/commerce/ProductReviews';
 import RelatedProductsSection from '@storefront/components/commerce/RelatedProductsSection';
-import { EditorialQuote, EditorialFeatureSplit } from '@/components/editorial';
+import { EditorialQuote, EditorialFeatureSplit } from '@storefront/components/editorial';
 import { useStore } from '@/mocks/store';
 import { ProductColor, ReviewItem } from '@/lib/types';
 import {
