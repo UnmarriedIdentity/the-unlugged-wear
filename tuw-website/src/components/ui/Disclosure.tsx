@@ -39,7 +39,7 @@ export default function Disclosure({
   };
 
   return (
-    <div className={`border-b border-[#E2DDCF] py-4 transition-colors ${className}`}>
+    <div className={`border-b border-store-card-border py-4 transition-colors ${className}`}>
       <button
         type="button"
         onClick={handleToggle}
@@ -48,25 +48,25 @@ export default function Disclosure({
       >
         <div className="flex-1 pr-4">
           <div className="flex items-center gap-2">
-            {icon && <span className="text-[#1A1A1A]">{icon}</span>}
-            <span className="text-sm font-semibold tracking-wide text-[#1A1A1A] group-hover:text-black">
+            {icon && <span className="text-store-charcoal">{icon}</span>}
+            <span className="text-sm font-semibold tracking-wide text-store-charcoal group-hover:text-black">
               {title}
             </span>
             {badge}
           </div>
-          {subtitle && <p className="text-xs text-[#8A8A8A] mt-0.5">{subtitle}</p>}
+          {subtitle && <p className="text-xs text-store-muted mt-0.5">{subtitle}</p>}
         </div>
 
         <ChevronDown
           size={16}
-          className={`text-[#8A8A8A] group-hover:text-[#1A1A1A] transition-transform duration-200 shrink-0 ${
+          className={`text-store-muted group-hover:text-store-charcoal transition-transform duration-200 shrink-0 ${
             open ? 'rotate-180' : 'rotate-0'
           }`}
         />
       </button>
 
       {open && (
-        <div className="pt-3 pb-1 text-sm text-[#5A5A5A] leading-relaxed animate-in fade-in duration-200">
+        <div className="pt-3 pb-1 text-sm text-store-text-secondary leading-relaxed animate-in fade-in duration-200">
           {children}
         </div>
       )}

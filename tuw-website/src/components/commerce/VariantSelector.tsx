@@ -2,197 +2,226 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ShoppingBag, Heart, Ruler, Check, AlertCircle, ShieldCheck } from 'lucide-react';
+import { ShoppingBag, Heart, ShieldCheck } from 'lucide-react';
 import { Product, ProductColor, ProductSize } from '@/lib/types';
 import { useStore } from '@/mocks/store';
 import Button from '../ui/Button';
 import SizeGuideModal from './SizeGuideModal';
+import ColorSwatchSelector from './ColorSwatchSelector';
+import VariantPillSelector from './VariantPillSelector';
+import RadioOptionSelector from './RadioOptionSelector';
 
 export interface VariantSelectorProps {
   product: Product;
+  selectedColor?: ProductColor;
+  onColorChange?: (color: ProductColor) => void;
+  selectedSize?: ProductSize | null;
+  onSizeChange?: (size: ProductSize | null) => void;
 }
 
-export default function VariantSelector({ product }: VariantSelectorProps) {
+export default function VariantSelector({
+  product,
+  selectedColor: controlledColor,
+  onColorChange,
+  selectedSize: controlledSize,
+  onSizeChange,
+}: VariantSelectorProps) {
   const router = useRouter();
   const { addToCart, isInWishlist, toggleWishlist } = useStore();
 
-  const [selectedColor, setSelectedColor] = useState<ProductColor>(product.colors[0]);
-  const [selectedSize, setSelectedSize] = useState<ProductSize | null>(
-    product.sizes.find((s) => s.inStock) || null
+  const isMug =
+    product.slug.includes('mug') ||
+    product.slug.includes('cup') ||
+    (product.category === 'accessories' &&
+      (product.sizes?.some((s) => s.size.includes('ml')) || false));
+  const isKids =
+    product.category === 'kids' ||
+    product.slug.includes('kids') ||
+    (product.sizes?.some((s) => s.size.includes('Y')) || false);
+
+  const hasColors = Boolean(product.colors && product.colors.length > 0);
+  const hasSizes = Boolean(product.sizes && product.sizes.length > 0);
+  const hasRadioGroups = Boolean(product.radioGroups && product.radioGroups.length > 0);
+
+  const [internalColor, setInternalColor] = useState<ProductColor | undefined>(
+    hasColors ? product.colors![0] : undefined
   );
+  const [internalSize, setInternalSize] = useState<ProductSize | null>(
+    hasSizes ? product.sizes!.find((s) => s.inStock) || null : null
+  );
+
+  const selectedColor = controlledColor !== undefined ? controlledColor : internalColor;
+  const selectedSize = controlledSize !== undefined ? controlledSize : internalSize;
+
+  // Track active radio option selections per group
+  const [selectedRadioValues, setSelectedRadioValues] = useState<Record<string, string>>(() => {
+    const initial: Record<string, string> = {};
+    if (product.radioGroups) {
+      product.radioGroups.forEach((g) => {
+        initial[g.groupKey] = g.defaultValue || g.options[0]?.id || '';
+      });
+    }
+    return initial;
+  });
+
   const [quantity, setQuantity] = useState(1);
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
   const isFavorite = isInWishlist(product.id);
 
-  const handleAddToCart = () => {
-    if (!selectedSize) {
-      setValidationError('Please choose a size to continue.');
-      return;
+  // Calculate cumulative price delta from selected radio options
+  const radioDeltaINR = (product.radioGroups || []).reduce((acc, group) => {
+    const selectedOptionId =
+      selectedRadioValues[group.groupKey] || group.defaultValue || group.options[0]?.id;
+    const option = group.options.find((o) => o.id === selectedOptionId);
+    return acc + (option?.priceDeltaINR || 0);
+  }, 0);
+
+  const effectiveUnitPriceINR = product.priceINR + radioDeltaINR;
+
+  const handleColorSelect = (color: ProductColor) => {
+    if (onColorChange) {
+      onColorChange(color);
+    } else {
+      setInternalColor(color);
     }
-    if (!selectedSize.inStock) {
-      setValidationError('This size is currently sold out.');
-      return;
+  };
+
+  const handleSizeSelect = (size: ProductSize) => {
+    setValidationError(null);
+    if (onSizeChange) {
+      onSizeChange(size);
+    } else {
+      setInternalSize(size);
+    }
+  };
+
+  const handleRadioSelect = (groupKey: string, optionId: string) => {
+    setSelectedRadioValues((prev) => ({
+      ...prev,
+      [groupKey]: optionId,
+    }));
+  };
+
+  const handleAddToCart = () => {
+    // Only enforce size validation if the product actually declares sizes
+    if (hasSizes) {
+      if (!selectedSize) {
+        setValidationError(
+          isMug ? 'Please choose a capacity to continue.' : 'Please choose a size to continue.'
+        );
+        return;
+      }
+      if (!selectedSize.inStock) {
+        setValidationError(
+          isMug ? 'This capacity is currently sold out.' : 'This size is currently sold out.'
+        );
+        return;
+      }
     }
 
     setValidationError(null);
     const activeImage =
-      product.images.find((img) => img.color === selectedColor.value)?.url ||
-      product.images[0]?.url;
+      (selectedColor && product.images.find((img) => img.color === selectedColor.value)?.url) ||
+      product.images[0]?.url ||
+      '';
+
+    const chosenRadioOptions = (product.radioGroups || []).map((group) => {
+      const optionId =
+        selectedRadioValues[group.groupKey] || group.defaultValue || group.options[0]?.id;
+      const option = group.options.find((o) => o.id === optionId);
+      return {
+        groupKey: group.groupKey,
+        groupLabel: group.label,
+        optionId: option?.id || '',
+        optionLabel: option?.label || '',
+        priceDeltaINR: option?.priceDeltaINR,
+      };
+    });
 
     addToCart({
       productId: product.id,
       title: product.title,
-      color: selectedColor.name,
-      size: selectedSize.size,
-      priceINR: product.priceINR,
+      color: selectedColor ? selectedColor.name : 'Standard',
+      size: selectedSize ? selectedSize.size : 'One Size',
+      priceINR: effectiveUnitPriceINR,
       quantity,
       image: activeImage,
+      selectedRadioOptions: chosenRadioOptions.length > 0 ? chosenRadioOptions : undefined,
     });
   };
 
   const handleBuyNow = () => {
-    if (!selectedSize) {
-      setValidationError('Please choose a size to continue.');
+    if (hasSizes && !selectedSize) {
+      setValidationError(
+        isMug ? 'Please choose a capacity to continue.' : 'Please choose a size to continue.'
+      );
       return;
     }
     handleAddToCart();
     router.push('/checkout');
   };
 
+  const sizeLabel = isMug
+    ? 'Capacity / Volume:'
+    : isKids
+    ? 'Age & Growth Size:'
+    : 'Size:';
+
   return (
     <div className="flex flex-col gap-6">
-      {/* 1. Color Selection */}
-      <div>
-        <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider mb-2.5">
-          <span className="text-[#5A5A5A]">
-            Dye / Shade: <strong className="text-[#1A1A1A] font-bold">{selectedColor.name}</strong>
-          </span>
+      {/* 1. Dynamic Color Swatch Selector (Omitted if no colors defined) */}
+      {hasColors && (
+        <ColorSwatchSelector
+          colors={product.colors}
+          selectedColor={selectedColor}
+          onSelect={handleColorSelect}
+          label={isMug ? 'Glaze Finish:' : 'Dye / Shade:'}
+        />
+      )}
+
+      {/* 2. Dynamic Variant Pill Selector (Omitted if no sizes defined) */}
+      {hasSizes && (
+        <VariantPillSelector
+          sizes={product.sizes}
+          selectedSize={selectedSize}
+          onSelect={handleSizeSelect}
+          label={sizeLabel}
+          onSizeGuideClick={!isMug ? () => setIsSizeGuideOpen(true) : undefined}
+          sizeGuideLabel={isKids ? 'Kids Growth Guide' : 'Size Guide'}
+          validationError={validationError}
+        />
+      )}
+
+      {/* 3. Dynamic Radio Option Selectors (Omitted if no radioGroups defined) */}
+      {hasRadioGroups && (
+        <div className="space-y-4 pt-1">
+          {product.radioGroups!.map((group) => (
+            <RadioOptionSelector
+              key={group.groupKey}
+              group={group}
+              selectedValue={selectedRadioValues[group.groupKey]}
+              onSelect={(optId) => handleRadioSelect(group.groupKey, optId)}
+            />
+          ))}
         </div>
+      )}
 
-        <div className="flex items-center gap-3">
-          {product.colors.map((color) => {
-            const isSelected = selectedColor.value === color.value;
-            return (
-              <button
-                key={color.value}
-                type="button"
-                onClick={() => setSelectedColor(color)}
-                aria-label={`Select shade ${color.name}`}
-                className={`relative w-8 h-8 rounded-full border transition-all cursor-pointer ${
-                  isSelected
-                    ? 'ring-2 ring-[#1A1A1A] ring-offset-2 scale-105'
-                    : 'border-black/20 hover:scale-105'
-                }`}
-                style={{ backgroundColor: color.hex }}
-              >
-                {isSelected && (
-                  <Check
-                    size={13}
-                    className={`absolute inset-0 m-auto ${
-                      color.value === 'bone-white' || color.value === 'raw-sand' || color.value === 'raw-ecru'
-                        ? 'text-black'
-                        : 'text-white'
-                    }`}
-                  />
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* 2. Size Selection & Sizing Guide Trigger */}
-      <div>
-        <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider mb-2.5">
-          <span className="text-[#5A5A5A]">
-            Size:{' '}
-            <strong className="text-[#1A1A1A] font-bold">
-              {selectedSize ? selectedSize.size : 'Select a size'}
-            </strong>
-          </span>
-
-          <button
-            type="button"
-            onClick={() => setIsSizeGuideOpen(true)}
-            className="flex items-center gap-1.5 text-xs font-semibold text-[#7539FF] hover:underline cursor-pointer lowercase first-letter:uppercase"
-          >
-            <Ruler size={13} />
-            <span>Size Guide</span>
-          </button>
-        </div>
-
-        <div className="grid grid-cols-6 gap-2">
-          {product.sizes.map((s) => {
-            const isSelected = selectedSize?.size === s.size;
-            return (
-              <button
-                key={s.size}
-                type="button"
-                disabled={!s.inStock}
-                onClick={() => {
-                  setSelectedSize(s);
-                  setValidationError(null);
-                }}
-                className={`h-11 rounded-xl text-xs font-bold uppercase transition-all flex flex-col items-center justify-center cursor-pointer border ${
-                  !s.inStock
-                    ? 'opacity-35 cursor-not-allowed bg-[#FAF9F6] border-[#E2DDCF] line-through text-[#8A8A8A]'
-                    : isSelected
-                    ? 'border-[#1A1A1A] bg-[#1A1A1A] text-white shadow-xs'
-                    : 'border-[#E2DDCF] bg-white text-[#1A1A1A] hover:border-[#1A1A1A]'
-                }`}
-              >
-                <span>{s.size}</span>
-                {s.inStock && s.stockCount <= 3 && (
-                  <span className="text-[9px] font-normal text-[#EF4444] leading-none -mt-0.5">
-                    {s.stockCount} left
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Real-time stock availability message */}
-        {selectedSize && (
-          <div className="mt-2 text-xs flex items-center gap-1.5">
-            {selectedSize.inStock ? (
-              <span className="text-[#10B981] font-medium flex items-center gap-1">
-                <Check size={13} />
-                In stock for next-day dispatch • {selectedSize.stockCount} pieces allocated
-              </span>
-            ) : (
-              <span className="text-[#EF4444] font-medium flex items-center gap-1">
-                <AlertCircle size={13} />
-                Out of stock in {selectedSize.size}
-              </span>
-            )}
-          </div>
-        )}
-
-        {validationError && (
-          <div className="mt-2 p-2.5 rounded-lg bg-[#FEF2F2] border border-[#FECACA] text-xs text-[#B91C1C] flex items-center gap-2">
-            <AlertCircle size={14} />
-            <span>{validationError}</span>
-          </div>
-        )}
-      </div>
-
-      {/* 3. Quantity & Purchase Actions */}
+      {/* 4. Quantity & Purchase Actions */}
       <div className="space-y-3 pt-2">
         <div className="flex gap-3">
           {/* Quantity Selector */}
-          <div className="flex items-center border border-[#E2DDCF] rounded-full bg-white h-14 px-3 shrink-0">
+          <div className="flex items-center border border-store-card-border rounded-full bg-store-surface h-14 px-3 shrink-0">
             <button
               type="button"
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
               aria-label="Decrease quantity"
-              className="w-8 h-8 flex items-center justify-center text-[#5A5A5A] hover:text-[#1A1A1A] font-bold text-base"
+              className="w-8 h-8 flex items-center justify-center text-store-text-secondary hover:text-store-text-primary font-bold text-base cursor-pointer"
             >
               -
             </button>
-            <span className="w-8 text-center text-sm font-bold text-[#1A1A1A]">
+            <span className="w-8 text-center text-sm font-bold text-store-text-primary">
               {quantity}
             </span>
             <button
@@ -203,38 +232,42 @@ export default function VariantSelector({ product }: VariantSelectorProps) {
                 )
               }
               aria-label="Increase quantity"
-              className="w-8 h-8 flex items-center justify-center text-[#5A5A5A] hover:text-[#1A1A1A] font-bold text-base"
+              className="w-8 h-8 flex items-center justify-center text-store-text-secondary hover:text-store-text-primary font-bold text-base cursor-pointer"
             >
               +
             </button>
           </div>
 
           {/* Add to Bag Button */}
-          <Button
-            variant="dark"
-            size="lg"
-            fullWidth
+          <button
+            type="button"
             onClick={handleAddToCart}
-            icon={<ShoppingBag size={18} />}
+            className="w-full h-14 px-6 rounded-full bg-store-charcoal text-white hover:bg-black transition-all flex items-center justify-between font-bold text-xs uppercase tracking-wider shadow-sm cursor-pointer active:scale-98"
           >
-            Add to Bag • ₹{(product.priceINR * quantity).toLocaleString()}
-          </Button>
+            <span className="flex items-center gap-2">
+              <ShoppingBag size={18} />
+              <span>Add to Bag</span>
+            </span>
+            <span className="font-mono text-sm tracking-normal">
+              ₹{(effectiveUnitPriceINR * quantity).toLocaleString()}
+            </span>
+          </button>
 
           {/* Wishlist Button */}
           <button
             type="button"
             onClick={() => toggleWishlist(product.id)}
             aria-label={isFavorite ? 'Remove from wishlist' : 'Add to wishlist'}
-            className="w-14 h-14 rounded-full border border-[#E2DDCF] bg-white flex items-center justify-center text-[#1A1A1A] hover:bg-[#F4F1EA] transition-colors shrink-0 shadow-xs cursor-pointer"
+            className="w-14 h-14 rounded-full border border-store-card-border bg-store-surface flex items-center justify-center text-store-charcoal hover:bg-store-cream transition-colors shrink-0 shadow-xs cursor-pointer"
           >
             <Heart
               size={20}
-              className={isFavorite ? 'fill-[#7539FF] text-[#7539FF]' : 'text-[#1A1A1A]'}
+              className={isFavorite ? 'fill-store-gold text-store-gold' : 'text-store-charcoal'}
             />
           </button>
         </div>
 
-        {/* Buy Now Instant Action */}
+        {/* Express Checkout */}
         <Button
           variant="secondary"
           size="lg"
@@ -245,25 +278,43 @@ export default function VariantSelector({ product }: VariantSelectorProps) {
         </Button>
       </div>
 
-      {/* Sustainable POD Guarantee Badge */}
-      <div className="p-4 rounded-2xl bg-[#F4F1EA] border border-[#E2DDCF] space-y-2 text-xs">
-        <div className="flex items-center gap-2 font-bold text-[#1A1A1A]">
-          <ShieldCheck size={16} className="text-[#10B981]" />
+      {/* Guarantee Badge */}
+      <div className="p-4 rounded-2xl bg-store-cream border border-store-card-border space-y-2 text-xs">
+        <div className="flex items-center gap-2 font-bold text-store-text-primary">
+          <ShieldCheck size={16} className="text-emerald-700" />
           <span>The Unplugged Wear Guarantee</span>
         </div>
-        <ul className="space-y-1 text-[#666] list-disc list-inside">
-          <li>Pre-shrunk 100% GOTS certified organic cotton</li>
-          <li>Complimentary domestic delivery on orders over ₹3,000</li>
-          <li>14-day hassle-free doorstep returns and exchanges</li>
+        <ul className="space-y-1 text-store-text-secondary list-disc list-inside">
+          {isMug ? (
+            <>
+              <li>High-fire 1,240°C durable stoneware ceramic</li>
+              <li>100% Dishwasher safe, microwave safe, food-grade glaze</li>
+              <li>Shatterproof recyclable protective transit packaging</li>
+            </>
+          ) : isKids ? (
+            <>
+              <li>100% GOTS certified organic long-staple combed cotton</li>
+              <li>Skin-safe non-toxic inks & itch-free flatlock seams</li>
+              <li>14-day hassle-free doorstep size exchanges across India</li>
+            </>
+          ) : (
+            <>
+              <li>Pre-shrunk 100% GOTS certified organic cotton</li>
+              <li>Complimentary domestic delivery on orders over ₹3,000</li>
+              <li>14-day hassle-free doorstep returns and exchanges</li>
+            </>
+          )}
         </ul>
       </div>
 
-      {/* Size Guide Modal */}
-      <SizeGuideModal
-        isOpen={isSizeGuideOpen}
-        onClose={() => setIsSizeGuideOpen(false)}
-        category={product.category}
-      />
+      {/* Size Guide Modal (only if sizes exist and not mug) */}
+      {hasSizes && !isMug && (
+        <SizeGuideModal
+          isOpen={isSizeGuideOpen}
+          onClose={() => setIsSizeGuideOpen(false)}
+          category={product.category}
+        />
+      )}
     </div>
   );
 }

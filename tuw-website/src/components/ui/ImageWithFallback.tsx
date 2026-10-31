@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ImageOff } from 'lucide-react';
 
 export interface ImageWithFallbackProps extends React.ImgHTMLAttributes<HTMLImageElement> {
@@ -18,6 +18,26 @@ export default function ImageWithFallback({
 }: ImageWithFallbackProps) {
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  // Server-rendered images often finish (or fail) before hydration attaches
+  // onLoad/onError, so those events never reach React. Read the element's
+  // settled state directly whenever the source changes.
+  useEffect(() => {
+    setError(false);
+    const img = imgRef.current;
+    if (!img) return;
+    if (img.complete) {
+      if (img.naturalWidth > 0) {
+        setLoading(false);
+      } else {
+        setError(true);
+        setLoading(false);
+      }
+    } else {
+      setLoading(true);
+    }
+  }, [src]);
 
   if (error || !src) {
     if (fallbackSrc) {
@@ -45,6 +65,7 @@ export default function ImageWithFallback({
 
   return (
     <img
+      ref={imgRef}
       src={src}
       alt={alt}
       onLoad={() => setLoading(false)}

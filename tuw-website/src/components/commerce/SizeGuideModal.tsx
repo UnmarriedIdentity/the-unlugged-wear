@@ -38,18 +38,18 @@ export default function SizeGuideModal({
       <div className="space-y-6">
         {/* Unit Toggle */}
         <div className="flex items-center justify-between">
-          <p className="text-xs text-[#666]">
+          <p className="text-xs text-store-text-secondary">
             Select your preferred unit of measurement:
           </p>
 
-          <div className="flex items-center p-1 rounded-lg bg-[#F4F1EA] border border-[#E2DDCF]">
+          <div className="flex items-center p-1 rounded-lg bg-store-cream border border-store-card-border">
             <button
               type="button"
               onClick={() => setUnit('cm')}
               className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${
                 unit === 'cm'
-                  ? 'bg-white text-[#1A1A1A] shadow-xs'
-                  : 'text-[#8A8A8A] hover:text-[#1A1A1A]'
+                  ? 'bg-white text-store-charcoal shadow-xs'
+                  : 'text-store-muted hover:text-store-charcoal'
               }`}
             >
               Centimeters (CM)
@@ -59,8 +59,8 @@ export default function SizeGuideModal({
               onClick={() => setUnit('inches')}
               className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${
                 unit === 'inches'
-                  ? 'bg-white text-[#1A1A1A] shadow-xs'
-                  : 'text-[#8A8A8A] hover:text-[#1A1A1A]'
+                  ? 'bg-white text-store-charcoal shadow-xs'
+                  : 'text-store-muted hover:text-store-charcoal'
               }`}
             >
               Inches (IN)
@@ -69,9 +69,9 @@ export default function SizeGuideModal({
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto rounded-xl border border-[#E2DDCF]">
+        <div className="overflow-x-auto rounded-xl border border-store-card-border">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[#F4F1EA] border-b border-[#E2DDCF] font-bold text-[#1A1A1A] uppercase tracking-wider">
+            <thead className="bg-store-cream border-b border-store-card-border font-bold text-store-charcoal uppercase tracking-wider">
               <tr>
                 <th className="p-3.5">Size</th>
                 <th className="p-3.5">Chest Circumference</th>
@@ -80,10 +80,10 @@ export default function SizeGuideModal({
                 <th className="p-3.5">Sleeve Length</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#E2DDCF] font-medium text-[#5A5A5A]">
+            <tbody className="divide-y divide-store-card-border font-medium text-store-text-secondary">
               {hoodieMeasurementsCM.map((row) => (
-                <tr key={row.size} className="hover:bg-[#FAF9F6]">
-                  <td className="p-3.5 font-bold text-[#1A1A1A]">{row.size}</td>
+                <tr key={row.size} className="hover:bg-store-canvas">
+                  <td className="p-3.5 font-bold text-store-charcoal">{row.size}</td>
                   <td className="p-3.5">
                     {unit === 'cm' ? `${row.chest} cm` : `${toInches(row.chest)}"`}
                   </td>
@@ -103,8 +103,8 @@ export default function SizeGuideModal({
         </div>
 
         {/* Silhouette Guidance Notes */}
-        <div className="p-4 rounded-xl bg-[#FAF9F6] border border-[#E2DDCF] text-xs text-[#5A5A5A] space-y-2 leading-relaxed">
-          <h4 className="font-bold text-[#1A1A1A] uppercase tracking-wide">
+        <div className="p-4 rounded-xl bg-store-canvas border border-store-card-border text-xs text-store-text-secondary space-y-2 leading-relaxed">
+          <h4 className="font-bold text-store-charcoal uppercase tracking-wide">
             Silhouette & Fit Recommendations
           </h4>
           <p>

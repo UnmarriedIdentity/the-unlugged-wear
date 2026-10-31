@@ -71,6 +71,27 @@ importers:
 
   tuw-website:
     dependencies:
+      '@fontsource/jost':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource/outfit':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@tiptap/extension-image':
+        specifier: 3.32.0
+        version: 3.32.0(@tiptap/core@3.32.0(@tiptap/pm@3.32.0))
+      '@tiptap/extension-link':
+        specifier: 3.32.0
+        version: 3.32.0(@tiptap/core@3.32.0(@tiptap/pm@3.32.0))(@tiptap/pm@3.32.0)
+      '@tiptap/pm':
+        specifier: 3.32.0
+        version: 3.32.0
+      '@tiptap/react':
+        specifier: 3.32.0
+        version: 3.32.0(@floating-ui/dom@1.8.0)(@tiptap/core@3.32.0(@tiptap/pm@3.32.0))(@tiptap/pm@3.32.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@tiptap/starter-kit':
+        specifier: 3.32.0
+        version: 3.32.0
       clsx:
         specifier: ^2.1.0
         version: 2.1.1
@@ -132,6 +153,12 @@ packages:
 
   '@floating-ui/utils@0.2.12':
     resolution: {integrity: sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww==}
+
+  '@fontsource/jost@5.3.0':
+    resolution: {integrity: sha512-lORv5y49hSoLVxjGb0qNuBzXvnaNYI3B94200uGPGJFei8fao6d6LLz2ziWbOZubGfZnibzuT6GVNX8fBw8WQQ==}
+
+  '@fontsource/outfit@5.3.0':
+    resolution: {integrity: sha512-0AVHzTTVJSxWDOxPKSfMeHhZeBFDU3cmgrcOb76ZEyhGo0+xgyG3GsLF3h9+X8w0IX7G4jzjJgFQEBiWdX6VgA==}
 
   '@img/colour@1.1.0':
     resolution: {integrity: sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ==}
@@ -945,6 +972,10 @@ snapshots:
 
   '@floating-ui/utils@0.2.12':
     optional: true
+
+  '@fontsource/jost@5.3.0': {}
+
+  '@fontsource/outfit@5.3.0': {}
 
   '@img/colour@1.1.0':
     optional: true

@@ -17,6 +17,9 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@admin/*": [
+        "./src/admin/*"
       ]
     },
     "allowJs": true,

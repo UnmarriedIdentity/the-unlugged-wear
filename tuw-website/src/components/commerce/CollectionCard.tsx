@@ -26,10 +26,10 @@ export default function CollectionCard({ collection, className = '' }: Collectio
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
         <div className="absolute bottom-5 left-5 right-5 text-white">
-          <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-[#C8A96A] block mb-1">
+          <span className="text-xs uppercase font-bold tracking-[0.2em] text-[#C8A96A] block mb-1">
             Capsule • {collection.productCount} Pieces
           </span>
-          <h3 className="text-xl sm:text-2xl font-bold tracking-tight">{collection.title}</h3>
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight">{collection.title}</h2>
           <p className="text-xs text-[#D1D5DB] mt-1 line-clamp-1">{collection.tagline}</p>
         </div>
       </div>

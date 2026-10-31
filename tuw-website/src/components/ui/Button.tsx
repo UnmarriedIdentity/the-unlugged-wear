@@ -24,6 +24,7 @@ export default function Button({
   href,
   className = '',
   disabled,
+  onClick,
   ...props
 }: ButtonProps) {
   const sizeClasses = {
@@ -47,7 +48,15 @@ export default function Button({
 
   if (href) {
     return (
-      <Link href={href} className={baseClasses}>
+      // Forward the click (e.g. closing a drawer) and accessible name to the link.
+      <Link
+        href={href}
+        className={baseClasses}
+        onClick={onClick as unknown as React.MouseEventHandler<HTMLAnchorElement> | undefined}
+        aria-label={props['aria-label']}
+        title={props.title}
+        id={props.id}
+      >
         {isLoading ? (
           <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
         ) : (
@@ -65,6 +74,7 @@ export default function Button({
     <button
       disabled={disabled || isLoading}
       className={baseClasses}
+      onClick={onClick}
       {...props}
     >
       {isLoading ? (

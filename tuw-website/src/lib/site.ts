@@ -14,4 +14,12 @@ export const site = {
     { href: "/faq", label: "FAQ" },
     { href: "/contact", label: "Contact" },
   ],
+  // Brand social profiles. Leave a URL empty to hide that icon; generic
+  // network homepages are never linked.
+  social: {
+    pinterest: "",
+    x: "",
+    facebook: "",
+    instagram: "",
+  },
 } as const;

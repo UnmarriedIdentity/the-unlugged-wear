@@ -9,7 +9,8 @@
 
 ## Design
 
-- [x] Urbanist loads with required weights and currency glyphs (`₹` symbol across products and checkout).
+- [x] Outfit (headings and body) loads locally through `next/font/local` with weights 300–900 and currency glyphs (`₹` symbol across products and checkout).
+- [ ] Homepage type roles applied and verified at 360/768/1024/1440: every section H2 28–48px/500, every eyebrow 16px/500, product names and prices 16px/500, no 700/800 inside a homepage section (`docs/DESIGN_SYSTEM.md` → Storefront homepage type roles, TL-WEB-037).
 - [x] Admin follows V2 semantic colours, spacing and radii (`--tuw-*` CSS tokens, 18 semantic roles).
 - [x] Website follows its editorial direction (clean warm neutrals, slow-living luxury, generous whitespace) rather than copying the admin shell.
 - [x] Components use consistent interaction states and sensible hierarchy.
