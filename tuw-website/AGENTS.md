@@ -66,11 +66,20 @@
 
 ---
 
-## 8. Documentation
+## 8. Documentation & Tracker Protocol
 
+- **Session State Tracking**: Always read and update `state-for-agents/tasks.json` following `TRACKER_GUIDE.md`. Open a task before starting work and close it with commit hash + `verified: true` + recomputed summary counts in the same commit.
+- **Inviolable Rules Checklist**:
+  - Rule 00: Pixel-perfect tolerance (zero tolerance, computed capture / screenshot matrix at 360/768/1024/1440px+).
+  - Rule 01: Git hygiene (exact paths only, one fix = one commit, never `git add .`).
+  - Rule 02: Verification gates (clean typecheck, test, build, built selector-level CSS proof `\.util\{`).
+  - Rule 03: Never push (agents NEVER push to remote, push is human-only).
+  - Rule 04: Task discipline (`tasks.json` tracking and exact-path updates).
+  - Rule 05: Branch hygiene (single shared branch `feat/storefront-meet`, verify HEAD matches `session.tip`, no force-push).
 - Maintain real, copy-pasteable setup and run commands in root and application `README.md` files.
 - Keep policy copy, terms, and unresolved business specifications explicitly marked as draft notices.
 - Document verified behavior with evidence in `UI_CHECKLIST.md`.
+
 
 <!-- BEGIN:nextjs-agent-rules -->
 
