@@ -1,5 +1,13 @@
 # tuw-admin — Folder Structure (Lean / Single `app.css` / No `features/`)
 
+> **Read this against the merged tree.** This doc was written for the standalone
+> `tuw-admin` package. The panel now lives inside `tuw-website`: its source is at
+> `src/admin/` (reached through the `@admin/*` alias), its routes are at
+> `src/app/(admin)/admin/`, and its single CSS entry is
+> `src/app/(admin)/globals.css`. Where this doc says `src/components/`, `src/lib/`
+> or `src/app/globals.css`, read it with the admin root in front. The storefront's
+> own structure is in `../FOLDER-STRUCTURE.md`.
+
 > Stack: Next.js 14+ App Router + TypeScript + Tailwind + CSS vars.
 > Rule: one CSS entry (`src/app/globals.css`), no `src/features/`, no `src/services/` — grow only on pain.
 

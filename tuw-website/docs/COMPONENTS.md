@@ -1,6 +1,6 @@
 # Component inventory
 
-Maintain separate component implementations in each application's `src/components/`. Reuse within an app first. Do not import source files directly from the other application.
+Maintain separate component implementations in each surface's own root: `src/storefront/components/` and `src/admin/components/`. Reuse within a surface first. Do not import source files directly from the other surface — the two carry different design tokens for the same component names.
 
 ## Foundations for both applications
 
