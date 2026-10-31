@@ -18,6 +18,9 @@
       "@/*": [
         "./src/*"
       ],
+      "@storefront/*": [
+        "./src/storefront/*"
+      ],
       "@admin/*": [
         "./src/admin/*"
       ]
