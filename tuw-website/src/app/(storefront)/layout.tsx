@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
 import { Providers } from './providers';
-import BrandIntro from '@/components/layout/BrandIntro';
+import BrandIntro from '@storefront/components/layout/BrandIntro';
 
 // Self-hosted Outfit for headings and body (vendored from @fontsource, OFL licensed).
 // next/font/local keeps Turbopack production builds deterministic with zero

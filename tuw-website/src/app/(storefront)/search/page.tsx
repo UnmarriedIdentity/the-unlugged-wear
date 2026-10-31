@@ -2,8 +2,8 @@
 
 import React, { useState, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
+import Header from '@storefront/components/layout/Header';
+import Footer from '@storefront/components/layout/Footer';
 import Breadcrumb from '@storefront/components/ui/Breadcrumb';
 import ProductGrid from '@/components/commerce/ProductGrid';
 import { useStore } from '@/mocks/store';

@@ -3,8 +3,8 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
+import Header from '@storefront/components/layout/Header';
+import Footer from '@storefront/components/layout/Footer';
 import Button from '@storefront/components/ui/Button';
 import Badge from '@storefront/components/ui/Badge';
 import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';

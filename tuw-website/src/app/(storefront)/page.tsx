@@ -12,8 +12,8 @@ import {
   Users,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
+import Header from '@storefront/components/layout/Header';
+import Footer from '@storefront/components/layout/Footer';
 import VirtualFittingRoom from '@/components/commerce/VirtualFittingRoom';
 import OurPhilosophy from '@/components/commerce/OurPhilosophy';
 import ProductCard from '@/components/commerce/ProductCard';

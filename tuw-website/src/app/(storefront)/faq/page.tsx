@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
+import Header from '@storefront/components/layout/Header';
+import Footer from '@storefront/components/layout/Footer';
 import Breadcrumb from '@storefront/components/ui/Breadcrumb';
 import Disclosure from '@storefront/components/ui/Disclosure';
 import { FAQ_ITEMS } from '@/mocks/fixtures';

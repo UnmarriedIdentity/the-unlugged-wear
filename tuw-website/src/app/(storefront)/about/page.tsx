@@ -2,9 +2,9 @@
 
 import React from 'react';
 import Link from 'next/link';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
-import TuwEmblem from '@/components/layout/TuwEmblem';
+import Header from '@storefront/components/layout/Header';
+import Footer from '@storefront/components/layout/Footer';
+import TuwEmblem from '@storefront/components/layout/TuwEmblem';
 import { STORE_PRODUCTS } from '@/mocks/fixtures';
 import { ArrowRight, ArrowUp } from 'lucide-react';
 import {

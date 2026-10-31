@@ -26,7 +26,7 @@ const SECTION_FILES = [
   'src/app/(storefront)/page.tsx',
   'src/components/commerce/OurPhilosophy.tsx',
   'src/components/commerce/VirtualFittingRoom.tsx',
-  'src/components/layout/BrandIntro.tsx',
+  'src/storefront/components/layout/BrandIntro.tsx',
 ];
 
 const H2_SIZE = 'text-[clamp(1.75rem,4vw+0.5rem,3rem)]';
@@ -165,7 +165,7 @@ describe('Homepage typography roles (weight & size only)', () => {
 
   test('documented exceptions stay intact: hero display, hero subtitle, footer signature', () => {
     const page = read('src/app/(storefront)/page.tsx');
-    const footer = read('src/components/layout/Footer.tsx');
+    const footer = read('src/storefront/components/layout/Footer.tsx');
 
     assert.ok(
       /<h1 className="font-heading font-normal text-\[clamp\(1\.75rem,1\.5vw\+1\.25rem,2\.5rem\)\]/.test(page),
