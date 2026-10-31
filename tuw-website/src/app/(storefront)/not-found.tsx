@@ -22,7 +22,7 @@ export default function NotFound() {
             <span className="text-xs uppercase tracking-widest text-[#707070] font-semibold">
               404 — Form Beyond Horizon
             </span>
-            <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-[#1A1A1A]">
+            <h1 className="text-[clamp(1.75rem,3vw+0.5rem,2.25rem)] font-semibold tracking-tight text-[#1A1A1A]">
               Page Not Found
             </h1>
             <p className="text-sm text-[#5D6772] leading-relaxed pt-2">
