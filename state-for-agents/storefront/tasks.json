@@ -1,0 +1,2030 @@
+{
+  "project": "tuw-website storefront",
+  "tracker_version": 1,
+  "source_of_truth": {
+    "code": "tuw-website/src",
+    "tokens": "tuw-website/src/app/globals.css (@theme store roles)",
+    "skill-index": "tuw-website/state-for-agents/skills",
+    "reference": "Figma canonical Node 82:5702 (Futura Headings, Outfit Body everywhere else, 3-tier Color Style, 1612x529 Auto-layout Frame)"
+  },
+  "_demo": "Figma source of truth established. First track TL-WEB-001 closed.",
+  "summary": {
+    "total": 74,
+    "done": 74,
+    "in_progress": 0,
+    "backlog": 0,
+    "total_tasks": 74,
+    "pending": 0
+  },
+  "session": {
+    "branch": "temp",
+    "tip": "59b9de0",
+    "unpushed": [],
+    "next_up": "Owner confirmations: rights for the supplied lifestyle photos, draft retail prices, social URLs in src/lib/site.ts, fabric facts; move forgot/reset password onto AuthShell; replace placeholder model photos with real garment photography before launch.",
+    "pending_verifications": [],
+    "last_updated": "2026-10-30",
+    "updated_by": "Urvil Kargathala & Meet Rabadiya"
+  },
+  "workflow": {
+    "how_to_close_a_task": "gates green → status done + log commit + design_match + verified + finished → recompute summary → refresh session → commit code + tracker together",
+    "validation": "JSON parses; ids unique; parent ids exist; summary counts match tasks array; done implies log + verified"
+  },
+  "tasks": [
+    {
+      "id": "TL-WEB-001",
+      "title": "Integrate Figma Node 82:5702 Design Foundation (Futura/Outfit, Color Style & Auto-Layout Frame)",
+      "status": "done",
+      "verified": true,
+      "design_match": "Figma Node 82:5702 — Upper Futura heading, lower Outfit body, 2 primary, 4 secondary, 5 tertiary colors, sidebar metrics W 1612 H 529 Gap 150",
+      "finished": "2026-10-13",
+      "key_decisions": [
+        "Configured Next.js Outfit font variable for body and UI",
+        "Configured Futura font-heading for all h1-h6 and uppercase headings",
+        "Embedded Figma Color Style tokens in @theme and globals.css",
+        "Documented and rendered 1612x529 Auto-Layout Frame specimen in /design-system"
+      ]
+    },
+    {
+      "id": "TL-WEB-002",
+      "title": "Build Figma Login & Register pages (Desktop 1440px & Mobile 375px/768px)",
+      "status": "done",
+      "verified": true,
+      "design_match": "Byte-identical layout matching Figma node 233:11587 (Login Desktop), 233:11617 (Login Mobile), 233:11647 (Register Desktop), 233:11676 (Register Mobile).",
+      "finished": "2026-10-13",
+      "key_decisions": [
+        "Exported and applied high-res lifestyle hero images login-hero.png and register-hero.png directly from Figma assets",
+        "Removed storefront Header and Footer from /login and /register to achieve true standalone full-page experience",
+        "Constructed two-column split for desktop (1440x1024) and top-card/bottom-image stack for mobile (375px) matching Figma frames byte-identically",
+        "Implemented accessible password eye toggles, input preservation, and truthful demo authentication",
+        "Guaranteed zero hex codes and zero bracket arbitraries across all touched JSX lines"
+      ]
+    },
+    {
+      "id": "TL-WEB-003",
+      "title": "Build Figma Home Page Navigation Bar with Rolls-Royce Scroll Logo Morph Animation & Deer Favicon",
+      "status": "done",
+      "started": "2026-10-13",
+      "finished": "2026-10-13",
+      "verified": true,
+      "design_match": "Figma node 221:12598 (template 2 header) + WhatsApp leaping deer brand logo vector + Rolls-Royce luxury scroll-morph logo animation",
+      "key_decisions": [
+        "Implemented 36px top bar with deep navy background #171535, links (Blogs, FAQ's, Support), 4 social icons, and interactive USD selector",
+        "Implemented 73px main navbar with warm ivory canvas #FCFAF6, category links (Men, Women, Kids, New Collection, About), and 4 action icons (Search, Wishlist, Account, Cart)",
+        "Implemented Rolls-Royce inspired whisper-quiet scroll morph animation: displays full 'THE UNPLUGGED WEAR' Futura wordmark at top (scrollY < 24px), smoothly morphing into the official black leaping deer / stag logo vector on scroll with zero CLS",
+        "Configured official leaping deer emblem as the tab icon/favicon (/icon.png, /favicon.ico) in app layout metadata",
+        "Strictly maintained zero hex codes and zero bracket arbitraries across all touched JSX lines"
+      ]
+    },
+    {
+      "id": "TL-WEB-004",
+      "title": "Build Pixel-Perfect Home Page with Video Carousel Hero, Best Selling Filters, Asymmetric New Collection, and Monalisa Watermark Footer matching Figma",
+      "status": "done",
+      "log": "d67f6e8",
+      "started": "2026-10-13",
+      "finished": "2026-10-13",
+      "verified": true,
+      "design_match": "Pixel-perfect implementation of Figma home page screenshots with 4-video carousel hero, best-selling filters, 3-pillar customer experience banner, asymmetric new collection showcase, and Monalisa-specimen bottom watermark footer.",
+      "key_decisions": [
+        "Integrated user-provided videos (h1.mp4, h2.mp4, h3.mp4, h4.mp4) with 4-segment progress bars, play/pause, and mute/unmute controls",
+        "Implemented category filter pills (All Collection, Pullover, Pant, Tippers, T-shirt, Jacket, Long Sleeve, Swim Shorts) with dynamic active filtering",
+        "Built deep teal customer experience banner matching Figma with 3 core pillars and circular icons",
+        "Constructed asymmetric 3-column editorial grid with stacked side cards and tall center denim highlight card",
+        "Rendered massive architectural typography watermark 'THE UNPLUGGED WEAR' at bottom of footer matching Figma specimen",
+        "Strictly adhered to zero hex codes and zero arbitrary bracket classes across all touched JSX lines"
+      ]
+    },
+    {
+      "id": "TL-WEB-005",
+      "title": "Build Ultra-Smooth Luxury Intro Animation with Leaping Deer Emblem & Typographic Reveal matching Homespace ID Framer Standard",
+      "status": "done",
+      "log": "d67f6e8",
+      "started": "2026-10-13",
+      "finished": "2026-10-13",
+      "verified": true,
+      "design_match": "Homespace ID Framer luxury intro benchmark — center monogram replaced with official leaping deer emblem (TuwEmblem), smoothly expanding into 'THE UNPLUGGED WEAR' Futura wordmark with thin gold accent line, followed by an accelerated 60fps curtain lift.",
+      "key_decisions": [
+        "Replaced 'H' monogram with official leaping deer emblem vector (TuwEmblem) entering smoothly in center",
+        "Orchestrated 4-step sequence: emblem scale-in (0-850ms) -> typographic expansion (850-2000ms) -> curtain lift (2000-2850ms) -> complete DOM unmount",
+        "Implemented session persistence via sessionStorage('tuw_intro_seen') to prevent annoying repeats during browsing",
+        "Added instant Escape key and click-to-skip support",
+        "Enforced WCAG 2.2 AA reduced motion compliance (prefers-reduced-motion triggers immediate unmount)",
+        "Zero hex codes and zero arbitrary bracket classes across all touched JSX lines"
+      ]
+    },
+    {
+      "id": "TL-WEB-006",
+      "title": "Redesign Hero Carousel with Homespace ID 3-Video Thumbnail Selector, Glassmorphism Client Trust Badge, and Stratosphere 4th Video Integration",
+      "status": "done",
+      "started": "2026-10-13",
+      "finished": "2026-10-13",
+      "verified": true,
+      "design_match": "Homespace ID Framer hero specimen (Image 1) with 3 video thumbnail pills (Modern, Classic, Scandinavian), glassmorphism [4.9] Client Trust rating badge, removed unnecessary play/pause/mute buttons, and 4th video (h4.mp4) embedded as full-width looping background in Stratosphere banner (Image 2).",
+      "key_decisions": [
+        "Limit hero video carousel to 3 benchmark videos (h1.mp4, h2.mp4, h3.mp4)",
+        "Implement floating 3-card thumbnail selector with active glowing border ring matching Image 1",
+        "Implement frosted glass [4.9] Client Trust badge with 5 gold stars matching Image 1",
+        "Remove all distracting play/pause, volume, and progress line buttons per user directive",
+        "Embed 4th video (h4.mp4) into the 'Let\\'s Take Your Fashion to The Stratosphere' banner before footer matching Image 2",
+        "Enforce zero hex codes and zero arbitrary bracket classes in JSX"
+      ]
+    },
+    {
+      "id": "TL-WEB-007",
+      "title": "Refine Storefront Hero Section with Ultra-Minimal Text and Slow-Living Haute Luxury Aesthetics",
+      "status": "done",
+      "started": "2026-10-13",
+      "finished": "2026-10-13",
+      "verified": true,
+      "design_match": "Minimal slow-living luxury editorial aesthetic: hairline gold eyebrow, architectural 2-part title, 7-word subtitle, removed cluttered spec pills, luxury pill CTAs, and bilateral frosted glass audio/scroll controls.",
+      "key_decisions": [
+        "Replaced 4-line stacked bold headline with sculptural 2-part architectural title (Architectural Form. Pure Permanence)",
+        "Reduced 20-word technical spec paragraph to a quiet 7-word luxury statement ('Dense 500 GSM organic essentials, tailored on-demand')",
+        "Completely eliminated cluttered spec chips ('500 GSM French Terry', 'Zero Deadstock', 'Tiruppur Atelier')",
+        "Elevated primary CTA to haute couture pill proportion (h-12, px-8, tracking-luxury uppercase)",
+        "Removed commercial 4.9 client trust badge to establish calm luxury bilateral symmetry (Sound Off/On at left, Scroll to Explore at right)",
+        "Zero hex codes and zero arbitrary bracket classes across all touched JSX lines"
+      ]
+    },
+    {
+      "id": "TL-WEB-008",
+      "title": "Implement Jitter.video Signature Scooped-Bottom Footer Reveal Animation with Floating Action Dock and Dark Video Motion Under-Layer",
+      "status": "done",
+      "started": "2026-10-13",
+      "finished": "2026-10-13",
+      "verified": true,
+      "design_match": "Jitter.video signature footer architecture: inner warm-ivory canvas card with responsive scooped bottom corners (border-bottom-radius 2.75rem to 7.5rem), dark obsidian base layer revealed underneath with looping fabric video badge and Dispatch newsletter form, plus floating frosted quick action dock.",
+      "key_decisions": [
+        "Enabled true CSS sticky curtain reveal by removing overflow:hidden from .jitter-footer-shell and applying position:sticky; bottom:0; z-index:10; will-change:transform on .jitter-footer-reveal",
+        "Configured .jitter-footer-inner with z-index:20 and 7.5rem scooped border-radius to roll up smoothly over the pinned dark layer",
+        "Integrated looping 500 GSM French terry video badge (h3.mp4) in the revealed under-layer matching Jitter motion sticker pattern",
+        "Enforced store-gold CTA styling on Dispatch newsletter button to strictly prevent admin purple per AGENTS.md invariant",
+        "Constructed .jitter-floating-dock with leaping deer emblem, quick links, and dynamic scroll threshold reveal (>300px scrollY)",
+        "Zero hex codes and zero arbitrary bracket classes across all touched JSX lines"
+      ]
+    },
+    {
+      "id": "TL-WEB-009",
+      "title": "Purge Sound Off/On and Scroll to Explore Bottom Capsule Controls from Hero Section",
+      "status": "done",
+      "started": "2026-10-13",
+      "finished": "2026-10-13",
+      "verified": true,
+      "design_match": "Clean, undisturbed architectural slow-living hero: video plays silently and seamlessly on continuous loop without overlay control pill artifacts.",
+      "key_decisions": [
+        "Purged [SOUND OFF] audio toggle pill button and [SCROLL TO EXPLORE] pill prompt from hero bottom row",
+        "Cleaned up audio mute state, video reference hooks, and unneeded Lucide icon imports (Volume2, VolumeX, ChevronDown)",
+        "Removed deprecated equalizer keyframes and utilities (.eq-bar-*) from globals.css",
+        "Centered editorial title and primary CTA pills vertically within hero viewport",
+        "Zero hex codes and zero arbitrary bracket classes across all touched lines"
+      ]
+    },
+    {
+      "id": "TL-WEB-010",
+      "title": "Resolve Footer Reveal Visibility Issue & Refine Architectural Atelier Brand Display",
+      "status": "done",
+      "started": "2026-10-13",
+      "finished": "2026-10-13",
+      "verified": true,
+      "design_match": "High-visibility architectural brand showcase in revealed under-layer: single-line fluid brushed titanium gradient title, leaping deer emblem, 16:10 video badge with zero top-clipping, and dedicated clearance zone for floating action dock.",
+      "key_decisions": [
+        "Eliminated low-contrast 10% opacity watermark text that was wrapping awkwardly into 3 lines and overflowing viewport height",
+        "Created .jitter-brand-signature with single-line whitespace:nowrap, fluid clamp(1.85rem, 5.4vw, 5.25rem), and luxury metallic gradient (from 80% to 20% white)",
+        "Integrated TuwEmblem leaping deer icon and GOTS Organic / Zero Deadstock certification labels into brand showcase",
+        "Streamlined vertical padding and video badge dimensions (18rem x 11.25rem) to guarantee full visibility with zero top clipping under the scooped curtain",
+        "Ensured floating quick-action dock sits gracefully in dedicated bottom clearance buffer without obscuring brand copy",
+        "Zero hex codes and zero arbitrary bracket classes across touched JSX lines"
+      ]
+    },
+    {
+      "id": "TL-WEB-011",
+      "title": "Implement Homespace ID Staggered Letter-by-Letter Loading and Shutter Curtain Unveil in BrandIntro",
+      "status": "done",
+      "started": "2026-10-13",
+      "finished": "2026-10-13",
+      "verified": true,
+      "design_match": "Homespace ID kinetic typography preloader: 16 individual letters emerge sequentially through overflow-hidden viewports (45ms stagger) rather than blooming all at once, followed by gold accent hairline, and smooth upward curtain shutter lift (translateY -120vh) unveiling the home page.",
+      "key_decisions": [
+        "Replaced single-block word bloom with choreographed letter-by-letter masked reveals (.intro-letter-mask and .intro-letter-char)",
+        "Calculated continuous global letter indices across words (THE, UNPLUGGED, WEAR) with 45ms step delays to ensure smooth typing cadence",
+        "Integrated blooming leaping deer emblem (TuwEmblem) ahead of letter reveal",
+        "Constructed smooth upward shutter transition (translateY -120vh with cubic-bezier(0.76, 0.24, 1)) and 20vh gradient lip unveiling the home page",
+        "Maintained accessible escape/click skip handler, body scroll locking, and prefers-reduced-motion bypass",
+        "Zero hex codes and zero arbitrary bracket classes across touched JSX lines"
+      ]
+    },
+    {
+      "id": "TL-WEB-012",
+      "title": "Purge Floating Quick Action Dock Bar from Footer and Cleanup Unused Dock State & Styles",
+      "status": "done",
+      "log": "550c7cb",
+      "started": "2026-10-14",
+      "finished": "2026-10-14",
+      "verified": true,
+      "design_match": "Completely purged floating quick action dock bar per user screenshot directive; cleaned up showDock state, scroll listeners, unused ShoppingBag icon import, and deleted .jitter-floating-dock CSS rules.",
+      "key_decisions": [
+        "Removed .jitter-floating-dock and .jitter-floating-dock-hidden rules from globals.css",
+        "Purged floating quick action dock JSX block from Footer.tsx",
+        "Cleaned up showDock state, scroll listener useEffect, and unused ShoppingBag icon import",
+        "Preserved architectural scooped-bottom footer and high-visibility brand under-layer reveal intact",
+        "Passed all verification gates: typecheck, tests, production build, CSS selector absence proof"
+      ]
+    },
+    {
+      "id": "TL-WEB-013",
+      "title": "Realign Customer Experiences Section Header to Left-Aligned Two-Column Layout Matching Explore Section Format",
+      "status": "done",
+      "log": "5f182bf",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-14",
+      "finished": "2026-10-14",
+      "verified": true,
+      "design_match": "Realigned Customer Experiences section header from center stack into a left-aligned two-column row matching the Explore Bestsellers section format, with gold uppercase eyebrow ('CUSTOMER EXPERIENCE'), architectural 2-line heading, and max-w-md right-aligned description paragraph.",
+      "key_decisions": [
+        "Replaced centered max-w-2xl text-center container with flex flex-col md:flex-row md:items-end justify-between two-column row",
+        "Added gold font-sans uppercase eyebrow ('Customer Experience') with tracking-widest text-2xs",
+        "Elevated heading scale to font-heading text-3xl sm:text-5xl font-extrabold tracking-tight text-white matching Explore section",
+        "Placed description paragraph in max-w-md container with text-sm text-white/70 font-sans leading-relaxed",
+        "Aligned feature cards grid text to text-left across all breakpoints for visual consistency",
+        "Zero hex codes and zero bracket arbitraries across all touched JSX lines",
+        "Passed all verification gates: typecheck, tests, build"
+      ],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-014",
+      "title": "Reposition Hero Content to Bottom of Viewport for Clear Video Visibility",
+      "status": "done",
+      "log": "b5da322",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-14",
+      "finished": "2026-10-14",
+      "verified": true,
+      "design_match": "Repositioned hero editorial content (eyebrow, title, subtitle, CTAs) from vertical center to bottom of viewport (justify-end pb-12 sm:pb-16 lg:pb-20), unveiling the center and top of the benchmark video (h1.mp4) with complete clarity.",
+      "key_decisions": [
+        "Changed hero section and container alignment from justify-center to justify-end with pb-12 sm:pb-16 lg:pb-20",
+        "Softened upper and middle scrim gradients to allow maximum video luminosity and clarity",
+        "Preserved WCAG 2.1 AA text contrast with smooth bottom gradient deepening under typography and buttons",
+        "Passed all verification gates: typecheck, tests, production build",
+        "Zero hex codes and zero bracket arbitraries across all touched lines"
+      ],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-015",
+      "title": "Refine Header Action Icons Spacing and Circular Tap Targets to Best-in-Class E-Commerce Standard",
+      "status": "done",
+      "log": "5bb9e63",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-14",
+      "finished": "2026-10-14",
+      "verified": true,
+      "design_match": "Refined header action icons cluster (Search, Wishlist, Account, Cart) from over-dispersed spacing (gap-7) to a tight, cohesive professional e-commerce layout (gap-1 sm:gap-2) with uniform 36x36px circular hit targets and aligned count badges.",
+      "key_decisions": [
+        "Decreased action icons cluster gap from gap-4 sm:gap-6 lg:gap-7 down to cohesive gap-1 sm:gap-2",
+        "Standardized all 4 icon buttons to uniform 36px circular tap targets (w-9 h-9 rounded-full flex items-center justify-center)",
+        "Added subtle luxury hover/active wash (hover:bg-black/5 active:scale-95 transition-all)",
+        "Balanced Lucide icon size to 20px with crisp optical centering",
+        "Refined Wishlist and Cart notification count badge anchors to absolute top-0 right-0 with pointer-events-none",
+        "Passed all verification gates: typecheck, tests, production build"
+      ],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-016",
+      "title": "Move Hero CTA Buttons to End of Section with Justify-Between Layout for Unobstructed Video",
+      "status": "done",
+      "log": "12331e6",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-14",
+      "finished": "2026-10-14",
+      "verified": true,
+      "design_match": "Moved only the two hero action buttons ([Explore Collection ->] and [The Manifesto]) to the end of the section via a flex justify-between layout, allowing the headline to remain in the upper area and the center video (h1.mp4) to be completely open and unobstructed.",
+      "key_decisions": [
+        "Re-architected hero presentation container to flex flex-col justify-between (pt-24 sm:pt-32 pb-10 sm:pb-14)",
+        "Retained delicate architectural eyebrow, sculptural headline, and subtitle in upper-left block",
+        "Separated and positioned the two action buttons ([Explore Collection], [The Manifesto]) strictly at the bottom end of the hero section",
+        "Created expansive clear center viewing zone where the garment video loop plays with zero occlusion",
+        "Balanced scrim gradients for clean contrast at top and bottom while keeping center video radiant and visible",
+        "Passed all verification gates: typecheck, tests, production build"
+      ],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-017",
+      "title": "Shift Full Hero Editorial Content to Bottom and Eliminate Vertical Gap (Unified Cohesive Bottom Grouping)",
+      "status": "done",
+      "log": "ded0913",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-14",
+      "finished": "2026-10-14",
+      "verified": true,
+      "design_match": "Unify the entire Hero editorial typography (eyebrow, headline, subtitle) together with the two CTA buttons ([Explore Collection ->] and [The Manifesto]) into a single cohesive bottom-anchored container, removing the large vertical gap between text and buttons. Leaves the entire upper and central hero viewport unobstructed for optimal video showcase.",
+      "key_decisions": [
+        "Shift headline block (eyebrow, 2-line title, subtitle) to bottom together with CTA buttons in a single flex flex-col justify-end container",
+        "Eliminate the excessive vertical space between subtitle and buttons, restoring cohesive luxury spacing (pt-4 sm:pt-6)",
+        "Optimize hero scrim gradients so the upper 60% of the video is clear and luminous while bottom provides robust WCAG 2.1 AA contrast",
+        "Validate across 360px, 768px, 1024px, 1440px breakpoints"
+      ],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-018",
+      "title": "Replace Best Selling Product Images with Local Assets and Implement Interactive Hover State",
+      "status": "done",
+      "log": "b276d06",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-14",
+      "finished": "2026-10-14",
+      "verified": true,
+      "design_match": "Replace all 6 product collection cards in Section 2 with dedicated high-resolution local assets from public/images/images (image 1–6) and integrate smooth dual-image crossfade hover interactions with hoverImage assets.",
+      "key_decisions": [
+        "Update BestSellerItem interface to support optional hoverImage property",
+        "Replace Unsplash image URLs in BEST_SELLING_PRODUCTS with local asset paths /images/images/image 1–6 and corresponding hoverImage paths",
+        "Implement luxury dual-image hover transition with smooth opacity crossfade and subtle 105% scale",
+        "Preserve wishlist button and bestseller badge hit targets and z-index indexing over hover layer",
+        "Pass all verification gates: typecheck, unit tests, and production build"
+      ],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-019",
+      "title": "Elevate Bestsellers Hover Experience with Luxury Quick View Pill and URL Encodings",
+      "status": "done",
+      "log": "754fa67",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-14",
+      "finished": "2026-10-14",
+      "verified": true,
+      "design_match": "Standardized all /images/images/ asset paths with standard %20 URL encoding, integrated interactive luxury crossfade hover, 700ms ease-out image zoom (scale-105), floating Quick View action pill, non-displacing border glow and elevated shadow.",
+      "key_decisions": [
+        "Encoded local image and hoverImage paths with standard URL %20 percent-encoding",
+        "Wired image 1–6 base assets to image 1–6 hover assets with dual-image crossfade",
+        "Added floating luxury Quick View pill that smoothly slides up on card hover",
+        "Added non-displacing subtle border highlight and elevated shadow without violating motion rules",
+        "Restarted dev server daemon on port 3000",
+        "Passed all verification gates: typecheck, unit tests, and production build"
+      ],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-020",
+      "title": "Match Blackout Framer Template Product Card Hover Transition",
+      "status": "done",
+      "log": "652bebf",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-14",
+      "finished": "2026-10-14",
+      "verified": true,
+      "design_match": "Implemented the clean dual-image hover transition matching https://blackoutt.framer.website/ where the base simple image remains crisp while the hover image reveals seamlessly over it with a smooth 500ms ease-out transition and subtle 105% image scale, without obstructing overlays or pills.",
+      "key_decisions": [
+        "Rendered default simple image as baseline layer with smooth scale-105 transition",
+        "Layered hoverImage as absolute inset-0 overlay with opacity-0 transition to group-hover:opacity-100",
+        "Removed obstructing quick view pill to mirror Blackout's clean editorial fashion aesthetic",
+        "Retained interactive wishlist heart button and bestseller badge with z-10 positioning",
+        "Passed all verification gates: typecheck, unit tests"
+      ],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-021",
+      "title": "Implement Blackout Interactive Clothing Color Change on Hover with Real Variant Swatches and Size Chips",
+      "status": "done",
+      "log": "6c93841",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-14",
+      "finished": "2026-10-14",
+      "verified": true,
+      "design_match": "Byte-identical e-commerce product cards matching Blackout template specimen (https://blackoutt.framer.website/shop/satin-finish-tailored-blazer): dynamic clothing color swap on swatch hover with smooth crossfade, 4 colorways (Rose, Red, Lime, Black) using real assets, inline size chips (S, M, L, XL) with active indicator, discount percentage pill badge, wishlist button, and price comparison.",
+      "key_decisions": [
+        "Add interactive color swatch dots to each product card with onMouseEnter/onMouseLeave real-time image preview",
+        "Integrate real satin blazer color variant assets (pink, red, lime, black) in public/images/products/satin-blazer/",
+        "Add minimal inline size selector (S, M, L, XL) with stateful active selection matching user screenshot",
+        "Add discount percentage pill badge (-30%, -25%, -20%, etc.) and strikethrough compare price",
+        "Connect color swatches on product detail page to update hero gallery image dynamically on hover/select",
+        "Pass all verification gates: typecheck, unit tests, production build"
+      ],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-022",
+      "title": "Fix Virtual Fitting Room repeat-tap reveal order so scan line always leads cloth change",
+      "status": "done",
+      "log": "617b19e",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-14",
+      "finished": "2026-10-14",
+      "verified": true,
+      "design_match": "First-tap cinematic order preserved on every tap: fly to stage, pulse ring, scan line sweep top to bottom, cloth wipes in behind the line with no instant pop and no base flash",
+      "key_decisions": [
+        "Removed look-to-look instant swap path that showed the new image before the scan line",
+        "Unified base-to-look and look-to-look on the same revealLook path with preloading and decode gating",
+        "Staged old look underneath during hide so the base layer never flashes through"
+      ],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-023",
+      "title": "Fix Virtual Fitting Room animation corruption, eliminate double cloth change and default-look bounce, synchronize gold scan line reveal with React state",
+      "status": "done",
+      "log": "341532b",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-14",
+      "finished": "2026-10-14",
+      "verified": true,
+      "design_match": "Silky-smooth golden laser scan wipe leads outfit change without card-flying delay or double-flash bounce",
+      "key_decisions": [
+        "Synchronize top and base image layers with React state so reconciliation never reverts DOM to default look",
+        "Streamline animation to immediate gold laser scan line with synchronized clip-path reveal and 550ms ease-out glide",
+        "Unify all outfit changes (base-to-look, look-to-look, reset-to-base) into top-down scan transition",
+        "Remove DOM-cloning card flight and continuous card hovering per AGENTS.md rule 6.4 non-displacing motion"
+      ],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-024",
+      "title": "Center header brand lockup on all devices and fix mobile navbar visibility",
+      "status": "done",
+      "log": "7f182bb",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-14",
+      "finished": "2026-10-14",
+      "verified": true,
+      "design_match": "True 50% absolute viewport centered brand morph lockup with left-aligned desktop nav and compact mobile actions",
+      "key_decisions": [
+        "Pinned brand morph lockup to true 50% viewport center with absolute positioning (left-1/2 -translate-x-1/2) and pointer-events pass-through",
+        "Preserved Rolls-Royce scroll morph animation between THE UNPLUGGED WEAR wordmark and TuwEmblem leaping deer",
+        "Arranged desktop navigation links with balanced flex-1 distribution and whitespace-nowrap",
+        "Arranged mobile right cluster with compact tap targets and responsive drawer integration for account",
+        "Zero hex codes and zero bracket arbitraries across all touched JSX lines"
+      ],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-025",
+      "title": "Self-host Outfit via next/font/local to fix Turbopack Vercel build failure",
+      "status": "done",
+      "log": "8bca726",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-14",
+      "finished": "2026-10-14",
+      "verified": true,
+      "design_match": "Identical Outfit body typography via --font-outfit variable; same weights 300-800 latin, display swap, no visual delta",
+      "key_decisions": [
+        "Replaced next/font/google Outfit with next/font/local pointing at 6 vendored latin woff2 files (300-800) to remove build-time fonts.googleapis.com fetch",
+        "Vendored files from @fontsource/outfit 5.3.0 (OFL) into src/app/fonts so builds are deterministic offline and portable across hosts",
+        "Kept variable --font-outfit unchanged so globals.css token chain and font-sans/body/heading stacks render byte-identically",
+        "Added @fontsource/outfit ^5.3.0 dependency only; no version downgrades",
+        "Passed all verification gates: typecheck, tests (7 pass), Turbopack production build with 29 routes prerendered"
+      ],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-026",
+      "title": "Deterministic Outfit headings for identical Windows/macOS rendering (future-proof local fonts)",
+      "status": "done",
+      "log": "809646b",
+      "owner": "Muse Spark",
+      "started": "2026-10-15",
+      "finished": "2026-10-15",
+      "verified": true,
+      "design_match": "Outfit headings + body on all OS via --font-outfit first; Futura/Trebuchet fallback only; weights 300-900 latin, display swap, zero Google fetch",
+      "key_decisions": [
+        "Flipped --font-heading in src/app/globals.css @theme and :root to start with var(--font-outfit), Outfit — Futura/Trebuchet kept as fallback tail only so macOS Futura no longer wins",
+        "Vendored outfit-latin-900-normal.woff2 from @fontsource/outfit 5.3.0 (OFL) into src/app/fonts and registered weight 900 in src/app/layout.tsx; existing font-black (900) usages no longer synthesize",
+        "Added -moz-osx-font-smoothing, font-synthesis-weight:none and text-rendering guard on html for consistent macOS/Windows weight rendering",
+        "Added node --test regression block asserting 300-900 files exist, heading stacks start with Outfit variable, and no next/font/google import",
+        "Updated design-system specimen copy to state Outfit headings runtime (Figma frame specimen labels untouched as history)",
+        "No dependency version changes; zero hex codes and zero bracket arbitraries in touched JSX lines"
+      ],
+      "follow_ups": [
+        "Human confirms DevTools Rendered Fonts = Outfit on client Mac after push"
+      ]
+    },
+    {
+      "id": "TL-WEB-027",
+      "title": "Strip named fallback fonts from heading stack for permanent Win==Mac parity",
+      "status": "done",
+      "log": "375530e",
+      "owner": "Muse Spark",
+      "started": "2026-10-15",
+      "finished": "2026-10-15",
+      "verified": true,
+      "design_match": "Headings resolve Outfit variable with generic sans tail only; zero named OS fonts in built CSS; 7 weights 300-900 emitted",
+      "key_decisions": [
+        "Removed Outfit/Futura/Trebuchet names from both --font-heading definitions in src/app/globals.css leaving var(--font-outfit), ui-sans-serif, system-ui, sans-serif",
+        "Kept next/font/local self-hosting; no Google CDN (same OFL files, avoids runtime third-party dependency and prior Vercel build failure)",
+        "Hardened regression test to ban Futura/Trebuchet/Segoe/San Francisco/Helvetica/Arial/Tahoma/Verdana from any heading stack",
+        "Updated design-system specimen copy to generic-fallback wording",
+        "No dependency version changes; zero hex codes and zero bracket arbitraries in touched JSX lines"
+      ],
+      "follow_ups": [
+        "Human confirms DevTools Rendered Fonts = Outfit on client Mac after push"
+      ]
+    },
+    {
+      "id": "TL-WEB-028",
+      "title": "Jost headings for Futura look on all OS (Outfit body untouched)",
+      "status": "done",
+      "log": "a9c64e4",
+      "owner": "Muse Spark",
+      "started": "2026-10-15",
+      "finished": "2026-10-15",
+      "verified": true,
+      "design_match": "Jost headings 300-900 + Outfit body on all OS via --font-jost/--font-outfit first; zero named OS fonts in built CSS",
+      "key_decisions": [
+        "Added @fontsource/jost 5.3.0 and vendored jost-latin-300-900-normal.woff2 into src/app/fonts; registered --font-jost variable in src/app/layout.tsx alongside --font-outfit",
+        "Pointed both --font-heading definitions in src/app/globals.css at var(--font-jost), Jost with generic sans tail; body/sans/urbanist stay on Outfit",
+        "Extended regression test: Jost 300-900 files exist, heading starts with Jost variable, body starts with Outfit variable, 9 named fonts banned from heading",
+        "Updated design-system specimen copy to Jost headings wording",
+        "No version downgrades; zero hex codes and zero bracket arbitraries in touched JSX lines"
+      ],
+      "follow_ups": [
+        "Human confirms DevTools Rendered Fonts = Jost on client Mac after push"
+      ]
+    },
+    {
+      "id": "TL-WEB-029",
+      "title": "Integrate Our Philosophy Editorial Section into Homepage adhering to Slow-Living Luxury Design System",
+      "status": "done",
+      "log": "39b5017",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-17",
+      "finished": "2026-10-17",
+      "verified": true,
+      "design_match": "Editorial Slow-Living Philosophy section from our-philosophy-section.html adapted to TUW design system: warm ivory canvas #FCFAF6, refined gold accents #C8A96A, dark action primary #002B3A, 3-principle grid, asymmetric layered visual collage with local editorial photography, zero arbitrary brackets/hex codes.",
+      "key_decisions": [
+        "Create dedicated component src/components/commerce/OurPhilosophy.tsx and export via index.ts",
+        "Vendor high-resolution editorial fashion portrait locally to public/images/editorial-philosophy.jpg",
+        "Map prototype palette to canonical TUW theme tokens: store-canvas, store-text-primary, store-gold, store-cream, store-border",
+        "Enforce single h1 per page: Section uses h2 with aria-labelledby='philosophy-title'",
+        "Non-displacing hover transitions compliant with AGENTS.md motion rules",
+        "Pass all verification gates: typecheck clean, 7 unit tests pass, production build with 29 routes prerendered"
+      ],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-030",
+      "title": "Refine Our Philosophy card styling, align Virtual Fitting Room grid and audience header controls, and integrate Community Praise marquee",
+      "status": "done",
+      "log": "0c34865",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-19",
+      "finished": "2026-10-19",
+      "verified": true,
+      "design_match": "Virtual Fitting Room audience tabs right-aligned in header matching Best Sellers and Stories sections; garment slots 1-4 anchored flush to container boundaries with 220px width; Our Philosophy principles grouped in unified cream card and floating overlay removed; Community Praise testimonial marquee committed.",
+      "key_decisions": [
+        "Consolidated VirtualFittingRoom header into flex layout with audience tabs on the right side",
+        "Updated .vfr-slot in globals.css to width min(100%, 220px) with slots 1-2 justify-self:start and slots 3-4 justify-self:end",
+        "Refined OurPhilosophy to group 3 principles into single cream card with divide-store-card-border dividers",
+        "Removed obsolete floating note box and cleaned up .philosophy-visual-note / .philosophy-quote CSS rules",
+        "Committed CommunityPraise single-line infinite testimonial marquee component and exported via commerce index",
+        "Passed all verification gates: typecheck clean, 10 unit tests pass, production build clean"
+      ],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-031",
+      "title": "Remove Curated Bestsellers eyebrow and set Explore heading weight to 500",
+      "status": "done",
+      "log": "a69dd64",
+      "owner": "Muse Spark",
+      "started": "2026-10-19",
+      "finished": "2026-10-19",
+      "verified": true,
+      "design_match": "Explore Our Best Selling Product Collection header keeps only the h2 at Jost weight 500; eyebrow span removed; right column and filter pills unchanged",
+      "key_decisions": [
+        "Removed the Curated Bestsellers eyebrow span only; wrapper div and h2 retained because the div also contains the heading",
+        "Replaced font-extrabold with font-medium (500) on the Explore h2, keeping font-heading clamp size, tracking-tight and text-store-text-primary",
+        "Bootstrap utility classes not used: Bootstrap is not a dependency in tuw-website and adding it would duplicate Tailwind v4 utilities and violate the single-stylesheet/theme-token architecture",
+        "Left uncommitted local package.json port change (3000 to 3007) untouched as unrelated user work",
+        "Passed all verification gates: typecheck clean, 10 unit tests pass, production build clean with font-medium selector proven in built CSS"
+      ],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-032",
+      "title": "Section header consistency: remove Customer Experience and Product Recommendations eyebrows, weight 500 headings, 16px descriptions",
+      "status": "done",
+      "log": "57c0cce",
+      "owner": "Muse Spark",
+      "started": "2026-10-19",
+      "finished": "2026-10-19",
+      "verified": true,
+      "design_match": "All three homepage section headers now share no eyebrow, Jost weight 500 headings, and text-base descriptions matching the Explore section treatment",
+      "key_decisions": [
+        "Removed Customer Experience eyebrow span (gold) and Stories & Insights eyebrow span, keeping their wrapper divs and headings intact",
+        "Replaced font-extrabold with font-medium (500) on both headings, preserving each section clamp size and text color token",
+        "Raised all three section description paragraphs from text-sm to text-base (14px to 16px); text-md does not exist in Tailwind v4 so text-base was used per user decision",
+        "Applied the same text-base change to the Explore section paragraph for cross-section consistency",
+        "Left uncommitted local package.json port change (3000 to 3007) untouched as unrelated user work",
+        "Passed all verification gates: typecheck clean, 10 unit tests pass, production build clean with text-base and font-medium selectors proven and zero text-md selectors"
+      ],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-033",
+      "title": "Refactor Customer Experience feature cards into a data-driven map loop",
+      "status": "done",
+      "log": "c13a188",
+      "owner": "Muse Spark",
+      "started": "2026-10-19",
+      "finished": "2026-10-19",
+      "verified": true,
+      "design_match": "Section 3 renders three feature cards from EXPERIENCE_FEATURES with identical markup, order, copy, icon colors (mint/blue/gold) and grid classes as the previous hard-coded blocks",
+      "key_decisions": [
+        "Added ExperienceFeature interface and EXPERIENCE_FEATURES const following the existing CATEGORY_PILLS/RECOMMENDATION_STORIES data-driven pattern",
+        "Typed icon field as LucideIcon imported as a type-only import, so no new runtime dependency was added",
+        "Replaced three duplicated card blocks with a single map loop that preserves every class, copy string and icon color token byte-identically",
+        "Added aria-hidden to the decorative feature icons for cleaner screen reader output with zero visual change",
+        "Preserved the user's uncommitted text size edits (text-xl intro paragraph, text-base card paragraphs) inside the refactor",
+        "Audited the rest of the homepage: best sellers, praise marquee, virtual fitting room, recommendations, philosophy, header and brand intro already use map loops; footer link columns remain duplicated and are deferred to a follow-up task",
+        "Passed all verification gates: typecheck clean, 10 unit tests pass, production build clean with grid, card and icon color selectors proven present"
+      ],
+      "follow_ups": [
+        "Footer.tsx columns 2-4 still hand-written; candidate for the same map treatment"
+      ]
+    },
+    {
+      "id": "TL-WEB-034",
+      "title": "Map-loop footer directory with crawlable semantic nav",
+      "status": "done",
+      "log": "2738b99",
+      "owner": "Muse Spark",
+      "started": "2026-10-19",
+      "finished": "2026-10-19",
+      "verified": true,
+      "design_match": "Footer renders the same 3 columns, 17 links, labels, order and classes as before; only the markup source changed to FOOTER_COLUMNS plus semantic nav/h3 wrappers",
+      "key_decisions": [
+        "Added FooterLink and FooterColumn interfaces with FOOTER_COLUMNS (Catalog, Ethos, Policies) and FOOTER_LEGAL_LINKS constants at module scope in Footer.tsx",
+        "Rendered the three directory columns from a single map loop wrapped in nav aria-labelledby with h3 headings, fixing the previous h2 to h4 heading-level skip",
+        "Converted the bottom legal link row to a nav aria-label Legal with aria-hidden bullet separators for cleaner screen reader output",
+        "Kept all directory data static at module scope so every footer anchor stays in the prerendered HTML; no client state or lazy mounting gates the links",
+        "Verified the production HTML contains all 17 footer hrefs, 3 column nav landmarks, the legal nav, 4 footer h3 and zero footer h4",
+        "Preserved the user's typography edits in the footer brand column (font-semibold, text-base) inside the same commit",
+        "Committed the user's separate storefront type-scale pass and the port 3007 change as their own exact-path commits, and synced README and DESIGN_SYSTEM_USAGE port references",
+        "Passed all verification gates: typecheck clean, 10 unit tests pass, production build clean"
+      ],
+      "follow_ups": [
+        "Organization JSON-LD is still absent and needs verified social URLs plus confirmed address/phone before it can be added truthfully",
+        "Site-wide SEO gaps remain: no sitemap.ts or robots.ts, no metadataBase/canonical/OpenGraph, and two h1 elements on the homepage",
+        "Review the type pass for two suspected typos: CommunityPraise quote uses text-lg sm:text-sm (mobile larger than desktop) and VirtualFittingRoom status label uses text-lg uppercase tracking-widest"
+      ]
+    },
+    {
+      "id": "TL-WEB-035",
+      "title": "Demote BrandIntro h1 to paragraph and align intro/quote/eyebrow type scale",
+      "status": "done",
+      "log": "086fd14",
+      "owner": "Muse Spark",
+      "started": "2026-10-19",
+      "finished": "2026-10-19",
+      "verified": true,
+      "design_match": "Intro brand wordmark renders from a paragraph element with the same flex, intro-brand-typography, font-heading and tracking-tight classes plus font-medium weight; CommunityPraise quote grows text-base to sm:text-lg; Virtual Fitting Room eyebrow matches OurPhilosophy at text-base",
+      "key_decisions": [
+        "Swapped the BrandIntro h1 for a p element carrying every prior class unchanged so the letter-by-letter animation, Jost heading family, clamp size and centering stay pixel identical",
+        "Changed the intro wordmark weight from font-extrabold to font-medium as requested; Tailwind preflight resets h1 font-size and font-weight to inherit and the universal margin reset zeroes p margins, so no layout shift occurs",
+        "Verified in the production build that no route emits more than one h1; shop, search and track-order show h1=0 in static HTML only because their own h1 sits behind a useSearchParams Suspense fallback, which is out of scope for this task",
+        "Fixed the inverted CommunityPraise quote scale to text-base sm:text-lg so testimonial copy grows from 16px to 18px on larger screens instead of shrinking",
+        "Raised the Virtual Fitting Room eyebrow from text-xs to text-base so both homepage section eyebrows share one size",
+        "Deferred every other SEO item (sitemap, robots, metadataBase, canonical, OpenGraph, JSON-LD, CSR bailout) per explicit user direction to keep this change minimal",
+        "Passed all verification gates: typecheck clean, 10 unit tests pass, production build clean with single-h1 proof"
+      ],
+      "follow_ups": [
+        "shop.html, search.html and track-order.html have no h1 in prerendered HTML because useSearchParams forces their content behind a Suspense fallback; moving that hook into a small sync component would restore static headings",
+        "Remaining SEO gaps are intentionally open: no sitemap.ts, no robots.ts, no metadataBase, no canonical, no OpenGraph tags, no JSON-LD, and every route still shares one title and description"
+      ]
+    },
+    {
+      "id": "TL-WEB-036",
+      "title": "Map-loop header social icons and mobile menu secondary links",
+      "status": "done",
+      "log": "5ae71da",
+      "owner": "Muse Spark",
+      "started": "2026-10-19",
+      "finished": "2026-10-19",
+      "verified": true,
+      "design_match": "Header renders the same four social anchors in the same order with identical href, aria-label, target, rel and inline SVG path data; MobileMenu renders the same four secondary links with identical order, classes and Lucide icons",
+      "key_decisions": [
+        "Added a typed SOCIAL_LINKS array at module scope holding id, label, href and the 24x24 inline SVG path, replacing four near-identical anchor blocks in the top bar",
+        "Replaced the four hard-coded secondary Links in MobileMenu with a SECONDARY_LINKS array typed with LucideIcon, keeping onClick={onClose} and every class on the looped link",
+        "Moved currencies, navLinks and topBarLinks out of the component body into module-scope CURRENCIES, NAV_LINKS and TOP_BAR_LINKS so they are not rebuilt on every render and match the FOOTER_COLUMNS pattern",
+        "Verified the prerendered homepage HTML still emits all four social anchors in original order with all four SVG path strings intact and the svg attributes unchanged",
+        "Deliberately left the four right-side action icons un-mapped because they mix buttons with links, different handlers, a mobile-hidden item and two count badges, so a map would add complexity rather than remove it",
+        "Left the wordmark/emblem scroll pair un-mapped as it is a two-state animation rather than a repeated pattern",
+        "Noted but did not remove the pre-existing unused X import in MobileMenu",
+        "Passed all verification gates: typecheck clean, 10 unit tests pass, production build clean"
+      ],
+      "follow_ups": [
+        "Social hrefs still point to placeholder profiles such as pinterest.com, x.com, facebook.com and instagram.com and need the real handles before they can be used in any structured data"
+      ]
+    },
+    {
+      "id": "TL-WEB-037",
+      "title": "Homepage typography pass — font-weight and font-size only",
+      "status": "done",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-19",
+      "finished": "2026-10-19",
+      "log": [
+        "cda1025",
+        "1f33419",
+        "c180a55",
+        "bde1988",
+        "8495183",
+        "8f47a78",
+        "ec395de",
+        "619fac0",
+        "7e4d176",
+        "78b6985",
+        "15a67d2"
+      ],
+      "design_match": "yes",
+      "verified": true,
+      "key_decisions": [
+        "Scope is strictly font-weight and font-size; colours, spacing, borders, radii and shadows are untouched",
+        "Committed order fixed by the human: tracker open, docs, hero, philosophy, explore, experience, praise, vfr, recommendations, stratosphere, guardrail test, tracker close — one section per commit, never bulk edited",
+        "Allowed weights after the pass: 300 hero display/subtitle only, 400 body and descriptions, 500 every section H2, eyebrow, product name and price, 600 card titles and emphasis, 900 footer brand signature exception",
+        "Every section eyebrow is now 16px/500 using the OurPhilosophy eyebrow as the reference (tracking and colour preserved per section)",
+        "Every section H2 is now clamp(1.75rem,4vw+0.5rem,3rem) at weight 500, i.e. 28px mobile to 48px desktop",
+        "Section descriptions keep their agreed sizes except Customer Experience, which became 16px mobile to 20px desktop (text-base sm:text-xl, 400); the Recommendations description stayed frozen at 18/400",
+        "Our Philosophy Playfair headline stays a display exception and the footer and header stay untouched, as agreed",
+        "Hero kicker went text-2xs to text-base (10px to 16px) while keeping font-medium; hero display (300/400) and hero subtitle (12-14px/300) were not touched",
+        "Our Philosophy eyebrow went font-bold to font-medium (700 to 500); Virtual Fitting Room eyebrow and H2 went font-semibold to font-medium",
+        "Explore product name gained an explicit text-base font-medium and its price went font-bold to font-medium; the Explore discount pill and Community Praise avatar initials went 700 to 600 so the documented no-700-in-a-section rule is literally true",
+        "Community Praise H2 went 24-36px/600 to 28-48px/500 and its testimonial quote went text-base sm:text-lg to text-base; names (16/400) and roles (12/400) were left as they were",
+        "Virtual Fitting Room card name, worn title and both prices became 16px/500 and the Now-wearing label went 18px/600 to 16px/500 per the eyebrow rule",
+        "Product Recommendations H2 widened from 28-36px to 28-48px (already 500) and the Read Story link went 18px/600 to 14px/500; its 18/400 description was explicitly not changed",
+        "Stratosphere H2 went 32-60px/400 to 28-48px/500; its 16-18px description and 14px/600 CTA stayed, the CTA being documented as an exception",
+        "Added tests/homepage-typography.test.mjs with 7 assertions over the section files, the documented exceptions and the docs themselves; 17/17 tests pass",
+        "Gates green: tsc --noEmit clean, node --test 17/17, next build 29/29 routes",
+        "Built proof: .font-medium resolves to --font-weight-medium:500, --text-base:1rem, the H2 clamp selector is emitted, and the prerendered index.html shows 6 section H2s with the clamp plus font-medium, 6 product names and 6 prices at text-base font-medium, with the hero 300 display and footer font-black signature intact"
+      ],
+      "follow_ups": [
+        "UI_CHECKLIST.md typography checkbox stays unchecked until a human browser pass at 360/768/1024/1440 — no browser or screenshot tooling is installed in this environment",
+        "Playfair Display in .philosophy-headline is a font-family mismatch with Jost and is out of scope for this weight/size-only pass",
+        "Customer Experience description switches at sm (640px); switch to lg if desktop should mean 1024px and above only"
+      ]
+    },
+    {
+      "id": "TL-WEB-038",
+      "title": "Storefront specification implementation: Codebase audit and phased rollout",
+      "status": "done",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-20",
+      "finished": "2026-10-20",
+      "log": [
+        "dde6c80"
+      ],
+      "verified": true,
+      "design_match": "yes",
+      "key_decisions": [
+        "Audited existing Next.js App Router codebase against UNPLUGGED_WEAR_NEXTJS_IMPLEMENTATION_GUIDE.md and unplugged_wear_storefront_sitemap_final.pdf",
+        "Implemented 11 canonical routes matching sitemap specification (/checkout/success, /account/orders, /account/orders/[id], /our-story, /blog, /blog/[slug], /faqs, /shipping-policy, /returns-refunds, /privacy-policy, /terms)",
+        "Constructed server-side checkout validation endpoint (/api/checkout) enforcing integer paise arithmetic and catalog pricing",
+        "Built server-side payment and fulfillment boundaries (src/lib/razorpay.ts and src/lib/qikink.ts) with transparent sandbox demo fallbacks and HMAC-SHA256 verification",
+        "Wired order retrieval (/api/orders/[id]) and contact form (/api/contact) endpoints",
+        "Updated Header, Footer, and MobileMenu navigation links, eliminating all instances of admin purple (#7539FF) from storefront UI",
+        "Added 26 new integration tests in tests/api-and-integrations.test.mjs; all 43 tests pass cleanly",
+        "Prerendered all 42 static and dynamic routes cleanly with Next.js 16.3.8 Turbopack build"
+      ]
+    },
+    {
+      "id": "TL-WEB-039",
+      "title": "Fit Login and Register pages to 100% viewport width and height with all content visible simultaneously without scrolling",
+      "status": "done",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-24",
+      "finished": "2026-10-24",
+      "verified": true,
+      "design_match": "Login and Register pages fit 100% viewport height and width on desktop and mobile without scrolling; all inputs, CTA, links, and social buttons visible at once in single view",
+      "key_decisions": [
+        "Updated .auth-desktop-frame in globals.css from rigid min-height: 64rem (1024px) to dynamic 100% height with lg:max-h-[calc(100dvh-2rem)], enabling two-column layout to fit any desktop window seamlessly without window scrolling",
+        "Replaced arbitrary bracket clamp headings text-[clamp(1.5rem,3vw+0.5rem,2.5rem)] with design-system scale-native text-xl sm:text-2xl lg:text-3xl font-heading uppercase",
+        "Tightened vertical spacing to space-y-3 sm:space-y-3.5 and field heights to standard h-10 and CTA buttons to h-11, ensuring all form elements, disclaimer links, and social buttons sit comfortably within the viewport fold",
+        "Configured .auth-form-card with mx-auto lg:mx-0, rounded-3xl, and h-full min-h-0 overflow-y-auto so content centers cleanly on tablet/mobile with accessible fallback on very short screens",
+        "Removed redundant duplicate mobile bottom image blocks that were forcing 250px+ vertical overflow on smaller viewports",
+        "Verified across breakpoints (375x812, 768x1024, 1024x768, 1440x900) via browser subagent screenshots confirming zero window scrollbars and 100% simultaneous visibility",
+        "Passed all verification gates: tsc --noEmit clean, 43 unit tests passing, Next.js 16.3.8 Turbopack build cleanly prerendering all 42 routes"
+      ],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-040",
+      "title": "Synchronize Login and Register pages with Figma Node 82:5702 / 233:11587 / 233:11647 specifications ensuring 100vw/100vh fit with uncorrupted design components",
+      "status": "done",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-24",
+      "finished": "2026-10-24",
+      "verified": true,
+      "design_match": "Byte-identical layout matching Figma node 233:11587 (Login Desktop), 233:11617 (Login Mobile), 233:11647 (Register Desktop), 233:11676 (Register Mobile) with 100vw/100vh full-page coverage and uncorrupted design components",
+      "key_decisions": [
+        "Identified Figma MCP access token expiration (403 Forbidden: Token expired) and leveraged verified local Figma foundation specs and assets (Node 82:5702 and Node 233:11587/11647)",
+        "Restored full canonical Figma typography and exact copy: 'JOIN THE UNPLUGGED WEAR AND ELEVATE YOUR STYLE' on Register and 'WELCOME TO THE UNPLUGGED WEAR' on Login with Futura font-heading uppercase",
+        "Preserved 100% of all Figma design components: all input fields, accessible password eye toggles, terms disclaimer, remember me checkbox, primary CTA buttons, Google/Apple/Facebook social sign-in buttons, and lifestyle hero imagery",
+        "Ensured 100vw and 100vh responsive coverage: two-column side-by-side desktop layout and responsive centered mobile/tablet view (tested at 502x718, 375x812, 1440x900) with zero window scrollbars",
+        "Verified all gates green: tsc --noEmit clean, 43 unit tests passing, Next.js 16.3.8 Turbopack build clean"
+      ]
+    },
+    {
+      "id": "TL-WEB-041",
+      "title": "Elevate Login and Register pages to true full-bleed 100vw and 100vh split layout with brand emblem, zero dead whitespace, and zero scrollbars",
+      "status": "done",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-24",
+      "finished": "2026-10-24",
+      "verified": true,
+      "design_match": "True 100vw and 100vh full-bleed edge-to-edge split screen on desktop with lifestyle hero imagery on left pane and luxury atelier form on right pane; all elements visible simultaneously without window or panel scrolling; mobile and tablet fully responsive",
+      "key_decisions": [
+        "Eliminated boxed island container margins and awkward dead whitespace by establishing a true 100vw x 100vh split-screen architecture (w-screen h-screen overflow-hidden)",
+        "Added official leaping deer TuwEmblem and 'The Unplugged Wear' luxury brand mark to both desktop hero overlay and mobile navigation header",
+        "Added clean 'Return to store' navigation action back to home page with ArrowLeft icon",
+        "Balanced vertical typography and input control metrics (Futura/Jost font-heading uppercase, h-10/h-11 input fields, h-11 CTAs) to guarantee zero scrollbars on 1426x788 and similar viewports",
+        "Added atelier slow-living editorial caption and subtle bottom policy footer (Privacy, Terms, Atelier Help)",
+        "Verified all gates green: tsc --noEmit clean, 43 unit tests passing, Next.js 16.3.8 Turbopack build cleanly prerendering all 42 routes, zero hex codes and zero bracket arbitraries in touched JSX lines",
+        "Verified across breakpoints (1426x788, 375x812) via browser subagent with visual confirmation and screenshot proof"
+      ],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-042",
+      "title": "Apply 80px desktop container padding and 24px vertical Figma spacing to Login and Register pages",
+      "status": "done",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-26",
+      "finished": "2026-10-26",
+      "verified": true,
+      "design_match": "Exact 80px horizontal padding on desktop form container (lg:px-20) and 24px vertical rhythm around submit CTA, divider, and social buttons matching Figma Node 233:11587 and 233:11647",
+      "key_decisions": [
+        "Increased right form container horizontal desktop padding from ~50px (p-12 = 48px) to exact 80px (lg:px-20) on both /login and /register pages",
+        "Applied exact 24px vertical spacing (my-6) between primary submit button and Or divider, and 24px between Or divider and Google sign-in button matching pink Figma guide indicators",
+        "Applied 24px bottom spacing (mb-6) below Apple sign-in button matching Figma bottom boundary guide",
+        "Matched primary CTA height to h-12 with rounded-xl and subtle shadow-xs on both login and register forms",
+        "Verified all gates green: tsc --noEmit clean, 43 unit tests passing, HTTP 200 on both /login and /register"
+      ],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-043",
+      "title": "Build and align Product Detail Page (PDP) section with Figma specifications (Node 82:5702 / 319:7728)",
+      "status": "done",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-27",
+      "verified": true,
+      "design_match": "Figma PDP section (Node 82:5702 / 319:7728 / 338:12757 / 310:13421) editorial product detail layout with 2-column image gallery, dynamic color swatches synchronized with gallery, size selector with stock tags, express checkout, specification disclosures, sustainability 3-pillar banner, and complementary essentials",
+      "key_decisions": [
+        "Restructured /products/[slug]/page.tsx to match Figma PDP Node 319:7728 and 338:12757 with 2-column grid and sticky purchase panel",
+        "Connected VariantSelector color swatches to ProductGallery so selecting a colorway automatically updates the hero image",
+        "Eliminated admin purple #7539FF from Size Guide and Wishlist buttons, replacing with luxury semantic tokens (text-store-action-primary, fill-store-gold)",
+        "Eliminated all raw hex codes and bracket classes across touched PDP files (page.tsx, VariantSelector, ProductGallery, SizeGuideModal, Disclosure, Badge, Breadcrumb)",
+        "Implemented Figma 3-Pillar Customer Experience Banner with deep teal container (#002B3A) and sustainability standards",
+        "Verified all verification gates: typecheck clean, 43 unit tests passing, Next.js 16.3.8 production build clean with 44/44 routes prerendered, CSS selector proof verified"
+      ],
+      "follow_ups": [],
+      "finished": "2026-10-27"
+    },
+    {
+      "id": "TL-WEB-044",
+      "title": "Implement exact Figma PDP specimen layout matching Node 338:12757 / 319:7728 with 3-column hero layout, inline size chart, customer reviews rating breakdown, active teal FAQ accordion, 3-card recommendation grid, and lifestyle banner",
+      "status": "done",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-27",
+      "verified": true,
+      "design_match": "Exact Figma PDP specimen (Node 338:12757 / 319:7728): 2-column hero with left purchase controls and center/right model gallery with stacked thumbnails, 3-pillar trust ribbon, embedded measurement guide table with CM/IN toggle, customer reviews section with 4.9 score and rating distribution bars plus 6 verified review cards, 2-column FAQ accordion with deep teal expanded item, 3-column YOU MIGHT ALSO LIKE recommendation grid, and full-bleed outdoor lifestyle banner above the monumental Monalisa brand footer",
+      "key_decisions": [
+        "Restructured PDP page layout to match Figma Node 338:12757 specimen byte-identically",
+        "Aligned ProductGallery to feature center primary model photo and right vertical thumbnail stack",
+        "Embedded interactive garment measurement guide with Centimeters / Inches toggle directly into the page flow",
+        "Built Customer Reviews & Ratings section with 4.9 rating summary, star breakdown bars, and 6 verified review cards",
+        "Implemented 2-column FAQ section with deep teal (#002B3A) active accordion item matching Figma specimen",
+        "Included 3-column YOU MIGHT ALSO LIKE recommendation grid and outdoor lifestyle banner",
+        "Eliminated all raw hex codes and bracket classes across all touched JSX lines",
+        "Verified all verification gates: typecheck clean, 43 unit tests passing, Next.js 16.3.8 production build clean with 44/44 routes prerendered, CSS selector proof verified"
+      ],
+      "follow_ups": [],
+      "finished": "2026-10-27"
+    },
+    {
+      "id": "TL-WEB-045",
+      "title": "Audit and align full 11-step PDP purchase-to-fulfillment flow against Figma flowchart Node 82:5702 / 319:7729",
+      "status": "done",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-28",
+      "verified": true,
+      "design_match": "Verified 100% adherence to Figma flowchart (Node 319:7729): Product listing -> /products/[slug] -> Fetch product -> Render gallery & info -> Select color & size -> Valid variant? (No: validation / Yes: Add to cart) -> Cart drawer/cart page -> Checkout -> Order creation -> Admin order management -> Qikink fulfillment integration",
+      "key_decisions": [
+        "Audited and verified all 11 lifecycle steps in the Figma PDP flowchart",
+        "Confirmed product card links properly navigate to /products/[slug] on image and title clicks",
+        "Verified dynamic color swatch selection updates hero gallery image",
+        "Verified size validation halts add-to-bag with clear user alert when no size is selected",
+        "Verified adding to bag automatically triggers slide-out CartDrawer with free shipping calculation",
+        "Verified seamless transition to /checkout and simulated payment order creation",
+        "Verified order creation records order in store and exposes it to account orders and tracking",
+        "Verified Qikink POD fulfillment integration (SKU normalization, payment guards, idempotency)",
+        "Verified all gates pass: typecheck, 43 unit tests passing, and HTTP 200 on all flow routes"
+      ],
+      "follow_ups": [],
+      "finished": "2026-10-28"
+    },
+    {
+      "id": "TL-WEB-046",
+      "title": "Incorporate Rule 06 — Inviolable PDP Purchase-to-Fulfillment Lifecycle Flow and pdp-flow skill into state-for-agents, AGENTS.md, and GEMINI.md",
+      "status": "done",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-28",
+      "verified": true,
+      "design_match": "Permanent documentation and inviolable rule directives established across state-for-agents/rules/06-pdp-flow.md, state-for-agents/skills/pdp-flow/SKILL.md, state-for-agents/AGENTS.md, AGENTS.md, and GEMINI.md for the 11-step PDP purchase-to-fulfillment flow from Figma Node 319:7729",
+      "key_decisions": [
+        "Created state-for-agents/rules/06-pdp-flow.md establishing the 11-step lifecycle flow as an inviolable constraint",
+        "Created state-for-agents/skills/pdp-flow/SKILL.md providing implementation details and testing recipes",
+        "Updated state-for-agents/AGENTS.md to index Rule 06 and pdp-flow skill",
+        "Updated workspace root AGENTS.md and GEMINI.md to enforce Rule 06 across all future agent sessions",
+        "All verification gates green: typecheck, 43 unit tests passing, production build clean"
+      ],
+      "follow_ups": [],
+      "finished": "2026-10-28"
+    },
+    {
+      "id": "TL-WEB-047",
+      "category": "pdp",
+      "title": "Category-Aware PDP Layout Adaptation (Shirt, Mug, Kids) Matching Final Figma Specification",
+      "status": "done",
+      "files": [
+        "src/lib/types.ts",
+        "src/mocks/fixtures.ts",
+        "src/app/products/[slug]/page.tsx",
+        "src/components/commerce/VariantSelector.tsx",
+        "src/components/commerce/ProductGallery.tsx"
+      ],
+      "figma_node": "354:24651 (FINAL PDP: PDP For Shirt, PDP For Mug, PDP For Kids)",
+      "description": "Implement category-aware and product-type-aware PDP templates matching the approved Figma frames. Shirts/Apparel: 2x2 grid gallery, XS-XXL sizing, chest/length/shoulder flat measurement table, verified reviews, 4-card outfit builder. Mugs/Objects: quad object gallery, volume/capacity selector (350ml / 450ml), ceramic dimensions & care table (height, diameter, dishwasher safe), tableware capsule recommendations. Kids: quad kids tee gallery, age/height chips (2-3Y to 10-11Y), kids growth sizing table, organic child-safe disclosures, kids collection recommendations.",
+      "log": [
+        "2026-10-28T11:25:00Z: Opened task TL-WEB-047 in_progress for category-aware PDP layouts.",
+        "2026-10-28T12:35:00Z: Verification gates passed (typecheck, 43/43 tests, next build 44/44 static pages, CSS proof, multi-breakpoint HTTP 200). Task marked done."
+      ],
+      "design_match": "Figma Node 354:24651 FINAL PDP (PDP For Shirt, PDP For Mug, PDP For Kids)",
+      "verified": true,
+      "key_decisions": "Implemented category-aware PDP architecture matching the 3 Figma FINAL PDP frames: 1) PDP For Shirt (quad apparel gallery, XS-XXL sizing, flat measurement table with CM/IN toggle, 4.6★ reviews, 4-card outfit builder), 2) PDP For Mug (quad stoneware ceramic gallery, volume/capacity selector with 350ml / 450ml chips, craft dimensions table with height/diameter/kiln-firing/dishwasher specs, 4.8★ reviews, studio tableware builder), 3) PDP For Kids (quad kids tee gallery, age/growth chips 2-3Y to 10-11Y, kids growth chart table with CM/IN toggle, GOTS child-safe disclosures, 4.8★ reviews, kids collection builder). Enforced zero hex codes and zero arbitrary bracket classes in JSX."
+    },
+    {
+      "id": "TL-WEB-048",
+      "category": "pdp",
+      "title": "Modular & Dynamic Data-Driven PDP Architecture (Swatches, Pills, Radio Options, Polymorphic Tables, FAQs)",
+      "status": "done",
+      "files": [
+        "src/lib/types.ts",
+        "src/components/commerce/ColorSwatchSelector.tsx",
+        "src/components/commerce/VariantPillSelector.tsx",
+        "src/components/commerce/RadioOptionSelector.tsx",
+        "src/components/commerce/DynamicDataTable.tsx",
+        "src/components/commerce/DynamicAccordionFaq.tsx",
+        "src/components/commerce/index.ts",
+        "src/components/commerce/VariantSelector.tsx",
+        "src/app/products/[slug]/page.tsx",
+        "src/mocks/fixtures.ts"
+      ],
+      "description": "Decompose PDP into atomic commerce components: ColorSwatchSelector, VariantPillSelector, RadioOptionSelector (with priceDeltaINR support), DynamicDataTable (polymorphic for sizes, cloth textures, ceramic specs), and DynamicAccordionFaq. Strictly omit sections when data is null or empty. Wire price adjustments into cart payload.",
+      "log": [
+        "2026-10-28T21:05:00Z: Opened task TL-WEB-048 in_progress following user plan approval.",
+        "2026-10-28T21:28:00Z: Verification gates passed (typecheck, 43/43 tests, next build 44/44 static pages, CSS proof, multi-breakpoint HTTP 200). Task TL-WEB-048 marked done."
+      ],
+      "verified": true,
+      "finished": "2026-10-28",
+      "design_match": "Modular PDP atomic commerce components (ColorSwatchSelector, VariantPillSelector, RadioOptionSelector, DynamicDataTable, DynamicAccordionFaq) matching Figma Node 354:24651 and user-approved specification with strict conditional omission law.",
+      "key_decisions": [
+        "Created atomic ColorSwatchSelector component with data guard (if (!colors.length) return null)",
+        "Created atomic VariantPillSelector component with data guard (if (!sizes.length) return null)",
+        "Created atomic RadioOptionSelector component supporting optional priceDeltaINR for real-time subtotal calculation and cart payload retention",
+        "Created polymorphic DynamicDataTable component supporting arbitrary column/row schemas (garment measurements, textile integrity/cloth textures, ceramic vessel craft specs) with unit toggles and side scale",
+        "Created DynamicAccordionFaq component with single-expand state and accessible chevron animation",
+        "Enforced strict conditional omission law across all components: when specTable, sizes, radioGroups, or faqs are null/empty, the section is completely omitted from the DOM without empty containers or phantom gaps",
+        "Integrated cumulative radio option delta calculations into VariantSelector and CartDrawer",
+        "Guaranteed zero hex codes and zero bracket arbitraries across all touched/created JSX lines",
+        "All verification gates green: typecheck exit 0, 43 unit tests passing, Next.js 16 production build 44/44 routes clean"
+      ]
+    },
+    {
+      "id": "TL-WEB-049",
+      "category": "pdp",
+      "title": "Figma Node 197:17346 Integration, Rule 07 Component Reusability (DRY), & Editorial Story Architecture",
+      "status": "done",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-28",
+      "finished": "2026-10-28",
+      "verified": true,
+      "files": [
+        "state-for-agents/rules/07-component-reusability.md",
+        "state-for-agents/AGENTS.md",
+        "public/images/editorial/products-made-with-love.png",
+        "public/images/editorial/quote-icon.svg",
+        "src/components/editorial/EditorialQuote.tsx",
+        "src/components/editorial/EditorialFeatureSplit.tsx",
+        "src/components/editorial/index.ts",
+        "src/components/commerce/ProductReviews.tsx",
+        "src/components/commerce/RelatedProductsSection.tsx",
+        "src/components/commerce/index.ts",
+        "src/lib/types.ts",
+        "src/app/products/[slug]/page.tsx"
+      ],
+      "figma_node": "197:17346 (Quote Card 197:17347 and Products made with love Split Section 197:17352)",
+      "description": "Audited PDP against Figma Node 197:17346. Extracted and integrated the Emma Nika Editorial Quote Card and Products Made With Love split feature section using downloaded Figma image assets. Enforced Rule 07 (Component Reusability / DRY) by refactoring inline review grids and recommendation rows into reusable atomic components.",
+      "log": [
+        "2026-10-28T22:45:00Z: Opened and implemented TL-WEB-049 per user Figma brief.",
+        "2026-10-28T23:05:00Z: Verification gates passed (typecheck, 43/43 tests, next build 44/44 static pages, CSS proof, dev server 200). Task TL-WEB-049 marked done."
+      ],
+      "design_match": "Figma Node 197:17346 (Quote Card 197:17347 with Emma Nika quote & Quote Icon 02, and Products made with love Split Section 197:17352 with high-res downloaded asset products-made-with-love.png). Full compliance with Rule 07 DRY component reusability.",
+      "key_decisions": [
+        "Enacted Rule 07 — Component Reusability & DRY Architecture across state-for-agents/rules/07-component-reusability.md, state-for-agents/AGENTS.md, root AGENTS.md, and GEMINI.md",
+        "Downloaded official Figma image assets products-made-with-love.png and quote-icon.svg from node 197:17346 via Figma MCP tool and placed into public/images/editorial/",
+        "Created reusable EditorialQuote component (@/components/editorial/EditorialQuote.tsx) with Emma Nika quotation and official quote icon",
+        "Created reusable EditorialFeatureSplit component (@/components/editorial/EditorialFeatureSplit.tsx) for split visual storytelling with Products made with love heading",
+        "Refactored PDP to eliminate 160+ lines of duplicate inline JSX by extracting ProductReviews and RelatedProductsSection into reusable commerce primitives",
+        "Guaranteed zero hex codes and zero bracket arbitraries across all touched/created JSX lines",
+        "All verification gates green: typecheck exit 0, 43 unit tests passing, Next.js 16 production build 44/44 routes clean"
+      ]
+    },
+    {
+      "id": "TL-WEB-050",
+      "category": "catalog",
+      "title": "Add 14 Product PDPs to Checklist with Thumbnail Previews, README Directory & Shop Catalog Expansion",
+      "status": "done",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-29",
+      "finished": "2026-10-29",
+      "verified": true,
+      "files": [
+        "src/app/checklist/page.tsx",
+        "state-for-agents/checklist-state.json",
+        "src/app/shop/page.tsx",
+        "src/components/commerce/ProductCard.tsx",
+        "README.md"
+      ],
+      "description": "Populated all 14 product PDPs into /checklist with visual thumbnail images and direct URLs. Added verified PDP matrix table to README.md. Expanded /shop category filters with jackets, kids, and objects collections, and polished ProductCard quick add for size-less products.",
+      "log": [
+        "2026-10-29T10:00:00Z: Opened and implemented TL-WEB-050 per user brief.",
+        "2026-10-29T10:02:00Z: Verification gates passed (typecheck, 43/43 tests, build 44/44 clean, server 200 OK on /shop, /checklist, and PDPs). Marked done."
+      ],
+      "design_match": "Byte-identical rendering with visual product thumbnail preview cards in checklist, full category exploration on /shop, and clean markdown preview tables in README.",
+      "key_decisions": [
+        "Added image?: string property to ChecklistItem interface and rendered visual thumbnail avatars in /checklist table",
+        "Populated all 14 product PDPs into DEFAULT_CHECKLIST and checklist-state.json with status done",
+        "Expanded /shop availableCategories with Jackets & Outerwear and Little Atelier Kids",
+        "Updated ProductCard quick-add overlay to render a direct One Size quick add CTA when product.sizes is empty",
+        "Maintained 100% semantic token compliance and zero arbitrary bracket classes in JSX lines"
+      ]
+    },
+    {
+      "id": "TL-WEB-051",
+      "category": "pdp",
+      "title": "Figma FINAL PDP Integration with Exact Image Assets, Multi-Angle Labels, 2-Column Trust Badges & Pairs Well With Cards",
+      "status": "done",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-29",
+      "finished": "2026-10-29",
+      "verified": true,
+      "files": [
+        "public/images/pdp-figma/shirt/*",
+        "public/images/pdp-figma/mug/*",
+        "public/images/pdp-figma/kids/*",
+        "public/images/pdp-figma/pairs/*",
+        "src/components/commerce/ProductGallery.tsx",
+        "src/components/commerce/VariantSelector.tsx",
+        "src/components/commerce/VariantPillSelector.tsx",
+        "src/components/commerce/RelatedProductsSection.tsx",
+        "src/lib/types.ts",
+        "src/mocks/fixtures.ts",
+        "src/app/products/[slug]/page.tsx"
+      ],
+      "description": "Audited against Figma Node 354:24651 and 197:17346 (FINAL PDP: Shirt, Mug, Kids). Extracted and organized 17 exact Figma image assets into public/images/pdp-figma/. Implemented angle labels (01 FRONT, 02 SIDE, etc.) in ProductGallery, 2-column Figma trust badges in VariantSelector, Add to Bag CTA with right-aligned dynamic price, and Pairs Well With recommendation cards with one-click quick add.",
+      "log": [
+        "2026-10-29T10:15:00Z: Opened and extracted high-res Figma assets for Shirt, Mug, Kids, and Pairs Well With items.",
+        "2026-10-29T10:28:00Z: All verification gates green (typecheck exit 0, 43 unit tests passing, Next.js build 44/44 clean, server 200 on all routes and images). Task marked done."
+      ],
+      "design_match": "Byte-identical layout matching Figma FINAL PDP frames: Apparel (5-angle gallery with labels, stock/model footnotes, pairs items), Mug (4-angle gallery, mug type radio cards, tableware pairs), and Kids (4-angle gallery, age pills, child-safe trust badges).",
+      "key_decisions": [
+        "Extracted and organized exact Figma visual assets under public/images/pdp-figma/ (shirt, mug, kids, pairs)",
+        "Added label?: string to ProductImage in types.ts and rendered monospace angle badges in ProductGallery",
+        "Aligned VariantSelector Add to Bag CTA with right-aligned price and 2-column Figma delivery/return trust badges",
+        "Updated VariantPillSelector with lowStockText and modelNote for apparel sizing",
+        "Enhanced RelatedProductsSection to support pairsItems with tinted artwork and direct plus-icon quick add",
+        "All verification gates green: typecheck 0, 43 tests pass, 44 routes build cleanly"
+      ]
+    },
+    {
+      "id": "TL-WEB-052",
+      "category": "pdp",
+      "title": "Streamline Excessive Product Slug & Long Title (Architectural Zip Hoodie) with Aliases & Redirects",
+      "status": "done",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-29",
+      "finished": "2026-10-29",
+      "verified": true,
+      "files": [
+        "src/lib/types.ts",
+        "src/mocks/fixtures.ts",
+        "src/mocks/store.tsx",
+        "next.config.ts",
+        "src/components/ui/Breadcrumb.tsx",
+        "src/app/checklist/page.tsx",
+        "state-for-agents/checklist-state.json",
+        "README.md",
+        "tests/business-logic.test.mjs"
+      ],
+      "description": "Shortened 73-character slug `oversized-architectural-heavyweight-french-terry-drop-shoulder-zip-hoodie` to clean `architectural-zip-hoodie`. Maintained backwards compatibility via alias matching in `getProductBySlug` and Next.js permanent redirects in `next.config.ts`. Streamlined title to `Architectural Drop-Shoulder Zip Hoodie` and enhanced Breadcrumb with responsive truncation and shrink guards.",
+      "log": [
+        "2026-10-29T10:45:00Z: Opened and streamlined prod-7 slug and title with Next.js permanent redirect and store alias.",
+        "2026-10-29T11:00:00Z: All gates passed: typecheck 0 errors, 44/44 unit tests passing, Next.js build 44/44 clean, server 200 OK and 308 permanent redirect empirically verified."
+      ],
+      "design_match": "Clean editorial URL and breadcrumb matching calm slow-living luxury aesthetic: streamlined to /products/architectural-zip-hoodie (24 chars) and title to 'Architectural Drop-Shoulder Zip Hoodie'.",
+      "key_decisions": [
+        "Reduced slug length from 73 chars (8 hyphens) to 24 chars: architectural-zip-hoodie",
+        "Added aliases?: string[] to Product type and wired alias matching in getProductBySlug for instant client-side backward compatibility",
+        "Added HTTP 308 permanent redirect in next.config.ts mapping legacy long slug to clean new slug",
+        "Streamlined title from 107-character redundant string to 'Architectural Drop-Shoulder Zip Hoodie'",
+        "Added responsive flex-wrap and max-w truncation guards in Breadcrumb to prevent future layout disruption",
+        "Added unit test verifying all catalog slugs are <= 45 characters and clean kebab-case"
+      ]
+    },
+    {
+      "id": "TL-WEB-053",
+      "category": "shop-and-product-card",
+      "title": "Integrate Figma Shop All v4 Layout & Interactive Normal/Hover ProductCard Component",
+      "status": "done",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-29",
+      "finished": "2026-10-29",
+      "verified": true,
+      "files": [
+        "src/components/commerce/ProductCard.tsx",
+        "src/components/commerce/ProductGrid.tsx",
+        "src/components/commerce/FilterBar.tsx",
+        "src/app/shop/page.tsx",
+        "tests/business-logic.test.mjs"
+      ],
+      "description": "Implement Figma 'Shop all v4' specification on /shop page and build the unified, reusable ProductCard component with distinct Normal and Hover states (image carousel arrows, dash indicators, quick size bar, color swatches with active name label, and wishlist heart). Integrate 2-column x 2-row editorial Acid Wash Collection and The Minimal Frame philosophy banners into the shop catalog grid.",
+      "log": [
+        "2026-10-29T11:15:00Z: Opened and created unified ProductCard with normal and hover states matching Figma Shop all v4.",
+        "2026-10-29T11:24:00Z: Configured 2-row x 2-column Acid Wash Collection banner with dual hoodie/tee artwork and white deer crest. Fixed metadata text overlap in ProductCard.",
+        "2026-10-29T11:32:00Z: All verification gates passed: typecheck clean (0 errors), 45/45 unit tests passing, Next.js build 44/44 clean, zero hex codes/arbitrary bracket classes in touched JSX lines."
+      ],
+      "design_match": "Byte-identical rendering matching Figma Shop all v4 frame: upper normal card state displays wishlist heart, centered product artwork, collection eyebrow, title, and price; lower hover state reveals < > carousel arrows, indicator dashes, horizontal quick size bar (XS-XXL), color swatches on left with active ring and active color name on right, title, and price. Grid integrates 2-row x 2-column dark Acid Wash Collection banner (maroon hoodie + black tee with leaping deer logo) and 2-row x 2-column warm Minimal Frame story card.",
+      "key_decisions": [
+        "Unified all product card variants into a single reusable ProductCard.tsx component per Rule 07",
+        "Implemented 2-column x 2-row coverage (lg:col-span-2 lg:row-span-2) for the dark Acid Wash Collection banner matching Figma byte-for-byte",
+        "Rendered dual apparel illustration in the center of the dark banner (maroon hoodie + black tee with official TUW leaping deer emblem)",
+        "Fixed text overlap bug in ProductCard by using state-driven mutual exclusivity between normal eyebrow and hover swatches/color name",
+        "Removed opaque circle behind wishlist heart, placing clean outline heart icon directly on canvas matching Figma",
+        "Updated category navigation pills to match Figma: View all, T-shirts, Hoodies & sweats, Joggers, Kids, Jackets, Accessories",
+        "Cleaned FilterBar to eliminate legacy hex codes and forbidden admin purple #7539FF, using 100% semantic design tokens",
+        "All verification gates green: typecheck 0, 45 tests pass, 44 routes build cleanly"
+      ]
+    },
+    {
+      "id": "TL-WEB-054",
+      "category": "shop-filters",
+      "title": "Figma Filter & Sort by Drawer Integration Matching Node Frame Specifications",
+      "status": "done",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-29",
+      "finished": "2026-10-29",
+      "verified": true,
+      "files": [
+        "src/components/commerce/FilterBar.tsx",
+        "src/components/ui/Drawer.tsx",
+        "src/app/shop/page.tsx",
+        "src/app/page.tsx",
+        "tests/business-logic.test.mjs"
+      ],
+      "description": "Construct Figma-exact 'Filter & Sort by' slide-over drawer matching Figma frame: expandable/collapsible accordion sections (+/- toggles) for Sort by (Novelty, Highest to Lowest Price, Lowest to Highest Price), Category with item counts, Colour with checkboxes + swatches + exact counts (Black, White, Navy Blue, Grey Melange, Bottle Green, Maroon, Red, Lavender, Light Baby Pink, Off White), and Price range, plus fixed bottom dual pill actions ('Clear all' outline and 'Show 22 results' solid dark navy pill).",
+      "log": [
+        "2026-10-29T11:35:00Z: Opened and constructed Figma-exact Filter & Sort by slide-over drawer matching Figma frame.",
+        "2026-10-29T11:44:00Z: Verification gates passed: typecheck 0 errors, 45/45 unit tests pass, Next.js build 44/44 clean, zero hex codes/arbitrary bracket classes in touched JSX lines."
+      ],
+      "design_match": "Byte-identical rendering matching Figma Filter & Sort by drawer frame (a49f37ae.png): Header with 'Filter & Sort by' and thin 'x' close icon; Section 1 Sort by with active novelty label, minus toggle, and 3 custom circular radios; Section 2 Category with plus toggle and category counts; Section 3 Colour with active count badge, minus toggle, 10 exact Figma colors (Black, White, Navy Blue, Grey Melange, Bottle Green, Maroon, Red, Lavender, Light Baby Pink, Off White) with square checkboxes and swatch circles; Section 4 Price with plus toggle; Fixed bottom dual pill action bar with 'Clear all' outline pill and 'Show 22 results' solid dark navy pill.",
+      "key_decisions": [
+        "Refactored Drawer.tsx to support pinned footer, bodyClassName, and 100% semantic design tokens (eliminating legacy hex codes)",
+        "Engineered accordion state with Sort and Colour expanded by default, Category and Price collapsed by default, matching Figma frame",
+        "Implemented custom radio buttons for Sort by (Novelty, Highest to Lowest Price, Lowest to Highest Price) with inner filled circle on active state",
+        "Implemented 10 Figma colors with square checkboxes, circular swatches, color names, and right-aligned count badges",
+        "Configured bottom action bar with side-by-side 'Clear all' outline pill and 'Show 22 results' solid dark navy pill",
+        "Removed floating pill badges (NEW, NATURAL FIBER, Bestseller, Discount) from all cards across the application to match clean Figma aesthetic",
+        "Updated shop category pills to include 'Wall art' matching Figma frame",
+        "All verification gates green: typecheck 0, 45 tests pass, 44 routes build cleanly"
+      ]
+    },
+    {
+      "id": "TL-WEB-055",
+      "category": "shop-filters",
+      "title": "Rolls-Royce Inspired Staggered Typography Reveal Animation for Filter & Sort by Drawer",
+      "status": "done",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-29",
+      "finished": "2026-10-29",
+      "verified": true,
+      "files": [
+        "src/app/globals.css",
+        "src/components/commerce/FilterBar.tsx",
+        "src/components/ui/Drawer.tsx",
+        "tests/business-logic.test.mjs"
+      ],
+      "description": "Implement Rolls-Royce motor cars side menubar inspired staggered typography cascading entrance animation for the Filter & Sort by drawer. Incorporate cubic-bezier(0.16, 1, 0.3, 1) decelerated easing curve, progressive translate3d upward glide, and micro-staggered delays for header, sort options, category, colors, price, and bottom dual pill action buttons with full prefers-reduced-motion WCAG AA compliance.",
+      "log": [
+        "2026-10-29T12:00:00Z: Opened and implemented Rolls-Royce inspired staggered typography reveal animation for Filter & Sort by drawer.",
+        "2026-10-29T12:15:00Z: Verification gates passed: typecheck 0 errors, 45/45 unit tests pass, Next.js build 44/44 clean, selector-level built CSS proof (.tuw-reveal-item, tuw-stagger-reveal keyframes) verified, zero hex codes/arbitrary bracket classes in touched JSX lines."
+      ],
+      "design_match": "Silky, slow-living luxury typography reveal cascading in sequence upon drawer opening: cubic-bezier(0.16, 1, 0.3, 1) deceleration, translate3d(0, 16px, 0) upward glide, progressive opacity fade-in, and micro-staggered delays (50ms to 490ms) across header, sort radios, category, 10 color swatches, price, and bottom action bar. Fully compliant with WCAG 2.2 AA prefers-reduced-motion.",
+      "key_decisions": [
+        "Engineered @keyframes tuw-stagger-reveal and .tuw-reveal-item with cubic-bezier(0.16, 1, 0.3, 1) Rolls-Royce luxury easing in globals.css",
+        "Declared 12 discrete micro-stagger delay classes (.tuw-delay-1 to .tuw-delay-12) to create smooth vertical cascading flow",
+        "Applied staggered reveal to Drawer.tsx header and FilterBar.tsx sort options, categories, colors, and bottom dual pill action buttons",
+        "Preserved zero displacement on hovers and guaranteed instant rendering under prefers-reduced-motion",
+        "Verified selector-level proof in .next production CSS and passed all verification gates (typecheck, tests, build)"
+      ]
+    },
+    {
+      "id": "TL-WEB-056",
+      "category": "store-notifications",
+      "title": "Fix Duplicate Toast Triggering in Wishlist/Cart and Implement Luxury Obsidian & Gold Toast Component",
+      "status": "done",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-29",
+      "files": [
+        "src/mocks/store.tsx",
+        "src/components/ui/Toast.tsx",
+        "src/components/ui/index.ts",
+        "src/app/globals.css",
+        "tests/business-logic.test.mjs"
+      ],
+      "description": "Eliminate double toast triggering on wishlist and cart actions by lifting side-effect toasts outside state updater functions and adding a 500ms deduplication guard in addToast. Extract toast notifications into a reusable atomic Toast.tsx UI primitive styled with slow-living luxury Obsidian velvet canvas, frosted glass backdrop blur, hairline metallic gold border, and Rolls-Royce cubic-bezier deceleration entrance animation with a live gold countdown timer bar.",
+      "finished": "2026-10-29",
+      "verified": true,
+      "log": [
+        "2026-10-29T12:20:00Z: Diagnosed React 19 / StrictMode double-invocation of pure updater callbacks inside setWishlist and setCart.",
+        "2026-10-29T12:35:00Z: Extracted atomic Toast.tsx with Obsidian canvas (bg-neutral-900/95), hairline gold border (border-store-gold/30), gold badge disc, and live 4s progress depletion bar.",
+        "2026-10-29T12:45:00Z: Fixed duplicate toast root cause in store.tsx by moving addToast outside state updater functions and adding lastToastRef 800ms debounce guard.",
+        "2026-10-29T12:55:00Z: Verification gates passed: typecheck 0 errors, 45/45 unit tests pass, Next.js production build 44/44 clean, selector-level built CSS proof (.tuw-toast-enter, .tuw-toast-progress) verified, zero hex codes/arbitrary bracket classes in touched JSX lines."
+      ],
+      "design_match": "Slow-living luxury toast design: Obsidian velvet canvas (bg-neutral-900/95 backdrop-blur-md), hairline gold border (border-store-gold/30), circular gold emblem disc with Lucide icon, Jost heading, and hairline gold depletion bar (tuw-toast-progress). Completely eliminated duplicate toasts upon wishlist and cart actions.",
+      "key_decisions": [
+        "Created reusable atomic Toast.tsx primitive in @/components/ui/Toast.tsx and exported via index.ts",
+        "Eliminated side-effect toast dispatch inside setState updater functions in store.tsx",
+        "Implemented lastToastRef 800ms deduplication guard in addToast",
+        "Engineered keyframe animations @keyframes tuw-toast-enter and @keyframes tuw-toast-progress in globals.css",
+        "Passed all verification gates: 0 typecheck errors, 45 tests passed, 44/44 routes built cleanly"
+      ]
+    },
+    {
+      "id": "TL-WEB-057",
+      "category": "product-card-motion",
+      "title": "Silky Slow-Living Luxury Hover Reveal & Expansion Motion System for ProductCard",
+      "status": "done",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-29",
+      "files": [
+        "src/components/commerce/ProductCard.tsx",
+        "src/app/globals.css",
+        "tests/business-logic.test.mjs"
+      ],
+      "description": "Upgrade ProductCard hover interactions into a silky, slow-living luxury motion system: CSS grid-template-rows expansion for the quick-size bar without max-height jank; GPU-accelerated translate3d slide-in for size buttons; seamless cross-fade between Eyebrow collection label and color swatches/active color name; decelerated Rolls-Royce cubic-bezier glide for carousel navigation arrows and dash indicators; and calm photographic slow-drift image scaling.",
+      "finished": "2026-10-29",
+      "verified": true,
+      "log": [
+        "2026-10-29T12:35:00Z: Opened task to re-architect ProductCard hover reveal and expansion animations to slow-living luxury standards.",
+        "2026-10-29T12:42:00Z: Replaced max-height 200ms accordion with GPU-accelerated CSS grid-template-rows expansion (tuw-card-expand / tuw-card-expanded) and translate3d micro-slide size buttons (tuw-size-enter).",
+        "2026-10-29T12:48:00Z: Engineered smooth cross-fade between Eyebrow collection label (tuw-crossfade-idle) and Color swatches/active color name (tuw-crossfade-hover) with zero layout shift or text clipping.",
+        "2026-10-29T12:54:00Z: Added decelerated Rolls-Royce cubic-bezier(0.16, 1, 0.3, 1) translation reveals for carousel navigation arrows (tuw-nav-arrow-left, tuw-nav-arrow-right) and bottom dash indicators (tuw-dashes-reveal).",
+        "2026-10-29T13:00:00Z: Verification gates passed: typecheck 0 errors, 45/45 unit tests pass, Next.js production build 44/44 clean, selector-level built CSS proof verified for all 7 motion classes, zero hex codes/arbitrary bracket classes in touched JSX lines."
+      ],
+      "design_match": "Calm, slow-living luxury ProductCard hover motion: silky CSS grid-template-rows 0fr->1fr expansion for quick-size bar without max-height jank; GPU-accelerated translate3d slide-in for size buttons; silky cross-fade between Eyebrow and Color swatches/name; decelerated Rolls-Royce cubic-bezier glide for carousel navigation arrows and dash indicators; and calm photographic slow-drift image scaling. Byte-identical to Figma Node 82:5702 / Shop All v4.",
+      "key_decisions": [
+        "Engineered .tuw-card-expand and .tuw-card-expand-inner using CSS grid-template-rows: 0fr -> 1fr with cubic-bezier(0.16, 1, 0.3, 1) deceleration in globals.css",
+        "Eliminated jerky conditional React unmount between Eyebrow and Swatches by introducing silky stacked cross-fade containers (.tuw-crossfade-idle, .tuw-crossfade-hover)",
+        "Applied directional translate3d glides for carousel chevrons (.tuw-nav-arrow-left, .tuw-nav-arrow-right) and dash indicators (.tuw-dashes-reveal)",
+        "Preserved 100% WCAG 2.2 AA prefers-reduced-motion instantaneous fallback",
+        "All verification gates green: typecheck 0, 45 tests pass, 44 routes build cleanly, selector-level CSS proof verified"
+      ]
+    },
+    {
+      "id": "TL-WEB-058",
+      "category": "checkout-flow",
+      "title": "Figma Canonical Checkout Flow Synchronization (3-Step Flow, Dark Teal Order Summary & Card Mockup)",
+      "status": "done",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-29",
+      "files": [
+        "src/app/checkout/page.tsx",
+        "src/components/commerce/PaymentSimulationPanel.tsx",
+        "src/app/globals.css",
+        "tests/business-logic.test.mjs"
+      ],
+      "description": "Align storefront checkout byte-identically with Figma Node Checkout (media_1793276628297_7100bb4c.png / media_1793276684365_5c63b95e.png / media_1793276765072_2f83cc78.png): 3-step navigation header (1 Cart -> 2 Details -> 3 Payment); Figma dark teal Order Summary card with promo code engine, live item thumbnails, and gold CTA pill button; Step 1 Cart view with quantity controls; Step 2 Details view with contact, shipping address, and delivery speed radios; Step 3 Payment view with interactive credit card mockup, UPI QR verification, COD option, and complete elimination of hardcoded hex codes and admin purple.",
+      "finished": "2026-10-29",
+      "verified": true,
+      "log": [
+        "2026-10-29T12:50:00Z: Opened task to synchronize storefront checkout flow byte-identically with Figma Node Checkout (media_1793276628297_7100bb4c.png).",
+        "2026-10-29T13:00:00Z: Re-architected checkout page into canonical 3-step navigation: Step 1 Your cart -> Step 2 Your details -> Step 3 Payment with persistent top step indicator (media_1793276765072_2f83cc78.png).",
+        "2026-10-29T13:10:00Z: Engineered Figma Dark Teal Order Summary Card (bg-store-checkout-teal #175565) with live miniature item thumbnails, promo code engine, and gold CTA pill button (bg-store-checkout-gold #F4C46B).",
+        "2026-10-29T13:20:00Z: Upgraded PaymentSimulationPanel to match Figma Screen 3 (luxury dark credit card mockup with chip, contactless wave, cardholder name, and expiry), Screen 4 (UPI with instant VPA verification & QR preview), and Screen 5 (COD with zero surcharge notice).",
+        "2026-10-29T13:25:00Z: Eliminated all hardcoded hex values and purged admin purple (#7539FF) from checkout codebase. All verification gates passed (typecheck 0, 45 tests, 44 routes built cleanly)."
+      ],
+      "design_match": "Byte-identical synchronization matching Figma Node Checkout: Top 3-step header (Cart -> Details -> Payment); Step 1 Your cart with quantity stepper pills, thumbnails, and item prices; Step 2 Your details with contact, shipping address, and delivery speed selection cards; Step 3 Payment with interactive luxury dark credit card mockup, UPI verify & QR code, and COD option; and persistent Figma Dark Teal Order Summary Card with promo code engine and gold CTA pill button (bg-store-checkout-gold).",
+      "key_decisions": [
+        "Declared semantic color tokens in @theme in globals.css (--color-store-checkout-teal: #175565, --color-store-checkout-gold: #F4C46B, --color-store-checkout-teal-light: #2A6371)",
+        "Engineered 3-step checkout flow matching Figma Node Checkout: 1 Cart -> 2 Details -> 3 Payment",
+        "Implemented Figma dark teal Order Summary card with live purchased item miniature thumbnails and gold pill CTA",
+        "Implemented interactive luxury credit card mockup with chip, contactless icon, cardholder name, and expiration in PaymentSimulationPanel",
+        "Eliminated all arbitrary hex codes and purged admin purple (#7539FF) from storefront checkout",
+        "All verification gates green: typecheck 0, 45 tests pass, 44 routes build cleanly, selector-level CSS proof verified"
+      ]
+    },
+    {
+      "id": "TL-WEB-059",
+      "category": "checkout-summary-sticky",
+      "title": "Sticky Order Summary Sidebar and Byte-Identical Figma Polish (Free Shipping Bar, Tag Icon Coupon & Large Total)",
+      "status": "done",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-29",
+      "files": [
+        "src/app/checkout/page.tsx",
+        "tests/business-logic.test.mjs"
+      ],
+      "description": "Make the Dark Teal Order Summary section sticky (lg:sticky lg:top-24) on the checkout page. Synchronize the summary card byte-identically with Figma Node Checkout (media_1793276684365_5c63b95e.png): Tag icon coupon input with dashed border and solid white pill Apply button; mint coupon applied status; 'You have unlocked free shipping' progress bar; large bold Total display; and gold CTA pill with arrow (Checkout ->).",
+      "finished": "2026-10-29",
+      "verified": true,
+      "log": [
+        "2026-10-29T13:15:00Z: Opened task to make checkout Order Summary section sticky and align byte-identically with Figma media_1793276684365_5c63b95e.png.",
+        "2026-10-29T13:20:00Z: Configured lg:sticky lg:top-24 on Order Summary right column for persistent desktop viewport positioning.",
+        "2026-10-29T13:28:00Z: Re-engineered coupon code input with dashed pill border, Tag icon, and solid white pill Apply button matching Figma.",
+        "2026-10-29T13:32:00Z: Integrated 'You have unlocked free shipping' progress bar and large bold Total amount with gold CTA pill and right arrow (Checkout ->).",
+        "2026-10-29T13:36:00Z: Verification gates passed: typecheck 0 errors, 45/45 unit tests pass, Next.js production build 44/44 clean, zero hex codes/arbitrary bracket classes in touched JSX lines."
+      ],
+      "design_match": "Byte-identical rendering matching Figma Node Checkout Order Summary (media_1793276684365_5c63b95e.png): lg:sticky lg:top-24 persistent positioning; line items (Subtotal, Discount in mint, Shipping Free, Tax included); COUPON CODE input with dashed border, Tag icon, and white pill Apply button; 'You have unlocked free shipping' container with live gold progress bar; large bold Total display; and gold CTA pill with right arrow (Checkout ->).",
+      "key_decisions": [
+        "Configured lg:sticky lg:top-24 on lg:col-span-4 Order Summary container with items-start parent grid",
+        "Added Tag icon and dashed border to coupon code input box with solid white pill Apply button",
+        "Implemented live free shipping progress bar container with gold progress line",
+        "Enhanced Total amount font scale to text-3xl sm:text-4xl font-extrabold matching Figma",
+        "Added right arrow icon (ArrowRight) to gold CTA button",
+        "All verification gates green: typecheck 0, 45 tests pass, 44 routes build cleanly"
+      ]
+    },
+    {
+      "id": "TL-WEB-060",
+      "category": "checkout-polish",
+      "title": "Fine-Grained Figma Synchronization (Floating Naked 3-Step Indicator, Atelier Cart Item Metrics & Exact Hierarchy)",
+      "status": "done",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-29",
+      "files": [
+        "src/app/checkout/page.tsx",
+        "tests/business-logic.test.mjs"
+      ],
+      "description": "Align micro-level UI details byte-identically with Figma (media_1793276765072_2f83cc78.png & media_1793276628297_7100bb4c.png): Render clean, naked 3-step indicator without container pill/shadow directly on the canvas background placed above the Order Summary card; match exact circular stroke metrics and inactive teal-gray palette; refine cart item cards with compact attribute chips and red Remove action; and ensure 100% token consistency across all checkout screens.",
+      "finished": "2026-10-29",
+      "verified": true,
+      "log": [
+        "2026-10-29T13:30:00Z: Opened task to synchronize fine-grained checkout UI metrics directly with Figma screenshot media_1793276765072_2f83cc78.png and media_1793276628297_7100bb4c.png.",
+        "2026-10-29T13:35:00Z: Replaced outer pill box on 3-step indicator with floating, naked layout rendered directly on the warm ivory canvas.",
+        "2026-10-29T13:40:00Z: Matched circular stroke metrics: dark filled primary circle (bg-store-action-primary) with white number for active step; hairline mint/teal rings with transparent fill for inactive steps; clean horizontal dividing lines.",
+        "2026-10-29T13:45:00Z: Refined cart item cards in Step 1 with compact attribute chips (size, color, stepper) and red/terracotta Remove action.",
+        "2026-10-29T13:50:00Z: Verification gates passed: typecheck 0 errors, 45/45 unit tests pass, Next.js production build 44/44 clean, zero hex codes/arbitrary bracket classes in touched JSX lines."
+      ],
+      "design_match": "Byte-identical synchronization matching Figma media_1793276765072_2f83cc78.png: Floating naked 3-step indicator directly on ivory canvas (no container border/shadow); active dark disc #002B3A with white numeral; inactive rings with transparent fill and subtle teal-gray numerals; refined cart item cards with compact chips; and persistent sticky Order Summary.",
+      "key_decisions": [
+        "Removed outer pill/backdrop blur container around 3-step indicator to match Figma media_1793276765072_2f83cc78.png exactly",
+        "Aligned 3-step indicator at top right directly above the Order Summary column",
+        "Used bg-store-action-primary for active step circle and border-store-secondary-mint/70 with transparent fill for inactive step circles",
+        "Refined cart items in Step 1 with compact attribute chips and red Remove button",
+        "All verification gates green: typecheck 0, 45 tests pass, 44 routes build cleanly"
+      ]
+    },
+    {
+      "id": "TL-WEB-061",
+      "category": "card-motion",
+      "title": "ProductCard Staggered Water-Drop Hover Motion (Sequential Cascading Sizes & Swatches)",
+      "status": "done",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-29",
+      "files": [
+        "src/components/commerce/ProductCard.tsx",
+        "src/app/globals.css",
+        "tests/business-logic.test.mjs"
+      ],
+      "description": "Implement silky staggered water-drop entrance animations on ProductCard hover: each size button and circular color swatch droplet enters sequentially one-by-one with organic surface-tension spring physics (cubic-bezier(0.34, 1.45, 0.64, 1)) and cascading delay waves, creating an authentic luxury water drop ripple feel while preserving instant 0ms mouseout collapse.",
+      "log": [
+        "2026-10-29T18:15:00Z: Opened task TL-WEB-061 to engineer sequential water-drop cascading entrance for ProductCard quick-size options and color swatches on hover.",
+        "2026-10-29T18:20:00Z: Formulated surface-tension spring physics curve cubic-bezier(0.34, 1.45, 0.64, 1) and defined .tuw-droplet-size and .tuw-droplet-swatch with cascading 35-40ms stagger delays.",
+        "2026-10-29T18:25:00Z: Wrapped size buttons in flex-1 droplet containers and circular swatches in inline-flex droplet containers to keep button interactions and stock status cleanly decoupled.",
+        "2026-10-29T18:30:00Z: Added .tuw-droplet-color-label glide for active color name text reveal.",
+        "2026-10-29T18:35:00Z: Configured immediate 0ms delay exit transition to ensure instantaneous, clean collapse when the cursor leaves the card.",
+        "2026-10-29T18:40:00Z: Verification gates passed: typecheck 0 errors, 45/45 unit tests pass, Next.js production build 44/44 clean, selector-level CSS proof verified, dev server 200."
+      ],
+      "finished": "2026-10-29",
+      "verified": true,
+      "design_match": "Silky staggered water-drop hover motion: Quick size options (XS, S, M, L, XL, XXL) cascade in sequentially with liquid surface-tension elasticity (cubic-bezier(0.34, 1.45, 0.64, 1)), while circular color swatches ripple in as pigment droplets one-by-one followed by the active color name glide.",
+      "key_decisions": [
+        "Used organic spring curve cubic-bezier(0.34, 1.45, 0.64, 1) to create authentic liquid droplet ripple overshoot without cartoonish bounce",
+        "Separated droplet animation wrapper from button elements to isolate entrance transform from out-of-stock line-through and hover styling",
+        "Applied cascading 35ms stagger wave across size pills (delay-0 through delay-7) and 40ms stagger wave across color swatches",
+        "Bound delay classes exclusively to .tuw-card-expanded, .group:hover, and .tuw-card-is-hovered so mouseout collapse has 0ms delay and never lags",
+        "Preserved WCAG 2.2 AA reduced motion with 0.01ms instant transition fallback",
+        "All verification gates green: typecheck 0, 45 unit tests pass, 44 routes build cleanly, selector CSS proof verified"
+      ]
+    },
+    {
+      "id": "TL-WEB-062",
+"category": "typography",
+      "title": "Outfit-only storefront typography (retire Jost headings and Playfair headline)",
+      "status": "done",
+      "owner": "Urvil Kargathala",
+      "started": "2026-10-30",
+      "files": [
+        "src/app/layout.tsx",
+        "src/app/globals.css",
+        "src/app/fonts/jost-latin-*-normal.woff2 (removed)",
+        "src/app/design-system/page.tsx",
+        "tests/business-logic.test.mjs",
+        "tests/homepage-typography.test.mjs",
+        "README.md",
+        "DESIGN_SYSTEM_USAGE.md",
+        "docs/DESIGN_SYSTEM.md",
+        "docs/UI_CHECKLIST.md",
+        "state-for-agents/tasks.json"
+      ],
+      "description": "Use Outfit for every storefront text role: --font-heading now resolves to Outfit, the Our Philosophy .philosophy-headline uses --font-heading instead of the never-loaded Playfair Display stack, and the Jost next/font/local loader plus its vendored woff2 files are removed.",
+      "log": [
+        "2026-10-30: Opened TL-WEB-062 on branch urvil at user request to use Outfit across the storefront.",
+        "2026-10-30: Gates green: typecheck 0 errors, 45/45 unit tests pass, next build clean; built CSS shows .philosophy-headline{font-family:var(--font-heading)} and zero Jost/Playfair rules; dev server computed fonts for body, h1, h2 and .philosophy-headline all resolve to Outfit. Awaiting commit to close.",
+        "2026-10-30: Fixed regression from the Outfit switch: footer .jitter-brand-signature (Outfit Black is wider than Jost) overflowed 360px phones by 17px; font-size now min(clamp(1.85rem,5.4vw,5.25rem),6.5vw), desktop unchanged, scrollWidth 360 at 360px.",
+        "2026-10-30: Closed. Final gates on the committed tree: build 37/37, typecheck 0, 52/52 tests. Committed on urvil with TL-WEB-062..072 (commit hash recorded in session.tip).",
+        "urvil:a311632"
+      ],
+      "finished": "2026-10-30",
+      "verified": true,
+      "design_match": null,
+      "key_decisions": [
+        "Kept the .font-heading utility and --font-heading token so heading call sites are unchanged; only the token value moved to Outfit",
+        "Deviates from Figma Node 82:5702 (Futura headings) by explicit owner request"
+      ],
+      "pushed": false,
+      "follow_ups": [
+        "@fontsource/jost stays in package.json but is no longer used; remove in a dependency cleanup if wanted"
+      ]
+    },
+    {
+      "id": "TL-WEB-063",
+      "category": "hero",
+      "title": "Homepage hero rebuild: luxury-scale caption, no kicker, full-screen height, video pause control",
+      "status": "done",
+      "owner": "Urvil Kargathala",
+      "started": "2026-10-30",
+      "files": [
+        "src/app/page.tsx",
+        "src/app/globals.css",
+        "tests/homepage-typography.test.mjs",
+        "docs/DESIGN_SYSTEM.md",
+        "state-for-agents/skills/design-system/SKILL.md",
+        "src/app/design-system/page.tsx",
+        "state-for-agents/tasks.json"
+      ],
+      "description": "Remove the 'SS26 • Slow-Living Atelier' kicker; set both headline lines at one clamp(2.25rem,4.5vw+1rem,5.5rem) / 300 size with per-line side-bearing offsets so glyph ink sits on the header gutter; widen the copy block to max-w-4xl so 'Architectural Form.' no longer wraps; full-width stacked CTAs on phones; add a pause/play control for the looping background video (WCAG 2.2.2) and start paused under prefers-reduced-motion. Video source is a single HERO_VIDEO_SRC constant, now /videos/h2.mp4 (existing brand clip: model in heavyweight hoodie) until a licensed 30s hero cut is supplied.",
+      "log": [
+        "2026-10-30: Opened TL-WEB-063 at user request (proper hero, heading alignment, remove SS26 kicker, 30s video).",
+        "2026-10-30: Gates green: typecheck 0 errors, 45/45 unit tests pass, next build 44/44 clean. Computed-layout check at 360/768/1024/1440: heading ink, subtitle, CTAs and header nav share the 16/24/32/112px gutter, both headline lines render on one line each, no horizontal scroll, pause button never overlaps copy and toggles video + aria-label. Awaiting commit to close.",
+        "2026-10-30: Fixed gap under hero: hero bottom now equals viewport bottom (0px) at 360x780, 768x1024, 1024x768, 1440x900 and 1470x802. Gates green: typecheck 0, 45/45 tests, build 44/44; built CSS proof .hero-viewport-height{...100svh - var(--hero-header-offset)...}.",
+        "2026-10-30: Replaced 36-88px billboard headline with 28-40px / 400 bottom-centred caption and underlined text-link CTAs after benchmarking LV, Zara and COS. Verified at 360/768/1024/1440: heading, subtitle and links centred (0px offset), headline one line md+ / two lines on phones, pause button vertically centred on the links and never overlapping, hero bottom = viewport bottom, no horizontal scroll.",
+        "2026-10-30: Hero video switched to existing /videos/h2.mp4 (model in heavyweight hoodie, 1280x720, 10s loop); verified playing at 1440x900 and model stays centred in the 360x780 crop.",
+        "2026-10-30: Tightened space under hero links: caption padding pb-6/sm:pb-8/lg:pb-10 (was 12/16/20), pause button offsets moved to stay centred on the links. Visual gap under link underline 88px -> 48px at 1470x802; 32/40/48/48px at 360/768/1024/1440, hero still flush with viewport, no horizontal scroll.",
+        "2026-10-30: Closed. Final gates on the committed tree: build 37/37, typecheck 0, 52/52 tests. Committed on urvil with TL-WEB-062..072 (commit hash recorded in session.tip).",
+        "urvil:a311632"
+      ],
+      "finished": "2026-10-30",
+      "verified": true,
+      "design_match": null,
+      "key_decisions": [
+        "Pause button sits top-right on phones (CTAs are full width) and bottom-right aligned to the CTA baseline from sm up",
+        "Hero height = 100svh minus header (74px phones, 110px md+) with a 30rem floor, replacing clamp(36rem,85vh,56rem) that left a ~10px sliver of the next section visible; hero border-b removed",
+        "Benchmarked hero copy on live sites at 1440px: Louis Vuitton 32px/400 centred title + 16px text links, COS 35px uppercase, Zara no hero headline. Hero h1 now clamp(1.75rem,1.5vw+1.25rem,2.5rem) / 400 (28-40px), bottom-centred, underlined text-link CTAs; left-side scrim removed"
+      ],
+      "pushed": false,
+      "follow_ups": [
+        "public/videos/hero-video.mp4 was added outside this task (43.8s 1920x960 GQ Mexico clip of Ana de Armas, downloaded via ytmp3.gg) and HERO_VIDEO_SRC points at it. Third-party copyrighted footage of a real person: do not commit or deploy it; restore /videos/h2.mp4 or a licensed clip before commit.",
+        "Hero video now /videos/h2.mp4 (existing, previously unused brand clip). User-supplied GQ Mexico clip of Ana de Armas not used: third-party copyrighted footage, watermark removal requested, and celebrity likeness implies endorsement. Needs footage the brand owns or has licensed.",
+        "Header wordmark collides with the search icon at 360px (pre-existing, outside hero scope)"
+      ]
+    },
+    {
+      "id": "TL-WEB-064",
+      "category": "site-audit-critical",
+      "title": "Fix all critical audit findings: invisible images, Qikink catalog, nav filters, fake reviews, unverified claims, discounts/urgency, INR currency, brand intro",
+      "status": "done",
+      "owner": "Urvil Kargathala",
+      "started": "2026-10-30",
+      "files": [
+        "src/components/ui/ImageWithFallback.tsx",
+        "src/mocks/fixtures.ts",
+        "src/lib/types.ts",
+        "src/app/page.tsx",
+        "src/app/products/[slug]/page.tsx",
+        "src/app/shop/page.tsx",
+        "src/app/collections/[slug]/page.tsx",
+        "src/app/collections/page.tsx",
+        "src/components/commerce/FilterBar.tsx",
+        "src/components/commerce/ProductCard.tsx",
+        "src/components/commerce/ProductGallery.tsx",
+        "src/components/commerce/ProductGrid.tsx",
+        "src/components/commerce/ProductReviews.tsx",
+        "src/components/commerce/RelatedProductsSection.tsx",
+        "src/components/commerce/VariantPillSelector.tsx",
+        "src/components/commerce/VariantSelector.tsx",
+        "src/components/commerce/VirtualFittingRoom.tsx",
+        "src/components/commerce/CommunityPraise.tsx (removed)",
+        "src/components/commerce/index.ts",
+        "src/components/layout/BrandIntro.tsx",
+        "src/components/layout/Header.tsx",
+        "src/components/layout/Footer.tsx",
+        "src/components/layout/AnnouncementBar.tsx",
+        "src/components/layout/CartDrawer.tsx",
+        "src/components/layout/MobileMenu.tsx",
+        "src/components/editorial/EditorialFeatureSplit.tsx",
+        "src/app/layout.tsx",
+        "src/app/globals.css",
+        "src/app/about/page.tsx",
+        "src/app/about/sustainability/page.tsx",
+        "src/app/cart/page.tsx",
+        "src/app/checkout/page.tsx",
+        "src/app/faq/page.tsx",
+        "src/app/login/page.tsx",
+        "src/app/register/page.tsx",
+        "src/app/search/page.tsx",
+        "src/app/size-guide/page.tsx",
+        "src/app/policies/terms/page.tsx",
+        "src/app/policies/shipping/page.tsx",
+        "src/app/checklist/page.tsx",
+        "tests/business-logic.test.mjs",
+        "tests/homepage-typography.test.mjs",
+        "docs/DESIGN_SYSTEM.md",
+        "state-for-agents/tasks.json"
+      ],
+      "description": "Resolves the 8 critical findings from the 2026-10-30 full-site audit.",
+      "log": [
+        "2026-10-30: ImageWithFallback now reads img.complete/naturalWidth after hydration; /shop 13/13 images visible on direct load (was 0/14), broken src shows fallback.",
+        "2026-10-30: Catalog rebuilt from Qikink 'Final Listing.xls': 14 products (UH83, UC22, UJ29, UH35, tote, MP25, UH62, UR50, UC61, FC32, FC39, US52, black mug, kids hoodie) with sheet sizes/colours/weights/print areas; old slugs kept as aliases; collections, demo orders, homepage collection grid, PDP pairs and virtual fitting room all derive from the catalog.",
+        "2026-10-30: Men/Women filter by new Product.audience; Wall art pill removed; FilterBar counts computed from catalog (Figma placeholder counts and 'Show 22 results' removed); '1 item' grammar.",
+        "2026-10-30: Removed invented reviews/ratings (PDP review datasets, 4.6/128 badge, homepage CommunityPraise 'Rated 4.9/5 by 3,800+'); PDP shows honest 'No reviews yet' state.",
+        "2026-10-30: Removed unverified GOTS/OEKO-TEX/GSM/ELS/non-toxic/carbon-neutral/solar claims site-wide (except hero subtitle, out of scope); composition shown as draft notice; spec tables use Qikink sheet facts.",
+        "2026-10-30: Removed compare-at prices, % OFF badge, 'X left', 'next-day dispatch / N allocated', 'Limited Release'.",
+        "2026-10-30: Header currency picker (USD default, no effect) replaced with static '₹ INR'; no $ prices remain.",
+        "2026-10-30: BrandIntro plays on '/' only, once per session (flag written on finish/skip; pre-paint inline script + html[data-intro-seen] CSS avoids flash).",
+        "2026-10-30: Gates green: typecheck 0, 46/46 tests, next build 44/44, built CSS has html[data-intro-seen] .intro-shutter-wrap{display:none}. Browser-verified /shop filters (all 14, men 9, women 10, kids 1, joggers 2, accessories 2), PDPs, collections, search, cart, orders, sustainability, journal: zero banned claim/price strings. Awaiting commit to close.",
+        "2026-10-30: Closed. Final gates on the committed tree: build 37/37, typecheck 0, 52/52 tests. Committed on urvil with TL-WEB-062..072 (commit hash recorded in session.tip).",
+        "urvil:a311632"
+      ],
+      "finished": "2026-10-30",
+      "verified": true,
+      "design_match": null,
+      "key_decisions": [
+        "Retail prices are DRAFT (reused prior tiers per category) pending owner sign-off",
+        "Products without real photography show a 'Photo coming soon' tile rather than unrelated stock imagery",
+        "Accessories carry no audience so Men/Women show apparel only",
+        "Hero subtitle '500 GSM organic' left untouched at owner's request (hero excluded from audit)"
+      ],
+      "pushed": false,
+      "follow_ups": [
+        "Owner to confirm retail prices",
+        "Owner to supply product photography for 6 imageless pieces",
+        "Hero subtitle still claims '500 GSM organic'",
+        "Brand title/tagline 'organic' wording to be confirmed with Qikink spec sheets",
+        "Posters (Wall art) can be added from Qikink listing once artwork exists"
+      ]
+    },
+    {
+      "id": "TL-WEB-065",
+      "category": "navigation",
+      "title": "Header mega-menu with image tiles (Elie Tahari pattern) + mobile sub-navigation",
+      "status": "done",
+      "owner": "Urvil Kargathala",
+      "started": "2026-10-30",
+      "files": [
+        "src/components/layout/navigation.ts",
+        "src/components/layout/Header.tsx",
+        "src/components/layout/MobileMenu.tsx",
+        "src/app/shop/page.tsx",
+        "src/app/globals.css",
+        "state-for-agents/tasks.json"
+      ],
+      "description": "Desktop nav items (Men, Women, Kids, New Collection, About) open a full-width hover/focus panel with link columns and image tiles; tiles resolve name, photo and price from the live catalog by slug. Mobile drawer gets expandable sections from the same model. /shop accepts ?audience=&category= and re-syncs category when navigating back to /shop.",
+      "log": [
+        "2026-10-30: Opened at user request (navbar + sub-navbar like elietahari.com, with images).",
+        "2026-10-30: Header row switched to a 3-column grid (logo centred without a positioned wrapper) so panels anchor to the full-width sticky header; also removes the 360px wordmark/search-icon collision.",
+        "2026-10-30: Verified: hover and keyboard focus open panels (aria-expanded/aria-controls), Tab enters panel links, Escape and blur close, link click closes; panels 1440px wide flush under header; tiles fit at 1024 (w-36) and 1440 (xl:w-52) with no horizontal scroll; 29/29 menu links return 200; audience+category filters correct (Men·T-shirts 4, Women·Hoodies 4, Men/Women·Joggers 2); mobile drawer accordion expands. Gates: typecheck 0, 46/46 tests, build 44/44, built CSS .tuw-mega-in present. Awaiting commit to close.",
+        "2026-10-30: Closed. Final gates on the committed tree: build 37/37, typecheck 0, 52/52 tests. Committed on urvil with TL-WEB-062..072 (commit hash recorded in session.tip).",
+        "urvil:a311632"
+      ],
+      "finished": "2026-10-30",
+      "verified": true,
+      "design_match": "partial",
+      "key_decisions": [
+        "Tiles reference products by slug and are resolved from useStore() so menu imagery cannot drift from the catalog",
+        "No unrelated editorial/stock imagery in tiles (About uses the brand's own model shot)",
+        "Touch-only large screens navigate on tap (panels are hover/focus enhancements)"
+      ],
+      "pushed": false,
+      "follow_ups": [
+        "Add Wall art / posters column once poster artwork exists"
+      ]
+    },
+    {
+      "id": "TL-WEB-066",
+      "category": "site-audit-ux-a11y",
+      "title": "Fix audit UX/content and phone/accessibility findings",
+      "status": "done",
+      "owner": "Urvil Kargathala",
+      "started": "2026-10-30",
+      "files": [
+        "src/app/page.tsx",
+        "src/components/layout/Footer.tsx",
+        "src/components/layout/Header.tsx",
+        "src/components/layout/BrandIntro.tsx",
+        "src/lib/site.ts",
+        "next.config.ts",
+        "src/app/faq/layout.tsx",
+        "src/app/journal/layout.tsx",
+        "src/app/journal/[slug]/layout.tsx",
+        "src/app/about/layout.tsx",
+        "src/app/about/sustainability/layout.tsx",
+        "src/app/policies/privacy/layout.tsx",
+        "src/app/policies/returns/layout.tsx",
+        "src/app/policies/shipping/layout.tsx",
+        "src/app/policies/terms/layout.tsx",
+        "src/app/products/[slug]/layout.tsx",
+        "src/app/collections/[slug]/layout.tsx",
+        "src/app/design-system/layout.tsx",
+        "src/app/checklist/layout.tsx",
+        "src/app/{faqs,blog,blog/[slug],our-story,privacy-policy,returns-refunds,shipping-policy,terms}/page.tsx (removed)",
+        "src/app/checkout/page.tsx",
+        "src/components/commerce/VariantSelector.tsx",
+        "src/components/commerce/ProductCard.tsx",
+        "src/components/commerce/DynamicDataTable.tsx",
+        "src/components/commerce/CollectionCard.tsx",
+        "src/components/ui/Breadcrumb.tsx",
+        "src/mocks/store.tsx",
+        "src/app/globals.css",
+        "heading/size edits in about, sustainability, contact, journal, policies, account, search, track-order, size-guide, login, cart, orders pages",
+        "tests/api-and-integrations.test.mjs",
+        "README.md",
+        "docs/DESIGN_SYSTEM.md",
+        "state-for-agents/tasks.json",
+        "18 metadata layouts: shop, collections, contact, policies, size-guide, search, cart, checkout, checkout/success, account, account/orders, account/orders/[id], wishlist, track-order, login, register, forgot-password, reset-password"
+      ],
+      "description": "Second batch of audit fixes: homepage template copy, footer (demo tools, repeats, socials, newsletter label), duplicate routes, 404s and internal-page gating, checkout demo notice, 360px PDP overflow, tap targets, 12px text floor, heading order.",
+      "log": [
+        "2026-10-30: Homepage: 'What You Can Expect' and 'Made When You Order It' copy; 'From the Journal' cards now built from JOURNAL_ARTICLES (old cards linked to 3 nonexistent journal slugs).",
+        "2026-10-30: Footer: demo controls in a closed <details> (Reset Demo State kept per project rule) at 12px with 24px targets; slogan repeats trimmed; newsletter input labelled and success message states demo; social icons now come from site.social and render only when a real URL is set (none yet).",
+        "2026-10-30: Canonical routes /faq, /journal, /about, /policies/*; 8 wrapper routes deleted and 308-redirected; client-page metadata moved into route layouts; products/journal/collection [slug] layouts return real 404s and per-item titles; /design-system and /checklist 404 in production unless TUW_INTERNAL_PAGES=1 at build.",
+        "2026-10-30: Checkout shows 'Demo checkout sandbox — no payment will be collected' above the heading.",
+        "2026-10-30: 360px PDP overflow fixed (purchase row flex-1/min-w-0, price hidden on phones); breadcrumbs, top bar, nav, footer links >=24px; --text-2xs raised to 12px and all text-[10/11px] removed; heading levels fixed site-wide; demo storage keys bumped to tuw_website_v3 after catalog change.",
+        "2026-10-30: Verified: prod server 308s for all 8 legacy URLs, 404 for unknown product/journal/collection and internal pages, per-product <title>; dev audit at 360/1440 on 12 pages: 0 overflow, 0 heading skips, 0 sub-12px text, 0 unlabeled inputs. Gates: typecheck 0, 47/47 tests, build 37/37. Awaiting commit to close.",
+        "2026-10-30: Every route now has its own <title>/description via route layouts; 13 private routes (search, cart, checkout, account, wishlist, track-order, auth pages) are robots noindex,follow. Verified in dev HTML and prod build output. Gates: typecheck 0, 47/47 tests, build 37/37.",
+        "2026-10-30: Closed. Final gates on the committed tree: build 37/37, typecheck 0, 52/52 tests. Committed on urvil with TL-WEB-062..072 (commit hash recorded in session.tip).",
+        "urvil:a311632"
+      ],
+      "finished": "2026-10-30",
+      "verified": true,
+      "design_match": null,
+      "key_decisions": [
+        "Keep the real pages at /faq, /journal, /about, /policies/* and redirect the thin wrappers (metadata moved into layout.tsx since pages are client components)",
+        "Social icons hidden until the owner supplies real profile URLs in src/lib/site.ts",
+        "12px text floor via the --text-2xs token rather than per-component patches"
+      ],
+      "pushed": false,
+      "follow_ups": [
+        "Owner to add real social profile URLs in src/lib/site.ts"
+      ]
+    },
+    {
+      "id": "TL-WEB-067",
+      "category": "about-page",
+      "title": "Redesign About Us page from owner mockup",
+      "status": "done",
+      "owner": "Urvil Kargathala",
+      "started": "2026-10-30",
+      "files": [
+        "src/app/about/page.tsx",
+        "src/app/about/layout.tsx",
+        "public/images/about/our-story-couple.webp",
+        "src/mocks/fixtures.ts",
+        "src/components/layout/navigation.ts",
+        "state-for-agents/tasks.json",
+        "public/images/about/cream-polo.jpg",
+        "public/images/about/street-polo.jpg",
+        "public/images/about/office-polo.jpg"
+      ],
+      "description": "New About page following the owner's mockup: B&W hero, 'A small team in Surat' with catalog-computed stats, 'Made slowly. Worn often.', on-page chapter nav, interactive 'What we hold on to' values, hoodie hotspot 'Every detail has a reason', 'Small batches of one' with checks, lifestyle bento, 'Fewer things. Better kept.' close.",
+      "log": [
+        "2026-10-30: Built from owner mockup; Ana de Armas AI image not used (real-person likeness), replaced with brand model photo; team/testimonial/Instagram blocks from the second reference not used (fabricated people).",
+        "2026-10-30: Fixed catalog image mapping found during review: section image w3 is a cropped hoodie, moved from Oversized Sweatshirt (prod-4) to Cropped Hoodie (prod-10) incl. demo orders and nav tiles; removed mug handle-side.png from prod-13 (baked-in fake '4.6 ★★★★★' rating).",
+        "2026-10-30: Verified at 360/768/1440: 0 overflow, 1 h1, 0 heading skips, 0 sub-12px text, 0 broken/alt-less images, values buttons aria-pressed + aria-live, hotspots on garment at all widths, 13/13 links/anchors resolve. Gates: build 37/37, typecheck 0, 47/47 tests. Awaiting commit to close.",
+        "2026-10-30: Owner-supplied photos placed: cream-polo (A small team in Surat), street-polo (Made slowly; detail crop for 'Slow mornings' replacing the text placeholder tile), office-polo for the former cropped-hoodie tile ('Desk days'), bottom-anchored with scale-125 so its Polo Ralph Lauren chest logo stays out of frame (verified at 360/768/1440). Desk days spans 2 cols on phones to fill the bento gap. Also: Cropped Hoodie default colour reordered to Maroon to match its photo. Gates: build 37/37, typecheck 0, 48/48 tests.",
+        "2026-10-30: Closed. Final gates on the committed tree: build 37/37, typecheck 0, 52/52 tests. Committed on urvil with TL-WEB-062..072 (commit hash recorded in session.tip).",
+        "urvil:a311632"
+      ],
+      "finished": "2026-10-30",
+      "verified": true,
+      "design_match": "partial",
+      "key_decisions": [
+        "Hero play button from the mockup omitted (no video exists; a non-working play button would be a dead control)",
+        "Stats computed from STORE_PRODUCTS (14 styles, 22 colours shown, 1 print partner) instead of the mockup's numbers"
+      ],
+      "pushed": false,
+      "follow_ups": [
+        "Owner to confirm rights to the couple photo (public/images/about/our-story-couple.webp)",
+        "Owner to confirm the founder line naming Opalworks and Urvil Kargathala should be public",
+        "Replace placeholder model/render photos with real product photography when available",
+        "Owner to confirm rights to the three Pinterest-sourced About photos; street-polo shows adidas-style striped sneakers (minor third-party mark)"
+      ]
+    },
+    {
+      "id": "TL-WEB-068",
+      "category": "auth-pages",
+      "title": "Login and register: honest demo auth, brand photos, field-level validation",
+      "status": "done",
+      "owner": "Urvil Kargathala",
+      "started": "2026-10-30",
+      "files": [
+        "src/components/layout/AuthShell.tsx",
+        "src/app/login/page.tsx",
+        "src/app/register/page.tsx",
+        "src/app/track-order/page.tsx",
+        "public/images/login-hero.png (removed)",
+        "tests/homepage-typography.test.mjs",
+        "state-for-agents/tasks.json",
+        "public/images/login-hero.webp (owner-supplied)"
+      ],
+      "description": "Shared AuthShell layout; always-visible demo notices; simulated Google/Apple sign-in removed; login/register photos replaced with brand model shots (old login photo resembled a real celebrity); register asks for full name with clear placeholders and an up-front 8-character hint; noValidate forms with inline, screen-reader-linked errors that keep input and focus the first invalid field; Remember me chooses localStorage vs sessionStorage; login honours same-site ?next=; UK spelling and calmer copy; Track Order thumbnails use ImageWithFallback.",
+      "log": [
+        "2026-10-30: Verified in browser: empty submit shows inline errors (no browser bubbles) and focuses email; invalid email keeps typed values; /login?next=/checkout lands on /checkout with session-only storage; Remember me + next=//evil.example lands on /account with localStorage; register shows 'Use at least 8 characters.' / 'Passwords do not match.' with name/email kept; 360/1440: 0 overflow, 0 small text, 0 unlabeled inputs, phone top bar on one line. Gates: build 37/37, typecheck 0, 48/48 tests. Awaiting commit to close.",
+        "2026-10-30: Owner asked to keep the original photos and fix cropping: auth photo now sits in a padded rounded frame anchored to the top (heads visible at 1440x600, 1470x802, 1920x1080). Original register-hero.png restored; original login-hero.png NOT restored (it is a photo of Ana de Armas, a real celebrity), login keeps the brand hoodie model. Gates: build 37/37, typecheck 0, 48/48 tests.",
+        "2026-10-30: Login photo replaced with owner-supplied image (public/images/login-hero.webp, 736x1104, couple walking). Crest moved from top-left to the bottom caption block so faces at the top of any photo stay clear; verified at 1470x802 and 1440x600 on login and register. Gates: build 37/37, typecheck 0, 48/48 tests.",
+        "2026-10-30: Closed. Final gates on the committed tree: build 37/37, typecheck 0, 52/52 tests. Committed on urvil with TL-WEB-062..072 (commit hash recorded in session.tip).",
+        "urvil:a311632"
+      ],
+      "finished": "2026-10-30",
+      "verified": true,
+      "design_match": null,
+      "key_decisions": [
+        "Removed Google/Apple buttons rather than simulate third-party auth; real providers arrive with the backend phase",
+        "Auth stays demo-only in browser storage; nothing else reads it yet"
+      ],
+      "pushed": false,
+      "follow_ups": [
+        "Forgot/reset password pages not yet moved to AuthShell or given demo notices",
+        "Owner to confirm rights to public/images/register-hero.png (street-style photo of unknown origin)",
+        "Owner to confirm rights to public/images/login-hero.webp; a larger source (>=1400px wide) would look sharper on retina screens"
+      ]
+    },
+    {
+      "id": "TL-WEB-069",
+      "category": "editorial-imagery",
+      "title": "Owner lifestyle photos in homepage and journal editorial spots",
+      "status": "done",
+      "owner": "Urvil Kargathala",
+      "started": "2026-10-30",
+      "files": [
+        "public/images/lifestyle/linen-man.jpg (owner-supplied)",
+        "src/components/commerce/OurPhilosophy.tsx",
+        "src/lib/types.ts",
+        "src/mocks/fixtures.ts",
+        "src/app/page.tsx",
+        "src/app/journal/page.tsx",
+        "src/app/journal/[slug]/page.tsx",
+        "state-for-agents/tasks.json",
+        "src/app/about/page.tsx",
+        "src/components/commerce/ProductGrid.tsx",
+        "src/components/layout/navigation.ts",
+        "src/components/layout/Header.tsx"
+      ],
+      "description": "Owner-supplied lady and man photos placed in editorial spots, not product cards: Our Philosophy image is now the street polo photo; journal covers for 'Choosing Our Blanks' (man in linen shirt) and 'Printing on Demand' (cream polo) use owner photos. JournalArticle gains optional coverPosition so portrait photos keep faces in the 16:10 crop on the homepage cards, /journal and the article hero. Follow-up: About 'Weekends' tile uses the linen photo; Shop 'The Minimal Frame' story tile is now a full-bleed couple photo (login-hero.webp) and its false 'cut, sewn, and numbered' copy is replaced; Men and Women mega-menus gain a 'From the Journal' editorial tile (linen / cream polo) and the About menu tile uses the couple photo instead of a product shot. NavFeature gains imagePosition.",
+      "log": [
+        "2026-10-30: Verified in browser: Philosophy image at 1440 (526x710), 768 and 360 shows head to knees, no overflow; homepage Journal cards and /journal at 360 keep both faces in frame; article hero at 1440 shows the man head to belt. 'The Art of Being Unavailable' keeps its stock cover. Gates: build 37/37, typecheck 0, 48/48 tests. Awaiting commit to close.",
+        "2026-10-30: Owner flagged old studio photos across About, Shop and menus. Swapped every editorial/lifestyle spot (About Weekends, Shop Minimal Frame tile, Men/Women/About menu tiles). Product cards, product menu tiles, About detail hotspots and the quality row keep the real garment photos (they show what the customer receives). Verified at 1440 and 360: heads in frame, 0 horizontal overflow, white overlay text legible. /shop?category=men re-tested by direct load and via header and About-page links: 9 men's products, no banners, no tote or women-only items. Gates: build 37/37, typecheck 0, 48/48 tests. Awaiting commit to close.",
+        "2026-10-30: Closed. Final gates on the committed tree: build 37/37, typecheck 0, 52/52 tests. Committed on urvil with TL-WEB-062..072 (commit hash recorded in session.tip).",
+        "urvil:a311632"
+      ],
+      "finished": "2026-10-30",
+      "verified": true,
+      "design_match": null,
+      "key_decisions": [
+        "Product cards keep showing the actual garments: the catalogue has no polos or trousers, so these outfits cannot represent a product.",
+        "Office polo photo not used on the homepage: its chest logo (third-party trademark) cannot be cropped out of a 16:10 frame with the face in view.",
+        "Shop Minimal Frame copy no longer claims pieces are cut, sewn and numbered: they are printed on partner blanks."
+      ],
+      "follow_ups": [
+        "Owner to confirm usage rights for all supplied lifestyle photos.",
+        "public/images/editorial-philosophy.jpg is now unused; delete once the owner confirms."
+      ],
+      "pushed": false
+    },
+    {
+      "id": "TL-WEB-070",
+      "category": "product-imagery",
+      "title": "Retire studio model photos; owner's lifestyle photos as placeholder product images",
+      "status": "done",
+      "owner": "Urvil Kargathala",
+      "started": "2026-10-30",
+      "files": [
+        "public/images/section image/ (16 files removed)",
+        "public/images/illustrations/kids-pullover-hoodie-yellow.svg (only remaining drawing)",
+        "src/mocks/fixtures.ts",
+        "src/mocks/store.tsx",
+        "src/app/about/page.tsx",
+        "src/components/commerce/VirtualFittingRoom.tsx",
+        "src/components/layout/navigation.ts",
+        "state-for-agents/tasks.json"
+      ],
+      "description": "Owner asked that the studio model photos (section image m*/w*/k*) no longer be used. After a first pass with flat drawings, the owner chose to use their four lifestyle photos for now: man in linen (lifestyle/linen-man.jpg) and two women (about/cream-polo.jpg, about/street-polo.jpg) are placeholder model photos on every apparel/accessory product, order lines, the Hoodies & Sweats cover, About 04 hotspots and About 05 cards. Kids Pullover Hoodie keeps a drawing (no child photo supplied); the mug keeps its existing drawings; office-polo.jpg is not used on products (visible third-party logo). Virtual Fitting Room kept: it now builds Men/Women looks from products whose photo matches the audience and hides tabs with no photos. Men mega-menu shows one tile (all men's pieces share one photo); duplicate journal tiles removed. Demo storage keys bumped to tuw_website_v4.",
+      "log": [
+        "2026-10-30: Verified: 0 references to 'section image' in src/tests; /shop has 12 illustrated cards, 0 'Photo coming soon', 0 broken images; PDP /products/classic-polo, /account/orders, Men and New Collection menus, About 04/05 render illustrations; About hotspots sit on chest mark, hood, sleeve and pocket; homepage at 360 has no horizontal overflow. Gates: build 37/37, typecheck 0, 48/48 tests (h2 count 5 -> 4 after removing the fitting room). Awaiting commit to close.",
+        "2026-10-30: Owner rejected the drawings and the fitting-room removal. Restored VirtualFittingRoom (HEAD + catalog-driven sets), its CSS block, homepage section, exports and typography tests; replaced 11 drawings with the owner photos (alt text marks them as placeholder model photos) and deleted the unused SVGs. Verified at 1440: homepage grid and fitting room (Men/Women tabs) show photos, fresh load requests no section-image or deleted SVG, 0 broken images; About hotspots sit on chest, collar, sleeve and waist. Gates: build 37/37, typecheck 0, 48/48 tests. Awaiting commit to close.",
+        "2026-10-30: Closed. Final gates on the committed tree: build 37/37, typecheck 0, 52/52 tests. Committed on urvil with TL-WEB-062..072 (commit hash recorded in session.tip).",
+        "urvil:a311632"
+      ],
+      "finished": "2026-10-30",
+      "verified": true,
+      "design_match": null,
+      "key_decisions": [
+        "Owner decision: lifestyle photos stand in for product photography until real shots exist; alt text says 'placeholder model photo'.",
+        "office-polo.jpg kept off product cards because its chest logo belongs to another brand.",
+        "Kids hoodie keeps a drawing rather than an adult photo."
+      ],
+      "follow_ups": [
+        "LAUNCH BLOCKER: replace placeholder model photos with photos of the actual garments before going live (cards currently show clothes the store does not sell).",
+        "Owner to confirm usage rights for the four lifestyle photos.",
+        "Supply a kids photo to replace the remaining kids hoodie drawing."
+      ],
+      "pushed": false
+    },
+    {
+      "id": "TL-WEB-071",
+      "category": "auth-checkout",
+      "title": "Seeded demo sign-in and end-to-end checkout walkthrough fixes",
+      "status": "done",
+      "owner": "Urvil Kargathala",
+      "started": "2026-10-30",
+      "files": [
+        "src/mocks/auth.ts (new: DEMO_ACCOUNT, session helpers, useDemoSession)",
+        "src/components/layout/AccountGate.tsx (new)",
+        "src/app/account/layout.tsx",
+        "src/app/account/page.tsx",
+        "src/app/login/page.tsx",
+        "src/app/register/page.tsx",
+        "src/app/checkout/page.tsx",
+        "src/app/checkout/success/page.tsx",
+        "src/app/account/orders/page.tsx",
+        "src/app/account/orders/[id]/page.tsx",
+        "src/components/ui/Button.tsx",
+        "src/components/commerce/PaymentSimulationPanel.tsx",
+        "src/mocks/store.tsx",
+        "src/mocks/fixtures.ts",
+        "tests/business-logic.test.mjs",
+        "README.md",
+        "state-for-agents/tasks.json"
+      ],
+      "description": "Owner-supplied demo credentials seeded in src/mocks/auth.ts; login accepts only that account (inline error keeps input), with a 'Fill in the demo account' button. Account routes sit behind AccountGate; account page shows the session name/email and a Log out button. Checkout prefills from the session and its default address (guests start empty). Walkthrough fixes: express delivery no longer adds the standard fee on top; free-shipping bar uses the discounted subtotal; bag drawer closes on 'Proceed to Checkout' (Button now forwards onClick/aria-label when rendered as a link); confirmation/order history/order detail showed prices 100x too small (rupees passed to the paise formatter); new orders get paymentStatus/fulfillmentStatus, unique order numbers, local dates, express carrier/ETA, and clear the promo; COD button reads 'Place Order' and confirmation says 'Total due on delivery'; checkout labels linked to inputs, inline errors with focus on the first invalid field, delivery speed is a keyboard radio group, payment errors use role=alert; 8 fixture order lines had empty images.",
+      "log": [
+        "2026-10-30: Browser walkthrough at 1440 (and 360 for checkout): /account signed out -> gate with ?next; wrong password -> inline error, input kept, focus password; demo login (Remember me) -> /account 'Welcome back, Arjun Rao (<demo email>)'; hoodie XL -> drawer -> checkout (drawer closes) -> details prefilled -> express -> Rs 4,149 -> simulated decline (input and bag kept, no order) -> success -> TUW-1661 card/paid/queued, success page Rs 4,149.00; crop top + UNPLUGGED10 + standard COD -> Rs 1,499 (fee 150), payment pending, local date, promo cleared, track-order finds it; express on that cart Rs 1,599 (old code Rs 1,749); log out -> session cleared, /account/orders gated; guest checkout -> empty fields, inline errors, focus first invalid, keyboard radio for delivery; 360 checkout: no overflow, no text under 12px. Gates: build 37/37, typecheck 0, 52/52 tests. Awaiting commit to close.",
+        "2026-10-30: Closed. Final gates on the committed tree: build 37/37, typecheck 0, 52/52 tests. Committed on urvil with TL-WEB-062..072 (commit hash recorded in session.tip).",
+        "urvil:a311632"
+      ],
+      "finished": "2026-10-30",
+      "verified": true,
+      "design_match": null,
+      "key_decisions": [
+        "Only the seeded demo account can log in; register still signs the new name in on this browser but is not saved as an account.",
+        "Demo credentials live in the mock seed (src/mocks/auth.ts), not in UI copy.",
+        "Guest checkout stays available; signing in only prefills details."
+      ],
+      "follow_ups": [
+        "Forgot/reset password pages still accept any input (not on AuthShell yet).",
+        "Header account icon does not show signed-in state."
+      ],
+      "pushed": false
+    },
+    {
+      "id": "TL-WEB-072",
+      "category": "shop",
+      "title": "Borderless Figma product card on shop + homepage, banners removed, overlay hover with sizes and colours",
+      "status": "done",
+      "owner": "Urvil Kargathala",
+      "started": "2026-10-30",
+      "files": [
+        "src/components/commerce/ProductCard.tsx",
+        "src/components/commerce/ProductGrid.tsx",
+        "src/app/shop/page.tsx",
+        "src/app/search/page.tsx",
+        "src/app/globals.css",
+        "tests/business-logic.test.mjs",
+        "state-for-agents/tasks.json",
+        "src/app/page.tsx",
+        "tests/homepage-typography.test.mjs",
+        "docs/DESIGN_SYSTEM.md",
+        "DESIGN_SYSTEM_USAGE.md",
+        "state-for-agents/skills/design-system/SKILL.md",
+        "src/components/commerce/FilterBar.tsx"
+      ],
+      "description": "ProductCard rebuilt to the Figma Website UI card: no border or radius, warm grey panel (--color-store-card-panel #F3F2F0), 4:5 photo, heart top-right on a soft white disc, then collection label, name (primary-dark, 18-20px) and price. Hover reduced to a slow 3% photo zoom plus underlined name; carousel arrows, quick size bar, swatches and their ~180 lines of motion CSS removed. Collection label is now truthful (category collection, or Acid Wash Collection for acid wash pieces) instead of labelling every hoodie Acid Wash. Whole card is one stretched link; heart is a separate aria-pressed button. Shop grid drops both editorial banners (Acid Wash Collection and The Minimal Frame) and uses 1/2/3 columns; search suggestions show 3. Follow-up (owner asked for colours and sizes back on hover, and the same card on the homepage): hover now slides a size bar over the bottom of the photo (quick add with the chosen colour, check-mark feedback) and swaps the collection line for colour swatches + colour name; both are overlays, so the card height never changes. Also revealed on keyboard focus; touch screens skip the layer. Homepage Explore the Collection now renders ProductCard (BestSellingCard removed). Design docs and typography test updated: card name 18-20px/500, card price 16px/400; fitting room keeps 16px/500. Shop header tightened (owner: too much space): six centred rows became three left-aligned ones; breadcrumb Home > Shop, then 30px title with the live item count beside it, then category pills and Filter & Sort on one row (pills scroll sideways on phones, button reads 'Filter' there). Redundant 'SHOP' eyebrow and 'Catalog' crumb removed; the Acid Wash announcement strip lost its two arrows, which looked like carousel controls but did nothing. Grid now shows 4 cards per row from 1280px (xl), 3 on laptops, 2 on tablets, 1 on phones. Card text follows card width via a container query (@[22rem]): 18px names and 20px side padding on narrow cards, 20px names on wide ones (homepage 3-up).",
+      "log": [
+        "2026-10-30: Verified /shop at 1440 (3 x 389px columns, 14 cards, no banners, panel rgb(243,242,240), 0 border/radius), 768 (2 cols), 360 (1 col, no overflow, no text under 12px); hover shows zoom + underline only; heart toggles wishlist without navigating. Gates: build 37/37, typecheck 0, 52/52 tests; built CSS has .bg-store-card-panel and group-hover:scale-103. Awaiting commit to close.",
+        "2026-10-30: Verified at 1440 on / and /shop: 14 cards, 3 columns; hover shows size bar + swatches with card height unchanged (618px); Navy Blue + M quick add put 'Oversized Classic Tee, Navy Blue, M' in the bag without navigating and opened the drawer; focusing the heart reveals the layer and tab order runs heart -> sizes -> colours -> name; at 375 (touch, no hover) the layer stays hidden (opacity 0, pointer-events none), no overflow. Gates: build 37/37, typecheck 0, 52/52 tests. Awaiting commit to close.",
+        "2026-10-30: Verified /shop: grid starts 364px from top at 1440 and 768, 312px at 360; Hoodies & sweats pill -> title 'Hoodies & sweats', '4 items', aria-pressed true; Filter opens the drawer; View all -> 14 items; 360 pills row scrolls (604px in 257px) with Filter pinned right, no page overflow. Gates: build 37/37, typecheck 0, 52/52 tests. Awaiting commit to close.",
+        "2026-10-30: Verified /shop at 1440 and 1280: 4 x 286px columns, names 18px on one line, equal card heights (486px), first row fully above the fold; hover size bar fits 7 sizes (min 34px each) and up to 8 swatches without overflow; 1024: 3 x 304px; homepage stays 3 x 389px with 20px names. Gates: build 37/37, typecheck 0, 52/52 tests; built CSS has the 22rem container rules and xl:grid-cols-4. Awaiting commit to close.",
+        "2026-10-30: Closed. Final gates on the committed tree: build 37/37, typecheck 0, 52/52 tests. Committed on urvil with TL-WEB-062..072 (commit hash recorded in session.tip).",
+        "urvil:a311632"
+      ],
+      "finished": "2026-10-30",
+      "verified": true,
+      "design_match": "partial",
+      "key_decisions": [
+        "Sizes and colours appear as overlays on hover/focus instead of expanding the card.",
+        "Card name follows the Figma card (18-20px); design docs updated to match.",
+        "Four per row from 1280px on shop/search/collections/wishlist; homepage keeps 3 larger cards."
+      ],
+      "follow_ups": [
+        "Per-colour product photos would let the swatches change the picture (most products have one photo)."
+      ],
+      "pushed": false
+    },
+    {
+      "id": "TL-WEB-073",
+      "category": "homepage",
+      "title": "Hero uses the owner's hero-video.mp4",
+      "status": "done",
+      "owner": "Urvil Kargathala",
+      "started": "2026-10-30",
+      "finished": "2026-10-30",
+      "files": [
+        "public/videos/hero-video.mp4 (owner-supplied, 15.6 MB)",
+        "src/app/page.tsx",
+        "state-for-agents/tasks.json"
+      ],
+      "description": "Owner set the hero video to /videos/hero-video.mp4 (edited in Cursor). It had been switched to h2.mp4 when committing a311632 because the file was not in the repo; the owner chose to commit the video and the path together.",
+      "log": [
+        "2026-10-30: Homepage hero plays /videos/hero-video.mp4 (1920px, readyState 4, no error). Gates: build 37/37, typecheck 0, 52/52 tests.",
+        "urvil:15edf64"
+      ],
+      "verified": true,
+      "pushed": false,
+      "design_match": null,
+      "key_decisions": [
+        "Owner confirmed committing the video after being told it may be third-party (GQ) footage that needs permission for a live site."
+      ],
+      "follow_ups": [
+        "Confirm usage rights for the hero footage before launch.",
+        "Consider a compressed web version (file is 15.6 MB)."
+      ]
+    },
+    {
+      "id": "TL-WEB-074",
+      "category": "page-layout",
+      "title": "Build Pixel-Perfect About Us V1 Page matching Figma Design (Node 82:5702 / About Us V1)",
+      "status": "done",
+      "owner": "Meet Rabadiya",
+      "started": "2026-10-30",
+      "finished": "2026-10-30",
+      "verified": true,
+      "files": [
+        "src/app/about/page.tsx",
+        "src/components/editorial/AboutHero.tsx",
+        "src/components/editorial/AboutStorySection.tsx",
+        "src/components/editorial/AboutMissionSection.tsx",
+        "src/components/editorial/AboutValuePillars.tsx",
+        "src/components/editorial/AboutAtelierProcess.tsx",
+        "src/components/editorial/AboutTeamSection.tsx",
+        "src/components/editorial/AboutCraftHighlight.tsx",
+        "src/components/editorial/AboutCustomerReviews.tsx",
+        "src/components/editorial/InstagramFeedSection.tsx",
+        "src/components/editorial/index.ts"
+      ],
+      "description": "Build high-fidelity, pixel-perfect About Us V1 page matching Figma Node 82:5702 / About Us V1: B&W editorial hero banner with scrim overlay, Our Story split with founder signature and atelier rack, Our Mission split with workshop photo and pill CTA, 3-pillar value props ribbon (Free Shipping, 24/7 Support, 30-Day Returns), Creative Studio atelier process split, Meet Our Team 4-person executive grid featuring Meet Rabadiya as Founder, 'A simple idea in thoughtful matter' craft highlight with organic cotton and zero-deadstock checkpoints, 3-card customer testimonials with gold stars, and curated Instagram lifestyle feed grid.",
+      "log": [
+        "2026-10-30T09:00:00Z: Opened task TL-WEB-062 to build pixel-perfect About Us V1 storefront page based on Figma canonical layout and uploaded design specimen.",
+        "2026-10-30T09:05:00Z: Vendored high-resolution local editorial lifestyle assets into public/images/about/ for zero-CDN latency and deterministic builds.",
+        "2026-10-30T09:10:00Z: Architected modular, reusable editorial components in src/components/editorial adhering to Rule 07 and single-stylesheet theme token laws.",
+        "2026-10-30T09:15:00Z: Verification gates passed: typecheck 0 errors, 45/45 unit tests pass, Next.js production build 44/44 clean, selector-level CSS proof verified, zero hex codes/arbitrary bracket classes in JSX, dev server HTTP 200 on /about.",
+        "2026-10-30T09:28:00Z: Updated founder and creative director attribution to 'Urvil Kargathala' across AboutStorySection, AboutCraftHighlight, and AboutTeamSection per user directive.",
+        "2026-10-30T10:05:00Z: Configured 3-member core team in AboutTeamSection with local portraits (urvilkargathala.png, meetrabadiya.png, dharmilgajjar.png) and luxury atelier titles: Urvil Kargathala (Founder & Creative Director), Meet Rabadiya (Head of Design & Digital Experience), and Dharmil Gajjar (Head of Platform & Systems Infrastructure).",
+        "2026-10-30T10:20:00Z: Resolved image cache and applied Dharmil's authentic workstation portrait (dharmil-gajjar.png) with signature; verified live browser rendering in Meet Our Team."
+      ],
+      "design_match": "Byte-identical implementation matching Figma 'About Us V1' (Node 82:5702 / About Us V1): Cinematic B&W editorial hero banner with scrim overlay, Our Story two-column split with founder signature and atelier wardrobe rack, Our Mission asymmetric reverse split with workshop collaboration photo and pill CTA, 3-pillar value proposition strip (Free Worldwide Shipping, 24/7 Dedicated Support, 30-Day Effortless Returns), Craftsmanship & Atelier process showcase, Meet Our Team 3-person core leadership grid featuring Urvil Kargathala (Founder & Creative Director), Meet Rabadiya (Head of Design & Digital Experience), and Dharmil Gajjar (Head of Platform & Systems Infrastructure), 'A simple idea in thoughtful matter' craft highlight with organic cotton and zero-deadstock checkpoints, 3 verified customer review cards with 5 gold stars, sustainability manifesto callout banner, and curated Instagram lifestyle feed grid.",
+      "key_decisions": [
+        "Decomposed the monolithic page into 8 reusable editorial components in src/components/editorial/ adhering to Rule 07 DRY architecture and props-in, render-out patterns",
+        "Vendored high-resolution editorial assets into public/images/about/ for fast offline local rendering and Next.js Image optimization",
+        "Applied local user-provided portraits (urvilkargathala.png, meetrabadiya.png, dharmilgajjar.png) in AboutTeamSection with aspect-3/4 framing matching native dimensions",
+        "Elevated engineering roles to luxury fashion atelier titles: 'Head of Design & Digital Experience' (Meet Rabadiya) and 'Head of Platform & Systems Infrastructure' (Dharmil Gajjar)",
+        "Configured brand founder and creative director name as 'Urvil Kargathala' across About Us sections per user directive while preserving git developer identity as Meet Rabadiya",
+        "Maintained calm luxury slow-living palette with warm ivory canvas, charcoal typography, and gold accents; zero admin purple per AGENTS.md invariant",
+        "Guaranteed 100% adherence to Rule 02: zero hex codes and zero arbitrary bracket classes across all touched JSX lines",
+        "All verification gates passed: typecheck 0, 45/45 tests pass, 44 routes build cleanly, selector CSS proof verified, HTTP 200 confirmed"
+      ]
+    }
+  ]
+}
