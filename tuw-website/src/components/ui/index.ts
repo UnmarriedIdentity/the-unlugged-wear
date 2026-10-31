@@ -54,3 +54,6 @@ export type { ImageWithFallbackProps } from './ImageWithFallback';
 
 export { default as IconButton } from './IconButton';
 export type { IconButtonProps } from './IconButton';
+
+export { default as Toast } from './Toast';
+export type { ToastProps, ToastMessage } from './Toast';
