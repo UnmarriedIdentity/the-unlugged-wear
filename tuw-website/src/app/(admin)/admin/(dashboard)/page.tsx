@@ -1,0 +1,5 @@
+import HomeView from './_components/HomeView';
+
+export default function Page() {
+  return <HomeView />;
+}
