@@ -4,7 +4,7 @@ import React from 'react';
 import Header from '@storefront/components/layout/Header';
 import Footer from '@storefront/components/layout/Footer';
 import Breadcrumb from '@storefront/components/ui/Breadcrumb';
-import ProductGrid from '@/components/commerce/ProductGrid';
+import ProductGrid from '@storefront/components/commerce/ProductGrid';
 import Button from '@storefront/components/ui/Button';
 import { useStore } from '@/mocks/store';
 import { Heart } from 'lucide-react';

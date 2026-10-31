@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Header from '@storefront/components/layout/Header';
 import Footer from '@storefront/components/layout/Footer';
-import PaymentSimulationPanel from '@/components/commerce/PaymentSimulationPanel';
+import PaymentSimulationPanel from '@storefront/components/commerce/PaymentSimulationPanel';
 import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
 import { useStore } from '@/mocks/store';
 import { useDemoSession } from '@/mocks/auth';

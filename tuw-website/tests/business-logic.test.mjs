@@ -180,9 +180,9 @@ describe('Deterministic local fonts (Windows == macOS)', () => {
     assert.ok(fixturesContent.includes('aliases: ["architectural-zip-hoodie"]'));
   });
   test('ProductCard and FilterBar conform to Figma Shop All v4 specs and zero admin purple', () => {
-    const cardContent = readFileSync(join(repoRoot, 'src/components/commerce/ProductCard.tsx'), 'utf8');
-    const filterContent = readFileSync(join(repoRoot, 'src/components/commerce/FilterBar.tsx'), 'utf8');
-    const gridContent = readFileSync(join(repoRoot, 'src/components/commerce/ProductGrid.tsx'), 'utf8');
+    const cardContent = readFileSync(join(repoRoot, 'src/storefront/components/commerce/ProductCard.tsx'), 'utf8');
+    const filterContent = readFileSync(join(repoRoot, 'src/storefront/components/commerce/FilterBar.tsx'), 'utf8');
+    const gridContent = readFileSync(join(repoRoot, 'src/storefront/components/commerce/ProductGrid.tsx'), 'utf8');
 
     // Invariant: Zero admin purple (#7539FF) in storefront card and filter components
     assert.ok(!cardContent.includes('#7539FF'), 'ProductCard must not contain admin purple #7539FF');
@@ -248,7 +248,7 @@ describe('Deterministic local fonts (Windows == macOS)', () => {
 
     // Figma Canonical Checkout Invariants (media_1793276628297_7100bb4c.png)
     const checkoutContent = readFileSync(join(repoRoot, 'src/app/(storefront)/checkout/page.tsx'), 'utf8');
-    const paymentContent = readFileSync(join(repoRoot, 'src/components/commerce/PaymentSimulationPanel.tsx'), 'utf8');
+    const paymentContent = readFileSync(join(repoRoot, 'src/storefront/components/commerce/PaymentSimulationPanel.tsx'), 'utf8');
 
     assert.ok(!checkoutContent.includes('#7539FF'), 'checkout/page.tsx must not contain admin purple #7539FF');
     assert.ok(!paymentContent.includes('#7539FF'), 'PaymentSimulationPanel.tsx must not contain admin purple #7539FF');
