@@ -2,7 +2,7 @@
 
 ## Purpose and location
 
-Use typed deterministic fixtures. Store them under `src/storefront/mocks/` and `src/admin/mocks/` — one set per surface, never shared — with fixtures, scenario definitions and a local state adapter. This folder may be added to the supplied scaffold. Separate mock adapters from UI components so real services can replace them later.
+Use typed deterministic fixtures. Store them under `src/storefront/mocks/` (imported as `@storefront/mocks/...`) with fixtures, scenario definitions and a local state adapter. `tuw-admin` keeps its own independent set in its own package; the two never share fixtures. This folder may be added to the supplied scaffold. Separate mock adapters from UI components so real services can replace them later.
 
 ## Product fixtures
 

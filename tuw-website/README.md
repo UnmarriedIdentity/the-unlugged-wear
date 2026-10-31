@@ -156,27 +156,18 @@ pnpm run build
 pnpm run start
 ```
 
-### Running both surfaces
+### Scope
 
-This one Next.js app serves two surfaces, each with its own root layout and its own
-Tailwind stylesheet, so neither can ever leak into the other:
+This package is the customer storefront only. The staff operations panel is a separate
+package in the same workspace, `tuw-admin`, with its own `src/`, its own root layout and its
+own Tailwind stylesheet. The two never import each other's source, so the storefront's
+Outfit/warm-editorial tokens and the admin's Urbanist/violet tokens can never leak into one
+another.
 
-| Surface | Route group | Layout entry | URLs |
-|---|---|---|---|
-| Storefront | `src/app/(storefront)/` | `(storefront)/layout.tsx` + `globals.css` | `/`, `/shop`, `/account`, … |
-| Admin panel | `src/app/(admin)/` | `(admin)/layout.tsx` + `globals.css` | `/admin/**` |
-
-Because both route groups define a root layout, Next performs a full page load when you
-cross from one surface to the other. That is deliberate: it guarantees exactly one
-stylesheet is in the document at a time. Everything below `/admin` lives under the
-`(admin)/admin/(dashboard)` route group, so a dashboard URL is `/admin/dashboard`, an order
-list is `/admin/orders`, and so on. Admin code that is not a route lives in `src/admin/`
-(imported as `@admin/*`) and `src/server/` (imported as `@/server/*`).
-
-`pnpm run dev` starts the single server on port 3007 and serves both surfaces:
+`pnpm run dev` (or `pnpm dev:website` from the workspace root) starts this app on port 3007:
 
 * Storefront — <http://localhost:3007/>
-* Admin panel — <http://localhost:3007/admin/dashboard>
+* Admin panel — separate app, port 3001 (`pnpm dev:admin`)
 
 ### Internal QA pages
 
@@ -188,6 +179,6 @@ TUW_INTERNAL_PAGES=1 pnpm run build
 
 ### Demo sign-in
 
-Login is a local demo: there is no server, and only the seeded demo accounts can sign in. Their emails and passwords live in `src/mocks/auth.ts` (`DEMO_ACCOUNT` and `ADMIN_DEMO_ACCOUNT`), and the login page has a **Fill in the demo account** button that fills the customer one. Signing in as the customer (`uk1115@tuw.co`) unlocks `/account` and its order pages, and fills checkout with the account's saved address; guests can still check out by typing their details. Payments are simulated on the checkout page and nothing is charged.
+Login is a local demo: there is no server, and only the seeded demo account can sign in. Its email and password live in `src/storefront/mocks/auth.ts` (`DEMO_ACCOUNT`), and the login page has a **Fill in the demo account** button. Signing in as `uk1115@tuw.co` unlocks `/account` and its order pages, and fills checkout with the account's saved address; guests can still check out by typing their details. Payments are simulated on the checkout page and nothing is charged.
 
-Signing in as the admin (`admin@tuw.co` / `tuwadmin123`) hands off to the admin panel and lands on `/admin/dashboard`. The panel has no sign-in screen of its own — `/login` is the single entry point, and `/admin/login` redirects there.
+The admin panel has its own sign-in at `/login` on its own origin.

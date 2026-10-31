@@ -1,6 +1,6 @@
 # Component inventory
 
-Maintain separate component implementations in each surface's own root: `src/storefront/components/` and `src/admin/components/`. Reuse within a surface first. Do not import source files directly from the other surface — the two carry different design tokens for the same component names.
+Maintain component implementations in this package's own source root: `src/storefront/components/` (imported as `@storefront/components/...`). Reuse within the surface first. `tuw-admin` is a separate package with its own `src/components/`; the two carry different design tokens for components that share a name, so never import source files across the package boundary.
 
 ## Foundations for both applications
 
