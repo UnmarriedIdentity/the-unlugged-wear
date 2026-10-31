@@ -2,20 +2,20 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
-import Breadcrumb from '@/components/ui/Breadcrumb';
-import Tabs from '@/components/ui/Tabs';
-import Badge from '@/components/ui/Badge';
-import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
-import Modal from '@/components/ui/Modal';
-import Textarea from '@/components/ui/Textarea';
-import Select from '@/components/ui/Select';
-import ImageWithFallback from '@/components/ui/ImageWithFallback';
+import Header from '@storefront/components/layout/Header';
+import Footer from '@storefront/components/layout/Footer';
+import Breadcrumb from '@storefront/components/ui/Breadcrumb';
+import Tabs from '@storefront/components/ui/Tabs';
+import Badge from '@storefront/components/ui/Badge';
+import Button from '@storefront/components/ui/Button';
+import Input from '@storefront/components/ui/Input';
+import Modal from '@storefront/components/ui/Modal';
+import Textarea from '@storefront/components/ui/Textarea';
+import Select from '@storefront/components/ui/Select';
+import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
 import { useRouter } from 'next/navigation';
-import { useStore } from '@/mocks/store';
-import { useDemoSession } from '@/mocks/auth';
+import { useStore } from '@storefront/mocks/store';
+import { useDemoSession } from '@storefront/mocks/auth';
 import { Package, MapPin, User, RotateCcw, Shield, Truck, ExternalLink, AlertCircle } from 'lucide-react';
 
 export default function AccountPage() {

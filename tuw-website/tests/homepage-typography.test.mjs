@@ -24,9 +24,9 @@ const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 const SECTION_FILES = [
   'src/app/(storefront)/page.tsx',
-  'src/components/commerce/OurPhilosophy.tsx',
-  'src/components/commerce/VirtualFittingRoom.tsx',
-  'src/components/layout/BrandIntro.tsx',
+  'src/storefront/components/commerce/OurPhilosophy.tsx',
+  'src/storefront/components/commerce/VirtualFittingRoom.tsx',
+  'src/storefront/components/layout/BrandIntro.tsx',
 ];
 
 const H2_SIZE = 'text-[clamp(1.75rem,4vw+0.5rem,3rem)]';
@@ -82,12 +82,12 @@ describe('Homepage typography roles (weight & size only)', () => {
     const eyebrows = [
       {
         name: 'Our Philosophy eyebrow',
-        src: read('src/components/commerce/OurPhilosophy.tsx'),
+        src: read('src/storefront/components/commerce/OurPhilosophy.tsx'),
         re: /text-base uppercase tracking-widest text-store-gold font-sans font-medium/,
       },
       {
         name: 'Virtual Fitting Room eyebrow',
-        src: read('src/components/commerce/VirtualFittingRoom.tsx'),
+        src: read('src/storefront/components/commerce/VirtualFittingRoom.tsx'),
         re: /text-base font-medium uppercase tracking-widest text-store-text-secondary font-sans/,
       },
     ];
@@ -108,8 +108,8 @@ describe('Homepage typography roles (weight & size only)', () => {
 
   test('product names and prices keep their agreed sizes and weights', () => {
     const page = read('src/app/(storefront)/page.tsx');
-    const card = read('src/components/commerce/ProductCard.tsx');
-    const vfr = read('src/components/commerce/VirtualFittingRoom.tsx');
+    const card = read('src/storefront/components/commerce/ProductCard.tsx');
+    const vfr = read('src/storefront/components/commerce/VirtualFittingRoom.tsx');
 
     // Explore the Collection renders the shared Figma ProductCard (18-20px / 500 name, 16px / 400 price).
     assert.ok(page.includes('<ProductCard key={product.id} product={product} />'), 'homepage uses the shared ProductCard');
@@ -138,7 +138,7 @@ describe('Homepage typography roles (weight & size only)', () => {
 
   test('section descriptions keep their agreed sizes at weight 400', () => {
     const page = read('src/app/(storefront)/page.tsx');
-    const vfr = read('src/components/commerce/VirtualFittingRoom.tsx');
+    const vfr = read('src/storefront/components/commerce/VirtualFittingRoom.tsx');
 
     const descriptions = [
       { name: 'Explore description (16px)', src: page, re: /<p className="text-base text-store-text-secondary font-sans leading-relaxed">/ },
@@ -165,7 +165,7 @@ describe('Homepage typography roles (weight & size only)', () => {
 
   test('documented exceptions stay intact: hero display, hero subtitle, footer signature', () => {
     const page = read('src/app/(storefront)/page.tsx');
-    const footer = read('src/components/layout/Footer.tsx');
+    const footer = read('src/storefront/components/layout/Footer.tsx');
 
     assert.ok(
       /<h1 className="font-heading font-normal text-\[clamp\(1\.75rem,1\.5vw\+1\.25rem,2\.5rem\)\]/.test(page),

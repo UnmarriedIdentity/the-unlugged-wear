@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ProductRadioGroup } from '@/lib/types';
+import { ProductRadioGroup } from '@storefront/lib/types';
 
 export interface RadioOptionSelectorProps {
   group: ProductRadioGroup;

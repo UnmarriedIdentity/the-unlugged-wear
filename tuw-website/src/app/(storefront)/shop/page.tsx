@@ -2,12 +2,12 @@
 
 import React, { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
-import ProductGrid from '@/components/commerce/ProductGrid';
-import FilterBar, { FilterState } from '@/components/commerce/FilterBar';
-import Breadcrumb from '@/components/ui/Breadcrumb';
-import { useStore } from '@/mocks/store';
+import Header from '@storefront/components/layout/Header';
+import Footer from '@storefront/components/layout/Footer';
+import ProductGrid from '@storefront/components/commerce/ProductGrid';
+import FilterBar, { FilterState } from '@storefront/components/commerce/FilterBar';
+import Breadcrumb from '@storefront/components/ui/Breadcrumb';
+import { useStore } from '@storefront/mocks/store';
 import { ShieldCheck, Sparkles, Truck } from 'lucide-react';
 import Link from 'next/link';
 

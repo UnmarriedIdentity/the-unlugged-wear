@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import Link from 'next/link';
-import Button from '@/components/ui/Button';
+import Button from '@storefront/components/ui/Button';
 import { RefreshCw, ArrowLeft, AlertCircle } from 'lucide-react';
 
 export default function ErrorPage({

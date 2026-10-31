@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { INITIAL_ORDERS } from '@/mocks/fixtures';
+import { INITIAL_ORDERS } from '@storefront/mocks/fixtures';
 
 export async function GET(
   req: NextRequest,

@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
-import ImageWithFallback from '../ui/ImageWithFallback';
-import Modal from '../ui/Modal';
+import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
+import Modal from '@storefront/components/ui/Modal';
 
 export interface ProductGalleryProps {
   images: {

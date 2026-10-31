@@ -12,7 +12,7 @@ import {
   Mail,
   MapPin,
 } from 'lucide-react';
-import { useStore } from '@/mocks/store';
+import { useStore } from '@storefront/mocks/store';
 import TuwEmblem from './TuwEmblem';
 
 interface FooterLink {

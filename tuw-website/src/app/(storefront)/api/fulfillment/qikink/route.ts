@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { submitOrderToQikink } from '@/lib/qikink';
-import { INITIAL_ORDERS } from '@/mocks/fixtures';
+import { submitOrderToQikink } from '@storefront/lib/qikink';
+import { INITIAL_ORDERS } from '@storefront/mocks/fixtures';
 
 export async function POST(req: NextRequest) {
   try {

@@ -2,21 +2,21 @@
 
 import React, { use, useState } from 'react';
 import Link from 'next/link';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
-import Breadcrumb from '@/components/ui/Breadcrumb';
-import Badge from '@/components/ui/Badge';
-import Modal from '@/components/ui/Modal';
-import Button from '@/components/ui/Button';
-import ProductGallery from '@/components/commerce/ProductGallery';
-import VariantSelector from '@/components/commerce/VariantSelector';
-import DynamicDataTable from '@/components/commerce/DynamicDataTable';
-import DynamicAccordionFaq from '@/components/commerce/DynamicAccordionFaq';
-import ProductReviews from '@/components/commerce/ProductReviews';
-import RelatedProductsSection from '@/components/commerce/RelatedProductsSection';
-import { EditorialQuote, EditorialFeatureSplit } from '@/components/editorial';
-import { useStore } from '@/mocks/store';
-import { ProductColor, ReviewItem } from '@/lib/types';
+import Header from '@storefront/components/layout/Header';
+import Footer from '@storefront/components/layout/Footer';
+import Breadcrumb from '@storefront/components/ui/Breadcrumb';
+import Badge from '@storefront/components/ui/Badge';
+import Modal from '@storefront/components/ui/Modal';
+import Button from '@storefront/components/ui/Button';
+import ProductGallery from '@storefront/components/commerce/ProductGallery';
+import VariantSelector from '@storefront/components/commerce/VariantSelector';
+import DynamicDataTable from '@storefront/components/commerce/DynamicDataTable';
+import DynamicAccordionFaq from '@storefront/components/commerce/DynamicAccordionFaq';
+import ProductReviews from '@storefront/components/commerce/ProductReviews';
+import RelatedProductsSection from '@storefront/components/commerce/RelatedProductsSection';
+import { EditorialQuote, EditorialFeatureSplit } from '@storefront/components/editorial';
+import { useStore } from '@storefront/mocks/store';
+import { ProductColor, ReviewItem } from '@storefront/lib/types';
 import {
   ChevronDown,
   ArrowRight,

@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
-import Breadcrumb from '@/components/ui/Breadcrumb';
+import Header from '@storefront/components/layout/Header';
+import Footer from '@storefront/components/layout/Footer';
+import Breadcrumb from '@storefront/components/ui/Breadcrumb';
 import { ShieldAlert } from 'lucide-react';
 
 export default function PrivacyPolicyPage() {

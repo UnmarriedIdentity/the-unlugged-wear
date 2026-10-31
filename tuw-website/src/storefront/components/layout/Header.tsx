@@ -11,15 +11,15 @@ import {
   Menu,
   X,
 } from 'lucide-react';
-import { useStore } from '@/mocks/store';
+import { useStore } from '@storefront/mocks/store';
 import MobileMenu from './MobileMenu';
 import CartDrawer from './CartDrawer';
 import TuwEmblem from './TuwEmblem';
-import ImageWithFallback from '../ui/ImageWithFallback';
-import { formatINR } from '@/lib/format';
-import type { Product } from '@/lib/types';
+import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
+import { formatINR } from '@storefront/lib/format';
+import type { Product } from '@storefront/lib/types';
 import { NAV_ITEMS, type NavItem } from './navigation';
-import { site } from '@/lib/site';
+import { site } from '@storefront/lib/site';
 
 // Desktop mega-menu panel: link columns on the left, image tiles on the right
 // (pattern after luxury house navigation). Spans the full header width.

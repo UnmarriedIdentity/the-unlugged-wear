@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { useStore } from '@/mocks/store';
+import { useStore } from '@storefront/mocks/store';
 
 export default function AnnouncementBar() {
   const { freeShippingRemaining, cartSubtotal, simulatedError, retryConnection } = useStore();

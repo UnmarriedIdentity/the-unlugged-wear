@@ -12,13 +12,13 @@ import {
   Users,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
-import VirtualFittingRoom from '@/components/commerce/VirtualFittingRoom';
-import OurPhilosophy from '@/components/commerce/OurPhilosophy';
-import ProductCard from '@/components/commerce/ProductCard';
-import { STORE_PRODUCTS, JOURNAL_ARTICLES } from '@/mocks/fixtures';
-import type { Product } from '@/lib/types';
+import Header from '@storefront/components/layout/Header';
+import Footer from '@storefront/components/layout/Footer';
+import VirtualFittingRoom from '@storefront/components/commerce/VirtualFittingRoom';
+import OurPhilosophy from '@storefront/components/commerce/OurPhilosophy';
+import ProductCard from '@storefront/components/commerce/ProductCard';
+import { STORE_PRODUCTS, JOURNAL_ARTICLES } from '@storefront/mocks/fixtures';
+import type { Product } from '@storefront/lib/types';
 
 
 
@@ -39,7 +39,7 @@ const HOME_PRODUCTS = STORE_PRODUCTS.filter((p) => p.images.length > 0);
 
 const CATEGORY_PILLS = ['All Collection', 'Hoodies & Sweats', 'T-shirts', 'Kids', 'Accessories'];
 
-// 3. Virtual fitting room data + interaction live in @/components/commerce/VirtualFittingRoom.tsx
+// 3. Virtual fitting room data + interaction live in @storefront/components/commerce/VirtualFittingRoom.tsx
 
 // 4. From the Journal: real articles, so every card links somewhere that exists
 const RECOMMENDATION_STORIES = JOURNAL_ARTICLES.slice(0, 3).map((article) => ({

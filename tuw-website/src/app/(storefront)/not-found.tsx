@@ -1,9 +1,9 @@
 import React from 'react';
 import Link from 'next/link';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
-import AnnouncementBar from '@/components/layout/AnnouncementBar';
-import Button from '@/components/ui/Button';
+import Header from '@storefront/components/layout/Header';
+import Footer from '@storefront/components/layout/Footer';
+import AnnouncementBar from '@storefront/components/layout/AnnouncementBar';
+import Button from '@storefront/components/ui/Button';
 import { ArrowLeft, Compass } from 'lucide-react';
 
 export default function NotFound() {

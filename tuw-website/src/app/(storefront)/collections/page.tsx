@@ -1,11 +1,11 @@
 'use client';
 
 import React from 'react';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
-import Breadcrumb from '@/components/ui/Breadcrumb';
-import CollectionCard from '@/components/commerce/CollectionCard';
-import { STORE_COLLECTIONS } from '@/mocks/fixtures';
+import Header from '@storefront/components/layout/Header';
+import Footer from '@storefront/components/layout/Footer';
+import Breadcrumb from '@storefront/components/ui/Breadcrumb';
+import CollectionCard from '@storefront/components/commerce/CollectionCard';
+import { STORE_COLLECTIONS } from '@storefront/mocks/fixtures';
 
 export default function CollectionsPage() {
   return (

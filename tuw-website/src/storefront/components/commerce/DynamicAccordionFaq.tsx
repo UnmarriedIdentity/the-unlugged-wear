@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { ProductFaqItem } from '@/lib/types';
+import { ProductFaqItem } from '@storefront/lib/types';
 
 export interface DynamicAccordionFaqProps {
   faqs?: ProductFaqItem[];

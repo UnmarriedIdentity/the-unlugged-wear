@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { Search, Heart, User, ArrowRight, ShieldCheck, RefreshCw, ChevronDown } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import Drawer from '../ui/Drawer';
+import Drawer from '@storefront/components/ui/Drawer';
 import type { NavItem } from './navigation';
 
 export interface MobileMenuProps {

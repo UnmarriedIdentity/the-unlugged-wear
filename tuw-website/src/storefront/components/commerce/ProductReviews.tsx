@@ -2,10 +2,10 @@
 
 import React, { useState } from 'react';
 import { MessageSquare } from 'lucide-react';
-import { ReviewItem } from '@/lib/types';
-import Button from '../ui/Button';
-import Badge from '../ui/Badge';
-import Modal from '../ui/Modal';
+import { ReviewItem } from '@storefront/lib/types';
+import Button from '@storefront/components/ui/Button';
+import Badge from '@storefront/components/ui/Badge';
+import Modal from '@storefront/components/ui/Modal';
 
 export interface ProductReviewsProps {
   reviews?: ReviewItem[];

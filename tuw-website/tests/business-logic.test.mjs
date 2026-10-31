@@ -163,7 +163,7 @@ describe('Deterministic local fonts (Windows == macOS)', () => {
   });
 
   test('all product slugs are concise, clean, and bounded (<= 45 characters)', () => {
-    const fixturesContent = readFileSync(join(repoRoot, 'src/mocks/fixtures.ts'), 'utf8');
+    const fixturesContent = readFileSync(join(repoRoot, 'src/storefront/mocks/fixtures.ts'), 'utf8');
     const slugMatches = [...fixturesContent.matchAll(/slug:\s*['"]([^'"]+)['"]/g)].map((m) => m[1]);
     assert.ok(slugMatches.length >= 14, 'expected at least 14 product/collection slugs');
 
@@ -180,9 +180,9 @@ describe('Deterministic local fonts (Windows == macOS)', () => {
     assert.ok(fixturesContent.includes('aliases: ["architectural-zip-hoodie"]'));
   });
   test('ProductCard and FilterBar conform to Figma Shop All v4 specs and zero admin purple', () => {
-    const cardContent = readFileSync(join(repoRoot, 'src/components/commerce/ProductCard.tsx'), 'utf8');
-    const filterContent = readFileSync(join(repoRoot, 'src/components/commerce/FilterBar.tsx'), 'utf8');
-    const gridContent = readFileSync(join(repoRoot, 'src/components/commerce/ProductGrid.tsx'), 'utf8');
+    const cardContent = readFileSync(join(repoRoot, 'src/storefront/components/commerce/ProductCard.tsx'), 'utf8');
+    const filterContent = readFileSync(join(repoRoot, 'src/storefront/components/commerce/FilterBar.tsx'), 'utf8');
+    const gridContent = readFileSync(join(repoRoot, 'src/storefront/components/commerce/ProductGrid.tsx'), 'utf8');
 
     // Invariant: Zero admin purple (#7539FF) in storefront card and filter components
     assert.ok(!cardContent.includes('#7539FF'), 'ProductCard must not contain admin purple #7539FF');
@@ -232,8 +232,8 @@ describe('Deterministic local fonts (Windows == macOS)', () => {
     assert.ok(filterContent.includes('tuw-delay-'), 'FilterBar must apply staggered animation delays');
 
     // Luxury Toast Notification & Deduplication Invariants
-    const storeContent = readFileSync(join(repoRoot, 'src/mocks/store.tsx'), 'utf8');
-    const toastContent = readFileSync(join(repoRoot, 'src/components/ui/Toast.tsx'), 'utf8');
+    const storeContent = readFileSync(join(repoRoot, 'src/storefront/mocks/store.tsx'), 'utf8');
+    const toastContent = readFileSync(join(repoRoot, 'src/storefront/components/ui/Toast.tsx'), 'utf8');
     assert.ok(storeContent.includes('lastToastRef'), 'store.tsx must have lastToastRef deduplication guard');
     assert.ok(storeContent.includes('<Toast'), 'store.tsx must render Toast component');
     assert.ok(toastContent.includes('tuw-toast-enter'), 'Toast.tsx must apply tuw-toast-enter animation');
@@ -248,7 +248,7 @@ describe('Deterministic local fonts (Windows == macOS)', () => {
 
     // Figma Canonical Checkout Invariants (media_1793276628297_7100bb4c.png)
     const checkoutContent = readFileSync(join(repoRoot, 'src/app/(storefront)/checkout/page.tsx'), 'utf8');
-    const paymentContent = readFileSync(join(repoRoot, 'src/components/commerce/PaymentSimulationPanel.tsx'), 'utf8');
+    const paymentContent = readFileSync(join(repoRoot, 'src/storefront/components/commerce/PaymentSimulationPanel.tsx'), 'utf8');
 
     assert.ok(!checkoutContent.includes('#7539FF'), 'checkout/page.tsx must not contain admin purple #7539FF');
     assert.ok(!paymentContent.includes('#7539FF'), 'PaymentSimulationPanel.tsx must not contain admin purple #7539FF');
@@ -266,10 +266,10 @@ describe('Demo sign-in and checkout flow', () => {
   const read = (relative) => readFileSync(join(repoRoot, relative), 'utf8');
 
   test('login only accepts the seeded demo account and account pages need a session', () => {
-    const auth = read('src/mocks/auth.ts');
+    const auth = read('src/storefront/mocks/auth.ts');
     const login = read('src/app/(storefront)/login/page.tsx');
     const accountLayout = read('src/app/(storefront)/account/layout.tsx');
-    assert.ok(/export const DEMO_ACCOUNT = \{[\s\S]*email: '[^']+@[^']+',[\s\S]*password: '[^']+'/.test(auth), 'demo account is seeded in src/mocks/auth.ts');
+    assert.ok(/export const DEMO_ACCOUNT = \{[\s\S]*email: '[^']+@[^']+',[\s\S]*password: '[^']+'/.test(auth), 'demo account is seeded in src/storefront/mocks/auth.ts');
     assert.ok(login.includes('checkDemoCredentials(email, password)'), 'login checks the demo credentials');
     assert.ok(!login.includes('any email and password will work'), 'login no longer accepts any credentials');
     assert.ok(accountLayout.includes('<AccountGate>'), 'account routes are wrapped in the sign-in gate');
@@ -300,7 +300,7 @@ describe('Demo sign-in and checkout flow', () => {
   });
 
   test('new orders keep payment and fulfilment status separate', () => {
-    const store = read('src/mocks/store.tsx');
+    const store = read('src/storefront/mocks/store.tsx');
     assert.ok(store.includes("paymentStatus: isCashOnDelivery ? 'pending' : 'paid'"), 'COD orders stay payment-pending');
     assert.ok(store.includes("fulfillmentStatus: 'queued'"), 'new orders start in the print queue');
     assert.ok(store.includes('while (taken.has(orderNumber))'), 'order numbers never reuse an existing reference');

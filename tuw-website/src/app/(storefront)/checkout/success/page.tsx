@@ -3,14 +3,14 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
-import Button from '@/components/ui/Button';
-import Badge from '@/components/ui/Badge';
-import ImageWithFallback from '@/components/ui/ImageWithFallback';
-import { useStore } from '@/mocks/store';
-import { Order } from '@/lib/types';
-import { formatINR } from '@/lib/format';
+import Header from '@storefront/components/layout/Header';
+import Footer from '@storefront/components/layout/Footer';
+import Button from '@storefront/components/ui/Button';
+import Badge from '@storefront/components/ui/Badge';
+import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
+import { useStore } from '@storefront/mocks/store';
+import { Order } from '@storefront/lib/types';
+import { formatINR } from '@storefront/lib/format';
 import { CheckCircle2, AlertCircle, Clock, Truck, ArrowRight, ShieldCheck, ShoppingBag } from 'lucide-react';
 
 function OrderSuccessContent() {

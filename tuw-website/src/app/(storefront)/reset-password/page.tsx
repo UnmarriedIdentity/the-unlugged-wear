@@ -3,11 +3,11 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
-import Breadcrumb from '@/components/ui/Breadcrumb';
-import Input from '@/components/ui/Input';
-import Button from '@/components/ui/Button';
+import Header from '@storefront/components/layout/Header';
+import Footer from '@storefront/components/layout/Footer';
+import Breadcrumb from '@storefront/components/ui/Breadcrumb';
+import Input from '@storefront/components/ui/Input';
+import Button from '@storefront/components/ui/Button';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 export default function ResetPasswordPage() {

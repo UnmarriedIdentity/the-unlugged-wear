@@ -2,7 +2,7 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
 // ---------------------------------------------------------------
-// Mirrors src/lib/attributePresentation.ts (self-contained per this
+// Mirrors src/admin/lib/attributePresentation.ts (self-contained per this
 // suite's convention). Persisted library rows are normalized at
 // hydration; unknown/missing values must fall back to the safe default.
 // ---------------------------------------------------------------

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyRazorpayWebhookSignature } from '@/lib/razorpay';
+import { verifyRazorpayWebhookSignature } from '@storefront/lib/razorpay';
 
 export async function POST(req: NextRequest) {
   try {

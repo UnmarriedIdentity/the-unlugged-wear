@@ -2,14 +2,14 @@
 
 import React, { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
-import Breadcrumb from '@/components/ui/Breadcrumb';
-import Input from '@/components/ui/Input';
-import ImageWithFallback from '@/components/ui/ImageWithFallback';
-import Button from '@/components/ui/Button';
-import Badge from '@/components/ui/Badge';
-import { useStore } from '@/mocks/store';
+import Header from '@storefront/components/layout/Header';
+import Footer from '@storefront/components/layout/Footer';
+import Breadcrumb from '@storefront/components/ui/Breadcrumb';
+import Input from '@storefront/components/ui/Input';
+import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
+import Button from '@storefront/components/ui/Button';
+import Badge from '@storefront/components/ui/Badge';
+import { useStore } from '@storefront/mocks/store';
 import { Truck, CheckCircle2, Clock, AlertCircle, Package, Search } from 'lucide-react';
 
 function TrackOrderContent() {

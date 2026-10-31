@@ -25,8 +25,8 @@ describe('Server Route & Asset Coverage Invariants', () => {
     'src/app/(storefront)/api/contact/route.ts',
     'src/app/(storefront)/api/webhooks/razorpay/route.ts',
     'src/app/(storefront)/api/fulfillment/qikink/route.ts',
-    'src/lib/razorpay.ts',
-    'src/lib/qikink.ts',
+    'src/storefront/lib/razorpay.ts',
+    'src/storefront/lib/qikink.ts',
   ];
 
   for (const relPath of requiredRoutes) {

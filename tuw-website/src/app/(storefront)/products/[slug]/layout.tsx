@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { STORE_PRODUCTS } from '@/mocks/fixtures';
+import { STORE_PRODUCTS } from '@storefront/mocks/fixtures';
 
 // Resolve the slug (or a legacy alias) on the server before the client page
 // streams, so unknown products return a real 404 and each piece gets its own title.

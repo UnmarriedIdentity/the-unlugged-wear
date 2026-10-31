@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Ruler, Check, AlertCircle } from 'lucide-react';
-import { ProductSize } from '@/lib/types';
+import { ProductSize } from '@storefront/lib/types';
 
 export interface VariantPillSelectorProps {
   sizes?: ProductSize[];

@@ -3,9 +3,9 @@
 import React from 'react';
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
-import { Product } from '@/lib/types';
+import { Product } from '@storefront/lib/types';
 import ProductCard from './ProductCard';
-import { useStore } from '@/mocks/store';
+import { useStore } from '@storefront/mocks/store';
 
 export interface PairsWithItem {
   id: string;

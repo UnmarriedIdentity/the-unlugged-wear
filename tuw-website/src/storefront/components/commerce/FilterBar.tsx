@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import type { Product } from '@/lib/types';
+import type { Product } from '@storefront/lib/types';
 import { SlidersHorizontal, X, Plus, Minus, Check } from 'lucide-react';
-import Drawer from '../ui/Drawer';
+import Drawer from '@storefront/components/ui/Drawer';
 
 export interface FilterState {
   category: string;

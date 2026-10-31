@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
-import AccountGate from '@/components/layout/AccountGate';
+import AccountGate from '@storefront/components/layout/AccountGate';
 
 // Private page: kept out of search results.
 export const metadata: Metadata = {
