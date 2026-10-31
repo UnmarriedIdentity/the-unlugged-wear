@@ -20,9 +20,6 @@
       ],
       "@storefront/*": [
         "./src/storefront/*"
-      ],
-      "@admin/*": [
-        "./src/admin/*"
       ]
     },
     "allowJs": true,
