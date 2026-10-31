@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { MessageSquare } from 'lucide-react';
-import { ReviewItem } from '@/lib/types';
+import { ReviewItem } from '@storefront/lib/types';
 import Button from '@storefront/components/ui/Button';
 import Badge from '@storefront/components/ui/Badge';
 import Modal from '@storefront/components/ui/Modal';

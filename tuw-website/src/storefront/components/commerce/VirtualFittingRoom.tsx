@@ -4,8 +4,8 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Heart, RotateCcw } from 'lucide-react';
 import Badge from '@storefront/components/ui/Badge';
 import { useStore } from '@/mocks/store';
-import { formatINR } from '@/lib/format';
-import { cn } from '@/lib/cn';
+import { formatINR } from '@storefront/lib/format';
+import { cn } from '@storefront/lib/cn';
 import { STORE_PRODUCTS } from '@/mocks/fixtures';
 
 export type FittingAudience = 'men' | 'women' | 'kids';

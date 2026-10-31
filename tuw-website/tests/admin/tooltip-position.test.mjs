@@ -2,7 +2,7 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
 // ---------------------------------------------------------------
-// Mirrors src/lib/tooltipPosition.ts (self-contained per this suite's
+// Mirrors src/admin/lib/tooltipPosition.ts (self-contained per this suite's
 // convention). The shared tooltip must flip and clamp without DOM access.
 // ---------------------------------------------------------------
 const computeTooltipPosition = ({

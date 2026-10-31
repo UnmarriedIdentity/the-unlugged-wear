@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ProductSpecTable } from '@/lib/types';
+import { ProductSpecTable } from '@storefront/lib/types';
 
 export interface DynamicDataTableProps {
   table?: ProductSpecTable | null;

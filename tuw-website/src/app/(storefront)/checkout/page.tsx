@@ -9,7 +9,7 @@ import PaymentSimulationPanel from '@storefront/components/commerce/PaymentSimul
 import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
 import { useStore } from '@/mocks/store';
 import { useDemoSession } from '@/mocks/auth';
-import { Address, Order } from '@/lib/types';
+import { Address, Order } from '@storefront/lib/types';
 import {
   ShieldCheck,
   Truck,

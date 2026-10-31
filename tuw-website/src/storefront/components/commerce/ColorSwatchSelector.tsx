@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Check } from 'lucide-react';
-import { ProductColor } from '@/lib/types';
+import { ProductColor } from '@storefront/lib/types';
 
 export interface ColorSwatchSelectorProps {
   colors?: ProductColor[];

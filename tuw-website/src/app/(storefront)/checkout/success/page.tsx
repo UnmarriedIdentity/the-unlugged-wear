@@ -9,8 +9,8 @@ import Button from '@storefront/components/ui/Button';
 import Badge from '@storefront/components/ui/Badge';
 import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
 import { useStore } from '@/mocks/store';
-import { Order } from '@/lib/types';
-import { formatINR } from '@/lib/format';
+import { Order } from '@storefront/lib/types';
+import { formatINR } from '@storefront/lib/format';
 import { CheckCircle2, AlertCircle, Clock, Truck, ArrowRight, ShieldCheck, ShoppingBag } from 'lucide-react';
 
 function OrderSuccessContent() {

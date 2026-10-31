@@ -9,7 +9,7 @@ import Badge from '@storefront/components/ui/Badge';
 import Button from '@storefront/components/ui/Button';
 import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
 import { useStore } from '@/mocks/store';
-import { formatINR } from '@/lib/format';
+import { formatINR } from '@storefront/lib/format';
 import {
   Package,
   Truck,

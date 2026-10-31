@@ -1,4 +1,4 @@
-import { Product, ProductSpecTable, Collection, Order, JournalArticle, FaqItem, Address } from '../lib/types';
+import { Product, ProductSpecTable, Collection, Order, JournalArticle, FaqItem, Address } from '@storefront/lib/types';
 
 // Catalog source: Qikink print-on-demand base listing ("Final Listing.xls").
 // Sizes, colours, garment weights and print areas come from that sheet.

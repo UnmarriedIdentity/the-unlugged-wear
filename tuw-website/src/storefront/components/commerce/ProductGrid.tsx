@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Product } from '@/lib/types';
+import { Product } from '@storefront/lib/types';
 import ProductCard from './ProductCard';
 import EmptyState from '@storefront/components/ui/EmptyState';
 import Skeleton from '@storefront/components/ui/Skeleton';

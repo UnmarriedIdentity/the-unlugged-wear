@@ -9,7 +9,7 @@ import {
   ReturnRequest,
   Address,
   DemoScenario,
-} from '../lib/types';
+} from '@storefront/lib/types';
 import {
   STORE_PRODUCTS,
   INITIAL_ORDERS,

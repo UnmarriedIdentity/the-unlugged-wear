@@ -16,7 +16,7 @@ import ProductReviews from '@storefront/components/commerce/ProductReviews';
 import RelatedProductsSection from '@storefront/components/commerce/RelatedProductsSection';
 import { EditorialQuote, EditorialFeatureSplit } from '@storefront/components/editorial';
 import { useStore } from '@/mocks/store';
-import { ProductColor, ReviewItem } from '@/lib/types';
+import { ProductColor, ReviewItem } from '@storefront/lib/types';
 import {
   ChevronDown,
   ArrowRight,
