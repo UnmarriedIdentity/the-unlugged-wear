@@ -1,136 +1,136 @@
-# The Unplugged Wear — Single Next.js App, Two Surfaces
+# The Unplugged Wear — Frontend Workspace
 
-One Next.js 16.3.8 (Turbopack) application serves the whole product: the customer
-storefront at the root and the staff operations panel under `/admin`. It is built with
-**React 19**, **Tailwind CSS v4**, and **TypeScript 5.7**, and deployed as a single Vercel
-project from `tuw-website/`.
+A pnpm workspace holding **two independent Next.js applications**: the customer storefront and
+the staff operations panel. Both are Next.js 16.3.8 (Turbopack) + React 19 + Tailwind CSS v4 +
+TypeScript 5.7, and both deploy separately.
+
+They are separate packages, not route groups of one app, because each ships its own Tailwind v4
+stylesheet that redefines the same custom properties — `--font-urbanist`, `--color-surface`,
+`--color-primary-*` — with different values. If one document ever loaded both files, the later
+one would silently win and one product would be repainted. Two packages make that impossible by
+construction, and let each app be built, released and rolled back on its own.
 
 ```
 the-unplugged-wear/
-├── tuw-website/                 # The app. Everything runs from here.
-│   ├── src/app/(storefront)/    # Storefront root layout + its own globals.css
-│   ├── src/app/(admin)/         # Admin root layout + its own globals.css
-│   │   └── admin/               # Every /admin route
-│   ├── src/admin/               # Admin components, hooks, lib, mocks (@admin/*)
-│   ├── src/server/              # DB migrations + seed (@/server/*)
-│   ├── src/{components,lib,mocks}/  # Storefront code
-│   ├── public/                  # Shared static assets
-│   ├── tests/                   # Storefront suites
-│   │   └── admin/               # Admin suites
-│   ├── docs/admin/              # Admin specifications
-│   └── design/                  # Figma design-system exports
+├── tuw-website/                 # Storefront — port 3007, deployed on its own
+│   ├── src/app/                 # Every storefront route (thin, SEO-focused)
+│   ├── src/storefront/          # @storefront/* — components, lib, mocks
+│   ├── public/                  # Fonts, logos, product imagery, videos
+│   ├── tests/                   # node:test suites
+│   ├── docs/                    # Storefront specifications
+│   └── vercel.json
+├── tuw-admin/                   # Staff operations panel — port 3001, deployed on its own
+│   ├── src/app/                 # Auth screens + the (dashboard) route group
+│   ├── src/{components,hooks,lib,mocks}/   # @/* — the panel's own design system
+│   ├── src/server/              # @/server/* — DB migrations and seed SQL
+│   ├── public/, design/, docs/
+│   ├── tests/
+│   └── vercel.json
+├── TUW-Frontend-UI-Docs/        # Source Figma-driven specifications (both apps)
+├── DOC/backend/                 # Backend schema and API design documents
 ├── state-for-agents/
-│   ├── admin/                   # Agent state for the admin surface
-│   └── storefront/              # Agent state for the storefront surface
-├── DOC/                         # Backend schema & API design documents
-├── AGENTS.md                    # Agent rules & dependency version policy
+│   ├── admin/                   # Resumable agent state for the panel
+│   └── storefront/              # Resumable agent state for the storefront
+├── AGENTS.md                    # Agent rules and dependency version policy
+├── ROUTES.md                    # Route directory for both apps
 ├── pnpm-workspace.yaml
+├── pnpm-lock.yaml               # One lockfile for the whole workspace
 └── README.md
 ```
 
 ---
 
-## Why two root layouts
+## Workspace commands
 
-Both surfaces ship a Tailwind v4 stylesheet that starts with `@import "tailwindcss"` and
-redefines the same custom properties — `--font-urbanist`, `--color-surface`,
-`--color-primary-*` — with different values. If one document ever loaded both files, the
-later one would silently win and one surface would be repainted.
-
-So the app has **no `src/app/layout.tsx`**. Instead each surface owns a root layout:
-
-| Surface | Route group | Entry |
-|---|---|---|
-| Storefront | `src/app/(storefront)/` | `layout.tsx` + `globals.css` |
-| Admin panel | `src/app/(admin)/` | `layout.tsx` + `globals.css` |
-
-Next.js therefore performs a full page load when crossing the boundary, which guarantees
-exactly one stylesheet is ever present. Route groups are URL-transparent, so the storefront
-keeps `/`, `/shop`, `/account`, … and the admin owns everything under `/admin/**`.
-
----
-
-## 🚀 Commands
-
-All commands run from the repository root and delegate to `tuw-website`:
+All commands run from the repository root and delegate to the package they belong to.
 
 ```bash
-# 1. Install dependencies for the workspace
-pnpm install
+pnpm install          # install both apps from the root lockfile
 
-# 2. Development server on port 3007 — serves BOTH surfaces
-pnpm dev
-# Storefront:  http://localhost:3007
-# Admin panel: http://localhost:3007/admin/dashboard
+pnpm dev:website      # storefront on http://localhost:3007
+pnpm dev:admin        # admin panel on http://localhost:3001
 
-# 3. Typecheck the app (strict mode, zero errors)
-pnpm typecheck
+pnpm typecheck        # tsc --noEmit in both packages
+pnpm test             # node:test suites in both packages
 
-# 4. Run every test suite (storefront + admin)
-pnpm test
-
-# 5. Production build (storefront + admin routes pre-rendered)
-pnpm build
-
-# 6. Start the production server
-pnpm start
+pnpm build            # production build of both packages
+pnpm start:website    # serve the built storefront on 3007
+pnpm start:admin      # serve the built panel on 3001
 ```
 
+`pnpm typecheck`, `pnpm test` and `pnpm build` are aggregates: they run the admin first and stop
+if it fails.
+
 ---
 
-## 🔐 Surfaces at a glance
+## The two applications
 
-| Surface | Entry URL | Description | Routes |
+| | [`tuw-website`](./tuw-website) | [`tuw-admin`](./tuw-admin) |
+|---|---|---|
+| Purpose | Customer shop: catalog, PDP, cart, checkout, account, order tracking | Staff workspace: catalog, orders, POD fulfillment, shipments, returns, refunds, CMS, team, settings |
+| Dev port | `3007` | `3001` |
+| Routes | `src/app/**` — `/`, `/shop`, `/products/[slug]`, `/checkout`, `/account/**`, … | `src/app/**` — `/login`, `/dashboard`, `/orders`, `/settings/**`, … |
+| Source root | `src/storefront/**` via `@storefront/*` | `src/{components,hooks,lib,mocks}/**` via `@/*` |
+| Stylesheet | `src/app/globals.css` — Outfit, warm editorial palette | `src/app/globals.css` — Urbanist, 18 violet/action roles |
+| Vercel Root Directory | `tuw-website` | `tuw-admin` |
+
+**Zero cross-package imports.** No file in `tuw-website` imports from `tuw-admin` and vice versa.
+That is what keeps `Badge`, `Button`, `Modal`, `Tabs`, `cn`, `format` and twenty other names free
+to exist twice with different implementations.
+
+---
+
+## Demo sign-in
+
+Both apps are mock-only: there is no server, no real auth, and nothing is charged.
+
+| App | Email | Password | Lands on |
 |---|---|---|---|
-| **Storefront** | `/` | Customer-facing shop for heavyweight organic apparel: catalog, PDP, cart, simulated Razorpay checkout, account, order tracking. | 36 routes |
-| **Admin panel** | `/admin` (redirects to `/admin/dashboard`) | Operating workspace for staff: catalog, orders, POD fulfillment, shipments, returns, refunds, CMS, team, settings, reports. | 41 routes |
+| Storefront | `uk1115@tuw.co` | `uktuw1115` | `/account` |
+| Admin | `contactstylehub@gmail.com` | anything except `wrong` / `error` | `/dashboard` |
 
-Full route tables: [`ROUTES.md`](./ROUTES.md) and [`tuw-website/ENDPOINTS.md`](./tuw-website/ENDPOINTS.md).
-
-### Demo sign-in
-
-Both surfaces are mock-only right now — there is no server, no real auth, and nothing is
-charged. The accounts live in [`tuw-website/src/mocks/auth.ts`](./tuw-website/src/mocks/auth.ts):
-
-| Account | Email | Password | Lands on |
-|---|---|---|---|
-| Customer | `uk1115@tuw.co` | `uktuw1115` | `/account` |
-| Admin | `admin@tuw.co` | `tuwadmin123` | `/admin/dashboard` |
-
-The storefront login (`/login`) is the single sign-in for both surfaces and routes by
-role, so signing in as the admin hands straight over to the panel. There is no separate
-admin login screen.
+The storefront account is seeded in `tuw-website/src/storefront/mocks/auth.ts` and owns the fixture
+orders; the login page has a **Fill in the demo account** button. The admin's login screen accepts
+any non-error password so its Figma error states can be reproduced with `?state=error`.
 
 ---
 
-## 🎨 Design System Compliance
+## Design system compliance
 
-The two surfaces deliberately keep **separate** design systems. Neither imports the other's
-tokens, components, or stylesheet.
+The two packages deliberately keep separate design systems, so neither can inherit the other's
+tokens.
 
-* **Admin — Urbanist / 18 semantic roles**: `--color-surface: #FFFFFF`, action primary
-  `#7539FF`, canvas `#F7F8F9`. Specimen at `/admin/design-system`.
-* **Storefront — Outfit / warm editorial palette**: ivory canvas `#FAF9F6`, charcoal text
-  `#1A1A1A`, dark purchase CTA `#111111`, gold accent `#C8A96A`. Admin purple never
-  appears in a customer purchase flow. Specimen at `/design-system`.
-
----
-
-## 💾 Deterministic Mock Data & Scenarios
-
-* **Assortment**: Focused catalog with 12 products in the storefront and 10 in admin, covering T-shirts, hoodies, jackets, pants, and lifestyle accessories. Includes edge cases: long title, missing image fallback, and unavailable sizes.
-* **Commerce Fixtures**: 22+ orders across independent payment (`paid`, `pending`, `failed`, `refunded`) and fulfillment states (`queued`, `printing`, `shipped`, `delivered`, `submission_failed`).
-* **Dynamic KPIs**: Dashboard totals calculate dynamically from live state (zero hardcoded numbers).
-* **Test Scenarios**: Header (admin) and Footer (storefront) controls allow switching between `Normal`, `Loading`, `Empty States`, `Simulated Error`, and `Long Multiline Text`.
-* **Reset Demo Action**: Restores local storage mutations back to deterministic fixtures.
+* **Admin — Urbanist, 18 semantic roles**: canvas `#F7F8F9`, surface `#FFFFFF`, primary text
+  `#262626`, action primary `#7539FF`. Specimen at `/design-system` on port 3001.
+* **Storefront — Outfit, warm editorial palette**: ivory canvas `#FAF9F6`, charcoal text
+  `#1A1A1A`, dark purchase CTA `#111111`, gold accent `#C8A96A`. Admin violet never appears in a
+  customer purchase flow. Specimen at `/design-system` on port 3007.
 
 ---
 
-## 📚 Project Documentation
+## Deployment
 
-* [`tuw-website/docs/`](./tuw-website/docs) — storefront specifications.
-* [`tuw-website/docs/admin/`](./tuw-website/docs/admin) — admin specifications (`ADMIN_UI.md`, `COMPONENTS.md`, `MOCK_DATA.md`, …).
-* [`tuw-website/TUW-Frontend-UI-Docs/`](./tuw-website/TUW-Frontend-UI-Docs) — source Figma-driven specifications.
-* [`state-for-agents/`](./state-for-agents) — resumable agent state, split per surface.
-* [`DOC/`](./DOC) — backend schema and API design.
+Two Vercel projects from this one repository. **Root Directory is a project setting** (Settings →
+Build and Deployment), not a `vercel.json` key — each app's `vercel.json` only pins
+`"framework": "nextjs"`.
+
+| Project | Root Directory | Notes |
+|---|---|---|
+| Storefront | `tuw-website` | Vercel reads the package manager from the repo-root `pnpm-lock.yaml` |
+| Admin | `tuw-admin` | Same lockfile; env vars are set per project |
+
+Each package carries its own `.env.example`. Leaving Root Directory at the repository root would
+drop the Next.js runtime preset, which breaks `/api/**`, dynamic routes and image optimization.
+
+---
+
+## Documentation
+
+* [`ROUTES.md`](./ROUTES.md) — every route in both apps, with redirects and state query params.
+* [`TUW-Frontend-UI-Docs/`](./TUW-Frontend-UI-Docs) — UI scope, design system, component contract,
+  mock-data contract, responsive/accessibility rules.
+* [`tuw-website/docs/`](./tuw-website/docs) — storefront folder structure, components, mock data.
+* [`tuw-admin/docs/`](./tuw-admin/docs) — the panel's equivalents, including `FOLDER-STRUCTURE.md`.
+* [`tuw-website/ENDPOINTS.md`](./tuw-website/ENDPOINTS.md) — storefront endpoint reference.
+* [`DOC/backend/`](./DOC/backend) — backend schema, API design, migrations.
 * [`AGENTS.md`](./AGENTS.md) — dependency version policy and engineering standards.
