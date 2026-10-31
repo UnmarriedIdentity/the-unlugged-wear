@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import Breadcrumb from '@/components/ui/Breadcrumb';
-import Disclosure from '@/components/ui/Disclosure';
+import Breadcrumb from '@storefront/components/ui/Breadcrumb';
+import Disclosure from '@storefront/components/ui/Disclosure';
 import { FAQ_ITEMS } from '@/mocks/fixtures';
 
 export default function FaqPage() {

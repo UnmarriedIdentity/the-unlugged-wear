@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import PaymentSimulationPanel from '@/components/commerce/PaymentSimulationPanel';
-import ImageWithFallback from '@/components/ui/ImageWithFallback';
+import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
 import { useStore } from '@/mocks/store';
 import { useDemoSession } from '@/mocks/auth';
 import { Address, Order } from '@/lib/types';

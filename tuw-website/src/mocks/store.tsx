@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import Toast from '@/components/ui/Toast';
+import Toast from '@storefront/components/ui/Toast';
 import {
   Product,
   CartItem,

@@ -4,9 +4,9 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import Breadcrumb from '@/components/ui/Breadcrumb';
-import Input from '@/components/ui/Input';
-import Button from '@/components/ui/Button';
+import Breadcrumb from '@storefront/components/ui/Breadcrumb';
+import Input from '@storefront/components/ui/Input';
+import Button from '@storefront/components/ui/Button';
 import { ArrowLeft, CheckCircle2 } from 'lucide-react';
 
 export default function ForgotPasswordPage() {

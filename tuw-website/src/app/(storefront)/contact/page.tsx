@@ -3,11 +3,11 @@
 import React, { useState } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import Breadcrumb from '@/components/ui/Breadcrumb';
-import Input from '@/components/ui/Input';
-import Textarea from '@/components/ui/Textarea';
-import Select from '@/components/ui/Select';
-import Button from '@/components/ui/Button';
+import Breadcrumb from '@storefront/components/ui/Breadcrumb';
+import Input from '@storefront/components/ui/Input';
+import Textarea from '@storefront/components/ui/Textarea';
+import Select from '@storefront/components/ui/Select';
+import Button from '@storefront/components/ui/Button';
 import { Mail, Clock, MapPin, CheckCircle2, ShieldCheck } from 'lucide-react';
 
 export default function ContactPage() {

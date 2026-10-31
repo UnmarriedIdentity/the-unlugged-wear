@@ -3,9 +3,9 @@
 import React from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import Breadcrumb from '@/components/ui/Breadcrumb';
+import Breadcrumb from '@storefront/components/ui/Breadcrumb';
 import ProductGrid from '@/components/commerce/ProductGrid';
-import Button from '@/components/ui/Button';
+import Button from '@storefront/components/ui/Button';
 import { useStore } from '@/mocks/store';
 import { Heart } from 'lucide-react';
 

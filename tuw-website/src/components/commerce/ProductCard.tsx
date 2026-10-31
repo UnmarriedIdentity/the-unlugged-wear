@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Heart, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { Product } from '@/lib/types';
 import { useStore } from '@/mocks/store';
-import ImageWithFallback from '../ui/ImageWithFallback';
+import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
 
 export interface ProductCardProps {
   product: Product;

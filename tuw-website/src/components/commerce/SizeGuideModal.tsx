@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import Modal from '../ui/Modal';
+import Modal from '@storefront/components/ui/Modal';
 
 export interface SizeGuideModalProps {
   isOpen: boolean;

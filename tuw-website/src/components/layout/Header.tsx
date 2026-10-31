@@ -15,7 +15,7 @@ import { useStore } from '@/mocks/store';
 import MobileMenu from './MobileMenu';
 import CartDrawer from './CartDrawer';
 import TuwEmblem from './TuwEmblem';
-import ImageWithFallback from '../ui/ImageWithFallback';
+import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
 import { formatINR } from '@/lib/format';
 import type { Product } from '@/lib/types';
 import { NAV_ITEMS, type NavItem } from './navigation';

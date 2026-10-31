@@ -3,12 +3,12 @@
 import React, { useState } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import Breadcrumb from '@/components/ui/Breadcrumb';
-import Button from '@/components/ui/Button';
-import Badge from '@/components/ui/Badge';
-import Input from '@/components/ui/Input';
-import Disclosure from '@/components/ui/Disclosure';
-import Tabs from '@/components/ui/Tabs';
+import Breadcrumb from '@storefront/components/ui/Breadcrumb';
+import Button from '@storefront/components/ui/Button';
+import Badge from '@storefront/components/ui/Badge';
+import Input from '@storefront/components/ui/Input';
+import Disclosure from '@storefront/components/ui/Disclosure';
+import Tabs from '@storefront/components/ui/Tabs';
 import { Copy, Check, Feather, ShieldCheck, Heart, ShoppingBag, Eye } from 'lucide-react';
 
 export default function StorefrontDesignSystemPage() {

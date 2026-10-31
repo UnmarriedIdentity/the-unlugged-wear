@@ -4,7 +4,7 @@ import React, { useState, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import Breadcrumb from '@/components/ui/Breadcrumb';
+import Breadcrumb from '@storefront/components/ui/Breadcrumb';
 import ProductGrid from '@/components/commerce/ProductGrid';
 import { useStore } from '@/mocks/store';
 import { Search as SearchIcon, X, Tag } from 'lucide-react';

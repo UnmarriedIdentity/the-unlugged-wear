@@ -4,10 +4,10 @@ import React, { use } from 'react';
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import Breadcrumb from '@/components/ui/Breadcrumb';
-import Badge from '@/components/ui/Badge';
-import Button from '@/components/ui/Button';
-import ImageWithFallback from '@/components/ui/ImageWithFallback';
+import Breadcrumb from '@storefront/components/ui/Breadcrumb';
+import Badge from '@storefront/components/ui/Badge';
+import Button from '@storefront/components/ui/Button';
+import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
 import { useStore } from '@/mocks/store';
 import { formatINR } from '@/lib/format';
 import {

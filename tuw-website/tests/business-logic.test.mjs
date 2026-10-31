@@ -233,7 +233,7 @@ describe('Deterministic local fonts (Windows == macOS)', () => {
 
     // Luxury Toast Notification & Deduplication Invariants
     const storeContent = readFileSync(join(repoRoot, 'src/mocks/store.tsx'), 'utf8');
-    const toastContent = readFileSync(join(repoRoot, 'src/components/ui/Toast.tsx'), 'utf8');
+    const toastContent = readFileSync(join(repoRoot, 'src/storefront/components/ui/Toast.tsx'), 'utf8');
     assert.ok(storeContent.includes('lastToastRef'), 'store.tsx must have lastToastRef deduplication guard');
     assert.ok(storeContent.includes('<Toast'), 'store.tsx must render Toast component');
     assert.ok(toastContent.includes('tuw-toast-enter'), 'Toast.tsx must apply tuw-toast-enter animation');

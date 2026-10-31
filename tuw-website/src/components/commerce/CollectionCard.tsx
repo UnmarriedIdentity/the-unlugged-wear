@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { Collection } from '@/lib/types';
-import ImageWithFallback from '../ui/ImageWithFallback';
+import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
 
 export interface CollectionCardProps {
   collection: Collection;

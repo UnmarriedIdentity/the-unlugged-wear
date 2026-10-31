@@ -3,8 +3,8 @@
 import React from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import Breadcrumb from '@/components/ui/Breadcrumb';
-import Button from '@/components/ui/Button';
+import Breadcrumb from '@storefront/components/ui/Breadcrumb';
+import Button from '@storefront/components/ui/Button';
 import { ShieldCheck, RefreshCw, Feather, Sun, Droplets, CheckCircle } from 'lucide-react';
 
 export default function SustainabilityPage() {

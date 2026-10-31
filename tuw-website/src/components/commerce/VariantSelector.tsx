@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ShoppingBag, Heart, ShieldCheck } from 'lucide-react';
 import { Product, ProductColor, ProductSize } from '@/lib/types';
 import { useStore } from '@/mocks/store';
-import Button from '../ui/Button';
+import Button from '@storefront/components/ui/Button';
 import SizeGuideModal from './SizeGuideModal';
 import ColorSwatchSelector from './ColorSwatchSelector';
 import VariantPillSelector from './VariantPillSelector';

@@ -4,8 +4,8 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import Breadcrumb from '@/components/ui/Breadcrumb';
-import Badge from '@/components/ui/Badge';
+import Breadcrumb from '@storefront/components/ui/Breadcrumb';
+import Badge from '@storefront/components/ui/Badge';
 import { ArrowRight, Clock } from 'lucide-react';
 import { JOURNAL_ARTICLES } from '@/mocks/fixtures';
 

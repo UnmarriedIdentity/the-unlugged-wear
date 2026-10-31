@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import Breadcrumb from '@/components/ui/Breadcrumb';
+import Breadcrumb from '@storefront/components/ui/Breadcrumb';
 import { ArrowRight, ShieldAlert, FileText, RefreshCw, Truck, Lock } from 'lucide-react';
 
 export default function PoliciesIndexPage() {

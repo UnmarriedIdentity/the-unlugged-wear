@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Heart, RotateCcw } from 'lucide-react';
-import Badge from '@/components/ui/Badge';
+import Badge from '@storefront/components/ui/Badge';
 import { useStore } from '@/mocks/store';
 import { formatINR } from '@/lib/format';
 import { cn } from '@/lib/cn';

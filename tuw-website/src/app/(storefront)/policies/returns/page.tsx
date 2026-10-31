@@ -3,7 +3,7 @@
 import React from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import Breadcrumb from '@/components/ui/Breadcrumb';
+import Breadcrumb from '@storefront/components/ui/Breadcrumb';
 import { ShieldAlert, RefreshCw, CheckCircle2 } from 'lucide-react';
 
 export default function ReturnsPolicyPage() {

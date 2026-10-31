@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import Breadcrumb from '@/components/ui/Breadcrumb';
-import Tabs from '@/components/ui/Tabs';
+import Breadcrumb from '@storefront/components/ui/Breadcrumb';
+import Tabs from '@storefront/components/ui/Tabs';
 
 export default function StandaloneSizeGuidePage() {
   const [activeCategory, setActiveCategory] = useState<'hoodies' | 'tees' | 'pants'>('hoodies');

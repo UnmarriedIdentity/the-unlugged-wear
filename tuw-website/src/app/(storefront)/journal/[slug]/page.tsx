@@ -4,9 +4,9 @@ import React, { use } from 'react';
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import Breadcrumb from '@/components/ui/Breadcrumb';
-import Badge from '@/components/ui/Badge';
-import Button from '@/components/ui/Button';
+import Breadcrumb from '@storefront/components/ui/Breadcrumb';
+import Badge from '@storefront/components/ui/Badge';
+import Button from '@storefront/components/ui/Button';
 import { JOURNAL_ARTICLES } from '@/mocks/fixtures';
 import { Clock, ArrowLeft, Share2 } from 'lucide-react';
 
