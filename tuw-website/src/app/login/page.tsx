@@ -58,8 +58,7 @@ export default function LoginPage() {
       }
       // "Remember me" keeps the sign-in in this browser, otherwise it lasts for this tab.
       writeDemoSession(session, rememberMe);
-      // The demo admin is handed to the admin panel; customers land on their account.
-      router.push(session.role === 'admin' ? '/admin/dashboard' : safeNextPath());
+      router.push(safeNextPath());
     }, 500);
   };
 
