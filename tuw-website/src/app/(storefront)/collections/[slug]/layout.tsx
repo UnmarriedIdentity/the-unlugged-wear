@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { STORE_COLLECTIONS } from '@/mocks/fixtures';
+import { STORE_COLLECTIONS } from '@storefront/mocks/fixtures';
 
 export async function generateMetadata({
   params,

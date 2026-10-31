@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Trash2, Plus, Minus, ArrowRight, ShoppingBag, ShieldCheck } from 'lucide-react';
-import { useStore } from '@/mocks/store';
+import { useStore } from '@storefront/mocks/store';
 import Drawer from '@storefront/components/ui/Drawer';
 import Button from '@storefront/components/ui/Button';
 import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';

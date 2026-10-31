@@ -7,7 +7,7 @@ import Footer from '@storefront/components/layout/Footer';
 import Breadcrumb from '@storefront/components/ui/Breadcrumb';
 import Badge from '@storefront/components/ui/Badge';
 import Button from '@storefront/components/ui/Button';
-import { JOURNAL_ARTICLES } from '@/mocks/fixtures';
+import { JOURNAL_ARTICLES } from '@storefront/mocks/fixtures';
 import { Clock, ArrowLeft, Share2 } from 'lucide-react';
 
 export default function JournalArticlePage({

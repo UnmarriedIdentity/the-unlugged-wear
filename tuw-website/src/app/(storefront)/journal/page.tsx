@@ -7,7 +7,7 @@ import Footer from '@storefront/components/layout/Footer';
 import Breadcrumb from '@storefront/components/ui/Breadcrumb';
 import Badge from '@storefront/components/ui/Badge';
 import { ArrowRight, Clock } from 'lucide-react';
-import { JOURNAL_ARTICLES } from '@/mocks/fixtures';
+import { JOURNAL_ARTICLES } from '@storefront/mocks/fixtures';
 
 export default function JournalPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');

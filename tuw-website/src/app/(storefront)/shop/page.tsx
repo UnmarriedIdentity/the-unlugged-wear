@@ -7,7 +7,7 @@ import Footer from '@storefront/components/layout/Footer';
 import ProductGrid from '@storefront/components/commerce/ProductGrid';
 import FilterBar, { FilterState } from '@storefront/components/commerce/FilterBar';
 import Breadcrumb from '@storefront/components/ui/Breadcrumb';
-import { useStore } from '@/mocks/store';
+import { useStore } from '@storefront/mocks/store';
 import { ShieldCheck, Sparkles, Truck } from 'lucide-react';
 import Link from 'next/link';
 

@@ -9,7 +9,7 @@ import Input from '@storefront/components/ui/Input';
 import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
 import Button from '@storefront/components/ui/Button';
 import Badge from '@storefront/components/ui/Badge';
-import { useStore } from '@/mocks/store';
+import { useStore } from '@storefront/mocks/store';
 import { Truck, CheckCircle2, Clock, AlertCircle, Package, Search } from 'lucide-react';
 
 function TrackOrderContent() {

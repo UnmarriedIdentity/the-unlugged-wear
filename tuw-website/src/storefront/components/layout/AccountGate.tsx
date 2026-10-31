@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { Lock } from 'lucide-react';
 import Header from './Header';
 import Footer from './Footer';
-import { useDemoSession } from '@/mocks/auth';
+import { useDemoSession } from '@storefront/mocks/auth';
 
 // Account pages need the demo sign-in. Until the session has been read, render
 // nothing so a signed-in visitor never sees the prompt flash.

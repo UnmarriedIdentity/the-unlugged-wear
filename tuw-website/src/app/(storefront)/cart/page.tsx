@@ -8,7 +8,7 @@ import Breadcrumb from '@storefront/components/ui/Breadcrumb';
 import Button from '@storefront/components/ui/Button';
 import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
 import { Trash2, Plus, Minus, ArrowRight, ShoppingBag, ShieldCheck } from 'lucide-react';
-import { useStore } from '@/mocks/store';
+import { useStore } from '@storefront/mocks/store';
 
 export default function CartPage() {
   const {

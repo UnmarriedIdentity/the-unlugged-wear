@@ -17,7 +17,7 @@ import Footer from '@storefront/components/layout/Footer';
 import VirtualFittingRoom from '@storefront/components/commerce/VirtualFittingRoom';
 import OurPhilosophy from '@storefront/components/commerce/OurPhilosophy';
 import ProductCard from '@storefront/components/commerce/ProductCard';
-import { STORE_PRODUCTS, JOURNAL_ARTICLES } from '@/mocks/fixtures';
+import { STORE_PRODUCTS, JOURNAL_ARTICLES } from '@storefront/mocks/fixtures';
 import type { Product } from '@storefront/lib/types';
 
 

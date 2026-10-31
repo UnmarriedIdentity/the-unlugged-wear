@@ -163,7 +163,7 @@ describe('Deterministic local fonts (Windows == macOS)', () => {
   });
 
   test('all product slugs are concise, clean, and bounded (<= 45 characters)', () => {
-    const fixturesContent = readFileSync(join(repoRoot, 'src/mocks/fixtures.ts'), 'utf8');
+    const fixturesContent = readFileSync(join(repoRoot, 'src/storefront/mocks/fixtures.ts'), 'utf8');
     const slugMatches = [...fixturesContent.matchAll(/slug:\s*['"]([^'"]+)['"]/g)].map((m) => m[1]);
     assert.ok(slugMatches.length >= 14, 'expected at least 14 product/collection slugs');
 
@@ -232,7 +232,7 @@ describe('Deterministic local fonts (Windows == macOS)', () => {
     assert.ok(filterContent.includes('tuw-delay-'), 'FilterBar must apply staggered animation delays');
 
     // Luxury Toast Notification & Deduplication Invariants
-    const storeContent = readFileSync(join(repoRoot, 'src/mocks/store.tsx'), 'utf8');
+    const storeContent = readFileSync(join(repoRoot, 'src/storefront/mocks/store.tsx'), 'utf8');
     const toastContent = readFileSync(join(repoRoot, 'src/storefront/components/ui/Toast.tsx'), 'utf8');
     assert.ok(storeContent.includes('lastToastRef'), 'store.tsx must have lastToastRef deduplication guard');
     assert.ok(storeContent.includes('<Toast'), 'store.tsx must render Toast component');
@@ -266,10 +266,10 @@ describe('Demo sign-in and checkout flow', () => {
   const read = (relative) => readFileSync(join(repoRoot, relative), 'utf8');
 
   test('login only accepts the seeded demo account and account pages need a session', () => {
-    const auth = read('src/mocks/auth.ts');
+    const auth = read('src/storefront/mocks/auth.ts');
     const login = read('src/app/(storefront)/login/page.tsx');
     const accountLayout = read('src/app/(storefront)/account/layout.tsx');
-    assert.ok(/export const DEMO_ACCOUNT = \{[\s\S]*email: '[^']+@[^']+',[\s\S]*password: '[^']+'/.test(auth), 'demo account is seeded in src/mocks/auth.ts');
+    assert.ok(/export const DEMO_ACCOUNT = \{[\s\S]*email: '[^']+@[^']+',[\s\S]*password: '[^']+'/.test(auth), 'demo account is seeded in src/storefront/mocks/auth.ts');
     assert.ok(login.includes('checkDemoCredentials(email, password)'), 'login checks the demo credentials');
     assert.ok(!login.includes('any email and password will work'), 'login no longer accepts any credentials');
     assert.ok(accountLayout.includes('<AccountGate>'), 'account routes are wrapped in the sign-in gate');
@@ -300,7 +300,7 @@ describe('Demo sign-in and checkout flow', () => {
   });
 
   test('new orders keep payment and fulfilment status separate', () => {
-    const store = read('src/mocks/store.tsx');
+    const store = read('src/storefront/mocks/store.tsx');
     assert.ok(store.includes("paymentStatus: isCashOnDelivery ? 'pending' : 'paid'"), 'COD orders stay payment-pending');
     assert.ok(store.includes("fulfillmentStatus: 'queued'"), 'new orders start in the print queue');
     assert.ok(store.includes('while (taken.has(orderNumber))'), 'order numbers never reuse an existing reference');

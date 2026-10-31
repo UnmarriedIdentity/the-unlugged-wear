@@ -4,7 +4,7 @@ import React, { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import AuthShell, { AuthField, PasswordToggle } from '@storefront/components/layout/AuthShell';
-import { writeDemoSession } from '@/mocks/auth';
+import { writeDemoSession } from '@storefront/mocks/auth';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD = 8;

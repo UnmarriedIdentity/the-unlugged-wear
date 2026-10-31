@@ -6,7 +6,7 @@ import Footer from '@storefront/components/layout/Footer';
 import Breadcrumb from '@storefront/components/ui/Breadcrumb';
 import ProductGrid from '@storefront/components/commerce/ProductGrid';
 import Button from '@storefront/components/ui/Button';
-import { useStore } from '@/mocks/store';
+import { useStore } from '@storefront/mocks/store';
 import { Heart } from 'lucide-react';
 
 export default function WishlistPage() {

@@ -5,7 +5,7 @@ import Header from '@storefront/components/layout/Header';
 import Footer from '@storefront/components/layout/Footer';
 import Breadcrumb from '@storefront/components/ui/Breadcrumb';
 import Disclosure from '@storefront/components/ui/Disclosure';
-import { FAQ_ITEMS } from '@/mocks/fixtures';
+import { FAQ_ITEMS } from '@storefront/mocks/fixtures';
 
 export default function FaqPage() {
   const [activeCategory, setActiveCategory] = useState<string>('All');

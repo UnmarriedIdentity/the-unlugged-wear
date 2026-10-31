@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { STORE_PRODUCTS } from '@/mocks/fixtures';
+import { STORE_PRODUCTS } from '@storefront/mocks/fixtures';
 
 const FREE_SHIPPING_THRESHOLD_PAISE = 300000; // ₹3,000.00
 const STANDARD_SHIPPING_FEE_PAISE = 15000; // ₹150.00

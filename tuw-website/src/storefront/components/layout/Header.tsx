@@ -11,7 +11,7 @@ import {
   Menu,
   X,
 } from 'lucide-react';
-import { useStore } from '@/mocks/store';
+import { useStore } from '@storefront/mocks/store';
 import MobileMenu from './MobileMenu';
 import CartDrawer from './CartDrawer';
 import TuwEmblem from './TuwEmblem';

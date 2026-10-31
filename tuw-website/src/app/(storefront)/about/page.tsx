@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Header from '@storefront/components/layout/Header';
 import Footer from '@storefront/components/layout/Footer';
 import TuwEmblem from '@storefront/components/layout/TuwEmblem';
-import { STORE_PRODUCTS } from '@/mocks/fixtures';
+import { STORE_PRODUCTS } from '@storefront/mocks/fixtures';
 import { ArrowRight, ArrowUp } from 'lucide-react';
 import {
   AboutTeamSection,

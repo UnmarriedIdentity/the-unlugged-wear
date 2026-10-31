@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { JOURNAL_ARTICLES } from '@/mocks/fixtures';
+import { JOURNAL_ARTICLES } from '@storefront/mocks/fixtures';
 
 // The article page is a client component, so per-article metadata lives here.
 export async function generateMetadata({

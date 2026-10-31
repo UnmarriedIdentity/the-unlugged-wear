@@ -14,8 +14,8 @@ import Textarea from '@storefront/components/ui/Textarea';
 import Select from '@storefront/components/ui/Select';
 import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
 import { useRouter } from 'next/navigation';
-import { useStore } from '@/mocks/store';
-import { useDemoSession } from '@/mocks/auth';
+import { useStore } from '@storefront/mocks/store';
+import { useDemoSession } from '@storefront/mocks/auth';
 import { Package, MapPin, User, RotateCcw, Shield, Truck, ExternalLink, AlertCircle } from 'lucide-react';
 
 export default function AccountPage() {

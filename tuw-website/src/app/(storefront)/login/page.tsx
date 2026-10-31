@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AlertCircle } from 'lucide-react';
 import AuthShell, { AuthField, PasswordToggle } from '@storefront/components/layout/AuthShell';
-import { DEMO_ACCOUNT, checkDemoCredentials, writeDemoSession } from '@/mocks/auth';
+import { DEMO_ACCOUNT, checkDemoCredentials, writeDemoSession } from '@storefront/mocks/auth';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

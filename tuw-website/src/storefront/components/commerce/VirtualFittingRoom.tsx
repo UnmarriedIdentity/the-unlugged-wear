@@ -3,10 +3,10 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Heart, RotateCcw } from 'lucide-react';
 import Badge from '@storefront/components/ui/Badge';
-import { useStore } from '@/mocks/store';
+import { useStore } from '@storefront/mocks/store';
 import { formatINR } from '@storefront/lib/format';
 import { cn } from '@storefront/lib/cn';
-import { STORE_PRODUCTS } from '@/mocks/fixtures';
+import { STORE_PRODUCTS } from '@storefront/mocks/fixtures';
 
 export type FittingAudience = 'men' | 'women' | 'kids';
 

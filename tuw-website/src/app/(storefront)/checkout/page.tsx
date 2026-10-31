@@ -7,8 +7,8 @@ import Header from '@storefront/components/layout/Header';
 import Footer from '@storefront/components/layout/Footer';
 import PaymentSimulationPanel from '@storefront/components/commerce/PaymentSimulationPanel';
 import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
-import { useStore } from '@/mocks/store';
-import { useDemoSession } from '@/mocks/auth';
+import { useStore } from '@storefront/mocks/store';
+import { useDemoSession } from '@storefront/mocks/auth';
 import { Address, Order } from '@storefront/lib/types';
 import {
   ShieldCheck,

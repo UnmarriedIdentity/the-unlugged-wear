@@ -8,7 +8,7 @@ import Footer from '@storefront/components/layout/Footer';
 import Button from '@storefront/components/ui/Button';
 import Badge from '@storefront/components/ui/Badge';
 import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
-import { useStore } from '@/mocks/store';
+import { useStore } from '@storefront/mocks/store';
 import { Order } from '@storefront/lib/types';
 import { formatINR } from '@storefront/lib/format';
 import { CheckCircle2, AlertCircle, Clock, Truck, ArrowRight, ShieldCheck, ShoppingBag } from 'lucide-react';

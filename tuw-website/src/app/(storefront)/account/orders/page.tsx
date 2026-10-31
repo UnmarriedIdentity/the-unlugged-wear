@@ -8,7 +8,7 @@ import Breadcrumb from '@storefront/components/ui/Breadcrumb';
 import Badge from '@storefront/components/ui/Badge';
 import Button from '@storefront/components/ui/Button';
 import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
-import { useStore } from '@/mocks/store';
+import { useStore } from '@storefront/mocks/store';
 import { formatINR } from '@storefront/lib/format';
 import { Package, Truck, ExternalLink, ArrowRight, ShieldCheck, ShoppingBag } from 'lucide-react';
 

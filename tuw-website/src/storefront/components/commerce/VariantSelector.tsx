@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ShoppingBag, Heart, ShieldCheck } from 'lucide-react';
 import { Product, ProductColor, ProductSize } from '@storefront/lib/types';
-import { useStore } from '@/mocks/store';
+import { useStore } from '@storefront/mocks/store';
 import Button from '@storefront/components/ui/Button';
 import SizeGuideModal from './SizeGuideModal';
 import ColorSwatchSelector from './ColorSwatchSelector';

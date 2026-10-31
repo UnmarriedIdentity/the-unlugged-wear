@@ -6,8 +6,8 @@ import Header from '@storefront/components/layout/Header';
 import Footer from '@storefront/components/layout/Footer';
 import Breadcrumb from '@storefront/components/ui/Breadcrumb';
 import ProductGrid from '@storefront/components/commerce/ProductGrid';
-import { useStore } from '@/mocks/store';
-import { STORE_COLLECTIONS } from '@/mocks/fixtures';
+import { useStore } from '@storefront/mocks/store';
+import { STORE_COLLECTIONS } from '@storefront/mocks/fixtures';
 
 export default function CollectionDetailPage({
   params,

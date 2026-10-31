@@ -6,7 +6,7 @@ import Header from '@storefront/components/layout/Header';
 import Footer from '@storefront/components/layout/Footer';
 import Breadcrumb from '@storefront/components/ui/Breadcrumb';
 import ProductGrid from '@storefront/components/commerce/ProductGrid';
-import { useStore } from '@/mocks/store';
+import { useStore } from '@storefront/mocks/store';
 import { Search as SearchIcon, X, Tag } from 'lucide-react';
 import Link from 'next/link';
 
