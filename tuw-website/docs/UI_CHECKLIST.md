@@ -4,7 +4,7 @@
 
 - [x] Website and admin run independently with documented commands (`pnpm dev:admin` / `pnpm dev:website`).
 - [x] Each application has its own routing, components, styling and configuration without cross-app imports.
-- [x] UI uses mock adapters (`src/mocks/`); no real service credentials or live transactions.
+- [x] UI uses mock adapters (`src/*/mocks/`); no real service credentials or live transactions.
 - [x] Actual implemented routes are listed; missing screens are recorded (35 admin routes + 27 website routes fully built and pre-rendered).
 
 ## Design
