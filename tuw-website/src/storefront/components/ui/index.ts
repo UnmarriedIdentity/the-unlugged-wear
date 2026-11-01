@@ -8,6 +8,8 @@ export { default as Textarea } from './Textarea';
 export type { TextareaProps } from './Textarea';
 
 export { default as Select } from './Select';
+export { default as Listbox } from './Listbox';
+export type { ListboxOption, ListboxProps } from './Listbox';
 export type { SelectProps, SelectOption } from './Select';
 
 export { default as Checkbox } from './Checkbox';

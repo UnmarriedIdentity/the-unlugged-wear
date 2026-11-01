@@ -7,8 +7,11 @@ import Header from '@storefront/components/layout/Header';
 import Footer from '@storefront/components/layout/Footer';
 import PaymentSimulationPanel from '@storefront/components/commerce/PaymentSimulationPanel';
 import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
+import Listbox from '@storefront/components/ui/Listbox';
 import { useStore } from '@storefront/mocks/store';
 import { useDemoSession } from '@storefront/mocks/auth';
+import { RETURN_WINDOW_DAYS, deliveryEstimate, variantLabelOf } from '@storefront/lib/product';
+import { formatShortDate } from '@storefront/lib/format';
 import { Address, Order } from '@storefront/lib/types';
 import {
   ShieldCheck,
@@ -20,8 +23,9 @@ import {
   Minus,
   Plus,
   Trash2,
-  Sparkles,
+  Heart,
   RotateCcw,
+  Lock,
   Tag,
 } from 'lucide-react';
 
@@ -40,9 +44,13 @@ export default function CheckoutPage() {
     applyPromoCode,
     removePromoCode,
     updateQuantity,
+    updateCartItemVariant,
     removeFromCart,
+    isInWishlist,
+    toggleWishlist,
     addresses,
     createOrder,
+    products,
   } = useStore();
 
   const { session } = useDemoSession();
@@ -86,6 +94,22 @@ export default function CheckoutPage() {
     setPrefilledFor(session.email);
   }, [session, addresses, prefilledFor]);
 
+  // Signed-in shoppers can switch between saved addresses (home, work, a friend's place...).
+  const [chosenAddressId, setChosenAddressId] = useState<string | null>(null);
+  const applySavedAddress = (saved: (typeof addresses)[number]) => {
+    const [first = '', ...rest] = saved.fullName.split(' ');
+    setFirstName(first);
+    setLastName(rest.join(' '));
+    setPhone(saved.phone);
+    setAddressLine1(saved.addressLine1);
+    setAddressLine2(saved.addressLine2 ?? '');
+    setCity(saved.city);
+    setState(saved.state);
+    setPostalCode(saved.postalCode);
+    setChosenAddressId(saved.id);
+  };
+
+  const [summaryPin, setSummaryPin] = useState('');
   const [deliverySpeed, setDeliverySpeed] = useState<'standard' | 'express'>('standard');
   // Express replaces the standard fee rather than adding to it.
   const deliveryFee = deliverySpeed === 'express' ? EXPRESS_FEE : shippingFee;
@@ -337,71 +361,119 @@ export default function CheckoutPage() {
 
                 {/* Cart Items List matching Figma Screen 1 */}
                 <div className="space-y-4">
-                  {cart.map((item) => (
-                    <div
-                      key={item.id}
-                      className="p-4 rounded-2xl border border-store-card-border/80 bg-store-canvas/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all hover:border-store-card-border"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-18 h-20 rounded-xl overflow-hidden bg-store-cream shrink-0 border border-store-card-border/80">
-                          <ImageWithFallback
-                            src={item.image}
-                            alt={item.title}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="space-y-1.5">
-                          <h3 className="text-sm font-semibold text-store-charcoal leading-snug">
-                            {item.title}
-                          </h3>
-                          {/* Attribute Chips & Stepper */}
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="inline-flex items-center rounded-md border border-store-card-border bg-white px-2 py-0.5 text-2xs text-store-charcoal font-medium">
-                              {item.color} • {item.size}
-                            </span>
+                  {cart.map((item) => {
+                    const product = products.find((p) => p.id === item.productId);
+                    const href = product ? `/products/${product.slug}` : '/shop';
+                    const variantLabel = product ? variantLabelOf(product) : 'Size';
+                    const changeColour = (name: string) => {
+                      const next = product?.colors.find((c) => c.name === name);
+                      const photo = product?.images.find((img) => img.color === next?.value)?.url;
+                      updateCartItemVariant(item.id, { color: name, ...(photo ? { image: photo } : {}) });
+                    };
+                    return (
+                      <div
+                        key={item.id}
+                        className="p-4 border border-store-card-border bg-store-canvas/40 flex flex-col sm:flex-row sm:items-start justify-between gap-4"
+                      >
+                        <div className="flex items-start gap-4 sm:gap-5 min-w-0">
+                          <Link
+                            href={href}
+                            className="w-24 h-32 sm:w-28 sm:h-36 overflow-hidden bg-store-cream shrink-0 border border-store-card-border/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-store-gold"
+                          >
+                            <ImageWithFallback
+                              src={item.image}
+                              alt={item.title}
+                              className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                            />
+                          </Link>
+                          <div className="space-y-2.5 min-w-0">
+                            <h3 className="text-base font-medium text-store-charcoal leading-snug">
+                              <Link href={href} className="hover:underline underline-offset-4 decoration-store-gold">
+                                {item.title}
+                              </Link>
+                            </h3>
+                            <p className="text-xs text-store-text-secondary">
+                              ₹{item.priceINR.toLocaleString('en-IN')} each · printed for you in 2–3 days
+                              {product?.priceIsDraft ? ' · draft price, to be confirmed' : ''}
+                            </p>
 
-                            {/* Quantity Stepper Pill */}
-                            <div className="inline-flex items-center rounded-md border border-store-card-border bg-white px-1.5 py-0.5 text-2xs text-store-charcoal font-medium gap-1.5 shadow-2xs">
-                              <button
-                                type="button"
-                                aria-label="Decrease quantity"
-                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                className="text-store-muted hover:text-store-charcoal transition-colors cursor-pointer"
-                              >
-                                <Minus size={11} />
-                              </button>
-                              <span className="w-4 text-center font-semibold">
-                                {item.quantity}
-                              </span>
-                              <button
-                                type="button"
-                                aria-label="Increase quantity"
-                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                className="text-store-muted hover:text-store-charcoal transition-colors cursor-pointer"
-                              >
-                                <Plus size={11} />
-                              </button>
+                            {/* Colour and size can be changed right here */}
+                            <div className="flex flex-wrap items-center gap-2">
+                              <Listbox
+                                label={`Colour for ${item.title}`}
+                                value={item.color}
+                                onChange={changeColour}
+                                options={(product?.colors.length ? product.colors : [{ name: item.color, value: item.color, hex: '#D9D4C7' }]).map((c) => ({
+                                  value: c.name,
+                                  label: c.name,
+                                  swatch: c.hex,
+                                }))}
+                              />
+                              <Listbox
+                                label={variantLabel}
+                                showLabel
+                                value={item.size}
+                                onChange={(size) => updateCartItemVariant(item.id, { size })}
+                                options={(product?.sizes.length ? product.sizes : [{ size: item.size, inStock: true, stockCount: 1 }]).map((sz) => ({
+                                  value: sz.size,
+                                  label: sz.size,
+                                  disabled: !sz.inStock,
+                                  note: sz.inStock ? undefined : 'Sold out',
+                                }))}
+                              />
+
+                              <div className="inline-flex items-center h-8 border border-store-card-border bg-store-surface text-xs text-store-charcoal" role="group" aria-label={`Quantity of ${item.title}`}>
+                                <button
+                                  type="button"
+                                  aria-label="Decrease quantity"
+                                  onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                  className="w-8 h-full flex items-center justify-center text-store-text-secondary hover:text-store-charcoal cursor-pointer"
+                                >
+                                  <Minus size={12} />
+                                </button>
+                                <span className="w-6 text-center font-medium tuw-tabular-nums">{item.quantity}</span>
+                                <button
+                                  type="button"
+                                  aria-label="Increase quantity"
+                                  onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                  className="w-8 h-full flex items-center justify-center text-store-text-secondary hover:text-store-charcoal cursor-pointer"
+                                >
+                                  <Plus size={12} />
+                                </button>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
 
-                      {/* Right: Price & Remove text */}
-                      <div className="flex items-center justify-between sm:flex-col sm:items-end sm:justify-center gap-1 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-store-card-border/60">
-                        <span className="text-sm font-bold text-store-charcoal">
-                          ₹{(item.priceINR * item.quantity).toLocaleString()}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => removeFromCart(item.id)}
-                          className="text-2xs text-store-terracotta hover:underline inline-flex items-center gap-1 cursor-pointer transition-colors"
-                        >
-                          <Trash2 size={12} />
-                          <span>Remove</span>
-                        </button>
+                        <div className="flex items-center justify-between sm:flex-col sm:items-end gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-store-card-border/60">
+                          <span className="text-base font-medium text-store-charcoal tuw-tabular-nums">
+                            ₹{(item.priceINR * item.quantity).toLocaleString('en-IN')}
+                          </span>
+                          <div className="flex items-center gap-4 text-xs">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (!isInWishlist(item.productId)) toggleWishlist(item.productId);
+                                removeFromCart(item.id);
+                              }}
+                              className="inline-flex items-center gap-1 text-store-charcoal hover:underline underline-offset-4 cursor-pointer"
+                            >
+                              <Heart size={12} aria-hidden="true" />
+                              Move to wishlist
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => removeFromCart(item.id)}
+                              className="inline-flex items-center gap-1 text-store-charcoal hover:underline underline-offset-4 cursor-pointer"
+                            >
+                              <Trash2 size={12} aria-hidden="true" />
+                              Remove
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 {/* Bottom Navigation */}
@@ -467,7 +539,7 @@ export default function CheckoutPage() {
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="arjun.rao@example.com"
+                        placeholder="urvil.kargathala@example.com"
                         className="w-full px-4 py-3 rounded-xl border border-store-input-border bg-store-input-bg text-store-text-primary text-sm focus:border-store-input-focus outline-hidden transition-colors"
                         required
                       />
@@ -502,6 +574,29 @@ export default function CheckoutPage() {
                   <h3 className="text-xs font-bold uppercase tracking-wider text-store-charcoal">
                     2. Shipping Address
                   </h3>
+                  {session && addresses.length > 0 && (
+                    <div role="group" aria-label="Saved addresses" className="flex flex-wrap gap-2">
+                      {addresses.map((saved) => {
+                        const isChosen = chosenAddressId ? chosenAddressId === saved.id : Boolean(saved.isDefault);
+                        return (
+                          <button
+                            key={saved.id}
+                            type="button"
+                            aria-pressed={isChosen}
+                            onClick={() => applySavedAddress(saved)}
+                            className={`px-4 py-2 rounded-full text-xs text-left transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-store-gold ${
+                              isChosen
+                                ? 'bg-store-charcoal text-white'
+                                : 'border border-store-border text-store-text-secondary hover:border-store-charcoal hover:text-store-charcoal'
+                            }`}
+                          >
+                            <span className="font-medium">{saved.label || 'Address'}</span>
+                            <span className="opacity-75"> · {saved.city}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label htmlFor="checkout-firstName" className="text-xs font-medium text-store-charcoal block mb-1.5">
@@ -514,7 +609,7 @@ export default function CheckoutPage() {
                         type="text"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
-                        placeholder="Arjun"
+                        placeholder="Urvil"
                         className="w-full px-4 py-3 rounded-xl border border-store-input-border bg-store-input-bg text-store-text-primary text-sm focus:border-store-input-focus outline-hidden transition-colors"
                         required
                       />
@@ -533,7 +628,7 @@ export default function CheckoutPage() {
                         type="text"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
-                        placeholder="Rao"
+                        placeholder="Kargathala"
                         className="w-full px-4 py-3 rounded-xl border border-store-input-border bg-store-input-bg text-store-text-primary text-sm focus:border-store-input-focus outline-hidden transition-colors"
                         required
                       />
@@ -554,7 +649,7 @@ export default function CheckoutPage() {
                       type="text"
                       value={addressLine1}
                       onChange={(e) => setAddressLine1(e.target.value)}
-                      placeholder="Flat 402, Skyline Residency"
+                      placeholder="D-603 Regency Height"
                       className="w-full px-4 py-3 rounded-xl border border-store-input-border bg-store-input-bg text-store-text-primary text-sm focus:border-store-input-focus outline-hidden transition-colors"
                       required
                     />
@@ -572,7 +667,7 @@ export default function CheckoutPage() {
                       type="text"
                       value={addressLine2}
                       onChange={(e) => setAddressLine2(e.target.value)}
-                      placeholder="12th Main, Indiranagar"
+                      placeholder="Shree Shradha Society, Dahin Nagar"
                       className="w-full px-4 py-3 rounded-xl border border-store-input-border bg-store-input-bg text-store-text-primary text-sm focus:border-store-input-focus outline-hidden transition-colors"
                     />
                   </div>
@@ -589,7 +684,7 @@ export default function CheckoutPage() {
                         type="text"
                         value={city}
                         onChange={(e) => setCity(e.target.value)}
-                        placeholder="Bengaluru"
+                        placeholder="Surat"
                         className="w-full px-4 py-3 rounded-xl border border-store-input-border bg-store-input-bg text-store-text-primary text-sm focus:border-store-input-focus outline-hidden transition-colors"
                         required
                       />
@@ -606,7 +701,7 @@ export default function CheckoutPage() {
                         type="text"
                         value={state}
                         onChange={(e) => setState(e.target.value)}
-                        placeholder="Karnataka"
+                        placeholder="Gujarat"
                         className="w-full px-4 py-3 rounded-xl border border-store-input-border bg-store-input-bg text-store-text-primary text-sm focus:border-store-input-focus outline-hidden transition-colors"
                         required
                       />
@@ -622,7 +717,7 @@ export default function CheckoutPage() {
                         type="text"
                         value={postalCode}
                         onChange={(e) => setPostalCode(e.target.value)}
-                        placeholder="560038"
+                        placeholder="395005"
                         className="w-full px-4 py-3 rounded-xl border border-store-input-border bg-store-input-bg text-store-text-primary text-sm focus:border-store-input-focus outline-hidden transition-colors"
                         required
                       />
@@ -770,17 +865,15 @@ export default function CheckoutPage() {
                 )}
 
                 <div className="flex justify-between">
-                  <span>Shipping</span>
+                  <span>Delivery{deliverySpeed === 'express' ? ' (express)' : ''}</span>
                   <span className="font-semibold text-white">
                     {deliveryFee === 0 ? 'Free' : `₹${deliveryFee}`}
                   </span>
                 </div>
 
                 <div className="flex justify-between">
-                  <span>Tax (5%)</span>
-                  <span className="font-semibold text-white">
-                    {cartSubtotal > 0 ? 'Included' : '₹0'}
-                  </span>
+                  <span>GST</span>
+                  <span className="font-semibold text-white">Included in prices</span>
                 </div>
               </div>
 
@@ -811,6 +904,34 @@ export default function CheckoutPage() {
                   ))}
                 </div>
               )}
+
+              {/* Delivery estimate: uses the address PIN once entered, else asks for one */}
+              <div className="pt-3 border-t border-white/10 text-xs text-white/80">
+                {(() => {
+                  const pin = postalCode.trim() || summaryPin.trim();
+                  const estimate = deliveryEstimate(pin);
+                  return estimate ? (
+                    <p>
+                      <span className="text-white font-medium">
+                        Arrives by {formatShortDate(estimate.earliest)} – {formatShortDate(estimate.latest)}
+                      </span>
+                      <span className="block text-white/60 mt-0.5">To {pin} · demo estimate</span>
+                    </p>
+                  ) : (
+                    <label className="flex items-center gap-2">
+                      <span className="shrink-0">Delivery date for PIN</span>
+                      <input
+                        inputMode="numeric"
+                        maxLength={6}
+                        value={summaryPin}
+                        onChange={(e) => setSummaryPin(e.target.value.replace(/\D/g, ''))}
+                        placeholder="395005"
+                        className="w-24 bg-transparent border-b border-white/30 focus:border-white/80 outline-none text-white placeholder-white/30 py-0.5 tuw-tabular-nums"
+                      />
+                    </label>
+                  );
+                })()}
+              </div>
 
               {/* COUPON CODE Input Box matching Figma (media_1793276684365_5c63b95e.png) */}
               <form onSubmit={handleApplyPromo} className="space-y-2 pt-2">
@@ -913,27 +1034,25 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Feature Trust Badges */}
-            <div className="p-5 rounded-2xl bg-white border border-store-card-border space-y-3 text-xs text-store-muted">
-              <div className="flex items-center gap-3">
-                <Truck size={18} className="text-store-action-primary shrink-0" />
-                <span>Free doorstep delivery on orders above ₹3,000</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Sparkles size={18} className="text-store-gold shrink-0" />
-                <span>Zero deadstock on-demand artisan craftsmanship</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <RotateCcw size={18} className="text-store-action-primary shrink-0" />
-                <span>7-day seamless doorstep reverse logistics & returns</span>
-              </div>
-              <div className="flex items-center gap-3 pt-2 border-t border-store-card-border/60">
-                <ShieldCheck size={18} className="text-emerald-600 shrink-0" />
-                <span className="text-2xs text-store-charcoal font-medium">
-                  Demo Checkout Sandbox — No financial deductions occur
-                </span>
-              </div>
-            </div>
+            {/* Plain reassurance lines (no badges) */}
+            <ul className="p-5 bg-white border border-store-card-border space-y-2.5 text-xs text-store-text-secondary">
+              <li className="flex items-center gap-2.5">
+                <Truck size={16} aria-hidden="true" className="text-store-charcoal shrink-0" />
+                Free delivery across India on orders over ₹3,000
+              </li>
+              <li className="flex items-center gap-2.5">
+                <RotateCcw size={16} aria-hidden="true" className="text-store-charcoal shrink-0" />
+                {RETURN_WINDOW_DAYS}-day returns on unworn clothing
+              </li>
+              <li className="flex items-center gap-2.5">
+                <Lock size={16} aria-hidden="true" className="text-store-charcoal shrink-0" />
+                Secure payment
+              </li>
+              <li className="flex items-center gap-2.5 pt-2.5 border-t border-store-card-border/60 text-store-charcoal">
+                <ShieldCheck size={16} aria-hidden="true" className="shrink-0" />
+                Demo checkout — no payment is collected
+              </li>
+            </ul>
           </div>
         </div>
       </main>

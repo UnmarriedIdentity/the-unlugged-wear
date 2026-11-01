@@ -7,7 +7,7 @@ import Footer from '@storefront/components/layout/Footer';
 import Breadcrumb from '@storefront/components/ui/Breadcrumb';
 import ProductGrid from '@storefront/components/commerce/ProductGrid';
 import { useStore } from '@storefront/mocks/store';
-import { STORE_COLLECTIONS } from '@storefront/mocks/fixtures';
+import { STORE_COLLECTIONS, productsInCollection } from '@storefront/mocks/fixtures';
 
 export default function CollectionDetailPage({
   params,
@@ -18,9 +18,7 @@ export default function CollectionDetailPage({
   const { products } = useStore();
 
   const collection = STORE_COLLECTIONS.find((c) => c.slug === resolvedParams.slug);
-  const collectionProducts = collection?.categories
-    ? products.filter((p) => collection.categories!.includes(p.category))
-    : products;
+  const collectionProducts = collection ? productsInCollection(collection, products) : products;
 
   if (!collection) {
     return (

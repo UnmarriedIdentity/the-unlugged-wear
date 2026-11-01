@@ -12,7 +12,6 @@ import {
   Mail,
   MapPin,
 } from 'lucide-react';
-import { useStore } from '@storefront/mocks/store';
 import TuwEmblem from './TuwEmblem';
 
 interface FooterLink {
@@ -67,14 +66,7 @@ const FOOTER_COLUMNS: FooterColumn[] = [
   },
 ];
 
-const FOOTER_LEGAL_LINKS: FooterLink[] = [
-  { label: 'Tiruppur Atelier', href: '/about' },
-  { label: 'Privacy', href: '/policies/privacy' },
-  { label: 'Terms', href: '/policies/terms' },
-];
-
 export default function Footer() {
-  const { scenario, setScenario, resetStoreData } = useStore();
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
 
@@ -102,8 +94,8 @@ export default function Footer() {
                   </span>
                 </div>
                 <p className="text-base text-store-text-secondary max-w-sm leading-relaxed font-sans font-light">
-                  Everyday pieces printed with the leaping deer. Printed only after you order, in
-                  Tiruppur, so nothing is made that nobody wanted.
+                  Everyday pieces printed with the leaping deer. Made in India only after you
+                  order, so nothing is made that nobody wanted.
                 </p>
                 <div className="flex items-center gap-4 text-base text-store-text-secondary pt-1 font-medium">
                   <span className="flex items-center gap-1.5">
@@ -143,69 +135,6 @@ export default function Footer() {
               ))}
             </div>
 
-            {/* Bottom Row: Copyright + Mindful Legal Notice matching Jitter format */}
-            <div className="pt-8 pb-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-store-text-secondary">
-              <div>
-                © {new Date().getFullYear()} The Unplugged Wear. Mindful POD apparel. All rights reserved.
-              </div>
-              <nav
-                aria-label="Legal"
-                className="flex items-center gap-5 text-xs uppercase tracking-wider"
-              >
-                {FOOTER_LEGAL_LINKS.map((link, index) => (
-                  <React.Fragment key={link.href}>
-                    {index > 0 && <span aria-hidden="true">•</span>}
-                    <Link href={link.href} className="inline-flex items-center min-h-6 hover:text-store-text-primary transition-colors">
-                      {link.label}
-                    </Link>
-                  </React.Fragment>
-                ))}
-              </nav>
-            </div>
-
-            {/* Demo controls (required by the UI phase): tucked into a closed
-                disclosure so shoppers are not shown test tooling by default. */}
-            <details className="pt-4 border-t border-store-border text-xs text-store-text-secondary">
-              <summary className="inline-flex items-center min-h-6 cursor-pointer font-medium text-store-text-secondary hover:text-store-text-primary">
-                Demo tools (preview build)
-              </summary>
-              <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-semibold text-store-text-primary">Scenario:</span>
-                  {[
-                    { id: 'normal', label: 'Normal Baseline' },
-                    { id: 'empty', label: 'Empty States' },
-                    { id: 'error', label: 'Simulated Error' },
-                    { id: 'long_content', label: 'Long Multiline Text' },
-                  ].map((sc) => (
-                    <button
-                      key={sc.id}
-                      type="button"
-                      aria-pressed={scenario === sc.id}
-                      onClick={() => setScenario(sc.id as any)}
-                      className={`min-h-6 px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer ${
-                        scenario === sc.id
-                          ? 'bg-primary-dark text-white font-semibold'
-                          : 'bg-store-canvas border border-store-border text-store-text-secondary hover:text-store-text-primary hover:bg-store-cream'
-                      }`}
-                    >
-                      {sc.label}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (window.confirm('Reset storefront demo state (cart, wishlist, orders) to baseline?')) {
-                      resetStoreData();
-                    }
-                  }}
-                  className="inline-flex items-center min-h-6 text-store-gold hover:underline font-medium text-xs cursor-pointer"
-                >
-                  Reset Demo State
-                </button>
-              </div>
-            </details>
           </div>
         </div>
 
@@ -231,14 +160,14 @@ export default function Footer() {
                   <div className="flex items-center gap-2 justify-center sm:justify-start">
                     <span className="w-1.5 h-1.5 rounded-full bg-store-gold" />
                     <span className="text-xs uppercase tracking-luxury text-store-gold font-medium">
-                      Slow-Living Motion • Tiruppur
+                      Slow-Living Motion • Surat
                     </span>
                   </div>
                   <h3 className="font-heading text-[clamp(1.125rem,2vw+0.5rem,1.5rem)] text-white tracking-tight leading-snug">
                     Crafted for Quiet Permanence.
                   </h3>
                   <p className="text-sm text-white/70 max-w-sm font-sans leading-relaxed">
-                    Hoodies, tees and everyday objects, made in Tiruppur.
+                    Hoodies, tees and everyday objects, printed to order in India.
                   </p>
                 </div>
               </div>
@@ -284,7 +213,7 @@ export default function Footer() {
             </div>
 
             {/* Monumental Architectural Brand Signature with High Visibility & Leaping Deer Emblem */}
-            <div className="w-full flex flex-col items-center justify-center text-center select-none pt-6 sm:pt-8 pb-16 sm:pb-20">
+            <div className="w-full flex flex-col items-center justify-center text-center select-none pt-6 sm:pt-8 pb-8 sm:pb-10">
               <div className="flex items-center justify-center gap-2.5 mb-2">
                 <TuwEmblem className="h-7 sm:h-7 w-auto text-store-gold" />
               </div>
@@ -294,10 +223,14 @@ export default function Footer() {
               </h2>
 
               <div className="flex items-center gap-3 sm:gap-5 text-xs uppercase tracking-wider text-white/50 font-sans font-medium mt-2.5">
-                <span>Tiruppur, India</span>
+                <span>Surat, India</span>
                 <span aria-hidden="true">•</span>
                 <span>Printed to Order</span>
               </div>
+
+              <p className="mt-6 text-xs text-white/60 font-sans">
+                © {new Date().getFullYear()} The Unplugged Wear. Mindful POD apparel. All rights reserved.
+              </p>
             </div>
           </div>
         </div>

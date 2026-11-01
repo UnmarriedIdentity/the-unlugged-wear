@@ -50,7 +50,7 @@
   --color-store-gold: #C8A96A;
   --color-store-terracotta: #AD512F;
   --color-store-charcoal: #1A1A1A;
-  --color-store-muted: #8A8A8A;
+  --color-store-muted: #6B6B6B; /* 5.3:1 on white, WCAG AA for small text */
   --color-store-deep-teal: #002B3A;
   --color-store-dark-card: #001F2B;
   --color-store-checkout-teal: #175565;
@@ -305,19 +305,13 @@ h6,
 
 /* Storefront Layout & Geometry Utilities */
 /* Hero fills exactly the first screen below the header, so no sliver of the
-   next section shows. Header = main bar (4.5625rem + 1px border), plus the
-   2.25rem top bar from md up. svh keeps it steady while mobile URL bars move;
-   the 30rem floor keeps the copy clear of the top on very short screens. */
+   next section shows. Header = 2.25rem announcement bar (shown at every width)
+   + main bar (4.5625rem + 1px border). svh keeps it steady while mobile URL
+   bars move; the 30rem floor keeps the copy clear of the top on very short screens. */
 .hero-viewport-height {
-  --hero-header-offset: calc(4.5625rem + 1px);
+  --hero-header-offset: calc(2.25rem + 4.5625rem + 1px);
   min-height: max(30rem, calc(100vh - var(--hero-header-offset)));
   min-height: max(30rem, calc(100svh - var(--hero-header-offset)));
-}
-
-@media (min-width: 48rem) {
-  .hero-viewport-height {
-    --hero-header-offset: calc(2.25rem + 4.5625rem + 1px);
-  }
 }
 
 .aspect-card-tall {
@@ -550,43 +544,20 @@ html[data-intro-seen] .intro-shutter-wrap {
    -------------------------------------------------------------------------- */
 .vfr-room {
   display: grid;
-  grid-template-columns: 1fr minmax(300px, 380px) 1fr;
-  grid-template-rows: 1fr 1fr;
-  gap: 1.5rem 2.5rem;
-  align-items: stretch;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
+  gap: 2.5rem;
+  align-items: start;
 }
 
+/* Looks scroll past on the left; the model stays put on the right. */
 .vfr-track {
-  display: contents;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2.5rem 1.5rem;
 }
 
 .vfr-slot {
-  width: min(100%, 220px);
-  will-change: transform;
-}
-
-.vfr-slot:nth-child(1) {
-  grid-area: 1 / 1;
-  justify-self: start;
-  align-self: start;
-}
-
-.vfr-slot:nth-child(2) {
-  grid-area: 2 / 1;
-  justify-self: start;
-  align-self: end;
-}
-
-.vfr-slot:nth-child(3) {
-  grid-area: 1 / 3;
-  justify-self: end;
-  align-self: start;
-}
-
-.vfr-slot:nth-child(4) {
-  grid-area: 2 / 3;
-  justify-self: end;
-  align-self: end;
+  width: 100%;
 }
 
 .vfr-card {
@@ -597,7 +568,6 @@ html[data-intro-seen] .intro-shutter-wrap {
   cursor: pointer;
   background: var(--color-store-surface);
   border: 1.5px solid var(--color-store-border);
-  border-radius: 1rem;
   overflow: hidden;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
@@ -618,7 +588,7 @@ html[data-intro-seen] .intro-shutter-wrap {
 .vfr-ph {
   display: block;
   position: relative;
-  aspect-ratio: 9 / 16;
+  aspect-ratio: 3 / 4;
   background: var(--color-store-cream);
   overflow: hidden;
 }
@@ -648,13 +618,11 @@ html[data-intro-seen] .intro-shutter-wrap {
 }
 
 .vfr-stage-col {
-  grid-column: 2;
-  grid-row: 1 / 3;
+  position: sticky;
+  top: 6.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  align-self: stretch;
   gap: 1.25rem;
 }
 
@@ -667,8 +635,7 @@ html[data-intro-seen] .intro-shutter-wrap {
 .vfr-stage {
   position: relative;
   width: 100%;
-  aspect-ratio: 9 / 16;
-  border-radius: 1.125rem;
+  aspect-ratio: 3 / 4;
   overflow: hidden;
   background: var(--color-store-cream);
   box-shadow: 0 20px 44px -18px rgba(20, 25, 22, 0.25);
@@ -729,6 +696,7 @@ html[data-intro-seen] .intro-shutter-wrap {
   }
 
   .vfr-stage-col {
+    position: static;
     order: -1;
     width: 100%;
     justify-content: flex-start;
@@ -1104,4 +1072,15 @@ html[data-intro-seen] .intro-shutter-wrap {
     animation: none !important;
     overflow-x: auto;
   }
+}
+/* Announcement bar: each message fades up as it arrives. */
+@keyframes tuw-announce-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.tuw-announce-in {
+  animation: tuw-announce-in 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .tuw-announce-in { animation: none; }
 }

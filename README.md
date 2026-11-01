@@ -86,7 +86,7 @@ Both apps are mock-only: there is no server, no real auth, and nothing is charge
 
 | App | Email | Password | Lands on |
 |---|---|---|---|
-| Storefront | `uk1115@tuw.co` | `uktuw1115` | `/account` |
+| Storefront | `urvil.kargathala@example.com` | `uktuw1115` | `/account` |
 | Admin | `contactstylehub@gmail.com` | anything except `wrong` / `error` | `/dashboard` |
 
 The storefront account is seeded in `tuw-website/src/storefront/mocks/auth.ts` and owns the fixture

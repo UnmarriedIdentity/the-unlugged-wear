@@ -193,7 +193,7 @@ describe('Deterministic local fonts (Windows == macOS)', () => {
     assert.ok(cardContent.includes('toggleWishlist'), 'ProductCard must support toggleWishlist');
 
     // ProductCard Luxury Bordered Frame & Motion Invariants
-    assert.ok(cardContent.includes('rounded-2xl'), 'ProductCard has rounded-2xl corners');
+    assert.ok(!/<article[^>]*rounded-/.test(cardContent), 'ProductCard frame has square corners');
     assert.ok(cardContent.includes('border-store-card-border'), 'ProductCard has store-card-border');
     assert.ok(cardContent.includes('handlePrevImage'), 'ProductCard must support handlePrevImage');
     assert.ok(cardContent.includes('handleNextImage'), 'ProductCard must support handleNextImage');

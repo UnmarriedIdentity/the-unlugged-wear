@@ -4,8 +4,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
   ArrowRight,
-  Pause,
-  Play,
+  ChevronLeft,
+  ChevronRight,
   ShoppingBag,
   ShieldCheck,
   Headphones,
@@ -93,36 +93,52 @@ export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState('All Collection');
 
   // Hero background video: swap HERO_VIDEO_SRC for the final 30s hero cut.
-  // Looping motion longer than 5s needs a pause control (WCAG 2.2.2), and
-  // reduced-motion visitors start on a still frame.
+  // It autoplays with no on-screen control (owner's choice); reduced-motion
+  // visitors get a still frame instead.
   const heroVideoRef = useRef<HTMLVideoElement>(null);
-  const [isHeroVideoPlaying, setIsHeroVideoPlaying] = useState(true);
 
   useEffect(() => {
-    const video = heroVideoRef.current;
-    if (!video) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      video.pause();
+      heroVideoRef.current?.pause();
     }
-    setIsHeroVideoPlaying(!video.paused);
   }, []);
 
-  const toggleHeroVideo = () => {
-    const video = heroVideoRef.current;
-    if (!video) return;
-    if (video.paused) {
-      void video.play();
-    } else {
-      video.pause();
-    }
-  };
-
-  // Filter best sellers: capped to exactly 6 cards for the homepage showcase
+  // Filter best sellers: capped to 10 cards for the homepage carousel
   const filteredProducts = (
     activeCategory === 'All Collection'
       ? HOME_PRODUCTS
       : HOME_PRODUCTS.filter((p) => CATEGORY_LABELS[p.category].toLowerCase() === activeCategory.toLowerCase())
-  ).slice(0, 6);
+  ).slice(0, 10);
+
+  // Collection carousel: native scroll-snap track with prev/next controls
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
+
+  const updateCarouselControls = () => {
+    const track = carouselRef.current;
+    if (!track) return;
+    setCanScrollPrev(track.scrollLeft > 4);
+    setCanScrollNext(track.scrollLeft + track.clientWidth < track.scrollWidth - 4);
+  };
+
+  useEffect(() => {
+    const track = carouselRef.current;
+    if (!track) return;
+    track.scrollTo({ left: 0 });
+    updateCarouselControls();
+    window.addEventListener('resize', updateCarouselControls);
+    return () => window.removeEventListener('resize', updateCarouselControls);
+  }, [activeCategory]);
+
+  const scrollCarousel = (direction: 1 | -1) => {
+    const track = carouselRef.current;
+    if (!track) return;
+    const slide = track.firstElementChild as HTMLElement | null;
+    const step = slide ? slide.offsetWidth + 24 : track.clientWidth;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    track.scrollBy({ left: direction * step, behavior: reduceMotion ? 'auto' : 'smooth' });
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-store-canvas text-store-text-primary selection:bg-store-action-primary selection:text-white">
@@ -148,8 +164,6 @@ export default function HomePage() {
               preload="auto"
               aria-hidden="true"
               tabIndex={-1}
-              onPlay={() => setIsHeroVideoPlaying(true)}
-              onPause={() => setIsHeroVideoPlaying(false)}
               className="w-full h-full object-cover video-watermark-cloak"
             />
           </div>
@@ -190,19 +204,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Pause / play: top-right on phones, bottom-right (level with the links) from sm up */}
-          <div className="absolute inset-x-0 top-4 sm:top-auto sm:bottom-[1.875rem] lg:bottom-[2.375rem] z-20 pointer-events-none">
-            <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex justify-end">
-              <button
-                type="button"
-                onClick={toggleHeroVideo}
-                aria-label={isHeroVideoPlaying ? 'Pause background video' : 'Play background video'}
-                className="pointer-events-auto inline-flex items-center justify-center w-12 h-12 rounded-full bg-white/5 hover:bg-white/15 backdrop-blur-md border border-white/20 hover:border-white/40 text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-store-gold focus-visible:ring-offset-2 focus-visible:ring-offset-primary-dark"
-              >
-                {isHeroVideoPlaying ? <Pause size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" />}
-              </button>
-            </div>
-          </div>
         </section>
 
         {/* =========================================================================
@@ -214,28 +215,24 @@ export default function HomePage() {
             SECTION 2: EXPLORE OUR BEST SELLING PRODUCT COLLECTION (Figma Specimen)
             ========================================================================= */}
         <section id="best-sellers" className="py-20 sm:py-28 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-store-border">
-          {/* Header Row */}
+          {/* Header Row: heading + intro on the left, shop link aligned to their baseline on the right */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
-            <div>
+            <div className="max-w-xl">
               <h2 className="font-heading text-[clamp(1.75rem,4vw+0.5rem,3rem)] font-medium tracking-tight text-store-text-primary">
                 Explore the Collection
               </h2>
-            </div>
-
-            <div className="max-w-md space-y-4">
-              <p className="text-base text-store-text-secondary font-sans leading-relaxed">
+              <p className="mt-3 text-base text-store-text-secondary font-sans leading-relaxed">
                 Hoodies, tees and everyday objects, each printed with the leaping deer after you order.
               </p>
-              <div>
-                <Link
-                  href="/shop"
-                  className="inline-flex items-center gap-2 px-6 h-11 rounded-full bg-store-action-primary hover:bg-store-action-hover text-white font-sans font-medium text-xs tracking-wider uppercase transition-colors"
-                >
-                  <span>Let&apos;s Shop Now</span>
-                  <ShoppingBag size={14} />
-                </Link>
-              </div>
             </div>
+
+            <Link
+              href="/shop"
+              className="self-start md:self-auto shrink-0 inline-flex items-center gap-2 px-6 h-11 rounded-full bg-store-action-primary hover:bg-store-action-hover text-white font-sans font-medium text-xs tracking-wider uppercase transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-store-gold focus-visible:ring-offset-2"
+            >
+              <span>Let&apos;s Shop Now</span>
+              <ShoppingBag size={14} aria-hidden="true" />
+            </Link>
           </div>
 
           {/* Filter Pills matching Figma */}
@@ -261,11 +258,46 @@ export default function HomePage() {
             })}
           </div>
 
-          {/* Same borderless card as /shop */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
-            {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+          {/* Collection carousel (same card as /shop) */}
+          <div className="relative" role="region" aria-roledescription="carousel" aria-label="Collection products">
+            <div
+              ref={carouselRef}
+              onScroll={updateCarouselControls}
+              className="flex gap-6 overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth pb-2"
+            >
+              {filteredProducts.map((product, idx) => (
+                <div
+                  key={product.id}
+                  role="group"
+                  aria-roledescription="slide"
+                  aria-label={`${idx + 1} of ${filteredProducts.length}`}
+                  className="snap-start shrink-0 basis-[85%] sm:basis-[calc((100%-1.5rem)/2)] lg:basis-[calc((100%-3rem)/3)]"
+                >
+                  <ProductCard product={product} />
+                </div>
+              ))}
+            </div>
+
+            <div className="flex items-center justify-end gap-3 mt-8">
+              <button
+                type="button"
+                aria-label="Previous products"
+                onClick={() => scrollCarousel(-1)}
+                disabled={!canScrollPrev}
+                className="inline-flex items-center justify-center w-11 h-11 rounded-full border border-store-border text-store-text-primary transition-colors hover:border-store-action-primary hover:bg-store-action-primary hover:text-white disabled:opacity-30 disabled:pointer-events-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-store-gold"
+              >
+                <ChevronLeft size={18} aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                aria-label="Next products"
+                onClick={() => scrollCarousel(1)}
+                disabled={!canScrollNext}
+                className="inline-flex items-center justify-center w-11 h-11 rounded-full border border-store-border text-store-text-primary transition-colors hover:border-store-action-primary hover:bg-store-action-primary hover:text-white disabled:opacity-30 disabled:pointer-events-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-store-gold"
+              >
+                <ChevronRight size={18} aria-hidden="true" />
+              </button>
+            </div>
           </div>
         </section>
 

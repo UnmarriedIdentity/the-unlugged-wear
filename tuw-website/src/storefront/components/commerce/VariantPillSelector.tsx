@@ -95,7 +95,7 @@ export default function VariantPillSelector({
               onClick={() => onSelect(s)}
               className={`${
                 isLong ? 'h-12 px-3 py-1.5' : 'h-11'
-              } rounded-xl text-xs font-bold uppercase transition-all flex flex-col items-center justify-center cursor-pointer border ${
+              } text-xs font-medium uppercase transition-all flex flex-col items-center justify-center cursor-pointer border ${
                 !s.inStock
                   ? 'opacity-40 cursor-not-allowed bg-store-canvas border-store-card-border line-through text-store-muted'
                   : isSelected
@@ -113,7 +113,7 @@ export default function VariantPillSelector({
       {selectedSize && (
         <div className="mt-2 text-xs flex items-center gap-1.5">
           {selectedSize.inStock ? (
-            <span className="text-emerald-700 font-medium flex items-center gap-1">
+            <span className="text-store-text-secondary flex items-center gap-1">
               <Check size={13} />
               Printed to order • usually dispatched within a few business days
             </span>
@@ -128,7 +128,7 @@ export default function VariantPillSelector({
 
       {/* Validation alert */}
       {validationError && (
-        <div className="mt-2 p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-800 flex items-center gap-2">
+        <div className="mt-2 p-3 bg-red-50 border border-red-200 text-xs text-red-800 flex items-center gap-2">
           <AlertCircle size={14} />
           <span>{validationError}</span>
         </div>

@@ -58,7 +58,7 @@ export default function DynamicDataTable({
           )}
 
           {/* Visual Slider Scale */}
-          <div className="p-4 rounded-xl bg-store-cream border border-store-card-border space-y-2">
+          <div className="p-4 bg-store-cream border border-store-card-border space-y-2">
             <div className="flex justify-between text-xs text-store-muted font-medium">
               <span>{table.sideScale.minLabel}</span>
               <span className="font-bold text-store-charcoal">
@@ -97,7 +97,7 @@ export default function DynamicDataTable({
 
           {/* Optional Unit Toggle */}
           {table.unitToggle && table.unitToggle.units.length > 1 && (
-            <div className="flex items-center p-1 rounded-xl bg-store-cream border border-store-card-border shrink-0 self-start sm:self-auto">
+            <div className="flex items-center p-1 bg-store-cream border border-store-card-border shrink-0 self-start sm:self-auto">
               {table.unitToggle.units.map((unit) => {
                 const isActive = activeUnit === unit.id;
                 return (
@@ -105,7 +105,7 @@ export default function DynamicDataTable({
                     key={unit.id}
                     type="button"
                     onClick={() => setActiveUnit(unit.id)}
-                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    className={`px-3 py-1 text-xs font-bold transition-all cursor-pointer ${
                       isActive
                         ? 'bg-store-surface text-store-charcoal shadow-xs'
                         : 'text-store-muted hover:text-store-charcoal'
@@ -120,7 +120,7 @@ export default function DynamicDataTable({
         </div>
 
         {/* Polymorphic Table Grid */}
-        <div className="overflow-x-auto rounded-2xl border border-store-card-border bg-store-surface shadow-xs">
+        <div className="overflow-x-auto border border-store-card-border bg-store-surface shadow-xs">
           <table className="w-full text-left text-xs">
             <thead className="bg-store-cream border-b border-store-card-border font-bold text-store-charcoal uppercase tracking-wider">
               <tr>

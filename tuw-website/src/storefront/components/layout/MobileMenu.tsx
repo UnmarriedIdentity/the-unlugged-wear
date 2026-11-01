@@ -6,6 +6,8 @@ import { Search, Heart, User, ArrowRight, ShieldCheck, RefreshCw, ChevronDown } 
 import type { LucideIcon } from 'lucide-react';
 import Drawer from '@storefront/components/ui/Drawer';
 import type { NavItem } from './navigation';
+import type { Product } from '@storefront/lib/types';
+import { matchesShopFilter } from '@storefront/lib/product';
 
 export interface MobileMenuProps {
   isOpen: boolean;
@@ -13,6 +15,10 @@ export interface MobileMenuProps {
   /** Primary navigation; items with columns expand to show their sub-links. */
   items?: NavItem[];
   links: { label: string; href: string }[];
+  /** Catalogue, so categories with no products are hidden. */
+  products?: Product[];
+  /** Brand social profiles shown at the bottom. */
+  socialLinks?: { id: string; label: string; href: string; path: string }[];
 }
 
 // Secondary account & tracking shortcuts shown below the primary nav list.
@@ -24,7 +30,7 @@ const SECONDARY_LINKS: { label: string; href: string; icon: LucideIcon }[] = [
   { label: 'Track My Order', href: '/track-order', icon: RefreshCw },
 ];
 
-export default function MobileMenu({ isOpen, onClose, items = [], links }: MobileMenuProps) {
+export default function MobileMenu({ isOpen, onClose, items = [], links, products = [], socialLinks = [] }: MobileMenuProps) {
   const [expanded, setExpanded] = useState<string | null>(null);
 
   return (
@@ -34,7 +40,7 @@ export default function MobileMenu({ isOpen, onClose, items = [], links }: Mobil
       position="left"
       maxWidth="max-w-sm"
       title="The Unplugged Wear"
-      subtitle="Intentional POD Apparel"
+      subtitle="Printed to order in India"
     >
       <div className="flex flex-col h-full justify-between gap-8">
         {/* Navigation Link List */}
@@ -46,10 +52,10 @@ export default function MobileMenu({ isOpen, onClose, items = [], links }: Mobil
                   key={item.href}
                   href={item.href}
                   onClick={onClose}
-                  className="flex items-center justify-between py-3 text-base font-semibold tracking-wide text-store-text-primary hover:text-store-accent border-b border-store-border transition-colors"
+                  className="flex items-center justify-between py-3 text-base font-medium tracking-wide text-store-text-primary hover:text-black border-b border-store-border transition-colors"
                 >
                   <span>{item.label}</span>
-                  <ArrowRight size={14} className="text-[#8A8A8A]" />
+                  <ArrowRight size={14} className="text-store-text-secondary" />
                 </Link>
               );
             }
@@ -62,12 +68,12 @@ export default function MobileMenu({ isOpen, onClose, items = [], links }: Mobil
                   aria-expanded={isExpanded}
                   aria-controls={panelId}
                   onClick={() => setExpanded(isExpanded ? null : item.label)}
-                  className="w-full flex items-center justify-between py-3 text-base font-semibold tracking-wide text-store-text-primary hover:text-store-accent transition-colors cursor-pointer"
+                  className="w-full flex items-center justify-between py-3 text-base font-medium tracking-wide text-store-text-primary hover:text-black transition-colors cursor-pointer"
                 >
                   <span>{item.label}</span>
                   <ChevronDown
                     size={16}
-                    className={`text-[#8A8A8A] transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                    className={`text-store-text-secondary transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
                   />
                 </button>
                 {isExpanded && (
@@ -78,12 +84,14 @@ export default function MobileMenu({ isOpen, onClose, items = [], links }: Mobil
                           {column.title}
                         </p>
                         <ul>
-                          {column.links.map((link) => (
+                          {column.links
+                            .filter((link) => !link.filter || products.some((p) => matchesShopFilter(p, link.filter!)))
+                            .map((link) => (
                             <li key={`${link.label}-${link.href}`}>
                               <Link
                                 href={link.href}
                                 onClick={onClose}
-                                className="block py-2 text-sm text-store-text-primary hover:text-store-accent"
+                                className="block py-2 text-sm text-store-text-primary hover:text-black"
                               >
                                 {link.label}
                               </Link>
@@ -92,6 +100,16 @@ export default function MobileMenu({ isOpen, onClose, items = [], links }: Mobil
                         </ul>
                       </div>
                     ))}
+                    {item.shopAll && (
+                      <Link
+                        href={item.shopAll.href}
+                        onClick={onClose}
+                        className="inline-flex items-center gap-2 py-2 text-sm font-medium text-store-charcoal underline underline-offset-4 decoration-store-gold"
+                      >
+                        {item.shopAll.label}
+                        <ArrowRight size={14} aria-hidden="true" />
+                      </Link>
+                    )}
                   </div>
                 )}
               </div>
@@ -102,16 +120,16 @@ export default function MobileMenu({ isOpen, onClose, items = [], links }: Mobil
               key={link.href}
               href={link.href}
               onClick={onClose}
-              className="flex items-center justify-between py-3 text-base font-semibold tracking-wide text-store-text-primary hover:text-store-accent border-b border-store-border transition-colors"
+              className="flex items-center justify-between py-3 text-base font-medium tracking-wide text-store-text-primary hover:text-black border-b border-store-border transition-colors"
             >
               <span>{link.label}</span>
-              <ArrowRight size={14} className="text-[#8A8A8A]" />
+              <ArrowRight size={14} className="text-store-text-secondary" />
             </Link>
           ))}
         </div>
 
         {/* Secondary Account & Tracking Links */}
-        <div className="flex flex-col gap-3 pt-6 border-t border-[#E2DDCF]">
+        <div className="flex flex-col gap-3 pt-6 border-t border-store-card-border">
           {SECONDARY_LINKS.map((link) => {
             const Icon = link.icon;
             return (
@@ -119,7 +137,7 @@ export default function MobileMenu({ isOpen, onClose, items = [], links }: Mobil
                 key={link.href}
                 href={link.href}
                 onClick={onClose}
-                className="flex items-center gap-3 text-sm font-medium text-[#5A5A5A] hover:text-[#1A1A1A]"
+                className="flex items-center gap-3 text-sm font-medium text-store-text-secondary hover:text-store-charcoal"
               >
                 <Icon size={18} />
                 <span>{link.label}</span>
@@ -128,13 +146,33 @@ export default function MobileMenu({ isOpen, onClose, items = [], links }: Mobil
           })}
         </div>
 
-        {/* Footer Brand Notes */}
-        <div className="p-4 rounded-xl bg-[#F4F1EA] text-xs text-[#666] leading-relaxed">
-          <div className="flex items-center gap-1.5 font-bold text-[#1A1A1A] mb-1">
-            <ShieldCheck size={16} className="text-[#10B981]" />
-            <span>Ethical POD Promise</span>
+        {/* Brand note + social profiles */}
+        <div className="space-y-4">
+          <div className="p-4 bg-store-cream text-xs text-store-text-secondary leading-relaxed">
+            <div className="flex items-center gap-1.5 font-medium text-store-charcoal mb-1">
+              <ShieldCheck size={16} aria-hidden="true" />
+              <span>Printed to order</span>
+            </div>
+            Every piece is printed after you order it, so nothing is made that nobody wanted.
           </div>
-          Zero overproduction. Every piece is printed after you order it.
+          {socialLinks.length > 0 && (
+            <div className="flex items-center gap-4 text-store-text-secondary">
+              {socialLinks.map((social) => (
+                <a
+                  key={social.id}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`The Unplugged Wear on ${social.label}`}
+                  className="inline-flex items-center justify-center w-9 h-9 hover:text-store-charcoal transition-colors"
+                >
+                  <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d={social.path} />
+                  </svg>
+                </a>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </Drawer>

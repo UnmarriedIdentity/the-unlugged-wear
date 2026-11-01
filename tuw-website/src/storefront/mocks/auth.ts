@@ -9,8 +9,8 @@ const SESSION_EVENT = 'tuw-demo-session';
 
 /** Seeded demo customer. Owns the fixture orders and the Indiranagar address. */
 export const DEMO_ACCOUNT = {
-  name: 'Arjun Rao',
-  email: 'uk1115@tuw.co',
+  name: 'Urvil Kargathala',
+  email: 'urvil.kargathala@example.com',
   password: 'uktuw1115',
 } as const;
 
@@ -31,6 +31,8 @@ function parseSession(raw: string | null): DemoSession | null {
   try {
     const value = JSON.parse(raw) as Partial<DemoSession> & { loggedIn?: boolean };
     if (!value.loggedIn || !value.email) return null;
+    // Sessions saved under an older demo email are signed out.
+    if (value.email !== DEMO_ACCOUNT.email) return null;
     return {
       name: value.name || value.email,
       email: value.email,

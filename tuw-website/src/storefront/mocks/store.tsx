@@ -1,7 +1,12 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import Toast from '@storefront/components/ui/Toast';
+import { Toaster, toast as sonnerToast } from 'sonner';
+import BrandToast, { type BrandToastProps } from '@storefront/components/ui/BrandToast';
+
+// Every storefront toast uses the branded card.
+const showToast = (props: Omit<BrandToastProps, 'id'>) =>
+  sonnerToast.custom((id) => <BrandToast id={id} {...props} />);
 import {
   Product,
   CartItem,
@@ -39,6 +44,8 @@ interface StoreContextType {
   cart: CartItem[];
   addToCart: (item: Omit<CartItem, 'id'>) => void;
   updateQuantity: (id: string, qty: number) => void;
+  /** Change a bag line's colour/size; merges with an identical line if one exists. */
+  updateCartItemVariant: (id: string, changes: { color?: string; size?: string; image?: string }) => void;
   removeFromCart: (id: string) => void;
   clearCart: () => void;
   cartCount: number;
@@ -80,6 +87,8 @@ interface StoreContextType {
   // Addresses
   addresses: Address[];
   saveAddress: (address: Address) => void;
+  deleteAddress: (addressId: string) => void;
+  setDefaultAddress: (addressId: string) => void;
 
   // Search & Global filters
   searchQuery: string;
@@ -119,23 +128,24 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [hasLoadedStorage, setHasLoadedStorage] = useState(false);
 
-  // Load from localStorage with schema version tuw_website_v4 (bumped when product photos became
-  // illustrations, so saved carts and orders never point at removed images). Older keys are ignored.
+  // Load from localStorage with schema version tuw_website_v5 (v4: product photos became
+  // illustrations; v5: the demo customer changed, so saved orders and addresses for the
+  // previous customer are dropped). Older keys are ignored.
   useEffect(() => {
     try {
-      const savedCart = localStorage.getItem('tuw_website_v4_cart');
+      const savedCart = localStorage.getItem('tuw_website_v5_cart');
       if (savedCart) setCart(JSON.parse(savedCart));
 
-      const savedWishlist = localStorage.getItem('tuw_website_v4_wishlist');
+      const savedWishlist = localStorage.getItem('tuw_website_v5_wishlist');
       if (savedWishlist) setWishlist(JSON.parse(savedWishlist));
 
-      const savedOrders = localStorage.getItem('tuw_website_v4_orders');
+      const savedOrders = localStorage.getItem('tuw_website_v5_orders');
       if (savedOrders) setOrders(JSON.parse(savedOrders));
 
-      const savedReturns = localStorage.getItem('tuw_website_v4_returns');
+      const savedReturns = localStorage.getItem('tuw_website_v5_returns');
       if (savedReturns) setReturns(JSON.parse(savedReturns));
 
-      const savedAddresses = localStorage.getItem('tuw_website_v4_addresses');
+      const savedAddresses = localStorage.getItem('tuw_website_v5_addresses');
       if (savedAddresses) setAddresses(JSON.parse(savedAddresses));
     } catch (e) {
       console.error('Failed to load storefront state from localStorage', e);
@@ -144,15 +154,15 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Save to localStorage with schema version tuw_website_v4
+  // Save to localStorage with schema version tuw_website_v5
   useEffect(() => {
     if (!hasLoadedStorage) return;
     try {
-      localStorage.setItem('tuw_website_v4_cart', JSON.stringify(cart));
-      localStorage.setItem('tuw_website_v4_wishlist', JSON.stringify(wishlist));
-      localStorage.setItem('tuw_website_v4_orders', JSON.stringify(orders));
-      localStorage.setItem('tuw_website_v4_returns', JSON.stringify(returns));
-      localStorage.setItem('tuw_website_v4_addresses', JSON.stringify(addresses));
+      localStorage.setItem('tuw_website_v5_cart', JSON.stringify(cart));
+      localStorage.setItem('tuw_website_v5_wishlist', JSON.stringify(wishlist));
+      localStorage.setItem('tuw_website_v5_orders', JSON.stringify(orders));
+      localStorage.setItem('tuw_website_v5_returns', JSON.stringify(returns));
+      localStorage.setItem('tuw_website_v5_addresses', JSON.stringify(addresses));
     } catch (e) {
       console.error('Failed to save storefront state to localStorage', e);
     }
@@ -168,16 +178,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
     lastToastRef.current = { key, time: now };
 
-    const id = `toast-${now}-${Math.random().toString(36).substring(2, 6)}`;
-    const newToast: ToastMessage = { ...toast, id };
-    setToasts((prev) => [...prev, newToast]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 4000);
+    // Rendered by Sonner's <Toaster> below (brand-styled, stacked, swipe-to-dismiss).
+    showToast({ title: toast.title, description: toast.description, tone: toast.type });
   }, []);
 
   const dismissToast = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
+    sonnerToast.dismiss(id);
   }, []);
 
   // Cart operations
@@ -200,13 +206,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       return [...prev, newItem];
     });
 
+    // Opening the bag drawer is the confirmation; a toast on top of it would cover the checkout button.
     setIsCartDrawerOpen(true);
-    addToast({
-      type: 'success',
-      title: 'Added to Bag',
-      description: `${item.title} (${item.color}, Size ${item.size}) added to your bag.`,
-    });
-  }, [addToast]);
+  }, []);
 
   const updateQuantity = useCallback((id: string, qty: number) => {
     if (qty <= 0) {
@@ -217,6 +219,31 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       prev.map((item) => (item.id === id ? { ...item, quantity: qty } : item))
     );
   }, []);
+
+  const updateCartItemVariant = useCallback(
+    (id: string, changes: { color?: string; size?: string; image?: string }) => {
+      setCart((prev) => {
+        const line = prev.find((i) => i.id === id);
+        if (!line) return prev;
+        const updated = { ...line, ...changes };
+        const twin = prev.find(
+          (i) =>
+            i.id !== id &&
+            i.productId === updated.productId &&
+            i.color === updated.color &&
+            i.size === updated.size &&
+            JSON.stringify(i.selectedRadioOptions || []) === JSON.stringify(updated.selectedRadioOptions || [])
+        );
+        if (twin) {
+          return prev
+            .filter((i) => i.id !== id)
+            .map((i) => (i.id === twin.id ? { ...i, quantity: i.quantity + line.quantity } : i));
+        }
+        return prev.map((i) => (i.id === id ? updated : i));
+      });
+    },
+    []
+  );
 
   const removeFromCart = useCallback((id: string) => {
     const item = cart.find((i) => i.id === id);
@@ -269,8 +296,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   // Wishlist operations
   const toggleWishlist = useCallback((productId: string) => {
     const isCurrentlySaved = wishlist.includes(productId);
-    const product = products.find((p) => p.id === productId);
-
     setWishlist((prev) => {
       if (isCurrentlySaved) {
         return prev.filter((id) => id !== productId);
@@ -279,20 +304,22 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
+    // Brand toast (Sonner) with a shortcut to the wishlist or an undo.
+    const product = products.find((p) => p.id === productId);
+    const name = product?.title ?? 'This piece';
+    const image = product?.images[0]?.url;
     if (isCurrentlySaved) {
-      addToast({
-        type: 'info',
-        title: 'Removed from Wishlist',
-        description: product ? `${product.title} removed.` : undefined,
+      showToast({
+        title: 'Removed from wishlist',
+        description: name,
+        image,
+        tone: 'info',
+        action: { label: 'Undo', onClick: () => setWishlist((prev) => (prev.includes(productId) ? prev : [...prev, productId])) },
       });
     } else {
-      addToast({
-        type: 'success',
-        title: 'Saved to Wishlist',
-        description: product ? `${product.title} saved to your wishlist.` : undefined,
-      });
+      showToast({ title: 'Saved to wishlist', description: name, image, action: { label: 'View', href: '/wishlist' } });
     }
-  }, [wishlist, products, addToast]);
+  }, [wishlist, products]);
 
   const isInWishlist = useCallback(
     (productId: string) => wishlist.includes(productId),
@@ -377,21 +404,39 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Addresses
+  // Exactly one address is the default; the first saved address always is.
   const saveAddress = (address: Address) => {
     setAddresses((prev) => {
-      const idx = prev.findIndex((a) => a.id === address.id);
-      if (idx > -1) {
-        const updated = [...prev];
-        updated[idx] = address;
-        return updated;
-      }
-      return [...prev, address];
+      const exists = prev.some((a) => a.id === address.id);
+      const others = prev.filter((a) => a.id !== address.id);
+      const makeDefault = address.isDefault || others.length === 0;
+      const next = exists
+        ? prev.map((a) => (a.id === address.id ? address : a))
+        : [...prev, address];
+      if (makeDefault) return next.map((a) => ({ ...a, isDefault: a.id === address.id }));
+      return next.some((a) => a.isDefault) ? next : next.map((a, idx) => ({ ...a, isDefault: idx === 0 }));
     });
     addToast({
       type: 'success',
-      title: 'Address Saved',
-      description: 'Your delivery address has been updated.',
+      title: 'Address saved',
+      description: `${address.label ? `${address.label} address` : 'Your address'} has been saved.`,
     });
+  };
+
+  const deleteAddress = (addressId: string) => {
+    setAddresses((prev) => {
+      const removed = prev.find((a) => a.id === addressId);
+      const next = prev.filter((a) => a.id !== addressId);
+      return removed?.isDefault && next.length > 0
+        ? next.map((a, idx) => ({ ...a, isDefault: idx === 0 }))
+        : next;
+    });
+    addToast({ type: 'info', title: 'Address removed' });
+  };
+
+  const setDefaultAddress = (addressId: string) => {
+    setAddresses((prev) => prev.map((a) => ({ ...a, isDefault: a.id === addressId })));
+    addToast({ type: 'success', title: 'Default address updated' });
   };
 
   const getProductBySlug = (slug: string) =>
@@ -463,6 +508,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setPromoCode('');
     setDiscountPercent(0);
     try {
+      localStorage.removeItem('tuw_website_v5_cart');
+      localStorage.removeItem('tuw_website_v5_wishlist');
+      localStorage.removeItem('tuw_website_v5_orders');
+      localStorage.removeItem('tuw_website_v5_returns');
+      localStorage.removeItem('tuw_website_v5_addresses');
       localStorage.removeItem('tuw_website_v4_cart');
       localStorage.removeItem('tuw_website_v4_wishlist');
       localStorage.removeItem('tuw_website_v4_orders');
@@ -495,6 +545,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         cart,
         addToCart,
         updateQuantity,
+        updateCartItemVariant,
         removeFromCart,
         clearCart,
         cartCount,
@@ -519,6 +570,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         submitReturnRequest,
         addresses,
         saveAddress,
+        deleteAddress,
+        setDefaultAddress,
         searchQuery,
         setSearchQuery,
         toasts,
@@ -529,8 +582,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     >
       {children}
 
-      {/* Floating Luxury Storefront Toast Notifications */}
-      <Toast toasts={toasts} onDismiss={dismissToast} />
+      {/* Small toasts near the top edge, over the announcement bar. */}
+      <Toaster position="top-center" offset={{ top: 12 }} mobileOffset={{ top: 8 }} duration={3000} visibleToasts={3} gap={6} />
     </StoreContext.Provider>
   );
 }
