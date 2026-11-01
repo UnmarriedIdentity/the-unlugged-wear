@@ -104,7 +104,29 @@ export type Product = {
   isNew?: boolean;
   isBestseller?: boolean;
   videoUrl?: string;
+  /** Page layout family; defaults from category when missing (see productTypeOf). */
+  productType?: ProductType;
+  /** Label for the variant picker, e.g. "Size", "Phone model", "Age". */
+  variantLabel?: string;
+  /** Retail price not yet confirmed by the owner; shown with a draft notice. */
+  priceIsDraft?: boolean;
+  /** Print areas offered by the print partner (verbatim from their sheet). */
+  printAreas?: string[];
+  weightGrams?: number;
+  taxRatePercent?: number;
+  hsnCode?: string;
 };
+
+export type ProductType =
+  | 'apparel'
+  | 'kids-apparel'
+  | 'pet'
+  | 'drinkware'
+  | 'wall-art'
+  | 'phone-case'
+  | 'bag'
+  | 'stationery'
+  | 'home';
 
 export type Collection = {
   id: string;
@@ -116,6 +138,8 @@ export type Collection = {
   tagline: string;
   /** Product categories this collection groups; omitted means every product. */
   categories?: Product['category'][];
+  /** Products whose title contains any of these words (used instead of categories). */
+  titleIncludes?: string[];
 };
 
 export type CartItem = {
@@ -139,6 +163,8 @@ export type CartItem = {
 
 export type Address = {
   id: string;
+  /** Customer's name for the address, e.g. "Home", "Work", "Friend". */
+  label?: string;
   fullName: string;
   addressLine1: string;
   addressLine2?: string;

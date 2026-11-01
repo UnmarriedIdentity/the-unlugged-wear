@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Camera, ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
 import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
 import Modal from '@storefront/components/ui/Modal';
+import { isPlaceholderImage } from '@storefront/lib/product';
 
 export interface ProductGalleryProps {
   images: {
@@ -49,12 +50,44 @@ export default function ProductGallery({
     setActiveIndex((prev) => (prev - 1 + totalSlides) % totalSlides);
   };
 
+  // Swipe between photos on touch screens.
+  const touchStartX = useRef<number | null>(null);
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || totalSlides < 2) return;
+    const delta = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(delta) > 40) (delta < 0 ? handleNext : handlePrev)();
+    touchStartX.current = null;
+  };
+
+  // No photography yet: say so plainly instead of showing a borrowed picture.
+  if (images.length === 0 && !videoUrl) {
+    return (
+      <div className="w-full aspect-4/5 bg-store-cream border border-store-card-border flex flex-col items-center justify-center gap-3 text-center p-8">
+        <Camera size={28} className="text-store-text-secondary" aria-hidden="true" />
+        <p className="text-sm font-medium text-store-charcoal">Photos coming soon</p>
+        <p className="text-sm text-store-text-secondary max-w-xs">
+          We’re photographing the {title}. Colours below show the shades it’s printed in.
+        </p>
+      </div>
+    );
+  }
+
+  const showsSamplePhoto = !isVideoActive && activeImage && isPlaceholderImage(activeImage.alt);
+  const sampleNote = showsSamplePhoto && (
+    <span className="absolute bottom-0 inset-x-0 bg-store-charcoal/80 text-white text-xs px-4 py-2 pointer-events-none">
+      Sample photo — final product photography coming soon
+    </span>
+  );
+
   return (
     <div className="w-full">
       {/* 1. DESKTOP EDITORIAL QUAD GALLERY (Figma Node 354:24651 FINAL PDP) */}
       <div className="hidden lg:flex flex-col gap-4">
         {/* Primary Large Hero Photo or Active Color Focus */}
-        <div className="relative aspect-4/5 w-full rounded-2xl overflow-hidden bg-store-cream border border-store-card-border group">
+        <div className="relative aspect-4/5 w-full overflow-hidden bg-store-cream border border-store-card-border group">
           {isVideoActive ? (
             <video
               src={videoUrl}
@@ -74,10 +107,12 @@ export default function ProductGallery({
 
           {/* Angle Label matching Figma */}
           {activeImage.label && (
-            <span className="absolute top-4 left-4 text-[11px] font-mono tracking-wider font-semibold uppercase text-store-charcoal/90 bg-white/90 backdrop-blur-xs px-2.5 py-1 rounded-md pointer-events-none shadow-2xs border border-store-card-border/60 z-10">
+            <span className="absolute top-4 left-4 text-[11px] font-mono tracking-wider font-semibold uppercase text-store-charcoal/90 bg-white/90 backdrop-blur-xs px-2.5 py-1 pointer-events-none shadow-2xs border border-store-card-border/60 z-10">
               {activeImage.label}
             </span>
           )}
+
+          {sampleNote}
 
           {/* Enlarge button */}
           <button
@@ -95,7 +130,7 @@ export default function ProductGallery({
               onClick={() => setActiveIndex(images.length)}
               className="absolute bottom-4 left-4 px-3.5 py-1.5 rounded-full bg-store-charcoal/90 text-white text-xs font-bold uppercase tracking-wider backdrop-blur-xs flex items-center gap-1.5 hover:bg-store-charcoal transition-colors cursor-pointer"
             >
-              <span>▶ Atelier Reel</span>
+              <span>▶ Watch video</span>
             </button>
           )}
         </div>
@@ -109,8 +144,18 @@ export default function ProductGallery({
               return (
                 <div
                   key={actualIdx}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Show ${img.alt}`}
+                  aria-pressed={isSelected}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setActiveIndex(actualIdx);
+                    }
+                  }}
                   onClick={() => setActiveIndex(actualIdx)}
-                  className={`relative aspect-4/5 rounded-2xl overflow-hidden bg-store-cream border transition-all cursor-pointer group ${
+                  className={`relative aspect-4/5  overflow-hidden bg-store-cream border transition-all cursor-pointer group ${
                     isSelected
                       ? 'border-store-charcoal ring-2 ring-store-charcoal/30'
                       : 'border-store-card-border hover:border-store-charcoal/50'
@@ -134,7 +179,7 @@ export default function ProductGallery({
                     <Maximize2 size={14} />
                   </button>
                   {img.label && (
-                    <span className="absolute top-3 left-3 text-[10px] font-mono tracking-wider font-semibold uppercase text-store-charcoal/90 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md pointer-events-none shadow-2xs border border-store-card-border/60 z-10">
+                    <span className="absolute top-3 left-3 text-[10px] font-mono tracking-wider font-semibold uppercase text-store-charcoal/90 bg-white/90 backdrop-blur-xs px-2 py-0.5 pointer-events-none shadow-2xs border border-store-card-border/60 z-10">
                       {img.label}
                     </span>
                   )}
@@ -146,7 +191,11 @@ export default function ProductGallery({
       </div>
 
       {/* 2. MOBILE & TABLET SLIDER VIEWPORT */}
-      <div className="lg:hidden relative aspect-3/4 w-full rounded-2xl overflow-hidden bg-store-cream border border-store-card-border">
+      <div
+        className="lg:hidden relative aspect-3/4 w-full overflow-hidden bg-store-cream border border-store-card-border touch-pan-y"
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
         {isVideoActive ? (
           <video
             src={videoUrl}
@@ -166,10 +215,12 @@ export default function ProductGallery({
 
         {/* Angle Label matching Figma */}
         {activeImage.label && (
-          <span className="absolute top-4 left-4 text-[11px] font-mono tracking-wider font-semibold uppercase text-store-charcoal/90 bg-white/90 backdrop-blur-xs px-2.5 py-1 rounded-md pointer-events-none shadow-2xs border border-store-card-border/60 z-10">
+          <span className="absolute top-4 left-4 text-[11px] font-mono tracking-wider font-semibold uppercase text-store-charcoal/90 bg-white/90 backdrop-blur-xs px-2.5 py-1 pointer-events-none shadow-2xs border border-store-card-border/60 z-10">
             {activeImage.label}
           </span>
         )}
+
+        {sampleNote}
 
         {/* Zoom trigger */}
         <button
@@ -226,11 +277,11 @@ export default function ProductGallery({
         title={title}
         subtitle={
           isVideoActive
-            ? 'Atelier Video Reel'
+            ? 'Product video'
             : `Image ${activeIndex + 1} of ${images.length} • ${activeImage.alt}`
         }
       >
-        <div className="relative aspect-3/4 sm:aspect-4/3 w-full rounded-xl overflow-hidden bg-store-canvas">
+        <div className="relative aspect-3/4 sm:aspect-4/3 w-full overflow-hidden bg-store-canvas">
           {isVideoActive ? (
             <video
               src={videoUrl}

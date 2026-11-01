@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
+  ArrowRight,
   Search,
   ShoppingBag,
   Heart,
@@ -12,17 +13,18 @@ import {
   X,
 } from 'lucide-react';
 import { useStore } from '@storefront/mocks/store';
+import { useDemoSession } from '@storefront/mocks/auth';
 import MobileMenu from './MobileMenu';
 import CartDrawer from './CartDrawer';
 import TuwEmblem from './TuwEmblem';
 import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
-import { formatINR } from '@storefront/lib/format';
 import type { Product } from '@storefront/lib/types';
-import { NAV_ITEMS, type NavItem } from './navigation';
+import { NAV_ITEMS, type NavItem, type NavLink } from './navigation';
+import { matchesShopFilter } from '@storefront/lib/product';
 import { site } from '@storefront/lib/site';
 
-// Desktop mega-menu panel: link columns on the left, image tiles on the right
-// (pattern after luxury house navigation). Spans the full header width.
+// Desktop mega-menu panel: link columns (with live product counts) on the left,
+// product tiles on the right, and a "Shop all" link along the bottom.
 function MegaPanel({
   id,
   item,
@@ -34,6 +36,18 @@ function MegaPanel({
   products: Product[];
   onNavigate: () => void;
 }) {
+  const countFor = (link: NavLink) =>
+    link.filter ? products.filter((p) => matchesShopFilter(p, link.filter!)).length : null;
+
+  const columns = (item.columns || [])
+    .map((column) => ({
+      ...column,
+      links: column.links
+        .map((link) => ({ ...link, count: countFor(link) }))
+        .filter((link) => link.count !== 0),
+    }))
+    .filter((column) => column.links.length > 0);
+
   const features = (item.features || []).flatMap((feature) => {
     const product = feature.productSlug
       ? products.find((p) => p.slug === feature.productSlug)
@@ -48,7 +62,7 @@ function MegaPanel({
         title: feature.title || product?.title || '',
         caption:
           feature.caption ??
-          (product ? formatINR(product.priceMinorINR ?? product.priceINR * 100) : ''),
+          (product ? `₹${product.priceINR.toLocaleString('en-IN')}` : ''),
         href: feature.href || (product ? `/products/${product.slug}` : item.href),
       },
     ];
@@ -59,20 +73,23 @@ function MegaPanel({
       id={id}
       className="absolute inset-x-0 top-full bg-store-canvas border-y border-store-border shadow-lg tuw-mega-in"
     >
-      <div className="max-w-7xl mx-auto px-8 py-10 flex gap-12">
-        <div className="flex gap-16 shrink-0">
-          {(item.columns || []).map((column) => (
-            <div key={column.title} className="min-w-44">
-              <p className="text-sm text-store-text-secondary mb-3">{column.title}</p>
-              <ul className="space-y-0.5">
+      <div className="max-w-7xl mx-auto px-8 py-10 grid grid-cols-[minmax(0,1fr)_auto] gap-12">
+        <div className="grid grid-cols-3 gap-10">
+          {columns.map((column) => (
+            <div key={column.title}>
+              <p className="text-xs uppercase tracking-wider text-store-text-secondary mb-4">{column.title}</p>
+              <ul className="space-y-1">
                 {column.links.map((link) => (
                   <li key={`${link.label}-${link.href}`}>
                     <Link
                       href={link.href}
                       onClick={onNavigate}
-                      className="block py-1.5 text-sm text-store-text-primary hover:text-black hover:underline underline-offset-4 transition-colors"
+                      className="group flex items-baseline justify-between gap-3 py-1.5 text-sm text-store-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-store-gold"
                     >
-                      {link.label}
+                      <span className="underline-offset-4 decoration-store-gold group-hover:underline">{link.label}</span>
+                      {link.count !== null && (
+                        <span className="text-xs text-store-text-secondary tuw-tabular-nums">{link.count}</span>
+                      )}
                     </Link>
                   </li>
                 ))}
@@ -82,15 +99,15 @@ function MegaPanel({
         </div>
 
         {features.length > 0 && (
-          <div className="ml-auto flex gap-4">
+          <div className="flex gap-4">
             {features.map((feature) => (
               <Link
                 key={feature.key}
                 href={feature.href}
                 onClick={onNavigate}
-                className="group block w-36 xl:w-52"
+                className="group block w-36 xl:w-48 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-store-gold"
               >
-                <div className="aspect-4/5 overflow-hidden rounded-lg bg-store-cream">
+                <div className="aspect-4/5 overflow-hidden bg-store-cream">
                   <ImageWithFallback
                     src={feature.image}
                     alt=""
@@ -98,14 +115,27 @@ function MegaPanel({
                     style={{ objectPosition: feature.imagePosition }}
                   />
                 </div>
-                <p className="mt-2.5 text-sm font-medium text-store-text-primary group-hover:underline underline-offset-4">
+                <p className="mt-2.5 text-sm font-medium text-store-text-primary underline-offset-4 decoration-store-gold group-hover:underline">
                   {feature.title}
                 </p>
                 {feature.caption && (
-                  <p className="mt-0.5 text-xs text-store-text-secondary">{feature.caption}</p>
+                  <p className="mt-0.5 text-xs text-store-text-secondary tuw-tabular-nums">{feature.caption}</p>
                 )}
               </Link>
             ))}
+          </div>
+        )}
+
+        {item.shopAll && (
+          <div className="col-span-2 pt-6 border-t border-store-border">
+            <Link
+              href={item.shopAll.href}
+              onClick={onNavigate}
+              className="inline-flex items-center gap-2 text-sm font-medium text-store-charcoal underline-offset-4 decoration-store-gold hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-store-gold"
+            >
+              {item.shopAll.label}
+              <ArrowRight size={14} aria-hidden="true" />
+            </Link>
           </div>
         )}
       </div>
@@ -113,12 +143,177 @@ function MegaPanel({
   );
 }
 
-// Top bar utility links matching Figma node 221:12602
-const TOP_BAR_LINKS = [
-  { label: 'Blogs', href: '/journal' },
-  { label: "FAQ's", href: '/faq' },
-  { label: 'Support', href: '/contact' },
+const POPULAR_SEARCHES = ['Hoodie', 'Oversized tee', 'Joggers', 'Mug', 'Tote bag'];
+
+function SearchPanel({
+  products,
+  value,
+  onChange,
+  onSubmit,
+  onClose,
+}: {
+  products: Product[];
+  value: string;
+  onChange: (value: string) => void;
+  onSubmit: (e: React.FormEvent) => void;
+  onClose: () => void;
+}) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  const query = value.trim().toLowerCase();
+  const results = query
+    ? products
+        .filter((p) => p.publicationStatus !== 'draft' && `${p.title} ${p.subtitle}`.toLowerCase().includes(query))
+        .slice(0, 6)
+    : [];
+
+  // Close on Escape or a click outside the panel.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    const onPointer = (e: PointerEvent) => {
+      const target = e.target as HTMLElement;
+      // The header search button toggles the panel itself.
+      if (target.closest('[data-search-toggle]')) return;
+      if (panelRef.current && !panelRef.current.contains(target)) onClose();
+    };
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('pointerdown', onPointer);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('pointerdown', onPointer);
+    };
+  }, [onClose]);
+
+  return (
+    <div ref={panelRef} className="absolute inset-x-0 top-full border-y border-store-border bg-store-surface shadow-lg tuw-mega-in">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-5">
+        <form onSubmit={onSubmit} role="search" className="flex items-center gap-3 border-b border-store-charcoal pb-3">
+          <Search size={18} className="text-store-text-secondary" aria-hidden="true" />
+          <label htmlFor="header-search" className="sr-only">
+            Search products
+          </label>
+          <input
+            id="header-search"
+            type="search"
+            placeholder="Search hoodies, tees, mugs…"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            autoFocus
+            autoComplete="off"
+            className="w-full text-base bg-transparent outline-none text-store-text-primary placeholder:text-store-text-secondary"
+          />
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close search"
+            className="p-1 text-store-text-secondary hover:text-store-text-primary cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-store-gold"
+          >
+            <X size={18} />
+          </button>
+        </form>
+
+        {!query && (
+          <div className="mt-4">
+            <p className="text-xs uppercase tracking-wider text-store-text-secondary">Popular searches</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {POPULAR_SEARCHES.map((term) => (
+                <button
+                  key={term}
+                  type="button"
+                  onClick={() => onChange(term)}
+                  className="px-3 py-1.5 rounded-full border border-store-border text-xs text-store-text-secondary hover:border-store-charcoal hover:text-store-charcoal cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-store-gold"
+                >
+                  {term}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {query && (
+          <div className="mt-4" aria-live="polite">
+            {results.length === 0 ? (
+              <p className="text-sm text-store-text-secondary">No products match “{value.trim()}”.</p>
+            ) : (
+              <ul className="divide-y divide-store-border">
+                {results.map((p) => (
+                  <li key={p.id}>
+                    <Link href={`/products/${p.slug}`} onClick={onClose} className="flex items-center gap-4 py-2.5 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-store-gold">
+                      <span className="w-12 h-14 shrink-0 overflow-hidden bg-store-cream">
+                        <ImageWithFallback src={p.images[0]?.url ?? ''} alt="" fallbackText="" className="w-full h-full object-cover" />
+                      </span>
+                      <span className="flex-1 min-w-0">
+                        <span className="block text-sm text-store-charcoal truncate group-hover:underline underline-offset-4">{p.title}</span>
+                        <span className="block text-xs text-store-text-secondary truncate">{p.subtitle}</span>
+                      </span>
+                      <span className="text-sm text-store-charcoal tuw-tabular-nums">₹{p.priceINR.toLocaleString('en-IN')}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <Link
+              href={`/search?q=${encodeURIComponent(value.trim())}`}
+              onClick={onClose}
+              className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-store-charcoal underline-offset-4 decoration-store-gold hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-store-gold"
+            >
+              See all results for “{value.trim()}”
+              <ArrowRight size={14} aria-hidden="true" />
+            </Link>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Secondary links kept in the phone menu (the top bar now carries announcements).
+const MOBILE_MENU_LINKS = [
+  { label: 'Journal', href: '/journal' },
+  { label: 'FAQ', href: '/faq' },
+  { label: 'Contact', href: '/contact' },
 ];
+
+// Announcement bar: calm, factual service notes (no discounts or urgency).
+const ANNOUNCEMENTS = [
+  { text: 'Free delivery across India on orders over ₹3,000', href: '/policies/shipping' },
+  { text: 'Every piece is printed for you after you order', href: '/about#how-it-works' },
+  { text: '14-day returns on unworn clothing', href: '/policies/returns' },
+];
+const ANNOUNCEMENT_INTERVAL_MS = 4500;
+
+// Rotates through ANNOUNCEMENTS; pauses on hover/focus and stays still for reduced motion.
+function AnnouncementTicker() {
+  const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    if (paused || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const timer = window.setInterval(
+      () => setIndex((i) => (i + 1) % ANNOUNCEMENTS.length),
+      ANNOUNCEMENT_INTERVAL_MS
+    );
+    return () => window.clearInterval(timer);
+  }, [paused]);
+
+  const current = ANNOUNCEMENTS[index];
+  return (
+    <div
+      className="flex items-center justify-center min-w-0"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocus={() => setPaused(true)}
+      onBlur={() => setPaused(false)}
+    >
+      <Link
+        key={index}
+        href={current.href}
+        className="tuw-announce-in truncate text-white/90 hover:text-white underline-offset-4 hover:underline"
+      >
+        {current.text}
+      </Link>
+    </div>
+  );
+}
 
 // Social icons matching Figma node 221:12607. `path` holds the inline
 // 24x24 SVG path data so a single loop renders every brand mark.
@@ -152,12 +347,21 @@ const SOCIAL_LINKS = [
 export default function Header() {
   const pathname = usePathname();
   const { cartCount, wishlist, setIsCartDrawerOpen, products } = useStore();
+  const { session } = useDemoSession();
+  const initials = session?.name
+    .split(' ')
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchVal, setSearchVal] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const closeSearch = useCallback(() => setIsSearchOpen(false), []);
 
   const openMenuNow = useCallback((label: string) => {
     if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
@@ -182,7 +386,10 @@ export default function Header() {
   useEffect(() => {
     if (!openMenu) return;
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeMenuNow();
+      if (e.key !== 'Escape') return;
+      const trigger = document.querySelector<HTMLElement>(`[data-nav-top="${openMenu}"]`);
+      closeMenuNow();
+      trigger?.focus();
     };
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
@@ -212,47 +419,34 @@ export default function Header() {
 
   return (
     <>
-      {/* 1. Figma Top Bar (36px, topbar-navy) — Node 221:12599 */}
-      <div className="w-full bg-header-topbar text-white header-topbar-height border-b border-white/10 hidden md:block select-none">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between text-xs font-sans">
-          {/* Top Bar Left: Utility links */}
-          <nav className="flex items-center gap-6" aria-label="Utility Links">
-            {TOP_BAR_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="inline-flex items-center min-h-6 text-white/80 hover:text-white transition-colors duration-150"
+      {/* 1. Top bar: social icons · rotating announcement · currency */}
+      <div className="w-full bg-header-topbar text-white header-topbar-height border-b border-white/10 select-none">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full grid grid-cols-[1fr_auto_1fr] items-center gap-4 text-xs font-sans">
+          <div className="hidden md:flex items-center gap-3 text-white/80">
+            {SOCIAL_LINKS.filter((social) => social.href).map((social) => (
+              <a
+                key={social.id}
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`The Unplugged Wear on ${social.label}`}
+                className="inline-flex items-center justify-center w-6 h-6 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-store-gold"
               >
-                {link.label}
-              </Link>
+                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d={social.path} />
+                </svg>
+              </a>
             ))}
-          </nav>
-
-          {/* Top Bar Right: Social Icons & Currency Selector */}
-          <div className="flex items-center gap-5">
-            {/* Social Icons matching Figma node 221:12607 */}
-            <div className="flex items-center gap-3 text-white/80">
-              {SOCIAL_LINKS.filter((social) => social.href).map((social) => (
-                <a
-                  key={social.id}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={social.label}
-                  className="inline-flex items-center justify-center w-6 h-6 hover:text-white transition-colors"
-                >
-                  <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d={social.path} />
-                  </svg>
-                </a>
-              ))}
-            </div>
-
-            {/* All prices are in Indian rupees; there is no currency conversion. */}
-            <span className="font-medium text-white/90" aria-label="Prices in Indian rupees">
-              ₹ INR
-            </span>
           </div>
+
+          <div className="col-span-3 md:col-span-1 md:col-start-2 min-w-0">
+            <AnnouncementTicker />
+          </div>
+
+          {/* All prices are in Indian rupees; there is no currency conversion. */}
+          <span className="hidden md:block justify-self-end font-medium text-white/90" aria-label="Prices in Indian rupees">
+            ₹ INR
+          </span>
         </div>
       </div>
 
@@ -279,9 +473,21 @@ export default function Header() {
                 <Menu size={22} />
               </button>
 
-              <nav className="hidden lg:flex items-center gap-5 xl:gap-7 h-full" aria-label="Main Navigation">
+              <nav
+                className="hidden lg:flex items-center gap-5 xl:gap-7 h-full"
+                aria-label="Main Navigation"
+                onKeyDown={(e) => {
+                  if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+                  const tops = Array.from(e.currentTarget.querySelectorAll<HTMLElement>('[data-nav-top]'));
+                  const current = tops.indexOf(document.activeElement as HTMLElement);
+                  if (current === -1) return;
+                  e.preventDefault();
+                  const next = (current + (e.key === 'ArrowRight' ? 1 : -1) + tops.length) % tops.length;
+                  tops[next].focus();
+                }}
+              >
                 {NAV_ITEMS.map((item) => {
-                  const isActive = pathname === item.href;
+                  const isActive = pathname === item.href.split('?')[0] && item.href.split('?')[0] !== '/shop';
                   const hasPanel = Boolean(item.columns?.length);
                   const isOpen = hasPanel && openMenu === item.label;
                   const panelId = `mega-menu-${item.label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
@@ -300,6 +506,7 @@ export default function Header() {
                     >
                       <Link
                         href={item.href}
+                        data-nav-top={item.label}
                         aria-expanded={hasPanel ? isOpen : undefined}
                         aria-controls={hasPanel ? panelId : undefined}
                         onClick={closeMenuNow}
@@ -364,7 +571,9 @@ export default function Header() {
               <button
                 type="button"
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
-                aria-label="Search catalog"
+                data-search-toggle
+                aria-expanded={isSearchOpen}
+                aria-label={isSearchOpen ? 'Close search' : 'Search products'}
                 className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-store-text-primary hover:text-black hover:bg-black/5 active:scale-95 transition-all cursor-pointer"
               >
                 <Search size={20} />
@@ -373,12 +582,12 @@ export default function Header() {
               {/* 2. Wishlist */}
               <Link
                 href="/wishlist"
-                aria-label="View wishlist"
+                aria-label={wishlist.length ? `Wishlist, ${wishlist.length} saved` : 'Wishlist'}
                 className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-store-text-primary hover:text-black hover:bg-black/5 active:scale-95 transition-all cursor-pointer"
               >
                 <Heart size={20} />
                 {wishlist.length > 0 && (
-                  <span className="absolute top-0 right-0 w-4 h-4 rounded-full bg-secondary-coral text-white text-2xs font-bold flex items-center justify-center pointer-events-none">
+                  <span className="absolute top-0 right-0 w-4 h-4 rounded-full bg-store-charcoal text-white text-2xs font-bold flex items-center justify-center pointer-events-none">
                     {wishlist.length}
                   </span>
                 )}
@@ -386,11 +595,17 @@ export default function Header() {
 
               {/* 3. Account / User Profile */}
               <Link
-                href="/login"
-                aria-label="My Account"
+                href={session ? '/account' : '/login'}
+                aria-label={session ? `My account (${session.name})` : 'Log in'}
                 className="hidden sm:flex w-8 h-8 sm:w-9 sm:h-9 rounded-full items-center justify-center text-store-text-primary hover:text-black hover:bg-black/5 active:scale-95 transition-all cursor-pointer"
               >
-                <User size={20} />
+                {initials ? (
+                  <span className="w-7 h-7 rounded-full bg-store-charcoal text-white text-2xs font-medium flex items-center justify-center">
+                    {initials}
+                  </span>
+                ) : (
+                  <User size={20} />
+                )}
               </Link>
 
               {/* 4. Cart */}
@@ -411,31 +626,15 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Expandable Live Search Overlay */}
+        {/* Search panel: instant product results as you type */}
         {isSearchOpen && (
-          <div className="border-t border-store-border bg-store-surface px-4 py-4 sm:px-6 shadow-sm animate-in fade-in slide-in-from-top-2 duration-150">
-            <div className="max-w-3xl mx-auto flex items-center gap-3">
-              <Search size={18} className="text-store-text-secondary" />
-              <form onSubmit={handleSearchSubmit} className="flex-1">
-                <input
-                  type="search"
-                  placeholder="Search hoodies, tees, joggers..."
-                  value={searchVal}
-                  onChange={(e) => setSearchVal(e.target.value)}
-                  autoFocus
-                  className="w-full text-sm bg-transparent outline-none text-store-text-primary placeholder:text-store-text-secondary"
-                />
-              </form>
-              <button
-                type="button"
-                onClick={() => setIsSearchOpen(false)}
-                aria-label="Close search"
-                className="p-1 rounded-md text-store-text-secondary hover:text-store-text-primary cursor-pointer"
-              >
-                <X size={18} />
-              </button>
-            </div>
-          </div>
+          <SearchPanel
+            products={products}
+            value={searchVal}
+            onChange={setSearchVal}
+            onSubmit={handleSearchSubmit}
+            onClose={closeSearch}
+          />
         )}
       </header>
 
@@ -444,7 +643,9 @@ export default function Header() {
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
         items={NAV_ITEMS}
-        links={TOP_BAR_LINKS}
+        links={MOBILE_MENU_LINKS}
+        products={products}
+        socialLinks={SOCIAL_LINKS.filter((social) => social.href)}
       />
 
       {/* Cart Drawer */}

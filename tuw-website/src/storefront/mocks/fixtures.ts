@@ -1,3 +1,4 @@
+import { GENERATED_PRODUCTS } from './catalog.generated';
 import { Product, ProductSpecTable, Collection, Order, JournalArticle, FaqItem, Address } from '@storefront/lib/types';
 
 // Catalog source: Qikink print-on-demand base listing ("Final Listing.xls").
@@ -84,7 +85,7 @@ const KIDS_FAQS = [
   }
 ];
 
-export const STORE_PRODUCTS: Product[] = [
+const CURATED_PRODUCTS: Product[] = [
   {
     id: "prod-1",
     slug: "everyday-pullover-hoodie",
@@ -449,7 +450,11 @@ export const STORE_PRODUCTS: Product[] = [
   },
 ];
 
-export const STORE_COLLECTIONS: Collection[] = [
+// Hand-written products first, then everything else from the Qikink sheet
+// (see scripts/generate-catalog.mjs).
+export const STORE_PRODUCTS: Product[] = [...CURATED_PRODUCTS, ...GENERATED_PRODUCTS];
+
+const COLLECTION_DEFINITIONS: Collection[] = [
   {
     id: 'col-1',
     slug: 'hoodies-and-sweats',
@@ -476,23 +481,51 @@ export const STORE_COLLECTIONS: Collection[] = [
     id: 'col-3',
     slug: 'objects',
     title: 'Objects',
-    tagline: 'Mugs and totes',
+    tagline: 'Mugs, bags, phone cases, wall art and more',
     description:
       'Everyday objects printed with the leaping deer.',
     coverImage: '/images/pdp-figma/mug/on-desk.png',
-    productCount: 2,
-    categories: ['accessories'],
+    productCount: 0,
+    categories: ['accessories', 'mugs'],
+  },
+  {
+    id: 'col-4',
+    slug: 'acid-wash',
+    title: 'Acid Wash',
+    tagline: 'Washed hoodies and tees with a worn-in look',
+    description: 'Our acid wash pieces, printed to order.',
+    coverImage: '/images/lifestyle/linen-man.jpg',
+    productCount: 0,
+    titleIncludes: ['acid wash'],
   },
 ];
 
+/** Products that belong to a collection (by category or title words). */
+export function productsInCollection(collection: Collection, products: Product[]): Product[] {
+  return products.filter((p) => {
+    if (collection.titleIncludes?.length) {
+      const title = p.title.toLowerCase();
+      return collection.titleIncludes.some((word) => title.includes(word.toLowerCase()));
+    }
+    return collection.categories ? collection.categories.includes(p.category) : true;
+  });
+}
+
+// Collection counts are computed from the catalogue so they never go stale.
+export const STORE_COLLECTIONS: Collection[] = COLLECTION_DEFINITIONS.map((c) => ({
+  ...c,
+  productCount: productsInCollection(c, STORE_PRODUCTS).length,
+}));
+
 export const INITIAL_ADDRESS: Address = {
   id: 'addr-1',
-  fullName: 'Arjun Rao',
-  addressLine1: 'Flat 402, Skyline Residency, 12th Main',
-  addressLine2: 'Indiranagar',
-  city: 'Bengaluru',
-  state: 'Karnataka',
-  postalCode: '560038',
+  label: 'Home',
+  fullName: 'Urvil Kargathala',
+  addressLine1: 'D-603 Regency Height, Beside 5 Square Road',
+  addressLine2: 'Shree Shradha Society, Dahin Nagar',
+  city: 'Surat',
+  state: 'Gujarat',
+  postalCode: '395005',
   country: 'India',
   phone: '+91 98450 12345',
   isDefault: true,
@@ -1233,7 +1266,8 @@ export const JOURNAL_ARTICLES: JournalArticle[] = [
     publishedAt: 'August 28, 2026',
     content: [
       'Our phones vibrate with notifications from people we have never met about emergencies that do not exist. In response, slow living is not an aesthetic — it is a deliberate survival strategy.',
-      'When we created the Monolith hoodie, we omitted drawstrings deliberately. Why? Because unnecessary cords dangle, tangle, and demand adjustment. In minimalism, restraint is an act of deep kindness.',
+      'When we choose a piece, we leave out what isn’t needed. Fewer details mean fewer things to fiddle with, and more room to simply wear it and get on with your day.',
+      'So close a few tabs, put the phone face down, and go for a walk. The clothes can keep up.',
     ],
   },
 ];

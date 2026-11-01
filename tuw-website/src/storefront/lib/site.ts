@@ -14,12 +14,12 @@ export const site = {
     { href: "/faq", label: "FAQ" },
     { href: "/contact", label: "Contact" },
   ],
-  // Brand social profiles. Leave a URL empty to hide that icon; generic
-  // network homepages are never linked.
+  // Brand social profiles shown in the top bar. Handles are placeholders
+  // until the owner confirms the real accounts.
   social: {
-    pinterest: "",
-    x: "",
-    facebook: "",
-    instagram: "",
+    instagram: "https://www.instagram.com/theunpluggedwear",
+    facebook: "https://www.facebook.com/theunpluggedwear",
+    pinterest: "https://www.pinterest.com/theunpluggedwear",
+    x: "https://x.com/theunpluggedwear",
   },
 } as const;

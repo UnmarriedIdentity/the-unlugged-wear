@@ -2,18 +2,19 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, Fingerprint, PenTool, Sun } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 interface PrincipleItem {
-  number: string;
+  icon: LucideIcon;
   line1: string;
   line2: string;
 }
 
 const PRINCIPLES: PrincipleItem[] = [
-  { number: '01 /', line1: 'Considered', line2: 'by design' },
-  { number: '02 /', line1: 'Made for', line2: 'real life' },
-  { number: '03 /', line1: 'Style on', line2: 'your terms' },
+  { icon: PenTool, line1: 'Considered', line2: 'by design' },
+  { icon: Sun, line1: 'Made for', line2: 'real life' },
+  { icon: Fingerprint, line1: 'Style on', line2: 'your terms' },
 ];
 
 export default function OurPhilosophy() {
@@ -26,12 +27,6 @@ export default function OurPhilosophy() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 xl:gap-24 items-center">
         {/* Left Column: Narrative, Typography & Principles */}
         <div className="lg:col-span-6 xl:col-span-6 space-y-7">
-          {/* Eyebrow */}
-          <div className="flex items-center gap-3 text-base uppercase tracking-widest text-store-gold font-sans font-medium">
-            <span aria-hidden="true" className="w-7 h-px bg-store-gold" />
-            <span>Our Philosophy</span>
-          </div>
-
           {/* Editorial Display Headline */}
           <h2
             id="philosophy-title"
@@ -39,9 +34,7 @@ export default function OurPhilosophy() {
           >
             Less, but
             <br />
-            <em className="text-store-gold italic font-normal">
-              more meaningful.
-            </em>
+            <span className="text-store-gold">more meaningful.</span>
           </h2>
 
           {/* Intro Narrative Body */}
@@ -53,15 +46,13 @@ export default function OurPhilosophy() {
 
           {/* 3 Principles Card */}
           <div
-            className="w-full max-w-lg bg-store-cream border border-store-card-border rounded-2xl p-5 sm:p-6 shadow-xs"
+            className="w-full max-w-lg bg-store-cream border border-store-card-border p-5 sm:p-6"
             aria-label="Our principles"
           >
             <div className="grid grid-cols-3 gap-3 sm:gap-6 divide-x divide-store-card-border">
-              {PRINCIPLES.map((principle, index) => (
-                <div key={principle.number} className={`space-y-1.5 ${index > 0 ? 'pl-3 sm:pl-6' : ''}`}>
-                  <span className="text-xs font-mono uppercase tracking-wider text-store-gold font-semibold block">
-                    {principle.number}
-                  </span>
+              {PRINCIPLES.map(({ icon: Icon, ...principle }, index) => (
+                <div key={principle.line1} className={`space-y-3 ${index > 0 ? 'pl-3 sm:pl-6' : ''}`}>
+                  <Icon size={22} strokeWidth={1.5} aria-hidden="true" className="text-store-gold" />
                   <p className="font-heading font-semibold text-base text-store-text-primary leading-snug">
                     {principle.line1}
                     <br />

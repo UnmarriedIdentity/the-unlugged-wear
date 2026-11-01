@@ -38,7 +38,7 @@ export default function PaymentSimulationPanel({
   const [cardCvv, setCardCvv] = useState('•••');
 
   // UPI State
-  const [upiId, setUpiId] = useState('arjun@okhdfcbank');
+  const [upiId, setUpiId] = useState('urvil@okhdfcbank');
   const [upiVerified, setUpiVerified] = useState(true);
   const [selectedUpiApp, setSelectedUpiApp] = useState<'gpay' | 'phonepe' | 'paytm' | 'bhim'>('gpay');
 
@@ -282,7 +282,7 @@ export default function PaymentSimulationPanel({
             {upiVerified && (
               <p className="text-2xs text-emerald-700 font-medium mt-1 flex items-center gap-1">
                 <CheckCircle2 size={13} />
-                VPA verified: Linked to Arjun Rao (HDFC Bank)
+                VPA verified: Linked to Urvil Kargathala (HDFC Bank)
               </p>
             )}
           </div>
