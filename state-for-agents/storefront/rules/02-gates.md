@@ -12,6 +12,11 @@ No code commit lands unless every applicable gate passes on the final tree:
    token definitions contaminate them.
 6. Screenshots vs production for affected states/routes at 360/1024/1440px.
 
+7. Break-it tests for the changed code pass (`stress-testing` skills —
+   backend and UI); speed budgets in `performance-budgets` met and logged.
+8. Rule 08 SEO page rules met for every changed route (h1 count, title,
+   description, canonical, robots, Lighthouse SEO ≥ 95).
+
 ## Good / bad
 
 - ✅ `\.text-store-brand` matched in built CSS + screenshot matrix attached.
@@ -20,5 +25,5 @@ No code commit lands unless every applicable gate passes on the final tree:
 
 ## Enforcement
 
-Every work report must state: "gates: typecheck/test/build/css-proof/screenshots —
+Every work report must state: "gates: typecheck/test/build/css-proof/screenshots/stress/vitals/seo —
 <pass details>". A report without it is incomplete.

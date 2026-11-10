@@ -14,7 +14,7 @@ work stopped. Start here, in this order:
    `utility-first-jsx`, `cascade-layers`, `stylesheet-anatomy`,
    `design-system`, `motion`, `decorative-graphics`, `debug-frontend`,
    `responsive-system`, `code-standards`, `component-scalability`,
-   `backend-readiness`, `nextjs-rendering`, `server-components`, `client-components`, `cache-components`, `performance-budgets`, `skill-maintenance`. Backend
+   `backend-readiness`, `nextjs-rendering`, `server-components`, `client-components`, `cache-components`, `performance-budgets`, `stress-testing`, `skill-maintenance`. Backend
    work (`packages/heart`, `db/`, actions, route handlers) also loads the
    skills in `state-for-agents/backend/` (see its `AGENTS.md`).
 

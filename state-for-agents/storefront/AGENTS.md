@@ -11,13 +11,13 @@ work stopped — without ever opening the admin app. Start here, in this order:
    sequence they depend on is `TL-BE-*` in `state-for-agents/admin/tasks.json`.
 3. `rules/` (in numeric order) → **inviolable constraints**. Rules are
    permissions, not techniques: pixel-perfect tolerance, git hygiene, gates,
-   commit-and-push, task discipline, branch hygiene, PDP lifecycle flow, component reusability (DRY). Every report quotes rule compliance.
+   commit-and-push, task discipline, branch hygiene, PDP lifecycle flow, component reusability (DRY), and SEO page rules. Every report quotes rule compliance.
 4. `skills/` → capabilities, loaded per task: `theme-tokens`,
    `utility-first-jsx`, `cascade-layers`, `stylesheet-anatomy`,
    `design-system`, `motion`, `decorative-graphics`, `debug-frontend`,
    `responsive-system`, `code-standards`, `component-scalability`,
    `component-creation`, `folder-structure`, `hooks`, `routes`,
-   `pdp-flow`, `backend-readiness`, `nextjs-rendering`, `server-components`, `client-components`, `cache-components`, `performance-budgets`, `skill-maintenance`. Backend
+   `pdp-flow`, `backend-readiness`, `nextjs-rendering`, `server-components`, `client-components`, `cache-components`, `performance-budgets`, `stress-testing`, `seo`, `skill-maintenance`. Backend
    work (`packages/heart`, `db/`, actions, route handlers) also loads the
    skills in `state-for-agents/backend/` (see its `AGENTS.md`).
 

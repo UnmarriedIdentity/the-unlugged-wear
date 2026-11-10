@@ -14,7 +14,8 @@ App-specific UI work still follows `state-for-agents/admin/` and
    steps; pickup steps in `TL-BE-CORE.log`), then `TL-INT-*` integrations last.
 4. `skills/` → loaded per task: `backend-modules`, `data-access`,
    `server-actions`, `route-handlers`, `auth-guards`, `idempotency`,
-   `background-jobs`, `integrations`, `migrations`.
+   `background-jobs`, `integrations`, `migrations`, `stress-testing`
+   (write tests that try to break the code — required before a step closes).
 5. Rendering rules for each app's pages: `server-components`,
    `client-components`, `cache-components`, `nextjs-rendering` in the app's
    own skills folder.

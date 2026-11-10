@@ -8,10 +8,10 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 435,
-    "done": 292,
+    "total": 438,
+    "done": 293,
     "in_progress": 1,
-    "backlog": 142
+    "backlog": 144
   },
   "session": {
     "branch": "urvil-ui",
@@ -7503,6 +7503,64 @@
       "follow_ups": [
         "Added by the 2026-11-10 admin screen audit"
       ]
+    },
+    {
+      "id": "TL-BE-17.08",
+      "title": "Add Playwright for UI stress tests (portals, double submit, keyboard, offline) in both apps",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-17",
+      "started": null,
+      "finished": null,
+      "log": "Not started. Needed by the stress-testing skills (storefront + admin). Run against next build && next start; include 360/768/1024/1440 viewports and Lighthouse budget checks.",
+      "files": [
+        "tuw-website/tests/e2e/",
+        "tuw-admin/tests/e2e/"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-17.09",
+      "title": "Automated SEO / page-rule checks + fix current violations (h1 count, titles, descriptions, canonical, noindex, html lang en-IN, sitemap.ts, robots.ts)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-17",
+      "started": null,
+      "finished": null,
+      "log": "Not started. Rule 08 (storefront) / Rule 07 (admin). Audit 2026-11-10: these storefront pages contain two <h1> in source — verify they are mutually exclusive states or fix: account/orders/[id], checkout, checkout/success, collections/[slug], journal/[slug], products/[slug]. Root layout uses lang=\"en\" (rule wants en-IN). No sitemap.ts/robots.ts yet; admin has no noindex.",
+      "files": [
+        "tuw-website/tests/seo-rules.test.mjs",
+        "tuw-admin/tests/page-rules.test.mjs",
+        "tuw-website/src/app/sitemap.ts",
+        "tuw-website/src/app/robots.ts",
+        "tuw-admin/src/app/robots.ts"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-17.10",
+      "title": "Skills: backend + UI stress testing, speed budgets, SEO skill and page rules",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-BE-17",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "stress-testing skills (backend, storefront, admin) with edge-case catalogs (portals, races, money, auth, time, volume…); performance-budgets gained TTFB/FCP/LCP/INP/TBT/CLS budgets; storefront seo skill + Rule 08; admin Rule 07; Rule 02 gates now require stress/vitals/seo proof.",
+      "design_match": null,
+      "key_decisions": [
+        "Tests are written to break the code; a step closes only when its break-it suite passes"
+      ],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
     },
     {
       "id": "TL-BE-SKILLS",
