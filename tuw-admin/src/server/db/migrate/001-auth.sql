@@ -75,8 +75,9 @@ CREATE TABLE user_roles (
 );
 CREATE INDEX idx_user_roles_role_id ON user_roles (role_id);
 
--- addresses moved to 011-household.sql — household-scoped book (shared +
--- personal rows, household-level defaults).
+-- addresses moved to 011-household.sql — a private per-profile book; it sits
+-- there because 011 owns everything person-vs-household, not because it is
+-- household-scoped.
 
 -- -------------------------------------------------------- refresh_tokens
 CREATE TABLE refresh_tokens (

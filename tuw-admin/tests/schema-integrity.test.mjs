@@ -74,6 +74,7 @@ const IMPLEMENTED = {
     'refunds',
     'returns',
     'return_items',
+    'return_status_history',
     'shipments',
     'shipment_events',
   ],
@@ -184,14 +185,14 @@ const block = (sql, table) =>
   sql.match(new RegExp(`CREATE\\s+TABLE\\s+${table}\\s*\\(([\\s\\S]*?)\\n\\);`, 'i'))?.[1] ?? '';
 
 describe('schema integrity', () => {
-  test('inventory matches the 88 implemented tables, file by file', () => {
+  test('inventory matches the 89 implemented tables, file by file', () => {
     const actual = {};
     for (const file of FILES) actual[file] = tablesIn(code(file));
 
     assert.deepEqual(actual, IMPLEMENTED);
-    assert.equal(EXPECTED_IMPLEMENTED, 88);
+    assert.equal(EXPECTED_IMPLEMENTED, 89);
     assert.equal(DOCUMENTED_ONLY.length, 0);
-    assert.equal(EXPECTED_TOTAL, 88);
+    assert.equal(EXPECTED_TOTAL, 89);
   });
 
   test('no duplicate CREATE TABLE names across files', () => {
@@ -269,13 +270,13 @@ describe('schema integrity', () => {
     assert.match(links, /\bdisplay_position\b\s+smallint/i);
   });
 
-  test('docs counts match 88 implemented tables', () => {
+  test('docs counts match 89 implemented tables', () => {
     const readme = read(join(DOCS_DIR, '00-README.md'));
     const dataTables = read(join(DOCS_DIR, '02-Data-Tables.md'));
     const catalog = read(join(DOCS_DIR, '04-Catalog.md'));
 
-    assert.match(readme, /Data at a glance \(88 tables, all implemented in DDL\)/);
-    assert.match(dataTables, /> 88 tables \(88 implemented DDL \+ 0 specified\)/);
+    assert.match(readme, /Data at a glance \(89 tables, all implemented in DDL\)/);
+    assert.match(dataTables, /> 89 tables \(89 implemented DDL \+ 0 specified\)/);
     assert.match(catalog, /> 17 tables\./);
 
     // Catalog = 002 (12) + 010 (5).
@@ -339,6 +340,57 @@ describe('schema integrity', () => {
     const addressesBlock = block(code('011-household.sql'), 'addresses');
     assert.match(addressesBlock, /\brecipient_name\b\s+varchar\(120\)\s+NOT NULL/i);
     assert.match(addressesBlock, /\bphone\b\s+varchar\(30\)/i);
+    // The book is private to one profile: a household-scoped book would leak
+    // one member's addresses into another member's account.
+    assert.match(addressesBlock, /\bprofile_id\b\s+uuid\s+NOT NULL REFERENCES profiles \(id\)/i);
+    assert.equal(/\bhousehold_id\b/.test(addressesBlock), false, 'addresses must not be household-scoped');
+    assert.match(
+      code('011-household.sql'),
+      /CREATE UNIQUE INDEX one_default_shipping_per_profile\s*\n?\s*ON addresses \(profile_id\)/i,
+    );
+
+    // Returns are a request pipeline with a separate resolution axis, not just
+    // an inbound-RMA stage (the four admin stages are a subset by design).
+    const returnsSql = code('004-orders.sql');
+    const returnsBlock = block(returnsSql, 'returns');
+    assert.ok(returnsBlock.length > 0, 'returns CREATE TABLE block not found');
+    assert.match(returnsBlock, /\brma_number\b\s+varchar\(30\)\s+NOT NULL UNIQUE/i);
+    assert.match(returnsBlock, /status IN \('requested','approved','rejected'/i);
+    assert.match(returnsBlock, /\bresolution\b\s+varchar\(20\)\s+NOT NULL DEFAULT 'pending'/i);
+    assert.match(returnsBlock, /\brefund_id\b\s+uuid\s+UNIQUE REFERENCES refunds \(id\)/i);
+    assert.match(returnsSql, /CREATE\s+TABLE\s+return_status_history\b/i);
+
+    const returnItemsBlock = block(returnsSql, 'return_items');
+    assert.match(returnItemsBlock, /\breason_code\b\s+varchar\(30\)\s+NOT NULL/i);
+    assert.match(returnItemsBlock, /CHECK \(disposition <> 'exchange' OR exchange_variant_id IS NOT NULL\)/i);
+    assert.match(returnItemsBlock, /UNIQUE \(return_id, order_item_id\)/i);
+
+    // Over-return guard lives on the order line, where the aggregate can be a CHECK.
+    const orderItemsBlock = block(returnsSql, 'order_items');
+    assert.match(orderItemsBlock, /\breturned_qty\b\s+integer\s+NOT NULL DEFAULT 0/i);
+    assert.match(orderItemsBlock, /CHECK \(returned_qty <= qty\)/i);
+
+    // Family: soft leave keeps order history valid, and the composite FK makes
+    // "order for a member of my own household" a database rule.
+    const household = code('011-household.sql');
+    assert.match(block(household, 'household_members'), /\bleft_at\b\s+timestamptz/i);
+    assert.match(
+      household,
+      /CREATE UNIQUE INDEX one_active_household_per_profile[\s\S]*?WHERE left_at IS NULL/i,
+    );
+    assert.match(
+      household,
+      /ALTER TABLE orders[\s\S]*?FOREIGN KEY \(for_household_id, for_profile_id\)\s*\n?\s*REFERENCES household_members \(household_id, profile_id\)/i,
+    );
+
+    // Saved sizes: the composite FK proves the value belongs to its definition.
+    const sizesBlock = block(household, 'profile_size_preferences');
+    assert.match(sizesBlock, /\bsize_definition_id\b\s+uuid\s+NOT NULL REFERENCES attribute_definitions/i);
+    assert.match(
+      sizesBlock,
+      /FOREIGN KEY \(size_definition_id, size_value_id\)\s*\n?\s*REFERENCES attribute_values \(definition_id, id\)/i,
+    );
+    assert.match(code('010-attr-library.sql'), /UNIQUE \(definition_id, id\)/i);
 
     // Payments record how the customer paid, not only who processed it.
     assert.match(block(code('004-orders.sql'), 'payments'), /\bmethod\b\s+varchar\(20\)/i);
@@ -413,7 +465,7 @@ describe('schema integrity', () => {
 
   test('migration README declares the full apply order and no blocked file', () => {
     const readme = read(join(MIGRATE_DIR, 'README.md'));
-    assert.match(readme, /Total.*\*\*88\*\*/);
+    assert.match(readme, /Total.*\*\*89\*\*/);
     assert.equal(/blocked/i.test(readme), false, 'no file is blocked any more');
     for (const file of FILES) {
       assert.match(readme, new RegExp(file.replace('.', '\\.')), `${file} missing from the apply order`);

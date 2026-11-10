@@ -42,7 +42,9 @@ auth join). Every profile holds **at most one** household membership
 (unique there); the signup/join transactions keep it exactly one.
 
 `addresses` moved to `17-Household-Accounts.md` §3 — the book is
-household-scoped (shared + personal rows), not login-scoped.
+**login-scoped: one private book per profile**, never household-scoped.
+Family membership shares sizes, not addresses, so a manager cannot read a
+member's saved addresses.
 
 ## 3. refresh_tokens
 

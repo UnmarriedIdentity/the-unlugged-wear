@@ -38,7 +38,10 @@ CREATE TABLE attribute_values (
   swatch_hex    varchar(7)   CHECK (swatch_hex ~ '^#[0-9A-Fa-f]{6}$'),
   position      integer      NOT NULL DEFAULT 0,
   created_at    timestamptz  NOT NULL DEFAULT now(),
-  UNIQUE (definition_id, value)
+  UNIQUE (definition_id, value),
+  -- Composite-FK target for profile_size_preferences (011): a saved size can
+  -- only point at a value that belongs to the definition it claims.
+  UNIQUE (definition_id, id)
 );
 
 -- -------------------------------------------- product_attribute_links

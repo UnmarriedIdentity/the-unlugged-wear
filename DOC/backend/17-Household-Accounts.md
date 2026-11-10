@@ -18,6 +18,9 @@
 5. Cart/checkout carries an explicit **Edit member** affordance so a stale
    profile can be corrected in context — a deliberate, labeled write,
    never a silent one.
+6. **Addresses stay private.** Grouping shares sizes and order visibility,
+   never address books — one member's saved address must never appear in
+   another member's account, manager included.
 
 ## 2. The three layers (identity model)
 
@@ -49,12 +52,19 @@ Indexes: PK only — reads always arrive through `household_members`.
 | Column | Type | Constraints | Reason |
 |---|---|---|---|
 | household_id | uuid | NOT NULL, FK → households(id) ON DELETE CASCADE, PK (household_id, profile_id) | |
-| profile_id | uuid | NOT NULL, FK → profiles(id) ON DELETE CASCADE, **UNIQUE** | **One household per profile (v1 lock)** — a move is leave + join, never dual membership |
+| profile_id | uuid | NOT NULL, FK → profiles(id) ON DELETE CASCADE, **one active membership** (partial unique `WHERE left_at IS NULL`) | One household at a time — a move is leave + join, never dual membership. The partial unique (not a plain `UNIQUE`) is what makes soft leave possible |
 | role | varchar(10) | NOT NULL DEFAULT 'member', CHECK IN ('manager','member') | `manager` ≠ RBAC `admin` (staff-only); multiple managers allowed (both parents) |
 | joined_at | timestamptz | NOT NULL DEFAULT now() | |
+| left_at | timestamptz | NULL | **Soft leave.** NULL = active. Orders keep pointing at this row, so "who was this order for" survives a member leaving |
+| updated_at | timestamptz | NOT NULL DEFAULT now() | Convention |
 
-Indexes: composite PK (household → member list) · unique `profile_id`
-(my-household lookup + the one-household rule in one constraint).
+Indexes: composite PK (household → member list) · partial unique
+`one_active_household_per_profile (profile_id) WHERE left_at IS NULL` (the
+one-household rule + my-household lookup) · `(profile_id)` for the FK
+delete-guard across *all* rows, including left ones.
+
+Re-joining the same household reactivates the existing row (the PK is
+`(household_id, profile_id)`), so leaving and returning never forks history.
 "Household retains ≥1 manager" is an **app-level guard** — a CHECK cannot
 express it.
 
@@ -64,12 +74,15 @@ express it.
 |---|---|---|---|
 | profile_id | uuid | NOT NULL, FK → profiles(id) ON DELETE CASCADE, PK (profile_id, category_id) | Per person, per garment type — "Rohan wears M in T-Shirts" |
 | category_id | uuid | NOT NULL, FK → categories(id) ON DELETE RESTRICT | RESTRICT: a category people sized against fails loudly if deleted |
-| size_value_id | uuid | NOT NULL, FK → attribute_values(id) ON DELETE RESTRICT | A **reference** to the Size library value — never a copied string; the in-use guard covers it (deleting a sized value fails loudly) |
+| size_definition_id | uuid | NOT NULL, FK → attribute_definitions(id) ON DELETE RESTRICT | Which Size definition this value comes from. Stored, not derived — it is what makes the composite FK below possible |
+| size_value_id | uuid | NOT NULL, composite FK `(size_definition_id, size_value_id) → attribute_values (definition_id, id)` ON DELETE RESTRICT | A **reference** to the Size library value — never a copied string. The composite FK proves the value actually belongs to that definition, so "a saved size that points at a Color" is now unstorable |
 | created_at / updated_at | timestamptz | NOT NULL DEFAULT now() | Convention |
 
-Indexes: PK · FK indexes `category_id`, `size_value_id` (delete-guard
-scans). App validates the value belongs to the Size definition — no single
-FK can express definition scope.
+Indexes: PK · FK indexes `category_id`, `size_value_id`,
+`size_definition_id` (delete-guard scans). `attribute_values` gained
+`UNIQUE (definition_id, id)` in `010` to make the composite FK legal. What
+remains app-validated is only the *semantic* part — that the definition is
+the Size type rather than Color — which no FK can know.
 
 Upsert key is (profile_id, category_id) — setting a size is
 `INSERT … ON CONFLICT … DO UPDATE`, never read-modify-write. This is the
@@ -99,15 +112,20 @@ WHERE status = 'pending' AND email IS NOT NULL` · partial unique
 `one_pending_claim_per_profile (profile_id) WHERE status = 'pending'
 AND profile_id IS NOT NULL`.
 
-### addresses (moved from 03 — reshaped)
+### addresses (moved from 03 — reshaped as a private book)
+
+The book belongs to **one person**, not to the home. Household membership
+shares *sizes*; it never shares addresses, so a query cannot return another
+member's rows even if the caller is the manager.
 
 | Column | Type | Constraints | Reason |
 |---|---|---|---|
 | id | uuid | PK | |
-| household_id | uuid | NOT NULL, FK → households(id) ON DELETE CASCADE | The book belongs to the home — dependents own no row but receive at it |
-| profile_id | uuid | NULL, FK → profiles(id) ON DELETE CASCADE | NULL = family-shared ("Home"); set = personal ("Hostel room") |
+| profile_id | uuid | **NOT NULL**, FK → profiles(id) ON DELETE CASCADE | The owner. No `household_id` and no shared rows — that is the privacy rule, not a missing feature |
 | type | varchar(10) | NOT NULL DEFAULT 'shipping', CHECK IN ('shipping','billing') | |
 | label | varchar(50) | NULL | "Home", "Office" |
+| recipient_name | varchar(120) | NOT NULL | The parcel label; survives a profile rename |
+| phone | varchar(30) | NULL | Courier contact, stored as entered |
 | line1 | varchar(255) | NOT NULL | |
 | line2 | varchar(255) | NULL | |
 | city | varchar(100) | NOT NULL | |
@@ -117,15 +135,38 @@ AND profile_id IS NOT NULL`.
 | is_default | boolean | NOT NULL DEFAULT false | |
 | created_at / updated_at | timestamptz | NOT NULL DEFAULT now() | |
 
-Indexes: PK · `idx_addresses_household_id` (book load) ·
-`idx_addresses_profile_id` · partial unique
-`one_default_shipping_per_household (household_id) WHERE is_default
-AND type = 'shipping'` · partial unique
-`one_default_billing_per_household (household_id) WHERE is_default
-AND type = 'billing'`.
+Indexes: PK · `idx_addresses_profile_id` (book load) · partial unique
+`one_default_shipping_per_profile (profile_id) WHERE is_default AND type =
+'shipping'` · partial unique `one_default_billing_per_profile (profile_id)
+WHERE is_default AND type = 'billing'`.
 
-The checkout address picker shows household-shared rows + the recipient's
-personal rows — any member may ship to the family book.
+Two members can therefore each hold their own default address, and neither
+can see the other's. Checkout lists **only the signed-in user's own rows**
+(`WHERE profile_id = me`); the recipient chosen in the "Order for" block
+changes whom the garment fits, never where it ships.
+
+### Proxy-order guard (`orders.for_household_id`)
+
+`004-orders.sql` ships before this file, so `orders` cannot declare the
+household pair itself. `011` ends with:
+
+```sql
+ALTER TABLE orders
+  ADD COLUMN for_household_id uuid NOT NULL,
+  ADD CONSTRAINT orders_for_household_member_fk
+    FOREIGN KEY (for_household_id, for_profile_id)
+    REFERENCES household_members (household_id, profile_id) ON DELETE RESTRICT;
+```
+
+Because `household_members`' PK is `(household_id, profile_id)`, this single
+constraint proves the recipient is a member of **that** household — an order
+cannot be placed for a stranger, and it cannot point at a household the
+recipient never joined. With soft leave, a left membership still satisfies the
+FK (history stays valid) while the partial unique stops a second active one.
+Household order history then reads one table: `WHERE for_household_id = $1`.
+
+`carts.for_profile_id` stays app-validated: a guest cart has no household, and
+checkout re-checks the pair before it writes the order.
 
 ## 4. Roles, visibility, flows
 
@@ -202,17 +243,21 @@ credential, nothing else moves.
 
 **Join (existing account joins a household).** Manager issues
 `POST /invitations {email}` → acceptance requires a session or signup with
-that email. The one-household UNIQUE means an existing membership fails
-loudly — leave first. Leaving moves the membership to a fresh solo
-household (profile, orders, sizes intact); join is atomic replace, never
-overlap.
+that email. The one-active-household partial unique means an existing
+membership fails loudly — leave first. Leaving stamps `left_at` on the old row
+and creates a membership in a fresh solo household (profile, orders, sizes
+intact); join is atomic replace, never overlap.
 
 **Remove / leave.**
 - Managed member (`user_id` NULL): removal deletes the profile (cascades
   membership + size prefs). **Refused when order history exists** —
   `orders.for_profile_id` is RESTRICT; history wins, the member stays.
-- Login member: removal/leave = membership moves to a fresh solo
-  household. They keep every order for them and placed by them.
+- Login member: removal/leave is a **soft leave** — `left_at = now()` on the
+  membership, plus a new row in their own solo household. They keep every
+  order for them and placed by them, and the old membership row survives so
+  `orders.for_household_id` still resolves.
+- Re-inviting a profile that already left the same household reactivates that
+  row (`left_at = NULL`) instead of inserting a second one.
 - App guard: a household must retain ≥1 manager — the last manager cannot
   be removed or demoted.
 
@@ -223,7 +268,8 @@ The cart/checkout page renders, in order, right before payment:
 1. **"Order for"** selector — self first, then household members
    (`GET /api/household/members`). Default: self.
 2. **"Edit member"** affordance beside it — the explicit write path (§6).
-3. Address picker — household-shared + recipient's personal rows.
+3. Address picker — **the signed-in user's own book only** (`addresses` where
+   `profile_id = me`). The recipient never contributes addresses.
 
 ### Autofill rule (deterministic)
 
@@ -255,15 +301,23 @@ never writes anything back.
 
 ## 7. Decisions & deferrals
 
-**Locked (2026-10-17):**
+**Locked (2026-10-17, revised 2026-10-31):**
 
-- One household per profile — `UNIQUE(profile_id)`. Multi-membership
-  later = a constraint drop, not a shadow column.
+- One **active** household per profile — partial unique
+  `WHERE left_at IS NULL`, not a plain `UNIQUE`. Soft leave is the reason:
+  orders must keep resolving to the household they were placed in.
+- **Addresses are private to one profile.** No `household_id`, no shared
+  rows, one default per person per type. A family book was rejected on
+  privacy: it would render one member's address inside another member's
+  account. Family shares sizes, never addresses.
+- Proxy ordering is a **database rule**: `orders.for_household_id` +
+  composite FK to `household_members`, not a service promise.
 - Roles `manager`/`member`; multiple managers allowed; last-manager guard
   is app-level.
 - Any member may order for any member; visibility = placed-by ∪ for-me;
   managers add all-for-household.
-- Sizes are library references (RESTRICT), per-category, no fallback row.
+- Sizes are library references with a composite FK to their definition;
+  per-category, no fallback row.
 - Profile writes: self or manager, explicit only. Line edits never write.
 - `customer_notes` re-points to `profiles` (admin customer record =
   person — dependents included). `support_tickets.customer_id`,
@@ -289,9 +343,10 @@ erDiagram
     profiles ||--o{ household_invitations : claims
     profiles ||--o{ profile_size_preferences : sizes
     categories ||--o{ profile_size_preferences : sized-in
+    attribute_definitions ||--o{ profile_size_preferences : width-of
     attribute_values ||--o{ profile_size_preferences : picks
-    households ||--o{ addresses : owns
-    profiles ||--o{ addresses : personal
+    profiles ||--o{ addresses : owns
     profiles ||--o{ carts : for
+    households ||--o{ orders : for-family
     profiles ||--o{ orders : for
 ```

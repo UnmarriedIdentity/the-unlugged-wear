@@ -1,7 +1,7 @@
 # Data Tables — Full Inventory (single PostgreSQL)
 
 > Status: Filling | Last Updated: 2026-10-30
-> 88 tables (88 implemented DDL + 0 specified) + 1 deferred footnote (`search_documents`). Column detail lives in files 03–10,
+> 89 tables (89 implemented DDL + 0 specified) + 1 deferred footnote (`search_documents`). Column detail lives in files 03–10,
 > 15, 17, and 19; this file is the index, ending with the full relationship diagram.
 > Conventions (UUIDv7, money, indexes): `01-Conventions.md`.
 > Retired systems and controlled duplication: `20-Schema-Decisions.md`.
@@ -43,10 +43,10 @@ are stored hashed, and the app owns rotation + reuse detection.
 | Table | Purpose | Key links |
 |---|---|---|
 | households | Family group; every signup auto-creates a solo one — uniform paths | — |
-| household_members | Composite PK (household, profile) + UNIQUE(profile) = one household per profile; roles manager/member | households, profiles |
-| profile_size_preferences | Per-person, per-category size (references Size library values, RESTRICT) | profiles, categories, attribute_values |
+| household_members | Composite PK (household, profile) + one-active-per-profile partial unique = one household per profile at a time; roles manager/member; `left_at` soft leave keeps order history valid | households, profiles |
+| profile_size_preferences | Per-person, per-category size; `size_definition_id` + composite FK to `attribute_values (definition_id, id)` so a saved value can only belong to the definition it claims | profiles, categories, attribute_definitions, attribute_values |
 | household_invitations | Join (email) + claim (profile) modes, one table, `staff_invitations` grammar | households, profiles, users (inviter) |
-| addresses | Family + personal book, household-level one-default partial uniques; `recipient_name` + `phone` travel with the row (a parcel label must survive a profile rename) | households, profiles |
+| addresses | **Private book, one owner per row** (`profile_id NOT NULL`): one default shipping + one default billing *per person*. Family membership shares sizes, never addresses | profiles |
 
 ## Catalog (17) → detail: `04-Catalog.md`
 
@@ -95,17 +95,18 @@ per-product shopper-facing label. New types are rows, not tables.
 | wishlists | One per user (unique) | users |
 | wishlist_items | Unique (wishlist, product) | wishlists |
 
-## Orders & money (10) → detail: `06-Orders-Payments.md`
+## Orders & money (11) → detail: `06-Orders-Payments.md`
 
 | Table | Purpose | Key links |
 |---|---|---|
-| orders | Number-unique, dual status axes, stored totals, address snapshots; placed-by + for-profile (both NOT NULL — checkout requires login); `idempotency_key` + partial unique so a retried checkout returns the same order | users (placed-by), profiles (for), discount_codes |
-| order_items | Immutable snapshots (name/sku/price/line, options jsonb) | orders (cascade) |
+| orders | Number-unique, dual status axes, stored totals, address snapshots; placed-by + for-profile (both NOT NULL — checkout requires login) + `for_household_id` with a composite FK proving the recipient is a member of that household; `idempotency_key` + partial unique so a retried checkout returns the same order | users (placed-by), profiles (for), households (for), discount_codes |
+| order_items | Immutable snapshots (name/sku/price/line, options jsonb) + `returned_qty` with `CHECK (returned_qty <= qty)` | orders (cascade) |
 | order_status_history | Status timeline + actor | orders |
 | payments | Provider lifecycle, `method` (upi/card/netbanking/wallet/cod), unique transaction ref | orders |
 | refunds | Refund records: amount, reason, method, status, actor (one open refund per order partial unique) | orders, users (actor) |
-| returns | RMA stages (in_transit/inspected/restocked/disputed), carrier, tracking, reason | orders |
-| return_items | Per-line qty + disposition | returns, order_items |
+| returns | Customer request → RMA: `rma_number` unique, requester, `type` (return/exchange), `status` pipeline (requested…completed/cancelled/disputed), `resolution` axis, decision fields, `refund_id` 1:1 | orders, profiles, users, refunds |
+| return_items | Per-line qty + `reason_code` + disposition + `exchange_variant_id` + agreed line `refund_amount`; unique (return, order_item) | returns, order_items, product_variants |
+| return_status_history | Return timeline, written in the same TX as `returns.status` | returns (cascade) |
 | discount_codes | Code-unique coupons, caps, expiry | — |
 | shipments | Carrier/tracking/status + `pieces`, `shipped_at`, `estimated_delivery_at`, `delivered_at` | orders |
 | shipment_events | Tracking timeline rows (status/location/description/occurred_at); unique (shipment, occurred_at, status) so a repeated carrier sync cannot append the same scan twice | shipments (cascade) |
@@ -192,7 +193,7 @@ core e-commerce app (file 19 §1).
 
 ## Deferred, not dropped
 
-Every table the spec asked for is now in the DDL — the count is 88
+Every table the spec asked for is now in the DDL — the count is 89
 implemented, 0 specified. What remains deferred is *behaviour*, not shape:
 
 - `search_documents` — `tsvector` + GIN on `products` and `categories`
@@ -235,8 +236,7 @@ erDiagram
     profiles ||--o{ profile_size_preferences : sizes
     categories ||--o{ profile_size_preferences : sized-in
     attribute_values ||--o{ profile_size_preferences : picks
-    households ||--o{ addresses : owns
-    profiles ||--o{ addresses : personal
+    profiles ||--o{ addresses : owns
     categories ||--o{ categories : nests
     categories ||--o{ products : lists
     brands ||--o{ products : labels
@@ -284,6 +284,10 @@ erDiagram
     orders ||--o{ refunds : returns-money
     orders ||--o{ returns : takes-back
     returns ||--o{ return_items : inspects
+    returns ||--o{ return_status_history : timelines
+    return_items }o--|| order_items : returns-one
+    return_items }o--o| product_variants : exchanges-for
+    refunds |o--o| returns : settles
     orders ||--o{ shipments : ships
     shipments ||--o{ shipment_events : reports
     discount_codes ||--o{ orders : applied-to

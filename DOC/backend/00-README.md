@@ -26,15 +26,15 @@ constraints, not application-code promises — and one migration history. Primar
 merge-safe). Depth: `12-UI-Merge-Single-Deploy.md`, `13-API-Contracts.md`,
 `14-Single-URL-Gating.md`.
 
-## 3. Data at a glance (88 tables, all implemented in DDL)
+## 3. Data at a glance (89 tables, all implemented in DDL)
 
 | Domain | Tables | Notes |
 |---|---|---|
 | Auth & RBAC | users, profiles, roles, permissions, role_permissions, user_roles, refresh_tokens, password_reset_tokens, email_verification_tokens, login_attempts, customer_notes, staff_invitations, audit_logs | Two-row identity (credential + person); normalized roles; the gate reads `users → user_roles → roles.slug`; custom Argon2id auth, never Supabase Auth |
-| Household & family | households, household_members, profile_size_preferences, household_invitations, addresses | Family profiles (dependents need no email); proxy ordering + per-order size edits (file 17) |
+| Household & family | households, household_members, profile_size_preferences, household_invitations, addresses | Family profiles (dependents need no email); proxy ordering is enforced by a composite FK on orders; sizes are shared, addresses are private per person (file 17) |
 | Catalog | categories, brands*, products, product_source_rows, product_variants, product_images, stock_movements, product_discounts, reviews, collections, collection_products, size_charts, attribute_definitions, attribute_values, product_attribute_links, product_attribute_link_values, product_variant_attribute_values | *brands defined but unbuilt; the attribute library is the single attribute system |
 | Cart & wishlist | carts, cart_items, wishlists, wishlist_items | Snapshot display fields; one-active-cart partial unique |
-| Orders & money | orders, order_items, order_status_history, payments, refunds, returns, return_items, discount_codes, shipments, shipment_events | Dual status axes; immutable snapshots; DECIMAL(12,2); the tracking timeline is a child table |
+| Orders & money | orders, order_items, order_status_history, payments, refunds, returns, return_items, return_status_history, discount_codes, shipments, shipment_events | Dual status axes; immutable snapshots; DECIMAL(12,2); returns are a request pipeline with a separate resolution axis; the tracking timeline is a child table |
 | Platform | import_jobs, email_logs, notification_templates, idempotency_keys, webhook_events | CSV pipeline reports; delivery states; HTTP-retry and provider-replay dedupe (file 21) |
 | CMS (jsonb, no Mongo) | media, blog_categories, blog_authors, blog_tags, blogs, blog_post_tags, blog_revisions, blog_slug_history, blog_post_media, design_assets, cms_sections, cms_settings, navigation_settings, pages, store_settings | No `content_html`, no `blog_statuses`, no `views` column; `design_assets` is the print-artwork library |
 | Analytics (partitioned) | page_views, analytics_sessions, cart_events, abandoned_carts, daily_stats, product_views, search_terms | Monthly partitions; raw events drop >30d, rollups kept; never plain `sessions` |

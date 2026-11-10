@@ -2,8 +2,10 @@
 -- Source of truth: DOC/backend/17-Household-Accounts.md (transcribed 1:1).
 -- profiles lives in 001-auth.sql (identity: users = credential, profiles =
 -- person). This file owns the grouping: households, memberships, sizes,
--- invitations, and the household-scoped address book (moved from 001).
+-- invitations, and the private per-profile address book (moved from 001).
+-- A household shares sizes, never addresses.
 -- Order matters: households before members/invitations; profiles first.
+-- The composite FK from orders is added at the end of this file.
 
 -- ------------------------------------------------------------ households
 CREATE TABLE households (
@@ -14,27 +16,42 @@ CREATE TABLE households (
 );
 
 -- ----------------------------------------------------- household_members
+-- Leaving is a soft leave (left_at), not a DELETE: orders keep pointing at the
+-- membership row, so "who was this order for" survives the member leaving.
 CREATE TABLE household_members (
   household_id uuid        NOT NULL REFERENCES households (id) ON DELETE CASCADE,
   profile_id   uuid        NOT NULL REFERENCES profiles (id) ON DELETE CASCADE,
   role         varchar(10) NOT NULL DEFAULT 'member'
     CHECK (role IN ('manager','member')),
   joined_at    timestamptz NOT NULL DEFAULT now(),
-  PRIMARY KEY (household_id, profile_id),
-  UNIQUE (profile_id)
+  left_at      timestamptz,                                   -- NULL = active
+  updated_at   timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (household_id, profile_id)
 );
+-- One active household per person. Re-joining the same household reactivates
+-- the existing row instead of inserting a second one (PK does that for us).
+CREATE UNIQUE INDEX one_active_household_per_profile
+  ON household_members (profile_id) WHERE left_at IS NULL;
+CREATE INDEX idx_household_members_profile_id ON household_members (profile_id);
 
 -- ----------------------------------------------- profile_size_preferences
+-- Myntra-style saved sizes: one row per person per category (a tee size, a
+-- pant size, a shoe size). The definition is stored, not derived, so the
+-- composite FK below can prove the value really belongs to that definition.
 CREATE TABLE profile_size_preferences (
-  profile_id    uuid        NOT NULL REFERENCES profiles (id) ON DELETE CASCADE,
-  category_id   uuid        NOT NULL REFERENCES categories (id) ON DELETE RESTRICT,
-  size_value_id uuid        NOT NULL REFERENCES attribute_values (id) ON DELETE RESTRICT,
-  created_at    timestamptz NOT NULL DEFAULT now(),
-  updated_at    timestamptz NOT NULL DEFAULT now(),
-  PRIMARY KEY (profile_id, category_id)
+  profile_id         uuid        NOT NULL REFERENCES profiles (id) ON DELETE CASCADE,
+  category_id        uuid        NOT NULL REFERENCES categories (id) ON DELETE RESTRICT,
+  size_definition_id uuid        NOT NULL REFERENCES attribute_definitions (id) ON DELETE RESTRICT,
+  size_value_id      uuid        NOT NULL,
+  created_at         timestamptz NOT NULL DEFAULT now(),
+  updated_at         timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (profile_id, category_id),
+  FOREIGN KEY (size_definition_id, size_value_id)
+    REFERENCES attribute_values (definition_id, id) ON DELETE RESTRICT
 );
 CREATE INDEX idx_psp_category_id ON profile_size_preferences (category_id);
 CREATE INDEX idx_psp_size_value_id ON profile_size_preferences (size_value_id);
+CREATE INDEX idx_psp_size_definition_id ON profile_size_preferences (size_definition_id);
 
 -- --------------------------------------------- household_invitations
 CREATE TABLE household_invitations (
@@ -62,16 +79,16 @@ CREATE UNIQUE INDEX one_pending_claim_per_profile
   WHERE status = 'pending' AND profile_id IS NOT NULL;
 
 -- ------------------------------------------------------------- addresses
--- Moved from 001-auth.sql — the book is household-scoped, not login-scoped.
--- profile_id NULL = family-shared row; set = personal row.
--- The recipient is a plain column, not a profile FK: a shared row can be
--- delivered to someone who has no profile (a parent, a gift recipient, a
--- courier contact), and the label on the parcel must survive a profile
--- rename. Phone is the courier's contact string, stored as entered.
+-- Moved from 001-auth.sql. The book belongs to ONE profile, not to the
+-- household: family membership shares sizes, never addresses, so no query can
+-- return another member's rows. No cap on how many a person saves.
+-- The recipient is a plain column, not a profile FK: an address can be
+-- delivered to someone who has no profile (a parent, a gift recipient), and
+-- the label on the parcel must survive a profile rename. Phone is the
+-- courier's contact string, stored as entered.
 CREATE TABLE addresses (
   id             uuid         PRIMARY KEY,
-  household_id   uuid         NOT NULL REFERENCES households (id) ON DELETE CASCADE,
-  profile_id     uuid         REFERENCES profiles (id) ON DELETE CASCADE,
+  profile_id     uuid         NOT NULL REFERENCES profiles (id) ON DELETE CASCADE,
   type           varchar(10)  NOT NULL DEFAULT 'shipping'
     CHECK (type IN ('shipping','billing')),
   label          varchar(50),
@@ -87,9 +104,21 @@ CREATE TABLE addresses (
   created_at     timestamptz  NOT NULL DEFAULT now(),
   updated_at     timestamptz  NOT NULL DEFAULT now()
 );
-CREATE INDEX idx_addresses_household_id ON addresses (household_id);
 CREATE INDEX idx_addresses_profile_id ON addresses (profile_id);
-CREATE UNIQUE INDEX one_default_shipping_per_household
-  ON addresses (household_id) WHERE is_default AND type = 'shipping';
-CREATE UNIQUE INDEX one_default_billing_per_household
-  ON addresses (household_id) WHERE is_default AND type = 'billing';
+-- One default per person per type — two members can each have their own.
+CREATE UNIQUE INDEX one_default_shipping_per_profile
+  ON addresses (profile_id) WHERE is_default AND type = 'shipping';
+CREATE UNIQUE INDEX one_default_billing_per_profile
+  ON addresses (profile_id) WHERE is_default AND type = 'billing';
+
+-- ------------------------------------------- deferred FK, now satisfiable
+-- orders ships in 004-orders.sql, household_members does not exist yet at that
+-- point. Same pattern as 004's stock_movements.order_id: this is still a
+-- from-scratch build, not a forward migration of a live schema. The pair makes
+-- "order for a member of my own household" a database rule, not a promise.
+ALTER TABLE orders
+  ADD COLUMN for_household_id uuid NOT NULL,
+  ADD CONSTRAINT orders_for_household_member_fk
+    FOREIGN KEY (for_household_id, for_profile_id)
+    REFERENCES household_members (household_id, profile_id) ON DELETE RESTRICT;
+CREATE INDEX idx_orders_for_household_id ON orders (for_household_id);

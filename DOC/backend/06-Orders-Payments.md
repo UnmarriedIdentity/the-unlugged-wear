@@ -1,7 +1,7 @@
 # Orders & Money — Columns, Scopes, Guards
 
 > Status: Filling | Last Updated: 2026-10-30
-> 10 tables. Money is DECIMAL(12,2); totals are **stored, not derived** —
+> 11 tables. Money is DECIMAL(12,2); totals are **stored, not derived** —
 > a financial record must be immutable, not recomputed. Conventions:
 > `01-Conventions.md`. Currency default: `INR` (IN localization applied;
 > file 00 keeps the display-formatting question open, storage is decided).
@@ -15,6 +15,7 @@
 | id | uuid | PK, UUIDv7 | |
 | placed_by_user_id | uuid | NOT NULL, FK → users(id) ON DELETE RESTRICT | Payer of record — receipts, refunds, and visibility start here; RESTRICT keeps history |
 | for_profile_id | uuid | NOT NULL, FK → profiles(id) ON DELETE RESTRICT | Recipient — the person the clothes are for (self by default). Sizes prefilled from their profile, never written back (file 17 §6) |
+| for_household_id | uuid | NOT NULL, FK → household_members(household_id, profile_id) ON DELETE RESTRICT (added by 011) | Proxy-order guard: the pair proves the recipient is an **active** member of that household, so "buy for my family" is a database rule, not a service promise |
 | order_number | varchar(30) | NOT NULL, UNIQUE | Human key (`#2026-000123`); support lookup |
 | status | varchar(20) | NOT NULL DEFAULT 'pending', CHECK IN ('pending','confirmed','processing','shipped','delivered','cancelled','failed','refunded') | Fulfillment axis — independent from payment |
 | subtotal | DECIMAL(12,2) | NOT NULL, CHECK (>= 0) | Sum of line totals at purchase |
@@ -33,7 +34,8 @@
 
 Indexes: PK · unique order_number · `(placed_by_user_id, created_at DESC)`
 (placed history) · `(for_profile_id, created_at DESC)` (for-me history —
-household reads, file 17 §4) · `idx_orders_status` · `idx_orders_created_at`
+household reads, file 17 §4) · `(for_household_id)` (family order history,
+single table) · `idx_orders_status` · `idx_orders_created_at`
 (date ranges) · `idx_orders_payment_status` (reconciliation) · partial
 unique `one_order_per_idempotency_key (placed_by_user_id, idempotency_key)
 WHERE idempotency_key IS NOT NULL` (retried checkout → same order).
@@ -50,6 +52,7 @@ WHERE idempotency_key IS NOT NULL` (retried checkout → same order).
 | sku | varchar(64) | NOT NULL | Snapshot |
 | unit_price | DECIMAL(12,2) | NOT NULL, CHECK (>= 0) | Price actually paid |
 | qty | integer | NOT NULL, CHECK (qty > 0) | |
+| returned_qty | integer | NOT NULL DEFAULT 0, CHECK (returned_qty >= 0), table CHECK `returned_qty <= qty` | The only mutable column: the restock TX increments it, so "more returned than bought" cannot be stored. A row CHECK is the only place the per-line aggregate can be structural |
 | line_total | DECIMAL(12,2) | NOT NULL, CHECK (>= 0) | unit_price × qty — immutable |
 | options | jsonb | NULL | Variant combination snapshot (`{"Size":"M","Color":"Onyx"}`) |
 
@@ -103,24 +106,59 @@ Indexes: PK · `idx_refunds_order_id` · partial unique
 `one_open_refund (order_id) WHERE status = 'processing'` (concurrency
 guard — no double-processing the same order).
 
-## returns + return_items (RMA)
+## returns + return_items + return_status_history (RMA)
+
+Two independent axes, and this is the whole design decision: **`status` is the
+request pipeline** (who asked, where the parcel is) and **`resolution` is what
+the customer gets back**. The admin board's four old stages
+(`in_transit / inspected / restocked / disputed`) remain valid `status` words,
+so the existing admin mock stays a subset — `restocked` is expressed as
+`status = 'completed'` plus per-line dispositions instead of a header stage.
 
 | Table | Column | Type | Constraints | Reason |
 |---|---|---|---|---|
 | returns | id | uuid | PK | |
+| returns | rma_number | varchar(30) | NOT NULL, UNIQUE | Human key (`RMA-2026-000123`); support + courier reference |
 | returns | order_id | uuid | NOT NULL, FK → orders(id) ON DELETE RESTRICT | |
-| returns | stage | varchar(20) | NOT NULL DEFAULT 'in_transit', CHECK IN ('in_transit','inspected','restocked','disputed') | The admin stage machine |
-| returns | carrier | varchar(50) | NULL | |
-| returns | tracking_number | varchar(100) | NULL | |
-| returns | reason | varchar(255) | NOT NULL | Sizing, quality, wrong item… |
+| returns | requested_by_profile_id | uuid | NOT NULL, FK → profiles(id) ON DELETE RESTRICT | Who asked — the customer, or the member a proxy order was placed for |
+| returns | requested_by_user_id | uuid | NULL, FK → users(id) ON DELETE SET NULL | The login that submitted it; NULL = logged by staff |
+| returns | type | varchar(10) | NOT NULL DEFAULT 'return', CHECK IN ('return','exchange') | A return and an exchange are different journeys with the same table |
+| returns | status | varchar(20) | NOT NULL DEFAULT 'requested', CHECK IN ('requested','approved','rejected','pickup_scheduled','in_transit','received','inspected','completed','cancelled','disputed') | The request pipeline. `requested` is the state the old machine could not express (nothing has shipped yet) |
+| returns | resolution | varchar(20) | NOT NULL DEFAULT 'pending', CHECK IN ('pending','refund','store_credit','exchange','none') | What the customer gets; decided at approval, settled at completion |
+| returns | customer_note | varchar(500) | NULL | Their words |
+| returns | rejection_reason | varchar(255) | NULL | Required by the app when `status = 'rejected'` |
+| returns | carrier / tracking_number | varchar(50) / varchar(100) | NULL | Reverse pickup |
+| returns | pickup_address | jsonb | NULL | Snapshot taken at approval — the address book may change before pickup |
+| returns | pickup_scheduled_at / received_at | timestamptz | NULL | Pickup and warehouse-receipt stamps |
+| returns | decided_by / decided_at | uuid / timestamptz | NULL, FK → users(id) ON DELETE SET NULL | Accountability for approve/reject |
+| returns | refund_id | uuid | NULL, UNIQUE, FK → refunds(id) ON DELETE RESTRICT | 1:1. UNIQUE supplies the FK index; one refund record per return, never a second refund table |
 | return_items | id | uuid | PK | |
 | return_items | return_id | uuid | NOT NULL, FK → returns(id) ON DELETE CASCADE | Owned child |
 | return_items | order_item_id | uuid | NOT NULL, FK → order_items(id) ON DELETE RESTRICT | History guard |
 | return_items | qty | integer | NOT NULL, CHECK (qty > 0) | |
-| return_items | disposition | varchar(20) | NOT NULL DEFAULT 'pending', CHECK IN ('pending','restock','scrap','exchange') | Restock writes `stock_movements` reason `return` |
+| return_items | reason_code | varchar(30) | NOT NULL, CHECK IN ('size_fit','damaged','wrong_item','not_as_described','quality','changed_mind','other') | The reason is **per garment** — "the tee fits, the pant does not" is normal, so a header-only reason loses information |
+| return_items | condition_note | varchar(500) | NULL | Inspector's note |
+| return_items | disposition | varchar(20) | NOT NULL DEFAULT 'pending', CHECK IN ('pending','restock','scrap','return_to_customer','exchange') | Restock writes `stock_movements` reason `return` |
+| return_items | exchange_variant_id | uuid | NULL, FK → product_variants(id) ON DELETE RESTRICT | The replacement; CHECK forces it when `disposition = 'exchange'` |
+| return_items | refund_amount | DECIMAL(12,2) | NULL, CHECK (>= 0) | Agreed line refund; the header refund is the sum |
+| return_status_history | id | uuid | PK | |
+| return_status_history | return_id | uuid | NOT NULL, FK → returns(id) ON DELETE CASCADE | |
+| return_status_history | from_status / to_status | varchar(20) | NULL / NOT NULL | NULL `from_status` on creation |
+| return_status_history | note | varchar(500) | NULL | |
+| return_status_history | actor | varchar(50) | NOT NULL | user id or 'system' |
+| return_status_history | created_at | timestamptz | NOT NULL | |
 
-Indexes: PKs · `idx_returns_order_id` · `idx_returns_stage`
-(stage queues) · `idx_return_items_return_id`.
+Constraints beyond the columns: `UNIQUE (return_id, order_item_id)` (one line
+per order item; `qty` says how many of it come back, and it doubles as the
+`return_id` FK index) and `CHECK (disposition <> 'exchange' OR
+exchange_variant_id IS NOT NULL)`.
+
+Indexes: PKs · `idx_returns_order_id` · `idx_returns_status` (status queues) ·
+`(requested_by_profile_id, created_at DESC)` (customer's own returns) ·
+partial `idx_returns_tracking_number WHERE tracking_number IS NOT NULL` ·
+`idx_returns_decided_by` · `idx_return_items_order_item_id` ·
+`idx_return_items_exchange_variant_id` · `idx_rsh_return_id (return_id,
+created_at)`.
 
 ## discount_codes
 
@@ -180,9 +218,11 @@ timeline is a child table, never a jsonb array on `shipments`
 
 | Transaction | Writes (single TX) | Guard |
 |---|---|---|
-| Checkout | orders (carrying `placed_by_user_id` + `for_profile_id` from the cart) + order_items + payments + stock decrement + cart→converted + discount uses_count+1 | Atomic `UPDATE … WHERE stock >= qty` (oversell impossible); `idempotency_keys (scope='checkout', key)` returns the stored response for 24h, and `one_order_per_idempotency_key` blocks a second order forever — a retried submit resolves to the same row |
-| Refund | payments.status + refunds row + orders.payment_status | One-open-refund partial unique; amount ≤ grand_total |
-| Return restock | return_items.disposition + stock_movements (`return`) + variant/product balance | Same atomic path as checkout decrement |
+| Checkout | orders (carrying `placed_by_user_id` + `for_profile_id` + `for_household_id` from the cart) + order_items + payments + stock decrement + cart→converted + discount uses_count+1 | Atomic `UPDATE … WHERE stock >= qty` (oversell impossible); the composite FK to `household_members` rejects a recipient outside the buyer's household; `idempotency_keys (scope='checkout', key)` returns the stored response for 24h, and `one_order_per_idempotency_key` blocks a second order forever — a retried submit resolves to the same row |
+| Refund | payments.status + refunds row + orders.payment_status (+ `returns.refund_id` when refund-driven) | One-open-refund partial unique; amount ≤ grand_total; `returns.refund_id` UNIQUE makes the link 1:1 |
+| Return request | returns (`status='requested'`) + return_items + return_status_history row | Stop at zero: the pipeline starts at `requested`, so no delivery is implied |
+| Return decision | returns.status + decided_by/decided_at + resolution + return_status_history row | History row written in-TX; `rejection_reason` required by the app when rejected |
+| Return restock | return_items.disposition + order_items.returned_qty + stock_movements (`return`) + variant/product balance | `CHECK (returned_qty <= qty)` makes an over-return unstorable; same atomic path as checkout decrement |
 | Status change | orders.status + order_status_history row | History row written in-TX — timeline can never skip |
 
 Isolation: READ COMMITTED + the atomic guards above; `SELECT … FOR
@@ -195,6 +235,7 @@ appears in metrics.
 erDiagram
     users ||--o{ orders : placed-by
     profiles ||--o{ orders : for
+    households ||--o{ orders : for-family
     discount_codes ||--o{ orders : applied-to
     orders ||--o{ order_items : snapshots
     orders ||--o{ order_status_history : timelines
@@ -202,11 +243,16 @@ erDiagram
     orders ||--o{ refunds : returns-money
     orders ||--o{ returns : takes-back
     returns ||--o{ return_items : inspects
+    returns ||--o{ return_status_history : timelines
+    return_items }o--|| order_items : returns-one
+    return_items }o--o| product_variants : exchanges-for
+    refunds |o--o| returns : settles
     orders ||--o{ shipments : ships
     shipments ||--o{ shipment_events : reports
 ```
 
 `stock_movements.order_id` is a real FK to `orders` in `002`'s ledger. The
-column is declared at the end of `004` because `002` applies first — the
-one file-order exception in the whole build, and it is a from-scratch
-column, not a forward migration (`migrate/README.md`).
+column is declared at the end of `004` because `002` applies first — one of the
+two file-order exceptions in the build (`orders.for_household_id` is the
+other, added at the end of `011`). Both are from-scratch columns, not forward
+migrations (`migrate/README.md`).

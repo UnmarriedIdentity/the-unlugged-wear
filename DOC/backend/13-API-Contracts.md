@@ -24,7 +24,7 @@
   body; a concurrent duplicate gets `409 REQUEST_IN_PROGRESS`; the same key
   with a different body gets `422 IDEMPOTENCY_KEY_REUSED`. Missing key is
   `400` on `/api/order/*`, `/api/payment/*`, `/api/refund/*`,
-  `/api/import/*`, `/api/household/invite`. Detail: `21-Idempotency.md`.
+  `/api/returns/*`, `/api/import/*`, `/api/household/invite`. Detail: `21-Idempotency.md`.
 - **Rate limits (per IP):** login/refresh 10/s · checkout 5/s ·
   beacon ingest 30/s · reads 30/s per route.
 - **Identity:** `Authorization: Bearer` (15m JWT) or session cookie for
@@ -46,7 +46,7 @@
 | POST | `/refresh` | – | rotate by hash → new pair; reuse revokes family |
 | GET / PATCH | `/me` | C | my profile read / partial update (name/phone/DOB) |
 | PATCH | `/me/password` | C | revokes all sessions |
-| GET/POST | `/me/addresses` | C | household book / add (shared or personal; default logic in service) |
+| GET/POST | `/me/addresses` | C | **my own book only** (`WHERE profile_id = me` — never household-scoped) / add; one default per type per person, enforced by partial uniques |
 | PATCH/DELETE | `/me/addresses/:id` | C | edit / remove |
 | GET | `/users` | A | `?page=&status=` admin list |
 | PATCH | `/users/:id/status` | A | disable/enable |
@@ -65,11 +65,16 @@ reads that column rather than recounting on each request.
 | POST | `/members` | C manager | add managed member `{firstName, lastName, dateOfBirth?}` — no email, no invite |
 | PATCH | `/members/:profileId` | C self/manager | profile fields — the checkout "Edit member" panel calls this |
 | PUT | `/members/:profileId/sizes` | C self/manager | upsert size map `{categoryId: sizeValueId, …}` (full desired map) |
-| DELETE | `/members/:profileId` | C manager | managed member: delete (409 when order history exists); login member: fresh solo household (leave) |
+| DELETE | `/members/:profileId` | C manager | managed member: delete (409 when order history exists); login member: **soft leave** (`left_at`) + fresh solo household |
 | POST / GET / DELETE | `/invitations` (+`/:id`) | C manager | join (email) / claim (`profileId`) links, 7-day expiry |
 
 Line-level size edits are cart-local and never call these routes
 (`17-Household-Accounts.md` §6).
+
+**The family payload never carries addresses.** `/members` returns profiles and
+saved sizes only; each person reads their own book through `/me/addresses`.
+A manager may see members' sizes, never their address rows — that is the
+privacy rule the schema enforces by removing `addresses.household_id`.
 
 ## Catalog `/api/catalog`
 
@@ -118,13 +123,28 @@ cannot merge twice.
 
 | Method | Path | Auth | Purpose |
 |---|---|---|---|
-| POST | `/checkout` | C + `Idempotency-Key` | full TX scope (file 06); copies `for_profile_id` from cart; 409 on stock, 422 on coupon. The key lands in `orders.idempotency_key` as well, so a retry after the 24h map expires still returns the same order |
+| POST | `/checkout` | C + `Idempotency-Key` | full TX scope (file 06); copies `for_profile_id` **and** `for_household_id` from the cart — the composite FK then rejects a recipient who is not an active member of that household; the delivery address is the buyer's own (`addresses.profile_id = me`), and a per-line size override is stored on the order line only, never written to `profile_size_preferences`. 409 on stock, 422 on coupon. The key lands in `orders.idempotency_key` as well, so a retry after the 24h map expires still returns the same order |
 | GET | `/orders/:id` | C: placed-by or for-me / A | order + items + payments |
 | GET | `/me/orders` | C | cursor history (placed by me ∪ for me) |
 | GET | `/orders` | A | `?page=&status=&from=&to=&q=` |
 | PATCH | `/orders/:id/status` | A | status + history row |
 | POST | `/orders/:id/refund` | A | refund TX scope |
 | POST / GET / PATCH / DELETE | `/discount-codes…` | C-validate / A-manage | validate + future manager UI |
+
+## Returns `/api/returns`
+
+The table is the contract: `status` is the pipeline, `resolution` is the
+outcome, the reason is per line (file 06).
+
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| POST | `/` | C: placed-by or for-me | `{orderId, type, items:[{orderItemId, qty, reasonCode, exchangeVariantId?}], note?}` → `returns` (`status='requested'`) + `return_items` + `return_status_history`, all one TX. 409 when `qty` would push `order_items.returned_qty` past `qty`; 422 when the exchange variant is missing for an exchange line |
+| GET | `/me/returns` | C | my requests (as requester), with lines |
+| GET | `/:id` | C: requester or for-me / A | header + lines + timeline |
+| GET | `/` | A | `?status=&from=&to=&q=` — the admin board, same rows |
+| PATCH | `/:id/status` | A | `{status, note?}` → `returns.status` + history row; `rejected` requires a `rejection_reason` |
+| PATCH | `/:id/items/:itemId` | A | `{disposition, exchangeVariantId?, refundAmount?}` — restock writes `stock_movements` and bumps `returned_qty` |
+| POST | `/:id/refund` | A | creates the `refunds` row and sets `returns.refund_id` in one TX (UNIQUE = 1:1) |
 
 ## CMS `/api/cms`
 

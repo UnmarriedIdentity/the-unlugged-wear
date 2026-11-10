@@ -140,9 +140,9 @@ The blog slice is the final model, not a temporary v1:
 
 | Status | Tables | Where |
 |---|---:|---|
-| Implemented DDL | 88 | all 13 files, `001`–`014` minus `008` |
+| Implemented DDL | 89 | all 13 files, `001`–`014` minus `008` |
 | Specified, migration pending | 0 | — |
-| Planned total | 88 | |
+| Planned total | 89 | |
 
 `009-partner.sql` forward-references `orders` and now applies cleanly
 because `004-orders.sql` precedes it in the apply order. No file is
@@ -199,3 +199,62 @@ in the DDL (`21-Idempotency.md`):
 Consequences that bind future work: every mutating route needs a scope
 name, every event id and its `ts` are stamped once client-side, and a new
 "producer" table needs a dedupe key **before** its job is written.
+
+## 10. Returns: two axes, one line-level reason
+
+`returns.status` is the request pipeline and `returns.resolution` is what the
+customer gets back. A single column could not express both, and the old
+`stage` machine had no `requested` state at all — nothing could exist before
+the parcel moved, which made a customer-initiated return unrepresentable.
+
+- **The reason is per line, not per header.** "The tee fits, the pant does
+  not" is an ordinary request; a header-only `reason` threw that away.
+  `reason_code` + `condition_note` live on `return_items`.
+- **`exchange_variant_id` instead of a second `exchanges` table.** An
+  exchange is a return whose line names its replacement; `CHECK (disposition
+  <> 'exchange' OR exchange_variant_id IS NOT NULL)` keeps the pairing honest.
+- **`returns.refund_id` (UNIQUE) rather than `refunds.return_id`.** `refunds`
+  is created earlier in `004`, so this direction needs no forward reference,
+  and UNIQUE gives 1:1 plus the FK index.
+- **`order_items.returned_qty` + `CHECK (returned_qty <= qty)`.** A
+  row-level CHECK is the only place the per-line aggregate can be structural.
+  The column is the single mutable one on an otherwise immutable purchase
+  record, and only the restock TX writes it.
+- **`return_status_history` mirrors `order_status_history`** — history as
+  rows, never a jsonb array (§8 rule applied to returns).
+
+## 11. Addresses are private; sizes are shared
+
+The household book (shared rows, `addresses.household_id`, one default per
+household) was **rejected on privacy, not on cost**: it would render one
+member's saved address inside another member's account, manager included, and
+no query discipline fixes a schema that allows the join in the first place.
+
+- `addresses.profile_id` is `NOT NULL`; `household_id` and the "NULL = shared"
+  convention are gone. `GET /me/addresses` cannot express a household scope.
+- Defaults are per person: `one_default_shipping_per_profile` /
+  `one_default_billing_per_profile` partial uniques. Two members can each own
+  a default, which the household-scoped uniques made impossible.
+- What the family *does* share is sizing: `profile_size_preferences` stays
+  keyed by `profile_id`, so "order for Rohan" reads his sizes and nothing else.
+- A checkout size override is written to the order line only; the profile is
+  read at autofill and never written as a side effect (file 17 §6).
+
+## 12. Two DB rules replace two service promises
+
+- **Proxy ordering.** `orders.for_household_id` + composite FK
+  `(for_household_id, for_profile_id) → household_members (household_id,
+  profile_id)` makes "you can only order for a member of your own household"
+  a constraint. The column is added by `ALTER TABLE` at the end of `011`
+  because `order` ships in `004` — the same deferred pattern as
+  `stock_movements.order_id`.
+- **Saved size belongs to its definition.** `profile_size_preferences`
+  stores `size_definition_id` and adds a composite FK to
+  `attribute_values (definition_id, id)`. `010` gained
+  `UNIQUE (definition_id, id)` to make that FK legal. Only the *semantic*
+  check ("this definition is the Size type") remains in the app, because no
+  FK can know which definition is the size axis.
+
+Soft leave (`household_members.left_at` + partial unique) is what keeps both
+work: a left membership still satisfies the order FK, while the partial
+unique enforces "one household at a time".

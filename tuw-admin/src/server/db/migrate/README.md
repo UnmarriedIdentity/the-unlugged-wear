@@ -2,7 +2,7 @@
 
 > No PostgreSQL instance exists yet. These files are edited in place until
 > the first provisioned database; afterward use forward migrations.
-> **88 tables across 13 files, all specified tables now written as DDL.**
+> **89 tables across 13 files, all specified tables now written as DDL.**
 
 ## Apply order
 
@@ -11,29 +11,36 @@
 | `001-auth.sql` | 13 | written | — |
 | `002-catalog.sql` | 12 | written | `001` (users for reviews) |
 | `003-cart.sql` | 4 | written | `001` (users, profiles), `002` (products, variants) |
-| `004-orders.sql` | 10 | written | `001`, `002`, `003` |
+| `004-orders.sql` | 11 | written | `001`, `002`, `003` |
 | `005-platform.sql` | 5 | written | `001` (users) |
 | `006-cms.sql` | 10 | written | `001` (users) |
 | `007-cms-pages.sql` | 5 | written | `001` (users) |
 | `009-partner.sql` | 2 | written | `001`, `004` (orders) |
 | `010-attr-library.sql` | 5 | written | `002` (products) |
-| `011-household.sql` | 5 | written | `001` (profiles), `002` (categories), `010` (attribute_values) |
+| `011-household.sql` | 5 | written | `001` (profiles), `002` (categories), `010` (attribute_values), `004` (orders, ALTER at end) |
 | `012-styling.sql` | 7 | written, ships last | `002` + `010` |
 | `013-analytics.sql` | 7 | written | `001`, `002`, `003` (carts) |
 | `014-operations.sql` | 3 | written | `001` (users) |
-| **Total** | **88** | | |
+| **Total** | **89** | | |
 
 Every `REFERENCES` target is created by an earlier file in this list, so a
 single ordered pass applies cleanly. There are no forward references and no
 external dependencies left.
 
-## One deferred FK, resolved locally
+## Two deferred columns, each resolved in the file that can satisfy it
 
 `002-catalog.sql` cannot declare `stock_movements.order_id` — `orders` does
 not exist yet at that point. `004-orders.sql` ends with the `ALTER TABLE`
-that adds the column and its index. This is a from-scratch build (no
-database exists), not a migration of a live schema, so the column is
-declared in the file that can satisfy it rather than left dangling.
+that adds the column and its index.
+
+`004-orders.sql` cannot declare `orders.for_household_id` — `household_members`
+does not exist yet at that point. `011-household.sql` ends with the `ALTER
+TABLE` that adds the column, the composite FK to
+`household_members (household_id, profile_id)`, and its index.
+
+Both are from-scratch builds (no database exists), not migrations of a live
+schema, so each column is declared in the file that can satisfy it rather than
+left dangling.
 
 ## Idempotency is a schema concern
 
@@ -72,7 +79,18 @@ migration, and again on every deploy.
 - `006` — `media.filename`, `media.size_bytes`, `usage` gains `design`;
   new `design_assets` library.
 - `010` — `attribute_definitions.is_active` next to the `show_on_*` flags.
-- `011` — `addresses.recipient_name`, `addresses.phone`.
+- `004` — `returns` is a request pipeline now (`rma_number`, requester,
+  `type`, `status` + `resolution`, decision fields, `refund_id` 1:1);
+  `return_items` carries a per-line `reason_code`, `exchange_variant_id` and
+  `refund_amount`; `order_items.returned_qty` + `CHECK (returned_qty <= qty)`
+  stops an over-return; `return_status_history` is new.
+- `011` — `household_members.left_at` (soft leave) + one-active-per-profile
+  unique instead of `UNIQUE (profile_id)`; `profile_size_preferences` gains
+  `size_definition_id` and a composite FK to `attribute_values
+  (definition_id, id)`; `addresses` is profile-private (`household_id`
+  removed, `profile_id NOT NULL`, one default per person); `orders` gains
+  `for_household_id` + the composite membership FK at the end of the file.
+  `addresses.recipient_name` and `addresses.phone` are unchanged.
 - `013` — the analytics session table is `analytics_sessions` (never plain
   `sessions`), and the four raw event tables are RANGE-partitioned on `ts`
   with a `_default` partition each.
