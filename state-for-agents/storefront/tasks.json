@@ -2210,7 +2210,7 @@
         "settings expires immediately; other tags 'max'"
       ],
       "follow_ups": [],
-      "log": "src/app/api/revalidate/route.ts — guards.route({ secret }) → revalidateTag(settings, { expire: 0 }) / others max."
+      "log": "af12876 — src/app/api/revalidate/route.ts — guards.route({ secret }) → revalidateTag(settings, { expire: 0 }) / others max."
     },
     {
       "id": "TL-WEB-BE-07",
@@ -2249,7 +2249,7 @@
       "follow_ups": [
         "Returns copy / RETURN_WINDOW_DAYS wait for the exchanges module (TL-BE-10)"
       ],
-      "log": "getStorefrontSettings() cached in the root layout → useSiteSettings(); demo cart fees, shipping policy copy, PDP delivery line, contact page and demo invoice read it. support email now comes from settings (care@… seed) instead of the hard-coded studio@…."
+      "log": "af12876 — getStorefrontSettings() cached in the root layout → useSiteSettings(); demo cart fees, shipping policy copy, PDP delivery line, contact page and demo invoice read it. support email now comes from settings (care@… seed) instead of the hard-coded studio@…."
     },
     {
       "id": "TL-WEB-BE-08",
