@@ -99,6 +99,9 @@ kilobytes — never the risk. Detail: `10-Analytics.md`, `11-Storage.md`.
 | 2026-11-10 | Gift cards sold on the storefront (`products.product_kind = 'gift_card'`), separate from discount codes | RESOLVED (file 22) |
 | 2026-11-10 | `products.exchange_policy` (default `defects_only`); print preview approval for custom prints; 60-minute free-cancel window; abuse limits (one exchange per line, size reasons only, photo required); customer mistakes not compensated | RESOLVED (files 04, 05, 06) |
 | 2026-11-10 | No `ALTER TABLE … ADD COLUMN`: every column is in its own `CREATE TABLE`; only forward FKs are attached later | RESOLVED (`db/migrate/README.md`) |
+| 2026-11-10 | Backend inside the two existing deployments + shared `packages/core`; Drizzle on `pg` (any Postgres); declarative guards; Vercel Cron behind a portable job runner; tests on Neon dev or local Postgres | RESOLVED (file 23) |
+| 2026-11-10 | Integrations (Razorpay, email, R2, Qikink live, GST PDFs) built in the last phase | RESOLVED (file 23 §8, `TL-INT-*` backlog) |
+| 2026-11-10 | GST invoices generated in-house: `TUW/2627/000123`, credit notes `TCN/2627/000045` | DRAFT (file 24; GSTIN pending) |
 | 2026-10-18 | Variant pricing ladder: base anchor + additive per-value adjustments; explicit cell overrides pinned; listed price = materialized min ("From") | RESOLVED (04-Catalog.md; admin build VPRICE-1/2) |
 
 ## 8. Doc map & status
@@ -127,6 +130,8 @@ kilobytes — never the risk. Detail: `10-Analytics.md`, `11-Storage.md`.
 | 20-Schema-Decisions.md | Retired systems, controlled duplication, vocabulary | Active |
 | 21-Idempotency.md | Duplicate-proofing: idempotency keys, webhooks, natural keys | Active |
 | 22-Commerce-Extras.md | Newsletter, FAQs, gift cards, stock alerts, settings-held rules | Draft |
+| 23-Backend-Implementation.md | No extra deploys, shared package, Drizzle + pg, guards, portable jobs, environments, phases | Active |
+| 24-GST-Invoices.md | Invoice/credit-note format, numbering, tables to add | Draft |
 
 ### Root overview documents
 

@@ -215,7 +215,7 @@ INSERT INTO navigation_settings (id, scope, navbar) VALUES
   ('00000000-0000-4000-8000-000000080101', 'global', '{}')
 ON CONFLICT DO NOTHING;
 
--- ------------------------------------- 7. store_settings (18 keys)
+-- ------------------------------------- 7. store_settings (19 keys)
 -- Operational config only. No qikink.api_key, no gateway secret: those live
 -- in env (09 §store_settings). Values are typed jsonb, not strings.
 INSERT INTO store_settings (key, value) VALUES
@@ -227,8 +227,11 @@ INSERT INTO store_settings (key, value) VALUES
   ('store.timezone',             to_jsonb('Asia/Kolkata'::text)),
   ('brand.tagline',              to_jsonb('Unplugged Luxury & Urban Minimalism'::text)),
   ('brand.color',                to_jsonb('#7539FF'::text)),
+  -- Shipping fees are NOT final: placeholders, edited in admin Settings
+  -- (one row each; checkout reads them through one function).
   ('shipping.free_threshold',    to_jsonb(3000)),
   ('shipping.standard_fee',      to_jsonb(150)),
+  ('shipping.cod_fee',           to_jsonb(0)),
   -- Exchanges: days after delivery a customer may request a size/variant swap.
   ('exchange.window_days',       to_jsonb(7)),
   -- Admin low-stock alert level (products.low_stock_threshold overrides).
