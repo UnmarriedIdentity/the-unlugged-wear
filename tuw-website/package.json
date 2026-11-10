@@ -20,6 +20,7 @@
     "@tiptap/pm": "3.32.0",
     "@tiptap/react": "3.32.0",
     "@tiptap/starter-kit": "3.32.0",
+    "@tuw/heart": "workspace:*",
     "clsx": "^2.1.0",
     "jspdf": "^4.2.1",
     "lucide-react": "^1.16.0",

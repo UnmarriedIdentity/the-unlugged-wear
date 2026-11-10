@@ -1,3 +1,4 @@
 packages:
+  - 'packages/heart'
   - 'tuw-admin'
   - 'tuw-website'

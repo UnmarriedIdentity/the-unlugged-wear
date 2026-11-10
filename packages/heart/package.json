@@ -1,0 +1,28 @@
+{
+  "name": "@tuw/heart",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared backend for The Unplugged Wear: platform plumbing, domain modules and integration adapters. Bundled into tuw-admin and tuw-website; never deployed on its own.",
+  "exports": {
+    "./platform/*": "./src/platform/*/index.ts",
+    "./modules/*": "./src/modules/*/index.ts",
+    "./integrations/*": "./src/integrations/*/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --env-file-if-exists=../../.env.local --conditions=react-server --test \"src/**/*.test.ts\""
+  },
+  "dependencies": {
+    "drizzle-orm": "0.45.4",
+    "pg": "8.13.1",
+    "server-only": "0.0.1",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/pg": "8.23.1",
+    "drizzle-kit": "0.31.11",
+    "typescript": "^5.7.0"
+  }
+}
