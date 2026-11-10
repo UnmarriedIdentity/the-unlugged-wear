@@ -8,22 +8,15 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 317,
-    "done": 268,
+    "total": 318,
+    "done": 269,
     "in_progress": 1,
     "backlog": 48
   },
   "session": {
     "branch": "urvil-ui",
     "tip": "9f69e61",
-    "unpushed": [
-      "9f69e61",
-      "370c754",
-      "bc696e6",
-      "13d02af",
-      "19fc666",
-      "9767bcc"
-    ],
+    "unpushed": [],
     "next_up": "Phase 3 storefront Journal SHIPPED (75363c6..6c7e124): validated block-JSON rendering, URL-driven category/author/tag/search/sort filters, pagination and empty states, SEO-rich article pages with one BlogPosting JSON-LD block, related essays, real reading time, Urbanist italic prose, charcoal/gold styling and a Culture-aligned taxonomy. The admin Journal editor runtime crash was fixed at the Tiptap boundary (90c3526: compact block JSON -> full ProseMirror doc and back; media URLs resolve from mediaId) and deterministic timestamps removed the hydration mismatch (c081f00 + dca4e76). NEXT: Phase 4 live CMS backend — PostgreSQL reads/writes, public/admin API, publish transaction, slug redirects, revision retention, R2 media, cache revalidation, analytics-backed views, and fixture retirement. Awaiting approval before implementation.",
     "pending_verifications": [
       "admin journal editor + list full keyboard/focus/Reset Demo pass at 360/768/1024/1440 (CDP route-load check passed; interactive pass pending)",
@@ -2058,7 +2051,7 @@
         "junction over arrays; legacy rows valid, new writes go library"
       ],
       "verified": true,
-      "pushed": false,
+      "pushed": true,
       "follow_ups": [
         "UI N1a model/linking",
         "UI N1b write-through",
@@ -2114,7 +2107,7 @@
         "customer_notes → profiles; tickets/reviews/views stay user-scoped (login-attached)"
       ],
       "verified": true,
-      "pushed": false,
+      "pushed": true,
       "follow_ups": [
         "household UI build (dropdown + 'Edit member' panel + autofill) follows the file-17 contract",
         "deferrals recorded in file 17 §7 (+Add member at checkout, per-order privacy toggle, size fallback)"
@@ -2138,7 +2131,7 @@
         "build order: LAST — after the core e-commerce app"
       ],
       "verified": true,
-      "pushed": false,
+      "pushed": true,
       "follow_ups": [
         "feature build is the project's final step: P1 (seed + scorer + API + PDP rail + events) → P2 (admin screens + Styling report + co-purchase job) → P3 (personalization, size-aware via profile_size_preferences)",
         "styling_events doubles as the shadow-mode harness (variant + contributors columns) — no schema change needed at any stage",
@@ -2163,7 +2156,7 @@
         "no views column — analytics page_views owns that data"
       ],
       "verified": true,
-      "pushed": false,
+      "pushed": true,
       "follow_ups": [
         "runtime SQL dry-run on a real PostgreSQL instance (006-cms.sql, incl. generated column + check constraints)",
         "Phase 2: admin blog state + taxonomy + full-page Tiptap editor"
@@ -4787,7 +4780,7 @@
         "No ALTER: 002 and 010 are edited at creation time"
       ],
       "verified": true,
-      "pushed": false,
+      "pushed": true,
       "follow_ups": [
         "Run the migrations against a real Postgres instance once provisioned (psql is not installed in this environment)",
         "Add dynamic variant-axis UI from product_attribute_links metadata"
@@ -4811,7 +4804,7 @@
         "Variant shipping fields are row-derived overrides with product-level fallbacks"
       ],
       "verified": true,
-      "pushed": false,
+      "pushed": true,
       "follow_ups": [
         "Dynamic variant-axis UI from product_attribute_links metadata",
         "Browser visual pass for workbook import at 360/768/1024/1440"
@@ -4833,7 +4826,7 @@
         "PDP compare, if scoped later, builds on attribute_definitions — never a second definition table"
       ],
       "verified": true,
-      "pushed": false,
+      "pushed": true,
       "follow_ups": [
         "Run the migrations against a real Postgres instance once provisioned (psql is unavailable)",
         "If PDP compare is scoped later, add typed spec fields then; do not reintroduce the retired pair"
@@ -4855,7 +4848,7 @@
         "No new dependency; the test runs under the existing node --test glob"
       ],
       "verified": true,
-      "pushed": false,
+      "pushed": true,
       "follow_ups": [
         "Runtime SQL validation still requires a real PostgreSQL instance"
       ]
@@ -4878,7 +4871,7 @@
         "No seed file: migrate/ remains schema-only; the importer/library creates the six definitions at runtime"
       ],
       "verified": true,
-      "pushed": false,
+      "pushed": true,
       "follow_ups": [
         "Phase 2: importer token classifier + editable preview label + mixed-cell flags",
         "Phase 3: admin N-axis matrix, dynamic attribute card, definition-scoped search",
@@ -4915,7 +4908,7 @@
         "Schema belongs to neither app; both deployments apply nothing themselves"
       ],
       "verified": true,
-      "pushed": false
+      "pushed": true
     },
     {
       "id": "TL-DB-SCHEMA-DECISIONS",
@@ -4933,7 +4926,7 @@
         "Free-shipping threshold already in store_settings.shipping.free_threshold"
       ],
       "verified": true,
-      "pushed": false
+      "pushed": true
     },
     {
       "id": "TL-DB-COMMERCE-EXTRAS",
@@ -4951,7 +4944,7 @@
         "Staff low/out-of-stock alerts reuse notifications kind 'inventory' — no table"
       ],
       "verified": true,
-      "pushed": false,
+      "pushed": true,
       "follow_ups": [
         "Owner to confirm: can customers buy gift cards on the storefront or only staff issue them? Expiry? Usable with discount codes?"
       ]
@@ -4971,7 +4964,7 @@
         "Old storefront words map queued→confirmed, printing→processing, submission_failed→failed"
       ],
       "verified": true,
-      "pushed": false
+      "pushed": true
     },
     {
       "id": "TL-DB-REPO-CLEANUP",
@@ -4987,7 +4980,7 @@
         "3.Database-Schema.md and 4.API-Design.md left untouched pending owner decision"
       ],
       "verified": true,
-      "pushed": false
+      "pushed": true
     },
     {
       "id": "TL-DB-MIGRATION-RUNNER",
@@ -5047,7 +5040,7 @@
         "New provider = integration_providers row + adapter, no migration"
       ],
       "verified": true,
-      "pushed": false
+      "pushed": true
     },
     {
       "id": "TL-DB-ROOT-DOCS",
@@ -5064,7 +5057,7 @@
         "Modules own their tables and talk via index.ts + events"
       ],
       "verified": true,
-      "pushed": false
+      "pushed": true
     },
     {
       "id": "TL-DB-GIFT-CARD-RULES",
@@ -5081,7 +5074,7 @@
         "Expiry is a setting, not hard-coded"
       ],
       "verified": true,
-      "pushed": false
+      "pushed": true
     },
     {
       "id": "TL-DB-EXCHANGE-POLICY",
@@ -5099,7 +5092,7 @@
         "Customer mistakes on defects-only items are not compensated"
       ],
       "verified": true,
-      "pushed": false,
+      "pushed": true,
       "follow_ups": [
         "Qikink reply pending on defect claims without unboxing video",
         "Consider adding the PGlite schema check as a repo script (needs a devDependency)"
@@ -5387,6 +5380,23 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false
+    },
+    {
+      "id": "TL-BE-SKILLS",
+      "title": "Agent skills: nextjs-rendering + server-data-and-auth (admin + storefront)",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-BE-CORE",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "Written from the bundled Next.js 16.3.8 docs: Cache Components/PPR model (experimental.ppr removed), per-component placement tables and route maps per app, use cache / private / remote rules, cacheLife presets, updateTag vs revalidateTag(tag, profile) vs refresh, server/client boundary, proxy = optimistic only, DAL + declarative guards, forms. Registered in both AGENTS.md skill indexes.",
+      "design_match": "n/a",
+      "key_decisions": [
+        "Suspense as low as possible; admin = one boundary per card/table",
+        "Admin edits reach the storefront cache via a secret revalidation endpoint (separate deployments)"
+      ],
+      "verified": true,
+      "pushed": true
     }
   ],
   "workflow": {

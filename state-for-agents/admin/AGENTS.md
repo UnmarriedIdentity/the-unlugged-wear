@@ -14,7 +14,7 @@ work stopped. Start here, in this order:
    `utility-first-jsx`, `cascade-layers`, `stylesheet-anatomy`,
    `design-system`, `motion`, `decorative-graphics`, `debug-frontend`,
    `responsive-system`, `code-standards`, `component-scalability`,
-   `backend-readiness`, `performance-budgets`, `skill-maintenance`.
+   `backend-readiness`, `nextjs-rendering`, `server-data-and-auth`, `performance-budgets`, `skill-maintenance`.
 
 ## Rules vs skills (the split — never confuse them)
 

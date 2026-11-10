@@ -15,7 +15,7 @@ work stopped — without ever opening the admin app. Start here, in this order:
    `design-system`, `motion`, `decorative-graphics`, `debug-frontend`,
    `responsive-system`, `code-standards`, `component-scalability`,
    `component-creation`, `folder-structure`, `hooks`, `routes`,
-   `pdp-flow`, `backend-readiness`, `performance-budgets`, `skill-maintenance`.
+   `pdp-flow`, `backend-readiness`, `nextjs-rendering`, `server-data-and-auth`, `performance-budgets`, `skill-maintenance`.
 
 ## Rules vs skills (the split — never confuse them)
 
