@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
@@ -53,7 +54,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Skip to main content
         </a>
         <Providers>
-          <BrandIntro />
+          {/* Reads the URL; streamed so dynamic routes keep a static shell. */}
+          <Suspense fallback={null}>
+            <BrandIntro />
+          </Suspense>
           {children}
         </Providers>
       </body>

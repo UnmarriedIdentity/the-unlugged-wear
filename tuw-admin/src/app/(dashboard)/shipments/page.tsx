@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import DashboardShell from '@/components/layout/DashboardShell';
 import { ContentCard, StatCard, Badge, Button, Input, Select, SearchableSelect, Drawer, Pagination, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, FilterPills, PageHeader, HeroCard, DrawerSection } from '@/components/ui';
 import { Truck, Search, Filter, Download, ExternalLink, Calendar, MapPin, Clock, Plus } from 'lucide-react';
@@ -23,7 +23,12 @@ export default function ShipmentsPage() {
   // Form State
   const [formOrderId, setFormOrderId] = useState(orders[0]?.id || '#ORD-8820');
   const [formCarrier, setFormCarrier] = useState('DHL Express Worldwide');
-  const [formTracking, setFormTracking] = useState('DHL-' + Math.floor(100000000 + Math.random() * 900000000));
+  // Random demo tracking number is generated after mount: Cache Components
+  // prerenders this page, and a render-time Math.random() would be frozen.
+  const [formTracking, setFormTracking] = useState('');
+  useEffect(() => {
+    setFormTracking((current) => current || 'DHL-' + Math.floor(100000000 + Math.random() * 900000000));
+  }, []);
   const [formDestination, setFormDestination] = useState('New York, NY, USA');
   const [formPieces, setFormPieces] = useState('1');
   const [formEstDelivery, setFormEstDelivery] = useState('3 Days');

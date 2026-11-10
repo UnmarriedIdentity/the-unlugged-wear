@@ -12,6 +12,12 @@ function findProduct(slug: string) {
   );
 }
 
+// Cache Components: prerender every known product; the list moves to the
+// database with its module (storefront TL-WEB-BE tasks).
+export function generateStaticParams() {
+  return STORE_PRODUCTS.map((p) => ({ slug: p.slug }));
+}
+
 export async function generateMetadata({
   params,
 }: {

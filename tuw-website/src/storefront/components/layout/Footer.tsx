@@ -13,6 +13,7 @@ import {
   MapPin,
 } from 'lucide-react';
 import TuwEmblem from './TuwEmblem';
+import { CopyrightYear } from './CopyrightYear';
 
 interface FooterLink {
   label: string;
@@ -229,7 +230,7 @@ export default function Footer() {
               </div>
 
               <p className="mt-6 text-xs text-white/60 font-sans">
-                © {new Date().getFullYear()} The Unplugged Wear. Mindful POD apparel. All rights reserved.
+                © <CopyrightYear /> The Unplugged Wear. Mindful POD apparel. All rights reserved.
               </p>
             </div>
           </div>

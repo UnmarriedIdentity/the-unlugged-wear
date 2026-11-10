@@ -4,6 +4,12 @@ import { notFound } from 'next/navigation';
 import { JOURNAL_ARTICLES } from '@storefront/mocks/fixtures';
 
 // The article page is a client component, so per-article metadata lives here.
+// Cache Components: prerender every known article; the list moves to the
+// database with its module (storefront TL-WEB-BE tasks).
+export function generateStaticParams() {
+  return JOURNAL_ARTICLES.map((a) => ({ slug: a.slug }));
+}
+
 export async function generateMetadata({
   params,
 }: {

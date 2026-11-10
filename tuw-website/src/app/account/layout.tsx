@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { Suspense, type ReactNode } from 'react';
 import type { Metadata } from 'next';
 import AccountGate from '@storefront/components/layout/AccountGate';
 
@@ -10,5 +10,10 @@ export const metadata: Metadata = {
 };
 
 export default function AccountLayout({ children }: { children: ReactNode }) {
-  return <AccountGate>{children}</AccountGate>;
+  // Per-shopper pages: always streamed at request time (cache-components skill).
+  return (
+    <Suspense fallback={<div className="min-h-screen" aria-busy="true" />}>
+      <AccountGate>{children}</AccountGate>
+    </Suspense>
+  );
 }

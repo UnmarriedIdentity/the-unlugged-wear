@@ -3,6 +3,12 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { STORE_COLLECTIONS } from '@storefront/mocks/fixtures';
 
+// Cache Components: prerender every known collection; the list moves to the
+// database with its module (storefront TL-WEB-BE tasks).
+export function generateStaticParams() {
+  return STORE_COLLECTIONS.map((c) => ({ slug: c.slug }));
+}
+
 export async function generateMetadata({
   params,
 }: {
