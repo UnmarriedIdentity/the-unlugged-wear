@@ -8,14 +8,14 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 319,
-    "done": 270,
+    "total": 320,
+    "done": 272,
     "in_progress": 1,
-    "backlog": 48
+    "backlog": 47
   },
   "session": {
     "branch": "urvil-ui",
-    "tip": "9f69e61",
+    "tip": "98b0533",
     "unpushed": [],
     "next_up": "Phase 3 storefront Journal SHIPPED (75363c6..6c7e124): validated block-JSON rendering, URL-driven category/author/tag/search/sort filters, pagination and empty states, SEO-rich article pages with one BlogPosting JSON-LD block, related essays, real reading time, Urbanist italic prose, charcoal/gold styling and a Culture-aligned taxonomy. The admin Journal editor runtime crash was fixed at the Tiptap boundary (90c3526: compact block JSON -> full ProseMirror doc and back; media URLs resolve from mediaId) and deterministic timestamps removed the hydration mismatch (c081f00 + dca4e76). NEXT: Phase 4 live CMS backend — PostgreSQL reads/writes, public/admin API, publish transaction, slug redirects, revision retention, R2 media, cache revalidation, analytics-backed views, and fixture retirement. Awaiting approval before implementation.",
     "pending_verifications": [
@@ -5413,6 +5413,23 @@
       "key_decisions": [
         "Retry keys are scoped per caller so responses cannot be replayed across users",
         "Stock guard keys on the order line, not the product, because personalised lines can share a variant"
+      ],
+      "verified": true,
+      "pushed": true
+    },
+    {
+      "id": "TL-BE-SKILLS-2",
+      "title": "Skills: server/client/cache components per app + 9 backend skills (state-for-agents/backend)",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-BE-CORE",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "Per app (admin + storefront): server-components, client-components, cache-components with project-specific good/bad cases; nextjs-rendering cut down to a short route map; long server-data-and-auth skills removed (content moved to backend skills). New state-for-agents/backend/AGENTS.md + skills: backend-modules, data-access, server-actions, route-handlers, auth-guards, idempotency, background-jobs, integrations, migrations. Indexes and AGENTS.md (x3) updated.",
+      "design_match": "n/a",
+      "key_decisions": [
+        "Skills follow the house format: short rules + good/bad, not documentation",
+        "Backend skills live once in state-for-agents/backend because packages/core is shared"
       ],
       "verified": true,
       "pushed": true

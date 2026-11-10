@@ -35,7 +35,7 @@
 
 - **Zero Cross-App Source Imports**: `tuw-website/` and `tuw-admin/` must remain completely independent applications. Neither app may import source code, components, or styles from the other. Shared **backend** code goes in `packages/core` (owned by neither app); UI code is never shared.
 - **Backend Modules**: one module per domain (`packages/core/src/modules/<name>`); others import only its `index.ts`; a module writes only its own tables. Role checks are declared once per entry point (`action({ permission })`, `route({ role })`) and repeated in the Data Access Layer, never only in `proxy.ts`.
-- **Rendering**: follow the `nextjs-rendering` skill (Cache Components / PPR, Server Components by default, small Client Components).
+- **Rendering**: follow the app's `nextjs-rendering`, `server-components`, `client-components` and `cache-components` skills (Cache Components / PPR, Server Components by default, small Client Components). Backend code follows `state-for-agents/backend/skills/`.
 - **Component Primitives**: Implement and reuse atomic UI primitives (`Button`, `Badge`, `Input`, `Card`, `Modal`, `Drawer`, `Select`, `Switch`, etc.).
 - **Mock Adapters**: Keep deterministic fixtures and mock state managers (`src/mocks/`) strictly isolated from UI components.
 
