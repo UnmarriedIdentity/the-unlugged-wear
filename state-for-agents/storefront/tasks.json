@@ -2069,7 +2069,7 @@
       "description": "Add @tuw/heart dependency + transpilePackages; cacheComponents: true; fix blocking-prerender insights; health route reads the DB.",
       "key_decisions": [],
       "follow_ups": [],
-      "log": "c4aa5ef + health commit — @tuw/heart dependency + transpilePackages, cacheComponents on (CopyrightYear, BrandIntro Suspense, generateStaticParams for products/collections/journal, account Suspense), GET /api/health ok on Neon."
+      "log": "c4aa5ef + 9519313 — @tuw/heart dependency + transpilePackages, cacheComponents on (CopyrightYear, BrandIntro Suspense, generateStaticParams for products/collections/journal, account Suspense), GET /api/health ok on Neon."
     },
     {
       "id": "TL-WEB-BE-02",
