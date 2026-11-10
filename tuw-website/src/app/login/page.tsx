@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AlertCircle } from 'lucide-react';
 import AuthShell, { AuthField, PasswordToggle } from '@storefront/components/layout/AuthShell';
-import { DEMO_ACCOUNT, checkDemoCredentials, writeDemoSession } from '@storefront/mocks/auth';
+import { loginAction } from '@/server/auth-actions';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -28,13 +28,6 @@ export default function LoginPage() {
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [formError, setFormError] = useState('');
 
-  const fillDemoAccount = () => {
-    setEmail(DEMO_ACCOUNT.email);
-    setPassword(DEMO_ACCOUNT.password);
-    setErrors({});
-    setFormError('');
-  };
-
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     const nextErrors: typeof errors = {};
@@ -47,19 +40,18 @@ export default function LoginPage() {
     if (nextErrors.password) return passwordRef.current?.focus();
 
     setIsLoading(true);
-    setTimeout(() => {
-      const session = checkDemoCredentials(email, password);
-      if (!session) {
+    // "Remember me" keeps the session for 30 days; otherwise it ends with the browser.
+    void loginAction({ email, password, remember: rememberMe, next: safeNextPath() }).then((result) => {
+      if (!result.ok) {
         // Keep what was typed so it can be corrected.
         setIsLoading(false);
-        setFormError('That email and password do not match the demo account.');
+        setFormError(result.error.message);
         passwordRef.current?.focus();
         return;
       }
-      // "Remember me" keeps the sign-in in this browser, otherwise it lasts for this tab.
-      writeDemoSession(session, rememberMe);
-      router.push(safeNextPath());
-    }, 500);
+      router.push(result.data.next);
+      router.refresh();
+    });
   };
 
   return (
@@ -71,15 +63,7 @@ export default function LoginPage() {
       caption="Everyday hoodies and tees, printed to order with zero deadstock."
       title="Welcome back"
       intro="Log in to see your orders, saved pieces and addresses."
-      demoNotice="Demo sign-in: only the demo account can log in, and nothing is sent to a server."
     >
-      <button
-        type="button"
-        onClick={fillDemoAccount}
-        className="w-full h-11 rounded-xl border border-store-border text-sm font-medium text-store-text-primary hover:border-store-text-primary transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-store-gold"
-      >
-        Fill in the demo account
-      </button>
 
       <form onSubmit={handleLogin} noValidate className="space-y-4">
         {formError && (

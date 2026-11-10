@@ -14,7 +14,7 @@ export const register = z.object({
   email,
   password,
   firstName: name,
-  lastName: name,
+  lastName: z.string().trim().max(100).default(''),
   phone: z.string().trim().max(20).optional().transform((v) => v || undefined),
   next: safeNext,
 });

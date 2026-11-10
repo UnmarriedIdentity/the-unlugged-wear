@@ -7,7 +7,7 @@ import Footer from '@storefront/components/layout/Footer';
 import Breadcrumb from '@storefront/components/ui/Breadcrumb';
 import Input from '@storefront/components/ui/Input';
 import Textarea from '@storefront/components/ui/Textarea';
-import { useDemoSession } from '@storefront/mocks/auth';
+import { useSession } from '@storefront/lib/session';
 import { site } from '@storefront/lib/site';
 import { ArrowRight, Check, Clock, Info, Mail, MapPin } from 'lucide-react';
 
@@ -38,7 +38,7 @@ const SOCIAL = [
 ].filter((s) => s.href);
 
 export default function ContactPage() {
-  const { session } = useDemoSession();
+  const { session } = useSession();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [orderRef, setOrderRef] = useState('');

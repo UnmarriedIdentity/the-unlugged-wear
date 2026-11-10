@@ -440,3 +440,13 @@ export async function bootstrapAdmin(input: { email: string; password: string; f
     return { userId, created: !existing };
   });
 }
+
+/** Invitation details for the accept page (token holder only; no secrets returned). */
+export async function describeInvite(token: string): Promise<{ email: string; role: string } | null> {
+  if (!token || token.length < 20 || token.length > 200) return null;
+  return one<{ email: string; role: string }>(
+    getDb(),
+    sql`SELECT i.email, r.slug AS role FROM staff_invitations i JOIN roles r ON r.id = i.role_id
+         WHERE i.token_hash = ${hashSecret(token)} AND i.status = 'pending' AND i.expires_at > now()`,
+  );
+}

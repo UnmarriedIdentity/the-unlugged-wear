@@ -11,7 +11,9 @@
     "./platform/jobs/catalog": "./src/platform/jobs/catalog.ts",
     "./platform/test": "./src/platform/test/index.ts",
     "./modules/auth/tokens": "./src/modules/auth/tokens.ts",
-    "./platform/ids": "./src/platform/ids/index.ts"
+    "./platform/ids": "./src/platform/ids/index.ts",
+    "./next/session": "./src/next/session.ts",
+    "./next/proxy": "./src/next/proxy.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -28,6 +30,12 @@
     "@types/node": "^22.0.0",
     "@types/pg": "8.23.1",
     "drizzle-kit": "0.31.11",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "next": "16.3.8",
+    "react": "^19.0.0",
+    "@types/react": "^19.0.0"
+  },
+  "peerDependencies": {
+    "next": "16.3.8"
   }
 }

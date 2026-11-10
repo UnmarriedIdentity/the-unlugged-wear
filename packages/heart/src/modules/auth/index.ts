@@ -16,6 +16,7 @@ export {
   inviteStaff,
   revokeInvite,
   acceptInvite,
+  describeInvite,
   setStaffRole,
   setUserStatus,
   bootstrapAdmin,

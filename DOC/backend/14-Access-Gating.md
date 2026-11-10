@@ -27,6 +27,20 @@ grant nothing extra here.
 
 A customer-only account that signs in to the admin is refused.
 
+## As built (TL-BE-02)
+
+- `tuw-website/src/proxy.ts` protects `/account/*`; `tuw-admin/src/proxy.ts`
+  protects everything except `/login`, `/forgot-password`,
+  `/reset-password`, `/accept-invite`, `/signup`, `/verify` and `/api/*`
+  (API routes guard themselves).
+- Expired access + refresh cookie → `GET /api/auth/refresh?next=…` (rotates,
+  returns); no cookies → login with `?next=`.
+- Admin pages call `session.requireStaff(permission)`; missing permission →
+  `/access-denied?need=<slug>`. Every action re-checks with
+  `action({ permission })`.
+- Admin sign-up is invitation only (`/signup` explains it; `/verify` redirects
+  to `/login`).
+
 ## Sessions
 
 Both apps use the same token design (file 03 §7): 15-minute access token,

@@ -15,7 +15,7 @@ import Select from '@storefront/components/ui/Select';
 import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@storefront/mocks/store';
-import { useDemoSession } from '@storefront/mocks/auth';
+import { useSession } from '@storefront/lib/session';
 import { STORE_PRODUCTS } from '@storefront/mocks/fixtures';
 import { formatPaise, formatShortDate } from '@storefront/lib/format';
 import { downloadInvoicePdf } from '@storefront/lib/invoice';
@@ -225,7 +225,7 @@ export default function AccountPage() {
   } = useStore();
   const router = useRouter();
   // AccountGate only renders this page once a demo session exists.
-  const { session, signOut } = useDemoSession();
+  const { session, signOut } = useSession();
   const accountName = session?.name ?? '';
   const accountEmail = session?.email ?? '';
   const defaultAddress = addresses.find((a) => a.isDefault) ?? addresses[0];

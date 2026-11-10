@@ -4,7 +4,7 @@ import React, { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import AuthShell, { AuthField, PasswordToggle } from '@storefront/components/layout/AuthShell';
-import { writeDemoSession } from '@storefront/mocks/auth';
+import { registerAction } from '@/server/auth-actions';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD = 8;
@@ -27,6 +27,7 @@ export default function RegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<Field, string>>>({});
+  const [formError, setFormError] = useState('');
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,10 +47,24 @@ export default function RegisterPage() {
     }
 
     setIsLoading(true);
-    setTimeout(() => {
-      writeDemoSession({ name: name.trim(), email: email.trim() }, true);
-      router.push('/account');
-    }, 500);
+    setFormError('');
+    const [firstName = '', ...rest] = name.trim().split(/\s+/);
+    void registerAction({ email, password, firstName, lastName: rest.join(' '), next: '/account' }).then((result) => {
+      if (!result.ok) {
+        // Keep every typed value; point at the field the server rejected.
+        setIsLoading(false);
+        const field = result.error.details[0]?.field;
+        if (field === 'email' || field === 'password') {
+          setErrors({ [field]: result.error.message });
+          refs[field].current?.focus();
+        } else {
+          setFormError(result.error.message);
+        }
+        return;
+      }
+      router.push(result.data.next);
+      router.refresh();
+    });
   };
 
   return (
@@ -61,9 +76,14 @@ export default function RegisterPage() {
       caption="Everyday hoodies and tees, printed to order with zero deadstock."
       title="Create your account"
       intro="Save your favourite pieces, keep track of orders and check out faster."
-      demoNotice="Demo sign-up: no real account is created and no email is sent. You stay signed in on this browser; to log in again later, use the demo account."
+      demoNotice="Your account is real; the confirmation email is not sent yet (email delivery comes later)."
     >
       <form onSubmit={handleRegister} noValidate className="space-y-4">
+        {formError && (
+          <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-3.5 py-3 text-sm text-red-700">
+            {formError}
+          </p>
+        )}
         <AuthField
           ref={refs.name}
           id="register-name"

@@ -15,7 +15,7 @@ is a Server Component unless it needs the browser. Source of truth:
    read inside a `<Suspense>` child. Pass the `searchParams` promise down to
    the table and `await` it there.
 4. No auth checks in layouts. Each data section calls the DAL
-   (`requireStaff('order.read')`); the sidebar hides links a role cannot use,
+   (`requireStaff('order.view')`); the sidebar hides links a role cannot use,
    but the guard is what protects the data.
 5. Pass Client Components narrow DTOs (row fields the table shows), never full
    rows with internal notes, cost prices or customer contact data they do

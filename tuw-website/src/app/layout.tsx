@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
 import { Providers } from './providers';
+import { getSessionSummary } from '@/server/session';
 import BrandIntro from '@storefront/components/layout/BrandIntro';
 
 // Self-hosted Outfit for headings and body (vendored from @fontsource, OFL licensed).
@@ -53,7 +54,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           Skip to main content
         </a>
-        <Providers>
+        {/* Un-awaited: read with use() inside Suspense boundaries. */}
+        <Providers session={getSessionSummary()}>
           {/* Reads the URL; streamed so dynamic routes keep a static shell. */}
           <Suspense fallback={null}>
             <BrandIntro />

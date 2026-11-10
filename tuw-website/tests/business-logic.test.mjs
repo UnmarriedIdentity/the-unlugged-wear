@@ -265,14 +265,15 @@ describe('Deterministic local fonts (Windows == macOS)', () => {
 describe('Demo sign-in and checkout flow', () => {
   const read = (relative) => readFileSync(join(repoRoot, relative), 'utf8');
 
-  test('login only accepts the seeded demo account and account pages need a session', () => {
-    const auth = read('src/storefront/mocks/auth.ts');
+  test('login uses the real auth action and account pages need a session', () => {
     const login = read('src/app/login/page.tsx');
     const accountLayout = read('src/app/account/layout.tsx');
-    assert.ok(/export const DEMO_ACCOUNT = \{[\s\S]*email: '[^']+@[^']+',[\s\S]*password: '[^']+'/.test(auth), 'demo account is seeded in src/storefront/mocks/auth.ts');
-    assert.ok(login.includes('checkDemoCredentials(email, password)'), 'login checks the demo credentials');
-    assert.ok(!login.includes('any email and password will work'), 'login no longer accepts any credentials');
-    assert.ok(accountLayout.includes('<AccountGate>'), 'account routes are wrapped in the sign-in gate');
+    const proxy = read('src/proxy.ts');
+    assert.ok(login.includes('loginAction('), 'login calls the server login action');
+    assert.ok(!login.includes('checkDemoCredentials'), 'the demo credential check is gone');
+    assert.ok(!existsSync(join(repoRoot, 'src/storefront/mocks/auth.ts')), 'demo auth adapter removed');
+    assert.ok(accountLayout.includes('<AccountGate>'), 'account routes keep the in-page sign-in fallback');
+    assert.ok(proxy.includes("pathname.startsWith('/account/')"), 'proxy.ts protects /account/*');
   });
 
   test('express delivery replaces the standard fee instead of adding to it', () => {

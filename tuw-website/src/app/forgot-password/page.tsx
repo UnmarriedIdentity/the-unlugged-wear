@@ -8,21 +8,30 @@ import Breadcrumb from '@storefront/components/ui/Breadcrumb';
 import Input from '@storefront/components/ui/Input';
 import Button from '@storefront/components/ui/Button';
 import { ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { forgotPasswordAction } from '@/server/auth-actions';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [devLink, setDevLink] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !email.includes('@')) return;
 
     setIsSubmitting(true);
-    setTimeout(() => {
+    setError(null);
+    void forgotPasswordAction({ email }).then((result) => {
       setIsSubmitting(false);
+      if (!result.ok) {
+        setError(result.error.message); // email stays typed
+        return;
+      }
+      setDevLink(result.data.devLink);
       setSubmitted(true);
-    }, 700);
+    });
   };
 
   return (
@@ -56,14 +65,23 @@ export default function ForgotPasswordPage() {
               <p className="text-xs text-[#666] leading-relaxed">
                 If an account exists for <strong>{email}</strong>, you will receive password reset instructions.
               </p>
+              {devLink && (
+                <p role="note" className="text-xs text-[#666] leading-relaxed">
+                  Email delivery is not connected yet (development).{' '}
+                  <a href={devLink} className="font-semibold text-[#1A1A1A] underline">Open the reset link</a>
+                </p>
+              )}
               <div className="pt-2">
-                <Button variant="secondary" size="sm" href="/reset-password">
-                  Go to Password Reset Simulation
+                <Button variant="secondary" size="sm" href="/login">
+                  Back to log in
                 </Button>
               </div>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-3.5 py-3 text-sm text-red-700">{error}</p>
+              )}
               <Input
                 label="Email Address"
                 type="email"

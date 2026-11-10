@@ -19,7 +19,8 @@ export interface AuthShellProps {
   caption: string;
   title: string;
   intro: string;
-  demoNotice: string;
+  /** Truthful notice for features still on demo adapters (e.g. email not sent). */
+  demoNotice?: string;
   children: React.ReactNode;
 }
 
@@ -93,13 +94,15 @@ export default function AuthShell({
           </div>
 
           {/* Truthful demo feedback (project rule): shown before any input */}
-          <div
-            role="note"
-            className="flex items-start gap-2.5 rounded-xl border border-store-gold/40 bg-store-cream px-3.5 py-3 text-sm text-store-text-primary"
-          >
-            <Info size={16} aria-hidden="true" className="mt-0.5 shrink-0 text-store-gold" />
-            <p>{demoNotice}</p>
-          </div>
+          {demoNotice && (
+            <div
+              role="note"
+              className="flex items-start gap-2.5 rounded-xl border border-store-gold/40 bg-store-cream px-3.5 py-3 text-sm text-store-text-primary"
+            >
+              <Info size={16} aria-hidden="true" className="mt-0.5 shrink-0 text-store-gold" />
+              <p>{demoNotice}</p>
+            </div>
+          )}
 
           {children}
         </div>

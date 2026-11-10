@@ -187,12 +187,12 @@ describe('Homepage typography roles (weight & size only)', () => {
 });
 
 
-describe('Honest demo authentication', () => {
-  test('login and register state demo status and fake no third-party sign-in', () => {
+describe('Honest authentication', () => {
+  test('auth pages are truthful about what is not live yet and fake no third-party sign-in', () => {
     const login = read('src/app/login/page.tsx');
     const register = read('src/app/register/page.tsx');
-    assert.ok(login.includes('demoNotice="Demo sign-in'), 'login must state it is a demo sign-in');
-    assert.ok(register.includes('demoNotice="Demo sign-up'), 'register must state it is a demo sign-up');
+    assert.ok(!login.includes('demoNotice="Demo sign-in'), 'login is real now — no demo notice');
+    assert.ok(register.includes('the confirmation email is not sent yet'), 'register states that email delivery is not connected');
     for (const src of [login, register]) {
       assert.ok(!/Sign in with (Google|Apple)/.test(src), 'no simulated Google/Apple sign-in buttons');
       assert.ok(src.includes('noValidate'), 'forms use inline errors instead of browser bubbles');

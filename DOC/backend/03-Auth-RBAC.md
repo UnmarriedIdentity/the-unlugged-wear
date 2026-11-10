@@ -213,9 +213,37 @@ visibility widens reads, file 17 §4), never a permission row.
 - Password change / explicit logout revokes all sessions via
   `idx_refresh_tokens_user_id`.
 - Login + refresh endpoints rate-limited (limits in `13-API-Contracts.md`).
-- Lockout: every attempt writes a `login_attempts` row; N failures inside
-  the window sets `users.locked_until`, and login reads that column
-  instead of recounting. A success clears both.
+- Lockout: every attempt writes a `login_attempts` row; **5 failures within
+  15 minutes** (since the last success) set `users.locked_until = now() + 15
+  min`, and login reads that column instead of recounting. A success or a
+  password reset clears it. Unknown emails run one bcrypt compare against a
+  dummy hash so timing never reveals whether an account exists.
+
+### As built (TL-BE-02, 2026-11-10)
+
+- **Access token:** HMAC-SHA256 signed (`AUTH_SECRET`, domain-separated per
+  app), 15 minutes, carries user id, name, email, role slugs and permission
+  slugs — so guards and `proxy.ts` need no database read. Role changes apply
+  at the next refresh (≤ 15 min); a role change or disable also revokes
+  refresh tokens.
+- **Refresh token:** 256-bit random, stored as SHA-256 in `refresh_tokens`
+  with `family_id` + `app` (`016-auth-sessions.sql`). Every refresh rotates;
+  replaying an already-rotated token (outside a 10-second grace for parallel
+  tabs) revokes the whole family.
+- **Cookies (httpOnly, SameSite=Lax, Secure in production):** storefront
+  `tuw_sf_at` / `tuw_sf_rt`, admin `tuw_admin_at` / `tuw_admin_rt`. "Remember
+  me" off = refresh cookie ends with the browser.
+- **Flows:** register (user + `customer` role + profile + solo household, in
+  one TX, then a verification link), email verification by button press
+  (`/verify-email`), forgot/reset (1-hour single-use link, revokes every
+  session), staff invite (7 days, one pending per email) → `/accept-invite`,
+  first admin via `pnpm auth:bootstrap-admin` (env `ADMIN_EMAIL`,
+  `ADMIN_PASSWORD`). At least one active admin always remains.
+- **Email:** `mock_email` adapter writes `email_logs` and sends nothing until
+  TL-INT-EMAIL; links are shown on screen only when
+  `AUTH_SHOW_DEV_LINKS=true` and not in production.
+- Code: `packages/heart/src/modules/auth`, `src/next/session.ts`,
+  `src/next/proxy.ts`; break-it tests `modules/auth/auth.int.test.ts`.
 - `last_login_at` updates are fire-and-forget (never block the login response).
 - Signup creates `users` + `profiles` + a solo `households` +
   `household_members` row in one TX (file 17 §4) — no user exists without

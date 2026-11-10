@@ -13,7 +13,7 @@ import { formatPaise, formatShortDate } from '@storefront/lib/format';
 import { RETURN_WINDOW_DAYS, deliveryEstimate } from '@storefront/lib/product';
 import { AlertCircle, ArrowLeft, ArrowRight, Download } from 'lucide-react';
 import { downloadInvoicePdf } from '@storefront/lib/invoice';
-import { useDemoSession } from '@storefront/mocks/auth';
+import { useSession } from '@storefront/lib/session';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -47,7 +47,7 @@ export default function OrderDetailPage({ params }: PageProps) {
   const { id } = use(params);
   const { getOrderById, getOrderByNumber, products } = useStore();
   const order = getOrderById(id) || getOrderByNumber(id);
-  const { session } = useDemoSession();
+  const { session } = useSession();
 
   if (!order) {
     return (

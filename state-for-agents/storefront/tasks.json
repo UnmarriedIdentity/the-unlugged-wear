@@ -11,11 +11,11 @@
   "_demo": "Figma source of truth established. First track TL-WEB-001 closed.",
   "summary": {
     "total": 114,
-    "done": 76,
+    "done": 79,
     "in_progress": 0,
-    "backlog": 38,
+    "backlog": 35,
     "total_tasks": 114,
-    "pending": 38
+    "pending": 35
   },
   "session": {
     "branch": "urvil-ui",
@@ -2075,14 +2075,14 @@
       "id": "TL-WEB-BE-02",
       "title": "Login and register on the DB",
       "category": "backend",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-WEB-BE",
-      "started": null,
-      "finished": null,
-      "verified": false,
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "verified": true,
       "design_match": null,
-      "pushed": false,
+      "pushed": true,
       "admin_ref": "TL-BE-02.07",
       "depends_on": [
         "TL-BE-02"
@@ -2094,20 +2094,21 @@
       ],
       "description": "Server actions with action({access:'public'}); keep typed values on error; remove the demo auth adapter from these screens.",
       "key_decisions": [],
-      "follow_ups": []
+      "follow_ups": [],
+      "log": "auth commit — /login and /register call loginAction/registerAction; demo auth adapter deleted; tests updated."
     },
     {
       "id": "TL-WEB-BE-03",
       "title": "Forgot password, reset password and email verification pages",
       "category": "backend",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-WEB-BE",
-      "started": null,
-      "finished": null,
-      "verified": false,
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "verified": true,
       "design_match": null,
-      "pushed": false,
+      "pushed": true,
       "admin_ref": "TL-BE-02.04",
       "depends_on": [
         "TL-BE-02"
@@ -2119,20 +2120,21 @@
       ],
       "description": "Mock email adapter: the dev link is shown on screen and logged in email_logs (truthful demo copy).",
       "key_decisions": [],
-      "follow_ups": []
+      "follow_ups": [],
+      "log": "auth commit — /forgot-password, /reset-password (token from link) and new /verify-email (button POST)."
     },
     {
       "id": "TL-WEB-BE-04",
       "title": "Storefront proxy.ts + session-aware header (account icon, sign out)",
       "category": "backend",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-WEB-BE",
-      "started": null,
-      "finished": null,
-      "verified": false,
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "verified": true,
       "design_match": null,
-      "pushed": false,
+      "pushed": true,
       "admin_ref": "TL-BE-02.06",
       "depends_on": [
         "TL-BE-02"
@@ -2143,7 +2145,8 @@
       ],
       "description": "Optimistic redirect for /account/* only; header session read inside Suspense ('use cache: private').",
       "key_decisions": [],
-      "follow_ups": []
+      "follow_ups": [],
+      "log": "auth commit — src/proxy.ts protects /account/*; header account link streams in Suspense from SessionProvider (use())."
     },
     {
       "id": "TL-WEB-BE-05",

@@ -9,7 +9,7 @@ import PaymentSimulationPanel from '@storefront/components/commerce/PaymentSimul
 import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
 import Listbox from '@storefront/components/ui/Listbox';
 import { useStore } from '@storefront/mocks/store';
-import { useDemoSession } from '@storefront/mocks/auth';
+import { useSession } from '@storefront/lib/session';
 import { RETURN_WINDOW_DAYS, deliveryEstimate, variantLabelOf } from '@storefront/lib/product';
 import { formatShortDate } from '@storefront/lib/format';
 import { Address, Order } from '@storefront/lib/types';
@@ -53,7 +53,7 @@ export default function CheckoutPage() {
     products,
   } = useStore();
 
-  const { session } = useDemoSession();
+  const { session } = useSession();
 
   // 3-step checkout flow matching Figma Node Checkout (media_1793276628297_7100bb4c.png)
   // Step 1: Your cart -> Step 2: Your details -> Step 3: Payment

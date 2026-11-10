@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { Suspense, useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -13,7 +13,7 @@ import {
   X,
 } from 'lucide-react';
 import { useStore } from '@storefront/mocks/store';
-import { useDemoSession } from '@storefront/mocks/auth';
+import { HeaderAccountLink, AccountLinkView } from './HeaderAccountLink';
 import MobileMenu from './MobileMenu';
 import CartDrawer from './CartDrawer';
 import TuwEmblem from './TuwEmblem';
@@ -347,13 +347,6 @@ const SOCIAL_LINKS = [
 export default function Header() {
   const pathname = usePathname();
   const { cartCount, wishlist, setIsCartDrawerOpen, products } = useStore();
-  const { session } = useDemoSession();
-  const initials = session?.name
-    .split(' ')
-    .map((part) => part[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchVal, setSearchVal] = useState('');
@@ -593,20 +586,10 @@ export default function Header() {
                 )}
               </Link>
 
-              {/* 3. Account / User Profile */}
-              <Link
-                href={session ? '/account' : '/login'}
-                aria-label={session ? `My account (${session.name})` : 'Log in'}
-                className="hidden sm:flex w-8 h-8 sm:w-9 sm:h-9 rounded-full items-center justify-center text-store-text-primary hover:text-black hover:bg-black/5 active:scale-95 transition-all cursor-pointer"
-              >
-                {initials ? (
-                  <span className="w-7 h-7 rounded-full bg-store-charcoal text-white text-2xs font-medium flex items-center justify-center">
-                    {initials}
-                  </span>
-                ) : (
-                  <User size={20} />
-                )}
-              </Link>
+              {/* 3. Account / User Profile — session streams; fallback is the signed-out icon */}
+              <Suspense fallback={<AccountLinkView session={null} />}>
+                <HeaderAccountLink />
+              </Suspense>
 
               {/* 4. Cart */}
               <button
