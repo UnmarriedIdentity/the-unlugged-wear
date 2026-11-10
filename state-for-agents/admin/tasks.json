@@ -8,8 +8,8 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 295,
-    "done": 266,
+    "total": 296,
+    "done": 267,
     "in_progress": 1,
     "backlog": 28
   },
@@ -5025,7 +5025,7 @@
       "parent": "TL-DB-BACKEND-PREP",
       "started": null,
       "finished": null,
-      "log": "Answered 2026-11-10: exchange price difference charged/refunded; exchanges need an account; COD refunds via UPI/bank transfer; gift cards sold on the website, separate from discount codes; old root docs rewritten; no money-back returns (Qikink offers none). Still open: (1) on an exchange, does the customer send the old garment back (to whom?) or keep it; (2) can a gift card and a discount code be used on the same order; (3) gift card expiry (RBI prepaid rules suggest >= 1 year); (4) shared packages/core vs per-app module copies; (5) Qikink live API access + webhook/tracking endpoints (ask care@qikink.com).",
+      "log": "Answered 2026-11-10: price difference charged/refunded; exchanges need an account; COD refunds via UPI/bank; gift cards sold on site, combinable with discount codes, expire 6 months after issue; old root docs rewritten; no money-back returns. Still open: (1) exchange policy for POD — customer keeps old garment vs ships it back, and whether personalised/custom prints are defects-only (proposed products.exchange_policy); (2) shared packages/core vs per-app module copies; (3) Qikink live API access + tracking/webhook endpoints; (4) legal check that a 6-month expiry suits a closed-loop store gift card.",
       "design_match": "n/a",
       "key_decisions": [],
       "verified": false,
@@ -5062,6 +5062,23 @@
       "key_decisions": [
         "Modular monolith per app, not microservices",
         "Modules own their tables and talk via index.ts + events"
+      ],
+      "verified": true,
+      "pushed": false
+    },
+    {
+      "id": "TL-DB-GIFT-CARD-RULES",
+      "title": "Gift cards: 6-month expiry, combinable with discount codes",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-DB-BACKEND-PREP",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "store_settings gift_card.validity_months = 6 (seed, 17 keys); 008 + doc 22 describe expiry at issue and discount-then-gift-card order of application. Admin 113/113.",
+      "design_match": "n/a",
+      "key_decisions": [
+        "Discount code applies first, gift card pays down the remainder",
+        "Expiry is a setting, not hard-coded"
       ],
       "verified": true,
       "pushed": false

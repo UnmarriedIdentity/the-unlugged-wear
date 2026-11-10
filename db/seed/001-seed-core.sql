@@ -215,7 +215,7 @@ INSERT INTO navigation_settings (id, scope, navbar) VALUES
   ('00000000-0000-4000-8000-000000080101', 'global', '{}')
 ON CONFLICT DO NOTHING;
 
--- ------------------------------------- 7. store_settings (16 keys)
+-- ------------------------------------- 7. store_settings (17 keys)
 -- Operational config only. No qikink.api_key, no gateway secret: those live
 -- in env (09 §store_settings). Values are typed jsonb, not strings.
 INSERT INTO store_settings (key, value) VALUES
@@ -233,6 +233,8 @@ INSERT INTO store_settings (key, value) VALUES
   ('exchange.window_days',       to_jsonb(7)),
   -- Admin low-stock alert level (products.low_stock_threshold overrides).
   ('inventory.low_stock_threshold', to_jsonb(10)),
+  -- Gift cards expire this many months after issue (gift_cards.expires_at).
+  ('gift_card.validity_months',  to_jsonb(6)),
   ('tax.included',               to_jsonb(true)),
   ('fulfillment.partner',        to_jsonb('qikink'::text)),
   ('fulfillment.environment',    to_jsonb('sandbox'::text)),

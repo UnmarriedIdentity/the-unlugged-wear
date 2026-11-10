@@ -59,7 +59,14 @@ Re-subscribing reuses the same row (status back to `pending`).
   product line; payment success issues the card, links it to that
   `order_items` row and emails the code to the recipient. A staff-issued
   card (goodwill) records `issued_by`.
-- Gift cards are a separate system from `discount_codes`.
+- Gift cards are a separate system from `discount_codes`, **and both can
+  be used on one order**: the discount code reduces the total first, then
+  the gift card pays down what remains (`orders.discount`, then
+  `orders.gift_card_amount`; payments cover the rest).
+- **Expiry: 6 months from issue** (`store_settings.gift_card.validity_months`
+  = 6 → `gift_cards.expires_at`). The expiry date is shown at purchase, in
+  the gift email and on the balance check. A daily job flips expired cards
+  to `status = 'expired'`; the remaining balance is not refundable.
 
 ## stock_alert_subscriptions
 

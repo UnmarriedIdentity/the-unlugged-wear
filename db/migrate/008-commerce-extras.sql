@@ -71,7 +71,9 @@ CREATE INDEX idx_faqs_created_by ON faqs (created_by);
 
 -- -------------------------------------------------------------- gift_cards
 -- Prepaid value redeemable at checkout. Not store credit: a gift card is
--- bought or issued as a code, never created from a refund.
+-- bought or issued as a code, never created from a refund. It can be
+-- combined with a discount code on the same order (discount first, then
+-- the gift card pays down the remaining total).
 -- balance is a cached figure; gift_card_transactions is the ledger that
 -- explains it, and both are written in the same transaction.
 CREATE TABLE gift_cards (
@@ -84,6 +86,7 @@ CREATE TABLE gift_cards (
   currency                char(3)       NOT NULL DEFAULT 'INR',
   status                  varchar(20)   NOT NULL DEFAULT 'active'
     CHECK (status IN ('active','disabled','expired','depleted')),
+  -- Set at issue: issue time + store_settings 'gift_card.validity_months' (6).
   expires_at              timestamptz,
   recipient_name          varchar(150),
   recipient_email         varchar(255),
