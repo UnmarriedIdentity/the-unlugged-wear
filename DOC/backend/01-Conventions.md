@@ -60,7 +60,7 @@
 - Errors follow the envelope in `13-API-Contracts.md`
   (`code/message/details/requestId`) — no bare 500s, no stack leaks.
 
-## 5. Migration rules (structure lives in code at `server/db/migrate/`)
+## 5. Migration rules (structure lives in code at `db/migrate/`)
 
 - **Numbered, single history:** `NNN-domain.sql` (`001-auth.sql`,
   `002-catalog.sql`…), strictly forward-only. No down migrations in v1 —

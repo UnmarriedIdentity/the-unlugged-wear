@@ -1,6 +1,6 @@
 # Database Feature Report — the-unplugged-wear
 
-> Scope: `tuw-admin/src/server/db/migrate/` (13 files, 88 tables) audited against
+> Scope: `db/migrate/` (13 files, 88 tables) audited against
 > `DOC/backend/` (01–21). Generated 2026-10-31. No schema changes made.
 
 ## 1. Cart — fully covered (`003-cart.sql`)

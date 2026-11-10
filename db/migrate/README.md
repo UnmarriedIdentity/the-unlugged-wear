@@ -60,7 +60,7 @@ See `DOC/backend/21-Idempotency.md`.
 
 ## Seed
 
-`src/server/db/seed/001-seed-core.sql` is a separate, re-runnable file
+`db/seed/001-seed-core.sql` is a separate, re-runnable file
 (roles, permissions, role grants, attribute library, styling slots + the
 30-row complement matrix, single-row settings, `store_settings` keys,
 coupon codes). It contains no credentials and no fabricated business data,

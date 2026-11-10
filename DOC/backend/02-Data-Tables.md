@@ -11,7 +11,7 @@
 
 1. **One database, real FKs everywhere.** Every arrow below is a true
    foreign key (`ON DELETE CASCADE` for owned children, restrictive
-   otherwise). Single migration history under `server/db/migrate/`.
+   otherwise). Single migration history under `db/migrate/` (repo root, shared by both apps).
 2. **UUIDv7 PKs, `timestamptz` created/updated pair** on every table.
 3. Money `DECIMAL(12,2)` + `CHECK >= 0`; statuses `varchar` + `CHECK IN`.
 

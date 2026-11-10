@@ -119,5 +119,5 @@ kilobytes — never the risk. Detail: `10-Analytics.md`, `11-Storage.md`.
   everywhere, cross-domain references as true constraints.** It is kept for
   history only — do not implement from it. Redis can return later as a cache
   if and when the infrastructure leaves Vercel; it is not part of v1.
-- The SQL files in `tuw-admin/src/server/db/migrate/` are the schema source
+- The SQL files in `db/migrate/` are the schema source
   of truth. A doc that disagrees with them is the bug.

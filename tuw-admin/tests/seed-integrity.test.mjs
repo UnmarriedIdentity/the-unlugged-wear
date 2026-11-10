@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 // ---------------------------------------------------------------
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const SEED_FILE = join(HERE, '..', 'src', 'server', 'db', 'seed', '001-seed-core.sql');
+const SEED_FILE = join(HERE, '..', '..', 'db', 'seed', '001-seed-core.sql');
 
 const raw = readFileSync(SEED_FILE, 'utf8');
 const sql = raw.replace(/--.*$/gm, '');

@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url';
 // ---------------------------------------------------------------
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const MIGRATE_DIR = join(HERE, '..', 'src', 'server', 'db', 'migrate');
+const MIGRATE_DIR = join(HERE, '..', '..', 'db', 'migrate');
 const DOCS_DIR = join(HERE, '..', '..', 'DOC', 'backend');
 
 // Apply order. Parents always precede their children, so 009 (which

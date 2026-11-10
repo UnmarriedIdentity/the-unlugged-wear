@@ -2,7 +2,7 @@
 
 > Status: Active | Last Updated: 2026-10-30
 > Companion to `02-Data-Tables.md`. These decisions bind the SQL in
-> `tuw-admin/src/server/db/migrate/` and the docs in this folder.
+> `db/migrate/` and the docs in this folder.
 
 ## 1. Edit-in-place policy
 
@@ -146,7 +146,7 @@ The blog slice is the final model, not a temporary v1:
 
 `009-partner.sql` forward-references `orders` and now applies cleanly
 because `004-orders.sql` precedes it in the apply order. No file is
-blocked; see `tuw-admin/src/server/db/migrate/README.md`.
+blocked; see `db/migrate/README.md`.
 
 ## 7. Derived, never stored
 

@@ -132,7 +132,7 @@ construction, cascade both sides. Reverse indexes:
 
 ### Seed block (idempotent, `ON CONFLICT DO NOTHING`)
 
-Lives in `src/server/db/seed/001-seed-core.sql` (guarded by
+Lives in `db/seed/001-seed-core.sql` (guarded by
 `tests/seed-integrity.test.mjs`), not in a migration.
 
 | Role | Grants | Reads like |
