@@ -11,7 +11,7 @@
 | Newsletter sign-up | `newsletter_subscribers` table | Guests subscribe without an account; double opt-in and unsubscribe history must outlive accounts; one row per email, linked to `users` when that person signs up |
 | FAQ page + product FAQs | `faqs` table | One table, `scope` = general / product / category |
 | Contact form | `support_tickets` with `source = 'contact_form'` (014) | Contact messages are support threads; one staff inbox |
-| Gift cards | `gift_cards` + `gift_card_transactions` | Balance + append-only ledger; redeemable at checkout |
+| Gift cards | `gift_cards` + `gift_card_transactions`; sold as a `products.product_kind = 'gift_card'` product | Bought on the storefront; separate from discount codes; balance + append-only ledger; redeemable at checkout; never sent to a fulfilment provider |
 | Back-in-stock alerts | `stock_alert_subscriptions` | Guests or customers ask to be emailed when a product/variant returns |
 | Low / out-of-stock alerts for staff | `notifications` (kind `inventory`) + `products.low_stock_threshold` + `store_settings.inventory.low_stock_threshold` | No new table: the existing bell + dedupe key covers it |
 | Free-shipping threshold | `store_settings.shipping.free_threshold` (₹3,000 seed) | Editable in admin settings, no deploy needed |
@@ -55,8 +55,11 @@ Re-subscribing reuses the same row (status back to `pending`).
   (card, order), so a retried checkout cannot spend twice.
 - Cancel/refund of an order that used a card writes a `reversal` that
   restores the balance.
-- A card bought on the storefront links to the paying `order_items` row;
-  a staff-issued card records `issued_by`.
+- Cards are bought on the storefront: a `product_kind = 'gift_card'`
+  product line; payment success issues the card, links it to that
+  `order_items` row and emails the code to the recipient. A staff-issued
+  card (goodwill) records `issued_by`.
+- Gift cards are a separate system from `discount_codes`.
 
 ## stock_alert_subscriptions
 

@@ -56,7 +56,7 @@ row counts are unchanged.
 | `products.stock` / `stock_movements` | Balance for fast reads; ledger for audit. |
 | `products.price` / `product_variants.price` | Materialized "From" price; exact variant price. |
 | `products.internal_serial_no` / `product_source_rows.source_serial_no` | Display reference; import lineage (a product may span rows). |
-| `partner_orders.awb` / `shipments.tracking_number` | Raw Qikink sync seam; customer-facing shipment projection. |
+| `fulfillment_orders.awb` / `shipments.tracking_number` | Raw provider sync seam; customer-facing shipment projection. |
 | `products.tags[]` / `collections` | Facets/search; curated merchandising pages. |
 | `size_charts.rows` / `product_variants` | Display measurements; sellable combinations. |
 | `photo_settings` JSONB | Whole-document gallery presentation, not relational state. |
@@ -129,6 +129,11 @@ The blog slice is the final model, not a temporary v1:
   source only; `store_credit` is removed from `refunds.method` and
   `returns.resolution`. Gift cards (file 22) are a separate, purchased
   product, not a refund outcome.
+- **No money-back returns; provider-agnostic fulfilment** (2026-11-10).
+  Qikink does not take garments back, so `returns.type` is `exchange` or
+  `replacement` only. `partner_orders` / `partner_wallet_ledger` were
+  replaced by the `009-fulfillment.sql` tables so another partner, courier
+  or gateway is a data row + adapter, never a schema change.
 - **`media.usage` is the only category vocabulary.** The admin library's
   chips map onto it (`photoshoot` → `section`, `brand` → `section`,
   `banner` → `section`, `design` → `design`); there is no parallel
@@ -145,11 +150,11 @@ The blog slice is the final model, not a temporary v1:
 
 | Status | Tables | Where |
 |---|---:|---|
-| Implemented DDL | 94 | all 14 files, `001`–`014` (`008` added 2026-11-10) |
+| Implemented DDL | 99 | all 14 files, `001`–`014` (`008` added and `009` made provider-agnostic 2026-11-10) |
 | Specified, migration pending | 0 | — |
-| Planned total | 94 | |
+| Planned total | 99 | |
 
-`009-partner.sql` forward-references `orders` and now applies cleanly
+`009-fulfillment.sql` forward-references `orders` and now applies cleanly
 because `004-orders.sql` precedes it in the apply order. No file is
 blocked; see `db/migrate/README.md`.
 

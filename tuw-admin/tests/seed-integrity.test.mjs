@@ -42,7 +42,7 @@ describe('seed integrity', () => {
   test('the seed file exists and only inserts', () => {
     assert.equal(existsSync(SEED_FILE), true, 'seed file is missing');
     assert.equal(/^\s*(UPDATE|DELETE|DROP|TRUNCATE|ALTER)\b/im.test(sql), false);
-    assert.equal(inserts.length, 13);
+    assert.equal(inserts.length, 14);
   });
 
   test('every statement is idempotent', () => {
@@ -95,6 +95,15 @@ describe('seed integrity', () => {
       assert.match(storeSettings, new RegExp(`'${key.replace(/\./g, '\\.')}'`), `${key} missing`);
     }
     assert.equal(/api_key|secret|password|token/i.test(storeSettings), false, 'a secret key reached store_settings');
+  });
+
+  test('integration providers are registry rows with no secrets', () => {
+    const providers = insertFor('integration_providers');
+    assert.equal(rowCount(providers), 7);
+    for (const slug of ['mock', 'razorpay', 'qikink']) {
+      assert.match(providers, new RegExp(`'${slug}'`));
+    }
+    assert.equal(/secret|api_key|password|token/i.test(providers), false);
   });
 
   test('coupons carry no fabricated redemption counts or expiry windows', () => {

@@ -215,7 +215,7 @@ INSERT INTO navigation_settings (id, scope, navbar) VALUES
   ('00000000-0000-4000-8000-000000080101', 'global', '{}')
 ON CONFLICT DO NOTHING;
 
--- ------------------------------------- 7. store_settings (14 keys)
+-- ------------------------------------- 7. store_settings (16 keys)
 -- Operational config only. No qikink.api_key, no gateway secret: those live
 -- in env (09 §store_settings). Values are typed jsonb, not strings.
 INSERT INTO store_settings (key, value) VALUES
@@ -250,4 +250,25 @@ VALUES
   ('00000000-0000-4000-8000-000000090101', 'UNPLUGGED10', 'percent', 10, 999,  500, 0, true),
   ('00000000-0000-4000-8000-000000090102', 'FLAT200',     'fixed',   200, 1499, NULL, 0, true),
   ('00000000-0000-4000-8000-000000090103', 'MINIMAL10',   'percent', 10, NULL, NULL, 0, true)
+ON CONFLICT DO NOTHING;
+
+-- ---------------------------------- 9. integration_providers (7 rows)
+-- Registry rows only — no secrets (env only). Every provider starts
+-- inactive in sandbox except the demo 'mock' gateway; staff switch a
+-- provider live from admin settings once its keys are configured.
+INSERT INTO integration_providers (id, slug, name, category, environment, is_active, capabilities) VALUES
+  ('00000000-0000-4000-8000-000000100101', 'mock',           'Demo payments',  'payment',     'sandbox', true,
+   '{"refunds":true}'),
+  ('00000000-0000-4000-8000-000000100102', 'razorpay',       'Razorpay',       'payment',     'sandbox', false,
+   '{"refunds":true,"webhooks":true}'),
+  ('00000000-0000-4000-8000-000000100103', 'stripe',         'Stripe',         'payment',     'sandbox', false,
+   '{"refunds":true,"webhooks":true}'),
+  ('00000000-0000-4000-8000-000000100104', 'qikink',         'Qikink',         'fulfillment', 'sandbox', false,
+   '{"cod":true,"cancel":true,"cancelUntil":"Live","webhooks":false,"tracking":"poll","claimWindowDays":7,"rtoStorageDays":100,"wallet":true}'),
+  ('00000000-0000-4000-8000-000000100105', 'printrove',      'Printrove',      'fulfillment', 'sandbox', false,
+   '{}'),
+  ('00000000-0000-4000-8000-000000100106', 'custom_atelier', 'Custom Atelier', 'fulfillment', 'live',    false,
+   '{"inHouse":true}'),
+  ('00000000-0000-4000-8000-000000100107', 'shiprocket',     'Shiprocket',     'shipping',    'sandbox', false,
+   '{"webhooks":true}')
 ON CONFLICT DO NOTHING;

@@ -3,7 +3,7 @@
 -- Money is DECIMAL(12,2); totals are stored, never derived — a financial
 -- record must be immutable, not recomputed. Currency: INR (single currency).
 -- Order inside the file: discount_codes first (orders references it), then
--- orders and every owned child. 009-partner.sql applies after this file.
+-- orders and every owned child. 009-fulfillment.sql applies after this file.
 -- Idempotency: orders.idempotency_key + one_order_per_idempotency_key make a
 -- retried checkout return the stored order instead of creating a second one.
 
@@ -35,9 +35,11 @@ CREATE INDEX idx_discount_codes_active ON discount_codes (is_active, ends_at)
 --   * Guest order: no user/profile/household; guest_email + guest_name are the
 --     contact of record. Order tracking for guests is order_number + email.
 -- RESTRICT keeps financial history even if an account is disabled.
--- order_type 'exchange' marks the zero-cost replacement order an approved
--- exchange creates (returns.replacement_order_id), so revenue reports never
--- count the same garment twice.
+-- order_type marks follow-up orders created from a returns row
+-- (returns.replacement_order_id): 'exchange' = size/variant swap (grand_total
+-- = the price difference the customer pays, 0 when the new variant costs the
+-- same or less), 'replacement' = free reprint of a defective/damaged item.
+-- Revenue reports count only the money actually charged.
 CREATE TABLE orders (
   id                uuid          PRIMARY KEY,
   placed_by_user_id uuid          REFERENCES users (id) ON DELETE RESTRICT,
@@ -47,7 +49,7 @@ CREATE TABLE orders (
   guest_phone       varchar(20),
   order_number      varchar(30)   NOT NULL UNIQUE,
   order_type        varchar(20)   NOT NULL DEFAULT 'standard'
-    CHECK (order_type IN ('standard','exchange')),
+    CHECK (order_type IN ('standard','exchange','replacement')),
   -- Fulfillment axis (independent from payment). Spec vocabulary only.
   status            varchar(20)   NOT NULL DEFAULT 'pending'
     CHECK (status IN ('pending','confirmed','processing','shipped',
@@ -137,8 +139,8 @@ CREATE INDEX idx_osh_order_id ON order_status_history (order_id, created_at);
 CREATE TABLE payments (
   id             uuid          PRIMARY KEY,
   order_id       uuid          NOT NULL REFERENCES orders (id) ON DELETE CASCADE,
-  provider       varchar(30)   NOT NULL DEFAULT 'mock'
-    CHECK (provider IN ('mock','razorpay','stripe')),
+  -- Provider slug; FK to integration_providers (slug) added in 009.
+  provider       varchar(30)   NOT NULL DEFAULT 'mock',
   method         varchar(20)   NOT NULL DEFAULT 'upi'
     CHECK (method IN ('upi','card','netbanking','wallet','cod')),
   amount         DECIMAL(12,2) NOT NULL CHECK (amount >= 0),
@@ -163,14 +165,24 @@ CREATE TABLE refunds (
   -- in the application, the floor in the DB.
   amount     DECIMAL(12,2) NOT NULL CHECK (amount > 0),
   reason     varchar(255)  NOT NULL,
-  -- Money always goes back to the original payment source (no store credit).
+  -- How the money goes back (never store credit):
+  --   source        = reversal through the original gateway (prepaid orders)
+  --   upi           = manual UPI payout (COD orders, which have no gateway)
+  --   bank_transfer = manual NEFT/IMPS payout (COD fallback)
   method     varchar(30)   NOT NULL DEFAULT 'source'
-    CHECK (method IN ('source')),
+    CHECK (method IN ('source','upi','bank_transfer')),
+  -- Gateway refund id or bank UTR — proof the money left.
+  payout_reference          varchar(100),
+  -- Masked destination only ('name@okaxis', 'HDFC ••••1234'). Full account
+  -- numbers are never stored; staff collect them at payout time.
+  payout_destination_masked varchar(100),
   status     varchar(20)   NOT NULL DEFAULT 'processing'
     CHECK (status IN ('processing','completed','rejected')),
   actor      uuid          NOT NULL REFERENCES users (id) ON DELETE RESTRICT,
   created_at timestamptz   NOT NULL DEFAULT now(),
-  updated_at timestamptz   NOT NULL DEFAULT now()
+  updated_at timestamptz   NOT NULL DEFAULT now(),
+  -- A completed manual payout must carry its proof.
+  CHECK (status <> 'completed' OR method = 'source' OR payout_reference IS NOT NULL)
 );
 CREATE INDEX idx_refunds_order_id ON refunds (order_id);
 CREATE INDEX idx_refunds_payment_id ON refunds (payment_id);
@@ -186,28 +198,36 @@ CREATE UNIQUE INDEX one_open_refund ON refunds (order_id)
 -- ('requested'), which the old stage machine could not express. Restock writes
 -- stock_movements with reason 'return'; the refund is linked 1:1 instead of
 -- duplicating refund rows.
--- Exchange rules (enforced in the service layer, see 06-Orders-Payments.md):
--- only for a delivered order, within store_settings 'exchange.window_days'
--- (7) of shipments.delivered_at, and only for another variant of the same
--- product. The replacement ships as its own order_type='exchange' order
--- (replacement_order_id) so it reuses shipments + partner_orders unchanged.
--- Guest orders have no profile: requester_email is then the requester.
+-- Two request types (there are no money-back returns — the fulfilment
+-- partner does not take garments back):
+--   exchange    = another size/variant of the same product. Delivered orders
+--                 only, within store_settings 'exchange.window_days' (7) of
+--                 delivery. price_difference > 0 is charged on the
+--                 replacement order; < 0 is refunded (refund_id).
+--   replacement = defective / misprinted / damaged / wrong item, reported
+--                 within the partner claim window with unboxing evidence;
+--                 a fulfillment_claims row (009) goes to the partner.
+-- Both require an account: a guest must sign up (and claim the order) first.
+-- The replacement ships as its own order (replacement_order_id), so it
+-- reuses shipments + fulfillment_orders unchanged.
 CREATE TABLE returns (
   id                      uuid          PRIMARY KEY,
   rma_number              varchar(30)   NOT NULL UNIQUE,   -- 'RMA-2026-000123'
   order_id                uuid          NOT NULL REFERENCES orders (id) ON DELETE RESTRICT,
   -- Who asked. A staff-logged request keeps the profile but has no user.
-  requested_by_profile_id uuid          REFERENCES profiles (id) ON DELETE RESTRICT,
+  requested_by_profile_id uuid          NOT NULL REFERENCES profiles (id) ON DELETE RESTRICT,
   requested_by_user_id    uuid          REFERENCES users (id) ON DELETE SET NULL,
-  requester_email         varchar(255),
-  type                    varchar(10)   NOT NULL DEFAULT 'return'
-    CHECK (type IN ('return','exchange')),
+  type                    varchar(12)   NOT NULL DEFAULT 'exchange'
+    CHECK (type IN ('exchange','replacement')),
   status                  varchar(20)   NOT NULL DEFAULT 'requested'
     CHECK (status IN ('requested','approved','rejected','pickup_scheduled',
                       'in_transit','received','inspected','completed',
                       'cancelled','disputed')),
   resolution              varchar(20)   NOT NULL DEFAULT 'pending'
-    CHECK (resolution IN ('pending','refund','exchange','none')),
+    CHECK (resolution IN ('pending','exchange','replacement','refund','none')),
+  -- Exchange only: new variant total − original line total (signed).
+  -- > 0 customer pays on the replacement order; < 0 refunded; 0 free swap.
+  price_difference        DECIMAL(12,2),
   customer_note           varchar(500),
   rejection_reason        varchar(255),
   carrier                 varchar(50),
@@ -224,8 +244,7 @@ CREATE TABLE returns (
   replacement_order_id    uuid          UNIQUE REFERENCES orders (id) ON DELETE RESTRICT,
   created_at              timestamptz   NOT NULL DEFAULT now(),
   updated_at              timestamptz   NOT NULL DEFAULT now(),
-  CHECK (requested_by_profile_id IS NOT NULL OR requester_email IS NOT NULL),
-  CHECK (replacement_order_id IS NULL OR type = 'exchange')
+  CHECK (price_difference IS NULL OR type = 'exchange')
 );
 CREATE INDEX idx_returns_order_id ON returns (order_id);
 CREATE INDEX idx_returns_status ON returns (status);
@@ -244,11 +263,12 @@ CREATE TABLE return_items (
   order_item_id       uuid          NOT NULL REFERENCES order_items (id) ON DELETE RESTRICT,
   qty                 integer       NOT NULL CHECK (qty > 0),
   reason_code         varchar(30)   NOT NULL
-    CHECK (reason_code IN ('size_fit','damaged','wrong_item','not_as_described',
-                           'quality','changed_mind','other')),
+    CHECK (reason_code IN ('size_fit','wrong_variant','damaged','misprint',
+                           'wrong_item','quality','other')),
   condition_note      varchar(500),
   disposition         varchar(20)   NOT NULL DEFAULT 'pending'
-    CHECK (disposition IN ('pending','restock','scrap','return_to_customer','exchange')),
+    CHECK (disposition IN ('pending','restock','scrap','return_to_customer',
+                           'exchange','replacement')),
   exchange_variant_id uuid          REFERENCES product_variants (id) ON DELETE RESTRICT,
   refund_amount       DECIMAL(12,2) CHECK (refund_amount >= 0),
   created_at          timestamptz   NOT NULL DEFAULT now(),
@@ -276,8 +296,8 @@ CREATE INDEX idx_rsh_return_id ON return_status_history (return_id, created_at);
 
 -- --------------------------------------------------------------- shipments
 -- Customer-facing projection. status mirrors the carrier and the admin
--- shipments page (out_for_delivery / exception included; 009-partner keeps
--- the raw Qikink state on partner_orders).
+-- shipments page (out_for_delivery / exception included; 009-fulfillment
+-- keeps the raw provider state on fulfillment_orders).
 CREATE TABLE shipments (
   id                    uuid        PRIMARY KEY,
   order_id              uuid        NOT NULL REFERENCES orders (id) ON DELETE CASCADE,

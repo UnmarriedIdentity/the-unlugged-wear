@@ -70,6 +70,10 @@ CREATE TABLE products (
   base_price         DECIMAL(12,2) CHECK (base_price >= 0),
   compare_at_price   DECIMAL(12,2) CHECK (compare_at_price >= 0),
   stock              integer       NOT NULL DEFAULT 0 CHECK (stock >= 0),
+  -- 'gift_card' products are digital: never sent to a fulfilment provider;
+  -- paying for one issues a gift_cards row (008).
+  product_kind       varchar(20)   NOT NULL DEFAULT 'physical'
+    CHECK (product_kind IN ('physical','gift_card')),
   -- Low-stock alert level for this product and its variants. NULL = use the
   -- store-wide store_settings 'inventory.low_stock_threshold'.
   low_stock_threshold integer      CHECK (low_stock_threshold >= 0),
@@ -77,11 +81,13 @@ CREATE TABLE products (
     CHECK (status IN ('draft','active','archived')),
   -- Fulfillment partner for this style. This is a catalog attribute (the
   -- product drawer's Partner field, and the storefront's partner filter),
-  -- NOT the Qikink order-sync seam in 009-partner.sql. NULL = produced
+  -- NOT the order-sync seam in 009-fulfillment.sql. NULL = produced
   -- in-house. Values are slugs; the UI labels ("Qikink Direct API",
   -- "Printrove Hub", "Custom Atelier") are a display concern.
-  partner_provider     varchar(20)
-    CHECK (partner_provider IN ('qikink','printrove','custom_atelier')),
+  -- Default fulfilment provider slug; FK to integration_providers (slug)
+  -- added in 009-fulfillment.sql. Per-variant provider SKUs live in
+  -- provider_product_mappings.
+  partner_provider     varchar(30),
   partner_availability varchar(20)
     CHECK (partner_availability IN ('ready_to_print','partner_delayed','discontinued')),
   tags               varchar(50)[],

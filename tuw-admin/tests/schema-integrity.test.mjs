@@ -27,7 +27,7 @@ const FILES = [
   '006-cms.sql',
   '007-cms-pages.sql',
   '008-commerce-extras.sql',
-  '009-partner.sql',
+  '009-fulfillment.sql',
   '010-attr-library.sql',
   '011-household.sql',
   '012-styling.sql',
@@ -112,7 +112,15 @@ const IMPLEMENTED = {
     'gift_card_transactions',
     'stock_alert_subscriptions',
   ],
-  '009-partner.sql': ['partner_orders', 'partner_wallet_ledger'],
+  '009-fulfillment.sql': [
+    'integration_providers',
+    'provider_product_mappings',
+    'provider_cod_remittances',
+    'fulfillment_orders',
+    'fulfillment_order_items',
+    'provider_wallet_ledger',
+    'fulfillment_claims',
+  ],
   '010-attr-library.sql': [
     'attribute_definitions',
     'attribute_values',
@@ -193,14 +201,14 @@ const block = (sql, table) =>
   sql.match(new RegExp(`CREATE\\s+TABLE\\s+${table}\\s*\\(([\\s\\S]*?)\\n\\);`, 'i'))?.[1] ?? '';
 
 describe('schema integrity', () => {
-  test('inventory matches the 94 implemented tables, file by file', () => {
+  test('inventory matches the 99 implemented tables, file by file', () => {
     const actual = {};
     for (const file of FILES) actual[file] = tablesIn(code(file));
 
     assert.deepEqual(actual, IMPLEMENTED);
-    assert.equal(EXPECTED_IMPLEMENTED, 94);
+    assert.equal(EXPECTED_IMPLEMENTED, 99);
     assert.equal(DOCUMENTED_ONLY.length, 0);
-    assert.equal(EXPECTED_TOTAL, 94);
+    assert.equal(EXPECTED_TOTAL, 99);
   });
 
   test('guest checkout, exchanges and no store credit are encoded in DDL', () => {
@@ -211,6 +219,12 @@ describe('schema integrity', () => {
     assert.match(ordersBlock, /orders_buyer_identity/i);
     assert.match(ordersBlock, /order_type\s+varchar\(20\)/i);
     assert.match(block(orders, 'returns'), /replacement_order_id\s+uuid\s+UNIQUE REFERENCES orders/i);
+    assert.match(block(orders, 'returns'), /requested_by_profile_id\s+uuid\s+NOT NULL/i);
+    assert.match(block(orders, 'returns'), /price_difference\s+DECIMAL/i);
+    assert.match(block(orders, 'refunds'), /'upi','bank_transfer'/);
+    // Provider slugs are data rows, not CHECK lists.
+    assert.match(code('009-fulfillment.sql'), /payments_provider_fk/);
+    assert.equal(/provider IN \(/i.test(code('005-platform.sql')), false);
     assert.equal(/store_credit/i.test(orders), false, 'store credit is not a feature');
     assert.match(code('014-operations.sql'), /'contact_form'/);
   });
@@ -247,10 +261,10 @@ describe('schema integrity', () => {
     }
   });
 
-  test('009-partner applies after 004-orders', () => {
-    assert.ok(FILES.indexOf('004-orders.sql') < FILES.indexOf('009-partner.sql'));
+  test('009-fulfillment applies after 004-orders', () => {
+    assert.ok(FILES.indexOf('004-orders.sql') < FILES.indexOf('009-fulfillment.sql'));
     // The dependency is real in the DDL, not just in the file name order.
-    assert.match(code('009-partner.sql'), /REFERENCES\s+orders\s*\(id\)/i);
+    assert.match(code('009-fulfillment.sql'), /REFERENCES\s+orders\s*\(id\)/i);
   });
 
   test('retired systems stay out of the DDL', () => {
@@ -290,13 +304,13 @@ describe('schema integrity', () => {
     assert.match(links, /\bdisplay_position\b\s+smallint/i);
   });
 
-  test('docs counts match 94 implemented tables', () => {
+  test('docs counts match 99 implemented tables', () => {
     const readme = read(join(DOCS_DIR, '00-README.md'));
     const dataTables = read(join(DOCS_DIR, '02-Data-Tables.md'));
     const catalog = read(join(DOCS_DIR, '04-Catalog.md'));
 
-    assert.match(readme, /Data at a glance \(94 tables, all implemented in DDL\)/);
-    assert.match(dataTables, /> 94 tables \(94 implemented DDL \+ 0 specified\)/);
+    assert.match(readme, /Data at a glance \(99 tables, all implemented in DDL\)/);
+    assert.match(dataTables, /> 99 tables \(99 implemented DDL \+ 0 specified\)/);
     assert.match(catalog, /> 17 tables\./);
 
     // Catalog = 002 (12) + 010 (5).
@@ -485,7 +499,7 @@ describe('schema integrity', () => {
 
   test('migration README declares the full apply order and no blocked file', () => {
     const readme = read(join(MIGRATE_DIR, 'README.md'));
-    assert.match(readme, /Total.*\*\*94\*\*/);
+    assert.match(readme, /Total.*\*\*99\*\*/);
     assert.equal(/blocked/i.test(readme), false, 'no file is blocked any more');
     for (const file of FILES) {
       assert.match(readme, new RegExp(file.replace('.', '\\.')), `${file} missing from the apply order`);

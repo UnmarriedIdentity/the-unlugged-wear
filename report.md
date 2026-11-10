@@ -37,7 +37,7 @@
 | Checkout idempotency | ✅ | `orders.idempotency_key` + `one_order_per_idempotency_key` |
 | Address snapshots | ✅ | `shipping_address` / `billing_address` JSONB |
 | Stock ledger linked to orders | ✅ | `stock_movements` (reason incl. `return`, `cancel`; `order_id` FK appended in 004) |
-| Partner fulfillment (Qikink) | ✅ | `009-partner.sql`: `partner_orders`, `partner_wallet_ledger` |
+| Partner fulfillment (Qikink and future providers) | ✅ | `009-fulfillment.sql`: provider registry, fulfilment orders/items, wallet, COD remittances, claims |
 | Order history per user / profile | ✅ | indexes on `placed_by_user_id`, `for_profile_id` |
 
 ## 3. Returns (RMA) — present (`004-orders.sql`)

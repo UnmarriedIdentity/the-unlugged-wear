@@ -30,7 +30,7 @@ custom and in-app with **bcrypt** password hashes — no third-party auth
 provider. Primary keys are **UUIDv7**. Depth: `12-Two-App-Deploy.md`,
 `13-API-Contracts.md`, `14-Access-Gating.md`.
 
-## 3. Data at a glance (94 tables, all implemented in DDL)
+## 3. Data at a glance (99 tables, all implemented in DDL)
 
 | Domain | Tables | Notes |
 |---|---|---|
@@ -38,13 +38,13 @@ provider. Primary keys are **UUIDv7**. Depth: `12-Two-App-Deploy.md`,
 | Household & family | households, household_members, profile_size_preferences, household_invitations, addresses | Family profiles (dependents need no email); proxy ordering is enforced by a composite FK on orders; sizes are shared, addresses are private per person (file 17) |
 | Catalog | categories, brands*, products, product_source_rows, product_variants, product_images, stock_movements, product_discounts, reviews, collections, collection_products, size_charts, attribute_definitions, attribute_values, product_attribute_links, product_attribute_link_values, product_variant_attribute_values | *brands: table created, seed/UI built in the backend phase; the attribute library is the single attribute system; `products.low_stock_threshold` drives staff stock alerts |
 | Cart & wishlist | carts, cart_items, wishlists, wishlist_items | Snapshot display fields; one-active-cart partial unique |
-| Orders & money | orders, order_items, order_status_history, payments, refunds, returns, return_items, return_status_history, discount_codes, shipments, shipment_events | Dual status axes; immutable snapshots; DECIMAL(12,2); **guest checkout** (`guest_email`/`guest_name`); returns are a request pipeline with a separate resolution axis; exchanges create a linked replacement order; no store credit; the tracking timeline is a child table |
+| Orders & money | orders, order_items, order_status_history, payments, refunds, returns, return_items, return_status_history, discount_codes, shipments, shipment_events | Dual status axes; immutable snapshots; DECIMAL(12,2); **guest checkout** (`guest_email`/`guest_name`); returns are a request pipeline with a separate resolution axis; exchanges (customer pays/gets back the price difference) and defect replacements create a linked follow-up order; no money-back returns; no store credit; COD refunds by UPI/bank transfer; the tracking timeline is a child table |
 | Platform | import_jobs, email_logs, notification_templates, idempotency_keys, webhook_events | CSV pipeline reports; delivery states; HTTP-retry and provider-replay dedupe (file 21) |
 | CMS (jsonb, no Mongo) | media, blog_categories, blog_authors, blog_tags, blogs, blog_post_tags, blog_revisions, blog_slug_history, blog_post_media, design_assets, cms_sections, cms_settings, navigation_settings, pages, store_settings | No `content_html`, no `blog_statuses`, no `views` column; `design_assets` is the print-artwork library |
 | Analytics (partitioned) | page_views, analytics_sessions, cart_events, abandoned_carts, daily_stats, product_views, search_terms | Monthly partitions; raw events drop >30d, rollups kept; never plain `sessions` |
 | Operations | support_tickets, support_messages, notifications | Threads + staff replies (contact form = `source 'contact_form'`); in-app bell (email stays in logs) |
 | Commerce extras | newsletter_subscribers, faqs, gift_cards, gift_card_transactions, stock_alert_subscriptions | Newsletter opt-in, FAQ content, gift-card balance + ledger, back-in-stock requests (file 22) |
-| Partner seam | partner_orders, partner_wallet_ledger | Qikink sync + wallet trail (file 16) |
+| Integrations & fulfilment | integration_providers, provider_product_mappings, provider_cod_remittances, fulfillment_orders, fulfillment_order_items, provider_wallet_ledger, fulfillment_claims | Provider registry (payments, fulfilment, couriers) + Qikink-ready, provider-agnostic order sync, wallet, COD remittances and defect claims (file 16) |
 | Styling — Complete the Look | styling_slots, styling_category_slots, styling_slot_rules, styling_value_affinity, styling_overrides, styling_co_purchase, styling_events | Module-owned (file 19); **ships last — after the core store** |
 
 Search has **no table** in v1 — `tsvector` + GIN on products/categories
@@ -94,6 +94,9 @@ kilobytes — never the risk. Detail: `10-Analytics.md`, `11-Storage.md`.
 | 2026-11-10 | Guest checkout allowed (`orders.guest_*`); order statuses use the SQL vocabulary | RESOLVED (files 05, 06) |
 | 2026-11-10 | No store credit; exchanges = same-product variant swap, delivered orders only, 7-day window; cancel only while `pending` | RESOLVED (file 06) |
 | 2026-11-10 | New tables: newsletter, FAQs, gift cards, back-in-stock alerts; free-shipping threshold stays in `store_settings` | RESOLVED (file 22, `008-commerce-extras.sql`) |
+| 2026-11-10 | Exchange price difference charged or refunded; exchanges/replacements need an account (guests claim orders after sign-up); COD refunds via UPI/bank transfer | RESOLVED (file 06) |
+| 2026-11-10 | No money-back returns (Qikink offers none); fulfilment is provider-agnostic: Qikink = one `integration_providers` row + adapter | RESOLVED (file 16, `009-fulfillment.sql`) |
+| 2026-11-10 | Gift cards sold on the storefront (`products.product_kind = 'gift_card'`), separate from discount codes | RESOLVED (file 22) |
 | 2026-10-18 | Variant pricing ladder: base anchor + additive per-value adjustments; explicit cell overrides pinned; listed price = materialized min ("From") | RESOLVED (04-Catalog.md; admin build VPRICE-1/2) |
 
 ## 8. Doc map & status
@@ -116,7 +119,7 @@ kilobytes — never the risk. Detail: `10-Analytics.md`, `11-Storage.md`.
 | 13-API-Contracts.md | Storefront API + admin API route contracts | Draft |
 | 14-Access-Gating.md | Per-app middleware + wrapper guards | Active |
 | 15-Operations.md | Support threads, notifications | Filling |
-| 16-Partner-Qikink.md | POD partner seam + wallet | Draft |
+| 16-Fulfillment-Providers.md | Provider registry, Qikink adapter, fulfilment sync, wallet, claims | Draft |
 | 17-Household-Accounts.md | Family groups, profiles, proxy ordering | Filling |
 | 19-Styling-Recommendations.md | Complete the Look: slots, rules, refinement roadmap | Draft |
 | 20-Schema-Decisions.md | Retired systems, controlled duplication, vocabulary | Active |

@@ -68,7 +68,7 @@ When one app's write must become visible to the other (a storefront order
 appearing in the admin, an admin status change appearing on the customer's
 order page), both simply read the same rows. Side effects that need a
 worker (emails, Qikink submission, back-in-stock mails) are queued as rows
-(`email_logs`, `partner_orders`, `notifications`) and processed by the app
+(`email_logs`, `fulfillment_orders`, `notifications`) and processed by the app
 that owns them — no message broker in v1.
 
 ## Release order

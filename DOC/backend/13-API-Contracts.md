@@ -133,6 +133,7 @@ cannot merge twice.
 | POST | `/checkout` | G + `Idempotency-Key` | full TX scope (file 06). Guest body adds `{guestEmail, guestName, guestPhone?}` and skips the household fields; account checkout: copies `for_profile_id` **and** `for_household_id` from the cart — the composite FK then rejects a recipient who is not an active member of that household; the delivery address is the buyer's own (`addresses.profile_id = me`), and a per-line size override is stored on the order line only, never written to `profile_size_preferences`. 409 on stock, 422 on coupon. The key lands in `orders.idempotency_key` as well, so a retry after the 24h map expires still returns the same order |
 | GET | `/orders/:id` | C: placed-by or for-me / A | order + items + payments |
 | GET | `/me/orders` | C | cursor history (placed by me ∪ for me) |
+| POST | `/me/orders/claim` | C (verified email) | attaches the caller's guest orders (`guest_email` = their verified email) to their account |
 | POST | `/track` | – | guest track-order: `{orderNumber, email}` → status + shipment timeline (rate-limited; never reveals whether an email exists) |
 | POST | `/orders/:id/cancel` | G: placed-by or guest email match | allowed only while `status = 'pending'`; 409 otherwise |
 | GET | `/orders` | A | `?page=&status=&from=&to=&q=` |
@@ -147,13 +148,27 @@ outcome, the reason is per line (file 06).
 
 | Method | Path | Auth | Purpose |
 |---|---|---|---|
-| POST | `/` | G: placed-by, for-me, or guest email match | Exchange rules (file 06): order must be `delivered`, within 7 days of delivery, exchange variant must belong to the same product — 409 otherwise. `{orderId, type, items:[{orderItemId, qty, reasonCode, exchangeVariantId?}], note?}` → `returns` (`status='requested'`) + `return_items` + `return_status_history`, all one TX. 409 when `qty` would push `order_items.returned_qty` past `qty`; 422 when the exchange variant is missing for an exchange line |
+| POST | `/` | C: placed-by or for-me (account required — guests sign up and claim the order first) | `type` = `exchange` or `replacement` (no money-back returns). Exchange rules (file 06): order `delivered`, within 7 days of delivery, exchange variant of the same product — 409 otherwise; response carries `priceDifference` (> 0 → pay on the replacement order, < 0 → refund). Replacement requires evidence media ids (unboxing video) within the partner claim window. `{orderId, type, items:[{orderItemId, qty, reasonCode, exchangeVariantId?}], note?}` → `returns` (`status='requested'`) + `return_items` + `return_status_history`, all one TX. 409 when `qty` would push `order_items.returned_qty` past `qty`; 422 when the exchange variant is missing for an exchange line |
 | GET | `/me/returns` | C | my requests (as requester), with lines |
 | GET | `/:id` | C: requester or for-me / A | header + lines + timeline |
 | GET | `/` | A | `?status=&from=&to=&q=` — the admin board, same rows |
 | PATCH | `/:id/status` | A | `{status, note?}` → `returns.status` + history row; `rejected` requires a `rejection_reason` |
 | PATCH | `/:id/items/:itemId` | A | `{disposition, exchangeVariantId?, refundAmount?}` — restock writes `stock_movements` and bumps `returned_qty` |
-| POST | `/:id/refund` | A | creates the `refunds` row and sets `returns.refund_id` in one TX (UNIQUE = 1:1) |
+| POST | `/:id/refund` | A | creates the `refunds` row and sets `returns.refund_id` in one TX (UNIQUE = 1:1). COD orders: `method` `upi` / `bank_transfer` + `payoutReference` (UTR) + masked destination |
+
+## Fulfilment `/api/fulfillment` (admin API; file 16)
+
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| GET / PATCH | `/providers`, `/providers/:slug` | A | list registry rows; toggle active, sandbox/live, non-secret settings |
+| GET / PUT | `/mappings?variantId=` | A | provider SKU + payload per variant |
+| POST | `/orders/:orderId/submit` | A | create `fulfillment_orders` + call the adapter (idempotent per `external_ref`) |
+| POST | `/fulfillment-orders/:id/sync` | A | "Sync now": poll the provider once |
+| POST | `/fulfillment-orders/:id/cancel` | A | adapter cancel + wallet `cancel_credit` |
+| POST | `/fulfillment-orders/:id/reship` | A | re-ship an RTO parcel (new row, `reason = 'reship'`) |
+| GET / POST / PATCH | `/claims…` | A | defect claims with evidence + outcome |
+| GET / POST | `/wallet/:slug` | A | ledger + manual recharge / adjustment entry |
+| GET / POST | `/cod-remittances` | A | record and reconcile COD payouts |
 
 ## CMS `/api/cms`
 

@@ -84,7 +84,9 @@ keeps them in a signed-cookie session cart. **Guests can also check out**
 and the `orders_buyer_identity` CHECK makes "both or neither" impossible to
 break (file 06). Logging in during checkout is optional; when a guest does
 log in, the merge rule below runs and the order is placed as an account
-order instead. Guest orders are tracked with order number + email. The ownership
+order instead. Guest orders are tracked with order number + email. Exchanges and
+replacements need an account: a guest signs up with the same email and
+claims the order (file 06). The ownership
 CHECK (`user_id IS NOT NULL OR session_id IS NOT NULL`) makes an ownerless
 cart impossible, and the partial unique on active user carts makes the
 merge target unambiguous.

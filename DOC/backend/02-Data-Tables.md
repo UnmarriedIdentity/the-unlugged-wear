@@ -1,7 +1,7 @@
 # Data Tables — Full Inventory (single PostgreSQL)
 
 > Status: Filling | Last Updated: 2026-10-30
-> 94 tables (94 implemented DDL + 0 specified) + 1 deferred footnote (`search_documents`). Column detail lives in files 03–10,
+> 99 tables (99 implemented DDL + 0 specified) + 1 deferred footnote (`search_documents`). Column detail lives in files 03–10,
 > 15, 17, and 19; this file is the index, ending with the full relationship diagram.
 > Conventions (UUIDv7, money, indexes): `01-Conventions.md`.
 > Retired systems and controlled duplication: `20-Schema-Decisions.md`.
@@ -54,7 +54,7 @@ are stored hashed, and the app owns rotation + reuse detection.
 |---|---|---|
 | categories | Tree (`parent_id` self-FK), nav flags, slug, tsvector | self |
 | brands | **Table created** (v1). Seed data, admin UI and storefront queries are built in the backend phase | — |
-| products | Core row: sku/slug unique, style name/code, internal S.No + source group key, base_price anchor + materialized min price ("From"), compare, stock balance, status, tags, HSN, Clothing Specs, `photo_settings` jsonb, source/external import ids, `partner_provider` + `partner_availability` (who produces it and whether they can), soft-delete, tsvector | categories, brands (nullable), size_charts (nullable) |
+| products | Core row: `product_kind` (physical / gift_card — gift cards are never sent to a provider), `low_stock_threshold`, sku/slug unique, style name/code, internal S.No + source group key, base_price anchor + materialized min price ("From"), compare, stock balance, status, tags, HSN, Clothing Specs, `photo_settings` jsonb, source/external import ids, `partner_provider` + `partner_availability` (who produces it and whether they can), soft-delete, tsvector | categories, brands (nullable), size_charts (nullable) |
 | product_source_rows | One row per legacy workbook listing row: S.No, spreadsheet row number, raw snapshot; preserves rows that group into one product | products (cascade) |
 | product_variants | SKU-unique rows, source row, variant key, materialized effective price + override flag, stock, variant shipping overrides, active flag | products (cascade), product_source_rows (set null) |
 | product_images | Gallery order, one-primary partial unique, optional variant scope | products, variants |
@@ -99,16 +99,16 @@ per-product shopper-facing label. New types are rows, not tables.
 
 | Table | Purpose | Key links |
 |---|---|---|
-| orders | Number-unique, dual status axes, stored totals, address snapshots; **account order**: placed-by + for-profile + `for_household_id` (composite FK proves the recipient is a household member); **guest order**: `guest_email` + `guest_name` (+ `guest_phone`) instead — CHECK `orders_buyer_identity` allows exactly one shape; `order_type` (standard/exchange); `gift_card_amount` (added by 008); `idempotency_key` + partial unique so a retried checkout returns the same order | users (placed-by), profiles (for), households (for), discount_codes |
+| orders | Number-unique, dual status axes, stored totals, address snapshots; **account order**: placed-by + for-profile + `for_household_id` (composite FK proves the recipient is a household member); **guest order**: `guest_email` + `guest_name` (+ `guest_phone`) instead — CHECK `orders_buyer_identity` allows exactly one shape; `order_type` (standard/exchange/replacement); `gift_card_amount` (added by 008); `idempotency_key` + partial unique so a retried checkout returns the same order | users (placed-by), profiles (for), households (for), discount_codes |
 | order_items | Immutable snapshots (name/sku/price/line, options jsonb) + `returned_qty` with `CHECK (returned_qty <= qty)` | orders (cascade) |
 | order_status_history | Status timeline + actor | orders |
 | payments | Provider lifecycle, `method` (upi/card/netbanking/wallet/cod), unique transaction ref | orders |
-| refunds | Refund records: amount, reason, method (`source` only — no store credit), status, actor (one open refund per order partial unique) | orders, users (actor) |
-| returns | Customer request → RMA: `rma_number` unique, requester, `type` (return/exchange), `status` pipeline (requested…completed/cancelled/disputed), `resolution` axis (refund/exchange/none), decision fields, `refund_id` 1:1, `replacement_order_id` (exchange's replacement order), `requester_email` for guest orders | orders, profiles, users, refunds |
+| refunds | Refund records: amount, reason, method (`source` gateway reversal, or `upi` / `bank_transfer` manual payout for COD — never store credit) + payout reference + masked destination, status, actor (one open refund per order partial unique) | orders, users (actor) |
+| returns | Customer request → RMA: `rma_number` unique, requester, `type` (exchange/replacement — no money-back returns), `status` pipeline (requested…completed/cancelled/disputed), `resolution` axis (exchange/replacement/refund/none), signed `price_difference`, decision fields, `refund_id` 1:1, `replacement_order_id`; account required | orders, profiles, users, refunds |
 | return_items | Per-line qty + `reason_code` + disposition + `exchange_variant_id` + agreed line `refund_amount`; unique (return, order_item) | returns, order_items, product_variants |
 | return_status_history | Return timeline, written in the same TX as `returns.status` | returns (cascade) |
 | discount_codes | Code-unique coupons, caps, expiry | — |
-| shipments | Carrier/tracking/status + `pieces`, `shipped_at`, `estimated_delivery_at`, `delivered_at` | orders |
+| shipments | Carrier/tracking/status + `pieces`, `shipped_at`, `estimated_delivery_at`, `delivered_at`; `fulfillment_order_id` (added by 009) | orders, fulfillment_orders |
 | shipment_events | Tracking timeline rows (status/location/description/occurred_at); unique (shipment, occurred_at, status) so a repeated carrier sync cannot append the same scan twice | shipments (cascade) |
 
 ## Platform (5) → detail: `07-Import-Jobs.md`, `08-Notify.md`, `21-Idempotency.md`
@@ -188,12 +188,21 @@ Implemented in `008-commerce-extras.sql`.
 | gift_card_transactions | Append-only ledger: issue / redeem / reversal / adjust, amount, balance after; one redeem per (card, order) | gift_cards, orders (nullable) |
 | stock_alert_subscriptions | Back-in-stock requests (guest email or customer) per product/variant; waiting → notified / cancelled | products, product_variants (nullable), users (nullable) |
 
-## Partner seam (2) → detail: `16-Partner-Qikink.md`
+## Integrations & fulfilment (7) → detail: `16-Fulfillment-Providers.md`
+
+Implemented in `009-fulfillment.sql`. Provider-agnostic: Qikink is one
+`integration_providers` row plus an adapter; a new partner, courier or
+gateway is a new row, not a new table.
 
 | Table | Purpose | Key links |
 |---|---|---|
-| partner_orders | Our order ↔ Qikink order/AWB/courier/status/raw/synced_at — one per order (unique) | orders |
-| partner_wallet_ledger | Credit debit/refund per order (Rs.1=1 trail) | orders |
+| integration_providers | Registry of payment / fulfilment / shipping / email / SMS providers: unique slug, category, sandbox/live, active flag, capabilities + non-secret settings jsonb. `products.partner_provider`, `payments.provider`, `webhook_events.provider` are FKs to its slug | — |
+| provider_product_mappings | Variant → provider SKU + provider payload (Qikink print type, designs, placements, mockups) + unit cost; unique (provider, variant) | integration_providers, product_variants |
+| provider_cod_remittances | COD money the provider collected and paid back (transfer ref, amount, fees, wallet/bank) | integration_providers |
+| fulfillment_orders | One per order per provider send (split, re-ship): our external ref, provider order id, normalized status + raw provider status, gateway, COD amount, provider cost, courier, AWB, RTO storage deadline, remittance link, sync state | orders, integration_providers, provider_cod_remittances |
+| fulfillment_order_items | Which order lines (qty, SKU snapshot) went in which provider order | fulfillment_orders, order_items |
+| provider_wallet_ledger | Prepaid provider wallet: recharge, order debit, cancel/claim credit, COD-to-wallet, withdrawal, adjustment | integration_providers, fulfillment_orders, provider_cod_remittances |
+| fulfillment_claims | Defect / damage / wrong item / lost-parcel claims to the provider with deadline, evidence media ids, ticket ref, resolution | fulfillment_orders, returns, users |
 
 ## Styling — Complete the Look (7, module-owned) → detail: `19-Styling-Recommendations.md`
 
@@ -213,7 +222,7 @@ core e-commerce app (file 19 §1).
 
 ## Deferred, not dropped
 
-Every table the spec asked for is now in the DDL — the count is 94
+Every table the spec asked for is now in the DDL — the count is 99
 implemented, 0 specified. What remains deferred is *behaviour*, not shape:
 
 - `search_documents` — `tsvector` + GIN on `products` and `categories`
@@ -314,8 +323,11 @@ erDiagram
     users |o--o{ support_tickets : opens
     support_tickets ||--o{ support_messages : threads
     users |o--o{ support_messages : answers
-    orders ||--o{ partner_orders : synced-to
-    orders ||--o{ partner_wallet_ledger : debits
+    orders ||--o{ fulfillment_orders : sent-as
+    fulfillment_orders ||--o{ fulfillment_order_items : contains
+    fulfillment_orders ||--o{ fulfillment_claims : disputed-by
+    integration_providers ||--o{ fulfillment_orders : fulfils
+    integration_providers ||--o{ provider_wallet_ledger : wallet
     styling_slots ||--o{ styling_category_slots : role-of
     categories ||--o{ styling_category_slots : mapped-by
     styling_slots ||--o{ styling_slot_rules : complements

@@ -101,8 +101,9 @@ CREATE INDEX idx_idempotency_keys_status ON idempotency_keys (status)
 -- also the replay log and the failed-delivery queue.
 CREATE TABLE webhook_events (
   id                 uuid        PRIMARY KEY,
-  provider           varchar(30) NOT NULL
-    CHECK (provider IN ('razorpay','stripe','qikink','shiprocket')),
+  -- Provider slug; FK to integration_providers (slug) is added in
+  -- 009-fulfillment.sql, so a new provider is a data row, not a migration.
+  provider           varchar(30) NOT NULL,
   provider_event_id  varchar(150) NOT NULL,
   event_type         varchar(100) NOT NULL,
   signature_verified boolean     NOT NULL DEFAULT false,

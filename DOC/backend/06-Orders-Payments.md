@@ -20,7 +20,7 @@
 | guest_name | varchar(150) | NULL | Guest's name (required when `guest_email` is set) |
 | guest_phone | varchar(20) | NULL | Optional guest phone for delivery |
 | order_number | varchar(30) | NOT NULL, UNIQUE | Human key (`#2026-000123`); support lookup |
-| order_type | varchar(20) | NOT NULL DEFAULT 'standard', CHECK IN ('standard','exchange') | `exchange` = the replacement order an approved exchange creates (`returns.replacement_order_id`); excluded from revenue reports |
+| order_type | varchar(20) | NOT NULL DEFAULT 'standard', CHECK IN ('standard','exchange','replacement') | Follow-up orders created from a returns row (`returns.replacement_order_id`): `exchange` charges only the price difference, `replacement` is free |
 | gift_card_amount | DECIMAL(12,2) | NOT NULL DEFAULT 0, CHECK (>= 0) (added by 008) | Portion of `grand_total` paid by gift card; payments cover the rest (file 22) |
 | status | varchar(20) | NOT NULL DEFAULT 'pending', CHECK IN ('pending','confirmed','processing','shipped','delivered','cancelled','failed','refunded') | Fulfillment axis — independent from payment |
 | subtotal | DECIMAL(12,2) | NOT NULL, CHECK (>= 0) | Sum of line totals at purchase |
@@ -56,8 +56,8 @@ columns. Nothing in between can be stored.
 
 Statuses are the SQL vocabulary above. The storefront's older demo words
 map onto it: `queued` → `confirmed`, `printing` → `processing`,
-`submission_failed` → `failed` (the raw Qikink state stays on
-`partner_orders`, file 16).
+`submission_failed` → `failed` (the raw provider state stays on
+`fulfillment_orders.provider_status`, file 16).
 
 - **Cancel:** the customer can cancel only while `status = 'pending'`.
   Once an order is `confirmed` it cannot be cancelled by the customer.
@@ -69,12 +69,31 @@ map onto it: `queued` → `confirmed`, `printing` → `processing`,
   customer who ordered the wrong item and whose order has not been
   delivered yet has no exchange path: they cancel (only while `pending`)
   and reorder. After the window closes the request is refused.
+- **Exchange pricing:** `returns.price_difference` = new variant price −
+  original line price. **> 0:** the replacement order's `grand_total` is the
+  difference and the customer pays it (same checkout/payment flow) before
+  it is sent to the fulfilment partner. **< 0:** the difference is refunded
+  (`refunds` row linked by `returns.refund_id`). **0:** free swap.
 - **Exchange fulfilment:** approval creates a replacement order
-  (`order_type = 'exchange'`, normally `grand_total = 0`) linked by
-  `returns.replacement_order_id`; it ships through the normal
-  `shipments` + `partner_orders` path, so tracking needs no extra table.
-- **Refunds** always go back to the original payment source. There is no
-  store credit.
+  (`order_type = 'exchange'`) linked by `returns.replacement_order_id`; it
+  ships through the normal `shipments` + `fulfillment_orders` path. With a
+  print-on-demand partner this is a **new partner order paid by us** —
+  Qikink does not do size exchanges itself.
+- **Defects (replacement):** damaged / misprinted / wrong item reported
+  within the partner's claim window (Qikink: 7 days from delivery, unboxing
+  video + photos required) → `returns.type = 'replacement'` + a
+  `fulfillment_claims` row to the partner. Approved → free replacement
+  order (`order_type = 'replacement'`), or a refund when a reprint is not
+  possible.
+- **No money-back returns.** The fulfilment partner (Qikink) offers no
+  customer returns for refund, so the storefront offers exchanges and
+  defect replacements only.
+- **Accounts required:** exchanges and replacements need a customer
+  account. A guest first signs up with the order's email; after the email
+  is verified, `POST /api/me/orders/claim` converts their guest orders to
+  account orders (guest fields cleared, user/profile/household set).
+- **Refunds** go back to the original payment source; COD orders are paid
+  out by UPI or bank transfer (`refunds.method`). There is no store credit.
 
 ## order_items
 
@@ -133,7 +152,9 @@ Indexes: PK · `idx_payments_order_id` · unique transaction_id.
 | payment_id | uuid | NULL, FK → payments(id) ON DELETE SET NULL | Source payment link |
 | amount | DECIMAL(12,2) | NOT NULL, CHECK (amount > 0 AND amount <= order grand_total — enforced in app, floor in DB) | Partial refunds allowed; never above paid total |
 | reason | varchar(255) | NOT NULL | Feed the Refund Volume KPI honestly |
-| method | varchar(30) | NOT NULL DEFAULT 'source', CHECK IN ('source') | Always back to the original payment source (no store credit) |
+| method | varchar(30) | NOT NULL DEFAULT 'source', CHECK IN ('source','upi','bank_transfer') | `source` = gateway reversal (prepaid). COD orders have no gateway, so staff pay out by `upi` (preferred) or `bank_transfer`. Never store credit |
+| payout_reference | varchar(100) | NULL; required when a `upi`/`bank_transfer` refund is `completed` (CHECK) | Gateway refund id or bank UTR — proof the money left |
+| payout_destination_masked | varchar(100) | NULL | Masked destination only (`name@okaxis`, `HDFC ••••1234`); full account numbers are never stored |
 | status | varchar(20) | NOT NULL DEFAULT 'processing', CHECK IN ('processing','completed','rejected') | Ops pipeline |
 | actor | uuid | NOT NULL, FK → users(id) ON DELETE RESTRICT | Who approved — accountability |
 | created_at / updated_at | timestamptz | NOT NULL | |
@@ -156,12 +177,12 @@ so the existing admin mock stays a subset — `restocked` is expressed as
 | returns | id | uuid | PK | |
 | returns | rma_number | varchar(30) | NOT NULL, UNIQUE | Human key (`RMA-2026-000123`); support + courier reference |
 | returns | order_id | uuid | NOT NULL, FK → orders(id) ON DELETE RESTRICT | |
-| returns | requested_by_profile_id | uuid | NULL, FK → profiles(id) ON DELETE RESTRICT | Who asked — the customer, or the member a proxy order was placed for. NULL only for a guest order |
-| returns | requester_email | varchar(255) | NULL | Guest requester (CHECK: profile **or** email is set) |
+| returns | requested_by_profile_id | uuid | NOT NULL, FK → profiles(id) ON DELETE RESTRICT | Who asked — the customer, or the member a proxy order was placed for (an account is required) |
 | returns | requested_by_user_id | uuid | NULL, FK → users(id) ON DELETE SET NULL | The login that submitted it; NULL = logged by staff |
-| returns | type | varchar(10) | NOT NULL DEFAULT 'return', CHECK IN ('return','exchange') | A return and an exchange are different journeys with the same table |
+| returns | type | varchar(12) | NOT NULL DEFAULT 'exchange', CHECK IN ('exchange','replacement') | Size/variant swap vs defect replacement. No money-back returns |
 | returns | status | varchar(20) | NOT NULL DEFAULT 'requested', CHECK IN ('requested','approved','rejected','pickup_scheduled','in_transit','received','inspected','completed','cancelled','disputed') | The request pipeline. `requested` is the state the old machine could not express (nothing has shipped yet) |
-| returns | resolution | varchar(20) | NOT NULL DEFAULT 'pending', CHECK IN ('pending','refund','exchange','none') | What the customer gets; decided at approval, settled at completion |
+| returns | resolution | varchar(20) | NOT NULL DEFAULT 'pending', CHECK IN ('pending','exchange','replacement','refund','none') | What the customer gets; `refund` only for a negative exchange difference or an unfixable defect |
+| returns | price_difference | DECIMAL(12,2) | NULL, signed; exchange only (CHECK) | > 0 customer pays on the replacement order; < 0 refunded |
 | returns | customer_note | varchar(500) | NULL | Their words |
 | returns | rejection_reason | varchar(255) | NULL | Required by the app when `status = 'rejected'` |
 | returns | carrier / tracking_number | varchar(50) / varchar(100) | NULL | Reverse pickup |
@@ -174,9 +195,9 @@ so the existing admin mock stays a subset — `restocked` is expressed as
 | return_items | return_id | uuid | NOT NULL, FK → returns(id) ON DELETE CASCADE | Owned child |
 | return_items | order_item_id | uuid | NOT NULL, FK → order_items(id) ON DELETE RESTRICT | History guard |
 | return_items | qty | integer | NOT NULL, CHECK (qty > 0) | |
-| return_items | reason_code | varchar(30) | NOT NULL, CHECK IN ('size_fit','damaged','wrong_item','not_as_described','quality','changed_mind','other') | The reason is **per garment** — "the tee fits, the pant does not" is normal, so a header-only reason loses information |
+| return_items | reason_code | varchar(30) | NOT NULL, CHECK IN ('size_fit','wrong_variant','damaged','misprint','wrong_item','quality','other') | The reason is **per garment** — "the tee fits, the pant does not" is normal, so a header-only reason loses information |
 | return_items | condition_note | varchar(500) | NULL | Inspector's note |
-| return_items | disposition | varchar(20) | NOT NULL DEFAULT 'pending', CHECK IN ('pending','restock','scrap','return_to_customer','exchange') | Restock writes `stock_movements` reason `return` |
+| return_items | disposition | varchar(20) | NOT NULL DEFAULT 'pending', CHECK IN ('pending','restock','scrap','return_to_customer','exchange','replacement') | Restock writes `stock_movements` reason `return` |
 | return_items | exchange_variant_id | uuid | NULL, FK → product_variants(id) ON DELETE RESTRICT | The replacement; CHECK forces it when `disposition = 'exchange'` |
 | return_items | refund_amount | DECIMAL(12,2) | NULL, CHECK (>= 0) | Agreed line refund; the header refund is the sum |
 | return_status_history | id | uuid | PK | |
