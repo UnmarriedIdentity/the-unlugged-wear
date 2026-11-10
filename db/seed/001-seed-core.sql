@@ -229,6 +229,10 @@ INSERT INTO store_settings (key, value) VALUES
   ('brand.color',                to_jsonb('#7539FF'::text)),
   ('shipping.free_threshold',    to_jsonb(3000)),
   ('shipping.standard_fee',      to_jsonb(150)),
+  -- Exchanges: days after delivery a customer may request a size/variant swap.
+  ('exchange.window_days',       to_jsonb(7)),
+  -- Admin low-stock alert level (products.low_stock_threshold overrides).
+  ('inventory.low_stock_threshold', to_jsonb(10)),
   ('tax.included',               to_jsonb(true)),
   ('fulfillment.partner',        to_jsonb('qikink'::text)),
   ('fulfillment.environment',    to_jsonb('sandbox'::text)),

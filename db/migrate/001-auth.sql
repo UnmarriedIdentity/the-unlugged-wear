@@ -32,6 +32,8 @@ CREATE TABLE permissions (
 CREATE TABLE users (
   id            uuid         PRIMARY KEY,
   email         varchar(255) NOT NULL UNIQUE,
+  -- bcrypt hash ($2b$, cost 12 — 60 chars; 255 leaves room for a future
+  -- algorithm). Hashing happens only in the API layer, never in SQL.
   password_hash varchar(255),
   status        varchar(20)  NOT NULL DEFAULT 'active'
     CHECK (status IN ('pending','active','disabled')),

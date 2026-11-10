@@ -82,13 +82,15 @@ describe('seed integrity', () => {
     assert.equal(rowCount(insertFor('navigation_settings')), 1);
 
     const storeSettings = insertFor('store_settings');
-    assert.equal((storeSettings.match(/^\s*\('/gm) ?? []).length, 14);
+    assert.equal((storeSettings.match(/^\s*\('/gm) ?? []).length, 16);
     for (const key of [
       'store.name',
       'brand.color',
       'shipping.free_threshold',
       'fulfillment.partner',
       'payments.stripe_live_mode',
+      'exchange.window_days',
+      'inventory.low_stock_threshold',
     ]) {
       assert.match(storeSettings, new RegExp(`'${key.replace(/\./g, '\\.')}'`), `${key} missing`);
     }
@@ -122,6 +124,6 @@ describe('seed integrity', () => {
         `the seed must not write ${table}`,
       );
     }
-    assert.equal(/argon2|\$argon2id\$/i.test(sql), false, 'no password hashes in the seed');
+    assert.equal(/argon2|\$argon2id\$|\$2[aby]\$\d{2}\$/i.test(sql), false, 'no password hashes in the seed');
   });
 });

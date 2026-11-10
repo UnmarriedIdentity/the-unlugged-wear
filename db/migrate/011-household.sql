@@ -116,8 +116,12 @@ CREATE UNIQUE INDEX one_default_billing_per_profile
 -- point. Same pattern as 004's stock_movements.order_id: this is still a
 -- from-scratch build, not a forward migration of a live schema. The pair makes
 -- "order for a member of my own household" a database rule, not a promise.
+-- Nullable only for guest orders: the CHECK ties it to the account columns,
+-- and the composite FK (MATCH SIMPLE) is skipped when the row is a guest's.
 ALTER TABLE orders
-  ADD COLUMN for_household_id uuid NOT NULL,
+  ADD COLUMN for_household_id uuid,
+  ADD CONSTRAINT orders_household_matches_buyer
+    CHECK ((placed_by_user_id IS NULL) = (for_household_id IS NULL)),
   ADD CONSTRAINT orders_for_household_member_fk
     FOREIGN KEY (for_household_id, for_profile_id)
     REFERENCES household_members (household_id, profile_id) ON DELETE RESTRICT;

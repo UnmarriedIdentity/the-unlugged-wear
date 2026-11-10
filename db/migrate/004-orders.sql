@@ -28,16 +28,26 @@ CREATE INDEX idx_discount_codes_active ON discount_codes (is_active, ends_at)
   WHERE is_active;
 
 -- ------------------------------------------------------------------ orders
--- Checkout requires a login: placed_by_user_id is the payer of record and is
--- never NULL (a guest cart must merge into a user before ordering). RESTRICT
--- keeps financial history even if an account is disabled.
--- for_profile_id is the recipient. 011-household.sql adds for_household_id and
--- the composite FK that proves the recipient is a member of that household.
+-- Two kinds of buyer, enforced by orders_buyer_identity:
+--   * Account order: placed_by_user_id (payer of record) + for_profile_id
+--     (recipient) are both set. 011-household.sql adds for_household_id and
+--     the composite FK that proves the recipient belongs to that household.
+--   * Guest order: no user/profile/household; guest_email + guest_name are the
+--     contact of record. Order tracking for guests is order_number + email.
+-- RESTRICT keeps financial history even if an account is disabled.
+-- order_type 'exchange' marks the zero-cost replacement order an approved
+-- exchange creates (returns.replacement_order_id), so revenue reports never
+-- count the same garment twice.
 CREATE TABLE orders (
   id                uuid          PRIMARY KEY,
-  placed_by_user_id uuid          NOT NULL REFERENCES users (id) ON DELETE RESTRICT,
-  for_profile_id    uuid          NOT NULL REFERENCES profiles (id) ON DELETE RESTRICT,
+  placed_by_user_id uuid          REFERENCES users (id) ON DELETE RESTRICT,
+  for_profile_id    uuid          REFERENCES profiles (id) ON DELETE RESTRICT,
+  guest_email       varchar(255),
+  guest_name        varchar(150),
+  guest_phone       varchar(20),
   order_number      varchar(30)   NOT NULL UNIQUE,
+  order_type        varchar(20)   NOT NULL DEFAULT 'standard'
+    CHECK (order_type IN ('standard','exchange')),
   -- Fulfillment axis (independent from payment). Spec vocabulary only.
   status            varchar(20)   NOT NULL DEFAULT 'pending'
     CHECK (status IN ('pending','confirmed','processing','shipped',
@@ -59,7 +69,13 @@ CREATE TABLE orders (
   idempotency_key   varchar(255),
   notes             text,
   created_at        timestamptz   NOT NULL DEFAULT now(),
-  updated_at        timestamptz   NOT NULL DEFAULT now()
+  updated_at        timestamptz   NOT NULL DEFAULT now(),
+  CONSTRAINT orders_buyer_identity CHECK (
+    (placed_by_user_id IS NOT NULL AND for_profile_id IS NOT NULL
+       AND guest_email IS NULL)
+    OR (placed_by_user_id IS NULL AND for_profile_id IS NULL
+       AND guest_email IS NOT NULL AND guest_name IS NOT NULL)
+  )
 );
 CREATE INDEX idx_orders_placed_by ON orders (placed_by_user_id, created_at DESC);
 CREATE INDEX idx_orders_for_profile ON orders (for_profile_id, created_at DESC);
@@ -67,8 +83,16 @@ CREATE INDEX idx_orders_discount_code_id ON orders (discount_code_id);
 CREATE INDEX idx_orders_status ON orders (status);
 CREATE INDEX idx_orders_created_at ON orders (created_at);
 CREATE INDEX idx_orders_payment_status ON orders (payment_status);
+-- Guest order lookup (track-order: order_number + email).
+CREATE INDEX idx_orders_guest_email ON orders (lower(guest_email))
+  WHERE guest_email IS NOT NULL;
+CREATE INDEX idx_orders_order_type ON orders (order_type)
+  WHERE order_type <> 'standard';
+-- Retry guard scoped per buyer: the user for account orders, the lowered
+-- email for guest orders.
 CREATE UNIQUE INDEX one_order_per_idempotency_key
-  ON orders (placed_by_user_id, idempotency_key)
+  ON orders ((COALESCE(placed_by_user_id::text, 'guest:' || lower(guest_email))),
+             idempotency_key)
   WHERE idempotency_key IS NOT NULL;
 
 -- ------------------------------------------------------------- order_items
@@ -139,8 +163,9 @@ CREATE TABLE refunds (
   -- in the application, the floor in the DB.
   amount     DECIMAL(12,2) NOT NULL CHECK (amount > 0),
   reason     varchar(255)  NOT NULL,
+  -- Money always goes back to the original payment source (no store credit).
   method     varchar(30)   NOT NULL DEFAULT 'source'
-    CHECK (method IN ('source','store_credit')),
+    CHECK (method IN ('source')),
   status     varchar(20)   NOT NULL DEFAULT 'processing'
     CHECK (status IN ('processing','completed','rejected')),
   actor      uuid          NOT NULL REFERENCES users (id) ON DELETE RESTRICT,
@@ -161,13 +186,20 @@ CREATE UNIQUE INDEX one_open_refund ON refunds (order_id)
 -- ('requested'), which the old stage machine could not express. Restock writes
 -- stock_movements with reason 'return'; the refund is linked 1:1 instead of
 -- duplicating refund rows.
+-- Exchange rules (enforced in the service layer, see 06-Orders-Payments.md):
+-- only for a delivered order, within store_settings 'exchange.window_days'
+-- (7) of shipments.delivered_at, and only for another variant of the same
+-- product. The replacement ships as its own order_type='exchange' order
+-- (replacement_order_id) so it reuses shipments + partner_orders unchanged.
+-- Guest orders have no profile: requester_email is then the requester.
 CREATE TABLE returns (
   id                      uuid          PRIMARY KEY,
   rma_number              varchar(30)   NOT NULL UNIQUE,   -- 'RMA-2026-000123'
   order_id                uuid          NOT NULL REFERENCES orders (id) ON DELETE RESTRICT,
   -- Who asked. A staff-logged request keeps the profile but has no user.
-  requested_by_profile_id uuid          NOT NULL REFERENCES profiles (id) ON DELETE RESTRICT,
+  requested_by_profile_id uuid          REFERENCES profiles (id) ON DELETE RESTRICT,
   requested_by_user_id    uuid          REFERENCES users (id) ON DELETE SET NULL,
+  requester_email         varchar(255),
   type                    varchar(10)   NOT NULL DEFAULT 'return'
     CHECK (type IN ('return','exchange')),
   status                  varchar(20)   NOT NULL DEFAULT 'requested'
@@ -175,7 +207,7 @@ CREATE TABLE returns (
                       'in_transit','received','inspected','completed',
                       'cancelled','disputed')),
   resolution              varchar(20)   NOT NULL DEFAULT 'pending'
-    CHECK (resolution IN ('pending','refund','store_credit','exchange','none')),
+    CHECK (resolution IN ('pending','refund','exchange','none')),
   customer_note           varchar(500),
   rejection_reason        varchar(255),
   carrier                 varchar(50),
@@ -188,8 +220,12 @@ CREATE TABLE returns (
   decided_at              timestamptz,
   -- UNIQUE = one refund per return, and it indexes the FK for free.
   refund_id               uuid          UNIQUE REFERENCES refunds (id) ON DELETE RESTRICT,
+  -- The replacement order an approved exchange creates (UNIQUE = one each).
+  replacement_order_id    uuid          UNIQUE REFERENCES orders (id) ON DELETE RESTRICT,
   created_at              timestamptz   NOT NULL DEFAULT now(),
-  updated_at              timestamptz   NOT NULL DEFAULT now()
+  updated_at              timestamptz   NOT NULL DEFAULT now(),
+  CHECK (requested_by_profile_id IS NOT NULL OR requester_email IS NOT NULL),
+  CHECK (replacement_order_id IS NULL OR type = 'exchange')
 );
 CREATE INDEX idx_returns_order_id ON returns (order_id);
 CREATE INDEX idx_returns_status ON returns (status);

@@ -10,6 +10,13 @@
 CREATE TABLE support_tickets (
   id          uuid         PRIMARY KEY,
   user_id     uuid         REFERENCES users (id) ON DELETE SET NULL,
+  -- Where the thread started. The storefront contact form writes
+  -- 'contact_form' rows here — contact messages and support threads are one
+  -- staff inbox, never two tables.
+  source      varchar(20)  NOT NULL DEFAULT 'account'
+    CHECK (source IN ('contact_form','account','order','admin')),
+  -- Optional order the thread is about ("where is my order?").
+  order_id    uuid         REFERENCES orders (id) ON DELETE SET NULL,
   -- A non-logged-in writer has no row to point at: one honest exception,
   -- recorded as columns rather than a fake user.
   guest_name  varchar(150),
@@ -30,6 +37,9 @@ CREATE TABLE support_tickets (
 CREATE INDEX idx_support_tickets_status_time ON support_tickets (status, updated_at DESC);
 CREATE INDEX idx_support_tickets_assignee ON support_tickets (assigned_to);
 CREATE INDEX idx_support_tickets_user_id ON support_tickets (user_id);
+CREATE INDEX idx_support_tickets_source ON support_tickets (source);
+CREATE INDEX idx_support_tickets_order_id ON support_tickets (order_id)
+  WHERE order_id IS NOT NULL;
 CREATE INDEX idx_support_tickets_guest_email ON support_tickets (guest_email)
   WHERE guest_email IS NOT NULL;
 

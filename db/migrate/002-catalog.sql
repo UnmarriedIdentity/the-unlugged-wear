@@ -29,7 +29,8 @@ CREATE INDEX idx_categories_navbar ON categories (is_active, show_in_navbar, sor
   WHERE is_active AND show_in_navbar;
 
 -- ----------------------------------------------------------------- brands
--- Defined but unbuilt in v1: DDL ships now, seed/UI/queries come at launch.
+-- Table created and part of v1. Seed rows, admin UI and storefront queries
+-- are built in the backend phase (no brand data is seeded yet).
 CREATE TABLE brands (
   id          uuid         PRIMARY KEY,
   name        varchar(150) NOT NULL,
@@ -69,6 +70,9 @@ CREATE TABLE products (
   base_price         DECIMAL(12,2) CHECK (base_price >= 0),
   compare_at_price   DECIMAL(12,2) CHECK (compare_at_price >= 0),
   stock              integer       NOT NULL DEFAULT 0 CHECK (stock >= 0),
+  -- Low-stock alert level for this product and its variants. NULL = use the
+  -- store-wide store_settings 'inventory.low_stock_threshold'.
+  low_stock_threshold integer      CHECK (low_stock_threshold >= 0),
   status             varchar(20)   NOT NULL DEFAULT 'draft'
     CHECK (status IN ('draft','active','archived')),
   -- Fulfillment partner for this style. This is a catalog attribute (the

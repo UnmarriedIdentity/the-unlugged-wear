@@ -2,7 +2,9 @@
 
 > No PostgreSQL instance exists yet. These files are edited in place until
 > the first provisioned database; afterward use forward migrations.
-> **89 tables across 13 files, all specified tables now written as DDL.**
+> **94 tables across 14 files, all specified tables now written as DDL.**
+> Location: repo-root `db/` — shared by both deployments (`tuw-admin`,
+> `tuw-website`), which connect to the same Neon Postgres database.
 
 ## Apply order
 
@@ -15,13 +17,14 @@
 | `005-platform.sql` | 5 | written | `001` (users) |
 | `006-cms.sql` | 10 | written | `001` (users) |
 | `007-cms-pages.sql` | 5 | written | `001` (users) |
+| `008-commerce-extras.sql` | 5 | written | `001`, `002`, `004` (orders, order_items; ALTERs orders) |
 | `009-partner.sql` | 2 | written | `001`, `004` (orders) |
 | `010-attr-library.sql` | 5 | written | `002` (products) |
 | `011-household.sql` | 5 | written | `001` (profiles), `002` (categories), `010` (attribute_values), `004` (orders, ALTER at end) |
 | `012-styling.sql` | 7 | written, ships last | `002` + `010` |
 | `013-analytics.sql` | 7 | written | `001`, `002`, `003` (carts) |
-| `014-operations.sql` | 3 | written | `001` (users) |
-| **Total** | **89** | | |
+| `014-operations.sql` | 3 | written | `001` (users), `004` (orders) |
+| **Total** | **94** | | |
 
 Every `REFERENCES` target is created by an earlier file in this list, so a
 single ordered pass applies cleanly. There are no forward references and no
