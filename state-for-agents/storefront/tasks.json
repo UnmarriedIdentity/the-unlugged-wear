@@ -2184,7 +2184,7 @@
       "follow_ups": [
         "Size preferences per member (with catalog)"
       ],
-      "log": "Profile tab (details, password, household), address book and checkout addresses on real data; household join page. Verified in browser."
+      "log": "75eea1e — Profile tab (details, password, household), address book and checkout addresses on real data; household join page. Verified in browser."
     },
     {
       "id": "TL-WEB-BE-06",
