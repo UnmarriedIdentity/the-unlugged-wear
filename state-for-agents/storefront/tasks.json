@@ -2095,7 +2095,7 @@
       "description": "Server actions with action({access:'public'}); keep typed values on error; remove the demo auth adapter from these screens.",
       "key_decisions": [],
       "follow_ups": [],
-      "log": "auth commit — /login and /register call loginAction/registerAction; demo auth adapter deleted; tests updated."
+      "log": "eb1506b — /login and /register call loginAction/registerAction; demo auth adapter deleted; tests updated."
     },
     {
       "id": "TL-WEB-BE-03",
@@ -2121,7 +2121,7 @@
       "description": "Mock email adapter: the dev link is shown on screen and logged in email_logs (truthful demo copy).",
       "key_decisions": [],
       "follow_ups": [],
-      "log": "auth commit — /forgot-password, /reset-password (token from link) and new /verify-email (button POST)."
+      "log": "eb1506b — /forgot-password, /reset-password (token from link) and new /verify-email (button POST)."
     },
     {
       "id": "TL-WEB-BE-04",
@@ -2146,7 +2146,7 @@
       "description": "Optimistic redirect for /account/* only; header session read inside Suspense ('use cache: private').",
       "key_decisions": [],
       "follow_ups": [],
-      "log": "auth commit — src/proxy.ts protects /account/*; header account link streams in Suspense from SessionProvider (use())."
+      "log": "eb1506b — src/proxy.ts protects /account/*; header account link streams in Suspense from SessionProvider (use())."
     },
     {
       "id": "TL-WEB-BE-05",
