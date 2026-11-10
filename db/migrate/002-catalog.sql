@@ -261,11 +261,19 @@ CREATE TABLE stock_movements (
   -- Sale/cancel/return linkage. The FK to orders is attached in
   -- 004-orders.sql (constraint only), because orders does not exist yet.
   order_id   uuid,
+  -- The order line it belongs to (FK attached in 004). Two lines of one
+  -- order can share product + variant (different personalisation), so the
+  -- line — not the product — is the duplicate key.
+  order_item_id uuid,
   qty_after  integer NOT NULL,
-  created_at timestamptz NOT NULL DEFAULT now()
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CHECK (reason NOT IN ('sale','cancel') OR order_item_id IS NOT NULL)
 );
 CREATE INDEX idx_stock_movements_order_id ON stock_movements (order_id)
   WHERE order_id IS NOT NULL;
+-- A retried checkout or cancel job can never take or give back stock twice.
+CREATE UNIQUE INDEX one_stock_movement_per_line_reason
+  ON stock_movements (order_item_id, reason) WHERE reason IN ('sale','cancel');
 CREATE INDEX idx_stock_movements_product_time
   ON stock_movements (product_id, created_at);
 CREATE INDEX idx_stock_movements_created_at ON stock_movements (created_at);

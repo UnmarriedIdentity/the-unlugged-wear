@@ -66,3 +66,8 @@ out of scope for v1.
 | `credit_notes` (+ items) | Same shape, linked to the invoice and the refund |
 
 Invoices are never edited; corrections are credit notes.
+
+Duplicate-proofing: `invoices.order_id` UNIQUE (one tax invoice per
+order), `credit_notes` unique per refund, and numbers come from
+`document_sequences` inside the same transaction, so a retried job can
+neither create a second invoice nor skip a number.

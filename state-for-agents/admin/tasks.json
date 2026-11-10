@@ -8,8 +8,8 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 318,
-    "done": 269,
+    "total": 319,
+    "done": 270,
     "in_progress": 1,
     "backlog": 48
   },
@@ -5394,6 +5394,23 @@
       "key_decisions": [
         "Suspense as low as possible; admin = one boundary per card/table",
         "Admin edits reach the storefront cache via a secret revalidation endpoint (separate deployments)"
+      ],
+      "verified": true,
+      "pushed": true
+    },
+    {
+      "id": "TL-DB-IDEMPOTENCY-AUDIT",
+      "title": "Idempotency audit: 10 missing duplicate guards added (refunds, payments, gift cards, stock, returns, fulfilment, wallet, claims, retry keys)",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-DB-BACKEND-PREP",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "refunds idempotency_key + unique payout reference; one captured payment per order; gift_cards purchased_unit_no; gift_card_transactions issue/reversal/adjust uniques; stock_movements.order_item_id + one sale/cancel per line; returns idempotency_key + one replacement per line; one initial provider submission per order; wallet debit/credit per fulfilment order; one open claim per type; idempotency_keys UNIQUE (scope, actor_ref, key) + new scopes. Doc 21 natural-key table rewritten; doc 24 invoice guards. Verified on Neon dev in a throwaway schema: 99 tables, seed x2, 15/15 duplicate checks rejected by the intended constraint and legit rows allowed; schema dropped (public still empty). Admin tests green.",
+      "design_match": "n/a",
+      "key_decisions": [
+        "Retry keys are scoped per caller so responses cannot be replayed across users",
+        "Stock guard keys on the order line, not the product, because personalised lines can share a variant"
       ],
       "verified": true,
       "pushed": true

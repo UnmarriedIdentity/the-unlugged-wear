@@ -69,8 +69,13 @@ CREATE TABLE idempotency_keys (
   id             uuid         PRIMARY KEY,
   -- checkout | payment.capture | refund.create | return.create | cart.merge
   -- import.apply | support.create | household.invite | auth.signup
-  -- auth.invite | auth.reset | cms.publish
+  -- auth.invite | auth.reset | cms.publish | order.cancel | order.claim
+  -- newsletter.subscribe | stock_alert.create | fulfillment.submit
+  -- claim.create | wallet.entry | gift_card.adjust
   scope          varchar(60)  NOT NULL,
+  -- Who sent it: 'user:<uuid>' or 'guest:<session id>'. Part of the unique
+  -- key, so one caller can never replay another caller's stored response.
+  actor_ref      varchar(80)  NOT NULL,
   key            varchar(255) NOT NULL,
   user_id        uuid         REFERENCES users (id) ON DELETE SET NULL,
   -- sha256(method + path + canonical body): a reused key with a different
@@ -87,7 +92,7 @@ CREATE TABLE idempotency_keys (
   expires_at     timestamptz  NOT NULL,
   created_at     timestamptz  NOT NULL DEFAULT now(),
   completed_at   timestamptz,
-  UNIQUE (scope, key)
+  UNIQUE (scope, actor_ref, key)
 );
 CREATE INDEX idx_idempotency_keys_user_id ON idempotency_keys (user_id);
 CREATE INDEX idx_idempotency_keys_expires_at ON idempotency_keys (expires_at);

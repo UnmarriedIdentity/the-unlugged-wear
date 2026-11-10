@@ -176,6 +176,7 @@ Indexes: PK · `idx_payments_order_id` · unique transaction_id.
 | method | varchar(30) | NOT NULL DEFAULT 'source', CHECK IN ('source','upi','bank_transfer') | `source` = gateway reversal (prepaid). COD orders have no gateway, so staff pay out by `upi` (preferred) or `bank_transfer`. Never store credit |
 | payout_reference | varchar(100) | NULL; required when a `upi`/`bank_transfer` refund is `completed` (CHECK) | Gateway refund id or bank UTR — proof the money left |
 | payout_destination_masked | varchar(100) | NULL | Masked destination only (`name@okaxis`, `HDFC ••••1234`); full account numbers are never stored |
+| idempotency_key | varchar(255) | NULL; unique per order | Retried refund action returns the same row; `(method, payout_reference)` is unique too |
 | status | varchar(20) | NOT NULL DEFAULT 'processing', CHECK IN ('processing','completed','rejected') | Ops pipeline |
 | actor | uuid | NOT NULL, FK → users(id) ON DELETE RESTRICT | Who approved — accountability |
 | created_at / updated_at | timestamptz | NOT NULL | |

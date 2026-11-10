@@ -132,6 +132,10 @@ CREATE TABLE fulfillment_orders (
   CHECK (gateway = 'cod' OR cod_amount IS NULL)
 );
 CREATE INDEX idx_fulfillment_orders_order_id ON fulfillment_orders (order_id);
+-- A retried submit job can never send the same order to a provider twice
+-- (a duplicate would be printed and charged twice). Re-ships are new rows.
+CREATE UNIQUE INDEX one_initial_submission_per_provider
+  ON fulfillment_orders (order_id, provider_id) WHERE reason = 'initial';
 CREATE UNIQUE INDEX one_provider_order_id
   ON fulfillment_orders (provider_id, provider_order_id) WHERE provider_order_id IS NOT NULL;
 CREATE INDEX idx_fulfillment_orders_awb ON fulfillment_orders (awb) WHERE awb IS NOT NULL;
@@ -186,6 +190,11 @@ CREATE INDEX idx_pwl_cod_remittance_id ON provider_wallet_ledger (cod_remittance
   WHERE cod_remittance_id IS NOT NULL;
 CREATE UNIQUE INDEX one_wallet_entry_per_external_ref
   ON provider_wallet_ledger (provider_id, external_ref) WHERE external_ref IS NOT NULL;
+-- One charge and one cancellation credit per provider order, even when the
+-- provider gives no transaction id.
+CREATE UNIQUE INDEX one_wallet_entry_per_fulfillment_kind
+  ON provider_wallet_ledger (fulfillment_order_id, kind)
+  WHERE fulfillment_order_id IS NOT NULL AND kind IN ('order_debit','cancel_credit');
 
 -- ------------------------------------------------------- fulfillment_claims
 -- A defect / damage / wrong-item / lost-parcel claim raised with the
@@ -220,3 +229,6 @@ CREATE INDEX idx_claims_return_id ON fulfillment_claims (return_id) WHERE return
 CREATE INDEX idx_claims_open ON fulfillment_claims (status, claim_deadline)
   WHERE status IN ('draft','submitted');
 CREATE INDEX idx_claims_created_by ON fulfillment_claims (created_by);
+-- One open claim per parcel per defect type.
+CREATE UNIQUE INDEX one_open_claim_per_type
+  ON fulfillment_claims (fulfillment_order_id, type) WHERE status IN ('draft','submitted');

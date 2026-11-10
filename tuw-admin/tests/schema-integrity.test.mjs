@@ -241,6 +241,35 @@ describe('schema integrity', () => {
     assert.match(block(orders, 'returns'), /cardinality\(evidence_media_ids\) >= 1/i);
   });
 
+  test('money and stock writes carry duplicate guards', () => {
+    const guards = {
+      '002-catalog.sql': ['one_stock_movement_per_line_reason'],
+      '004-orders.sql': [
+        'one_order_per_idempotency_key', 'one_captured_payment_per_order',
+        'one_refund_per_idempotency_key', 'one_refund_per_payout_reference',
+        'one_return_per_idempotency_key', 'one_exchange_per_order_item',
+        'one_replacement_per_order_item',
+      ],
+      '008-commerce-extras.sql': [
+        'one_gift_card_redeem_per_order', 'one_gift_card_issue',
+        'one_gift_card_reversal_per_order', 'one_gift_card_adjust_per_key',
+      ],
+      '009-fulfillment.sql': [
+        'one_initial_submission_per_provider', 'one_provider_order_id',
+        'one_wallet_entry_per_external_ref', 'one_wallet_entry_per_fulfillment_kind',
+        'one_open_claim_per_type',
+      ],
+    };
+    for (const [file, names] of Object.entries(guards)) {
+      const sql = code(file);
+      for (const name of names) {
+        assert.match(sql, new RegExp(`CREATE UNIQUE INDEX ${name}\\b`), `${file}: ${name} missing`);
+      }
+    }
+    assert.match(block(code('005-platform.sql'), 'idempotency_keys'), /UNIQUE \(scope, actor_ref, key\)/);
+    assert.match(block(code('008-commerce-extras.sql'), 'gift_cards'), /UNIQUE \(purchased_order_item_id, purchased_unit_no\)/);
+  });
+
   test('no duplicate CREATE TABLE names across files', () => {
     const seen = new Map();
     for (const file of FILES) {
@@ -458,7 +487,7 @@ describe('schema integrity', () => {
   test('idempotency guards live in the schema, not only in handlers', () => {
     const platform = code('005-platform.sql');
     const idem = block(platform, 'idempotency_keys');
-    assert.match(idem, /UNIQUE \(scope, key\)/i);
+    assert.match(idem, /UNIQUE \(scope, actor_ref, key\)/i);
     assert.match(block(platform, 'webhook_events'), /UNIQUE \(provider, provider_event_id\)/i);
 
     // Retried checkout cannot fork an order; survives idempotency_keys TTL.

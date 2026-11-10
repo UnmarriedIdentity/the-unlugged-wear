@@ -182,6 +182,10 @@ CREATE TABLE payments (
   updated_at     timestamptz   NOT NULL DEFAULT now()
 );
 CREATE INDEX idx_payments_order_id ON payments (order_id);
+-- Never charge twice: at most one successful payment per order (failed and
+-- pending attempts may pile up; a captured one cannot be joined by another).
+CREATE UNIQUE INDEX one_captured_payment_per_order
+  ON payments (order_id) WHERE status IN ('captured','refunded');
 CREATE INDEX idx_payments_status ON payments (status);
 
 -- ----------------------------------------------------------------- refunds
@@ -205,6 +209,9 @@ CREATE TABLE refunds (
   -- Masked destination only ('name@okaxis', 'HDFC ••••1234'). Full account
   -- numbers are never stored; staff collect them at payout time.
   payout_destination_masked varchar(100),
+  -- Client Idempotency-Key of the staff action that created it: a retried
+  -- "refund ₹500" returns this row instead of refunding again.
+  idempotency_key           varchar(255),
   status     varchar(20)   NOT NULL DEFAULT 'processing'
     CHECK (status IN ('processing','completed','rejected')),
   actor      uuid          NOT NULL REFERENCES users (id) ON DELETE RESTRICT,
@@ -220,6 +227,11 @@ CREATE INDEX idx_refunds_status ON refunds (status);
 -- Concurrency guard: no double-processing the same order.
 CREATE UNIQUE INDEX one_open_refund ON refunds (order_id)
   WHERE status = 'processing';
+CREATE UNIQUE INDEX one_refund_per_idempotency_key
+  ON refunds (order_id, idempotency_key) WHERE idempotency_key IS NOT NULL;
+-- A gateway refund id or bank UTR is proof of one payout — never two rows.
+CREATE UNIQUE INDEX one_refund_per_payout_reference
+  ON refunds (method, payout_reference) WHERE payout_reference IS NOT NULL;
 
 -- ----------------------------------------------------------------- returns
 -- Two independent axes: `status` is the customer/RMA pipeline, `resolution` is
@@ -272,6 +284,9 @@ CREATE TABLE returns (
   decided_at              timestamptz,
   -- UNIQUE = one refund per return, and it indexes the FK for free.
   refund_id               uuid          UNIQUE REFERENCES refunds (id) ON DELETE RESTRICT,
+  -- Client Idempotency-Key of the request: a double-submitted form returns
+  -- the same request instead of opening a second one.
+  idempotency_key         varchar(255),
   -- The replacement order an approved exchange creates (UNIQUE = one each).
   replacement_order_id    uuid          UNIQUE REFERENCES orders (id) ON DELETE RESTRICT,
   created_at              timestamptz   NOT NULL DEFAULT now(),
@@ -286,6 +301,8 @@ CREATE INDEX idx_returns_requested_by_profile_id
 CREATE INDEX idx_returns_tracking_number ON returns (tracking_number)
   WHERE tracking_number IS NOT NULL;
 CREATE INDEX idx_returns_decided_by ON returns (decided_by);
+CREATE UNIQUE INDEX one_return_per_idempotency_key
+  ON returns (requested_by_profile_id, idempotency_key) WHERE idempotency_key IS NOT NULL;
 
 -- ------------------------------------------------------------ return_items
 -- One row per garment: the reason is per item, and an exchange names its
@@ -326,6 +343,9 @@ CREATE TABLE return_items (
 );
 CREATE UNIQUE INDEX one_exchange_per_order_item
   ON return_items (order_item_id) WHERE request_type = 'exchange';
+-- One defect replacement per order line (the reprint is a new order line).
+CREATE UNIQUE INDEX one_replacement_per_order_item
+  ON return_items (order_item_id) WHERE request_type = 'replacement';
 CREATE INDEX idx_return_items_order_item_id ON return_items (order_item_id);
 CREATE INDEX idx_return_items_exchange_variant_id ON return_items (exchange_variant_id);
 
@@ -391,7 +411,10 @@ CREATE TABLE shipment_events (
 -- ------------------------------------ forward foreign key (constraint only)
 -- Every column lives in its own CREATE TABLE. Postgres cannot reference a
 -- table before it exists, so the one FK that points from an earlier file
--- (002 stock_movements.order_id) is attached here, where orders exists.
+-- (002 stock_movements.order_id / order_item_id) is attached here, where
+-- orders and order_items exist.
 ALTER TABLE stock_movements
   ADD CONSTRAINT stock_movements_order_fk
-    FOREIGN KEY (order_id) REFERENCES orders (id) ON DELETE SET NULL;
+    FOREIGN KEY (order_id) REFERENCES orders (id) ON DELETE SET NULL,
+  ADD CONSTRAINT stock_movements_order_item_fk
+    FOREIGN KEY (order_item_id) REFERENCES order_items (id) ON DELETE SET NULL;

@@ -93,11 +93,15 @@ CREATE TABLE gift_cards (
   message                 varchar(500),
   -- Bought on the storefront (the order line that paid for it) or issued by
   -- staff (issued_by). Either may be NULL for imported cards.
-  purchased_order_item_id uuid          UNIQUE REFERENCES order_items (id) ON DELETE RESTRICT,
+  purchased_order_item_id uuid          REFERENCES order_items (id) ON DELETE RESTRICT,
+  -- 1..qty of that line: a line buying 3 cards issues exactly 3, never 4.
+  purchased_unit_no       smallint      CHECK (purchased_unit_no >= 1),
   issued_by               uuid          REFERENCES users (id) ON DELETE SET NULL,
   created_at              timestamptz   NOT NULL DEFAULT now(),
   updated_at              timestamptz   NOT NULL DEFAULT now(),
-  CHECK (balance <= initial_value)
+  CHECK (balance <= initial_value),
+  CHECK ((purchased_order_item_id IS NULL) = (purchased_unit_no IS NULL)),
+  UNIQUE (purchased_order_item_id, purchased_unit_no)
 );
 CREATE INDEX idx_gift_cards_status ON gift_cards (status);
 CREATE INDEX idx_gift_cards_recipient_email ON gift_cards (lower(recipient_email))
@@ -118,14 +122,24 @@ CREATE TABLE gift_card_transactions (
   order_id      uuid          REFERENCES orders (id) ON DELETE RESTRICT,
   actor         varchar(50)   NOT NULL,                  -- user id or 'system'
   note          varchar(255),
+  -- Staff adjustments carry the action's Idempotency-Key (required).
+  idempotency_key varchar(255),
   created_at    timestamptz   NOT NULL DEFAULT now(),
-  CHECK (type NOT IN ('redeem','reversal') OR order_id IS NOT NULL)
+  CHECK (type NOT IN ('redeem','reversal') OR order_id IS NOT NULL),
+  CHECK (type <> 'adjust' OR idempotency_key IS NOT NULL)
 );
 CREATE INDEX idx_gct_gift_card_id ON gift_card_transactions (gift_card_id, created_at);
 CREATE INDEX idx_gct_order_id ON gift_card_transactions (order_id) WHERE order_id IS NOT NULL;
 -- A retried checkout cannot redeem the same card twice for one order.
 CREATE UNIQUE INDEX one_gift_card_redeem_per_order
   ON gift_card_transactions (gift_card_id, order_id) WHERE type = 'redeem';
+-- A card is issued once, and its balance is restored at most once per order.
+CREATE UNIQUE INDEX one_gift_card_issue
+  ON gift_card_transactions (gift_card_id) WHERE type = 'issue';
+CREATE UNIQUE INDEX one_gift_card_reversal_per_order
+  ON gift_card_transactions (gift_card_id, order_id) WHERE type = 'reversal';
+CREATE UNIQUE INDEX one_gift_card_adjust_per_key
+  ON gift_card_transactions (gift_card_id, idempotency_key) WHERE idempotency_key IS NOT NULL;
 
 -- orders.gift_card_amount (004) records how much of the total a gift card
 -- covered; grand_total stays the full order value.
