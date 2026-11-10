@@ -9,7 +9,9 @@
     "./modules/*": "./src/modules/*/index.ts",
     "./integrations/*": "./src/integrations/*/index.ts",
     "./platform/jobs/catalog": "./src/platform/jobs/catalog.ts",
-    "./platform/test": "./src/platform/test/index.ts"
+    "./platform/test": "./src/platform/test/index.ts",
+    "./modules/auth/tokens": "./src/modules/auth/tokens.ts",
+    "./platform/ids": "./src/platform/ids/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -19,7 +21,8 @@
     "drizzle-orm": "0.45.4",
     "pg": "8.13.1",
     "server-only": "0.0.1",
-    "zod": "^3.23.0"
+    "zod": "^3.23.0",
+    "bcryptjs": "3.0.3"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

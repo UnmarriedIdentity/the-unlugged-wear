@@ -34,6 +34,7 @@ const FILES = [
   '013-analytics.sql',
   '014-operations.sql',
   '015-claim-evidence.sql',
+  '016-auth-sessions.sql',
 ];
 
 const IMPLEMENTED = {
@@ -156,6 +157,7 @@ const IMPLEMENTED = {
   ],
   '014-operations.sql': ['support_tickets', 'support_messages', 'notifications'],
   '015-claim-evidence.sql': [],
+  '016-auth-sessions.sql': [],
 };
 
 // Every specified table is now written as DDL. Kept as an explicit empty

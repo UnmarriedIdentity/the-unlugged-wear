@@ -194,8 +194,10 @@ export const users = pgTable("users", {
 	lockedUntil: timestamp("locked_until", { withTimezone: true, mode: 'string' }),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true, mode: 'string' }),
 }, (table) => [
 	unique("users_email_key").on(table.email),
+	check("users_email_lowercase", sql`(email)::text = lower((email)::text)`),
 	check("users_status_check", sql`(status)::text = ANY ((ARRAY['pending'::character varying, 'active'::character varying, 'disabled'::character varying])::text[])`),
 ]);
 
@@ -237,23 +239,6 @@ export const permissions = pgTable("permissions", {
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
 	unique("permissions_slug_key").on(table.slug),
-]);
-
-export const refreshTokens = pgTable("refresh_tokens", {
-	id: uuid().primaryKey().notNull(),
-	userId: uuid("user_id").notNull(),
-	tokenHash: varchar("token_hash", { length: 255 }).notNull(),
-	expiresAt: timestamp("expires_at", { withTimezone: true, mode: 'string' }).notNull(),
-	revokedAt: timestamp("revoked_at", { withTimezone: true, mode: 'string' }),
-	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-}, (table) => [
-	index("idx_refresh_tokens_user_id").using("btree", table.userId.asc().nullsLast().op("uuid_ops")),
-	foreignKey({
-			columns: [table.userId],
-			foreignColumns: [users.id],
-			name: "refresh_tokens_user_id_fkey"
-		}).onDelete("cascade"),
-	unique("refresh_tokens_token_hash_key").on(table.tokenHash),
 ]);
 
 export const passwordResetTokens = pgTable("password_reset_tokens", {
@@ -312,6 +297,30 @@ export const loginAttempts = pgTable("login_attempts", {
 		}).onDelete("set null"),
 ]);
 
+export const refreshTokens = pgTable("refresh_tokens", {
+	id: uuid().primaryKey().notNull(),
+	userId: uuid("user_id").notNull(),
+	tokenHash: varchar("token_hash", { length: 255 }).notNull(),
+	expiresAt: timestamp("expires_at", { withTimezone: true, mode: 'string' }).notNull(),
+	revokedAt: timestamp("revoked_at", { withTimezone: true, mode: 'string' }),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	familyId: uuid("family_id").notNull(),
+	app: varchar({ length: 10 }).notNull(),
+	rotatedAt: timestamp("rotated_at", { withTimezone: true, mode: 'string' }),
+	userAgent: varchar("user_agent", { length: 255 }),
+}, (table) => [
+	index("idx_refresh_tokens_expires_at").using("btree", table.expiresAt.asc().nullsLast().op("timestamptz_ops")),
+	index("idx_refresh_tokens_family").using("btree", table.familyId.asc().nullsLast().op("uuid_ops")),
+	index("idx_refresh_tokens_user_id").using("btree", table.userId.asc().nullsLast().op("uuid_ops")),
+	foreignKey({
+			columns: [table.userId],
+			foreignColumns: [users.id],
+			name: "refresh_tokens_user_id_fkey"
+		}).onDelete("cascade"),
+	unique("refresh_tokens_token_hash_key").on(table.tokenHash),
+	check("refresh_tokens_app_check", sql`(app)::text = ANY ((ARRAY['storefront'::character varying, 'admin'::character varying])::text[])`),
+]);
+
 export const customerNotes = pgTable("customer_notes", {
 	id: uuid().primaryKey().notNull(),
 	profileId: uuid("profile_id").notNull(),
@@ -343,6 +352,7 @@ export const staffInvitations = pgTable("staff_invitations", {
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
 	index("idx_staff_invitations_email").using("btree", table.email.asc().nullsLast().op("text_ops")),
+	uniqueIndex("one_pending_staff_invitation_per_email").using("btree", sql`lower((email)::text)`).where(sql`((status)::text = 'pending'::text)`),
 	foreignKey({
 			columns: [table.invitedBy],
 			foreignColumns: [users.id],

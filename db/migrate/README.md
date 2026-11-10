@@ -7,7 +7,7 @@
 > change is a **new numbered file** (`015-…sql`). Until production exists,
 > a development database may instead be rebuilt with
 > `DB_ALLOW_RESET=true pnpm db:reset --yes` after editing a file in place.
-> **99 tables across 15 files, all specified tables now written as DDL.**
+> **99 tables across 16 files, all specified tables now written as DDL.**
 > Location: repo-root `db/` — shared by both deployments (`tuw-admin`,
 > `tuw-website`), which connect to the same Neon Postgres database.
 
@@ -30,6 +30,7 @@
 | `013-analytics.sql` | 7 | written | `001`, `002`, `003` (carts) |
 | `014-operations.sql` | 3 | written | `001` (users), `004` (orders) |
 | `015-claim-evidence.sql` | 0 | applied (forward) | `004`, `009` — Qikink evidence rules: `missing_item`, unboxing video required for wrong/missing-item claims |
+| `016-auth-sessions.sql` | 0 | applied (forward) | `001`, `005` — `users.email_verified_at` + lowercase email CHECK, refresh-token families per app, one pending invite per email |
 | **Total** | **99** | | |
 
 Every `REFERENCES` target is created by an earlier file in this list, so a

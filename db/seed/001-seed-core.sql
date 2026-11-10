@@ -259,7 +259,7 @@ VALUES
   ('00000000-0000-4000-8000-000000090103', 'MINIMAL10',   'percent', 10, NULL, NULL, 0, true)
 ON CONFLICT DO NOTHING;
 
--- ---------------------------------- 9. integration_providers (7 rows)
+-- ---------------------------------- 9. integration_providers (8 rows)
 -- Registry rows only — no secrets (env only). Every provider starts
 -- inactive in sandbox except the demo 'mock' gateway; staff switch a
 -- provider live from admin settings once its keys are configured.
@@ -277,5 +277,8 @@ INSERT INTO integration_providers (id, slug, name, category, environment, is_act
   ('00000000-0000-4000-8000-000000100106', 'custom_atelier', 'Custom Atelier', 'fulfillment', 'live',    false,
    '{"inHouse":true}'),
   ('00000000-0000-4000-8000-000000100107', 'shiprocket',     'Shiprocket',     'shipping',    'sandbox', false,
-   '{"webhooks":true}')
+   '{"webhooks":true}'),
+  -- Dev/demo email sender: writes email_logs only, sends nothing (until TL-INT-EMAIL).
+  ('00000000-0000-4000-8000-000000100108', 'mock_email',     'Demo email (log only)', 'email', 'sandbox', true,
+   '{}')
 ON CONFLICT DO NOTHING;

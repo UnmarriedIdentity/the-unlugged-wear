@@ -99,7 +99,7 @@ describe('seed integrity', () => {
 
   test('integration providers are registry rows with no secrets', () => {
     const providers = insertFor('integration_providers');
-    assert.equal(rowCount(providers), 7);
+    assert.equal(rowCount(providers), 8);
     for (const slug of ['mock', 'razorpay', 'qikink']) {
       assert.match(providers, new RegExp(`'${slug}'`));
     }
