@@ -321,7 +321,6 @@ export default function RefundsPage() {
             onChange={(e) => setRefundMethod(e.target.value)}
             options={[
               { value: 'Original Payment Method', label: 'Original Payment Method (Gateway Reversal)' },
-              { value: 'Store Credit Voucher', label: 'Store Credit Voucher' },
               { value: 'Manual Bank Wire Transfer', label: 'Manual Bank Wire Transfer' },
             ]}
           />

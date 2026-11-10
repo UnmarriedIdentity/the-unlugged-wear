@@ -1092,7 +1092,7 @@ export const initialRefunds: RefundItem[] = [
     customer: 'Michael Chang',
     reason: 'Defective hem stitching on sleeve',
     amount: 84.5,
-    method: 'Store Credit',
+    method: 'Original Payment Method',
     date: '14 Apr 2026',
     status: 'processing',
   },

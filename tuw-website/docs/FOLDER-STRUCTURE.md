@@ -47,7 +47,7 @@ tuw-website/
         commerce/               # ProductCard ProductGallery VariantSelector CartDrawer
         editorial/              # journal, lookbook and story blocks
       lib/                      # FLAT helpers — no subfolders until >8 files
-        supabase.ts             # browser + server clients
+        db.ts                   # server-only Neon Postgres client
         razorpay.ts             # Razorpay checkout + webhook verify (website-only)
         cn.ts                   # clsx + tailwind-merge
         format.ts               # currency (INR), date formatters
@@ -94,7 +94,7 @@ src/app/checkout/
   _components/
     CheckoutForm.tsx    # ONLY used here
     AddressStep.tsx     # ONLY used here
-  _actions.ts           # place-order, calls @storefront/lib/razorpay + @storefront/lib/supabase
+  _actions.ts           # place-order, calls @storefront/lib/razorpay + @storefront/lib/db
   _schemas.ts           # zod schema, private
 ```
 

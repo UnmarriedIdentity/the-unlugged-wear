@@ -14,6 +14,7 @@
 
 ## 2. Scope & Boundaries
 
+- Two separately deployed applications share one Neon Postgres database; the schema lives in the repo-root `db/` folder (see `DOC/backend/12-Two-App-Deploy.md`).
 - Build the UI-only phase across the two applications: `tuw-website/` (customer storefront) and `tuw-admin/` (operations workspace).
 - Backend connections, live authentication, payment processing, and fulfillment integration are deferred to subsequent phases.
 - Demo state is handled deterministically via local storage adapters with explicit reset-demo controls.
@@ -48,8 +49,8 @@
 ## 6. Data Integrity & Minor-Unit Rules
 
 - **Deterministic Fixtures**: Use realistic fictitious identities (`@example.com` domains, Indian mobile numbers, Indiranagar addresses).
-- **Integer Minor Units**: Store and calculate monetary amounts using integer minor units (paise: e.g. `priceINR: 3899` maps to `priceMinorINR: 389900`) to avoid floating-point inaccuracies.
-- **State Separation**: Maintain strict independence between `paymentStatus` (`paid`, `pending`, `failed`, `refunded`), `fulfillmentStatus` (`queued`, `printing`, `shipped`, `delivered`, `submission_failed`), and `returnStatus`.
+- **Money**: The database stores money as `DECIMAL(12,2)` rupees (see `DOC/backend/01-Conventions.md`). Application code may calculate in integer minor units (paise: e.g. `priceINR: 3899` maps to `priceMinorINR: 389900`) to avoid floating-point errors, and converts at the API boundary. Never use floats for money.
+- **State Separation**: Maintain strict independence between `paymentStatus` (`paid`, `pending`, `failed`, `refunded`), order status — the fulfilment axis, SQL vocabulary `pending`, `confirmed`, `processing`, `shipped`, `delivered`, `cancelled`, `failed`, `refunded` (older UI words map as `queued`→`confirmed`, `printing`→`processing`, `submission_failed`→`failed`) — and `returnStatus`.
 - **Reset Demo Support**: Both applications must provide an accessible Reset Demo State action that clears localStorage keys and restores baseline fixtures.
 
 ---

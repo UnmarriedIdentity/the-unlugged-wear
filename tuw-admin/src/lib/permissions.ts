@@ -4,5 +4,5 @@ export type StaffRole = "admin" | "manager" | "support";
 
 export function requireStaff(role: StaffRole | undefined): void {
   if (!role) throw new Error("Unauthorized: staff only");
-  // TODO: enforce per-route role matrix with Supabase custom claims.
+  // TODO: enforce per-route role matrix from users → user_roles → roles (DOC/backend/14-Access-Gating.md).
 }

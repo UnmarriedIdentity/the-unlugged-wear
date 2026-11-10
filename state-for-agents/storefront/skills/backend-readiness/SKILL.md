@@ -21,7 +21,7 @@ stays frontend.
    and input preservation on failure.
 5. Every mutation path keeps a reset-demo action (`resetStoreData()`)
    clearing its namespaced keys (`tuw_website_v2_*`) and restoring fixtures.
-6. Auth stays stub-first (`supabase.ts` stub → session hook shape); login and
+6. Auth stays stub-first (`db.ts` stub → session hook shape); login and
    signup must work fully against the mock seam so the backend swap is
    adapter-only. Identities stay fictitious (`@example.com`, Indian mobiles).
    Never commit secrets or real customer data.

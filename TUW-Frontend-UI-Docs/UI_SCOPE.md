@@ -26,7 +26,7 @@ Login; password recovery/reset; invitation acceptance; overview; products/list/c
 
 ## Deferred
 
-Supabase connections, real authentication/authorization, Razorpay checkout, Qikink API calls, live fulfillment, transactional messaging, actual refunds, production file uploads, persistent server data, database migrations and production deployment. Browser-local demo data is not a secure access control mechanism.
+Database (Neon Postgres) connections, real authentication/authorization, Razorpay checkout, Qikink API calls, live fulfillment, transactional messaging, actual refunds, production file uploads, persistent server data, database migrations and production deployment. Browser-local demo data is not a secure access control mechanism.
 
 ## Completion criteria
 
