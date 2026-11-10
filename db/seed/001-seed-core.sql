@@ -215,7 +215,7 @@ INSERT INTO navigation_settings (id, scope, navbar) VALUES
   ('00000000-0000-4000-8000-000000080101', 'global', '{}')
 ON CONFLICT DO NOTHING;
 
--- ------------------------------------- 7. store_settings (19 keys)
+-- ------------------------------------- 7. store_settings (20 keys = settings registry)
 -- Operational config only. No qikink.api_key, no gateway secret: those live
 -- in env (09 §store_settings). Values are typed jsonb, not strings.
 INSERT INTO store_settings (key, value) VALUES
@@ -229,9 +229,10 @@ INSERT INTO store_settings (key, value) VALUES
   ('brand.color',                to_jsonb('#7539FF'::text)),
   -- Shipping fees are NOT final: placeholders, edited in admin Settings
   -- (one row each; checkout reads them through one function).
-  ('shipping.free_threshold',    to_jsonb(3000)),
-  ('shipping.standard_fee',      to_jsonb(150)),
-  ('shipping.cod_fee',           to_jsonb(0)),
+  -- Money as rupee decimal strings, never JSON floats (017-settings-registry).
+  ('shipping.free_threshold',    to_jsonb('3000.00'::text)),
+  ('shipping.standard_fee',      to_jsonb('150.00'::text)),
+  ('shipping.cod_fee',           to_jsonb('0.00'::text)),
   -- Exchanges: days after delivery a customer may request a size/variant swap.
   ('exchange.window_days',       to_jsonb(7)),
   -- Admin low-stock alert level (products.low_stock_threshold overrides).
@@ -241,9 +242,12 @@ INSERT INTO store_settings (key, value) VALUES
   -- Free-cancel window before an order is sent to the fulfilment partner.
   ('orders.cancel_window_minutes', to_jsonb(60)),
   ('tax.included',               to_jsonb(true)),
-  ('fulfillment.partner',        to_jsonb('qikink'::text)),
-  ('fulfillment.environment',    to_jsonb('sandbox'::text)),
-  ('payments.stripe_live_mode',  to_jsonb(false)),
+  -- GST invoice seller block (DOC/backend/24). Legal name and GSTIN are
+  -- pending from the owner; provider state lives in integration_providers.
+  ('invoice.seller_legal_name',  to_jsonb('The Unplugged Wear'::text)),
+  ('invoice.seller_address',     to_jsonb('17-Sanskruti Park Row House, Behind Subhash Garden, Near Doctor''s Park Society, Jahangirpura, Surat, Gujarat 395005, India'::text)),
+  ('invoice.seller_state_code',  to_jsonb('24'::text)),
+  ('invoice.seller_gstin',       'null'::jsonb),
   ('notifications.order_email',  to_jsonb('orders@theunpluggedwear.com'::text))
 ON CONFLICT (key) DO NOTHING;
 

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useSiteSettings } from '@storefront/lib/site-settings';
 import Link from 'next/link';
 import Header from '@storefront/components/layout/Header';
 import Footer from '@storefront/components/layout/Footer';
@@ -11,7 +12,6 @@ import { useSession } from '@storefront/lib/session';
 import { site } from '@storefront/lib/site';
 import { ArrowRight, Check, Clock, Info, Mail, MapPin } from 'lucide-react';
 
-const SUPPORT_EMAIL = 'studio@theunpluggedwear.com';
 
 const TOPICS = [
   { value: 'order', label: 'An order' },
@@ -39,6 +39,7 @@ const SOCIAL = [
 
 export default function ContactPage() {
   const { session } = useSession();
+  const { supportEmail: SUPPORT_EMAIL } = useSiteSettings();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [orderRef, setOrderRef] = useState('');

@@ -54,3 +54,14 @@ test('actor refs, framework signals and request hashing', () => {
   assert.equal(hashRequest('checkout', { a: 1, b: 2 }), hashRequest('checkout', { b: 2, a: 1 }));
   assert.notEqual(hashRequest('checkout', { a: 1 }), hashRequest('refund.create', { a: 1 }));
 });
+
+test('secretMatches: constant-time, refuses missing/short secrets and near misses', async () => {
+  const { secretMatches } = await import('./index.ts');
+  const secret = 'a-long-enough-revalidate-secret';
+  assert.equal(secretMatches(secret, secret), true);
+  assert.equal(secretMatches(secret + 'x', secret), false);
+  assert.equal(secretMatches('', secret), false);
+  assert.equal(secretMatches(null, secret), false);
+  assert.equal(secretMatches('short', 'short'), false, 'a weak env secret never authenticates');
+  assert.equal(secretMatches('anything', undefined), false);
+});

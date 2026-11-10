@@ -1,5 +1,6 @@
-import SettingsView from './_components/SettingsView';
+import { redirect } from 'next/navigation';
 
-export default function Page() {
-  return <SettingsView />;
+// /settings opens the first tab; every tab is its own route.
+export default function SettingsIndex() {
+  redirect('/settings/general');
 }

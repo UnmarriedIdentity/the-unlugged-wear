@@ -21,6 +21,8 @@ exist for callers that are not our own UI. Docs:
    `{ error: { code, message, details }, requestId, timestamp }`.
 2. Handlers stay under ~30 lines: verify → call one service/job → respond.
 3. `'use cache'` cannot go in a handler body; call a cached helper instead.
+   Secrets are compared with `secretMatches()` (constant time; a secret
+   shorter than 16 characters never authenticates).
    Invalidate with `revalidateTag(tag, 'max')` (`updateTag` throws here).
 4. Bail-outs throw internally — never wrap Next.js calls in a catch-all `try`.
 5. Return `200` fast for webhooks and let jobs do slow work.

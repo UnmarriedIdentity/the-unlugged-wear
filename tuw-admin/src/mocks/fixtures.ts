@@ -1678,36 +1678,5 @@ export const initialTeam: TeamMember[] = [
   },
 ];
 
-export interface StoreSettings {
-  storeName: string;
-  legalEntity: string;
-  supportEmail: string;
-  defaultCurrency: string;
-  timezone: string;
-  brandTagline: string;
-  brandColor: string;
-  qikinkApiKey: string;
-  qikinkEnvironment: 'sandbox' | 'production';
-  stripeLiveMode: boolean;
-  freeShippingThreshold: number;
-  standardShippingFee: number;
-  taxIncluded: boolean;
-  orderNotificationEmail: string;
-}
+// Store settings moved to the database (TL-BE-04: modules/settings).
 
-export const initialSettings: StoreSettings = {
-  storeName: 'The Unplugged Wear',
-  legalEntity: 'The Unplugged Wear Apparel LLC',
-  supportEmail: 'care@theunpluggedwear.com',
-  defaultCurrency: 'INR (₹)',
-  timezone: 'UTC+00:00 (London, Edinburgh)',
-  brandTagline: 'Unplugged Luxury & Urban Minimalism',
-  brandColor: '#7539FF',
-  qikinkApiKey: 'qik_live_mock_connection_89172',
-  qikinkEnvironment: 'sandbox',
-  stripeLiveMode: false,
-  freeShippingThreshold: 3000,
-  standardShippingFee: 150,
-  taxIncluded: true,
-  orderNotificationEmail: 'orders@theunpluggedwear.com',
-};

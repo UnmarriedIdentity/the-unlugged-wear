@@ -13,6 +13,7 @@ import { formatPaise, formatShortDate } from '@storefront/lib/format';
 import { RETURN_WINDOW_DAYS, deliveryEstimate } from '@storefront/lib/product';
 import { AlertCircle, ArrowLeft, ArrowRight, Download } from 'lucide-react';
 import { downloadInvoicePdf } from '@storefront/lib/invoice';
+import { useSiteSettings } from '@storefront/lib/site-settings';
 import { useSession } from '@storefront/lib/session';
 
 interface PageProps {
@@ -48,6 +49,7 @@ export default function OrderDetailPage({ params }: PageProps) {
   const { getOrderById, getOrderByNumber, products } = useStore();
   const order = getOrderById(id) || getOrderByNumber(id);
   const { session } = useSession();
+  const { supportEmail } = useSiteSettings();
 
   if (!order) {
     return (
@@ -251,7 +253,7 @@ export default function OrderDetailPage({ params }: PageProps) {
               </dl>
               <button
                 type="button"
-                onClick={() => void downloadInvoicePdf(order, session?.email)}
+                onClick={() => void downloadInvoicePdf(order, session?.email, supportEmail)}
                 className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-store-charcoal underline-offset-4 decoration-store-gold hover:underline cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-store-gold"
               >
                 <Download size={14} aria-hidden="true" /> Download invoice PDF (demo)

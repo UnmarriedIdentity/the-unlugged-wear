@@ -20,6 +20,8 @@ shell, request-bound parts stream inside `<Suspense>`. Docs:
 5. After a write in a Server Action: `updateTag(tag)` (read-your-own-writes).
    From a route handler/webhook: `revalidateTag(tag, 'max')` — the second
    argument is required in Next 16. Revalidate before `redirect()`.
+   Exception: `settings` uses `{ expire: 0 }` (it changes prices shown —
+   the next request re-reads instead of serving one stale page).
 6. Lifetimes: `days` for policies/journal, `hours` for products/collections,
    `minutes` for stock badges. `seconds` drops out of the shell (becomes a hole).
 7. Old route configs `dynamic`, `revalidate`, `fetchCache` are errors now.

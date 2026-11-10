@@ -10,8 +10,8 @@ import SizeGuideModal from './SizeGuideModal';
 import ColorSwatchSelector from './ColorSwatchSelector';
 import VariantPillSelector from './VariantPillSelector';
 import RadioOptionSelector from './RadioOptionSelector';
+import { useSiteSettings, rupeesLabel } from '@storefront/lib/site-settings';
 import {
-  FREE_SHIPPING_THRESHOLD_INR,
   RETURN_WINDOW_DAYS,
   isWearable,
   productTypeOf,
@@ -34,6 +34,7 @@ export default function VariantSelector({
   selectedSize: controlledSize,
   onSizeChange,
 }: VariantSelectorProps) {
+  const { freeThresholdPaise } = useSiteSettings().shipping;
   const router = useRouter();
   const { addToCart, isInWishlist, toggleWishlist } = useStore();
 
@@ -286,7 +287,7 @@ export default function VariantSelector({
         </p>
         <ul className="space-y-1 text-store-text-secondary list-disc list-inside">
           <li>Printed in 2–3 business days, then shipped across India</li>
-          <li>Free delivery on orders over ₹{FREE_SHIPPING_THRESHOLD_INR.toLocaleString('en-IN')}</li>
+          <li>Free delivery on orders over {rupeesLabel(freeThresholdPaise)}</li>
           <li>
             {wearable
               ? `${RETURN_WINDOW_DAYS}-day returns on unworn pieces with tags`

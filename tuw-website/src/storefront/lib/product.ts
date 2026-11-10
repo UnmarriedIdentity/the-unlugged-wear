@@ -2,7 +2,6 @@
 import type { Product, ProductType } from './types';
 
 export const RETURN_WINDOW_DAYS = 14;
-export const FREE_SHIPPING_THRESHOLD_INR = 3000;
 
 /** Shopper-facing name for each category (breadcrumbs, eyebrows). */
 export const CATEGORY_LABELS: Record<Product['category'], string> = {

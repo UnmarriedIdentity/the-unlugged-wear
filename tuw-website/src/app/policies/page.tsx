@@ -4,7 +4,8 @@ import type { LucideIcon } from 'lucide-react';
 import Header from '@storefront/components/layout/Header';
 import Footer from '@storefront/components/layout/Footer';
 import Breadcrumb from '@storefront/components/ui/Breadcrumb';
-import { POLICIES, type PolicySlug } from '@storefront/lib/policies';
+import { getPolicies, type PolicySlug } from '@storefront/lib/policies';
+import { getStorefrontSettings } from '@/server/settings';
 
 const ICONS: Record<PolicySlug, LucideIcon> = {
   returns: RefreshCw,
@@ -13,7 +14,9 @@ const ICONS: Record<PolicySlug, LucideIcon> = {
   terms: FileText,
 };
 
-export default function PoliciesIndexPage() {
+export default async function PoliciesIndexPage() {
+  const settings = await getStorefrontSettings();
+  const policies = getPolicies({ supportEmail: settings.supportEmail, freeThresholdPaise: settings.shipping.freeThresholdPaise, standardFeePaise: settings.shipping.standardFeePaise });
   return (
     <div className="min-h-screen flex flex-col bg-store-canvas text-store-charcoal">
       <Header />
@@ -34,7 +37,7 @@ export default function PoliciesIndexPage() {
         </header>
 
         <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {POLICIES.map((policy) => {
+          {policies.map((policy) => {
             const Icon = ICONS[policy.slug];
             return (
               <li key={policy.slug}>

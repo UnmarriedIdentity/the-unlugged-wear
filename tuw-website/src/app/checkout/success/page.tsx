@@ -12,6 +12,7 @@ import type { Order } from '@storefront/lib/types';
 import { formatPaise, formatShortDate } from '@storefront/lib/format';
 import { RETURN_WINDOW_DAYS, deliveryEstimate } from '@storefront/lib/product';
 import { downloadInvoicePdf } from '@storefront/lib/invoice';
+import { useSiteSettings } from '@storefront/lib/site-settings';
 import { AlertCircle, ArrowRight, Check, Clock, Download, Info, Mail } from 'lucide-react';
 
 const STEPS = ['Order placed', 'Printing', 'Shipped', 'Delivered'] as const;
@@ -27,6 +28,7 @@ function OrderSuccessContent() {
   const orderNumber = searchParams.get('order') || searchParams.get('id');
   const { getOrderByNumber, getOrderById, products } = useStore();
   const { session } = useSession();
+  const { supportEmail } = useSiteSettings();
 
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
@@ -199,7 +201,7 @@ function OrderSuccessContent() {
             </dl>
             <button
               type="button"
-              onClick={() => void downloadInvoicePdf(order, session?.email)}
+              onClick={() => void downloadInvoicePdf(order, session?.email, supportEmail)}
               className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-store-charcoal underline-offset-4 decoration-store-gold hover:underline cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-store-gold"
             >
               <Download size={14} aria-hidden="true" /> Download invoice PDF (demo)

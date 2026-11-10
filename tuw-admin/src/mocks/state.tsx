@@ -12,7 +12,6 @@ import {
   CollectionItem,
   DesignAsset,
   TeamMember,
-  StoreSettings,
   StaffRole,
   StockMovement,
   DiscountCode,
@@ -30,7 +29,6 @@ import {
   initialCollections,
   initialDesigns,
   initialTeam,
-  initialSettings,
   initialStockMovements,
   initialDiscountCodes,
   initialAbandonedCarts,
@@ -119,7 +117,6 @@ interface AdminStateContextType {
   collections: CollectionItem[];
   designs: DesignAsset[];
   team: TeamMember[];
-  settings: StoreSettings;
   stockMovements: StockMovement[];
   discountCodes: DiscountCode[];
   abandonedCarts: AbandonedCart[];
@@ -180,7 +177,6 @@ interface AdminStateContextType {
   inviteTeamMember: (member: Omit<TeamMember, 'id' | 'lastActive' | 'avatarBg'>) => boolean;
   removeTeamMember: (memberId: string) => boolean;
 
-  updateSettings: (newSettings: Partial<StoreSettings>) => boolean;
 
   createDiscountCode: (input: Omit<DiscountCode, 'id' | 'usesCount'>) => boolean;
   toggleDiscountCode: (id: string) => boolean;
@@ -232,7 +228,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
   const [collections, setCollections] = useState<CollectionItem[]>(initialCollections);
   const [designs, setDesigns] = useState<DesignAsset[]>(initialDesigns);
   const [team, setTeam] = useState<TeamMember[]>(initialTeam);
-  const [settings, setSettings] = useState<StoreSettings>(initialSettings);
   const [stockMovements, setStockMovements] = useState<StockMovement[]>(initialStockMovements);
   const [discountCodes, setDiscountCodes] = useState<DiscountCode[]>(initialDiscountCodes);
   const [abandonedCarts, setAbandonedCarts] = useState<AbandonedCart[]>(initialAbandonedCarts);
@@ -330,15 +325,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         }
         if (parsed.designs) setDesigns(parsed.designs);
         if (parsed.team) setTeam(parsed.team);
-        if (parsed.settings) setSettings({
-          ...parsed.settings,
-          defaultCurrency: 'INR (₹)',
-          // Legacy demo shipping defaults → INR-scale (storefront parity).
-          freeShippingThreshold:
-            parsed.settings.freeShippingThreshold === 150 ? 3000 : parsed.settings.freeShippingThreshold,
-          standardShippingFee:
-            parsed.settings.standardShippingFee === 12 ? 150 : parsed.settings.standardShippingFee,
-        });
         if (parsed.stockMovements) setStockMovements(parsed.stockMovements);
         if (parsed.discountCodes) setDiscountCodes(parsed.discountCodes);
         if (parsed.abandonedCarts) setAbandonedCarts(parsed.abandonedCarts);
@@ -381,7 +367,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
       collections?: CollectionItem[];
       designs?: DesignAsset[];
       team?: TeamMember[];
-      settings?: StoreSettings;
       stockMovements?: StockMovement[];
       discountCodes?: DiscountCode[];
       abandonedCarts?: AbandonedCart[];
@@ -408,7 +393,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
           collections,
           designs,
           team,
-          settings,
           stockMovements,
           discountCodes,
           abandonedCarts,
@@ -428,7 +412,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         // Storage quota / privacy protection
       }
     },
-    [activeRole, products, orders, shipments, refunds, returns, customers, supportTickets, collections, designs, team, settings, stockMovements, discountCodes, abandonedCarts, sizeCharts, libraryAttributes, blogCategories, blogAuthors, blogTags, blogMedia, blogPosts, blogRevisions, blogSlugHistory]
+    [activeRole, products, orders, shipments, refunds, returns, customers, supportTickets, collections, designs, team, stockMovements, discountCodes, abandonedCarts, sizeCharts, libraryAttributes, blogCategories, blogAuthors, blogTags, blogMedia, blogPosts, blogRevisions, blogSlugHistory]
   );
 
   const showToast = useCallback((toast: Omit<ToastMessage, 'id'>) => {
@@ -1072,19 +1056,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     return true;
   };
 
-  const updateSettings = (newSettings: Partial<StoreSettings>) => {
-    if (!canPerformAction('settings')) return false;
-    const next = { ...settings, ...newSettings };
-    setSettings(next);
-    persistState({ settings: next });
-    showToast({
-      type: 'success',
-      title: 'Settings Saved',
-      description: 'Preferences and connection parameters updated locally.',
-    });
-    return true;
-  };
-
   // Discount codes (Phase-2 discounts): used codes are history (delete
   // refused); kill switch flips is_active reversibly.
   const createDiscountCode = (input: Omit<DiscountCode, 'id' | 'usesCount'>) => {
@@ -1691,7 +1662,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
       setCollections(initialCollections);
       setDesigns(initialDesigns);
       setTeam(initialTeam);
-      setSettings(initialSettings);
       setStockMovements(initialStockMovements);
       setDiscountCodes(initialDiscountCodes);
       setAbandonedCarts(initialAbandonedCarts);
@@ -1744,7 +1714,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     setCollections(initialCollections);
     setDesigns(initialDesigns);
     setTeam(initialTeam);
-    setSettings(initialSettings);
     setStockMovements(initialStockMovements);
     setDiscountCodes(initialDiscountCodes);
     setAbandonedCarts(initialAbandonedCarts);
@@ -1785,7 +1754,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         collections,
         designs,
         team,
-        settings,
         stockMovements,
         discountCodes,
         abandonedCarts,
@@ -1820,7 +1788,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         uploadDesignAsset,
         inviteTeamMember,
         removeTeamMember,
-        updateSettings,
         createDiscountCode,
         toggleDiscountCode,
         deleteDiscountCode,

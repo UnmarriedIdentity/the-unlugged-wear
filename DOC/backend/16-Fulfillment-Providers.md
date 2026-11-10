@@ -156,3 +156,29 @@ claims are handled in the Qikink dashboard, and the admin has a per-row
 5. Design upload: link-based only, or an upload endpoint (files ≤ 25 MB,
    300 DPI PNG/JPEG).
 6. Whether the RTO storage charge (₹20/product) applies.
+
+## 9. As built (TL-BE-04, 2026-11-11)
+
+`packages/heart/src/integrations/`:
+
+| Folder | What is there now |
+|---|---|
+| `registry/` | `listProviders`, `activeProviderSlug`, `updateProvider` — owns `integration_providers` |
+| `payments/` | `PaymentGateway` interface + `mock` demo gateway (captures, `simulate: 'decline'`); `getPaymentGateway()` picks the active row |
+| `fulfillment/` | `FulfillmentPartner` interface (§1) + `qikink` **simulator** (sandbox only, §5 status map, cancel only while Live) + `custom_atelier` (in-house, manual) |
+| `storage/` | `ObjectStore` interface + in-memory mock (R2 in TL-INT-R2) |
+| `email/` | mock sender (email_logs only) |
+
+Registry rules (tests: `registry.int.test.ts`):
+
+1. A provider switches **on** only if an adapter exists (Razorpay, Stripe,
+   Printrove, Shiprocket: integrations phase).
+2. **Live** only if the adapter reports live keys (`liveReady()`); mocks and
+   the Qikink simulator never do. Custom Atelier is in-house, so it may.
+3. `payment` and `email` keep **exactly one** active provider: switching one
+   on switches the others off; the last one cannot be switched off.
+4. Toggles lock the category's rows (`FOR UPDATE`) and are audited
+   (`integration.update`).
+5. Unknown Qikink status words map to `on_hold` (ops alert), never to a
+   happy state.
+

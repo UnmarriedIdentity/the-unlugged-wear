@@ -38,6 +38,9 @@ const mockSender: EmailSender = {
 
 const senders = new Map<string, EmailSender>([[mockSender.slug, mockSender]]);
 
+/** Adapters the registry may activate (live only once a real sender exists). */
+export const emailAdapters: readonly { slug: string; liveReady(): boolean }[] = [{ slug: mockSender.slug, liveReady: () => false }];
+
 export function getEmailSender(slug = process.env.EMAIL_PROVIDER ?? 'mock_email'): EmailSender {
   const sender = senders.get(slug);
   if (!sender) throw new Error(`No email adapter for "${slug}" (integrations phase: TL-INT-EMAIL).`);

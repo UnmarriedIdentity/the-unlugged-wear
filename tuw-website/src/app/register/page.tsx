@@ -62,6 +62,8 @@ export default function RegisterPage() {
         }
         return;
       }
+      setPassword('');
+      setConfirmPassword('');
       router.push(result.data.next);
       router.refresh();
     });

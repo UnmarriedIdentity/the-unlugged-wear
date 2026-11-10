@@ -16,6 +16,10 @@ Next.js 16.3.8 differs from older versions — read
    Suspense.
 4. Sidebar `<Link>`s use the default prefetch; never `prefetch={true}` on
    hundreds of table rows.
+5. Every data-backed route has its **own** boundary (`loading.tsx` in its
+   folder, or `<Suspense>` in its page). A `loading.tsx` above sibling routes
+   (e.g. `/settings/*` tabs) is already mounted when you move between them,
+   so the navigation blocks and dev logs "uncached data … navigation".
 
 ## Route map
 

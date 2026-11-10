@@ -124,6 +124,33 @@ Settings. Changing a fee is one edit in the admin — no code change, no
 migration. The same applies to the cancel window, exchange window, gift
 card validity and low-stock threshold.
 
+**As built (TL-BE-04, 2026-11-11).** `modules/settings` keeps one registry
+entry per key (`keys.ts`: zod rule, fallback, admin tab, public or staff).
+The seed has exactly the registry's 20 keys (a test checks both ways).
+
+- Money keys are rupee strings (`"150.00"`) in jsonb and paise in code;
+  `017-settings-registry.sql` rewrote the old numeric rows.
+- Provider state is only in `integration_providers`; the duplicate keys
+  `fulfillment.partner`, `fulfillment.environment` and
+  `payments.stripe_live_mode` were removed (017).
+- Saves refuse unknown, other-tab and read-only keys, report every bad
+  field, write only changed keys, and audit the diff (`audit_logs`,
+  `settings.update`) in the same transaction.
+- Reads never throw on a corrupt or missing row: fallback + warning.
+- Storefront: `getStorefrontSettings()` (`'use cache'`, tag `settings`,
+  `cacheLife('hours')`; `'minutes'` with seed defaults if the database is
+  down) is read once in the root layout and handed to Client Components via
+  `useSiteSettings()`. Fees in the demo cart, the shipping policy copy, the
+  product page delivery line, the contact page and the demo invoice read it.
+- Admin save → `POST <STOREFRONT_URL>/api/revalidate` (header
+  `x-revalidate-secret`, tags allow-list). `settings` expires immediately
+  (`{ expire: 0 }`) because it changes prices shown; other tags use `'max'`.
+  If the call fails the save still succeeds and the admin says the
+  storefront will catch up within the hour.
+- Admin `/settings/<tab>` routes (general, brand, shipping, taxes &
+  invoices, orders & policies, payments, fulfillment, notifications), each
+  `requireStaff('settings.manage')` with its own Suspense boundary.
+
 ## 8. Phases
 
 1. **Core modules (now):** platform, auth, catalog, cart, checkout and

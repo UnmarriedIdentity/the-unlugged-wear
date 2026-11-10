@@ -82,18 +82,25 @@ describe('seed integrity', () => {
     assert.equal(rowCount(insertFor('navigation_settings')), 1);
 
     const storeSettings = insertFor('store_settings');
-    assert.equal((storeSettings.match(/^\s*\('/gm) ?? []).length, 19);
+    // 20 keys = the settings registry (packages/heart/src/modules/settings/keys.ts).
+    assert.equal((storeSettings.match(/^\s*\('/gm) ?? []).length, 20);
     for (const key of [
       'store.name',
       'brand.color',
       'shipping.free_threshold',
-      'fulfillment.partner',
-      'payments.stripe_live_mode',
       'exchange.window_days',
+      'orders.cancel_window_minutes',
       'inventory.low_stock_threshold',
+      'invoice.seller_gstin',
     ]) {
       assert.match(storeSettings, new RegExp(`'${key.replace(/\./g, '\\.')}'`), `${key} missing`);
     }
+    // Provider state lives in integration_providers (017-settings-registry).
+    for (const retired of ['fulfillment.partner', 'fulfillment.environment', 'payments.stripe_live_mode']) {
+      assert.equal(storeSettings.includes(`'${retired}'`), false, `${retired} must not come back`);
+    }
+    // Money is a rupee string, never a JSON number.
+    assert.match(storeSettings, /'shipping\.standard_fee',\s*to_jsonb\('150\.00'::text\)/);
     assert.equal(/api_key|secret|password|token/i.test(storeSettings), false, 'a secret key reached store_settings');
   });
 

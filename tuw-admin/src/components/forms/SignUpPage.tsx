@@ -112,6 +112,8 @@ function SignUpPageContent({ initialMode, invite = null }: SignUpPageProps) {
     void acceptInviteAction({ token: invite.token, password, firstName, lastName: rest.join(' ') || firstName }).then((result) => {
       setPending(false);
       if (!result.ok) return setNotice(result.error.message); // typed values are kept
+      setPassword('');
+      setConfirmPassword('');
       router.push(result.data.next);
       router.refresh();
     });

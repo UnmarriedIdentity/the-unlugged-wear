@@ -43,6 +43,8 @@ export default function ResetPasswordPage() {
         setError(result.error.message); // typed passwords are kept
         return;
       }
+      setPassword('');
+      setConfirmPassword('');
       setSuccess(true);
     });
   };

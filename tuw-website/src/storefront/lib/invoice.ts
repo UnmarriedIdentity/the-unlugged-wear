@@ -5,7 +5,8 @@ import type { Order } from './types';
 import { formatShortDate } from './format';
 
 const BRAND = 'The Unplugged Wear';
-const SUPPORT_EMAIL = 'studio@theunpluggedwear.com';
+// Fallback only; callers pass the support email from store settings.
+const DEFAULT_SUPPORT_EMAIL = 'care@theunpluggedwear.com';
 const LOGO_URL = '/images/brand/deer.png';
 
 // Storefront palette (charcoal text, muted grey, warm card border, gold accent).
@@ -48,7 +49,8 @@ async function loadLogo(): Promise<string | null> {
   }
 }
 
-export async function downloadInvoicePdf(order: Order, customerEmail?: string) {
+export async function downloadInvoicePdf(order: Order, customerEmail?: string, supportEmail: string = DEFAULT_SUPPORT_EMAIL) {
+  const SUPPORT_EMAIL = supportEmail;
   const { jsPDF } = await import('jspdf');
   const doc = new jsPDF({ unit: 'pt', format: 'a4' });
   const pageW = doc.internal.pageSize.getWidth();

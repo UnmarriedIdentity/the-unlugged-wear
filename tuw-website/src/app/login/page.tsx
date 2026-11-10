@@ -49,6 +49,7 @@ export default function LoginPage() {
         passwordRef.current?.focus();
         return;
       }
+      setPassword('');
       router.push(result.data.next);
       router.refresh();
     });

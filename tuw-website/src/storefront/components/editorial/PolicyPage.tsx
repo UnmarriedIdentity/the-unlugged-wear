@@ -6,12 +6,15 @@ import { ArrowRight, Info, Mail, Printer } from 'lucide-react';
 import Header from '@storefront/components/layout/Header';
 import Footer from '@storefront/components/layout/Footer';
 import Breadcrumb from '@storefront/components/ui/Breadcrumb';
-import { POLICIES, getPolicy, type PolicySlug } from '@storefront/lib/policies';
+import { getPolicies, type PolicySlug } from '@storefront/lib/policies';
+import { useSiteSettings } from '@storefront/lib/site-settings';
 
 /** Shared layout for every /policies/* page: summary, contents, numbered sections, help. */
 export default function PolicyPage({ slug }: { slug: PolicySlug }) {
-  const policy = getPolicy(slug);
-  const others = POLICIES.filter((p) => p.slug !== slug);
+  const settings = useSiteSettings();
+  const policies = getPolicies({ supportEmail: settings.supportEmail, freeThresholdPaise: settings.shipping.freeThresholdPaise, standardFeePaise: settings.shipping.standardFeePaise });
+  const policy = policies.find((p) => p.slug === slug)!;
+  const others = policies.filter((p) => p.slug !== slug);
   const [activeId, setActiveId] = useState(policy.sections[0]?.id);
 
   // Highlight the section currently being read in the contents list.

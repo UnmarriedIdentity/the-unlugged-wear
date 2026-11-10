@@ -1,4 +1,5 @@
 import 'server-only';
+import { createHash, timingSafeEqual } from 'node:crypto';
 import type { z } from 'zod';
 import { AppError, isAppError, newRequestId, toEnvelope, type ErrorEnvelope } from '../errors/index.ts';
 import { claim, complete, fail, hashRequest } from '../idempotency/index.ts';
@@ -85,6 +86,14 @@ export function formDataToObject(form: FormData): Record<string, unknown> {
   return out;
 }
 
+/** Constant-time compare (hash first so lengths match); a missing or short env secret never matches. */
+export function secretMatches(given: string | null, expected: string | undefined): boolean {
+  if (!expected || expected.length < 16 || !given) return false;
+  const a = createHash('sha256').update(given).digest();
+  const b = createHash('sha256').update(expected).digest();
+  return timingSafeEqual(a, b);
+}
+
 type Handler<S extends z.ZodTypeAny, T> = (args: { input: z.infer<S>; ctx: RequestContext }) => Promise<T>;
 
 export function createGuards({ resolveContext }: { resolveContext: ResolveContext }) {
@@ -153,8 +162,7 @@ export function createGuards({ resolveContext }: { resolveContext: ResolveContex
       const requestId = newRequestId();
       try {
         if (opts.secret) {
-          const expected = process.env[opts.secret.env];
-          if (!expected || request.headers.get(opts.secret.header) !== expected) {
+          if (!secretMatches(request.headers.get(opts.secret.header), process.env[opts.secret.env])) {
             throw new AppError('UNAUTHENTICATED', 'Invalid credentials.');
           }
         }

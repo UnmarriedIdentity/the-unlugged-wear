@@ -114,6 +114,9 @@ function LoginPageContent({ initialMode }: LoginPageProps) {
         return;
       }
       setHasError(false);
+      // Cache Components keep the previous route mounted (hidden) — never
+      // leave the typed password in memory or the DOM after signing in.
+      setPassword('');
       router.push(result.data.next);
       router.refresh();
     });

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { useSiteSettings } from '@storefront/lib/site-settings';
 import { Toaster, toast as sonnerToast } from 'sonner';
 import BrandToast, { type BrandToastProps } from '@storefront/components/ui/BrandToast';
 
@@ -99,14 +100,16 @@ interface StoreContextType {
 
 const StoreContext = createContext<StoreContextType | null>(null);
 
-const FREE_SHIPPING_THRESHOLD = 3000;
-
 // YYYY-MM-DD in the shopper's own time zone (toISOString would give the UTC
 // date, which is still "yesterday" in India until 05:30).
 const localDate = (d: Date) => d.toLocaleDateString('en-CA');
-const STANDARD_SHIPPING_FEE = 150;
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
+  // Fees come from admin Settings (store_settings). The demo cart works in
+  // whole rupees until the cart module replaces it (TL-BE-07).
+  const { shipping } = useSiteSettings();
+  const FREE_SHIPPING_THRESHOLD = shipping.freeThresholdPaise / 100;
+  const STANDARD_SHIPPING_FEE = shipping.standardFeePaise / 100;
   const [scenario, setScenarioState] = useState<DemoScenario>('normal');
   const [simulatedError, setSimulatedError] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[]>(STORE_PRODUCTS);

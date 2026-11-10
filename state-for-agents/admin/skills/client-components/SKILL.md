@@ -23,6 +23,8 @@ client leaves inside server-rendered pages.
    un-awaited promise (`use()`), placed around `{children}`, not `<html>`.
 5. Forms keep every typed value on failure (`useActionState` returns field
    errors); pending buttons show progress, never a dead click.
+6. Clear password fields on success: Cache Components keep the previous
+   route mounted but hidden (`<Activity>`), typed values included.
 
 ## Good / bad
 

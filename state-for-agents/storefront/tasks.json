@@ -2190,14 +2190,14 @@
       "id": "TL-WEB-BE-06",
       "title": "POST /api/revalidate for admin-driven cache refresh",
       "category": "backend",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-WEB-BE",
-      "started": null,
-      "finished": null,
-      "verified": false,
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "verified": true,
       "design_match": null,
-      "pushed": false,
+      "pushed": true,
       "admin_ref": "TL-BE-04.03",
       "depends_on": [
         "TL-BE-04"
@@ -2206,32 +2206,50 @@
         "src/app/api/revalidate/route.ts (new)"
       ],
       "description": "route({secret: REVALIDATE_SECRET}) → revalidateTag(tag,'max') for each tag sent by the admin.",
-      "key_decisions": [],
-      "follow_ups": []
+      "key_decisions": [
+        "settings expires immediately; other tags 'max'"
+      ],
+      "follow_ups": [],
+      "log": "src/app/api/revalidate/route.ts — guards.route({ secret }) → revalidateTag(settings, { expire: 0 }) / others max."
     },
     {
       "id": "TL-WEB-BE-07",
       "title": "Public settings on the storefront (shipping threshold copy, store name, support email)",
       "category": "backend",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-WEB-BE",
-      "started": null,
-      "finished": null,
-      "verified": false,
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "verified": true,
       "design_match": null,
-      "pushed": false,
+      "pushed": true,
       "admin_ref": "TL-BE-04.01",
       "depends_on": [
         "TL-BE-04"
       ],
       "files": [
-        "src/storefront/lib/site.ts",
-        "checkout + cart totals copy"
+        "src/server/settings.ts (new)",
+        "src/storefront/lib/site-settings.tsx (new)",
+        "src/app/layout.tsx",
+        "src/app/providers.tsx",
+        "src/storefront/mocks/store.tsx",
+        "src/storefront/lib/policies.ts",
+        "src/storefront/components/editorial/PolicyPage.tsx",
+        "src/app/policies/page.tsx",
+        "src/storefront/components/commerce/VariantSelector.tsx",
+        "src/app/contact/page.tsx",
+        "src/storefront/lib/invoice.ts"
       ],
       "description": "Read through modules/settings (cacheTag 'settings'); no hard-coded fees.",
-      "key_decisions": [],
-      "follow_ups": []
+      "key_decisions": [
+        "Read once in the root layout (cached, part of the static shell) — no client fetch, no flash",
+        "Database down → seed defaults cached for minutes only"
+      ],
+      "follow_ups": [
+        "Returns copy / RETURN_WINDOW_DAYS wait for the exchanges module (TL-BE-10)"
+      ],
+      "log": "getStorefrontSettings() cached in the root layout → useSiteSettings(); demo cart fees, shipping policy copy, PDP delivery line, contact page and demo invoice read it. support email now comes from settings (care@… seed) instead of the hard-coded studio@…."
     },
     {
       "id": "TL-WEB-BE-08",

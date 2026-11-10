@@ -4,6 +4,7 @@ import localFont from 'next/font/local';
 import './globals.css';
 import { Providers } from './providers';
 import { getSessionSummary } from '@/server/session';
+import { getStorefrontSettings } from '@/server/settings';
 import BrandIntro from '@storefront/components/layout/BrandIntro';
 
 // Self-hosted Outfit for headings and body (vendored from @fontsource, OFL licensed).
@@ -44,7 +45,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Cached ('settings' tag) — part of the static shell, not a dynamic hole.
+  const settings = await getStorefrontSettings();
   return (
     <html lang="en" className={outfit.variable} suppressHydrationWarning>
       <body className="font-sans antialiased bg-store-canvas text-store-text-primary min-h-screen">
@@ -55,7 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Skip to main content
         </a>
         {/* Un-awaited: read with use() inside Suspense boundaries. */}
-        <Providers session={getSessionSummary()}>
+        <Providers session={getSessionSummary()} settings={settings}>
           {/* Reads the URL; streamed so dynamic routes keep a static shell. */}
           <Suspense fallback={null}>
             <BrandIntro />

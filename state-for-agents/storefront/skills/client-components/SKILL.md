@@ -24,7 +24,9 @@ react to input.
 4. Context providers wrap `{children}` as deep as possible, never `<html>`.
    Share the shopper by passing an un-awaited promise and reading it with `use()`.
 5. `useSearchParams` needs a `<Suspense>` parent. Cache Components keeps
-   hidden routes mounted (`<Activity>`), so reset drawers/forms on purpose.
+   hidden routes mounted (`<Activity>`), so reset drawers/forms on purpose —
+   and clear password fields after a successful sign-in/sign-up/reset (the
+   hidden login page would otherwise keep the typed password in the DOM).
 
 ## Good / bad
 

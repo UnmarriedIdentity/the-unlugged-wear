@@ -21,6 +21,7 @@ import AccountProfileSection from '@storefront/components/commerce/AccountProfil
 import { STORE_PRODUCTS } from '@storefront/mocks/fixtures';
 import { formatPaise, formatShortDate } from '@storefront/lib/format';
 import { downloadInvoicePdf } from '@storefront/lib/invoice';
+import { useSiteSettings } from '@storefront/lib/site-settings';
 import type {
   Address,
   CartItem,
@@ -225,6 +226,7 @@ export default function AccountPage() {
   const router = useRouter();
   // AccountGate only renders this page once a demo session exists.
   const { session, signOut } = useSession();
+  const { supportEmail } = useSiteSettings();
   // Real address book, profile and household (TL-BE-03).
   const accountState = useAccount();
   const { addresses, saveAddress, deleteAddress, setDefaultAddress } = accountState;
@@ -621,7 +623,7 @@ export default function AccountPage() {
                                   <ShoppingBag size={14} aria-hidden="true" />
                                   {buyAgainOrderId === order.id ? 'Added to bag' : 'Buy again'}
                                 </Button>
-                                <Button variant="ghost" size="sm" onClick={() => void downloadInvoicePdf(order, accountEmail)}>
+                                <Button variant="ghost" size="sm" onClick={() => void downloadInvoicePdf(order, accountEmail, supportEmail)}>
                                   <Download size={14} aria-hidden="true" /> Invoice PDF (demo)
                                 </Button>
                                 {retWindow && retWindow.daysLeft > 0 && (
