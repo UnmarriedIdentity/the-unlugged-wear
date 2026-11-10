@@ -1,5 +1,7 @@
 import { Suspense, type ReactNode } from 'react';
 import type { Metadata } from 'next';
+import { AccountDataProvider } from '@storefront/lib/account';
+import { getMyAccount } from '@/server/account';
 
 // Private page: kept out of search results.
 export const metadata: Metadata = {
@@ -10,5 +12,9 @@ export const metadata: Metadata = {
 
 // The page reads the shopper session (use()), so it streams inside Suspense.
 export default function CheckoutLayout({ children }: { children: ReactNode }) {
-  return <Suspense fallback={<div className="min-h-screen" aria-busy="true" />}>{children}</Suspense>;
+  return (
+    <Suspense fallback={<div className="min-h-screen" aria-busy="true" />}>
+      <AccountDataProvider data={getMyAccount()}>{children}</AccountDataProvider>
+    </Suspense>
+  );
 }

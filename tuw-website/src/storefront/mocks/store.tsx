@@ -18,7 +18,6 @@ import {
 import {
   STORE_PRODUCTS,
   INITIAL_ORDERS,
-  INITIAL_ADDRESS,
   LONG_CONTENT_PRODUCTS,
 } from './fixtures';
 
@@ -84,11 +83,6 @@ interface StoreContextType {
   returns: ReturnRequest[];
   submitReturnRequest: (req: Omit<ReturnRequest, 'id' | 'createdAt' | 'status'>) => void;
 
-  // Addresses
-  addresses: Address[];
-  saveAddress: (address: Address) => void;
-  deleteAddress: (addressId: string) => void;
-  setDefaultAddress: (addressId: string) => void;
 
   // Search & Global filters
   searchQuery: string;
@@ -120,7 +114,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [orders, setOrders] = useState<Order[]>(INITIAL_ORDERS);
   const [returns, setReturns] = useState<ReturnRequest[]>([]);
-  const [addresses, setAddresses] = useState<Address[]>([INITIAL_ADDRESS]);
   const [promoCode, setPromoCode] = useState<string>('');
   const [discountPercent, setDiscountPercent] = useState<number>(0);
   const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false);
@@ -145,8 +138,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       const savedReturns = localStorage.getItem('tuw_website_v5_returns');
       if (savedReturns) setReturns(JSON.parse(savedReturns));
 
-      const savedAddresses = localStorage.getItem('tuw_website_v5_addresses');
-      if (savedAddresses) setAddresses(JSON.parse(savedAddresses));
     } catch (e) {
       console.error('Failed to load storefront state from localStorage', e);
     } finally {
@@ -162,11 +153,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('tuw_website_v5_wishlist', JSON.stringify(wishlist));
       localStorage.setItem('tuw_website_v5_orders', JSON.stringify(orders));
       localStorage.setItem('tuw_website_v5_returns', JSON.stringify(returns));
-      localStorage.setItem('tuw_website_v5_addresses', JSON.stringify(addresses));
     } catch (e) {
       console.error('Failed to save storefront state to localStorage', e);
     }
-  }, [cart, wishlist, orders, returns, addresses, hasLoadedStorage]);
+  }, [cart, wishlist, orders, returns, hasLoadedStorage]);
 
   const lastToastRef = useRef<{ key: string; time: number } | null>(null);
 
@@ -403,41 +393,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  // Addresses
-  // Exactly one address is the default; the first saved address always is.
-  const saveAddress = (address: Address) => {
-    setAddresses((prev) => {
-      const exists = prev.some((a) => a.id === address.id);
-      const others = prev.filter((a) => a.id !== address.id);
-      const makeDefault = address.isDefault || others.length === 0;
-      const next = exists
-        ? prev.map((a) => (a.id === address.id ? address : a))
-        : [...prev, address];
-      if (makeDefault) return next.map((a) => ({ ...a, isDefault: a.id === address.id }));
-      return next.some((a) => a.isDefault) ? next : next.map((a, idx) => ({ ...a, isDefault: idx === 0 }));
-    });
-    addToast({
-      type: 'success',
-      title: 'Address saved',
-      description: `${address.label ? `${address.label} address` : 'Your address'} has been saved.`,
-    });
-  };
-
-  const deleteAddress = (addressId: string) => {
-    setAddresses((prev) => {
-      const removed = prev.find((a) => a.id === addressId);
-      const next = prev.filter((a) => a.id !== addressId);
-      return removed?.isDefault && next.length > 0
-        ? next.map((a, idx) => ({ ...a, isDefault: idx === 0 }))
-        : next;
-    });
-    addToast({ type: 'info', title: 'Address removed' });
-  };
-
-  const setDefaultAddress = (addressId: string) => {
-    setAddresses((prev) => prev.map((a) => ({ ...a, isDefault: a.id === addressId })));
-    addToast({ type: 'success', title: 'Default address updated' });
-  };
+  // Addresses live in the real address book now (storefront/lib/account, TL-BE-03).
 
   const getProductBySlug = (slug: string) =>
     products.find(
@@ -504,7 +460,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setWishlist([]);
     setOrders(INITIAL_ORDERS);
     setReturns([]);
-    setAddresses([INITIAL_ADDRESS]);
     setPromoCode('');
     setDiscountPercent(0);
     try {
@@ -568,10 +523,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         getOrderByNumber,
         returns,
         submitReturnRequest,
-        addresses,
-        saveAddress,
-        deleteAddress,
-        setDefaultAddress,
         searchQuery,
         setSearchQuery,
         toasts,

@@ -1,6 +1,6 @@
 # Household Accounts — Profiles, Family Groups, Proxy Ordering
 
-> Status: Filling | Last Updated: 2026-10-17
+> Status: Active (as built §9) | Last Updated: 2026-11-11
 > 5 tables here (`households`, `household_members`, `profile_size_preferences`,
 > `household_invitations`, `addresses`) + `profiles`, which lives in
 > `03-Auth-RBAC.md` §2 because it *is* identity. Conventions:
@@ -350,3 +350,47 @@ erDiagram
     households ||--o{ orders : for-family
     profiles ||--o{ orders : for
 ```
+
+## 9. As built (TL-BE-03, 2026-11-11)
+
+Module `packages/heart/src/modules/customers` (others import `index.ts`
+only; it writes only the tables above plus `customer_notes`).
+
+| Area | Service functions | Rules enforced in the service |
+|---|---|---|
+| Profile | `getMyProfile`, `updateMyProfile` | trimmed names, Indian mobile, DOB not in the future / not before 1900 |
+| Addresses | `listAddresses`, `saveAddress`, `deleteAddress`, `setDefaultAddress` | owner-only (another profile's id → `NOT_FOUND`), first address is default, one default per type under a row lock, delete promotes the next, cap 20 |
+| Household | `getMyHousehold`, `addManagedMember`, `updateMember`, `removeMember`, `leaveHousehold`, `setMemberRole` | managers edit members; a no-login member cannot be a manager; leaving never strands members without a manager; a removed member moves to a solo household (never orphaned) |
+| Invitations | `inviteToHousehold`, `acceptHouseholdInvite`, `revokeHouseholdInvite`, `listHouseholdInvites` | managers only; one pending per email; only the invited email can accept; single use |
+| Sizes | `getSizePreferences`, `setSizePreference` | self or manager; composite FK rejects a value from another chart (UI lands with the catalog) |
+| Admin | `listCustomers`, `getCustomerDetail`, `customerStats`, `addCustomerNote`, `tierFor` | LIKE wildcards escaped, paged; notes 1–2000 chars, stored as text |
+
+Account creation from the admin is `auth.createCustomerAccount` (the auth
+module owns `users`): a pending user with no password, the customer role,
+the account holder profile + solo household, and a 7-day set-password link
+that opens on the storefront `/reset-password`.
+
+**Storefront.** `/account` and `/checkout` layouts stream
+`getMyAccount()` into `AccountDataProvider` (promise read with `use()`
+inside Suspense). Profile tab: details, password change (other devices
+signed out), household members / add / invite / revoke / leave. Address
+book and checkout addresses read the same provider; the demo address book
+is gone. Join link: `/account/household/join?token=`.
+
+**Admin.** `/customers` is a Server Component: `requireStaff('customer.view')`,
+then list + stats + the open profile (`?customer=<profileId>`) in parallel.
+Search and paging live in the URL (`q`, `page`, `perPage`). The drawer opens
+on click from the row, then fills in. Notes and new customers need
+`customer.update_status`; creating is idempotent (scope `customer.create`).
+Order history in the drawer stays empty until the orders module (TL-BE-08).
+
+**Validation messages.** `parseInput` now names the first problem
+("Enter a valid email." / "… (and 2 more).") and keeps every field in
+`details`, so forms that highlight fields and forms that only show the
+message are both truthful.
+
+**Tests.** `customers.int.test.ts` (9, throwaway schema on Neon): hostile
+names/dates, default-address race (10 parallel saves → one default), IDOR on
+addresses, address cap, household permissions + last-manager guard,
+invitation wrong-account / replay, size chart FK, admin search wildcard
+escaping and note validation.

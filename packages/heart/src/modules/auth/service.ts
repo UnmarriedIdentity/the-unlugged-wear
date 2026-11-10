@@ -450,3 +450,32 @@ export async function describeInvite(token: string): Promise<{ email: string; ro
          WHERE i.token_hash = ${hashSecret(token)} AND i.status = 'pending' AND i.expires_at > now()`,
   );
 }
+
+/** Staff-created customer (DOC/backend/13 POST /invite): pending account, no
+ *  password; the customer sets one through a 7-day "set your password" link. */
+export async function createCustomerAccount(
+  input: { email: string; firstName: string; lastName: string; phone?: string | null },
+  meta: Pick<RequestMeta, 'origin'>,
+): Promise<{ userId: string; profileId: string; devLink?: string }> {
+  const email = normalizeEmail(input.email);
+  const secret = randomSecret();
+  try {
+    const created = await withTransaction(async (tx) => {
+      const userId = uuidv7();
+      await tx.execute(sql`INSERT INTO users (id, email, password_hash, status) VALUES (${userId}, ${email}, NULL, 'pending')`);
+      await tx.execute(sql`INSERT INTO user_roles (user_id, role_id) SELECT ${userId}, id FROM roles WHERE slug = 'customer'`);
+      const { profileId } = await createAccountHolder(tx, { userId, firstName: input.firstName.trim(), lastName: input.lastName.trim(), phone: input.phone ?? null });
+      await tx.execute(sql`INSERT INTO password_reset_tokens (id, user_id, token_hash, expires_at)
+                           VALUES (${uuidv7()}, ${userId}, ${hashSecret(secret)}, now() + interval '7 days')`);
+      return { userId, profileId };
+    });
+    const link = `${meta.origin}/reset-password?token=${secret}`;
+    await getEmailSender().send({ to: email, subject: 'Your The Unplugged Wear account is ready', template: 'auth.set_password', link, dedupeKey: `auth.set_password:${created.userId}` });
+    return showDevLinks() ? { ...created, devLink: link } : created;
+  } catch (error) {
+    if (isUniqueViolation(error, 'users_email_key')) {
+      throw new AppError('CONFLICT', 'A customer with this email already exists.', [{ field: 'email', message: 'Already registered' }]);
+    }
+    throw error;
+  }
+}

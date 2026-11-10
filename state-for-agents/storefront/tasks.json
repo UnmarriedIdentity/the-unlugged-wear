@@ -2152,26 +2152,39 @@
       "id": "TL-WEB-BE-05",
       "title": "Account overview, profile, addresses and household sections",
       "category": "backend",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-WEB-BE",
-      "started": null,
-      "finished": null,
-      "verified": false,
+      "started": "2026-11-10",
+      "finished": "2026-11-11",
+      "verified": true,
       "design_match": null,
-      "pushed": false,
+      "pushed": true,
       "admin_ref": "TL-BE-03.02",
       "depends_on": [
         "TL-BE-03"
       ],
       "files": [
         "src/app/account/page.tsx",
-        "src/app/account/profile/ (empty today)",
-        "src/app/account/addresses/ (empty today)"
+        "src/app/account/layout.tsx",
+        "src/app/account/household/join/page.tsx (new)",
+        "src/app/checkout/layout.tsx",
+        "src/app/checkout/page.tsx",
+        "src/server/account.ts (new)",
+        "src/server/customer-actions.ts (new)",
+        "src/storefront/lib/account.tsx (new)",
+        "src/storefront/components/commerce/AccountProfileSection.tsx (new)",
+        "src/storefront/mocks/store.tsx (demo address book removed)"
       ],
       "description": "Decide tabs vs sub-pages (folders exist but are empty); DAL requireCustomer(); one default address per type.",
-      "key_decisions": [],
-      "follow_ups": []
+      "key_decisions": [
+        "Kept tabs on /account (empty profile/ and addresses/ folders not used); account data streams once per layout via use()",
+        "Checkout reads the same AccountDataProvider for saved addresses"
+      ],
+      "follow_ups": [
+        "Size preferences per member (with catalog)"
+      ],
+      "log": "Profile tab (details, password, household), address book and checkout addresses on real data; household join page. Verified in browser."
     },
     {
       "id": "TL-WEB-BE-06",

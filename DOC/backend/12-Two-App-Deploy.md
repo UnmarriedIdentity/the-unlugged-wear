@@ -52,6 +52,13 @@ handlers stay thin: parse → guard → service → shape (file 01 §4).
 - **Connection:** each app reads `DATABASE_URL` (Neon pooled connection
   string). Serverless functions use the pooled endpoint; the migration
   runner uses the direct (unpooled) endpoint.
+- **Pool:** `pg.Pool` per app instance, `DATABASE_POOL_MAX` (default 5),
+  idle connections kept `DATABASE_POOL_IDLE_MS` (default 5 min) with TCP
+  keep-alive. A new TLS connection costs ~10 round trips (measured 3.6 s
+  from India to US East, warm query 350 ms), so short idle timeouts make
+  every pause pay the handshake. Deploy the functions in the database's
+  region (Vercel `iad1`/`cle1` for Neon `us-east-2`) — round trips there are
+  a few ms.
 - **Least privilege (recommended):** two Postgres roles —
   `tuw_storefront` (no access to staff-only tables such as `audit_logs`,
   `staff_invitations`, `import_jobs`) and `tuw_admin` (full DML). Neither

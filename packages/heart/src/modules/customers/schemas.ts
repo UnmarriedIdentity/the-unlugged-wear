@@ -37,3 +37,9 @@ export const householdAccept = z.object({ token: z.string().min(20).max(200) });
 export const inviteRef = z.object({ inviteId: z.string().uuid() });
 export const customerList = z.object({ q: z.string().max(100).optional(), page: z.coerce.number().int().min(1).max(10_000).optional(), perPage: z.coerce.number().int().min(1).max(100).optional() });
 export const note = z.object({ profileId: z.string().uuid(), note: z.string().max(2000) });
+export const createCustomer = z.object({
+  name: z.string().trim().min(1, 'Enter the customer name').max(200),
+  email: z.string().trim().email('Enter a valid email').max(255),
+  phone,
+  initialNote: z.string().trim().max(2000).optional(),
+});

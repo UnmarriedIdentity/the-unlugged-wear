@@ -17,6 +17,7 @@ export {
   revokeInvite,
   acceptInvite,
   describeInvite,
+  createCustomerAccount,
   setStaffRole,
   setUserStatus,
   bootstrapAdmin,

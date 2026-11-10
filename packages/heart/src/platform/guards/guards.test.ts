@@ -33,6 +33,16 @@ test('input validation returns field details', () => {
     assert.equal((e as AppError).code, 'VALIDATION_FAILED');
     assert.equal((e as AppError).details[0]?.field, 'qty');
   }
+  // The message names the actual problem (forms that only show the message
+  // stay truthful) and counts the rest.
+  const form = z.object({ name: z.string().min(1, 'Enter the customer name.'), email: z.string().email('Enter a valid email') });
+  try { parseInput(form, { name: '', email: 'x' }); assert.fail(); } catch (e) {
+    assert.equal((e as AppError).message, 'Enter the customer name (and 1 more).');
+    assert.equal((e as AppError).details.length, 2);
+  }
+  try { parseInput(form, { name: 'A', email: 'x' }); assert.fail(); } catch (e) {
+    assert.equal((e as AppError).message, 'Enter a valid email.');
+  }
 });
 
 test('actor refs, framework signals and request hashing', () => {

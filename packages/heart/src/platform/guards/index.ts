@@ -63,11 +63,12 @@ export function authorize(ctx: RequestContext, opts: Pick<GuardOptions<z.ZodType
 export function parseInput<S extends z.ZodTypeAny>(schema: S, raw: unknown): z.infer<S> {
   const parsed = schema.safeParse(raw);
   if (parsed.success) return parsed.data;
-  throw new AppError(
-    'VALIDATION_FAILED',
-    'Please check the highlighted fields.',
-    parsed.error.issues.map((i) => ({ field: i.path.join('.') || undefined, message: i.message })),
-  );
+  const details = parsed.error.issues.map((i) => ({ field: i.path.join('.') || undefined, message: i.message }));
+  // The message names the first problem so a form that shows only the
+  // message (no per-field highlight) is still truthful; details carry all.
+  const first = details[0]?.message ?? 'Please check your details.';
+  const more = details.length > 1 ? ` (and ${details.length - 1} more)` : '';
+  throw new AppError('VALIDATION_FAILED', `${first.replace(/\.$/, '')}${more}.`, details);
 }
 
 export const actorRef = (ctx: RequestContext): string =>

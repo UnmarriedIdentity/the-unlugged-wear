@@ -16,6 +16,8 @@ import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@storefront/mocks/store';
 import { useSession } from '@storefront/lib/session';
+import { useAccount } from '@storefront/lib/account';
+import AccountProfileSection from '@storefront/components/commerce/AccountProfileSection';
 import { STORE_PRODUCTS } from '@storefront/mocks/fixtures';
 import { formatPaise, formatShortDate } from '@storefront/lib/format';
 import { downloadInvoicePdf } from '@storefront/lib/invoice';
@@ -214,11 +216,8 @@ export default function AccountPage() {
   const {
     orders,
     returns,
-    addresses,
-    saveAddress,
-    deleteAddress,
-    setDefaultAddress,
     submitReturnRequest,
+    addToast,
     resetStoreData,
     addToCart,
     wishlist,
@@ -226,6 +225,11 @@ export default function AccountPage() {
   const router = useRouter();
   // AccountGate only renders this page once a demo session exists.
   const { session, signOut } = useSession();
+  // Real address book, profile and household (TL-BE-03).
+  const accountState = useAccount();
+  const { addresses, saveAddress, deleteAddress, setDefaultAddress } = accountState;
+  const [addressError, setAddressError] = useState<string | null>(null);
+  const [addressSaving, setAddressSaving] = useState(false);
   const accountName = session?.name ?? '';
   const accountEmail = session?.email ?? '';
   const defaultAddress = addresses.find((a) => a.isDefault) ?? addresses[0];
@@ -294,15 +298,23 @@ export default function AccountPage() {
 
   const handleSaveAddress = (e: React.FormEvent) => {
     e.preventDefault();
+    if (addressSaving) return;
     const { id, otherLabel, label, addressLine2, ...fields } = addressForm;
-    saveAddress({
+    setAddressSaving(true);
+    setAddressError(null);
+    void saveAddress({
       ...fields,
-      id: id ?? `addr-${Date.now()}`,
+      id: id ?? 'new-address',
       label: label === 'Other' ? otherLabel.trim() || 'Other' : label,
       addressLine2: addressLine2?.trim() || undefined,
       country: 'India',
+    }).then((outcome) => {
+      setAddressSaving(false);
+      // On failure the dialog stays open with every typed value.
+      if (!outcome.ok) return setAddressError(outcome.message);
+      setIsAddressModalOpen(false);
+      addToast({ type: 'success', title: 'Address saved' });
     });
-    setIsAddressModalOpen(false);
   };
 
   const handleSubmitReturn = (e: React.FormEvent) => {
@@ -693,7 +705,7 @@ export default function AccountPage() {
                           Edit
                         </Button>
                         {!addr.isDefault && (
-                          <Button variant="ghost" size="sm" onClick={() => setDefaultAddress(addr.id)}>
+                          <Button variant="ghost" size="sm" onClick={() => void setDefaultAddress(addr.id).then((o) => addToast(o.ok ? { type: 'success', title: 'Default address updated' } : { type: 'error', title: o.message }))}>
                             Set as default
                           </Button>
                         )}
@@ -772,25 +784,7 @@ export default function AccountPage() {
 
             {/* PROFILE */}
             {activeSection === 'profile' && (
-              <section aria-labelledby="profile-heading" className="bg-store-surface border border-store-card-border p-6 sm:p-8 max-w-2xl space-y-6">
-                <h2 id="profile-heading" className="font-heading text-xl font-medium text-store-charcoal pb-3 border-b border-store-card-border">
-                  Profile
-                </h2>
-
-                <div className="space-y-4">
-                  <Input label="Name" value={accountName} readOnly />
-                  <Input label="Email" value={accountEmail} readOnly />
-                  <Input label="Mobile" value={defaultAddress?.phone ?? ''} readOnly />
-                </div>
-
-                <div className="pt-4 border-t border-store-card-border space-y-3">
-                  <h3 className="text-sm font-medium text-store-charcoal">Sign-in security</h3>
-                  <p className="text-sm text-store-text-secondary">
-                    This is a demo account that only exists in this browser. Password changes and two-step verification
-                    arrive with live sign-in in a later phase.
-                  </p>
-                </div>
-              </section>
+              <AccountProfileSection account={accountState} />
             )}
           </div>
         </div>
@@ -798,7 +792,7 @@ export default function AccountPage() {
         {/* Demo controls, kept apart from the customer actions */}
         <aside className="mt-16 pt-6 border-t border-dashed border-store-card-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <p className="text-xs text-store-text-secondary">
-            Demo store: orders, addresses and returns are saved in this browser only.
+            Demo store: orders and returns are still saved in this browser only (your profile and addresses are saved to your account).
           </p>
           <button
             type="button"
@@ -817,6 +811,9 @@ export default function AccountPage() {
         title={addressForm.id ? 'Edit address' : 'Add a new address'}
       >
         <form onSubmit={handleSaveAddress} className="space-y-4">
+          {addressError && (
+            <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-3.5 py-3 text-sm text-red-700">{addressError}</p>
+          )}
           <fieldset>
             <legend className="text-sm font-medium text-store-charcoal mb-2">Save this address as</legend>
             <div className="flex flex-wrap gap-2">
@@ -877,8 +874,8 @@ export default function AccountPage() {
             <Button variant="secondary" size="md" onClick={() => setIsAddressModalOpen(false)}>
               Cancel
             </Button>
-            <Button variant="dark" size="md" type="submit">
-              Save address
+            <Button variant="dark" size="md" type="submit" disabled={addressSaving}>
+              {addressSaving ? 'Saving…' : 'Save address'}
             </Button>
           </div>
         </form>
@@ -905,8 +902,10 @@ export default function AccountPage() {
                 variant="danger"
                 size="md"
                 onClick={() => {
-                  deleteAddress(addressPendingDelete.id);
-                  setAddressPendingDelete(null);
+                  void deleteAddress(addressPendingDelete.id).then((outcome) => {
+                    setAddressPendingDelete(null);
+                    addToast(outcome.ok ? { type: 'info', title: 'Address removed' } : { type: 'error', title: outcome.message });
+                  });
                 }}
               >
                 Remove address

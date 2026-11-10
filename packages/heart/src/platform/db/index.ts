@@ -24,11 +24,23 @@ export function connectionString(env: NodeJS.ProcessEnv = process.env): string {
 }
 
 export function getPool(): pg.Pool {
-  globalForDb.__tuwPool ??= new pg.Pool({
-    connectionString: connectionString(),
-    max: Number(process.env.DATABASE_POOL_MAX ?? 5),
-    idleTimeoutMillis: 10_000,
-  });
+  if (!globalForDb.__tuwPool) {
+    // A new TLS connection costs ~10 round trips (≈3s from India to US East,
+    // a few ms from Vercel next to Neon), a warm query one. Keep idle
+    // connections for 5 minutes so a pause between clicks does not pay the
+    // handshake again; the Neon pooler (PgBouncer) absorbs the idle sockets.
+    const pool = new pg.Pool({
+      connectionString: connectionString(),
+      max: Number(process.env.DATABASE_POOL_MAX ?? 5),
+      idleTimeoutMillis: Number(process.env.DATABASE_POOL_IDLE_MS ?? 300_000),
+      keepAlive: true,
+    });
+    // An idle client killed by the server (compute suspend, pooler restart)
+    // emits 'error' on the pool; unhandled, that crashes the process. The
+    // pool drops the client and the next query opens a fresh one.
+    pool.on('error', (err) => console.warn('[db] idle client dropped:', err.message));
+    globalForDb.__tuwPool = pool;
+  }
   return globalForDb.__tuwPool;
 }
 

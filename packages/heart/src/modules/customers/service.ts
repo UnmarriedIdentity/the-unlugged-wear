@@ -543,3 +543,20 @@ export async function listHouseholdInvites(managerProfileId: string): Promise<{ 
      WHERE household_id = ${householdId} AND status = 'pending' AND expires_at > now() ORDER BY created_at DESC`);
   return rows.map((r) => ({ id: r.id, email: r.email, expiresAt: r.expires_at }));
 }
+
+/** Directory-wide numbers for the admin stat cards. */
+export async function customerStats(): Promise<{ total: number; vip: number; lifetimeValuePaise: number; avgOrders: number }> {
+  const row = await one<{ total: number; vip: number; ltv: string; avg: string }>(getDb(), sql`
+    WITH c AS (
+      SELECT u.id,
+             (SELECT count(*) FROM orders o WHERE o.placed_by_user_id = u.id AND o.order_type = 'standard') AS n,
+             COALESCE((SELECT sum(grand_total) FROM orders o WHERE o.placed_by_user_id = u.id AND o.payment_status = 'paid' AND o.order_type = 'standard'), 0) AS spent
+        FROM users u JOIN user_roles ur ON ur.user_id = u.id JOIN roles r ON r.id = ur.role_id AND r.slug = 'customer'
+    )
+    SELECT count(*)::int AS total,
+           count(*) FILTER (WHERE spent >= 25000 OR n >= 8)::int AS vip,
+           COALESCE(sum(spent), 0)::text AS ltv,
+           COALESCE(round(avg(n), 1), 0)::text AS avg
+      FROM c`);
+  return { total: row?.total ?? 0, vip: row?.vip ?? 0, lifetimeValuePaise: toPaise(row?.ltv ?? '0'), avgOrders: Number(row?.avg ?? 0) };
+}
