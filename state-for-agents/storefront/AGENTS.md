@@ -7,6 +7,8 @@ work stopped — without ever opening the admin app. Start here, in this order:
    `pending_verifications`), then the task list. Verify `HEAD` matches
    `session.tip`; if not, reconcile before touching code.
 2. `TRACKER_GUIDE.md` → how to read and update the tracker.
+   Backend phase: storefront screen tasks are `TL-WEB-BE-*` here; the module
+   sequence they depend on is `TL-BE-*` in `state-for-agents/admin/tasks.json`.
 3. `rules/` (in numeric order) → **inviolable constraints**. Rules are
    permissions, not techniques: pixel-perfect tolerance, git hygiene, gates,
    never-push, task discipline, branch hygiene, PDP lifecycle flow, component reusability (DRY), and never-commit. Every report quotes rule compliance.

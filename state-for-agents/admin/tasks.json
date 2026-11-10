@@ -17,7 +17,7 @@
     "branch": "urvil-ui",
     "tip": "98b0533",
     "unpushed": [],
-    "next_up": "TL-BE-00 (owner decisions) then TL-BE-01.01 — create packages/core",
+    "next_up": "TL-BE-00 (owner decisions) then TL-BE-01.01 — create packages/core; storefront tasks: state-for-agents/storefront/tasks.json TL-WEB-BE",
     "pending_verifications": [
       "admin journal editor + list full keyboard/focus/Reset Demo pass at 360/768/1024/1440 (CDP route-load check passed; interactive pass pending)",
       "SQL dry-run: apply 001 + 002 + 006-cms.sql against a real PostgreSQL instance; verify generated blogs.search_vector, slug/CHECK constraints, FK RESTRICT/CASCADE behavior, and partial indexes. psql remains unavailable locally.",
@@ -5209,7 +5209,7 @@
       "owner": "agent",
       "started": null,
       "finished": null,
-      "log": "Backend core — build modules in order TL-BE-01 → TL-BE-17 (respect depends_on), integrations (TL-INT-*) only after. HOW TO PICK UP WORK: 1) read state-for-agents/backend/AGENTS.md and DOC/backend/23-Backend-Implementation.md; 2) take the lowest-numbered backlog child whose parent's depends_on are all done; 3) set it in_progress (owner = you) — exactly one in_progress per person; 4) build inside packages/core/src/modules/<name> + thin app actions/routes, follow the skills; 5) gates: pnpm typecheck, pnpm test, pnpm build, pnpm db:migrate on dev if SQL changed; 6) commit code + this tracker together (status done, log = commit hash, verified true, finished date); 7) a parent is done when all children are done and its done_when holds. Each module ends by replacing the demo adapter on its screens (screen by screen).",
+      "log": "Backend core — build modules in order TL-BE-01 → TL-BE-17 (respect depends_on), integrations (TL-INT-*) only after. HOW TO PICK UP WORK: 1) read state-for-agents/backend/AGENTS.md and DOC/backend/23-Backend-Implementation.md; 2) take the lowest-numbered backlog child whose parent's depends_on are all done; 3) set it in_progress (owner = you) — exactly one in_progress per person; 4) build inside packages/core/src/modules/<name> + thin app actions/routes, follow the skills; 5) gates: pnpm typecheck, pnpm test, pnpm build, pnpm db:migrate on dev if SQL changed; 6) commit code + this tracker together (status done, log = commit hash, verified true, finished date); 7) a parent is done when all children are done and its done_when holds. Each module ends by replacing the demo adapter on its screens (screen by screen). STOREFRONT: every storefront screen/route is a task in state-for-agents/storefront/tasks.json (TL-WEB-BE-NN). Admin mains and steps list them in storefront_tasks[]; when you finish an admin step, do (or hand off) its storefront_tasks next. After TL-BE-17, any TL-WEB-BE task still in backlog is the remaining storefront work.",
       "design_match": "n/a",
       "key_decisions": [],
       "verified": false,
@@ -5231,7 +5231,8 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": []
     },
     {
       "id": "TL-BE-00.01",
@@ -5326,7 +5327,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-01"
+      ]
     },
     {
       "id": "TL-BE-01.01",
@@ -5341,7 +5345,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-01"
+      ]
     },
     {
       "id": "TL-BE-01.02",
@@ -5526,7 +5533,12 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-02",
+        "TL-WEB-BE-03",
+        "TL-WEB-BE-04"
+      ]
     },
     {
       "id": "TL-BE-02.01",
@@ -5586,7 +5598,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-03"
+      ]
     },
     {
       "id": "TL-BE-02.05",
@@ -5616,7 +5631,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-04"
+      ]
     },
     {
       "id": "TL-BE-02.07",
@@ -5631,7 +5649,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-02"
+      ]
     },
     {
       "id": "TL-BE-02.08",
@@ -5681,7 +5702,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-05"
+      ]
     },
     {
       "id": "TL-BE-03.01",
@@ -5711,7 +5735,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-05"
+      ]
     },
     {
       "id": "TL-BE-03.03",
@@ -5761,7 +5788,11 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-06",
+        "TL-WEB-BE-07"
+      ]
     },
     {
       "id": "TL-BE-04.01",
@@ -5776,7 +5807,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-07"
+      ]
     },
     {
       "id": "TL-BE-04.02",
@@ -5806,7 +5840,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-06"
+      ]
     },
     {
       "id": "TL-BE-04.04",
@@ -5841,7 +5878,16 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-08",
+        "TL-WEB-BE-09",
+        "TL-WEB-BE-10",
+        "TL-WEB-BE-11",
+        "TL-WEB-BE-12",
+        "TL-WEB-BE-13",
+        "TL-WEB-BE-14"
+      ]
     },
     {
       "id": "TL-BE-05.01",
@@ -5871,7 +5917,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-12"
+      ]
     },
     {
       "id": "TL-BE-05.03",
@@ -5901,7 +5950,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-14"
+      ]
     },
     {
       "id": "TL-BE-05.05",
@@ -5916,7 +5968,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-13"
+      ]
     },
     {
       "id": "TL-BE-05.06",
@@ -5931,7 +5986,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-11"
+      ]
     },
     {
       "id": "TL-BE-05.07",
@@ -5946,7 +6004,12 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-08",
+        "TL-WEB-BE-09",
+        "TL-WEB-BE-10"
+      ]
     },
     {
       "id": "TL-BE-05.08",
@@ -6011,7 +6074,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-15"
+      ]
     },
     {
       "id": "TL-BE-06.01",
@@ -6056,7 +6122,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-15"
+      ]
     },
     {
       "id": "TL-BE-06.04",
@@ -6092,7 +6161,12 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-16",
+        "TL-WEB-BE-17",
+        "TL-WEB-BE-18"
+      ]
     },
     {
       "id": "TL-BE-07.01",
@@ -6137,7 +6211,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-18"
+      ]
     },
     {
       "id": "TL-BE-07.04",
@@ -6152,7 +6229,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-17"
+      ]
     },
     {
       "id": "TL-BE-07.05",
@@ -6167,7 +6247,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-16"
+      ]
     },
     {
       "id": "TL-BE-08",
@@ -6189,7 +6272,16 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-19",
+        "TL-WEB-BE-20",
+        "TL-WEB-BE-21",
+        "TL-WEB-BE-22",
+        "TL-WEB-BE-23",
+        "TL-WEB-BE-24",
+        "TL-WEB-BE-25"
+      ]
     },
     {
       "id": "TL-BE-08.01",
@@ -6204,7 +6296,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-25"
+      ]
     },
     {
       "id": "TL-BE-08.02",
@@ -6249,7 +6344,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-24"
+      ]
     },
     {
       "id": "TL-BE-08.05",
@@ -6264,7 +6362,12 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-21",
+        "TL-WEB-BE-22",
+        "TL-WEB-BE-23"
+      ]
     },
     {
       "id": "TL-BE-08.06",
@@ -6294,7 +6397,11 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-19",
+        "TL-WEB-BE-20"
+      ]
     },
     {
       "id": "TL-BE-08.08",
@@ -6329,7 +6436,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-26"
+      ]
     },
     {
       "id": "TL-BE-09.01",
@@ -6344,7 +6454,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-26"
+      ]
     },
     {
       "id": "TL-BE-09.02",
@@ -6395,7 +6508,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-27"
+      ]
     },
     {
       "id": "TL-BE-10.01",
@@ -6455,7 +6571,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-27"
+      ]
     },
     {
       "id": "TL-BE-10.05",
@@ -6490,7 +6609,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-28"
+      ]
     },
     {
       "id": "TL-BE-11.01",
@@ -6565,7 +6687,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-28"
+      ]
     },
     {
       "id": "TL-BE-12",
@@ -6585,7 +6710,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-29"
+      ]
     },
     {
       "id": "TL-BE-12.01",
@@ -6615,7 +6743,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-29"
+      ]
     },
     {
       "id": "TL-BE-12.03",
@@ -6650,7 +6781,14 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-30",
+        "TL-WEB-BE-31",
+        "TL-WEB-BE-32",
+        "TL-WEB-BE-33",
+        "TL-WEB-BE-34"
+      ]
     },
     {
       "id": "TL-BE-13.01",
@@ -6665,7 +6803,11 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-30",
+        "TL-WEB-BE-31"
+      ]
     },
     {
       "id": "TL-BE-13.02",
@@ -6680,7 +6822,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-32"
+      ]
     },
     {
       "id": "TL-BE-13.03",
@@ -6695,7 +6840,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-33"
+      ]
     },
     {
       "id": "TL-BE-13.04",
@@ -6710,7 +6858,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-34"
+      ]
     },
     {
       "id": "TL-BE-13.05",
@@ -6745,7 +6896,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-35"
+      ]
     },
     {
       "id": "TL-BE-14.01",
@@ -6760,7 +6914,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-35"
+      ]
     },
     {
       "id": "TL-BE-14.02",
@@ -6810,7 +6967,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-36"
+      ]
     },
     {
       "id": "TL-BE-15.01",
@@ -6825,7 +6985,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-36"
+      ]
     },
     {
       "id": "TL-BE-15.02",
@@ -6876,7 +7039,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-37"
+      ]
     },
     {
       "id": "TL-BE-16.01",
@@ -6906,7 +7072,10 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-37"
+      ]
     },
     {
       "id": "TL-BE-17",
@@ -6926,7 +7095,11 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-38",
+        "TL-WEB-BE-39"
+      ]
     },
     {
       "id": "TL-BE-17.01",
@@ -6986,7 +7159,11 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": []
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-38",
+        "TL-WEB-BE-39"
+      ]
     },
     {
       "id": "TL-BE-17.05",

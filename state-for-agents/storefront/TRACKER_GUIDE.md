@@ -13,6 +13,11 @@ Read this before touching `tasks.json`. It is the only live task record;
   `started`/`finished` (dates or null), `log` (commit hash(es)), `design_match`
   (`yes`|`partial`|null), `key_decisions[]`, `verified` (bool),
   `pushed` (**true/false only** — see push accounting), `follow_ups[]`.
+- Backend tasks (`TL-WEB-BE-NN`, main `TL-WEB-BE`) also carry `admin_ref`
+  (the admin-tracker step that builds the module they need),
+  `depends_on[]` (admin mains in `state-for-agents/admin/tasks.json` that
+  must be done first) and `files[]`. The admin tracker is the master
+  sequence; do a `TL-WEB-BE` task once its `depends_on` are done.
 - `session{branch, tip, unpushed[], next_up, pending_verifications[],
   last_updated, updated_by}` — live resume state, refreshed every commit.
 - `workflow{how_to_close_a_task, validation}` — the rules restated for machines.
