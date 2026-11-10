@@ -8,15 +8,16 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 293,
-    "done": 264,
+    "total": 295,
+    "done": 266,
     "in_progress": 1,
     "backlog": 28
   },
   "session": {
     "branch": "urvil-ui",
-    "tip": "370c754",
+    "tip": "9f69e61",
     "unpushed": [
+      "9f69e61",
       "370c754",
       "bc696e6",
       "13d02af",
@@ -5024,10 +5025,45 @@
       "parent": "TL-DB-BACKEND-PREP",
       "started": null,
       "finished": null,
-      "log": "Pending answers: (1) money-back returns besides exchanges? (2) exchange price difference when the new variant costs more/less; (3) can guests request exchanges with order number + email? (4) COD refunds — bank/UPI transfer method needed? (5) gift card purchase/expiry rules; (6) keep or archive 3.Database-Schema.md and 4.API-Design.md; (7) backend shape inside each Next app vs standalone services.",
+      "log": "Answered 2026-11-10: exchange price difference charged/refunded; exchanges need an account; COD refunds via UPI/bank transfer; gift cards sold on the website, separate from discount codes; old root docs rewritten; no money-back returns (Qikink offers none). Still open: (1) on an exchange, does the customer send the old garment back (to whom?) or keep it; (2) can a gift card and a discount code be used on the same order; (3) gift card expiry (RBI prepaid rules suggest >= 1 year); (4) shared packages/core vs per-app module copies; (5) Qikink live API access + webhook/tracking endpoints (ask care@qikink.com).",
       "design_match": "n/a",
       "key_decisions": [],
       "verified": false,
+      "pushed": false
+    },
+    {
+      "id": "TL-DB-FULFILLMENT-PROVIDERS",
+      "title": "Provider-agnostic fulfilment (009-fulfillment.sql) + Qikink research + exchange pricing / COD refunds",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-DB-BACKEND-PREP",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "9f69e61 — 009-partner → 009-fulfillment (7 tables: integration_providers, provider_product_mappings, provider_cod_remittances, fulfillment_orders, fulfillment_order_items, provider_wallet_ledger, fulfillment_claims); provider slugs FK to the registry; returns exchange|replacement + price_difference, account required; refunds upi/bank_transfer + payout_reference; products.product_kind; 7 provider seed rows; 99 tables; doc 16 rewritten from the Qikink help centre. Admin 113/113.",
+      "design_match": "n/a",
+      "key_decisions": [
+        "Qikink has no money-back returns or size exchanges → no money-back returns; exchange = new partner order paid by us",
+        "Defects: 7-day claim window with unboxing video → fulfillment_claims",
+        "New provider = integration_providers row + adapter, no migration"
+      ],
+      "verified": true,
+      "pushed": false
+    },
+    {
+      "id": "TL-DB-ROOT-DOCS",
+      "title": "Rewrite 3.Database-Schema.md and 4.API-Design.md for the modular two-backend design",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-DB-BACKEND-PREP",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "Old microservices/MongoDB/Redis content replaced: schema-by-module ownership map; module layout (index/service/repository/schemas/events), integration registries, events for side effects, per-app module table.",
+      "design_match": "n/a",
+      "key_decisions": [
+        "Modular monolith per app, not microservices",
+        "Modules own their tables and talk via index.ts + events"
+      ],
+      "verified": true,
       "pushed": false
     }
   ],

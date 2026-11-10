@@ -126,13 +126,11 @@ kilobytes — never the risk. Detail: `10-Analytics.md`, `11-Storage.md`.
 | 21-Idempotency.md | Duplicate-proofing: idempotency keys, webhooks, natural keys | Active |
 | 22-Commerce-Extras.md | Newsletter, FAQs, gift cards, stock alerts, settings-held rules | Draft |
 
-### Superseded documents
+### Root overview documents
 
-- **`3.Database-Schema.md`** (repo root, 917 lines) describes a
-  microservice split with MongoDB + Redis and no cross-schema foreign keys.
-  That is the opposite of the current doctrine: **one PostgreSQL, real FKs
-  everywhere, cross-domain references as true constraints.** It is kept for
-  history only — do not implement from it. Redis can return later as a cache
-  if and when the infrastructure leaves Vercel; it is not part of v1.
+- **`3.Database-Schema.md`** and **`4.API-Design.md`** (repo root) were
+  rewritten on 2026-11-10: the old microservices / MongoDB / Redis design
+  is retired. They are now short overviews of the schema-by-module map and
+  the modular two-backend design; this folder holds the detail.
 - The SQL files in `db/migrate/` are the schema source
   of truth. A doc that disagrees with them is the bug.
