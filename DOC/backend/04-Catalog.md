@@ -88,6 +88,9 @@ No seed, no UI, no queries in v1 — launch is seed + UI only.
 | monogram_enabled | boolean | NOT NULL DEFAULT false | Clothing Specs monogram offer |
 | monogram_max_chars | smallint | NOT NULL DEFAULT 3, CHECK (monogram_max_chars >= 1) | Monogram character limit |
 | monogram_upcharge | DECIMAL(12,2) | NOT NULL DEFAULT 0, CHECK (monogram_upcharge >= 0) | Monogram add-on price |
+| product_kind | varchar(20) | NOT NULL DEFAULT 'physical', CHECK IN ('physical','gift_card') | Gift cards are digital and never sent to a fulfilment provider |
+| exchange_policy | varchar(20) | NOT NULL DEFAULT 'defects_only', CHECK IN ('defects_only','exchangeable','none') | After delivery: `defects_only` = replaced only if defective/damaged/misprinted/wrong (the print partner reprints those); `exchangeable` = also one size/variant exchange per item; `none` = final sale. Copied onto each order line at purchase |
+| low_stock_threshold | integer | NULL, CHECK (>= 0) | Staff low-stock alert level; NULL = store-wide setting |
 | partner_provider | varchar(20) | NULL, CHECK IN ('qikink','printrove','custom_atelier') | Who produces this item — the drawer's Partner field, filterable |
 | partner_availability | varchar(20) | NULL, CHECK IN ('ready_to_print','partner_delayed','discontinued') | Can the partner print it right now; storefront filters/badges read this, nothing else |
 | deleted_at | timestamptz | NULL | Soft-delete |

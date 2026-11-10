@@ -127,11 +127,8 @@ CREATE INDEX idx_gct_order_id ON gift_card_transactions (order_id) WHERE order_i
 CREATE UNIQUE INDEX one_gift_card_redeem_per_order
   ON gift_card_transactions (gift_card_id, order_id) WHERE type = 'redeem';
 
--- Orders record how much of the total a gift card covered; grand_total stays
--- the full order value and payments cover the remainder.
-ALTER TABLE orders
-  ADD COLUMN gift_card_amount DECIMAL(12,2) NOT NULL DEFAULT 0
-    CHECK (gift_card_amount >= 0);
+-- orders.gift_card_amount (004) records how much of the total a gift card
+-- covered; grand_total stays the full order value.
 
 -- ----------------------------------------------- stock_alert_subscriptions
 -- "Notify me when back in stock". Works for guests (email only) and

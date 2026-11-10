@@ -74,6 +74,13 @@ CREATE TABLE products (
   -- paying for one issues a gift_cards row (008).
   product_kind       varchar(20)   NOT NULL DEFAULT 'physical'
     CHECK (product_kind IN ('physical','gift_card')),
+  -- What the customer can ask for after delivery. Default 'defects_only':
+  -- printed-to-order garments are only replaced when they arrive defective,
+  -- damaged, misprinted or wrong (the fulfilment partner reprints those).
+  -- 'exchangeable' also allows one size/variant exchange per item.
+  -- 'none' = final sale (gift cards).
+  exchange_policy    varchar(20)   NOT NULL DEFAULT 'defects_only'
+    CHECK (exchange_policy IN ('defects_only','exchangeable','none')),
   -- Low-stock alert level for this product and its variants. NULL = use the
   -- store-wide store_settings 'inventory.low_stock_threshold'.
   low_stock_threshold integer      CHECK (low_stock_threshold >= 0),
@@ -251,11 +258,14 @@ CREATE TABLE stock_movements (
   qty_change integer NOT NULL,
   reason     varchar(30) NOT NULL
     CHECK (reason IN ('sale','restock','import','admin_adjustment','return','cancel')),
-  -- order_id arrives via 004-orders.sql (orders table does not exist yet;
-  -- linking FKs are added where both sides exist, never forward-referenced).
+  -- Sale/cancel/return linkage. The FK to orders is attached in
+  -- 004-orders.sql (constraint only), because orders does not exist yet.
+  order_id   uuid,
   qty_after  integer NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now()
 );
+CREATE INDEX idx_stock_movements_order_id ON stock_movements (order_id)
+  WHERE order_id IS NOT NULL;
 CREATE INDEX idx_stock_movements_product_time
   ON stock_movements (product_id, created_at);
 CREATE INDEX idx_stock_movements_created_at ON stock_movements (created_at);

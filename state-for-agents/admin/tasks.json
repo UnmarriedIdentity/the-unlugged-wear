@@ -8,8 +8,8 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 296,
-    "done": 267,
+    "total": 297,
+    "done": 268,
     "in_progress": 1,
     "backlog": 28
   },
@@ -4997,7 +4997,7 @@
       "parent": "TL-DB-BACKEND-PREP",
       "started": null,
       "finished": null,
-      "log": "Apply db/migrate/*.sql in file order then db/seed, recording applied files in a schema_migrations table; uses DATABASE_URL_UNPOOLED.",
+      "log": "Apply db/migrate/*.sql in file order then db/seed, recording applied files in a schema_migrations table; uses DATABASE_URL_UNPOOLED. A PGlite (Postgres 17 in WASM) apply check proved the files run in order; the runner can reuse that approach for CI.",
       "design_match": "n/a",
       "key_decisions": [],
       "verified": false,
@@ -5082,6 +5082,28 @@
       ],
       "verified": true,
       "pushed": false
+    },
+    {
+      "id": "TL-DB-EXCHANGE-POLICY",
+      "title": "exchange_policy (default defects_only), print preview, cancel window, abuse limits; no ADD COLUMN ALTERs",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-DB-BACKEND-PREP",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "products.exchange_policy + order_items snapshot; cart_items/order_items personalization + preview_image_url + preview_approved_at (CHECK: no unapproved custom print); orders.cancellable_until + store_settings orders.cancel_window_minutes=60; returns.evidence_media_ids (>=1 photo), return_items.request_type with reason CHECKs and one_exchange_per_order_item. All ALTER ... ADD COLUMN moved into CREATE TABLE; only 6 forward-FK ADD CONSTRAINTs remain. Full schema + seed (twice) applied on PostgreSQL 17 via PGlite: 99 tables, 17 partitions; guest/provider/refund constraints behave. Admin 114/114.",
+      "design_match": "n/a",
+      "key_decisions": [
+        "Defects-only by default because Qikink reprints defects but never takes items back",
+        "Paid orders stay pending during the cancel window, then become confirmed when sent to Qikink",
+        "Customer mistakes on defects-only items are not compensated"
+      ],
+      "verified": true,
+      "pushed": false,
+      "follow_ups": [
+        "Qikink reply pending on defect claims without unboxing video",
+        "Consider adding the PGlite schema check as a repo script (needs a devDependency)"
+      ]
     }
   ],
   "workflow": {

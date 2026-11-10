@@ -33,7 +33,9 @@ CREATE TABLE integration_providers (
 );
 CREATE INDEX idx_integration_providers_category ON integration_providers (category, is_active);
 
--- Provider slugs elsewhere become real FKs now that the registry exists.
+-- Forward foreign keys (constraint only — the columns are declared in their
+-- own CREATE TABLE in 002/004/005): provider slugs become real FKs now that
+-- the registry exists.
 ALTER TABLE products
   ADD CONSTRAINT products_partner_provider_fk
     FOREIGN KEY (partner_provider) REFERENCES integration_providers (slug)
@@ -139,10 +141,10 @@ CREATE INDEX idx_fulfillment_orders_sync ON fulfillment_orders (status, synced_a
 CREATE INDEX idx_fulfillment_orders_cod_remittance ON fulfillment_orders (cod_remittance_id)
   WHERE cod_remittance_id IS NOT NULL;
 
--- Customer-facing shipments now know which provider order they belong to.
+-- shipments.fulfillment_order_id is declared in 004; attach its FK now.
 ALTER TABLE shipments
-  ADD COLUMN fulfillment_order_id uuid REFERENCES fulfillment_orders (id) ON DELETE SET NULL;
-CREATE INDEX idx_shipments_fulfillment_order_id ON shipments (fulfillment_order_id);
+  ADD CONSTRAINT shipments_fulfillment_order_fk
+    FOREIGN KEY (fulfillment_order_id) REFERENCES fulfillment_orders (id) ON DELETE SET NULL;
 
 -- ------------------------------------------------ fulfillment_order_items
 -- Which order lines (and how many) went to which provider order.

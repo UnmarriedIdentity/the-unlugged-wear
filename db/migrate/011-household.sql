@@ -111,18 +111,12 @@ CREATE UNIQUE INDEX one_default_shipping_per_profile
 CREATE UNIQUE INDEX one_default_billing_per_profile
   ON addresses (profile_id) WHERE is_default AND type = 'billing';
 
--- ------------------------------------------- deferred FK, now satisfiable
--- orders ships in 004-orders.sql, household_members does not exist yet at that
--- point. Same pattern as 004's stock_movements.order_id: this is still a
--- from-scratch build, not a forward migration of a live schema. The pair makes
--- "order for a member of my own household" a database rule, not a promise.
--- Nullable only for guest orders: the CHECK ties it to the account columns,
--- and the composite FK (MATCH SIMPLE) is skipped when the row is a guest's.
+-- ------------------------------------ forward foreign key (constraint only)
+-- orders.for_household_id is declared in 004-orders.sql; household_members
+-- only exists from this file on, so the composite FK is attached here. The
+-- pair makes "order for a member of my own household" a database rule. MATCH
+-- SIMPLE skips the check for guest orders (both columns NULL).
 ALTER TABLE orders
-  ADD COLUMN for_household_id uuid,
-  ADD CONSTRAINT orders_household_matches_buyer
-    CHECK ((placed_by_user_id IS NULL) = (for_household_id IS NULL)),
   ADD CONSTRAINT orders_for_household_member_fk
     FOREIGN KEY (for_household_id, for_profile_id)
     REFERENCES household_members (household_id, profile_id) ON DELETE RESTRICT;
-CREATE INDEX idx_orders_for_household_id ON orders (for_household_id);

@@ -34,6 +34,7 @@
 | billing_address | jsonb | NOT NULL | Snapshot |
 | discount_code_id | uuid | NULL, FK → discount_codes(id) ON DELETE SET NULL | Which coupon applied; history survives code deletion |
 | idempotency_key | varchar(255) | NULL | The client's `Idempotency-Key` at checkout. Duplicated here **on purpose**: `idempotency_keys` rows expire in 24h, this one never does, so a retry a week later still cannot fork the order |
+| cancellable_until | timestamptz | NULL | End of the free-cancel window (payment time + 60 min); the submit worker sends the order to the partner after it |
 | notes | text | NULL | Admin/customer notes |
 | created_at / updated_at | timestamptz | NOT NULL | |
 
@@ -59,8 +60,26 @@ map onto it: `queued` → `confirmed`, `printing` → `processing`,
 `submission_failed` → `failed` (the raw provider state stays on
 `fulfillment_orders.provider_status`, file 16).
 
-- **Cancel:** the customer can cancel only while `status = 'pending'`.
-  Once an order is `confirmed` it cannot be cancelled by the customer.
+- **Cancel window:** a paid (or COD) order stays `pending` for
+  `store_settings.orders.cancel_window_minutes` (60) — stored per order as
+  `orders.cancellable_until`. During that window the customer can cancel
+  for free; nothing has been sent to the print partner. When the window
+  ends the submit worker sends it and the order becomes `confirmed`, after
+  which the customer cannot cancel.
+- **Print preview:** personalised / custom-print lines carry the approved
+  preview (`order_items.personalization`, `preview_image_url`,
+  `preview_approved_at`); a CHECK makes an unapproved custom print
+  unstorable. The approved preview is what the partner prints.
+- **Exchange policy per product:** `products.exchange_policy` (default
+  `defects_only`) is copied onto each order line. Only `exchangeable` lines
+  can be exchanged; every line can request a defect replacement.
+- **Abuse limits:** one exchange per order line, ever (partial unique on
+  `return_items`); exchanges only for `size_fit` / `wrong_variant`;
+  replacements only for `damaged` / `misprint` / `wrong_item` / `quality`
+  (CHECKs); at least one photo on every request (`returns.evidence_media_ids`);
+  replacement-order lines are written with `exchange_policy = 'none'`, so an
+  exchanged item cannot be exchanged again. Customer mistakes on
+  `defects_only` items are not compensated.
 - **Exchange (size / variant swap):** allowed only when the order is
   `delivered`, only within `store_settings.exchange.window_days` (7) of
   `shipments.delivered_at`, and only for **another variant of the same
@@ -110,6 +129,8 @@ map onto it: `queued` → `confirmed`, `printing` → `processing`,
 | returned_qty | integer | NOT NULL DEFAULT 0, CHECK (returned_qty >= 0), table CHECK `returned_qty <= qty` | The only mutable column: the restock TX increments it, so "more returned than bought" cannot be stored. A row CHECK is the only place the per-line aggregate can be structural |
 | line_total | DECIMAL(12,2) | NOT NULL, CHECK (>= 0) | unit_price × qty — immutable |
 | options | jsonb | NULL | Variant combination snapshot (`{"Size":"M","Color":"Onyx"}`) |
+| exchange_policy | varchar(20) | NOT NULL DEFAULT 'defects_only' | Snapshot of `products.exchange_policy` at purchase |
+| personalization / preview_image_url / preview_approved_at | jsonb / varchar(2048) / timestamptz | NULL; CHECK: personalisation requires an approved preview | Custom print copied from the cart |
 
 Indexes: PK · `idx_order_items_order_id` (order load).
 
@@ -184,6 +205,7 @@ so the existing admin mock stays a subset — `restocked` is expressed as
 | returns | resolution | varchar(20) | NOT NULL DEFAULT 'pending', CHECK IN ('pending','exchange','replacement','refund','none') | What the customer gets; `refund` only for a negative exchange difference or an unfixable defect |
 | returns | price_difference | DECIMAL(12,2) | NULL, signed; exchange only (CHECK) | > 0 customer pays on the replacement order; < 0 refunded |
 | returns | customer_note | varchar(500) | NULL | Their words |
+| returns | evidence_media_ids | uuid[] | NOT NULL DEFAULT '{}', CHECK (at least 1) | Photos (and, for defects, the unboxing video) — required on every request |
 | returns | rejection_reason | varchar(255) | NULL | Required by the app when `status = 'rejected'` |
 | returns | carrier / tracking_number | varchar(50) / varchar(100) | NULL | Reverse pickup |
 | returns | pickup_address | jsonb | NULL | Snapshot taken at approval — the address book may change before pickup |
@@ -193,7 +215,8 @@ so the existing admin mock stays a subset — `restocked` is expressed as
 | returns | replacement_order_id | uuid | NULL, UNIQUE, FK → orders(id) ON DELETE RESTRICT | The exchange's replacement order; CHECK allows it only when `type = 'exchange'` |
 | return_items | id | uuid | PK | |
 | return_items | return_id | uuid | NOT NULL, FK → returns(id) ON DELETE CASCADE | Owned child |
-| return_items | order_item_id | uuid | NOT NULL, FK → order_items(id) ON DELETE RESTRICT | History guard |
+| return_items | order_item_id | uuid | NOT NULL, FK → order_items(id) ON DELETE RESTRICT | History guard; partial unique `one_exchange_per_order_item` WHERE `request_type = 'exchange'` |
+| return_items | request_type | varchar(12) | NOT NULL, CHECK IN ('exchange','replacement') | Copy of `returns.type` so reason rules are CHECKs |
 | return_items | qty | integer | NOT NULL, CHECK (qty > 0) | |
 | return_items | reason_code | varchar(30) | NOT NULL, CHECK IN ('size_fit','wrong_variant','damaged','misprint','wrong_item','quality','other') | The reason is **per garment** — "the tee fits, the pant does not" is normal, so a header-only reason loses information |
 | return_items | condition_note | varchar(500) | NULL | Inspector's note |

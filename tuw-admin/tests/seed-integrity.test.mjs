@@ -82,7 +82,7 @@ describe('seed integrity', () => {
     assert.equal(rowCount(insertFor('navigation_settings')), 1);
 
     const storeSettings = insertFor('store_settings');
-    assert.equal((storeSettings.match(/^\s*\('/gm) ?? []).length, 17);
+    assert.equal((storeSettings.match(/^\s*\('/gm) ?? []).length, 18);
     for (const key of [
       'store.name',
       'brand.color',

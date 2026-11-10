@@ -44,14 +44,25 @@ CREATE TABLE cart_items (
   product_slug  varchar(280),
   image_url     varchar(2048),
   variant_label varchar(150),
-  added_at      timestamptz   NOT NULL DEFAULT now()
+  -- Personalised / custom print: what the customer typed or chose
+  -- ({"monogram":"UK","placement":"chest"}), the rendered print preview they
+  -- saw, and when they approved it. Nothing personalised is printed without
+  -- an approved preview.
+  personalization     jsonb,
+  preview_image_url   varchar(2048),
+  preview_approved_at timestamptz,
+  added_at      timestamptz   NOT NULL DEFAULT now(),
+  CHECK (personalization IS NULL OR preview_image_url IS NOT NULL)
 );
 CREATE INDEX idx_cart_items_product_id ON cart_items (product_id);
 CREATE INDEX idx_cart_items_variant_id ON cart_items (variant_id);
--- No duplicate lines: re-adding the same product+variant merges qty instead
--- of inserting a second row (NULL variant counts as equal).
+-- No duplicate lines: re-adding the same product+variant (+ the same
+-- personalisation) merges qty instead of inserting a second row (NULL
+-- variant / no personalisation count as equal). Two different monograms
+-- stay two lines.
 CREATE UNIQUE INDEX cart_items_cart_product_unique
-  ON cart_items (cart_id, product_id, variant_id) NULLS NOT DISTINCT;
+  ON cart_items (cart_id, product_id, variant_id, COALESCE(personalization, '{}'::jsonb))
+  NULLS NOT DISTINCT;
 
 -- --------------------------------------------------------------- wishlists
 -- One list per user, by design. No admin UI: wishlists inform nothing

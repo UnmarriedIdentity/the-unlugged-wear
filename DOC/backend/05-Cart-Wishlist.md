@@ -40,6 +40,9 @@ WHERE user_id IS NOT NULL AND status = 'active'` (merge target) ·
 | product_slug | varchar(280) | NULL | Frozen link target |
 | image_url | varchar(2048) | NULL | Frozen thumb — survives media reorganization |
 | variant_label | varchar(150) | NULL | `Size M / Onyx` — frozen display line |
+| personalization | jsonb | NULL | Custom print / monogram choices (`{"monogram":"UK","placement":"chest"}`) |
+| preview_image_url | varchar(2048) | NULL; required when `personalization` is set (CHECK) | Rendered print preview shown before adding to cart |
+| preview_approved_at | timestamptz | NULL | When the customer approved the preview; checkout refuses a personalised line without it |
 | added_at | timestamptz | NOT NULL DEFAULT now() | |
 
 Snapshot doctrine (deliberate denormalization): the cart re-read is one

@@ -17,7 +17,7 @@
 | `005-platform.sql` | 5 | written | `001` (users) |
 | `006-cms.sql` | 10 | written | `001` (users) |
 | `007-cms-pages.sql` | 5 | written | `001` (users) |
-| `008-commerce-extras.sql` | 5 | written | `001`, `002`, `004` (orders, order_items; ALTERs orders) |
+| `008-commerce-extras.sql` | 5 | written | `001`, `002`, `004` (orders, order_items) |
 | `009-fulfillment.sql` | 7 | written | `002`, `004`, `005` (adds provider FKs to products, payments, webhook_events and shipments.fulfillment_order_id) |
 | `010-attr-library.sql` | 5 | written | `002` (products) |
 | `011-household.sql` | 5 | written | `001` (profiles), `002` (categories), `010` (attribute_values), `004` (orders, ALTER at end) |
@@ -30,20 +30,24 @@ Every `REFERENCES` target is created by an earlier file in this list, so a
 single ordered pass applies cleanly. There are no forward references and no
 external dependencies left.
 
-## Two deferred columns, each resolved in the file that can satisfy it
+## Every column lives in its own CREATE TABLE
 
-`002-catalog.sql` cannot declare `stock_movements.order_id` — `orders` does
-not exist yet at that point. `004-orders.sql` ends with the `ALTER TABLE`
-that adds the column and its index.
+No database exists yet, so there is no `ALTER TABLE … ADD COLUMN` anywhere:
+each column is written directly in its table's `CREATE TABLE`. The only
+`ALTER TABLE` statements left attach **foreign keys that point to a table
+created in a later file** — Postgres cannot reference a table that does not
+exist yet. Each is constraint-only and sits in the file that creates the
+target table:
 
-`004-orders.sql` cannot declare `orders.for_household_id` — `household_members`
-does not exist yet at that point. `011-household.sql` ends with the `ALTER
-TABLE` that adds the column, the composite FK to
-`household_members (household_id, profile_id)`, and its index.
+| Column (declared in) | FK attached in | Target |
+|---|---|---|
+| `stock_movements.order_id` (002) | 004 | `orders` |
+| `orders.for_household_id` + `for_profile_id` (004) | 011 | `household_members (household_id, profile_id)` |
+| `shipments.fulfillment_order_id` (004) | 009 | `fulfillment_orders` |
+| `products.partner_provider` (002), `payments.provider` (004), `webhook_events.provider` (005) | 009 | `integration_providers (slug)` |
 
-Both are from-scratch builds (no database exists), not migrations of a live
-schema, so each column is declared in the file that can satisfy it rather than
-left dangling.
+Verified 2026-11-10: all 14 files + the seed (twice) apply cleanly, in
+order, on PostgreSQL 17 (PGlite) — 99 tables, 17 partitions.
 
 ## Idempotency is a schema concern
 

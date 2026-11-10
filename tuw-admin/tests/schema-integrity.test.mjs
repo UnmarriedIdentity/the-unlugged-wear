@@ -229,6 +229,18 @@ describe('schema integrity', () => {
     assert.match(code('014-operations.sql'), /'contact_form'/);
   });
 
+  test('columns live in CREATE TABLE; later files only attach forward FKs', () => {
+    for (const file of FILES) {
+      assert.equal(/ADD\s+COLUMN/i.test(code(file)), false, `${file} adds a column with ALTER`);
+    }
+    const products = block(code('002-catalog.sql'), 'products');
+    assert.match(products, /exchange_policy\s+varchar\(20\)\s+NOT NULL DEFAULT 'defects_only'/i);
+    const orders = code('004-orders.sql');
+    assert.match(block(orders, 'orders'), /cancellable_until\s+timestamptz/i);
+    assert.match(orders, /CREATE UNIQUE INDEX one_exchange_per_order_item/i);
+    assert.match(block(orders, 'returns'), /cardinality\(evidence_media_ids\) >= 1/i);
+  });
+
   test('no duplicate CREATE TABLE names across files', () => {
     const seen = new Map();
     for (const file of FILES) {

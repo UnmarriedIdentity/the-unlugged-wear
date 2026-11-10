@@ -76,7 +76,7 @@ directly, so swapping or adding providers never touches order code.
 | Topic | Qikink rule | What we do |
 |---|---|---|
 | Money-back returns / size exchanges | Not offered — the seller places a new order at their own cost | **No money-back returns.** Exchanges = new replacement order paid by us; customer pays any price difference (file 06) |
-| Defects, misprints, damage | Claim within **7 days of delivery**; unboxing video + product + packaging photos required, else no liability | `returns.type = 'replacement'` + `fulfillment_claims` (deadline, `evidence_media_ids`). Storefront asks for the video at request time |
+| Defects, misprints, damage | **Yes, Qikink replaces (or refunds) them** — claim within **7 days of delivery**; unboxing video + product + packaging photos required, else no liability (clarification requested from Qikink 2026-11-10, awaiting reply) | `returns.type = 'replacement'` + `fulfillment_claims` (deadline, `evidence_media_ids`). Storefront asks for the unboxing video at request time; this is why `products.exchange_policy` defaults to `defects_only` |
 | Lost in transit | Refunded once marked lost | Claim type `lost_in_transit` → `claim_credit` in the wallet ledger |
 | RTO (undelivered) | Returns to Qikink's Coimbatore warehouse; stored **100 days**; can be re-shipped from the dashboard; no RTO charge (pricing page lists ₹20/product storage — conflicting) | `status = 'rto_initiated' / 'returned'`, `rto_storage_until`; re-ship = new `fulfillment_orders` row with `reason = 'reship'` |
 | Cancel | Only while **Live** (or Live OOS — pages conflict); full value back to wallet | Customer cancel only while our order is `pending` (before submission); staff cancel → `cancelOrder` + `cancel_credit` |

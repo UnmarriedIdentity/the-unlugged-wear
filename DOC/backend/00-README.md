@@ -97,6 +97,8 @@ kilobytes — never the risk. Detail: `10-Analytics.md`, `11-Storage.md`.
 | 2026-11-10 | Exchange price difference charged or refunded; exchanges/replacements need an account (guests claim orders after sign-up); COD refunds via UPI/bank transfer | RESOLVED (file 06) |
 | 2026-11-10 | No money-back returns (Qikink offers none); fulfilment is provider-agnostic: Qikink = one `integration_providers` row + adapter | RESOLVED (file 16, `009-fulfillment.sql`) |
 | 2026-11-10 | Gift cards sold on the storefront (`products.product_kind = 'gift_card'`), separate from discount codes | RESOLVED (file 22) |
+| 2026-11-10 | `products.exchange_policy` (default `defects_only`); print preview approval for custom prints; 60-minute free-cancel window; abuse limits (one exchange per line, size reasons only, photo required); customer mistakes not compensated | RESOLVED (files 04, 05, 06) |
+| 2026-11-10 | No `ALTER TABLE … ADD COLUMN`: every column is in its own `CREATE TABLE`; only forward FKs are attached later | RESOLVED (`db/migrate/README.md`) |
 | 2026-10-18 | Variant pricing ladder: base anchor + additive per-value adjustments; explicit cell overrides pinned; listed price = materialized min ("From") | RESOLVED (04-Catalog.md; admin build VPRICE-1/2) |
 
 ## 8. Doc map & status

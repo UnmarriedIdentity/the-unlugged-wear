@@ -44,6 +44,10 @@ CREATE TABLE orders (
   id                uuid          PRIMARY KEY,
   placed_by_user_id uuid          REFERENCES users (id) ON DELETE RESTRICT,
   for_profile_id    uuid          REFERENCES profiles (id) ON DELETE RESTRICT,
+  -- Household the recipient belongs to. The composite FK to
+  -- household_members (household_id, profile_id) is attached in
+  -- 011-household.sql, where that table exists. NULL only for guest orders.
+  for_household_id  uuid,
   guest_email       varchar(255),
   guest_name        varchar(150),
   guest_phone       varchar(20),
@@ -58,6 +62,8 @@ CREATE TABLE orders (
   shipping_fee      DECIMAL(12,2) NOT NULL DEFAULT 0 CHECK (shipping_fee >= 0),
   tax               DECIMAL(12,2) NOT NULL DEFAULT 0 CHECK (tax >= 0),
   discount          DECIMAL(12,2) NOT NULL DEFAULT 0 CHECK (discount >= 0),
+  -- Part of grand_total paid by gift card (008); payments cover the rest.
+  gift_card_amount  DECIMAL(12,2) NOT NULL DEFAULT 0 CHECK (gift_card_amount >= 0),
   grand_total       DECIMAL(12,2) NOT NULL CHECK (grand_total >= 0),
   currency          char(3)       NOT NULL DEFAULT 'INR',
   payment_status    varchar(20)   NOT NULL DEFAULT 'pending'
@@ -69,6 +75,12 @@ CREATE TABLE orders (
   -- Retry guard (client `Idempotency-Key`). Survives the idempotency_keys
   -- table's TTL cleanup, so a replayed request can never fork an order.
   idempotency_key   varchar(255),
+  -- Free-cancel window: paid orders stay 'pending' (not sent to the
+  -- fulfilment partner) until this moment = payment time + store_settings
+  -- 'orders.cancel_window_minutes'. The customer may cancel only while
+  -- status = 'pending' AND now() < cancellable_until; the submit worker picks
+  -- orders whose window has passed, then the order becomes 'confirmed'.
+  cancellable_until timestamptz,
   notes             text,
   created_at        timestamptz   NOT NULL DEFAULT now(),
   updated_at        timestamptz   NOT NULL DEFAULT now(),
@@ -77,14 +89,21 @@ CREATE TABLE orders (
        AND guest_email IS NULL)
     OR (placed_by_user_id IS NULL AND for_profile_id IS NULL
        AND guest_email IS NOT NULL AND guest_name IS NOT NULL)
-  )
+  ),
+  CONSTRAINT orders_household_matches_buyer
+    CHECK ((placed_by_user_id IS NULL) = (for_household_id IS NULL))
 );
 CREATE INDEX idx_orders_placed_by ON orders (placed_by_user_id, created_at DESC);
 CREATE INDEX idx_orders_for_profile ON orders (for_profile_id, created_at DESC);
+CREATE INDEX idx_orders_for_household_id ON orders (for_household_id);
 CREATE INDEX idx_orders_discount_code_id ON orders (discount_code_id);
 CREATE INDEX idx_orders_status ON orders (status);
 CREATE INDEX idx_orders_created_at ON orders (created_at);
 CREATE INDEX idx_orders_payment_status ON orders (payment_status);
+-- The submit worker: still pending, window over (prepaid orders must also
+-- be paid; COD orders are submitted unpaid by design).
+CREATE INDEX idx_orders_ready_to_submit ON orders (cancellable_until)
+  WHERE status = 'pending';
 -- Guest order lookup (track-order: order_number + email).
 CREATE INDEX idx_orders_guest_email ON orders (lower(guest_email))
   WHERE guest_email IS NOT NULL;
@@ -114,8 +133,18 @@ CREATE TABLE order_items (
   line_total   DECIMAL(12,2) NOT NULL CHECK (line_total >= 0),
   -- {"Size":"M","Color":"Onyx"} — frozen variant combination.
   options      jsonb,
+  -- Snapshot of the exchange rule at purchase time (products.exchange_policy).
+  exchange_policy varchar(20) NOT NULL DEFAULT 'defects_only'
+    CHECK (exchange_policy IN ('defects_only','exchangeable','none')),
+  -- Personalised line: copied from the cart. The approved preview is what the
+  -- fulfilment partner prints; the CHECK forbids an unapproved custom print.
+  personalization     jsonb,
+  preview_image_url   varchar(2048),
+  preview_approved_at timestamptz,
   created_at   timestamptz   NOT NULL DEFAULT now(),
-  CHECK (returned_qty <= qty)
+  CHECK (returned_qty <= qty),
+  CHECK (personalization IS NULL
+         OR (preview_image_url IS NOT NULL AND preview_approved_at IS NOT NULL))
 );
 CREATE INDEX idx_order_items_order_id ON order_items (order_id);
 CREATE INDEX idx_order_items_product_id ON order_items (product_id);
@@ -229,6 +258,9 @@ CREATE TABLE returns (
   -- > 0 customer pays on the replacement order; < 0 refunded; 0 free swap.
   price_difference        DECIMAL(12,2),
   customer_note           varchar(500),
+  -- Abuse limit: every request needs at least one photo (media ids, 006).
+  -- Defect replacements also need the unboxing video the partner demands.
+  evidence_media_ids      uuid[]        NOT NULL DEFAULT '{}',
   rejection_reason        varchar(255),
   carrier                 varchar(50),
   tracking_number         varchar(100),
@@ -244,7 +276,8 @@ CREATE TABLE returns (
   replacement_order_id    uuid          UNIQUE REFERENCES orders (id) ON DELETE RESTRICT,
   created_at              timestamptz   NOT NULL DEFAULT now(),
   updated_at              timestamptz   NOT NULL DEFAULT now(),
-  CHECK (price_difference IS NULL OR type = 'exchange')
+  CHECK (price_difference IS NULL OR type = 'exchange'),
+  CHECK (cardinality(evidence_media_ids) >= 1)
 );
 CREATE INDEX idx_returns_order_id ON returns (order_id);
 CREATE INDEX idx_returns_status ON returns (status);
@@ -257,10 +290,21 @@ CREATE INDEX idx_returns_decided_by ON returns (decided_by);
 -- ------------------------------------------------------------ return_items
 -- One row per garment: the reason is per item, and an exchange names its
 -- replacement variant, so "send the M back, ship me the L" is a single row.
+-- Abuse limits enforced here:
+--   * request_type copies returns.type so the reason rules below can be
+--     CHECKs: exchanges accept only size/variant reasons, replacements only
+--     defect reasons.
+--   * one exchange per order line, ever (one_exchange_per_order_item) — a
+--     rejected or cancelled request still uses the line's one attempt.
+--   * the service also refuses lines whose order_items.exchange_policy is not
+--     'exchangeable', and replacement orders' lines are written with
+--     exchange_policy 'none', so an exchanged item cannot be exchanged again.
 CREATE TABLE return_items (
   id                  uuid          PRIMARY KEY,
   return_id           uuid          NOT NULL REFERENCES returns (id) ON DELETE CASCADE,
   order_item_id       uuid          NOT NULL REFERENCES order_items (id) ON DELETE RESTRICT,
+  request_type        varchar(12)   NOT NULL
+    CHECK (request_type IN ('exchange','replacement')),
   qty                 integer       NOT NULL CHECK (qty > 0),
   reason_code         varchar(30)   NOT NULL
     CHECK (reason_code IN ('size_fit','wrong_variant','damaged','misprint',
@@ -275,8 +319,13 @@ CREATE TABLE return_items (
   updated_at          timestamptz   NOT NULL DEFAULT now(),
   -- UNIQUE doubles as the return_id FK index; qty is how many come back.
   UNIQUE (return_id, order_item_id),
-  CHECK (disposition <> 'exchange' OR exchange_variant_id IS NOT NULL)
+  CHECK (disposition <> 'exchange' OR exchange_variant_id IS NOT NULL),
+  CHECK (request_type <> 'exchange' OR reason_code IN ('size_fit','wrong_variant')),
+  CHECK (request_type <> 'replacement'
+         OR reason_code IN ('damaged','misprint','wrong_item','quality'))
 );
+CREATE UNIQUE INDEX one_exchange_per_order_item
+  ON return_items (order_item_id) WHERE request_type = 'exchange';
 CREATE INDEX idx_return_items_order_item_id ON return_items (order_item_id);
 CREATE INDEX idx_return_items_exchange_variant_id ON return_items (exchange_variant_id);
 
@@ -312,10 +361,13 @@ CREATE TABLE shipments (
   shipped_at            timestamptz,
   estimated_delivery_at date,
   delivered_at          timestamptz,
+  -- Which provider order this parcel belongs to (FK attached in 009).
+  fulfillment_order_id  uuid,
   created_at            timestamptz NOT NULL DEFAULT now(),
   updated_at            timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX idx_shipments_order_id ON shipments (order_id);
+CREATE INDEX idx_shipments_fulfillment_order_id ON shipments (fulfillment_order_id);
 CREATE INDEX idx_shipments_tracking_number ON shipments (tracking_number);
 CREATE INDEX idx_shipments_status ON shipments (status);
 
@@ -336,11 +388,10 @@ CREATE TABLE shipment_events (
   UNIQUE (shipment_id, occurred_at, status)
 );
 
--- ------------------------------------------- deferred FK, now satisfiable
--- 002-catalog.sql is applied before this file, so stock_movements.order_id
--- could not be declared there. This is still a from-scratch build (no
--- database exists), not a forward migration of a live schema.
+-- ------------------------------------ forward foreign key (constraint only)
+-- Every column lives in its own CREATE TABLE. Postgres cannot reference a
+-- table before it exists, so the one FK that points from an earlier file
+-- (002 stock_movements.order_id) is attached here, where orders exists.
 ALTER TABLE stock_movements
-  ADD COLUMN order_id uuid REFERENCES orders (id) ON DELETE SET NULL;
-CREATE INDEX idx_stock_movements_order_id ON stock_movements (order_id)
-  WHERE order_id IS NOT NULL;
+  ADD CONSTRAINT stock_movements_order_fk
+    FOREIGN KEY (order_id) REFERENCES orders (id) ON DELETE SET NULL;
