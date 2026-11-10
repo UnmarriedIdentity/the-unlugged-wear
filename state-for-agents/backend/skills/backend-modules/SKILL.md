@@ -1,6 +1,6 @@
 # Skill: Backend Modules (one domain, one folder, one public API)
 
-Global authority for code in `packages/core/src/modules/<name>`. A change
+Global authority for code in `packages/heart/src/modules/<name>`. A change
 to cart rules is made in the cart module and reaches both apps. Plan:
 `DOC/backend/23-Backend-Implementation.md`; table ownership:
 `3.Database-Schema.md` §4.

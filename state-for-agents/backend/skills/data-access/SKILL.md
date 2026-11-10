@@ -1,7 +1,7 @@
 # Skill: Data Access (Drizzle on pg, any Postgres)
 
 Global authority for reading and writing the database in
-`packages/core`. The SQL files in `db/migrate` are the schema; Drizzle
+`packages/heart`. The SQL files in `db/migrate` are the schema; Drizzle
 gives us types for it.
 
 ## Rules

@@ -1,7 +1,7 @@
-# Backend Agents — packages/core + database
+# Backend Agents — packages/heart + database
 
 Entry point for agents working on backend code shared by both apps
-(`packages/core`, `db/`, app route handlers and server actions).
+(`packages/heart`, `db/`, app route handlers and server actions).
 App-specific UI work still follows `state-for-agents/admin/` and
 `state-for-agents/storefront/`.
 

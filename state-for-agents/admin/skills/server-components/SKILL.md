@@ -7,7 +7,7 @@ is a Server Component unless it needs the browser. Source of truth:
 ## Rules
 
 1. Pages, layouts, tables and KPI cards are Server Components. They call
-   `@tuw/core` module functions (`orders.list`, `analytics.revenueSummary`)
+   `@tuw/heart` module functions (`orders.list`, `analytics.revenueSummary`)
    directly — never `fetch('/api/...')` to our own routes.
 2. Modules that touch the DB, env secrets or provider keys start with
    `import 'server-only'`. Qikink / Razorpay keys never reach a client file.

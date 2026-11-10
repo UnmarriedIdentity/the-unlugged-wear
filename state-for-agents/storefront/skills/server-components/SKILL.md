@@ -7,7 +7,7 @@ truth: `node_modules/next/dist/docs/01-app/01-getting-started/05-server-and-clie
 ## Rules
 
 1. Pages, layouts and anything that reads data are Server Components.
-   They call `@tuw/core` module functions directly (`catalog.getProduct`,
+   They call `@tuw/heart` module functions directly (`catalog.getProduct`,
    `cart.getCart`) — never `fetch('/api/...')` to our own routes.
 2. Modules that touch the DB, env secrets or provider keys start with
    `import 'server-only'`. Only `NEXT_PUBLIC_*` env vars may reach the browser.

@@ -6,7 +6,7 @@ POST endpoints, so each one guards itself. Docs:
 
 ## Rules
 
-1. Wrap every action in `action({...}, handler)` from `@tuw/core/platform/guards`:
+1. Wrap every action in `action({...}, handler)` from `@tuw/heart/platform/guards`:
    `access` (`public` | `guestOrCustomer` | `customer`) or `role` /
    `permission` (admin), a zod `input`, and `idempotent: true` for anything
    that creates money, stock or order rows.

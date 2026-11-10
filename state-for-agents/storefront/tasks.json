@@ -2038,7 +2038,7 @@
       "verified": false,
       "design_match": null,
       "pushed": false,
-      "description": "Storefront side of the backend plan. The module work (shared services in packages/core) is tracked in state-for-agents/admin/tasks.json TL-BE-00…TL-BE-17, in that order. Each child here is one storefront screen or route; admin_ref names the admin step that builds what it needs, depends_on the admin mains that must be done first. Order of work: follow the admin sequence; when an admin main is done, complete the TL-WEB-BE children that depend on it; at the end, any TL-WEB-BE child still in backlog is the remaining storefront work.",
+      "description": "Storefront side of the backend plan. The module work (shared services in packages/heart) is tracked in state-for-agents/admin/tasks.json TL-BE-00…TL-BE-17, in that order. Each child here is one storefront screen or route; admin_ref names the admin step that builds what it needs, depends_on the admin mains that must be done first. Order of work: follow the admin sequence; when an admin main is done, complete the TL-WEB-BE children that depend on it; at the end, any TL-WEB-BE child still in backlog is the remaining storefront work.",
       "key_decisions": [
         "Admin tracker stays the master sequence; this tracker holds the storefront screen tasks",
         "The storefront never calls Qikink; provider work runs in the admin app"
@@ -2047,7 +2047,7 @@
     },
     {
       "id": "TL-WEB-BE-01",
-      "title": "Wire the storefront to @tuw/core, turn on cacheComponents, add /api/health",
+      "title": "Wire the storefront to @tuw/heart, turn on cacheComponents, add /api/health",
       "category": "backend",
       "status": "backlog",
       "owner": "unassigned",
@@ -2066,7 +2066,7 @@
         "tuw-website/next.config.ts",
         "src/app/api/health/route.ts"
       ],
-      "description": "Add @tuw/core dependency + transpilePackages; cacheComponents: true; fix blocking-prerender insights; health route reads the DB.",
+      "description": "Add @tuw/heart dependency + transpilePackages; cacheComponents: true; fix blocking-prerender insights; health route reads the DB.",
       "key_decisions": [],
       "follow_ups": []
     },

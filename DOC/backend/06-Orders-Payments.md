@@ -98,6 +98,10 @@ map onto it: `queued` → `confirmed`, `printing` → `processing`,
   ships through the normal `shipments` + `fulfillment_orders` path. With a
   print-on-demand partner this is a **new partner order paid by us** —
   Qikink does not do size exchanges itself.
+- **Old garment on an exchange (owner, 2026-11-10):** the customer
+  **keeps** it — no reverse pickup for size/variant exchanges (the print
+  partner does not take items back). The `returns` pickup fields stay for
+  future use. Revisit only if the owner changes this.
 - **Defects (replacement):** damaged / misprinted / wrong / missing item
   reported within the partner's claim window (Qikink: 7 days from delivery).
   Evidence (Qikink, 2026-11-10): **wrong or missing item → unboxing video

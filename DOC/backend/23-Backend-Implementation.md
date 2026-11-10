@@ -12,14 +12,14 @@ The backend runs **inside the two apps that are already deployed**:
 - `tuw-website` serves the storefront API from its own route handlers and
   server actions.
 - `tuw-admin` serves the admin API the same way.
-- Shared backend code lives in a **workspace package** (`packages/core`,
+- Shared backend code lives in a **workspace package** (`packages/heart`,
   added to `pnpm-workspace.yaml`). Each app imports it and Next.js bundles
-  it into that app's own build (`transpilePackages: ['@tuw/core']`), so the
+  it into that app's own build (`transpilePackages: ['@tuw/heart']`), so the
   package is **never deployed on its own**. The "apps never import each
   other" rule still holds: the package belongs to neither app.
 
 ```
-packages/core/src/
+packages/heart/src/
   platform/      db client, errors, auth/session, guards, idempotency, jobs, events
   modules/       cart, catalog, orders, returns, … (index.ts = public API)
   integrations/  payments/, fulfillment/, email/, storage/ (registry + adapters)

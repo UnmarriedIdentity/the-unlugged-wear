@@ -16,7 +16,7 @@
 
 - Two separately deployed applications share one Neon Postgres database; the schema lives in the repo-root `db/` folder (see `DOC/backend/12-Two-App-Deploy.md`).
 - **Backend phase (started 2026-11-10):** the UI phase is complete. Real backend modules now replace demo data **screen by screen, module by module** across `tuw-website/` (customer storefront) and `tuw-admin/` (operations workspace). Plan: `DOC/backend/23-Backend-Implementation.md`.
-- No extra deployments: each app serves its own API (route handlers + server actions); shared backend code lives in the `packages/core` workspace package.
+- No extra deployments: each app serves its own API (route handlers + server actions); shared backend code lives in the `packages/heart` workspace package.
 - **Third-party integrations come last** (Razorpay, email provider, R2 uploads, Qikink live API, GST invoice PDFs). Until then modules use mock/sandbox adapters behind integration registries. Backlog: `TL-INT-*` in `state-for-agents/admin/tasks.json`.
 - Screens not yet moved to the backend keep their deterministic localStorage demo adapters and reset-demo controls until their module goes live.
 
@@ -33,8 +33,8 @@
 
 ## 4. Architecture & Modularity
 
-- **Zero Cross-App Source Imports**: `tuw-website/` and `tuw-admin/` must remain completely independent applications. Neither app may import source code, components, or styles from the other. Shared **backend** code goes in `packages/core` (owned by neither app); UI code is never shared.
-- **Backend Modules**: one module per domain (`packages/core/src/modules/<name>`); others import only its `index.ts`; a module writes only its own tables. Role checks are declared once per entry point (`action({ permission })`, `route({ role })`) and repeated in the Data Access Layer, never only in `proxy.ts`.
+- **Zero Cross-App Source Imports**: `tuw-website/` and `tuw-admin/` must remain completely independent applications. Neither app may import source code, components, or styles from the other. Shared **backend** code goes in `packages/heart` (owned by neither app); UI code is never shared.
+- **Backend Modules**: one module per domain (`packages/heart/src/modules/<name>`); others import only its `index.ts`; a module writes only its own tables. Role checks are declared once per entry point (`action({ permission })`, `route({ role })`) and repeated in the Data Access Layer, never only in `proxy.ts`.
 - **Rendering**: follow the app's `nextjs-rendering`, `server-components`, `client-components` and `cache-components` skills (Cache Components / PPR, Server Components by default, small Client Components). Backend code follows `state-for-agents/backend/skills/`.
 - **Component Primitives**: Implement and reuse atomic UI primitives (`Button`, `Badge`, `Input`, `Card`, `Modal`, `Drawer`, `Select`, `Switch`, etc.).
 - **Mock Adapters**: Keep deterministic fixtures and mock state managers (`src/mocks/`) strictly isolated from UI components.

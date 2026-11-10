@@ -6,7 +6,7 @@ email, storage, couriers. Design: `DOC/backend/16-Fulfillment-Providers.md`.
 ## Rules
 
 1. Each category has an interface and a registry in
-   `packages/core/src/integrations/<category>/` (`registry.get(slug)`).
+   `packages/heart/src/integrations/<category>/` (`registry.get(slug)`).
    Services never import an adapter directly.
 2. A provider = one `integration_providers` row + one adapter + env
    secrets. No schema change, no edits to other modules.

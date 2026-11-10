@@ -99,9 +99,11 @@ kilobytes — never the risk. Detail: `10-Analytics.md`, `11-Storage.md`.
 | 2026-11-10 | Gift cards sold on the storefront (`products.product_kind = 'gift_card'`), separate from discount codes | RESOLVED (file 22) |
 | 2026-11-10 | `products.exchange_policy` (default `defects_only`); print preview approval for custom prints; 60-minute free-cancel window; abuse limits (one exchange per line, size reasons only, photo required); customer mistakes not compensated | RESOLVED (files 04, 05, 06) |
 | 2026-11-10 | No `ALTER TABLE … ADD COLUMN`: every column is in its own `CREATE TABLE`; only forward FKs are attached later | RESOLVED (`db/migrate/README.md`) |
-| 2026-11-10 | Backend inside the two existing deployments + shared `packages/core`; Drizzle on `pg` (any Postgres); declarative guards; Vercel Cron behind a portable job runner; tests on Neon dev or local Postgres | RESOLVED (file 23) |
+| 2026-11-10 | Backend inside the two existing deployments + shared `packages/heart`; Drizzle on `pg` (any Postgres); declarative guards; Vercel Cron behind a portable job runner; tests on Neon dev or local Postgres | RESOLVED (file 23) |
 | 2026-11-10 | Integrations (Razorpay, email, R2, Qikink live, GST PDFs) built in the last phase | RESOLVED (file 23 §8, `TL-INT-*` backlog) |
 | 2026-11-10 | GST invoices generated in-house: `TUW/2627/000123`, credit notes `TCN/2627/000045` | DRAFT (file 24; GSTIN pending) |
+| 2026-11-10 | Shared package named `@tuw/heart` (`packages/heart`); Neon stays in US East for now; customer keeps the old garment on an exchange | RESOLVED (files 06, 23) |
+| 2026-11-10 | Qikink order lines: build for Store SKUs (strategy A, verified), keep design-per-order (B) as data in `provider_payload` until Qikink confirms it in live | RESOLVED for now (file 16 §6) |
 | 2026-10-18 | Variant pricing ladder: base anchor + additive per-value adjustments; explicit cell overrides pinned; listed price = materialized min ("From") | RESOLVED (04-Catalog.md; admin build VPRICE-1/2) |
 
 ## 8. Doc map & status

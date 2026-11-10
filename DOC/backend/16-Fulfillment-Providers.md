@@ -105,7 +105,30 @@ directly, so swapping or adding providers never touches order code.
 Shipment-level statuses (Pickup Scheduled … RTO Delivered, Reverse Pickup
 Initiated) map onto `shipment_events.status` in the adapter.
 
-## 6. API (Postman 08-23 — **unverified until a sandbox call**)
+## 6. How order lines name what to print (strategy A vs B)
+
+| | **A — Store SKU** (`search_from_my_products: 1`) | **B — design per order** (`search_from_my_products: 0`) |
+|---|---|---|
+| Setup | Add each design to a blank in the Qikink dashboard (My Products); copy the generated Store SKU (`v-…`) per colour/size into our admin | Admin stores blank SKU (e.g. `MRnHs-Bk-M`), print type, placement, design + mockup links |
+| Per order | Just the Store SKU + qty + price | SKU + print type + design code + design link + mockup link + placement + size in inches |
+| Verified in live | **Yes** — used by production integrations | **Not confirmed** — public write-ups show it only as the sandbox test format |
+| Strengths | Qikink has the artwork on file; less per-order data; errors caught at setup | One place to manage products; new designs need no Qikink dashboard work; scales to many designs |
+| Weaknesses | Double setup per product; mapping must be kept in sync | Depends on Qikink allowing it in live; design files must be publicly hosted (R2) |
+
+Decision (2026-11-10): **build for A** (the verified path) and keep the
+adapter able to send B — `provider_product_mappings.provider_sku` holds the
+Store SKU for A, `provider_payload` holds the design fields for B, so a
+switch is data, not code. Ask Qikink support whether
+`search_from_my_products: 0` is accepted in live (TL-INT-QIKINK).
+
+Known API rules (third-party integration write-ups, unverified by Qikink
+docs): `order_number` ≤ 15 characters, no dashes; `quantity`, `price`,
+`total_order_value` sent as strings; token `POST /api/token`
+(`ClientId`, `client_secret` → `Accesstoken`); sandbox and live have
+separate product databases (sandbox cannot see My Products); one invalid
+line holds the whole order; no webhooks (poll status).
+
+## 7. API (Postman 08-23 — **unverified until a sandbox call**)
 
 | | Sandbox | Live (request via dashboard → Integration → Custom API) |
 |---|---|---|
@@ -124,7 +147,7 @@ lookup**. Until Qikink confirms otherwise: tracking is poll-only, NDR and
 claims are handled in the Qikink dashboard, and the admin has a per-row
 **Sync now** button.
 
-## 7. Open verifications (ask Qikink / sandbox)
+## 8. Open verifications (ask Qikink / sandbox)
 
 1. Exact `/api/token` params and token lifetime.
 2. Order-status / tracking endpoint (`GET /api/order?id=`?) and any webhook.
