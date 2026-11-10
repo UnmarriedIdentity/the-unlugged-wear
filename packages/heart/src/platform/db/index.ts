@@ -50,3 +50,16 @@ export async function closeDb(): Promise<void> {
 
 export { schema };
 export { sql } from 'drizzle-orm';
+
+/** Health probe used by /api/health in both apps. */
+export async function checkDatabase(): Promise<{ ok: boolean; migrations: number; latencyMs: number }> {
+  const started = Date.now();
+  const pool = getPool();
+  const exists = await pool.query<{ t: string | null }>(`SELECT to_regclass('schema_migrations')::text AS t`);
+  let migrations = 0;
+  if (exists.rows[0]?.t) {
+    const { rows } = await pool.query<{ n: number }>(`SELECT count(*)::int AS n FROM schema_migrations`);
+    migrations = rows[0]?.n ?? 0;
+  }
+  return { ok: true, migrations, latencyMs: Date.now() - started };
+}

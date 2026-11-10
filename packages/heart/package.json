@@ -8,7 +8,8 @@
     "./platform/*": "./src/platform/*/index.ts",
     "./modules/*": "./src/modules/*/index.ts",
     "./integrations/*": "./src/integrations/*/index.ts",
-    "./platform/jobs/catalog": "./src/platform/jobs/catalog.ts"
+    "./platform/jobs/catalog": "./src/platform/jobs/catalog.ts",
+    "./platform/test": "./src/platform/test/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

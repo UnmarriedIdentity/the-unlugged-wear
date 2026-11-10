@@ -11,11 +11,11 @@
   "_demo": "Figma source of truth established. First track TL-WEB-001 closed.",
   "summary": {
     "total": 114,
-    "done": 74,
+    "done": 76,
     "in_progress": 0,
-    "backlog": 40,
+    "backlog": 38,
     "total_tasks": 114,
-    "pending": 40
+    "pending": 38
   },
   "session": {
     "branch": "urvil-ui",
@@ -2049,14 +2049,14 @@
       "id": "TL-WEB-BE-01",
       "title": "Wire the storefront to @tuw/heart, turn on cacheComponents, add /api/health",
       "category": "backend",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-WEB-BE",
-      "started": null,
-      "finished": null,
-      "verified": false,
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "verified": true,
       "design_match": null,
-      "pushed": false,
+      "pushed": true,
       "admin_ref": "TL-BE-01.01",
       "depends_on": [
         "TL-BE-01"
@@ -2068,7 +2068,8 @@
       ],
       "description": "Add @tuw/heart dependency + transpilePackages; cacheComponents: true; fix blocking-prerender insights; health route reads the DB.",
       "key_decisions": [],
-      "follow_ups": []
+      "follow_ups": [],
+      "log": "c4aa5ef + health commit — @tuw/heart dependency + transpilePackages, cacheComponents on (CopyrightYear, BrandIntro Suspense, generateStaticParams for products/collections/journal, account Suspense), GET /api/health ok on Neon."
     },
     {
       "id": "TL-WEB-BE-02",
@@ -2960,14 +2961,14 @@
       "id": "TL-WEB-BE-39",
       "title": "Developer-only pages stay static: /design-system, /checklist, api/checklist, [...notfound]",
       "category": "backend",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-WEB-BE",
-      "started": null,
-      "finished": null,
-      "verified": false,
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "verified": true,
       "design_match": null,
-      "pushed": false,
+      "pushed": true,
       "admin_ref": "TL-BE-17.04",
       "depends_on": [
         "TL-BE-01"
@@ -2980,7 +2981,8 @@
       ],
       "description": "No backend; just confirm they build under cacheComponents.",
       "key_decisions": [],
-      "follow_ups": []
+      "follow_ups": [],
+      "log": "c4aa5ef — /design-system, /checklist, api/checklist and [...notfound] build under cacheComponents; no backend."
     }
   ]
 }

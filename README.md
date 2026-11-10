@@ -61,6 +61,13 @@ pnpm start:admin      # serve the built panel on 3001
 `pnpm typecheck`, `pnpm test` and `pnpm build` are aggregates: they run the admin first and stop
 if it fails.
 
+### Shared backend (`packages/heart`)
+
+Both apps import `@tuw/heart` (bundled into each build, never deployed alone).
+`pnpm test` also runs its tests; integration tests build a throwaway schema on
+`DATABASE_URL_UNPOOLED` and drop it afterwards. `GET /api/health` in each app
+checks the database connection.
+
 ### Database (shared by both apps)
 
 Put the connection strings in a repo-root `.env.local` (gitignored; same keys as
@@ -71,6 +78,7 @@ Any PostgreSQL works — a Neon branch or a local Postgres (`postgresql://localh
 pnpm db:status        # applied / pending migration files and table count
 pnpm db:migrate       # apply pending db/migrate/*.sql in order
 pnpm db:seed          # re-runnable baseline data (roles, settings, providers…)
+pnpm db:types         # regenerate Drizzle types in packages/heart after a migration
 DB_ALLOW_RESET=true pnpm db:reset --yes   # DEV ONLY: drop everything, migrate, seed
 ```
 

@@ -41,6 +41,7 @@ export async function claim(input: ClaimInput): Promise<Claim> {
   if (!KEY_PATTERN.test(input.key)) {
     throw new AppError('VALIDATION_FAILED', 'A valid Idempotency-Key is required.', [{ field: 'idempotencyKey', message: 'Missing or malformed key' }]);
   }
+  if (!/^[0-9a-f]{64}$/.test(input.requestHash)) throw new TypeError('requestHash must be a sha256 hex digest (use hashRequest)');
   const ttl = input.ttlHours ?? 168;
   const lease = input.leaseSeconds ?? 60;
   const pool = getPool();
