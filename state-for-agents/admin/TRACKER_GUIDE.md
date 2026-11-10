@@ -13,6 +13,11 @@ Read this before touching `tasks.json`. It is the only live task record;
   `started`/`finished` (dates or null), `log` (commit hash(es)), `design_match`
   (`yes`|`partial`|null), `key_decisions[]`, `verified` (bool),
   `pushed` (**true/false only** — see push accounting), `follow_ups[]`.
+- Backend module mains (`TL-BE-NN`) also carry `wiring` (how the module
+  connects to `packages/core`, the apps and other modules), `done_when`
+  (acceptance check) and `depends_on[]` (mains that must be done first).
+  Their children are `TL-BE-NN.MM`; pick the lowest open child whose main's
+  `depends_on` are all done. Pickup steps: `TL-BE-CORE.log`.
 - `session{branch, tip, unpushed[], next_up, pending_verifications[],
   last_updated, updated_by}` — live resume state, refreshed every commit.
 - `workflow{how_to_close_a_task, validation}` — the rules restated for machines.

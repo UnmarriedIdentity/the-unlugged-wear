@@ -9,8 +9,9 @@ App-specific UI work still follows `state-for-agents/admin/` and
 
 1. `DOC/backend/23-Backend-Implementation.md` → how the backend is built.
 2. `4.API-Design.md` + `3.Database-Schema.md` → modules and table ownership.
-3. Tracker: `state-for-agents/admin/tasks.json` (`TL-BE-*` modules,
-   `TL-INT-*` integrations — integrations come last).
+3. Tracker: `state-for-agents/admin/tasks.json` — `TL-BE-00`…`TL-BE-17`
+   modules (each with `wiring`, `done_when`, `depends_on` and `.NN` child
+   steps; pickup steps in `TL-BE-CORE.log`), then `TL-INT-*` integrations last.
 4. `skills/` → loaded per task: `backend-modules`, `data-access`,
    `server-actions`, `route-handlers`, `auth-guards`, `idempotency`,
    `background-jobs`, `integrations`, `migrations`.
