@@ -61,6 +61,19 @@ pnpm start:admin      # serve the built panel on 3001
 `pnpm typecheck`, `pnpm test` and `pnpm build` are aggregates: they run the admin first and stop
 if it fails.
 
+### Database (shared by both apps)
+
+Put the connection strings in a repo-root `.env.local` (gitignored; same keys as
+`tuw-admin/.env.example`): `DATABASE_URL` (pooled) and `DATABASE_URL_UNPOOLED` (direct).
+Any PostgreSQL works — a Neon branch or a local Postgres (`postgresql://localhost:5432/tuw`).
+
+```bash
+pnpm db:status        # applied / pending migration files and table count
+pnpm db:migrate       # apply pending db/migrate/*.sql in order
+pnpm db:seed          # re-runnable baseline data (roles, settings, providers…)
+DB_ALLOW_RESET=true pnpm db:reset --yes   # DEV ONLY: drop everything, migrate, seed
+```
+
 ---
 
 ## The two applications

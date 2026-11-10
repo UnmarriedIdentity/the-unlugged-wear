@@ -1,7 +1,12 @@
 # Migrations — Apply Order & Status
 
-> No PostgreSQL instance exists yet. These files are edited in place until
-> the first provisioned database; afterward use forward migrations.
+> **Applied** to the Neon development branch on 2026-11-10 with
+> `pnpm db:migrate` + `pnpm db:seed` (runner: `db/scripts/db.mjs`).
+> The runner records each file and its SHA-256 in `schema_migrations` and
+> refuses a file that changed after it was applied. From now on a schema
+> change is a **new numbered file** (`015-…sql`). Until production exists,
+> a development database may instead be rebuilt with
+> `DB_ALLOW_RESET=true pnpm db:reset --yes` after editing a file in place.
 > **99 tables across 14 files, all specified tables now written as DDL.**
 > Location: repo-root `db/` — shared by both deployments (`tuw-admin`,
 > `tuw-website`), which connect to the same Neon Postgres database.

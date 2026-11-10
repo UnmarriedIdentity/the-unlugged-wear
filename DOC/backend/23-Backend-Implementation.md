@@ -105,8 +105,11 @@ when to use each are in the `nextjs-rendering` skill.
 | Production | Neon main branch |
 
 - `pnpm db:migrate` applies `db/migrate/*.sql` in order and records them in
-  `schema_migrations`; `pnpm db:seed` runs the seed. Both work on any
-  Postgres.
+  `schema_migrations` (with a checksum; a changed applied file is
+  refused); `pnpm db:seed` runs the seed; `pnpm db:status` shows what is
+  applied; `pnpm db:reset` rebuilds a dev database. All work on any
+  Postgres (`db/scripts/db.mjs`, driver `pg`). Applied to the Neon dev
+  branch on 2026-11-10: 99 tables + `schema_migrations`.
 - Integration tests create a throwaway schema per run on whatever database
   `DATABASE_URL` points to, apply the migrations there, and drop it
   afterwards. They never touch production.

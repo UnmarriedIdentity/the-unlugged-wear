@@ -16,6 +16,13 @@
     "test:admin": "pnpm --dir tuw-admin test",
     "test:website": "pnpm --dir tuw-website test",
     "test": "pnpm run test:admin && pnpm run test:website",
-    "build": "pnpm run build:admin && pnpm run build:website"
+    "build": "pnpm run build:admin && pnpm run build:website",
+    "db:status": "node --env-file-if-exists=.env.local db/scripts/db.mjs status",
+    "db:migrate": "node --env-file-if-exists=.env.local db/scripts/db.mjs migrate",
+    "db:seed": "node --env-file-if-exists=.env.local db/scripts/db.mjs seed",
+    "db:reset": "node --env-file-if-exists=.env.local db/scripts/db.mjs reset"
+  },
+  "devDependencies": {
+    "pg": "8.13.1"
   }
 }

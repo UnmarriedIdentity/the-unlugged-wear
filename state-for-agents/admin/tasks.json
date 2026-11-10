@@ -4985,16 +4985,18 @@
     {
       "id": "TL-DB-MIGRATION-RUNNER",
       "title": "Small script to create/apply the schema on any Postgres (Neon or local)",
-      "status": "backlog",
+      "status": "done",
       "owner": "agent",
       "parent": "TL-BE-CORE",
-      "started": null,
-      "finished": null,
-      "log": "Apply db/migrate/*.sql in file order then db/seed, recording applied files in a schema_migrations table; uses DATABASE_URL_UNPOOLED. A PGlite (Postgres 17 in WASM) apply check proved the files run in order; the runner can reuse that approach for CI.",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "db/scripts/db.mjs (pg 8.13.1 root devDependency): status / migrate / seed / reset. Per-file transactions, schema_migrations ledger with SHA-256 (changed applied file refused), advisory lock, dev-only reset behind DB_ALLOW_RESET=true + --yes. Root scripts db:*. Applied to Neon dev: 14 files, 99 tables; seed run twice (roles 4, permissions 19, store_settings 19, integration_providers 7).",
       "design_match": "n/a",
-      "key_decisions": [],
-      "verified": false,
-      "pushed": false
+      "key_decisions": [
+        "Forward-only migrations from now on (new numbered files); dev may reset while pre-launch"
+      ],
+      "verified": true,
+      "pushed": true
     },
     {
       "id": "TL-DB-FRONTEND-STATUS-VOCAB",
