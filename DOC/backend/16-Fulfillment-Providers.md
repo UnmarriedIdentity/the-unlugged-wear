@@ -76,7 +76,7 @@ directly, so swapping or adding providers never touches order code.
 | Topic | Qikink rule | What we do |
 |---|---|---|
 | Money-back returns / size exchanges | Not offered — the seller places a new order at their own cost | **No money-back returns.** Exchanges = new replacement order paid by us; customer pays any price difference (file 06) |
-| Defects, misprints, damage | **Yes, Qikink replaces (or refunds) them** — claim within **7 days of delivery**; unboxing video + product + packaging photos required, else no liability (clarification requested from Qikink 2026-11-10, awaiting reply) | `returns.type = 'replacement'` + `fulfillment_claims` (deadline, `evidence_media_ids`). Storefront asks for the unboxing video at request time; this is why `products.exchange_policy` defaults to `defects_only` |
+| Defects, misprints, damage, wrong / missing items | **Confirmed by Qikink support (2026-11-10):** an **unboxing video is mandatory** for *wrong product delivered* and *missing product/item* claims; for other quality issues (damage, misprint, quality) Qikink reviews the details + supporting images and guides case by case. Claim within 7 days of delivery | `returns.type = 'replacement'` + `fulfillment_claims`. Reasons `wrong_item` / `missing_item` need the video (`fulfillment_claims.has_unboxing_video`, DB CHECK from `015-claim-evidence.sql`); damage / misprint / quality need photos. Storefront tells customers to record an unboxing video on every parcel (order email + delivery page). `products.exchange_policy` defaults to `defects_only` |
 | Lost in transit | Refunded once marked lost | Claim type `lost_in_transit` → `claim_credit` in the wallet ledger |
 | RTO (undelivered) | Returns to Qikink's Coimbatore warehouse; stored **100 days**; can be re-shipped from the dashboard; no RTO charge (pricing page lists ₹20/product storage — conflicting) | `status = 'rto_initiated' / 'returned'`, `rto_storage_until`; re-ship = new `fulfillment_orders` row with `reason = 'reship'` |
 | Cancel | Only while **Live** (or Live OOS — pages conflict); full value back to wallet | Customer cancel only while our order is `pending` (before submission); staff cancel → `cancelOrder` + `cancel_credit` |
@@ -129,7 +129,7 @@ claims are handled in the Qikink dashboard, and the admin has a per-row
 1. Exact `/api/token` params and token lifetime.
 2. Order-status / tracking endpoint (`GET /api/order?id=`?) and any webhook.
 3. Cancel endpoint, and whether **Live OOS** orders can be cancelled.
-4. Claim (replacement/refund) submission by API or dashboard only.
+4. Claim (replacement/refund) submission by API or dashboard only. (Evidence rules answered 2026-11-10 — see §4.)
 5. Design upload: link-based only, or an upload endpoint (files ≤ 25 MB,
    300 DPI PNG/JPEG).
 6. Whether the RTO storage charge (₹20/product) applies.

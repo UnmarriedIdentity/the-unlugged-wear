@@ -98,9 +98,10 @@ map onto it: `queued` → `confirmed`, `printing` → `processing`,
   ships through the normal `shipments` + `fulfillment_orders` path. With a
   print-on-demand partner this is a **new partner order paid by us** —
   Qikink does not do size exchanges itself.
-- **Defects (replacement):** damaged / misprinted / wrong item reported
-  within the partner's claim window (Qikink: 7 days from delivery, unboxing
-  video + photos required) → `returns.type = 'replacement'` + a
+- **Defects (replacement):** damaged / misprinted / wrong / missing item
+  reported within the partner's claim window (Qikink: 7 days from delivery).
+  Evidence (Qikink, 2026-11-10): **wrong or missing item → unboxing video
+  required**; damage / misprint / quality → details + photos → `returns.type = 'replacement'` + a
   `fulfillment_claims` row to the partner. Approved → free replacement
   order (`order_type = 'replacement'`), or a refund when a reprint is not
   possible.

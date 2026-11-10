@@ -33,6 +33,7 @@ const FILES = [
   '012-styling.sql',
   '013-analytics.sql',
   '014-operations.sql',
+  '015-claim-evidence.sql',
 ];
 
 const IMPLEMENTED = {
@@ -154,6 +155,7 @@ const IMPLEMENTED = {
     'search_terms',
   ],
   '014-operations.sql': ['support_tickets', 'support_messages', 'notifications'],
+  '015-claim-evidence.sql': [],
 };
 
 // Every specified table is now written as DDL. Kept as an explicit empty
@@ -230,7 +232,9 @@ describe('schema integrity', () => {
   });
 
   test('columns live in CREATE TABLE; later files only attach forward FKs', () => {
-    for (const file of FILES) {
+    // 001–014 are the pre-provision baseline; 015+ are forward migrations
+    // on an applied database, where ALTER … ADD COLUMN is the normal tool.
+    for (const file of FILES.filter((f) => f < '015')) {
       assert.equal(/ADD\s+COLUMN/i.test(code(file)), false, `${file} adds a column with ALTER`);
     }
     const products = block(code('002-catalog.sql'), 'products');
@@ -239,6 +243,12 @@ describe('schema integrity', () => {
     assert.match(block(orders, 'orders'), /cancellable_until\s+timestamptz/i);
     assert.match(orders, /CREATE UNIQUE INDEX one_exchange_per_order_item/i);
     assert.match(block(orders, 'returns'), /cardinality\(evidence_media_ids\) >= 1/i);
+  });
+
+  test('015 encodes the Qikink unboxing-video rule', () => {
+    const sql = code('015-claim-evidence.sql');
+    assert.match(sql, /'missing_item'/);
+    assert.match(sql, /fulfillment_claims_video_required[\s\S]*?has_unboxing_video/);
   });
 
   test('money and stock writes carry duplicate guards', () => {

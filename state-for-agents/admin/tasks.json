@@ -9,9 +9,9 @@
   },
   "summary": {
     "total": 435,
-    "done": 272,
+    "done": 273,
     "in_progress": 1,
-    "backlog": 162
+    "backlog": 161
   },
   "session": {
     "branch": "urvil-ui",
@@ -5267,16 +5267,16 @@
     {
       "id": "TL-BE-00.03",
       "title": "Repo rules 03-never-push / 10-never-commit vs owner instruction to commit + push on urvil-ui",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-00",
-      "started": null,
-      "finished": null,
-      "log": "Not started. Owner asked to commit and push; update or keep the rule files?",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "dde825c — owner: no never-commit rule; commit after each change and push to urvil-ui. Rule 03 rewritten as 03-commit-and-push (admin + storefront), storefront rule 10 deleted, guides/AGENTS updated.",
       "design_match": null,
       "key_decisions": [],
-      "verified": false,
-      "pushed": false,
+      "verified": true,
+      "pushed": true,
       "follow_ups": []
     },
     {
@@ -5287,7 +5287,7 @@
       "parent": "TL-BE-00",
       "started": null,
       "finished": null,
-      "log": "Not started. Needed by TL-BE-05.08 (provider mappings) and TL-BE-11.",
+      "log": "Explained to owner 2026-11-10. A Qikink order line must name what to print: either (A) the 'Store SKU' Qikink generates after you add a design to a blank in the Qikink dashboard (My Products → View Variations), or (B) the blank's Qikink SKU + print type + design file link sent with every order (no dashboard product needed). Owner to choose A or B; (B) recommended if the API confirms it.",
       "design_match": null,
       "key_decisions": [],
       "verified": false,
@@ -5302,7 +5302,7 @@
       "parent": "TL-BE-00",
       "started": null,
       "finished": null,
-      "log": "Not started. Shapes TL-BE-10 (pickup fields on returns).",
+      "log": "Qikink support reply 2026-11-10: unboxing video mandatory for wrong-product and missing-item claims; other quality issues reviewed from details + images. Applied in 015-claim-evidence.sql + docs 06/16. Still open: on a size/variant exchange, does the customer keep the old garment (recommended) or send it back?",
       "design_match": null,
       "key_decisions": [],
       "verified": false,
