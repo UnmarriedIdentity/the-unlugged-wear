@@ -9,7 +9,7 @@ work stopped. Start here, in this order:
 2. `TRACKER_GUIDE.md` → how to read and update the tracker.
 3. `rules/` (in numeric order) → **inviolable constraints**. Rules are
    permissions, not techniques: pixel-perfect tolerance, git hygiene, gates,
-   and never-push. Every report quotes rule compliance.
+   and commit-and-push (commit + push to urvil-ui after every change). Every report quotes rule compliance.
 4. `skills/` → capabilities, loaded per task: `theme-tokens`,
    `utility-first-jsx`, `cascade-layers`, `stylesheet-anatomy`,
    `design-system`, `motion`, `decorative-graphics`, `debug-frontend`,
@@ -20,7 +20,7 @@ work stopped. Start here, in this order:
 
 ## Rules vs skills (the split — never confuse them)
 
-- **Rules** say what agents must/must-not do (no pushes ever — the human pushes
+- **Rules** say what agents must/must-not do (commit and push every finished change to urvil-ui
   after browser-testing; exact-path commits; gates before every commit).
 - **Skills** say how to build pixel-perfect UI (tokens, utilities, layers,
   motion, debugging playbooks). Skills never grant permissions.

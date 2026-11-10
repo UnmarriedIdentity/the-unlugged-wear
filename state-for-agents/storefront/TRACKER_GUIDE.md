@@ -30,7 +30,9 @@ one `in_progress` while work remains.
 
 ## Push accounting (no screenshots anywhere)
 
-- Agents NEVER push (rule 03). Every finished task ships with `pushed:false`.
+- Agents commit and push every finished change to `urvil-ui` (rule 03),
+  then set `pushed:true` on its tasks. The older flow below applies only if
+  a push fails or the owner pushes manually.
 - The human reports "pushed till <commit>"; the agent then sets `pushed:true`
   on every task whose `log` is an ancestor-or-equal of that commit, refreshes
   `session.unpushed[]`, and commits the tracker update.

@@ -77,7 +77,7 @@
   - Rule 00: Pixel-perfect tolerance (zero tolerance, computed capture / screenshot matrix at 360/768/1024/1440px+).
   - Rule 01: Git hygiene (exact paths only, one fix = one commit, never `git add .`).
   - Rule 02: Verification gates (clean typecheck, test, build, built selector-level CSS proof `\.util\{`).
-  - Rule 03: Never push (agents NEVER push to remote, push is human-only).
+  - Rule 03: Commit and push every finished change to `urvil-ui` (owner decision 2026-11-10).
   - Rule 04: Task discipline (`tasks.json` tracking and exact-path updates).
   - Rule 05: Branch hygiene (single shared branch `feat/storefront-meet`, verify HEAD matches `session.tip`, no force-push).
 - Maintain real, copy-pasteable setup and run commands in root and application `README.md` files.
