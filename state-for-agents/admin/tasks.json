@@ -8,10 +8,10 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 421,
+    "total": 435,
     "done": 272,
     "in_progress": 1,
-    "backlog": 148
+    "backlog": 162
   },
   "session": {
     "branch": "urvil-ui",
@@ -5685,6 +5685,27 @@
       "follow_ups": []
     },
     {
+      "id": "TL-BE-02.10",
+      "title": "Replace lib/permissions.ts (admin/manager/support) with DB RBAC (admin/support/warehouse + 19 permission slugs); map UI personas; sidebar gating",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-02",
+      "started": null,
+      "finished": null,
+      "log": "Not started. DB roles are admin/support/warehouse/customer; 'manager' does not exist — personas Owner/Operations/Content/Read-only map per DOC/backend/03 §4.",
+      "files": [
+        "tuw-admin/src/lib/permissions.ts",
+        "tuw-admin/src/components/layout/Sidebar.tsx"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [
+        "Added by the 2026-11-10 admin screen audit"
+      ]
+    },
+    {
       "id": "TL-BE-03",
       "title": "Customers & households — profile, addresses, family members, sizes",
       "status": "backlog",
@@ -5859,6 +5880,33 @@
       "verified": false,
       "pushed": false,
       "follow_ups": []
+    },
+    {
+      "id": "TL-BE-04.05",
+      "title": "Wire each settings tab: /settings/general, /brand, /shipping, /taxes, /payments, /fulfillment, /notifications",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-04",
+      "started": null,
+      "finished": null,
+      "log": "Not started. Values → store_settings keys; payments/fulfillment tabs → integration_providers (no secrets in the DB); remove SettingsView localStorage.",
+      "files": [
+        "tuw-admin/src/app/(dashboard)/settings/general/page.tsx",
+        "tuw-admin/src/app/(dashboard)/settings/brand/page.tsx",
+        "tuw-admin/src/app/(dashboard)/settings/shipping/page.tsx",
+        "tuw-admin/src/app/(dashboard)/settings/taxes/page.tsx",
+        "tuw-admin/src/app/(dashboard)/settings/payments/page.tsx",
+        "tuw-admin/src/app/(dashboard)/settings/fulfillment/page.tsx",
+        "tuw-admin/src/app/(dashboard)/settings/notifications/page.tsx",
+        "tuw-admin/src/app/(dashboard)/settings/_components/SettingsView.tsx"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [
+        "Added by the 2026-11-10 admin screen audit"
+      ]
     },
     {
       "id": "TL-BE-05",
@@ -6055,6 +6103,74 @@
       "verified": false,
       "pushed": false,
       "follow_ups": []
+    },
+    {
+      "id": "TL-BE-05.11",
+      "title": "/settings/attributes → attribute library editor (attribute_definitions + attribute_values)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-05",
+      "started": null,
+      "finished": null,
+      "log": "Not started. New option types are data rows, never schema changes.",
+      "files": [
+        "tuw-admin/src/app/(dashboard)/settings/attributes/page.tsx"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [
+        "Added by the 2026-11-10 admin screen audit"
+      ]
+    },
+    {
+      "id": "TL-BE-05.12",
+      "title": "Move pure catalog logic into modules/catalog: lib/productPricing.ts, productImport.ts, attributePresentation.ts, collections.ts (tests move with it)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-05",
+      "started": null,
+      "finished": null,
+      "log": "Not started. Same rules serve both apps; keep the existing tests passing after the move.",
+      "files": [
+        "tuw-admin/src/lib/productPricing.ts",
+        "tuw-admin/src/lib/productImport.ts",
+        "tuw-admin/src/lib/attributePresentation.ts",
+        "tuw-admin/src/lib/collections.ts",
+        "tuw-admin/tests/product-pricing.test.mjs",
+        "tuw-admin/tests/product-import.test.mjs",
+        "tuw-admin/tests/attribute-presentation.test.mjs",
+        "tuw-admin/tests/collections.test.mjs"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [
+        "Added by the 2026-11-10 admin screen audit"
+      ]
+    },
+    {
+      "id": "TL-BE-05.13",
+      "title": "Wire admin /products (ProductsView) and /collections pages; drop their localStorage state",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-05",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "files": [
+        "tuw-admin/src/app/(dashboard)/products/_components/ProductsView.tsx",
+        "tuw-admin/src/app/(dashboard)/collections/page.tsx"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [
+        "Added by the 2026-11-10 admin screen audit"
+      ]
     },
     {
       "id": "TL-BE-06",
@@ -6419,6 +6535,28 @@
       "follow_ups": []
     },
     {
+      "id": "TL-BE-08.09",
+      "title": "Admin global search modal (orders, products, customers, pages) from the DB",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-08",
+      "started": null,
+      "finished": null,
+      "log": "Not started. Server-side search across modules; 'frequent queries' may stay in localStorage (per-user UI preference only).",
+      "files": [
+        "tuw-admin/src/components/search/localSearch.ts",
+        "tuw-admin/src/components/search/useFrequentQueries.ts",
+        "tuw-admin/src/components/search/SearchModal.tsx"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [
+        "Added by the 2026-11-10 admin screen audit"
+      ]
+    },
+    {
       "id": "TL-BE-09",
       "title": "Payments & refunds",
       "status": "backlog",
@@ -6693,6 +6831,26 @@
       ]
     },
     {
+      "id": "TL-BE-11.06",
+      "title": "lib/qikink.ts stub → integrations/fulfillment/qikink adapter skeleton (mock behaviour; live calls in TL-INT-QIKINK)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-11",
+      "started": null,
+      "finished": null,
+      "log": "Not started. Admin /settings/fulfillment shows provider status from integration_providers.",
+      "files": [
+        "tuw-admin/src/lib/qikink.ts"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [
+        "Added by the 2026-11-10 admin screen audit"
+      ]
+    },
+    {
       "id": "TL-BE-12",
       "title": "Gift cards",
       "status": "backlog",
@@ -6879,6 +7037,92 @@
       "follow_ups": []
     },
     {
+      "id": "TL-BE-13.06",
+      "title": "Wire /content/pages and /content/navigation editors",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-13",
+      "started": null,
+      "finished": null,
+      "log": "Not started. Publishing pings the storefront revalidate endpoint.",
+      "files": [
+        "tuw-admin/src/app/(dashboard)/content/pages/page.tsx",
+        "tuw-admin/src/app/(dashboard)/content/navigation/page.tsx",
+        "tuw-admin/src/app/(dashboard)/content/page.tsx"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [
+        "Added by the 2026-11-10 admin screen audit"
+      ]
+    },
+    {
+      "id": "TL-BE-13.07",
+      "title": "Wire /content/journal (list, new, edit) with revisions and slug history; move lib/blog.ts into modules/content",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-13",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "files": [
+        "tuw-admin/src/app/(dashboard)/content/journal/page.tsx",
+        "tuw-admin/src/app/(dashboard)/content/journal/new/page.tsx",
+        "tuw-admin/src/app/(dashboard)/content/journal/[id]/edit/page.tsx",
+        "tuw-admin/src/lib/blog.ts",
+        "tuw-admin/tests/blog-model.test.mjs"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [
+        "Added by the 2026-11-10 admin screen audit"
+      ]
+    },
+    {
+      "id": "TL-BE-13.08",
+      "title": "Wire /content/media library (mock storage adapter until TL-INT-STORAGE)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-13",
+      "started": null,
+      "finished": null,
+      "log": "Not started. Truthful demo copy for uploads.",
+      "files": [
+        "tuw-admin/src/app/(dashboard)/content/media/page.tsx"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [
+        "Added by the 2026-11-10 admin screen audit"
+      ]
+    },
+    {
+      "id": "TL-BE-13.09",
+      "title": "Wire /designs — print-artwork library (design_assets) with approval status",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-13",
+      "started": null,
+      "finished": null,
+      "log": "Not started. Design links feed provider_product_mappings.",
+      "files": [
+        "tuw-admin/src/app/(dashboard)/designs/page.tsx"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [
+        "Added by the 2026-11-10 admin screen audit"
+      ]
+    },
+    {
       "id": "TL-BE-14",
       "title": "Support & notifications",
       "status": "backlog",
@@ -6948,6 +7192,28 @@
       "verified": false,
       "pushed": false,
       "follow_ups": []
+    },
+    {
+      "id": "TL-BE-14.04",
+      "title": "Notification panel from the notifications table (replace computed feed.ts)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-14",
+      "started": null,
+      "finished": null,
+      "log": "Not started. Unread count in its own Suspense.",
+      "files": [
+        "tuw-admin/src/components/notifications/feed.ts",
+        "tuw-admin/src/components/notifications/useNotifications.ts",
+        "tuw-admin/src/components/notifications/NotificationPanel.tsx"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [
+        "Added by the 2026-11-10 admin screen audit"
+      ]
     },
     {
       "id": "TL-BE-15",
@@ -7179,6 +7445,55 @@
       "verified": false,
       "pushed": false,
       "follow_ups": []
+    },
+    {
+      "id": "TL-BE-17.06",
+      "title": "Remove the admin demo state once every admin screen is live: mocks/state.tsx, fixtures.ts, blogFixtures.ts, variants.ts (34 files import @/mocks) and the Reset Demo control",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-17",
+      "started": null,
+      "finished": null,
+      "log": "Not started. Keep localStorage only for per-user UI preferences (sidebar collapse, frequent searches); rewrite tests that read fixtures.",
+      "files": [
+        "tuw-admin/src/mocks/state.tsx",
+        "tuw-admin/src/mocks/fixtures.ts",
+        "tuw-admin/src/mocks/blogFixtures.ts",
+        "tuw-admin/src/mocks/variants.ts",
+        "tuw-admin/src/components/layout/DashboardShell.tsx",
+        "tuw-admin/src/components/layout/Sidebar.tsx",
+        "tuw-admin/tests/business-logic.test.mjs",
+        "tuw-admin/tests/seed-integrity.test.mjs"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [
+        "Added by the 2026-11-10 admin screen audit"
+      ]
+    },
+    {
+      "id": "TL-BE-17.07",
+      "title": "Developer-only and redirect pages stay static: /design-system, app/page.tsx and (dashboard)/page.tsx redirects",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-17",
+      "started": null,
+      "finished": null,
+      "log": "Not started. Confirm they build under cacheComponents; no backend.",
+      "files": [
+        "tuw-admin/src/app/(dashboard)/design-system/page.tsx",
+        "tuw-admin/src/app/page.tsx",
+        "tuw-admin/src/app/(dashboard)/page.tsx"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [
+        "Added by the 2026-11-10 admin screen audit"
+      ]
     },
     {
       "id": "TL-BE-SKILLS",
