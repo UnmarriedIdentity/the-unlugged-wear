@@ -33,7 +33,7 @@ GIN `idx_categories_search_vector` · partial
 `idx_categories_navbar (is_active, show_in_navbar, sort_order)
 WHERE is_active AND show_in_navbar` (nav render = one narrow read).
 
-## brands (defined, unbuilt v1)
+## brands (table created — v1; seed/UI built in the backend phase)
 
 | Column | Type | Constraints | Reason |
 |---|---|---|---|
@@ -320,7 +320,7 @@ visibility='scheduled'` (the scheduler's only query).
 | variant_id | uuid | NULL, FK → product_variants(id) ON DELETE CASCADE | Variant-level movement |
 | qty_change | integer | NOT NULL | Signed delta (+ restock, − sale) |
 | reason | varchar(30) | NOT NULL, CHECK IN ('sale','restock','import','admin_adjustment','return','cancel') | Audit classification |
-| order_id | uuid | NULL, FK → orders(id) ON DELETE SET NULL | Real FK (monolith) — sale linkage without coupling deletes |
+| order_id | uuid | NULL, FK → orders(id) ON DELETE SET NULL | Real FK (one shared database) — sale linkage without coupling deletes |
 | qty_after | integer | NOT NULL | Balance snapshot — full audit trail |
 | created_at | timestamptz | NOT NULL | |
 
@@ -348,7 +348,7 @@ partial `(starts_at, ends_at) WHERE is_active` (scheduler).
 |---|---|---|---|
 | id | uuid | PK | |
 | product_id | uuid | NOT NULL, FK → products(id) ON DELETE CASCADE | |
-| user_id | uuid | NOT NULL, FK → users(id) ON DELETE CASCADE | Real FK (monolith) |
+| user_id | uuid | NOT NULL, FK → users(id) ON DELETE CASCADE | Real FK (one shared database) |
 | rating | smallint | NOT NULL, CHECK (rating BETWEEN 1 AND 5) | |
 | title | varchar(255) | NULL | |
 | body | text | NULL | |

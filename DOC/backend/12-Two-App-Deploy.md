@@ -1,74 +1,82 @@
-# UI Merge & Single Deploy — Groups, Isolation, Sequence
+# Two-App Deploy — Storefront API, Admin API, One Database
 
-> Status: Filling | Last Updated: 2026-10-15
-> Goal: one URL, one deploy, zero style/logic cross-load. Non-goal: no
-> visual redesign during the move — pixel-parity per route is the
-> acceptance bar. Gate spec: `14-Single-URL-Gating.md`.
+> Status: Active | Last Updated: 2026-11-10
+> Replaces the earlier single-URL merge plan (decided 2026-11-10: the
+> storefront and the admin panel stay two separately deployed apps).
+> Access rules per app: `14-Access-Gating.md`. Routes: `13-API-Contracts.md`.
 
-## Canonical merged tree (`tuw-admin/` after merge)
+## Topology
 
 ```
-src/
-  middleware.ts                    ← role gate (file 14 matcher map)
-  app/
-    layout.tsx                     ← html shell + reset CSS only (no tokens, no fonts)
-    globals.css                    ← reset + Tailwind core only
-    providers.tsx                  ← admin providers (storefront wraps its own)
-    api/<domain>/route.ts          ← thin handlers, no /v1 (file 13)
-    (admin)/
-      layout.tsx                   ← Urbanist (next/font) + admin-tokens scope
-      admin-tokens.module.css      ← .scope { --tuw-*: … } — admin routes only
-      dashboard/ orders/ products/ fulfillment/ customers/ content/
-      settings/ team/ support/ reports/ refunds/ returns/ shipments/ ...
-    (storefront)/
-      layout.tsx                   ← editorial stack (next/font) + store-tokens scope
-      store-tokens.module.css      ← .scope { --store-*: … } — storefront only
-      page.tsx  products/ cart/ checkout/ account/ journal/ faq/ ...
-  components/
-    ui/ dashboard/ layout/ ...     ← admin's, frozen
-    storefront/                    ← website components/ (ui/, commerce/ inside)
-  lib/ (+ storefront/) · hooks/ · mocks/ (+ storefront/) · server/ · tests/
+                ┌──────────────────────────┐      ┌──────────────────────────┐
+ shoppers ───▶  │ tuw-website (Next.js)    │      │ tuw-admin (Next.js)      │ ◀─── staff
+                │  storefront UI           │      │  admin UI                │
+                │  /api/* storefront API   │      │  /api/* admin API        │
+                └────────────┬─────────────┘      └────────────┬─────────────┘
+                             │   pooled connections (DATABASE_URL)   │
+                             └──────────────┐   ┌────────────────────┘
+                                            ▼   ▼
+                                  ┌──────────────────────┐        ┌──────────┐
+                                  │ Neon Postgres (one)  │        │ R2 bytes │
+                                  │ schema: db/migrate   │        └──────────┘
+                                  └──────────────────────┘
 ```
 
-`server/` tree and repo map: `00-README.md`. Route contracts: file 13.
+- **Two deployments, two domains**, each with its own build, env vars and
+  release cadence. Neither app imports source from the other (`AGENTS.md`
+  §4) and neither calls the other over HTTP on the request path.
+- **One database.** Both apps connect to the same Neon Postgres. The schema
+  lives once, at the repo root in `db/migrate` + `db/seed`, and is applied
+  by a migration step that belongs to neither app.
+- **Each app owns its API.** The storefront API serves public, guest and
+  customer routes; the admin API serves staff routes. Shared business rules
+  (prices, stock decrement, order status changes) are enforced by database
+  constraints first, so the two codebases cannot drift into inconsistent
+  data even though their service code is separate.
 
-## CSS isolation spec (separate stylesheets, zero cross-load)
+## Where code lives (target layout)
 
-- Root global holds reset + Tailwind core only (deduped utilities,
-  cached across both experiences — splitting it would duplicate bytes).
-- Each group layout imports its token module and wraps its tree in
-  `.scope`; custom properties cascade to descendants, so modules resolve
-  tokens within scope. Next splits modules per route: storefront HTML
-  never contains the admin scope element and never downloads
-  `admin-tokens.module.css` (and vice versa).
-- Fonts via `next/font` per group layout — Urbanist downloads on admin
-  routes only, editorial on storefront only. Global font `<link>`s die.
-- Portal safety: drawers/menus/overlays render inside the React tree
-  under the scope wrapper — tokens inherit, no orphan styling.
-- Per-route proof: network panel shows only that experience's token
-  sheet + font; visual pass against pre-merge screenshots.
+```
+db/                      ← shared: migrations, seed, migration runner
+tuw-website/src/server/  ← storefront services + DB access (server-only)
+tuw-website/src/app/api/ ← thin storefront route handlers
+tuw-admin/src/server/    ← admin services + DB access (server-only)
+tuw-admin/src/app/api/   ← thin admin route handlers
+```
 
-## Namespace & import law
+`server/` is UI-free and UI never imports it (`server-only`). Route
+handlers stay thin: parse → guard → service → shape (file 01 §4).
 
-- Same-name dirs nest, never merge (`lib/storefront/`,
-  `mocks/storefront/`, `components/storefront/`); admin originals never
-  move. No file is ever overwritten by the move.
-- Nothing in `(admin)` imports from `(storefront)` and vice versa —
-  today's zero-cross-import law restated as directory law (directional
-  lint later).
-- `server/` is UI-free; UI never imports `server/` (`server-only`
-  enforcement). `api/` is logic-free (~30-line handler limit).
+## Database access rules for two apps
 
-## Migration sequence (each step independently shippable)
+- **Connection:** each app reads `DATABASE_URL` (Neon pooled connection
+  string). Serverless functions use the pooled endpoint; the migration
+  runner uses the direct (unpooled) endpoint.
+- **Least privilege (recommended):** two Postgres roles —
+  `tuw_storefront` (no access to staff-only tables such as `audit_logs`,
+  `staff_invitations`, `import_jobs`) and `tuw_admin` (full DML). Neither
+  role can run DDL; only the migration role can.
+- **No row-level security in v1.** RLS exists for databases exposed directly
+  to browsers (the Supabase model). Here only server code connects, so
+  access is enforced in each API's guards and by the role grants above.
+- **Shared invariants stay in SQL** (CHECKs, FKs, partial uniques,
+  idempotency keys) so both apps get them for free.
 
-1. Create groups; move one low-risk storefront route (FAQ) → gates +
-   network + visual proof.
-2. Remaining storefront routes in batches → per-batch commits + proofs.
-3. Token-module extraction + font split → per-route network proof.
-4. Middleware gate on `/dashboard/*` + `/api/admin/*` (file 14).
-5. Delete `tuw-website/` only after every route proves parity + isolation.
+## Cross-app effects without cross-app calls
 
-## Rollback rule
+When one app's write must become visible to the other (a storefront order
+appearing in the admin, an admin status change appearing on the customer's
+order page), both simply read the same rows. Side effects that need a
+worker (emails, Qikink submission, back-in-stock mails) are queued as rows
+(`email_logs`, `partner_orders`, `notifications`) and processed by the app
+that owns them — no message broker in v1.
 
-Each step is one commit; a failed proof reverts that step alone — never
-the batch. The old app keeps serving until step 5 lands.
+## Release order
+
+1. Apply migrations (`db/migrate`, in file order) to Neon, then the seed.
+2. Deploy the admin API (staff can prepare the catalog).
+3. Deploy the storefront API.
+
+A migration must stay backward compatible with the currently deployed
+version of **both** apps (add columns before using them; remove only after
+neither app reads them).

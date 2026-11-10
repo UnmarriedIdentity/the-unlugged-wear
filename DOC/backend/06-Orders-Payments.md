@@ -13,10 +13,15 @@
 | Column | Type | Constraints | Reason |
 |---|---|---|---|
 | id | uuid | PK, UUIDv7 | |
-| placed_by_user_id | uuid | NOT NULL, FK → users(id) ON DELETE RESTRICT | Payer of record — receipts, refunds, and visibility start here; RESTRICT keeps history |
-| for_profile_id | uuid | NOT NULL, FK → profiles(id) ON DELETE RESTRICT | Recipient — the person the clothes are for (self by default). Sizes prefilled from their profile, never written back (file 17 §6) |
-| for_household_id | uuid | NOT NULL, FK → household_members(household_id, profile_id) ON DELETE RESTRICT (added by 011) | Proxy-order guard: the pair proves the recipient is an **active** member of that household, so "buy for my family" is a database rule, not a service promise |
+| placed_by_user_id | uuid | NULL (guest orders only), FK → users(id) ON DELETE RESTRICT | Payer of record for account orders — receipts, refunds, and visibility start here; RESTRICT keeps history |
+| for_profile_id | uuid | NULL (guest orders only), FK → profiles(id) ON DELETE RESTRICT | Recipient — the person the clothes are for (self by default). Sizes prefilled from their profile, never written back (file 17 §6) |
+| for_household_id | uuid | NULL (guest orders only), FK → household_members(household_id, profile_id) ON DELETE RESTRICT (added by 011) | Proxy-order guard: the pair proves the recipient is an **active** member of that household, so "buy for my family" is a database rule, not a service promise. CHECK: NULL exactly when `placed_by_user_id` is NULL |
+| guest_email | varchar(255) | NULL | Guest checkout contact of record; track-order looks up `order_number` + `lower(guest_email)` |
+| guest_name | varchar(150) | NULL | Guest's name (required when `guest_email` is set) |
+| guest_phone | varchar(20) | NULL | Optional guest phone for delivery |
 | order_number | varchar(30) | NOT NULL, UNIQUE | Human key (`#2026-000123`); support lookup |
+| order_type | varchar(20) | NOT NULL DEFAULT 'standard', CHECK IN ('standard','exchange') | `exchange` = the replacement order an approved exchange creates (`returns.replacement_order_id`); excluded from revenue reports |
+| gift_card_amount | DECIMAL(12,2) | NOT NULL DEFAULT 0, CHECK (>= 0) (added by 008) | Portion of `grand_total` paid by gift card; payments cover the rest (file 22) |
 | status | varchar(20) | NOT NULL DEFAULT 'pending', CHECK IN ('pending','confirmed','processing','shipped','delivered','cancelled','failed','refunded') | Fulfillment axis — independent from payment |
 | subtotal | DECIMAL(12,2) | NOT NULL, CHECK (>= 0) | Sum of line totals at purchase |
 | shipping_fee | DECIMAL(12,2) | NOT NULL DEFAULT 0, CHECK (>= 0) | |
@@ -36,9 +41,40 @@ Indexes: PK · unique order_number · `(placed_by_user_id, created_at DESC)`
 (placed history) · `(for_profile_id, created_at DESC)` (for-me history —
 household reads, file 17 §4) · `(for_household_id)` (family order history,
 single table) · `idx_orders_status` · `idx_orders_created_at`
-(date ranges) · `idx_orders_payment_status` (reconciliation) · partial
-unique `one_order_per_idempotency_key (placed_by_user_id, idempotency_key)
-WHERE idempotency_key IS NOT NULL` (retried checkout → same order).
+(date ranges) · `idx_orders_payment_status` (reconciliation) ·
+`idx_orders_guest_email (lower(guest_email))` (guest track-order) · partial
+unique `one_order_per_idempotency_key (COALESCE(placed_by_user_id,
+'guest:'||lower(guest_email)), idempotency_key) WHERE idempotency_key IS NOT
+NULL` (retried checkout → same order, for account and guest buyers alike).
+
+**Buyer identity (CHECK `orders_buyer_identity`):** an account order has
+`placed_by_user_id` + `for_profile_id` (+ `for_household_id`) and no guest
+fields; a guest order has `guest_email` + `guest_name` and no account
+columns. Nothing in between can be stored.
+
+## Order lifecycle rules (customer actions)
+
+Statuses are the SQL vocabulary above. The storefront's older demo words
+map onto it: `queued` → `confirmed`, `printing` → `processing`,
+`submission_failed` → `failed` (the raw Qikink state stays on
+`partner_orders`, file 16).
+
+- **Cancel:** the customer can cancel only while `status = 'pending'`.
+  Once an order is `confirmed` it cannot be cancelled by the customer.
+- **Exchange (size / variant swap):** allowed only when the order is
+  `delivered`, only within `store_settings.exchange.window_days` (7) of
+  `shipments.delivered_at`, and only for **another variant of the same
+  product** (`return_items.exchange_variant_id` must belong to the same
+  `product_id`). Swapping for a different product is not offered. A
+  customer who ordered the wrong item and whose order has not been
+  delivered yet has no exchange path: they cancel (only while `pending`)
+  and reorder. After the window closes the request is refused.
+- **Exchange fulfilment:** approval creates a replacement order
+  (`order_type = 'exchange'`, normally `grand_total = 0`) linked by
+  `returns.replacement_order_id`; it ships through the normal
+  `shipments` + `partner_orders` path, so tracking needs no extra table.
+- **Refunds** always go back to the original payment source. There is no
+  store credit.
 
 ## order_items
 
@@ -97,7 +133,7 @@ Indexes: PK · `idx_payments_order_id` · unique transaction_id.
 | payment_id | uuid | NULL, FK → payments(id) ON DELETE SET NULL | Source payment link |
 | amount | DECIMAL(12,2) | NOT NULL, CHECK (amount > 0 AND amount <= order grand_total — enforced in app, floor in DB) | Partial refunds allowed; never above paid total |
 | reason | varchar(255) | NOT NULL | Feed the Refund Volume KPI honestly |
-| method | varchar(30) | NOT NULL DEFAULT 'source', CHECK IN ('source','store_credit') | Back to source or store credit |
+| method | varchar(30) | NOT NULL DEFAULT 'source', CHECK IN ('source') | Always back to the original payment source (no store credit) |
 | status | varchar(20) | NOT NULL DEFAULT 'processing', CHECK IN ('processing','completed','rejected') | Ops pipeline |
 | actor | uuid | NOT NULL, FK → users(id) ON DELETE RESTRICT | Who approved — accountability |
 | created_at / updated_at | timestamptz | NOT NULL | |
@@ -120,11 +156,12 @@ so the existing admin mock stays a subset — `restocked` is expressed as
 | returns | id | uuid | PK | |
 | returns | rma_number | varchar(30) | NOT NULL, UNIQUE | Human key (`RMA-2026-000123`); support + courier reference |
 | returns | order_id | uuid | NOT NULL, FK → orders(id) ON DELETE RESTRICT | |
-| returns | requested_by_profile_id | uuid | NOT NULL, FK → profiles(id) ON DELETE RESTRICT | Who asked — the customer, or the member a proxy order was placed for |
+| returns | requested_by_profile_id | uuid | NULL, FK → profiles(id) ON DELETE RESTRICT | Who asked — the customer, or the member a proxy order was placed for. NULL only for a guest order |
+| returns | requester_email | varchar(255) | NULL | Guest requester (CHECK: profile **or** email is set) |
 | returns | requested_by_user_id | uuid | NULL, FK → users(id) ON DELETE SET NULL | The login that submitted it; NULL = logged by staff |
 | returns | type | varchar(10) | NOT NULL DEFAULT 'return', CHECK IN ('return','exchange') | A return and an exchange are different journeys with the same table |
 | returns | status | varchar(20) | NOT NULL DEFAULT 'requested', CHECK IN ('requested','approved','rejected','pickup_scheduled','in_transit','received','inspected','completed','cancelled','disputed') | The request pipeline. `requested` is the state the old machine could not express (nothing has shipped yet) |
-| returns | resolution | varchar(20) | NOT NULL DEFAULT 'pending', CHECK IN ('pending','refund','store_credit','exchange','none') | What the customer gets; decided at approval, settled at completion |
+| returns | resolution | varchar(20) | NOT NULL DEFAULT 'pending', CHECK IN ('pending','refund','exchange','none') | What the customer gets; decided at approval, settled at completion |
 | returns | customer_note | varchar(500) | NULL | Their words |
 | returns | rejection_reason | varchar(255) | NULL | Required by the app when `status = 'rejected'` |
 | returns | carrier / tracking_number | varchar(50) / varchar(100) | NULL | Reverse pickup |
@@ -132,6 +169,7 @@ so the existing admin mock stays a subset — `restocked` is expressed as
 | returns | pickup_scheduled_at / received_at | timestamptz | NULL | Pickup and warehouse-receipt stamps |
 | returns | decided_by / decided_at | uuid / timestamptz | NULL, FK → users(id) ON DELETE SET NULL | Accountability for approve/reject |
 | returns | refund_id | uuid | NULL, UNIQUE, FK → refunds(id) ON DELETE RESTRICT | 1:1. UNIQUE supplies the FK index; one refund record per return, never a second refund table |
+| returns | replacement_order_id | uuid | NULL, UNIQUE, FK → orders(id) ON DELETE RESTRICT | The exchange's replacement order; CHECK allows it only when `type = 'exchange'` |
 | return_items | id | uuid | PK | |
 | return_items | return_id | uuid | NOT NULL, FK → returns(id) ON DELETE CASCADE | Owned child |
 | return_items | order_item_id | uuid | NOT NULL, FK → order_items(id) ON DELETE RESTRICT | History guard |
@@ -214,11 +252,11 @@ sync cannot append the same scan twice. Feeds both the admin drawer
 timeline is a child table, never a jsonb array on `shipments`
 (`20-Schema-Decisions.md` §8).
 
-## Transaction scopes (ACID — no broker in monolith)
+## Transaction scopes (ACID — one shared database, no broker)
 
 | Transaction | Writes (single TX) | Guard |
 |---|---|---|
-| Checkout | orders (carrying `placed_by_user_id` + `for_profile_id` + `for_household_id` from the cart) + order_items + payments + stock decrement + cart→converted + discount uses_count+1 | Atomic `UPDATE … WHERE stock >= qty` (oversell impossible); the composite FK to `household_members` rejects a recipient outside the buyer's household; `idempotency_keys (scope='checkout', key)` returns the stored response for 24h, and `one_order_per_idempotency_key` blocks a second order forever — a retried submit resolves to the same row |
+| Checkout | orders (account: `placed_by_user_id` + `for_profile_id` + `for_household_id` from the cart; guest: `guest_email` + `guest_name`) + order_items + payments + stock decrement + cart→converted + discount uses_count+1 | Atomic `UPDATE … WHERE stock >= qty` (oversell impossible); the composite FK to `household_members` rejects a recipient outside the buyer's household; `idempotency_keys (scope='checkout', key)` returns the stored response for 24h, and `one_order_per_idempotency_key` blocks a second order forever — a retried submit resolves to the same row |
 | Refund | payments.status + refunds row + orders.payment_status (+ `returns.refund_id` when refund-driven) | One-open-refund partial unique; amount ≤ grand_total; `returns.refund_id` UNIQUE makes the link 1:1 |
 | Return request | returns (`status='requested'`) + return_items + return_status_history row | Stop at zero: the pipeline starts at `requested`, so no delivery is implied |
 | Return decision | returns.status + decided_by/decided_at + resolution + return_status_history row | History row written in-TX; `rejection_reason` required by the app when rejected |

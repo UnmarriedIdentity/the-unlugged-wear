@@ -1,7 +1,7 @@
 # Data Tables — Full Inventory (single PostgreSQL)
 
 > Status: Filling | Last Updated: 2026-10-30
-> 89 tables (89 implemented DDL + 0 specified) + 1 deferred footnote (`search_documents`). Column detail lives in files 03–10,
+> 94 tables (94 implemented DDL + 0 specified) + 1 deferred footnote (`search_documents`). Column detail lives in files 03–10,
 > 15, 17, and 19; this file is the index, ending with the full relationship diagram.
 > Conventions (UUIDv7, money, indexes): `01-Conventions.md`.
 > Retired systems and controlled duplication: `20-Schema-Decisions.md`.
@@ -33,9 +33,9 @@
 | staff_invitations | Invite flow: email, role, token hash, expiry, status (members *are* users) | users (inviter) |
 | audit_logs | Stock-edit summaries only: one row per product per import job (qty inserted, job ref) — variant deltas live in stock_movements; nothing else is recorded here | users (actor) |
 
-The single-URL gate reads `users → user_roles → roles.slug`
-(see `14-Single-URL-Gating.md`). Auth is **custom Argon2id**, never
-Supabase Auth: `users.password_hash` holds an Argon2id hash, refresh tokens
+Both deployments' access gates read `users → user_roles → roles.slug`
+(see `14-Access-Gating.md`). Auth is **custom, in-app**:
+`users.password_hash` holds a bcrypt hash, refresh tokens
 are stored hashed, and the app owns rotation + reuse detection.
 
 ## Household & family (5) → detail: `17-Household-Accounts.md`
@@ -53,7 +53,7 @@ are stored hashed, and the app owns rotation + reuse detection.
 | Table | Purpose | Key links |
 |---|---|---|
 | categories | Tree (`parent_id` self-FK), nav flags, slug, tsvector | self |
-| brands | **Defined but unbuilt in v1** — no seed, no UI (see footnote) | — |
+| brands | **Table created** (v1). Seed data, admin UI and storefront queries are built in the backend phase | — |
 | products | Core row: sku/slug unique, style name/code, internal S.No + source group key, base_price anchor + materialized min price ("From"), compare, stock balance, status, tags, HSN, Clothing Specs, `photo_settings` jsonb, source/external import ids, `partner_provider` + `partner_availability` (who produces it and whether they can), soft-delete, tsvector | categories, brands (nullable), size_charts (nullable) |
 | product_source_rows | One row per legacy workbook listing row: S.No, spreadsheet row number, raw snapshot; preserves rows that group into one product | products (cascade) |
 | product_variants | SKU-unique rows, source row, variant key, materialized effective price + override flag, stock, variant shipping overrides, active flag | products (cascade), product_source_rows (set null) |
@@ -164,7 +164,7 @@ events drop >30d, rollups kept forever. The session table is
 
 | Table | Purpose | Key links |
 |---|---|---|
-| support_tickets | Threads: subject, priority, status; a guest thread carries `guest_name` + `guest_email` (CHECK: user *or* both guest fields) | users (nullable customer) |
+| support_tickets | Threads: subject, priority, status, `source` (`contact_form` = storefront contact page), optional `order_id`; a guest thread carries `guest_name` + `guest_email` (CHECK: user *or* both guest fields) | users (nullable customer) |
 | support_messages | Normalized replies with sender + timestamp; `UNIQUE (ticket_id, created_at, sender)` collapses a retried send | support_tickets (cascade) |
 | notifications | In-app bell: `kind` ∈ order/cart/inventory/payment/system/marketing/refund, title/body/link, read_at; `dedupe_key` + partial unique so the same event never rings twice (email stays in `email_logs`) | users |
 
@@ -193,7 +193,7 @@ core e-commerce app (file 19 §1).
 
 ## Deferred, not dropped
 
-Every table the spec asked for is now in the DDL — the count is 89
+Every table the spec asked for is now in the DDL — the count is 94
 implemented, 0 specified. What remains deferred is *behaviour*, not shape:
 
 - `search_documents` — `tsvector` + GIN on `products` and `categories`

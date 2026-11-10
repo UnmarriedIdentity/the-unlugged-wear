@@ -1,4 +1,4 @@
-# API Contracts — Monolith Routes
+# API Contracts — Storefront API + Admin API
 
 > Status: Filling | Last Updated: 2026-10-30
 > One API serving one first-party client — **no `/v1` segment** (versioning
@@ -28,9 +28,16 @@
 - **Rate limits (per IP):** login/refresh 10/s · checkout 5/s ·
   beacon ingest 30/s · reads 30/s per route.
 - **Identity:** `Authorization: Bearer` (15m JWT) or session cookie for
-  guests (`x-session-id` on cart) — guest carts are allowed, guest
-  **checkout is not** (`orders.placed_by_user_id` is `NOT NULL`). Auth
-  marks: `–` public, `C` customer, `A` admin.
+  guests (`x-session-id` on cart). Guest carts **and guest checkout** are
+  allowed (orders carry `guest_email` + `guest_name`, file 06). Auth
+  marks: `–` public, `G` guest or customer, `C` customer, `A` admin
+  (staff role).
+- **Which deployment serves a route:** `C`, `G` and `–` routes are served by
+  the **storefront API** (`tuw-website`, `/api/*`); `A` routes are served by
+  the **admin API** (`tuw-admin`, `/api/*`). Both talk to the same Neon
+  database. Where one table below lists both, the storefront route is the
+  customer view and the admin route is the staff view. Detail:
+  `12-Two-App-Deploy.md`.
 
 ## Auth `/api/auth`
 
@@ -123,9 +130,11 @@ cannot merge twice.
 
 | Method | Path | Auth | Purpose |
 |---|---|---|---|
-| POST | `/checkout` | C + `Idempotency-Key` | full TX scope (file 06); copies `for_profile_id` **and** `for_household_id` from the cart — the composite FK then rejects a recipient who is not an active member of that household; the delivery address is the buyer's own (`addresses.profile_id = me`), and a per-line size override is stored on the order line only, never written to `profile_size_preferences`. 409 on stock, 422 on coupon. The key lands in `orders.idempotency_key` as well, so a retry after the 24h map expires still returns the same order |
+| POST | `/checkout` | G + `Idempotency-Key` | full TX scope (file 06). Guest body adds `{guestEmail, guestName, guestPhone?}` and skips the household fields; account checkout: copies `for_profile_id` **and** `for_household_id` from the cart — the composite FK then rejects a recipient who is not an active member of that household; the delivery address is the buyer's own (`addresses.profile_id = me`), and a per-line size override is stored on the order line only, never written to `profile_size_preferences`. 409 on stock, 422 on coupon. The key lands in `orders.idempotency_key` as well, so a retry after the 24h map expires still returns the same order |
 | GET | `/orders/:id` | C: placed-by or for-me / A | order + items + payments |
 | GET | `/me/orders` | C | cursor history (placed by me ∪ for me) |
+| POST | `/track` | – | guest track-order: `{orderNumber, email}` → status + shipment timeline (rate-limited; never reveals whether an email exists) |
+| POST | `/orders/:id/cancel` | G: placed-by or guest email match | allowed only while `status = 'pending'`; 409 otherwise |
 | GET | `/orders` | A | `?page=&status=&from=&to=&q=` |
 | PATCH | `/orders/:id/status` | A | status + history row |
 | POST | `/orders/:id/refund` | A | refund TX scope |
@@ -138,7 +147,7 @@ outcome, the reason is per line (file 06).
 
 | Method | Path | Auth | Purpose |
 |---|---|---|---|
-| POST | `/` | C: placed-by or for-me | `{orderId, type, items:[{orderItemId, qty, reasonCode, exchangeVariantId?}], note?}` → `returns` (`status='requested'`) + `return_items` + `return_status_history`, all one TX. 409 when `qty` would push `order_items.returned_qty` past `qty`; 422 when the exchange variant is missing for an exchange line |
+| POST | `/` | G: placed-by, for-me, or guest email match | Exchange rules (file 06): order must be `delivered`, within 7 days of delivery, exchange variant must belong to the same product — 409 otherwise. `{orderId, type, items:[{orderItemId, qty, reasonCode, exchangeVariantId?}], note?}` → `returns` (`status='requested'`) + `return_items` + `return_status_history`, all one TX. 409 when `qty` would push `order_items.returned_qty` past `qty`; 422 when the exchange variant is missing for an exchange line |
 | GET | `/me/returns` | C | my requests (as requester), with lines |
 | GET | `/:id` | C: requester or for-me / A | header + lines + timeline |
 | GET | `/` | A | `?status=&from=&to=&q=` — the admin board, same rows |

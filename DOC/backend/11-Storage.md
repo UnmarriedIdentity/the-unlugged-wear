@@ -10,7 +10,7 @@
 |---|---|---|---|
 | **Cloudflare R2** | 10 GB, 1M writes + 10M reads/mo | Free, unlimited | **Chosen** — S3-compatible, zero-egress caps the scary bill |
 | Vercel Blob | ~1 GB, then paid | $0.15/GB after 1 GB | Rejected — same R2 underneath at ~2× markup ($2/M reads vs $0.36/M) |
-| Supabase Storage | 1 GB + 5 GB egress | $0.09/GB after quota | Rejected — couples files to the DB host for zero benefit |
+| Supabase Storage | 1 GB + 5 GB egress | $0.09/GB after quota | Rejected — couples files to a DB host for zero benefit (the database is Neon) |
 | AWS S3 direct | 5 GB, 12 months only | $0.09/GB | Rejected — trial-shaped free tier, egress bills from day 366 |
 
 Revisit trigger: sustained egress/storage past free tier for 3 months, or

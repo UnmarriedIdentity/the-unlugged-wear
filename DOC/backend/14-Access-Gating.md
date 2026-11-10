@@ -1,59 +1,76 @@
-# Single-URL Gating — Middleware, Wrappers, Deny Behavior
+# Access Gating — Per-App Guards, Wrappers, Deny Behavior
 
-> Status: Filling | Last Updated: 2026-10-15
-> One domain serves both experiences; paths decide access, roles decide
-> identity. Route groups (`(admin)`/`(storefront)`) are URL-transparent —
-> the gate keys off **paths**, never groups. Role source: file 03 §5.
+> Status: Active | Last Updated: 2026-11-10
+> Replaces the single-URL gate. Each deployment gates its own routes; both
+> resolve roles from the same tables (`users → user_roles → roles.slug`,
+> file 03 §5). Topology: `12-Two-App-Deploy.md`.
 
-## Matcher map (`middleware.ts`)
+## Storefront (`tuw-website`)
 
 | Path pattern | Rule |
 |---|---|
-| `/dashboard/*`, `/api/admin/*` | `admin` role required |
-| `/api/cart`, `/api/order`, `/api/me/*` | session required (customer or guest-with-`x-session-id` where applicable) |
-| `/`, `/products/*`, `/collections/*`, `/journal/*`, public `/api/*` reads | public |
-| `/_next/*`, static assets, `/favicon.ico` | excluded from matcher (never gated, never session-touched) |
+| `/`, `/products/*`, `/collections/*`, `/journal/*`, `/faq`, public `/api/*` reads | public |
+| `/api/cart/*`, `/api/order/checkout`, `/api/order/track`, `/api/newsletter/*`, `/api/stock-alerts`, `/api/contact` | guest (signed `x-session-id` cookie) **or** customer |
+| `/account/*`, `/api/me/*`, `/api/household/*` | customer session required |
+| `/_next/*`, static assets, `/favicon.ico` | excluded from the matcher |
 
-## Role resolution (edge-light)
+Staff accounts may shop on the storefront like any customer; staff roles
+grant nothing extra here.
 
-Session cookie → `user_id` → role slugs via the file-03 gate queries,
-cached 5 minutes. Middleware never opens a pg connection: it reads the
-signed session payload + cache only. Staleness is bounded (15m access TTL
-+ 5m role cache), never manually invalidated — rotation and revocation
-propagate within those windows by construction.
+## Admin (`tuw-admin`)
+
+| Path pattern | Rule |
+|---|---|
+| `/login`, `/forgot-password`, `/reset-password`, `/accept-invite`, `/verify` | public |
+| every other page and every `/api/*` route | staff session with a role other than `customer` |
+| individual actions | permission slug (`withPermission('order.refund', …)`) |
+
+A customer-only account that signs in to the admin is refused.
+
+## Sessions
+
+Both apps use the same token design (file 03 §7): 15-minute access token,
+30-day rotating refresh token stored hashed in `refresh_tokens`. Each app
+sets its **own** cookie on its own domain — a storefront login does not
+log anyone into the admin, and vice versa. The signing secret may differ
+per app (recommended).
+
+## Role resolution
+
+Session → `user_id` → role slugs via the file-03 gate queries, cached for
+5 minutes. Middleware reads only the signed session payload + cache and
+never opens a database connection. Staleness is bounded (15m access TTL +
+5m role cache).
 
 ## Deny behavior (truthful, never masquerading)
 
-- Unauthenticated on gated paths → `/login?next=<original>` (post-login
-  return, no dead ends).
-- Authenticated non-admin on admin paths → storefront home + truthful
-  toast ("Admin access required") — never a fake 404.
+- Unauthenticated on a gated path → that app's `/login?next=<original>`.
+- Storefront: guest on `/account/*` → `/login`. Admin: authenticated
+  non-staff → admin login page with "Staff access required".
 - API denials use the envelope: `UNAUTHENTICATED` 401 / `FORBIDDEN` 403
   with `requestId` (file 13 codes).
 
-## `withRole` wrapper contract (handler decorator)
+## `withRole` / `withPermission` wrappers (handler decorators)
 
 ```ts
 withRole('admin', handler)          // slug gate
 withPermission('order.refund', h)   // fine-grained gate
+withGuestOrCustomer(handler)        // storefront: session cookie or user
 ```
 
-Resolves session → checks slug/permission → short-circuits 401/403 →
-injects `ctx.user` (id + roles). Handlers stay thin (file 01 §4):
-parse → `withRole` → service → shape. Guards never inline in handlers.
+Resolve session → check → short-circuit 401/403 → inject `ctx.user` (or
+`ctx.guestSessionId`). Guards never inline in handlers.
 
-## Guest path (no role, no admin)
+## Guest path (storefront only)
 
-`x-session-id` carts and guest checkout-adjacent reads bypass role checks
-but can never match an admin path (matcher runs first). Login merges
-guest state per the file-05 rule, then the session upgrades to customer.
+`x-session-id` carts, guest checkout and guest track-order bypass role
+checks. Guest access to an order is proven by order number + guest email,
+never by order id alone. On login the guest cart merges (file 05) and the
+session upgrades to customer.
 
 ## Operational notes
 
-- First admin is env-seeded (file 03 §4); middleware treats a missing
-  role set as non-admin (fail closed).
-- Every deny logs `{path, user_id?, reason}` at info level — the audit
-  trail for gate decisions (separate from `audit_logs`, which records
-  per-import stock summaries, not gate checks).
-- Load test target: gate overhead <2ms p99 (cache hit) — matcher runs
-  before any render or query.
+- First admin is env-seeded (file 03 §4); a missing role set is treated as
+  no access (fail closed).
+- Every deny logs `{app, path, user_id?, reason}` at info level.
+- Gate overhead target: <2ms p99 on a cache hit.

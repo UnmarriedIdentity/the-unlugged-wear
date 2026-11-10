@@ -12,6 +12,8 @@
 |---|---|---|---|
 | id | uuid | PK, UUIDv7 | Queue identity |
 | user_id | uuid | NULL, FK → users(id) ON DELETE SET NULL | Logged-in writer; nulls survive account deletion |
+| source | varchar(20) | NOT NULL DEFAULT 'account', CHECK IN ('contact_form','account','order','admin') | Where the thread started — the storefront contact form writes `contact_form` rows, so contact messages and support threads share one staff inbox |
+| order_id | uuid | NULL, FK → orders(id) ON DELETE SET NULL | The order a thread is about, when known |
 | guest_name | varchar(150) | NULL | Non-logged-in writers have no row to point at (one honest exception) |
 | guest_email | varchar(255) | NULL | Reply target for guests |
 | subject | varchar(255) | NOT NULL | Queue-scanning readability |

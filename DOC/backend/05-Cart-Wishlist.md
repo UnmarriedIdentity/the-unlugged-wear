@@ -75,13 +75,16 @@ checkout shows a household member selector, an **Edit member** affordance
 profile), and per-line size chips that affect **that order only**. Line
 edits never write `profile_size_preferences`; autofill only reads it.
 
-## Guest cart, never a guest order
+## Guest cart and guest checkout
 
 `carts.session_id` keeps anonymous browsing real: a visitor adds items and
-keeps them in a signed-cookie session cart. The gate is at **checkout**,
-not at add-to-cart — `orders.placed_by_user_id` is `NOT NULL`, so placing
-an order requires login. A guest hitting checkout is sent to `/login` with
-a return path, and the merge rule below runs on success. The ownership
+keeps them in a signed-cookie session cart. **Guests can also check out**
+(decided 2026-11-10): the order is written with `guest_email` +
+`guest_name` (+ optional `guest_phone`) instead of a user/profile/household,
+and the `orders_buyer_identity` CHECK makes "both or neither" impossible to
+break (file 06). Logging in during checkout is optional; when a guest does
+log in, the merge rule below runs and the order is placed as an account
+order instead. Guest orders are tracked with order number + email. The ownership
 CHECK (`user_id IS NOT NULL OR session_id IS NOT NULL`) makes an ownerless
 cart impossible, and the partial unique on active user carts makes the
 merge target unambiguous.

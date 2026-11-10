@@ -121,9 +121,14 @@ The blog slice is the final model, not a temporary v1:
   `customer`. The admin sidebar's personas (Owner/Operations/Content/
   Read-only) map onto them in `03-Auth-RBAC.md` §4 — they are labels, never
   role rows, and the invented `manager` slug is retired.
-- **Guest cart, never guest order.** `carts.session_id` stays (anonymous
-  add-to-cart is real), but `orders.placed_by_user_id` is `NOT NULL`: the
-  login gate sits at checkout. See `05-Cart-Wishlist.md`.
+- **Guest cart and guest checkout** (revised 2026-11-10). `carts.session_id`
+  stays, and guests can place orders: `orders.guest_email` + `guest_name`
+  replace the account columns, enforced by the `orders_buyer_identity`
+  CHECK. See `05-Cart-Wishlist.md` and `06-Orders-Payments.md`.
+- **No store credit** (2026-11-10). Refunds go to the original payment
+  source only; `store_credit` is removed from `refunds.method` and
+  `returns.resolution`. Gift cards (file 22) are a separate, purchased
+  product, not a refund outcome.
 - **`media.usage` is the only category vocabulary.** The admin library's
   chips map onto it (`photoshoot` → `section`, `brand` → `section`,
   `banner` → `section`, `design` → `design`); there is no parallel
@@ -140,9 +145,9 @@ The blog slice is the final model, not a temporary v1:
 
 | Status | Tables | Where |
 |---|---:|---|
-| Implemented DDL | 89 | all 13 files, `001`–`014` minus `008` |
+| Implemented DDL | 94 | all 14 files, `001`–`014` (`008` added 2026-11-10) |
 | Specified, migration pending | 0 | — |
-| Planned total | 89 | |
+| Planned total | 94 | |
 
 `009-partner.sql` forward-references `orders` and now applies cleanly
 because `004-orders.sql` precedes it in the apply order. No file is
