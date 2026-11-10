@@ -18,13 +18,13 @@ import { useStore } from '@storefront/mocks/store';
 import { useSession } from '@storefront/lib/session';
 import { useAccount } from '@storefront/lib/account';
 import AccountProfileSection from '@storefront/components/commerce/AccountProfileSection';
-import { STORE_PRODUCTS } from '@storefront/mocks/fixtures';
 import { formatPaise, formatShortDate } from '@storefront/lib/format';
 import { downloadInvoicePdf } from '@storefront/lib/invoice';
 import { useSiteSettings } from '@storefront/lib/site-settings';
 import type {
   Address,
   CartItem,
+  Product,
   FulfillmentStatus,
   Order,
   PaymentStatus,
@@ -138,8 +138,8 @@ function orderPaise(order: Order) {
 }
 
 // Catalogue photo for an order line; falls back to the image saved on the order.
-function itemImage(item: CartItem) {
-  const product = STORE_PRODUCTS.find((p) => p.id === item.productId);
+function itemImage(item: CartItem, products: Product[]) {
+  const product = products.find((p) => p.id === item.productId);
   const photo =
     product?.images.find((img) => img.color === item.color)?.url ?? product?.images[0]?.url;
   return photo || item.image;
@@ -222,6 +222,7 @@ export default function AccountPage() {
     resetStoreData,
     addToCart,
     wishlist,
+    products,
   } = useStore();
   const router = useRouter();
   // AccountGate only renders this page once a demo session exists.
@@ -532,7 +533,7 @@ export default function AccountPage() {
                               <span className="flex -space-x-3 shrink-0" aria-hidden="true">
                                 {order.items.slice(0, 2).map((item) => (
                                   <span key={item.id} className="block w-12 h-16 overflow-hidden bg-store-cream border-2 border-store-surface">
-                                    <ImageWithFallback src={itemImage(item)} alt="" fallbackText="" className="w-full h-full object-cover" />
+                                    <ImageWithFallback src={itemImage(item, products)} alt="" fallbackText="" className="w-full h-full object-cover" />
                                   </span>
                                 ))}
                               </span>
@@ -562,7 +563,7 @@ export default function AccountPage() {
                                 {order.items.map((item) => (
                                   <li key={item.id} className="py-4 flex gap-4">
                                     <div className="w-16 h-20 overflow-hidden bg-store-cream shrink-0">
-                                      <ImageWithFallback src={itemImage(item)} alt={item.title} fallbackText="" className="w-full h-full object-cover" />
+                                      <ImageWithFallback src={itemImage(item, products)} alt={item.title} fallbackText="" className="w-full h-full object-cover" />
                                     </div>
                                     <div className="flex-1 flex justify-between gap-4">
                                       <div>

@@ -6,7 +6,7 @@ import Badge from '@storefront/components/ui/Badge';
 import { useStore } from '@storefront/mocks/store';
 import { formatINR } from '@storefront/lib/format';
 import { cn } from '@storefront/lib/cn';
-import { STORE_PRODUCTS } from '@storefront/mocks/fixtures';
+import type { Product } from '@storefront/lib/types';
 
 export type FittingAudience = 'men' | 'women' | 'kids';
 
@@ -51,9 +51,9 @@ const LOOK_PHOTOS: Record<FittingAudience, string[]> = {
 };
 
 // Clothing for this audience, hand-written catalogue pieces first.
-function buildFittingSet(audience: FittingAudience): FittingSet {
+function buildFittingSet(audience: FittingAudience, products: Product[]): FittingSet {
   const photos = LOOK_PHOTOS[audience];
-  const looks: FittingLook[] = STORE_PRODUCTS.filter(
+  const looks: FittingLook[] = products.filter(
     (p) => Boolean(p.audience?.includes(audience)) && p.category !== 'accessories' && p.category !== 'mugs'
   )
     .slice(0, photos.length)
@@ -67,19 +67,21 @@ function buildFittingSet(audience: FittingAudience): FittingSet {
   return { base: { ...(looks[0] ?? { id: '', title: '', cat: '', priceINR: 0, image: '' }), badge: 'Sample photos' }, cards: looks };
 }
 
-const FITTING_SETS: Record<FittingAudience, FittingSet> = {
-  men: buildFittingSet('men'),
-  women: buildFittingSet('women'),
-  kids: buildFittingSet('kids'),
-};
-
-// Only offer tabs that have at least one photographed piece.
-const AUDIENCE_ORDER = (['men', 'women', 'kids'] as FittingAudience[]).filter(
-  (key) => FITTING_SETS[key].cards.length > 0
-);
+// Built from the live catalogue (database) inside the component.
+const fittingSets = (products: Product[]): Record<FittingAudience, FittingSet> => ({
+  men: buildFittingSet('men', products),
+  women: buildFittingSet('women', products),
+  kids: buildFittingSet('kids', products),
+});
 
 export default function VirtualFittingRoom() {
-  const { isInWishlist, toggleWishlist } = useStore();
+  const { isInWishlist, toggleWishlist, products } = useStore();
+  const FITTING_SETS = React.useMemo(() => fittingSets(products), [products]);
+  // Only offer tabs that have at least one photographed piece.
+  const AUDIENCE_ORDER = React.useMemo(
+    () => (['men', 'women', 'kids'] as FittingAudience[]).filter((key) => FITTING_SETS[key].cards.length > 0),
+    [FITTING_SETS]
+  );
   const [audience, setAudience] = useState<FittingAudience>('men');
   const [current, setCurrent] = useState(-1);
   const [liveMsg, setLiveMsg] = useState('Men base look.');

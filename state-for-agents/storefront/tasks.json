@@ -2255,14 +2255,14 @@
       "id": "TL-WEB-BE-08",
       "title": "/shop on the DB (filters + sort from searchParams in Suspense)",
       "category": "backend",
-      "status": "backlog",
+      "status": "in_progress",
       "owner": "unassigned",
       "parent": "TL-WEB-BE",
-      "started": null,
+      "started": "2026-11-11",
       "finished": null,
       "verified": false,
       "design_match": null,
-      "pushed": false,
+      "pushed": true,
       "admin_ref": "TL-BE-05.07",
       "depends_on": [
         "TL-BE-05"
@@ -2272,20 +2272,21 @@
       ],
       "description": "Shell = chrome; grid is the hole.",
       "key_decisions": [],
-      "follow_ups": []
+      "follow_ups": [],
+      "log": "Shop lists DB products (155) through the store provider; filters/sort unchanged. Remaining: Server Component grid + searchParams in Suspense."
     },
     {
       "id": "TL-WEB-BE-09",
       "title": "/collections and /collections/[slug] on the DB",
       "category": "backend",
-      "status": "backlog",
+      "status": "in_progress",
       "owner": "unassigned",
       "parent": "TL-WEB-BE",
-      "started": null,
+      "started": "2026-11-11",
       "finished": null,
       "verified": false,
       "design_match": null,
-      "pushed": false,
+      "pushed": true,
       "admin_ref": "TL-BE-05.07",
       "depends_on": [
         "TL-BE-05"
@@ -2296,20 +2297,21 @@
       ],
       "description": "'use cache' + cacheTag('collection:<id>'); generateStaticParams ≥ 1.",
       "key_decisions": [],
-      "follow_ups": []
+      "follow_ups": [],
+      "log": "Collections and collection pages read DB collections (membership + order from collection_products); static params + 404 from the DB. Remaining: Server Components with cacheTag per collection."
     },
     {
       "id": "TL-WEB-BE-10",
       "title": "/products/[slug] PDP on the DB (cached body, live stock hole, FAQs, size chart)",
       "category": "backend",
-      "status": "backlog",
+      "status": "in_progress",
       "owner": "unassigned",
       "parent": "TL-WEB-BE",
-      "started": null,
+      "started": "2026-11-11",
       "finished": null,
       "verified": false,
       "design_match": null,
-      "pushed": false,
+      "pushed": true,
       "admin_ref": "TL-BE-05.07",
       "depends_on": [
         "TL-BE-05"
@@ -2319,7 +2321,8 @@
       ],
       "description": "Follows the pdp-flow and cache-components skills; unknown slug → notFound().",
       "key_decisions": [],
-      "follow_ups": []
+      "follow_ups": [],
+      "log": "PDP from the DB: old slugs resolve via slug_aliases, unknown slug → 404, price tiers ('From' headline, chosen-size price in the bag). Remaining: cached Server Component body + live stock hole."
     },
     {
       "id": "TL-WEB-BE-11",
@@ -2395,14 +2398,14 @@
       "id": "TL-WEB-BE-14",
       "title": "Retire catalog.generated.ts and the generate-catalog script once products come from the DB",
       "category": "backend",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-WEB-BE",
-      "started": null,
-      "finished": null,
-      "verified": false,
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "verified": true,
       "design_match": null,
-      "pushed": false,
+      "pushed": true,
       "admin_ref": "TL-BE-05.04",
       "depends_on": [
         "TL-BE-05"
@@ -2414,7 +2417,8 @@
       ],
       "description": "The listing JSON becomes import input for the admin import job (keep the file, drop the generated TS).",
       "key_decisions": [],
-      "follow_ups": []
+      "follow_ups": [],
+      "log": "catalog.generated.ts and scripts/generate-catalog.mjs deleted; data/qikink-listing.json kept as import input (pnpm db:seed-catalog). tests/catalog.test.mjs now guards that nothing imports a static catalogue and no partner cost reaches source."
     },
     {
       "id": "TL-WEB-BE-15",

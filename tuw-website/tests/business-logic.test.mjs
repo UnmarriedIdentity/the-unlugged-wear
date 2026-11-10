@@ -163,8 +163,10 @@ describe('Deterministic local fonts (Windows == macOS)', () => {
   });
 
   test('all product slugs are concise, clean, and bounded (<= 45 characters)', () => {
-    const fixturesContent = readFileSync(join(repoRoot, 'src/storefront/mocks/fixtures.ts'), 'utf8');
-    const slugMatches = [...fixturesContent.matchAll(/slug:\s*['"]([^'"]+)['"]/g)].map((m) => m[1]);
+    // Curated products + collections are seed data now (db/seed/catalog, TL-BE-05).
+    const seed = (f) => JSON.parse(readFileSync(join(repoRoot, '../db/seed/catalog', f), 'utf8'));
+    const slugMatches = [...seed('curated-products.json'), ...seed('collections.json')].map((x) => x.slug);
+    const fixturesContent = slugMatches.map((slug) => `slug: "${slug}"`).join('\n');
     assert.ok(slugMatches.length >= 14, 'expected at least 14 product/collection slugs');
 
     for (const slug of slugMatches) {
@@ -177,7 +179,7 @@ describe('Deterministic local fonts (Windows == macOS)', () => {
 
     // Catalog follows the Qikink listing; pre-Qikink slugs stay reachable as aliases.
     assert.ok(fixturesContent.includes('slug: "acid-wash-hoodie"'));
-    assert.ok(fixturesContent.includes('aliases: ["architectural-zip-hoodie"]'));
+    assert.ok(seed('curated-products.json').some((p) => p.aliases?.includes('architectural-zip-hoodie')));
   });
   test('ProductCard and FilterBar conform to Figma Shop All v4 specs and zero admin purple', () => {
     const cardContent = readFileSync(join(repoRoot, 'src/storefront/components/commerce/ProductCard.tsx'), 'utf8');

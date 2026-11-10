@@ -12,6 +12,7 @@ import VariantPillSelector from './VariantPillSelector';
 import RadioOptionSelector from './RadioOptionSelector';
 import { useSiteSettings, rupeesLabel } from '@storefront/lib/site-settings';
 import {
+  sizePriceINR,
   RETURN_WINDOW_DAYS,
   isWearable,
   productTypeOf,
@@ -82,7 +83,8 @@ export default function VariantSelector({
     return acc + (option?.priceDeltaINR || 0);
   }, 0);
 
-  const effectiveUnitPriceINR = product.priceINR + radioDeltaINR;
+  // Price tiers: the chosen size's own price (see lib/product sizePriceINR).
+  const effectiveUnitPriceINR = sizePriceINR(product, selectedSize?.size) + radioDeltaINR;
 
   const handleColorSelect = (color: ProductColor) => {
     if (onColorChange) {
@@ -146,7 +148,7 @@ export default function VariantSelector({
       color: selectedColor ? selectedColor.name : 'Standard',
       size: selectedSize ? selectedSize.size : 'One Size',
       priceINR: effectiveUnitPriceINR,
-      priceMinorINR: effectiveUnitPriceINR * 100,
+      priceMinorINR: Math.round(effectiveUnitPriceINR * 100),
       quantity,
       image: activeImage,
       selectedRadioOptions: chosenRadioOptions.length > 0 ? chosenRadioOptions : undefined,

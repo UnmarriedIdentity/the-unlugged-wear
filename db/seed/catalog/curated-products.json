@@ -1,0 +1,2327 @@
+[
+ {
+  "id": "prod-1",
+  "slug": "everyday-pullover-hoodie",
+  "aliases": [
+   "monolith-heavyweight-hoodie-vintage-black"
+  ],
+  "specTable": {
+   "title": "Product Specifications",
+   "description": "Taken from our print partner's base-product sheet. Final size chart to follow.",
+   "columns": [
+    {
+     "key": "spec",
+     "label": "Specification",
+     "align": "left"
+    },
+    {
+     "key": "value",
+     "label": "Detail",
+     "align": "left"
+    }
+   ],
+   "rows": [
+    {
+     "spec": "Product",
+     "value": "Pullover hoodie"
+    },
+    {
+     "spec": "Sizes",
+     "value": "XS–3XL"
+    },
+    {
+     "spec": "Colours offered",
+     "value": "4"
+    },
+    {
+     "spec": "Approximate weight",
+     "value": "640 g (size M)"
+    },
+    {
+     "spec": "Print areas",
+     "value": "front, back, left chest, right chest, left sleeve, right sleeve"
+    },
+    {
+     "spec": "Made",
+     "value": "Printed after you order by our print partner in Tiruppur, India"
+    },
+    {
+     "spec": "Fabric composition",
+     "value": "To be confirmed (draft)"
+    }
+   ]
+  },
+  "faqs": [
+   {
+    "id": "faq-1",
+    "question": "How does the sizing run?",
+    "answer": "A detailed size chart from our print partner is on its way. Until then, the size guide page gives general guidance; if you are between sizes, choose the larger one for a relaxed fit."
+   },
+   {
+    "id": "faq-2",
+    "question": "How should I wash it?",
+    "answer": "Wash cold and inside out, skip the bleach, avoid ironing directly on the print, and line dry in shade. This keeps the print sharp for longer."
+   },
+   {
+    "id": "faq-3",
+    "question": "What does print-on-demand mean for my order?",
+    "answer": "Nothing is printed until you order it. Our print partner in Tiruppur prints and dispatches your piece, so there is no unsold stock sitting in a warehouse."
+   },
+   {
+    "id": "faq-4",
+    "question": "Can I return or exchange it?",
+    "answer": "Please see our Returns & Exchanges policy for the current terms. The policy is still being finalised and is marked as a draft."
+   }
+  ],
+  "title": "Everyday Pullover Hoodie",
+  "subtitle": "Unisex · XS–3XL · 4 colours",
+  "category": "hoodies",
+  "audience": [
+   "men",
+   "women"
+  ],
+  "priceINR": 3899,
+  "priceMinorINR": 389900,
+  "publicationStatus": "published",
+  "partnerProvider": "Qikink Direct API",
+  "partnerStyleCode": "UH83",
+  "partnerAvailability": "ready_to_print",
+  "images": [
+   {
+    "url": "/images/lifestyle/linen-man.jpg",
+    "alt": "Placeholder model photo for the Everyday Pullover Hoodie",
+    "color": "black"
+   }
+  ],
+  "colors": [
+   {
+    "name": "Black",
+    "hex": "#141414",
+    "value": "black"
+   },
+   {
+    "name": "Navy Blue",
+    "hex": "#1F2A44",
+    "value": "navy-blue"
+   },
+   {
+    "name": "Off White",
+    "hex": "#F3EFE6",
+    "value": "off-white"
+   },
+   {
+    "name": "White",
+    "hex": "#FFFFFF",
+    "value": "white"
+   }
+  ],
+  "sizes": [
+   {
+    "size": "XS",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "S",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "M",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "L",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "XL",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "XXL",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "3XL",
+    "inStock": true,
+    "stockCount": 100
+   }
+  ],
+  "description": "A relaxed unisex pullover hoodie for everyday wear, printed with The Unplugged Wear leaping-deer mark. Each piece is printed only after you order it, so nothing sits unsold in a warehouse.",
+  "details": [
+   "Sizes: XS–3XL",
+   "Printed to order — print areas available: front, back, left chest, right chest, left sleeve, right sleeve",
+   "Approximate garment weight: 640 g"
+  ],
+  "careInstructions": [
+   "Machine wash cold, inside out",
+   "Do not bleach",
+   "Do not iron directly on the print",
+   "Line dry in shade"
+  ],
+  "composition": "Fabric composition to be confirmed with our print partner (draft)",
+  "sustainabilityBadge": "Printed to order",
+  "isNew": true
+ },
+ {
+  "id": "prod-2",
+  "slug": "oversized-classic-tee",
+  "aliases": [
+   "atelier-raw-edge-relaxed-tee"
+  ],
+  "specTable": {
+   "title": "Product Specifications",
+   "description": "Taken from our print partner's base-product sheet. Final size chart to follow.",
+   "columns": [
+    {
+     "key": "spec",
+     "label": "Specification",
+     "align": "left"
+    },
+    {
+     "key": "value",
+     "label": "Detail",
+     "align": "left"
+    }
+   ],
+   "rows": [
+    {
+     "spec": "Product",
+     "value": "Oversized t-shirt"
+    },
+    {
+     "spec": "Sizes",
+     "value": "XS–XXL"
+    },
+    {
+     "spec": "Colours offered",
+     "value": "8"
+    },
+    {
+     "spec": "Approximate weight",
+     "value": "330 g (size M)"
+    },
+    {
+     "spec": "Print areas",
+     "value": "front, back, left chest, right chest, left sleeve, right sleeve"
+    },
+    {
+     "spec": "Made",
+     "value": "Printed after you order by our print partner in Tiruppur, India"
+    },
+    {
+     "spec": "Fabric composition",
+     "value": "To be confirmed (draft)"
+    }
+   ]
+  },
+  "faqs": [
+   {
+    "id": "faq-1",
+    "question": "How does the sizing run?",
+    "answer": "A detailed size chart from our print partner is on its way. Until then, the size guide page gives general guidance; if you are between sizes, choose the larger one for a relaxed fit."
+   },
+   {
+    "id": "faq-2",
+    "question": "How should I wash it?",
+    "answer": "Wash cold and inside out, skip the bleach, avoid ironing directly on the print, and line dry in shade. This keeps the print sharp for longer."
+   },
+   {
+    "id": "faq-3",
+    "question": "What does print-on-demand mean for my order?",
+    "answer": "Nothing is printed until you order it. Our print partner in Tiruppur prints and dispatches your piece, so there is no unsold stock sitting in a warehouse."
+   },
+   {
+    "id": "faq-4",
+    "question": "Can I return or exchange it?",
+    "answer": "Please see our Returns & Exchanges policy for the current terms. The policy is still being finalised and is marked as a draft."
+   }
+  ],
+  "title": "Oversized Classic Tee",
+  "subtitle": "Unisex · XS–XXL · 8 colours",
+  "category": "tees",
+  "audience": [
+   "men",
+   "women"
+  ],
+  "priceINR": 2199,
+  "priceMinorINR": 219900,
+  "publicationStatus": "published",
+  "partnerProvider": "Qikink Direct API",
+  "partnerStyleCode": "UC22",
+  "partnerAvailability": "ready_to_print",
+  "images": [
+   {
+    "url": "/images/about/street-polo.jpg",
+    "alt": "Placeholder model photo for the Oversized Classic Tee",
+    "color": "black"
+   },
+   {
+    "url": "/images/pdp-figma/shirt/front.png",
+    "alt": "Oversized Classic Tee in Black, front",
+    "color": "black",
+    "label": "01 · FRONT"
+   },
+   {
+    "url": "/images/pdp-figma/shirt/side.png",
+    "alt": "Oversized Classic Tee in Black, side",
+    "color": "black",
+    "label": "02 · SIDE"
+   },
+   {
+    "url": "/images/pdp-figma/shirt/back.png",
+    "alt": "Oversized Classic Tee in Black, back",
+    "color": "black",
+    "label": "03 · BACK"
+   },
+   {
+    "url": "/images/pdp-figma/shirt/collar.png",
+    "alt": "Oversized Classic Tee collar detail",
+    "color": "black",
+    "label": "04 · COLLAR"
+   },
+   {
+    "url": "/images/pdp-figma/shirt/hem.png",
+    "alt": "Oversized Classic Tee hem detail",
+    "color": "black",
+    "label": "05 · HEM"
+   }
+  ],
+  "colors": [
+   {
+    "name": "Black",
+    "hex": "#141414",
+    "value": "black"
+   },
+   {
+    "name": "White",
+    "hex": "#FFFFFF",
+    "value": "white"
+   },
+   {
+    "name": "Off White",
+    "hex": "#F3EFE6",
+    "value": "off-white"
+   },
+   {
+    "name": "Grey Melange",
+    "hex": "#A7A9AC",
+    "value": "grey-melange"
+   },
+   {
+    "name": "Navy Blue",
+    "hex": "#1F2A44",
+    "value": "navy-blue"
+   },
+   {
+    "name": "Bottle Green",
+    "hex": "#1F4D3A",
+    "value": "bottle-green"
+   },
+   {
+    "name": "Maroon",
+    "hex": "#6E1E2A",
+    "value": "maroon"
+   },
+   {
+    "name": "Lavender",
+    "hex": "#B9A7D6",
+    "value": "lavender"
+   }
+  ],
+  "sizes": [
+   {
+    "size": "XS",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "S",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "M",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "L",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "XL",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "XXL",
+    "inStock": true,
+    "stockCount": 100
+   }
+  ],
+  "description": "A dropped-shoulder oversized tee with a clean crew neck, printed with our leaping-deer mark. Made to order, available in 19 colours from our print partner; eight are shown here.",
+  "details": [
+   "Sizes: XS–XXL",
+   "Printed to order — print areas available: front, back, left chest, right chest, left sleeve, right sleeve",
+   "Approximate garment weight: 330 g"
+  ],
+  "careInstructions": [
+   "Machine wash cold, inside out",
+   "Do not bleach",
+   "Do not iron directly on the print",
+   "Line dry in shade"
+  ],
+  "composition": "Fabric composition to be confirmed with our print partner (draft)",
+  "sustainabilityBadge": "Printed to order",
+  "isNew": true
+ },
+ {
+  "id": "prod-3",
+  "slug": "everyday-joggers",
+  "aliases": [
+   "solitude-wide-leg-canvas-trousers"
+  ],
+  "specTable": {
+   "title": "Product Specifications",
+   "description": "Taken from our print partner's base-product sheet. Final size chart to follow.",
+   "columns": [
+    {
+     "key": "spec",
+     "label": "Specification",
+     "align": "left"
+    },
+    {
+     "key": "value",
+     "label": "Detail",
+     "align": "left"
+    }
+   ],
+   "rows": [
+    {
+     "spec": "Product",
+     "value": "Joggers"
+    },
+    {
+     "spec": "Sizes",
+     "value": "S–XXL"
+    },
+    {
+     "spec": "Colours offered",
+     "value": "7"
+    },
+    {
+     "spec": "Approximate weight",
+     "value": "490 g (size M)"
+    },
+    {
+     "spec": "Print areas",
+     "value": "left chest, right chest, left sleeve, right sleeve"
+    },
+    {
+     "spec": "Made",
+     "value": "Printed after you order by our print partner in Tiruppur, India"
+    },
+    {
+     "spec": "Fabric composition",
+     "value": "To be confirmed (draft)"
+    }
+   ]
+  },
+  "faqs": [
+   {
+    "id": "faq-1",
+    "question": "How does the sizing run?",
+    "answer": "A detailed size chart from our print partner is on its way. Until then, the size guide page gives general guidance; if you are between sizes, choose the larger one for a relaxed fit."
+   },
+   {
+    "id": "faq-2",
+    "question": "How should I wash it?",
+    "answer": "Wash cold and inside out, skip the bleach, avoid ironing directly on the print, and line dry in shade. This keeps the print sharp for longer."
+   },
+   {
+    "id": "faq-3",
+    "question": "What does print-on-demand mean for my order?",
+    "answer": "Nothing is printed until you order it. Our print partner in Tiruppur prints and dispatches your piece, so there is no unsold stock sitting in a warehouse."
+   },
+   {
+    "id": "faq-4",
+    "question": "Can I return or exchange it?",
+    "answer": "Please see our Returns & Exchanges policy for the current terms. The policy is still being finalised and is marked as a draft."
+   }
+  ],
+  "title": "Everyday Joggers",
+  "subtitle": "Unisex · S–XXL · 7 colours",
+  "category": "pants",
+  "audience": [
+   "men",
+   "women"
+  ],
+  "priceINR": 2999,
+  "priceMinorINR": 299900,
+  "publicationStatus": "published",
+  "partnerProvider": "Qikink Direct API",
+  "partnerStyleCode": "UJ29",
+  "partnerAvailability": "ready_to_print",
+  "images": [
+   {
+    "url": "/images/about/cream-polo.jpg",
+    "alt": "Placeholder model photo for the Everyday Joggers",
+    "color": "black"
+   }
+  ],
+  "colors": [
+   {
+    "name": "Black",
+    "hex": "#141414",
+    "value": "black"
+   },
+   {
+    "name": "Navy Blue",
+    "hex": "#1F2A44",
+    "value": "navy-blue"
+   },
+   {
+    "name": "Grey Melange",
+    "hex": "#A7A9AC",
+    "value": "grey-melange"
+   },
+   {
+    "name": "Bottle Green",
+    "hex": "#1F4D3A",
+    "value": "bottle-green"
+   },
+   {
+    "name": "Maroon",
+    "hex": "#6E1E2A",
+    "value": "maroon"
+   },
+   {
+    "name": "Lavender",
+    "hex": "#B9A7D6",
+    "value": "lavender"
+   },
+   {
+    "name": "Light Baby Pink",
+    "hex": "#F4C7D0",
+    "value": "light-baby-pink"
+   }
+  ],
+  "sizes": [
+   {
+    "size": "S",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "M",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "L",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "XL",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "XXL",
+    "inStock": true,
+    "stockCount": 100
+   }
+  ],
+  "description": "Unisex joggers to pair with our hoodies and sweatshirts, finished with a small leaping-deer print. Printed to order.",
+  "details": [
+   "Sizes: S–XXL",
+   "Printed to order — print areas available: left chest, right chest, left sleeve, right sleeve",
+   "Approximate garment weight: 490 g"
+  ],
+  "careInstructions": [
+   "Machine wash cold, inside out",
+   "Do not bleach",
+   "Do not iron directly on the print",
+   "Line dry in shade"
+  ],
+  "composition": "Fabric composition to be confirmed with our print partner (draft)",
+  "sustainabilityBadge": "Printed to order",
+  "isNew": true
+ },
+ {
+  "id": "prod-4",
+  "slug": "oversized-sweatshirt",
+  "aliases": [
+   "unplugged-oversized-crewneck-slate"
+  ],
+  "specTable": {
+   "title": "Product Specifications",
+   "description": "Taken from our print partner's base-product sheet. Final size chart to follow.",
+   "columns": [
+    {
+     "key": "spec",
+     "label": "Specification",
+     "align": "left"
+    },
+    {
+     "key": "value",
+     "label": "Detail",
+     "align": "left"
+    }
+   ],
+   "rows": [
+    {
+     "spec": "Product",
+     "value": "Oversized sweatshirt"
+    },
+    {
+     "spec": "Sizes",
+     "value": "S–3XL"
+    },
+    {
+     "spec": "Colours offered",
+     "value": "7"
+    },
+    {
+     "spec": "Approximate weight",
+     "value": "810 g (size M)"
+    },
+    {
+     "spec": "Print areas",
+     "value": "front, back, left chest, right chest"
+    },
+    {
+     "spec": "Made",
+     "value": "Printed after you order by our print partner in Tiruppur, India"
+    },
+    {
+     "spec": "Fabric composition",
+     "value": "To be confirmed (draft)"
+    }
+   ]
+  },
+  "faqs": [
+   {
+    "id": "faq-1",
+    "question": "How does the sizing run?",
+    "answer": "A detailed size chart from our print partner is on its way. Until then, the size guide page gives general guidance; if you are between sizes, choose the larger one for a relaxed fit."
+   },
+   {
+    "id": "faq-2",
+    "question": "How should I wash it?",
+    "answer": "Wash cold and inside out, skip the bleach, avoid ironing directly on the print, and line dry in shade. This keeps the print sharp for longer."
+   },
+   {
+    "id": "faq-3",
+    "question": "What does print-on-demand mean for my order?",
+    "answer": "Nothing is printed until you order it. Our print partner in Tiruppur prints and dispatches your piece, so there is no unsold stock sitting in a warehouse."
+   },
+   {
+    "id": "faq-4",
+    "question": "Can I return or exchange it?",
+    "answer": "Please see our Returns & Exchanges policy for the current terms. The policy is still being finalised and is marked as a draft."
+   }
+  ],
+  "title": "Oversized Sweatshirt",
+  "subtitle": "Unisex · S–3XL · 7 colours",
+  "category": "hoodies",
+  "audience": [
+   "men",
+   "women"
+  ],
+  "priceINR": 3499,
+  "priceMinorINR": 349900,
+  "publicationStatus": "published",
+  "partnerProvider": "Qikink Direct API",
+  "partnerStyleCode": "UH35",
+  "partnerAvailability": "ready_to_print",
+  "images": [
+   {
+    "url": "/images/about/street-polo.jpg",
+    "alt": "Placeholder model photo for the Oversized Sweatshirt",
+    "color": "maroon"
+   }
+  ],
+  "colors": [
+   {
+    "name": "Maroon",
+    "hex": "#6E1E2A",
+    "value": "maroon"
+   },
+   {
+    "name": "Black",
+    "hex": "#141414",
+    "value": "black"
+   },
+   {
+    "name": "White",
+    "hex": "#FFFFFF",
+    "value": "white"
+   },
+   {
+    "name": "Navy Blue",
+    "hex": "#1F2A44",
+    "value": "navy-blue"
+   },
+   {
+    "name": "Bottle Green",
+    "hex": "#1F4D3A",
+    "value": "bottle-green"
+   },
+   {
+    "name": "Lavender",
+    "hex": "#B9A7D6",
+    "value": "lavender"
+   },
+   {
+    "name": "Light Baby Pink",
+    "hex": "#F4C7D0",
+    "value": "light-baby-pink"
+   }
+  ],
+  "sizes": [
+   {
+    "size": "S",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "M",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "L",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "XL",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "XXL",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "3XL",
+    "inStock": true,
+    "stockCount": 100
+   }
+  ],
+  "description": "A roomy unisex crewneck sweatshirt with dropped shoulders, printed with our leaping-deer mark after you order.",
+  "details": [
+   "Sizes: S–3XL",
+   "Printed to order — print areas available: front, back, left chest, right chest",
+   "Approximate garment weight: 810 g"
+  ],
+  "careInstructions": [
+   "Machine wash cold, inside out",
+   "Do not bleach",
+   "Do not iron directly on the print",
+   "Line dry in shade"
+  ],
+  "composition": "Fabric composition to be confirmed with our print partner (draft)",
+  "sustainabilityBadge": "Printed to order",
+  "isNew": true
+ },
+ {
+  "id": "prod-5",
+  "slug": "zip-tote-bag",
+  "aliases": [
+   "heavy-canvas-utility-carryall-tote"
+  ],
+  "specTable": {
+   "title": "Product Specifications",
+   "description": "Taken from our print partner's base-product sheet. Final size chart to follow.",
+   "columns": [
+    {
+     "key": "spec",
+     "label": "Specification",
+     "align": "left"
+    },
+    {
+     "key": "value",
+     "label": "Detail",
+     "align": "left"
+    }
+   ],
+   "rows": [
+    {
+     "spec": "Product",
+     "value": "Zip tote bag"
+    },
+    {
+     "spec": "Sizes",
+     "value": "One Size"
+    },
+    {
+     "spec": "Colours offered",
+     "value": "7"
+    },
+    {
+     "spec": "Approximate weight",
+     "value": "150 g (approx. weight)"
+    },
+    {
+     "spec": "Print areas",
+     "value": "front, back"
+    },
+    {
+     "spec": "Made",
+     "value": "Printed after you order by our print partner in Tiruppur, India"
+    },
+    {
+     "spec": "Fabric composition",
+     "value": "To be confirmed (draft)"
+    }
+   ]
+  },
+  "faqs": [
+   {
+    "id": "faq-1",
+    "question": "How does the sizing run?",
+    "answer": "A detailed size chart from our print partner is on its way. Until then, the size guide page gives general guidance; if you are between sizes, choose the larger one for a relaxed fit."
+   },
+   {
+    "id": "faq-2",
+    "question": "How should I wash it?",
+    "answer": "Wash cold and inside out, skip the bleach, avoid ironing directly on the print, and line dry in shade. This keeps the print sharp for longer."
+   },
+   {
+    "id": "faq-3",
+    "question": "What does print-on-demand mean for my order?",
+    "answer": "Nothing is printed until you order it. Our print partner in Tiruppur prints and dispatches your piece, so there is no unsold stock sitting in a warehouse."
+   },
+   {
+    "id": "faq-4",
+    "question": "Can I return or exchange it?",
+    "answer": "Please see our Returns & Exchanges policy for the current terms. The policy is still being finalised and is marked as a draft."
+   }
+  ],
+  "title": "Zip Tote Bag",
+  "subtitle": "One Size · 7 colours",
+  "category": "accessories",
+  "priceINR": 999,
+  "priceMinorINR": 99900,
+  "publicationStatus": "published",
+  "partnerProvider": "Qikink Direct API",
+  "partnerStyleCode": "TOTE-ZIP",
+  "partnerAvailability": "ready_to_print",
+  "images": [
+   {
+    "url": "/images/about/cream-polo.jpg",
+    "alt": "Placeholder model photo for the Zip Tote Bag",
+    "color": "black"
+   }
+  ],
+  "colors": [
+   {
+    "name": "Black",
+    "hex": "#141414",
+    "value": "black"
+   },
+   {
+    "name": "Khaki",
+    "hex": "#B9A77E",
+    "value": "khaki"
+   },
+   {
+    "name": "Navy Blue",
+    "hex": "#1F2A44",
+    "value": "navy-blue"
+   },
+   {
+    "name": "Bottle Green",
+    "hex": "#1F4D3A",
+    "value": "bottle-green"
+   },
+   {
+    "name": "Maroon",
+    "hex": "#6E1E2A",
+    "value": "maroon"
+   },
+   {
+    "name": "Red",
+    "hex": "#B3261E",
+    "value": "red"
+   },
+   {
+    "name": "White",
+    "hex": "#FFFFFF",
+    "value": "white"
+   }
+  ],
+  "sizes": [
+   {
+    "size": "One Size",
+    "inStock": true,
+    "stockCount": 100
+   }
+  ],
+  "description": "An everyday zip-top tote printed with our leaping-deer mark. Printed to order.",
+  "details": [
+   "Size: One Size",
+   "Printed to order — print areas available: front, back",
+   "Approximate product weight: 150 g"
+  ],
+  "careInstructions": [
+   "Machine wash cold, inside out",
+   "Do not bleach",
+   "Do not iron directly on the print",
+   "Line dry in shade"
+  ],
+  "composition": "Fabric composition to be confirmed with our print partner (draft)",
+  "sustainabilityBadge": "Printed to order",
+  "isNew": true
+ },
+ {
+  "id": "prod-6",
+  "slug": "classic-polo",
+  "aliases": [
+   "washed-cotton-dad-cap-minimal"
+  ],
+  "specTable": {
+   "title": "Product Specifications",
+   "description": "Taken from our print partner's base-product sheet. Final size chart to follow.",
+   "columns": [
+    {
+     "key": "spec",
+     "label": "Specification",
+     "align": "left"
+    },
+    {
+     "key": "value",
+     "label": "Detail",
+     "align": "left"
+    }
+   ],
+   "rows": [
+    {
+     "spec": "Product",
+     "value": "Polo"
+    },
+    {
+     "spec": "Sizes",
+     "value": "S–3XL"
+    },
+    {
+     "spec": "Colours offered",
+     "value": "7"
+    },
+    {
+     "spec": "Approximate weight",
+     "value": "280 g (size M)"
+    },
+    {
+     "spec": "Print areas",
+     "value": "back, left chest, right chest"
+    },
+    {
+     "spec": "Made",
+     "value": "Printed after you order by our print partner in Tiruppur, India"
+    },
+    {
+     "spec": "Fabric composition",
+     "value": "To be confirmed (draft)"
+    }
+   ]
+  },
+  "faqs": [
+   {
+    "id": "faq-1",
+    "question": "How does the sizing run?",
+    "answer": "A detailed size chart from our print partner is on its way. Until then, the size guide page gives general guidance; if you are between sizes, choose the larger one for a relaxed fit."
+   },
+   {
+    "id": "faq-2",
+    "question": "How should I wash it?",
+    "answer": "Wash cold and inside out, skip the bleach, avoid ironing directly on the print, and line dry in shade. This keeps the print sharp for longer."
+   },
+   {
+    "id": "faq-3",
+    "question": "What does print-on-demand mean for my order?",
+    "answer": "Nothing is printed until you order it. Our print partner in Tiruppur prints and dispatches your piece, so there is no unsold stock sitting in a warehouse."
+   },
+   {
+    "id": "faq-4",
+    "question": "Can I return or exchange it?",
+    "answer": "Please see our Returns & Exchanges policy for the current terms. The policy is still being finalised and is marked as a draft."
+   }
+  ],
+  "title": "Classic Polo",
+  "subtitle": "Men · S–3XL · 7 colours",
+  "category": "tees",
+  "audience": [
+   "men"
+  ],
+  "priceINR": 2299,
+  "priceMinorINR": 229900,
+  "publicationStatus": "published",
+  "partnerProvider": "Qikink Direct API",
+  "partnerStyleCode": "MP25",
+  "partnerAvailability": "ready_to_print",
+  "images": [
+   {
+    "url": "/images/lifestyle/linen-man.jpg",
+    "alt": "Placeholder model photo for the Classic Polo",
+    "color": "navy-blue"
+   }
+  ],
+  "colors": [
+   {
+    "name": "Navy Blue",
+    "hex": "#1F2A44",
+    "value": "navy-blue"
+   },
+   {
+    "name": "Black",
+    "hex": "#141414",
+    "value": "black"
+   },
+   {
+    "name": "White",
+    "hex": "#FFFFFF",
+    "value": "white"
+   },
+   {
+    "name": "Grey Melange",
+    "hex": "#A7A9AC",
+    "value": "grey-melange"
+   },
+   {
+    "name": "Maroon",
+    "hex": "#6E1E2A",
+    "value": "maroon"
+   },
+   {
+    "name": "Coffee Brown",
+    "hex": "#4B3426",
+    "value": "coffee-brown"
+   },
+   {
+    "name": "Petrol Blue",
+    "hex": "#1D5466",
+    "value": "petrol-blue"
+   }
+  ],
+  "sizes": [
+   {
+    "size": "S",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "M",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "L",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "XL",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "XXL",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "3XL",
+    "inStock": true,
+    "stockCount": 100
+   }
+  ],
+  "description": "A men's polo with a small leaping-deer mark on the chest. Printed to order, in 11 colours from our print partner; seven are shown here.",
+  "details": [
+   "Sizes: S–3XL",
+   "Printed to order — print areas available: back, left chest, right chest",
+   "Approximate garment weight: 280 g"
+  ],
+  "careInstructions": [
+   "Machine wash cold, inside out",
+   "Do not bleach",
+   "Do not iron directly on the print",
+   "Line dry in shade"
+  ],
+  "composition": "Fabric composition to be confirmed with our print partner (draft)",
+  "sustainabilityBadge": "Printed to order",
+  "isNew": true
+ },
+ {
+  "id": "prod-7",
+  "slug": "acid-wash-hoodie",
+  "aliases": [
+   "architectural-zip-hoodie"
+  ],
+  "specTable": {
+   "title": "Product Specifications",
+   "description": "Taken from our print partner's base-product sheet. Final size chart to follow.",
+   "columns": [
+    {
+     "key": "spec",
+     "label": "Specification",
+     "align": "left"
+    },
+    {
+     "key": "value",
+     "label": "Detail",
+     "align": "left"
+    }
+   ],
+   "rows": [
+    {
+     "spec": "Product",
+     "value": "Acid-wash hoodie"
+    },
+    {
+     "spec": "Sizes",
+     "value": "XS–3XL"
+    },
+    {
+     "spec": "Colours offered",
+     "value": "4"
+    },
+    {
+     "spec": "Approximate weight",
+     "value": "740 g (size M)"
+    },
+    {
+     "spec": "Print areas",
+     "value": "front, back, left chest, right chest"
+    },
+    {
+     "spec": "Made",
+     "value": "Printed after you order by our print partner in Tiruppur, India"
+    },
+    {
+     "spec": "Fabric composition",
+     "value": "To be confirmed (draft)"
+    }
+   ]
+  },
+  "faqs": [
+   {
+    "id": "faq-1",
+    "question": "How does the sizing run?",
+    "answer": "A detailed size chart from our print partner is on its way. Until then, the size guide page gives general guidance; if you are between sizes, choose the larger one for a relaxed fit."
+   },
+   {
+    "id": "faq-2",
+    "question": "How should I wash it?",
+    "answer": "Wash cold and inside out, skip the bleach, avoid ironing directly on the print, and line dry in shade. This keeps the print sharp for longer."
+   },
+   {
+    "id": "faq-3",
+    "question": "What does print-on-demand mean for my order?",
+    "answer": "Nothing is printed until you order it. Our print partner in Tiruppur prints and dispatches your piece, so there is no unsold stock sitting in a warehouse."
+   },
+   {
+    "id": "faq-4",
+    "question": "Can I return or exchange it?",
+    "answer": "Please see our Returns & Exchanges policy for the current terms. The policy is still being finalised and is marked as a draft."
+   }
+  ],
+  "title": "Acid Wash Hoodie",
+  "subtitle": "Unisex · XS–3XL · 4 colours",
+  "category": "hoodies",
+  "audience": [
+   "men",
+   "women"
+  ],
+  "priceINR": 4299,
+  "priceMinorINR": 429900,
+  "publicationStatus": "published",
+  "partnerProvider": "Qikink Direct API",
+  "partnerStyleCode": "UH62",
+  "partnerAvailability": "ready_to_print",
+  "images": [
+   {
+    "url": "/images/lifestyle/linen-man.jpg",
+    "alt": "Placeholder model photo for the Acid Wash Hoodie",
+    "color": "black"
+   }
+  ],
+  "colors": [
+   {
+    "name": "Black",
+    "hex": "#141414",
+    "value": "black"
+   },
+   {
+    "name": "Navy Blue",
+    "hex": "#1F2A44",
+    "value": "navy-blue"
+   },
+   {
+    "name": "Bottle Green",
+    "hex": "#1F4D3A",
+    "value": "bottle-green"
+   },
+   {
+    "name": "Maroon",
+    "hex": "#6E1E2A",
+    "value": "maroon"
+   }
+  ],
+  "sizes": [
+   {
+    "size": "XS",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "S",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "M",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "L",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "XL",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "XXL",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "3XL",
+    "inStock": true,
+    "stockCount": 100
+   }
+  ],
+  "description": "Part of the Acid Wash Collection: a unisex hoodie on an acid-washed blank, printed with the leaping deer. Because the wash is done by hand, every piece looks slightly different.",
+  "details": [
+   "Sizes: XS–3XL",
+   "Printed to order — print areas available: front, back, left chest, right chest",
+   "Approximate garment weight: 740 g"
+  ],
+  "careInstructions": [
+   "Machine wash cold, inside out",
+   "Do not bleach",
+   "Do not iron directly on the print",
+   "Line dry in shade"
+  ],
+  "composition": "Fabric composition to be confirmed with our print partner (draft)",
+  "sustainabilityBadge": "Printed to order",
+  "isNew": true
+ },
+ {
+  "id": "prod-8",
+  "slug": "oversized-raglan-tee",
+  "aliases": [
+   "technical-shell-modular-bomber-jacket"
+  ],
+  "specTable": {
+   "title": "Product Specifications",
+   "description": "Taken from our print partner's base-product sheet. Final size chart to follow.",
+   "columns": [
+    {
+     "key": "spec",
+     "label": "Specification",
+     "align": "left"
+    },
+    {
+     "key": "value",
+     "label": "Detail",
+     "align": "left"
+    }
+   ],
+   "rows": [
+    {
+     "spec": "Product",
+     "value": "Oversized raglan t-shirt"
+    },
+    {
+     "spec": "Sizes",
+     "value": "XS–XXL"
+    },
+    {
+     "spec": "Colours offered",
+     "value": "4"
+    },
+    {
+     "spec": "Approximate weight",
+     "value": "300 g (size M)"
+    },
+    {
+     "spec": "Print areas",
+     "value": "front, back, left chest, right chest"
+    },
+    {
+     "spec": "Made",
+     "value": "Printed after you order by our print partner in Tiruppur, India"
+    },
+    {
+     "spec": "Fabric composition",
+     "value": "To be confirmed (draft)"
+    }
+   ]
+  },
+  "faqs": [
+   {
+    "id": "faq-1",
+    "question": "How does the sizing run?",
+    "answer": "A detailed size chart from our print partner is on its way. Until then, the size guide page gives general guidance; if you are between sizes, choose the larger one for a relaxed fit."
+   },
+   {
+    "id": "faq-2",
+    "question": "How should I wash it?",
+    "answer": "Wash cold and inside out, skip the bleach, avoid ironing directly on the print, and line dry in shade. This keeps the print sharp for longer."
+   },
+   {
+    "id": "faq-3",
+    "question": "What does print-on-demand mean for my order?",
+    "answer": "Nothing is printed until you order it. Our print partner in Tiruppur prints and dispatches your piece, so there is no unsold stock sitting in a warehouse."
+   },
+   {
+    "id": "faq-4",
+    "question": "Can I return or exchange it?",
+    "answer": "Please see our Returns & Exchanges policy for the current terms. The policy is still being finalised and is marked as a draft."
+   }
+  ],
+  "title": "Oversized Raglan Tee",
+  "subtitle": "Unisex · XS–XXL · 4 colours",
+  "category": "tees",
+  "audience": [
+   "men",
+   "women"
+  ],
+  "priceINR": 2399,
+  "priceMinorINR": 239900,
+  "publicationStatus": "published",
+  "partnerProvider": "Qikink Direct API",
+  "partnerStyleCode": "UR50",
+  "partnerAvailability": "ready_to_print",
+  "images": [
+   {
+    "url": "/images/about/street-polo.jpg",
+    "alt": "Placeholder model photo for the Oversized Raglan Tee",
+    "color": "black-charcoal-melange"
+   }
+  ],
+  "colors": [
+   {
+    "name": "Black / Charcoal Melange",
+    "hex": "#3A3A3A",
+    "value": "black-charcoal-melange"
+   },
+   {
+    "name": "Black / White",
+    "hex": "#141414",
+    "value": "black-white"
+   },
+   {
+    "name": "Olive Green / Off White",
+    "hex": "#5B6236",
+    "value": "olive-green-off-white"
+   },
+   {
+    "name": "Coffee Brown / Off White",
+    "hex": "#4B3426",
+    "value": "coffee-brown-off-white"
+   }
+  ],
+  "sizes": [
+   {
+    "size": "XS",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "S",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "M",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "L",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "XL",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "XXL",
+    "inStock": true,
+    "stockCount": 100
+   }
+  ],
+  "description": "An oversized tee with contrast raglan sleeves, printed with our leaping-deer mark. Printed to order.",
+  "details": [
+   "Sizes: XS–XXL",
+   "Printed to order — print areas available: front, back, left chest, right chest",
+   "Approximate garment weight: 300 g"
+  ],
+  "careInstructions": [
+   "Machine wash cold, inside out",
+   "Do not bleach",
+   "Do not iron directly on the print",
+   "Line dry in shade"
+  ],
+  "composition": "Fabric composition to be confirmed with our print partner (draft)",
+  "sustainabilityBadge": "Printed to order",
+  "isNew": true
+ },
+ {
+  "id": "prod-9",
+  "slug": "acid-wash-oversized-tee",
+  "aliases": [
+   "raw-hem-heavyweight-thermal-waffle-tee"
+  ],
+  "specTable": {
+   "title": "Product Specifications",
+   "description": "Taken from our print partner's base-product sheet. Final size chart to follow.",
+   "columns": [
+    {
+     "key": "spec",
+     "label": "Specification",
+     "align": "left"
+    },
+    {
+     "key": "value",
+     "label": "Detail",
+     "align": "left"
+    }
+   ],
+   "rows": [
+    {
+     "spec": "Product",
+     "value": "Acid-wash oversized t-shirt"
+    },
+    {
+     "spec": "Sizes",
+     "value": "XS–XXL"
+    },
+    {
+     "spec": "Colours offered",
+     "value": "5"
+    },
+    {
+     "spec": "Approximate weight",
+     "value": "350 g (size M)"
+    },
+    {
+     "spec": "Print areas",
+     "value": "front, back, left chest, right chest, left sleeve, right sleeve"
+    },
+    {
+     "spec": "Made",
+     "value": "Printed after you order by our print partner in Tiruppur, India"
+    },
+    {
+     "spec": "Fabric composition",
+     "value": "To be confirmed (draft)"
+    }
+   ]
+  },
+  "faqs": [
+   {
+    "id": "faq-1",
+    "question": "How does the sizing run?",
+    "answer": "A detailed size chart from our print partner is on its way. Until then, the size guide page gives general guidance; if you are between sizes, choose the larger one for a relaxed fit."
+   },
+   {
+    "id": "faq-2",
+    "question": "How should I wash it?",
+    "answer": "Wash cold and inside out, skip the bleach, avoid ironing directly on the print, and line dry in shade. This keeps the print sharp for longer."
+   },
+   {
+    "id": "faq-3",
+    "question": "What does print-on-demand mean for my order?",
+    "answer": "Nothing is printed until you order it. Our print partner in Tiruppur prints and dispatches your piece, so there is no unsold stock sitting in a warehouse."
+   },
+   {
+    "id": "faq-4",
+    "question": "Can I return or exchange it?",
+    "answer": "Please see our Returns & Exchanges policy for the current terms. The policy is still being finalised and is marked as a draft."
+   }
+  ],
+  "title": "Acid Wash Oversized Tee",
+  "subtitle": "Unisex · XS–XXL · 5 colours",
+  "category": "tees",
+  "audience": [
+   "men",
+   "women"
+  ],
+  "priceINR": 2699,
+  "priceMinorINR": 269900,
+  "publicationStatus": "published",
+  "partnerProvider": "Qikink Direct API",
+  "partnerStyleCode": "UC61",
+  "partnerAvailability": "ready_to_print",
+  "images": [
+   {
+    "url": "/images/about/cream-polo.jpg",
+    "alt": "Placeholder model photo for the Acid Wash Oversized Tee",
+    "color": "black"
+   }
+  ],
+  "colors": [
+   {
+    "name": "Black",
+    "hex": "#141414",
+    "value": "black"
+   },
+   {
+    "name": "Navy Blue",
+    "hex": "#1F2A44",
+    "value": "navy-blue"
+   },
+   {
+    "name": "Bottle Green",
+    "hex": "#1F4D3A",
+    "value": "bottle-green"
+   },
+   {
+    "name": "Maroon",
+    "hex": "#6E1E2A",
+    "value": "maroon"
+   },
+   {
+    "name": "Olive Green",
+    "hex": "#5B6236",
+    "value": "olive-green"
+   }
+  ],
+  "sizes": [
+   {
+    "size": "XS",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "S",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "M",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "L",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "XL",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "XXL",
+    "inStock": true,
+    "stockCount": 100
+   }
+  ],
+  "description": "Part of the Acid Wash Collection: an oversized tee on an acid-washed blank, printed with the leaping deer. Every wash pattern is unique.",
+  "details": [
+   "Sizes: XS–XXL",
+   "Printed to order — print areas available: front, back, left chest, right chest, left sleeve, right sleeve",
+   "Approximate garment weight: 350 g"
+  ],
+  "careInstructions": [
+   "Machine wash cold, inside out",
+   "Do not bleach",
+   "Do not iron directly on the print",
+   "Line dry in shade"
+  ],
+  "composition": "Fabric composition to be confirmed with our print partner (draft)",
+  "sustainabilityBadge": "Printed to order",
+  "isNew": true
+ },
+ {
+  "id": "prod-10",
+  "slug": "cropped-hoodie",
+  "aliases": [
+   "japanese-selvedge-cotton-chore-coat"
+  ],
+  "specTable": {
+   "title": "Product Specifications",
+   "description": "Taken from our print partner's base-product sheet. Final size chart to follow.",
+   "columns": [
+    {
+     "key": "spec",
+     "label": "Specification",
+     "align": "left"
+    },
+    {
+     "key": "value",
+     "label": "Detail",
+     "align": "left"
+    }
+   ],
+   "rows": [
+    {
+     "spec": "Product",
+     "value": "Women's cropped hoodie"
+    },
+    {
+     "spec": "Sizes",
+     "value": "XS–XXL"
+    },
+    {
+     "spec": "Colours offered",
+     "value": "4"
+    },
+    {
+     "spec": "Approximate weight",
+     "value": "560 g (size M)"
+    },
+    {
+     "spec": "Print areas",
+     "value": "front, back, left chest, right chest"
+    },
+    {
+     "spec": "Made",
+     "value": "Printed after you order by our print partner in Tiruppur, India"
+    },
+    {
+     "spec": "Fabric composition",
+     "value": "To be confirmed (draft)"
+    }
+   ]
+  },
+  "faqs": [
+   {
+    "id": "faq-1",
+    "question": "How does the sizing run?",
+    "answer": "A detailed size chart from our print partner is on its way. Until then, the size guide page gives general guidance; if you are between sizes, choose the larger one for a relaxed fit."
+   },
+   {
+    "id": "faq-2",
+    "question": "How should I wash it?",
+    "answer": "Wash cold and inside out, skip the bleach, avoid ironing directly on the print, and line dry in shade. This keeps the print sharp for longer."
+   },
+   {
+    "id": "faq-3",
+    "question": "What does print-on-demand mean for my order?",
+    "answer": "Nothing is printed until you order it. Our print partner in Tiruppur prints and dispatches your piece, so there is no unsold stock sitting in a warehouse."
+   },
+   {
+    "id": "faq-4",
+    "question": "Can I return or exchange it?",
+    "answer": "Please see our Returns & Exchanges policy for the current terms. The policy is still being finalised and is marked as a draft."
+   }
+  ],
+  "title": "Cropped Hoodie",
+  "subtitle": "Women · XS–XXL · 4 colours",
+  "category": "hoodies",
+  "audience": [
+   "women"
+  ],
+  "priceINR": 2999,
+  "priceMinorINR": 299900,
+  "publicationStatus": "published",
+  "partnerProvider": "Qikink Direct API",
+  "partnerStyleCode": "FC32",
+  "partnerAvailability": "ready_to_print",
+  "images": [
+   {
+    "url": "/images/about/street-polo.jpg",
+    "alt": "Placeholder model photo for the Cropped Hoodie",
+    "color": "maroon"
+   }
+  ],
+  "colors": [
+   {
+    "name": "Maroon",
+    "hex": "#6E1E2A",
+    "value": "maroon"
+   },
+   {
+    "name": "Black",
+    "hex": "#141414",
+    "value": "black"
+   },
+   {
+    "name": "Mustard Yellow",
+    "hex": "#C9A227",
+    "value": "mustard-yellow"
+   },
+   {
+    "name": "Light Baby Pink",
+    "hex": "#F4C7D0",
+    "value": "light-baby-pink"
+   }
+  ],
+  "sizes": [
+   {
+    "size": "XS",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "S",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "M",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "L",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "XL",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "XXL",
+    "inStock": true,
+    "stockCount": 100
+   }
+  ],
+  "description": "A women's cropped hoodie printed with our leaping-deer mark. Printed to order.",
+  "details": [
+   "Sizes: XS–XXL",
+   "Printed to order — print areas available: front, back, left chest, right chest",
+   "Approximate garment weight: 560 g"
+  ],
+  "careInstructions": [
+   "Machine wash cold, inside out",
+   "Do not bleach",
+   "Do not iron directly on the print",
+   "Line dry in shade"
+  ],
+  "composition": "Fabric composition to be confirmed with our print partner (draft)",
+  "sustainabilityBadge": "Printed to order",
+  "isNew": true
+ },
+ {
+  "id": "prod-11",
+  "slug": "everyday-crop-top",
+  "aliases": [
+   "brushed-cashmere-ribbed-studio-blanket"
+  ],
+  "specTable": {
+   "title": "Product Specifications",
+   "description": "Taken from our print partner's base-product sheet. Final size chart to follow.",
+   "columns": [
+    {
+     "key": "spec",
+     "label": "Specification",
+     "align": "left"
+    },
+    {
+     "key": "value",
+     "label": "Detail",
+     "align": "left"
+    }
+   ],
+   "rows": [
+    {
+     "spec": "Product",
+     "value": "Women's crop top"
+    },
+    {
+     "spec": "Sizes",
+     "value": "XS–XXL"
+    },
+    {
+     "spec": "Colours offered",
+     "value": "6"
+    },
+    {
+     "spec": "Approximate weight",
+     "value": "170 g (size M)"
+    },
+    {
+     "spec": "Print areas",
+     "value": "front, back, left chest, right chest"
+    },
+    {
+     "spec": "Made",
+     "value": "Printed after you order by our print partner in Tiruppur, India"
+    },
+    {
+     "spec": "Fabric composition",
+     "value": "To be confirmed (draft)"
+    }
+   ]
+  },
+  "faqs": [
+   {
+    "id": "faq-1",
+    "question": "How does the sizing run?",
+    "answer": "A detailed size chart from our print partner is on its way. Until then, the size guide page gives general guidance; if you are between sizes, choose the larger one for a relaxed fit."
+   },
+   {
+    "id": "faq-2",
+    "question": "How should I wash it?",
+    "answer": "Wash cold and inside out, skip the bleach, avoid ironing directly on the print, and line dry in shade. This keeps the print sharp for longer."
+   },
+   {
+    "id": "faq-3",
+    "question": "What does print-on-demand mean for my order?",
+    "answer": "Nothing is printed until you order it. Our print partner in Tiruppur prints and dispatches your piece, so there is no unsold stock sitting in a warehouse."
+   },
+   {
+    "id": "faq-4",
+    "question": "Can I return or exchange it?",
+    "answer": "Please see our Returns & Exchanges policy for the current terms. The policy is still being finalised and is marked as a draft."
+   }
+  ],
+  "title": "Everyday Crop Top",
+  "subtitle": "Women · XS–XXL · 6 colours",
+  "category": "tees",
+  "audience": [
+   "women"
+  ],
+  "priceINR": 1499,
+  "priceMinorINR": 149900,
+  "publicationStatus": "published",
+  "partnerProvider": "Qikink Direct API",
+  "partnerStyleCode": "FC39",
+  "partnerAvailability": "ready_to_print",
+  "images": [
+   {
+    "url": "/images/about/cream-polo.jpg",
+    "alt": "Placeholder model photo for the Everyday Crop Top",
+    "color": "lavender"
+   }
+  ],
+  "colors": [
+   {
+    "name": "Lavender",
+    "hex": "#B9A7D6",
+    "value": "lavender"
+   },
+   {
+    "name": "Black",
+    "hex": "#141414",
+    "value": "black"
+   },
+   {
+    "name": "White",
+    "hex": "#FFFFFF",
+    "value": "white"
+   },
+   {
+    "name": "Grey Melange",
+    "hex": "#A7A9AC",
+    "value": "grey-melange"
+   },
+   {
+    "name": "Beige",
+    "hex": "#D9C8A9",
+    "value": "beige"
+   },
+   {
+    "name": "Light Baby Pink",
+    "hex": "#F4C7D0",
+    "value": "light-baby-pink"
+   }
+  ],
+  "sizes": [
+   {
+    "size": "XS",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "S",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "M",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "L",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "XL",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "XXL",
+    "inStock": true,
+    "stockCount": 100
+   }
+  ],
+  "description": "A fitted women's crop top with a small leaping-deer print. Printed to order, in 10 colours from our print partner; six are shown here.",
+  "details": [
+   "Sizes: XS–XXL",
+   "Printed to order — print areas available: front, back, left chest, right chest",
+   "Approximate garment weight: 170 g"
+  ],
+  "careInstructions": [
+   "Machine wash cold, inside out",
+   "Do not bleach",
+   "Do not iron directly on the print",
+   "Line dry in shade"
+  ],
+  "composition": "Fabric composition to be confirmed with our print partner (draft)",
+  "sustainabilityBadge": "Printed to order",
+  "isNew": true
+ },
+ {
+  "id": "prod-12",
+  "slug": "everyday-sweatpants",
+  "aliases": [
+   "modular-lightweight-ripstop-windbreaker"
+  ],
+  "specTable": {
+   "title": "Product Specifications",
+   "description": "Taken from our print partner's base-product sheet. Final size chart to follow.",
+   "columns": [
+    {
+     "key": "spec",
+     "label": "Specification",
+     "align": "left"
+    },
+    {
+     "key": "value",
+     "label": "Detail",
+     "align": "left"
+    }
+   ],
+   "rows": [
+    {
+     "spec": "Product",
+     "value": "Sweatpants"
+    },
+    {
+     "spec": "Sizes",
+     "value": "S–XXL"
+    },
+    {
+     "spec": "Colours offered",
+     "value": "2"
+    },
+    {
+     "spec": "Approximate weight",
+     "value": "750 g (size M)"
+    },
+    {
+     "spec": "Print areas",
+     "value": "left chest, right chest"
+    },
+    {
+     "spec": "Made",
+     "value": "Printed after you order by our print partner in Tiruppur, India"
+    },
+    {
+     "spec": "Fabric composition",
+     "value": "To be confirmed (draft)"
+    }
+   ]
+  },
+  "faqs": [
+   {
+    "id": "faq-1",
+    "question": "How does the sizing run?",
+    "answer": "A detailed size chart from our print partner is on its way. Until then, the size guide page gives general guidance; if you are between sizes, choose the larger one for a relaxed fit."
+   },
+   {
+    "id": "faq-2",
+    "question": "How should I wash it?",
+    "answer": "Wash cold and inside out, skip the bleach, avoid ironing directly on the print, and line dry in shade. This keeps the print sharp for longer."
+   },
+   {
+    "id": "faq-3",
+    "question": "What does print-on-demand mean for my order?",
+    "answer": "Nothing is printed until you order it. Our print partner in Tiruppur prints and dispatches your piece, so there is no unsold stock sitting in a warehouse."
+   },
+   {
+    "id": "faq-4",
+    "question": "Can I return or exchange it?",
+    "answer": "Please see our Returns & Exchanges policy for the current terms. The policy is still being finalised and is marked as a draft."
+   }
+  ],
+  "title": "Everyday Sweatpants",
+  "subtitle": "Unisex · S–XXL · 2 colours",
+  "category": "pants",
+  "audience": [
+   "men",
+   "women"
+  ],
+  "priceINR": 3199,
+  "priceMinorINR": 319900,
+  "publicationStatus": "published",
+  "partnerProvider": "Qikink Direct API",
+  "partnerStyleCode": "US52",
+  "partnerAvailability": "ready_to_print",
+  "images": [
+   {
+    "url": "/images/lifestyle/linen-man.jpg",
+    "alt": "Placeholder model photo for the Everyday Sweatpants",
+    "color": "black"
+   }
+  ],
+  "colors": [
+   {
+    "name": "Black",
+    "hex": "#141414",
+    "value": "black"
+   },
+   {
+    "name": "Off White",
+    "hex": "#F3EFE6",
+    "value": "off-white"
+   }
+  ],
+  "sizes": [
+   {
+    "size": "S",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "M",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "L",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "XL",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "XXL",
+    "inStock": true,
+    "stockCount": 100
+   }
+  ],
+  "description": "Unisex sweatpants that match our hoodies and sweatshirts, with a small leaping-deer print. Printed to order.",
+  "details": [
+   "Sizes: S–XXL",
+   "Printed to order — print areas available: left chest, right chest",
+   "Approximate garment weight: 750 g"
+  ],
+  "careInstructions": [
+   "Machine wash cold, inside out",
+   "Do not bleach",
+   "Do not iron directly on the print",
+   "Line dry in shade"
+  ],
+  "composition": "Fabric composition to be confirmed with our print partner (draft)",
+  "sustainabilityBadge": "Printed to order",
+  "isNew": true
+ },
+ {
+  "id": "prod-13",
+  "slug": "black-coffee-mug",
+  "aliases": [
+   "stoneware-emblem-ceramic-mug"
+  ],
+  "specTable": {
+   "title": "Product Specifications",
+   "description": "Taken from our print partner's base-product sheet. Final size chart to follow.",
+   "columns": [
+    {
+     "key": "spec",
+     "label": "Specification",
+     "align": "left"
+    },
+    {
+     "key": "value",
+     "label": "Detail",
+     "align": "left"
+    }
+   ],
+   "rows": [
+    {
+     "spec": "Product",
+     "value": "11 oz ceramic mug"
+    },
+    {
+     "spec": "Sizes",
+     "value": "11 oz"
+    },
+    {
+     "spec": "Colours offered",
+     "value": "1"
+    },
+    {
+     "spec": "Approximate weight",
+     "value": "480 g (approx. weight)"
+    },
+    {
+     "spec": "Print areas",
+     "value": "front"
+    },
+    {
+     "spec": "Made",
+     "value": "Printed after you order by our print partner in Tiruppur, India"
+    },
+    {
+     "spec": "Fabric composition",
+     "value": "To be confirmed (draft)"
+    }
+   ]
+  },
+  "faqs": [
+   {
+    "id": "faq-c1",
+    "question": "Is the mug dishwasher and microwave safe?",
+    "answer": "We are confirming this with our print partner. Until then, we recommend hand washing to protect the print."
+   },
+   {
+    "id": "faq-c2",
+    "question": "What if it arrives damaged?",
+    "answer": "Contact us with a photo of the damage and your order number, and we will sort out a replacement. See our Returns & Exchanges policy (draft) for details."
+   }
+  ],
+  "title": "Black Coffee Mug",
+  "subtitle": "11 oz · 1 colour",
+  "category": "accessories",
+  "priceINR": 599,
+  "priceMinorINR": 59900,
+  "publicationStatus": "published",
+  "partnerProvider": "Qikink Direct API",
+  "partnerStyleCode": "MUG-BLK-11",
+  "partnerAvailability": "ready_to_print",
+  "images": [
+   {
+    "url": "/images/pdp-figma/mug/front.png",
+    "alt": "Black Coffee Mug, front",
+    "color": "black",
+    "label": "01 · FRONT"
+   },
+   {
+    "url": "/images/pdp-figma/mug/on-desk.png",
+    "alt": "Black Coffee Mug on a desk",
+    "color": "black",
+    "label": "02 · IN USE"
+   },
+   {
+    "url": "/images/pdp-figma/mug/print-detail.png",
+    "alt": "Black Coffee Mug print detail",
+    "color": "black",
+    "label": "03 · PRINT"
+   }
+  ],
+  "colors": [
+   {
+    "name": "Black",
+    "hex": "#141414",
+    "value": "black"
+   }
+  ],
+  "sizes": [
+   {
+    "size": "11 oz",
+    "inStock": true,
+    "stockCount": 100
+   }
+  ],
+  "description": "An 11 oz black ceramic mug printed with our leaping-deer mark. Printed to order.",
+  "details": [
+   "Size: 11 oz",
+   "Printed to order — print areas available: front",
+   "Approximate product weight: 480 g"
+  ],
+  "careInstructions": [
+   "Hand wash recommended to protect the print",
+   "Microwave and dishwasher suitability to be confirmed with our print partner"
+  ],
+  "composition": "Fabric composition to be confirmed with our print partner (draft)",
+  "sustainabilityBadge": "Printed to order",
+  "isNew": true
+ },
+ {
+  "id": "prod-14",
+  "slug": "kids-pullover-hoodie",
+  "aliases": [
+   "kids-organic-cotton-emblem-tee"
+  ],
+  "specTable": {
+   "title": "Product Specifications",
+   "description": "Taken from our print partner's base-product sheet. Final size chart to follow.",
+   "columns": [
+    {
+     "key": "spec",
+     "label": "Specification",
+     "align": "left"
+    },
+    {
+     "key": "value",
+     "label": "Detail",
+     "align": "left"
+    }
+   ],
+   "rows": [
+    {
+     "spec": "Product",
+     "value": "Kids' pullover hoodie"
+    },
+    {
+     "spec": "Sizes",
+     "value": "5Yrs–13Yrs"
+    },
+    {
+     "spec": "Colours offered",
+     "value": "5"
+    },
+    {
+     "spec": "Approximate weight",
+     "value": "500 g (9Yrs)"
+    },
+    {
+     "spec": "Print areas",
+     "value": "front, back, left chest, right chest"
+    },
+    {
+     "spec": "Made",
+     "value": "Printed after you order by our print partner in Tiruppur, India"
+    },
+    {
+     "spec": "Fabric composition",
+     "value": "To be confirmed (draft)"
+    }
+   ]
+  },
+  "faqs": [
+   {
+    "id": "faq-k1",
+    "question": "Which size should I choose?",
+    "answer": "Kids sizes go by age (5 to 13 years). If your child is between ages or growing fast, choose the next size up."
+   },
+   {
+    "id": "faq-k2",
+    "question": "Can I exchange for a different size?",
+    "answer": "Please see our Returns & Exchanges policy for the current terms. The policy is still being finalised and is marked as a draft."
+   }
+  ],
+  "title": "Kids Pullover Hoodie",
+  "subtitle": "Kids · 5Yrs–13Yrs · 5 colours",
+  "category": "kids",
+  "audience": [
+   "kids"
+  ],
+  "priceINR": 1799,
+  "priceMinorINR": 179900,
+  "publicationStatus": "published",
+  "partnerProvider": "Qikink Direct API",
+  "partnerStyleCode": "KIDS-HOODIE",
+  "partnerAvailability": "ready_to_print",
+  "images": [
+   {
+    "url": "/images/illustrations/kids-pullover-hoodie-yellow.svg",
+    "alt": "Illustration of the Kids Pullover Hoodie in Yellow",
+    "color": "yellow"
+   }
+  ],
+  "colors": [
+   {
+    "name": "Yellow",
+    "hex": "#F2C94C",
+    "value": "yellow"
+   },
+   {
+    "name": "Black",
+    "hex": "#141414",
+    "value": "black"
+   },
+   {
+    "name": "Grey Melange",
+    "hex": "#A7A9AC",
+    "value": "grey-melange"
+   },
+   {
+    "name": "Red",
+    "hex": "#B3261E",
+    "value": "red"
+   },
+   {
+    "name": "Baby Pink",
+    "hex": "#F4C2C2",
+    "value": "baby-pink"
+   }
+  ],
+  "sizes": [
+   {
+    "size": "5Yrs",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "7Yrs",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "9Yrs",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "11Yrs",
+    "inStock": true,
+    "stockCount": 100
+   },
+   {
+    "size": "13Yrs",
+    "inStock": true,
+    "stockCount": 100
+   }
+  ],
+  "description": "A kids' pullover hoodie printed with our leaping-deer mark, for ages 5 to 13. Printed to order.",
+  "details": [
+   "Sizes: 5Yrs–13Yrs",
+   "Printed to order — print areas available: front, back, left chest, right chest",
+   "Approximate garment weight: 500 g"
+  ],
+  "careInstructions": [
+   "Machine wash cold, inside out",
+   "Do not bleach",
+   "Do not iron directly on the print",
+   "Line dry in shade"
+  ],
+  "composition": "Fabric composition to be confirmed with our print partner (draft)",
+  "sustainabilityBadge": "Printed to order",
+  "isNew": true
+ }
+]

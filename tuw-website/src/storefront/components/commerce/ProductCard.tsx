@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { priceLabel, sizePriceINR } from '@storefront/lib/product';
 import Link from 'next/link';
 import { Heart, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { Product } from '@storefront/lib/types';
@@ -87,8 +88,8 @@ export default function ProductCard({
       title: product.title,
       color: colorName,
       size,
-      priceINR: product.priceINR,
-      priceMinorINR: product.priceMinorINR,
+      priceINR: sizePriceINR(product, size),
+      priceMinorINR: Math.round(sizePriceINR(product, size) * 100),
       quantity: 1,
       image: activeImage,
     });
@@ -340,7 +341,7 @@ export default function ProductCard({
         {/* Line 3: Price */}
         <div className="flex items-center gap-2 pt-0.5">
           <p className="text-base text-store-text-secondary tuw-tabular-nums">
-            ₹{product.priceINR.toLocaleString()}
+            {priceLabel(product)}
           </p>
           {product.compareAtPriceINR && (
             <span className="text-xs text-store-muted line-through tuw-tabular-nums">

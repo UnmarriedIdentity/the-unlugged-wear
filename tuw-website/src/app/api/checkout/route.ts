@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { STORE_PRODUCTS } from '@storefront/mocks/fixtures';
+import { getCatalog } from '@/server/catalog';
 
 const FREE_SHIPPING_THRESHOLD_PAISE = 300000; // ₹3,000.00
 const STANDARD_SHIPPING_FEE_PAISE = 15000; // ₹150.00
@@ -43,6 +43,7 @@ export async function POST(req: NextRequest) {
 
     let subtotalPaise = 0;
     const validatedItems = [];
+    const { products: catalog } = await getCatalog();
 
     for (const item of body.items) {
       if (!item.productId || !item.size || !item.quantity || item.quantity < 1) {
@@ -52,7 +53,7 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const catalogProduct = STORE_PRODUCTS.find((p) => p.id === item.productId);
+      const catalogProduct = catalog.find((p) => p.id === item.productId);
       if (!catalogProduct || catalogProduct.publicationStatus === 'draft') {
         return NextResponse.json(
           { error: `Garment '${item.productId}' is not available for purchase.` },
@@ -75,8 +76,9 @@ export async function POST(req: NextRequest) {
       const colorEntry = catalogProduct.colors.find((c) => c.value === item.color || c.name === item.color);
       const selectedColor = colorEntry ? colorEntry.name : catalogProduct.colors[0]?.name || item.color;
 
+      // Price tiers: the chosen size's own price, never the "From" price.
       const unitPricePaise =
-        catalogProduct.priceMinorINR ?? catalogProduct.priceINR * 100;
+        sizeEntry.priceMinorINR ?? catalogProduct.priceMinorINR ?? Math.round(catalogProduct.priceINR * 100);
       const lineTotalPaise = unitPricePaise * Math.floor(item.quantity);
 
       subtotalPaise += lineTotalPaise;

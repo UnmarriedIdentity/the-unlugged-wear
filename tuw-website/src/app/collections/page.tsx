@@ -5,9 +5,10 @@ import Header from '@storefront/components/layout/Header';
 import Footer from '@storefront/components/layout/Footer';
 import Breadcrumb from '@storefront/components/ui/Breadcrumb';
 import CollectionCard from '@storefront/components/commerce/CollectionCard';
-import { STORE_COLLECTIONS } from '@storefront/mocks/fixtures';
+import { useStore } from '@storefront/mocks/store';
 
 export default function CollectionsPage() {
+  const { collections } = useStore();
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF9F6]">
       <Header />
@@ -30,7 +31,7 @@ export default function CollectionsPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pt-4">
-          {STORE_COLLECTIONS.map((col) => (
+          {collections.map((col) => (
             <CollectionCard key={col.id} collection={col} />
           ))}
         </div>

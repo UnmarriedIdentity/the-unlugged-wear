@@ -17,7 +17,8 @@ import Footer from '@storefront/components/layout/Footer';
 import VirtualFittingRoom from '@storefront/components/commerce/VirtualFittingRoom';
 import OurPhilosophy from '@storefront/components/commerce/OurPhilosophy';
 import ProductCard from '@storefront/components/commerce/ProductCard';
-import { STORE_PRODUCTS, JOURNAL_ARTICLES } from '@storefront/mocks/fixtures';
+import { JOURNAL_ARTICLES } from '@storefront/mocks/fixtures';
+import { useStore } from '@storefront/mocks/store';
 import type { Product } from '@storefront/lib/types';
 
 
@@ -34,8 +35,6 @@ const CATEGORY_LABELS: Record<Product['category'], string> = {
   capsules: 'Capsules',
 };
 
-// Derived from the catalog so the homepage can never drift from /shop.
-const HOME_PRODUCTS = STORE_PRODUCTS.filter((p) => p.images.length > 0);
 
 const CATEGORY_PILLS = ['All Collection', 'Hoodies & Sweats', 'T-shirts', 'Kids', 'Accessories'];
 
@@ -91,6 +90,9 @@ const HERO_VIDEO_SRC = '/videos/hero-video.mp4';
 
 export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState('All Collection');
+  // Derived from the catalog (database) so the homepage can never drift from /shop.
+  const { products } = useStore();
+  const HOME_PRODUCTS = products.filter((p) => p.images.length > 0);
 
   // Hero background video: swap HERO_VIDEO_SRC for the final 30s hero cut.
   // It autoplays with no on-screen control (owner's choice); reduced-motion

@@ -7,7 +7,6 @@ import Footer from '@storefront/components/layout/Footer';
 import Breadcrumb from '@storefront/components/ui/Breadcrumb';
 import ProductGrid from '@storefront/components/commerce/ProductGrid';
 import { useStore } from '@storefront/mocks/store';
-import { STORE_COLLECTIONS, productsInCollection } from '@storefront/mocks/fixtures';
 
 export default function CollectionDetailPage({
   params,
@@ -15,10 +14,13 @@ export default function CollectionDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const resolvedParams = use(params);
-  const { products } = useStore();
+  const { products, collections } = useStore();
 
-  const collection = STORE_COLLECTIONS.find((c) => c.slug === resolvedParams.slug);
-  const collectionProducts = collection ? productsInCollection(collection, products) : products;
+  const collection = collections.find((c) => c.slug === resolvedParams.slug);
+  // Membership and order come from collection_products (database).
+  const collectionProducts = collection
+    ? collection.productIds.map((id) => products.find((p) => p.id === id)).filter((p): p is (typeof products)[number] => Boolean(p))
+    : products;
 
   if (!collection) {
     return (

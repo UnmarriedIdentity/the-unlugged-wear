@@ -1,37 +1,46 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { join } from 'node:path';
 
-// The generated catalogue is a JSON array behind a TypeScript export.
-const source = readFileSync(new URL('../src/storefront/mocks/catalog.generated.ts', import.meta.url), 'utf8');
-const products = JSON.parse(source.slice(source.indexOf('= [') + 2, source.lastIndexOf(';')));
-const curated = readFileSync(new URL('../src/storefront/mocks/fixtures.ts', import.meta.url), 'utf8');
-const curatedSlugs = [...curated.matchAll(/slug: "([^"]+)"/g)].map((m) => m[1]);
+// Products now come from the database (TL-BE-05). The import, pricing and
+// read-model rules are tested in packages/heart (catalog.int.test.ts,
+// planner.test.ts); this file guards what the storefront still owns.
 
-test('generated catalogue: every Qikink style becomes one product with a unique slug and id', () => {
-  assert.ok(products.length > 100, `expected the full sheet, got ${products.length}`);
-  const slugs = [...products.map((p) => p.slug), ...curatedSlugs];
-  assert.equal(new Set(slugs).size, slugs.length, 'slugs must be unique across curated + generated');
-  assert.equal(new Set(products.map((p) => p.id)).size, products.length, 'ids must be unique');
+const root = new URL('..', import.meta.url).pathname;
+const curated = JSON.parse(readFileSync(join(root, '../db/seed/catalog/curated-products.json'), 'utf8'));
+const listing = JSON.parse(readFileSync(join(root, 'data/qikink-listing.json'), 'utf8'));
+
+function* files(dir) {
+  for (const name of readdirSync(dir)) {
+    const path = join(dir, name);
+    if (statSync(path).isDirectory()) yield* files(path);
+    else if (/\.(ts|tsx)$/.test(name)) yield path;
+  }
+}
+const source = [...files(join(root, 'src'))].map((f) => [f, readFileSync(f, 'utf8')]);
+
+test('the generated catalogue is gone and nothing imports it', () => {
+  assert.equal(existsSync(join(root, 'src/storefront/mocks/catalog.generated.ts')), false);
+  for (const [file, text] of source) assert.ok(!/catalog\.generated|STORE_PRODUCTS\b.*from|STORE_COLLECTIONS/.test(text), `${file} still reads the static catalogue`);
 });
 
-test('generated catalogue: prices are integer paise and marked as drafts', () => {
-  for (const p of products) {
-    assert.ok(Number.isInteger(p.priceINR) && p.priceINR >= 299, `${p.slug} price`);
-    assert.equal(p.priceMinorINR, p.priceINR * 100, `${p.slug} minor units`);
-    assert.equal(p.priceIsDraft, true, `${p.slug} draft flag`);
+test('supplier costs never reach storefront source', () => {
+  for (const [file, text] of source) assert.ok(!/basePriceINR|base_price|costPaise/.test(text), `${file} mentions partner cost`);
+});
+
+test('curated seed: unique slugs and aliases, positive whole-rupee prices, sellable variants', () => {
+  const urls = curated.flatMap((p) => [p.slug, ...(p.aliases ?? [])]);
+  assert.equal(new Set(urls).size, urls.length, 'slugs and aliases must never collide');
+  assert.equal(new Set(curated.map((p) => p.id)).size, curated.length);
+  for (const p of curated) {
+    assert.ok(Number.isInteger(p.priceINR) && p.priceINR > 0, `${p.slug} price`);
+    assert.ok(p.colors.length > 0 && p.sizes.length > 0, `${p.slug} variants`);
+    assert.ok(p.images.length > 0 && p.images.every((i) => i.url.startsWith('/') && i.alt), `${p.slug} images need a local url + alt`);
   }
 });
 
-test('generated catalogue: supplier costs never reach the storefront bundle', () => {
-  assert.ok(!/basePrice|costINR|basePriceINR/.test(source));
-});
-
-test('generated catalogue: every product has variants, colours and a product type', () => {
-  for (const p of products) {
-    assert.ok(p.sizes.length > 0, `${p.slug} sizes`);
-    assert.ok(p.colors.length > 0, `${p.slug} colours`);
-    assert.ok(p.productType, `${p.slug} productType`);
-    assert.ok(p.variantLabel, `${p.slug} variantLabel`);
-  }
+test('listing input keeps the import contract (style, gender, price, sizes)', () => {
+  assert.ok(listing.length > 300);
+  for (const r of listing) assert.ok(r.style && r.basePriceINR > 0 && r.sizes, `row ${r.qikinkId}`);
 });

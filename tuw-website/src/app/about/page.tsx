@@ -5,15 +5,11 @@ import Link from 'next/link';
 import Header from '@storefront/components/layout/Header';
 import Footer from '@storefront/components/layout/Footer';
 import TuwEmblem from '@storefront/components/layout/TuwEmblem';
-import { STORE_PRODUCTS } from '@storefront/mocks/fixtures';
+import { useStore } from '@storefront/mocks/store';
 import { CATEGORY_LABELS, RETURN_WINDOW_DAYS, isWearable, productTypeOf } from '@storefront/lib/product';
 import type { Product } from '@storefront/lib/types';
 import { ArrowRight, ArrowUp, PackageCheck, Printer, RotateCcw, ShoppingBag, Truck } from 'lucide-react';
 
-// Stats are computed from the live catalogue so they can never go stale.
-const CLOTHING_COUNT = STORE_PRODUCTS.filter((p) => isWearable(productTypeOf(p))).length;
-const OBJECT_COUNT = STORE_PRODUCTS.length - CLOTHING_COUNT;
-const COLOUR_COUNT = new Set(STORE_PRODUCTS.flatMap((p) => p.colors.map((c) => c.name.toLowerCase()))).size;
 // Round down to a tidy "40+" style figure.
 const roundDown = (n: number) => (n >= 20 ? `${Math.floor(n / 10) * 10}+` : String(n));
 
@@ -31,15 +27,21 @@ const STEPS = [
   },
 ];
 
-// One card per main category, with the first photo from that category.
-const CATEGORY_CARDS: { category: Product['category']; image: string }[] = (
-  ['hoodies', 'tees', 'pants', 'kids', 'accessories'] as Product['category'][]
-).map((category) => ({
-  category,
-  image:
-    STORE_PRODUCTS.find((p) => p.category === category && p.images[0])?.images[0].url ??
-    '/images/samples/women-white-cardigan.jpg',
-}));
+// Stats and category cards come from the live catalogue (database), so they
+// can never go stale.
+function catalogFacts(products: Product[]) {
+  const clothing = products.filter((p) => isWearable(productTypeOf(p))).length;
+  return {
+    CLOTHING_COUNT: clothing,
+    OBJECT_COUNT: products.length - clothing,
+    COLOUR_COUNT: new Set(products.flatMap((p) => p.colors.map((c) => c.name.toLowerCase()))).size,
+    // One card per main category, with the first photo from that category.
+    CATEGORY_CARDS: (['hoodies', 'tees', 'pants', 'kids', 'accessories'] as Product['category'][]).map((category) => ({
+      category,
+      image: products.find((p) => p.category === category && p.images[0])?.images[0].url ?? '/images/samples/women-white-cardigan.jpg',
+    })),
+  };
+}
 
 const HELP_LINKS = [
   { href: '/faq', label: 'FAQ', body: 'Sizing, printing and orders' },
@@ -49,6 +51,8 @@ const HELP_LINKS = [
 ];
 
 export default function AboutPage() {
+  const { products } = useStore();
+  const { CLOTHING_COUNT, OBJECT_COUNT, COLOUR_COUNT, CATEGORY_CARDS } = React.useMemo(() => catalogFacts(products), [products]);
   return (
     <div className="min-h-screen flex flex-col bg-store-canvas text-store-charcoal">
       <Header />

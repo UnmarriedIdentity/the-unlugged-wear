@@ -1,6 +1,6 @@
 # Catalog — Columns, Constraints, Indexes
 
-> Status: Filling | Last Updated: 2026-10-30
+> Status: Active (as built §TL-BE-05) | Last Updated: 2026-11-11
 > 17 tables. Conventions: `01-Conventions.md`. Money semantics follow the
 > open currency decision (`00-README.md` §7) — DECIMAL(12,2) shape is final.
 > The attribute library is the single attribute system; the retired compare
@@ -391,3 +391,51 @@ erDiagram
     products ||--o{ collection_products : collected-in
     collections ||--o{ collection_products : groups
 ```
+
+## As built (TL-BE-05 slice 1, 2026-11-11)
+
+Module `packages/heart/src/modules/catalog` (`planner.ts` pure rules,
+`import.ts` import job, `read.ts` storefront read model).
+
+**Migration 018** adds what the storefront renders: `products.product_type`,
+`variant_label`, `details text[]`, `composition`, `spec_table jsonb`,
+`price_is_draft`, `slug_aliases varchar[]` (old URLs keep resolving),
+`badge`; `product_images.label` + `color_value_id` (colour-specific photos);
+`product_attribute_link_values.position` (per-product value order).
+
+**Storefront read model** (`getStorefrontCatalog()`): only `status =
+'active'`, not deleted, physical products with at least one active
+variant. Shaped exactly like the storefront `Product` type.
+
+- Public `id` = `external_id` (legacy demo id such as `prod-1` / `qk-uh83`)
+  so saved bags and wishlists keep working; `productId` is the uuid.
+- `priceINR` is the **From** price (lowest active variant). When sizes are
+  priced differently (31 Qikink styles, e.g. posters ₹399–₹1,499), each size
+  carries `priceINR`/`priceMinorINR`; cards and the PDP headline say
+  "From ₹…", add-to-bag and the checkout route charge the chosen size.
+- Made-to-order (partner) variants are available while active and the
+  partner is `ready_to_print`, capped at 100 per order; stock counts only
+  apply to stocked items (the inventory module, TL-BE-06).
+- No colour axis → one neutral "Standard" swatch.
+- Partner cost (`products.base_price`), source rows and staff fields never
+  leave `read.ts` (test: "partner cost never reaches the storefront").
+
+**Storefront wiring.** `src/server/catalog.ts` → `getCatalog()`
+(`'use cache'`, tag `products`, `cacheLife('hours')`, no silent fallback),
+read in the root layout next to settings and handed to the demo store
+provider, so every existing page reads database products unchanged.
+PDP / collection layouts use it for `generateStaticParams`, metadata and
+404s. `POST /api/revalidate {"tags":["products"]}` expires it at once.
+`catalog.generated.ts` and `scripts/generate-catalog.mjs` are deleted.
+
+**Demo catalog.** `pnpm db:seed-catalog` imports
+`tuw-website/data/qikink-listing.json` through the import job, then applies
+the old storefront classification + the 14 curated products and 4
+collections (`db/seed/catalog/*.json`) and publishes: 155 products,
+2,348 active variants. Re-running classifies only new products.
+
+**Not yet (slices 2–3):** admin product list/editor and collections on the
+database; categories + megamenu; search ranking; size charts; reviews;
+attribute library editor; provider SKU mappings. Shop/PDP are still Client
+Components reading the catalog from the provider (≈25 KB gzipped, same as
+the old bundle); moving them to Server Components is TL-WEB-BE-08/10.

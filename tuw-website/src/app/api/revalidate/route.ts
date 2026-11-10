@@ -3,10 +3,11 @@ import { z } from 'zod';
 import { guards } from '@/server/session';
 
 // Admin → storefront cache refresh (route-handlers skill). Secret-protected;
-// only known tags. Settings change prices shown to shoppers, so they expire
-// at once ({ expire: 0 }: next request re-reads); content tags use 'max'.
+// only known tags. Settings and products change prices shown to shoppers,
+// so they expire at once ({ expire: 0 }: the next request re-reads instead of
+// being served one stale page); content tags use 'max'.
 const TAGS = ['settings', 'products', 'nav', 'faqs'] as const;
-const IMMEDIATE: ReadonlySet<string> = new Set(['settings']);
+const IMMEDIATE: ReadonlySet<string> = new Set(['settings', 'products']);
 
 export const POST = guards.route(
   {

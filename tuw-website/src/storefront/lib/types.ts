@@ -10,6 +10,9 @@ export type ProductSize = {
   size: string;
   inStock: boolean;
   stockCount: number;
+  /** Set only when sizes are priced differently (partner price tiers). */
+  priceINR?: number;
+  priceMinorINR?: number;
 };
 
 
@@ -69,6 +72,8 @@ export interface ProductFaqItem {
 
 export type Product = {
   id: string;
+  /** Database id (the public `id` keeps the legacy demo id for saved bags/wishlists). */
+  productId?: string;
   slug: string;
   aliases?: string[];
   title: string;
@@ -136,10 +141,8 @@ export type Collection = {
   coverImage: string;
   productCount: number;
   tagline: string;
-  /** Product categories this collection groups; omitted means every product. */
-  categories?: Product['category'][];
-  /** Products whose title contains any of these words (used instead of categories). */
-  titleIncludes?: string[];
+  /** Member product ids in merchandising order (from collection_products). */
+  productIds: string[];
 };
 
 export type CartItem = {

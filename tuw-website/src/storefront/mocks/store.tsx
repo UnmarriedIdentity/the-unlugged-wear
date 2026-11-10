@@ -16,11 +16,8 @@ import {
   Address,
   DemoScenario,
 } from '@storefront/lib/types';
-import {
-  STORE_PRODUCTS,
-  INITIAL_ORDERS,
-  LONG_CONTENT_PRODUCTS,
-} from './fixtures';
+import { INITIAL_ORDERS, toLongContentProducts } from './fixtures';
+import type { Collection } from '@storefront/lib/types';
 
 export interface ToastMessage {
   id: string;
@@ -36,8 +33,9 @@ interface StoreContextType {
   simulatedError: string | null;
   retryConnection: () => void;
 
-  // Products
+  // Products (from the database via the root layout — TL-BE-05)
   products: Product[];
+  collections: Collection[];
   getProductBySlug: (slug: string) => Product | undefined;
 
   // Cart
@@ -104,7 +102,8 @@ const StoreContext = createContext<StoreContextType | null>(null);
 // date, which is still "yesterday" in India until 05:30).
 const localDate = (d: Date) => d.toLocaleDateString('en-CA');
 
-export function StoreProvider({ children }: { children: React.ReactNode }) {
+export function StoreProvider({ children, catalog }: { children: React.ReactNode; catalog: { products: Product[]; collections: Collection[] } }) {
+  const STORE_PRODUCTS = catalog.products;
   // Fees come from admin Settings (store_settings). The demo cart works in
   // whole rupees until the cart module replaces it (TL-BE-07).
   const { shipping } = useSiteSettings();
@@ -113,6 +112,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [scenario, setScenarioState] = useState<DemoScenario>('normal');
   const [simulatedError, setSimulatedError] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[]>(STORE_PRODUCTS);
+  // A fresh catalog (admin edit → revalidated layout) replaces the baseline.
+  useEffect(() => {
+    if (scenario === 'normal') setProducts(catalog.products);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [catalog.products]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [orders, setOrders] = useState<Order[]>(INITIAL_ORDERS);
@@ -426,7 +430,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         description: 'Simulating edge network disruption and recovery flows.',
       });
     } else if (sc === 'long_content') {
-      setProducts(LONG_CONTENT_PRODUCTS);
+      setProducts(toLongContentProducts(STORE_PRODUCTS));
       setSimulatedError(null);
       addToast({
         type: 'info',
@@ -499,6 +503,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         simulatedError,
         retryConnection,
         products,
+        collections: catalog.collections,
         getProductBySlug,
         cart,
         addToCart,

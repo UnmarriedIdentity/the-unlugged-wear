@@ -1,21 +1,23 @@
 import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { STORE_PRODUCTS } from '@storefront/mocks/fixtures';
+import { getCatalog } from '@/server/catalog';
 
 // Resolve the slug (or a legacy alias) on the server before the client page
 // streams, so unknown products return a real 404 and each piece gets its own title.
-function findProduct(slug: string) {
+async function findProduct(slug: string) {
   const key = slug.toLowerCase();
-  return STORE_PRODUCTS.find(
+  const { products } = await getCatalog();
+  return products.find(
     (p) => p.slug.toLowerCase() === key || p.aliases?.some((a) => a.toLowerCase() === key)
   );
 }
 
-// Cache Components: prerender every known product; the list moves to the
-// database with its module (storefront TL-WEB-BE tasks).
-export function generateStaticParams() {
-  return STORE_PRODUCTS.map((p) => ({ slug: p.slug }));
+// Cache Components: prerender every published product (database, cached
+// with the 'products' tag); new products render on demand.
+export async function generateStaticParams() {
+  const { products } = await getCatalog();
+  return products.length ? products.map((p) => ({ slug: p.slug })) : [{ slug: 'everyday-pullover-hoodie' }];
 }
 
 export async function generateMetadata({
@@ -24,7 +26,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const product = findProduct(slug);
+  const product = await findProduct(slug);
   if (!product) return { title: 'Piece Not Found | The Unplugged Wear' };
   return {
     title: `${product.title} | The Unplugged Wear`,
@@ -41,6 +43,6 @@ export default async function ProductLayout({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  if (!findProduct(slug)) notFound();
+  if (!(await findProduct(slug))) notFound();
   return children;
 }

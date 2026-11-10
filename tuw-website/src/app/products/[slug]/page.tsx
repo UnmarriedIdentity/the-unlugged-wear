@@ -22,6 +22,7 @@ import {
   productTypeOf,
   relatedProductsFor,
   variantLabelOf,
+  priceLabel,
 } from '@storefront/lib/product';
 import { formatShortDate } from '@storefront/lib/format';
 import { ArrowRight, ChevronDown, MapPin, MessageSquare } from 'lucide-react';
@@ -258,7 +259,7 @@ export default function ProductDetailPage({
 
               <div className="flex flex-wrap items-baseline gap-3 mt-5">
                 <span className="text-2xl font-medium text-store-charcoal tuw-tabular-nums">
-                  ₹{product.priceINR.toLocaleString('en-IN')}
+                  {priceLabel(product)}
                 </span>
                 {product.compareAtPriceINR && product.compareAtPriceINR > product.priceINR && (
                   <span className="text-base text-store-text-secondary line-through tuw-tabular-nums">
@@ -384,7 +385,7 @@ export default function ProductDetailPage({
       >
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-store-charcoal truncate">{product.title}</p>
-          <p className="text-sm text-store-text-secondary tuw-tabular-nums">₹{product.priceINR.toLocaleString('en-IN')}</p>
+          <p className="text-sm text-store-text-secondary tuw-tabular-nums">{priceLabel(product)}</p>
         </div>
         <button
           type="button"

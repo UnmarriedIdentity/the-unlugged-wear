@@ -126,3 +126,16 @@ export function shopHref(filter: ShopFilter): string {
   const query = params.toString();
   return query ? `/shop?${query}` : '/shop';
 }
+
+// ---- Price tiers (partner prices some sizes higher; TL-BE-05) ----------
+
+/** True when sizes carry their own prices; the product price is then "From". */
+export const hasPriceTiers = (p: Product): boolean => p.sizes.some((s) => s.priceINR !== undefined);
+
+/** Unit price for a chosen size (falls back to the product price). */
+export const sizePriceINR = (p: Product, size?: string | null): number =>
+  p.sizes.find((s) => s.size === size)?.priceINR ?? p.priceINR;
+
+/** "₹1,299" or "From ₹399" for cards and headlines. */
+export const priceLabel = (p: Product): string =>
+  `${hasPriceTiers(p) ? 'From ' : ''}₹${p.priceINR.toLocaleString('en-IN')}`;

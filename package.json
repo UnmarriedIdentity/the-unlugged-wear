@@ -24,7 +24,8 @@
     "typecheck:heart": "pnpm --dir packages/heart typecheck",
     "test:heart": "pnpm --dir packages/heart test",
     "db:types": "pnpm --dir packages/heart exec node --env-file-if-exists=../../.env.local node_modules/drizzle-kit/bin.cjs pull --config drizzle.config.ts && node packages/heart/scripts/fix-generated.mjs",
-    "auth:bootstrap-admin": "node --env-file-if-exists=.env.local --conditions=react-server packages/heart/scripts/bootstrap-admin.ts"
+    "auth:bootstrap-admin": "node --env-file-if-exists=.env.local --conditions=react-server packages/heart/scripts/bootstrap-admin.ts",
+    "db:seed-catalog": "node --env-file-if-exists=.env.local --conditions=react-server packages/heart/scripts/seed-demo-catalog.ts"
   },
   "devDependencies": {
     "pg": "8.13.1"
