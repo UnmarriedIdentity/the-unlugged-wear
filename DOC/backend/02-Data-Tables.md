@@ -99,12 +99,12 @@ per-product shopper-facing label. New types are rows, not tables.
 
 | Table | Purpose | Key links |
 |---|---|---|
-| orders | Number-unique, dual status axes, stored totals, address snapshots; placed-by + for-profile (both NOT NULL — checkout requires login) + `for_household_id` with a composite FK proving the recipient is a member of that household; `idempotency_key` + partial unique so a retried checkout returns the same order | users (placed-by), profiles (for), households (for), discount_codes |
+| orders | Number-unique, dual status axes, stored totals, address snapshots; **account order**: placed-by + for-profile + `for_household_id` (composite FK proves the recipient is a household member); **guest order**: `guest_email` + `guest_name` (+ `guest_phone`) instead — CHECK `orders_buyer_identity` allows exactly one shape; `order_type` (standard/exchange); `gift_card_amount` (added by 008); `idempotency_key` + partial unique so a retried checkout returns the same order | users (placed-by), profiles (for), households (for), discount_codes |
 | order_items | Immutable snapshots (name/sku/price/line, options jsonb) + `returned_qty` with `CHECK (returned_qty <= qty)` | orders (cascade) |
 | order_status_history | Status timeline + actor | orders |
 | payments | Provider lifecycle, `method` (upi/card/netbanking/wallet/cod), unique transaction ref | orders |
-| refunds | Refund records: amount, reason, method, status, actor (one open refund per order partial unique) | orders, users (actor) |
-| returns | Customer request → RMA: `rma_number` unique, requester, `type` (return/exchange), `status` pipeline (requested…completed/cancelled/disputed), `resolution` axis, decision fields, `refund_id` 1:1 | orders, profiles, users, refunds |
+| refunds | Refund records: amount, reason, method (`source` only — no store credit), status, actor (one open refund per order partial unique) | orders, users (actor) |
+| returns | Customer request → RMA: `rma_number` unique, requester, `type` (return/exchange), `status` pipeline (requested…completed/cancelled/disputed), `resolution` axis (refund/exchange/none), decision fields, `refund_id` 1:1, `replacement_order_id` (exchange's replacement order), `requester_email` for guest orders | orders, profiles, users, refunds |
 | return_items | Per-line qty + `reason_code` + disposition + `exchange_variant_id` + agreed line `refund_amount`; unique (return, order_item) | returns, order_items, product_variants |
 | return_status_history | Return timeline, written in the same TX as `returns.status` | returns (cascade) |
 | discount_codes | Code-unique coupons, caps, expiry | — |
@@ -143,7 +143,11 @@ Whole-document reads; app-layer Zod validation. No `content_html`, no
 | blog_revisions | Immutable revision snapshots | blogs, users (author) |
 | blog_slug_history | Retired slugs → `301` redirect targets | blogs |
 | blog_post_media | FK ledger for inline JSON media | blogs, media |
-| store_settings | Operational config key-value (key UNIQUE, value jsonb): brand, payments, shipping, taxes, notifications tabs | — |
+| cms_sections | Ordered page sections by `page_key` (hero, banner, featured_products, blog_teaser, brands, testimonial); `content` jsonb | users (updated_by) |
+| cms_settings | Single-row theme document per `scope` with a `version` cache-buster | users |
+| navigation_settings | Single-row navbar/megamenu document (`navbar` jsonb) | users |
+| pages | Static pages (about, shipping, returns policy) as block documents + SEO, by unique `slug` | users |
+| store_settings | Operational config key-value (key UNIQUE, value jsonb): brand, payments, shipping (incl. `shipping.free_threshold`), taxes, notifications, `exchange.window_days`, `inventory.low_stock_threshold` | — |
 
 ## Analytics, partitioned (7) → detail: `10-Analytics.md`
 
@@ -156,6 +160,10 @@ events drop >30d, rollups kept forever. The session table is
 
 | Table | Purpose | Key links |
 |---|---|---|
+| page_views | Raw page-view events (partitioned monthly by `ts`, `_default` partition) — session, path, referrer | users (nullable) |
+| cart_events | Raw cart events (item_added / item_removed / qty_changed / cart_viewed), partitioned monthly | carts, users (nullable) |
+| abandoned_carts | One row per abandoned cart; exactly-once `reminded_at` | carts (unique), users (nullable) |
+| daily_stats | Permanent daily rollups (never partitioned, never dropped) | — |
 | analytics_sessions | One row per browsing session, upserted by unique `session_id` on heartbeat; embedded page path for funnels | users (nullable) |
 | product_views | PDP views with product FK (top-viewed, viewed-but-OOS) — never parsed from URLs | products, users (nullable) |
 | search_terms | Term, hits, result count (zero-result → import guidance) | — |
@@ -167,6 +175,18 @@ events drop >30d, rollups kept forever. The session table is
 | support_tickets | Threads: subject, priority, status, `source` (`contact_form` = storefront contact page), optional `order_id`; a guest thread carries `guest_name` + `guest_email` (CHECK: user *or* both guest fields) | users (nullable customer) |
 | support_messages | Normalized replies with sender + timestamp; `UNIQUE (ticket_id, created_at, sender)` collapses a retried send | support_tickets (cascade) |
 | notifications | In-app bell: `kind` ∈ order/cart/inventory/payment/system/marketing/refund, title/body/link, read_at; `dedupe_key` + partial unique so the same event never rings twice (email stays in `email_logs`) | users |
+
+## Commerce extras (5) → detail: `22-Commerce-Extras.md`
+
+Implemented in `008-commerce-extras.sql`.
+
+| Table | Purpose | Key links |
+|---|---|---|
+| newsletter_subscribers | One row per email (unique `lower(email)`): status pending/subscribed/unsubscribed/bounced, source, double opt-in token hash, consent timestamps | users (nullable, linked on sign-up) |
+| faqs | `/faq` and product/category FAQs: scope general/product/category, group label, question, answer, order, published flag | products, categories, users (author) |
+| gift_cards | Hashed code + last 4, initial value, cached balance, status, expiry, recipient, buying order line or issuing staff member | order_items (nullable, unique), users (issuer) |
+| gift_card_transactions | Append-only ledger: issue / redeem / reversal / adjust, amount, balance after; one redeem per (card, order) | gift_cards, orders (nullable) |
+| stock_alert_subscriptions | Back-in-stock requests (guest email or customer) per product/variant; waiting → notified / cancelled | products, product_variants (nullable), users (nullable) |
 
 ## Partner seam (2) → detail: `16-Partner-Qikink.md`
 
