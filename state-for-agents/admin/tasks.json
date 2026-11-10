@@ -5951,7 +5951,7 @@
       "parent": "TL-BE-CORE",
       "started": "2026-11-11",
       "finished": null,
-      "log": "Slice 1 of 3 done (commit: see TL-BE-05.01 log): catalog module (planner, import job, storefront read model), migration 018, demo catalog seed (155 products / 2,348 variants from the Qikink listing + 14 curated + 4 collections), storefront reads products and collections from the DB (cached, products tag expires immediately), catalog.generated.ts retired, price tiers. Slice 2: admin products/collections + categories/megamenu. Slice 3: search, size charts, reviews, attribute library, SKU mappings.",
+      "log": "Slice 1 of 3 done (commit 794eb68): catalog module (planner, import job, storefront read model), migration 018, demo catalog seed (155 products / 2,348 variants from the Qikink listing + 14 curated + 4 collections), storefront reads products and collections from the DB (cached, products tag expires immediately), catalog.generated.ts retired, price tiers. Slice 2: admin products/collections + categories/megamenu. Slice 3: search, size charts, reviews, attribute library, SKU mappings.",
       "wiring": "modules/catalog (reads cached with product/collection tags); admin product editor + import; storefront shop/collections/PDP/search as cached Server Components per the rendering skills.",
       "done_when": "Products imported from tuw-website/data/qikink-listing.json appear in admin and on the storefront from the DB; editing a product updates the storefront via tag revalidation; catalog.generated.ts no longer used.",
       "depends_on": [
