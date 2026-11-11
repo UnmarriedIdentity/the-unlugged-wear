@@ -1,7 +1,7 @@
 # The Unplugged Wear — Route Directory
 
 > **Two packages, two deployments.** `tuw-website` (storefront, port 3007) and `tuw-admin`
-> (staff panel, port 3001) are independent Next.js apps in one pnpm workspace. No route of one
+> (staff panel, port 3024) are independent Next.js apps in one pnpm workspace. No route of one
 > app is served by the other, so no storefront URL can collide with an admin one.
 >
 > **Repository**: [github.com/UnmarriedIdentity/the-unplugged-wear](https://github.com/UnmarriedIdentity/the-unplugged-wear)
@@ -12,7 +12,7 @@
 | App | Local | Route tree | Source root |
 |---|---|---|---|
 | Storefront | <http://localhost:3007> | `tuw-website/src/app/**` | `tuw-website/src/storefront/**` (`@storefront/*`) |
-| Admin panel | <http://localhost:3001> | `tuw-admin/src/app/**` | `tuw-admin/src/{components,hooks,lib,mocks}/**` (`@/*`) |
+| Admin panel | <http://localhost:3024> | `tuw-admin/src/app/**` | `tuw-admin/src/{components,hooks,lib,mocks}/**` (`@/*`) |
 
 ---
 
@@ -96,7 +96,7 @@ Any other path renders the storefront not-found page through the `[...notfound]`
 
 # Part B — Admin panel (`tuw-admin`)
 
-Routes are relative to the panel's own origin (`:3001` or its own Vercel project). The
+Routes are relative to the panel's own origin (`:3024` or its own Vercel project). The
 `(dashboard)` route group is URL-transparent, so a source file at
 `src/app/(dashboard)/orders/page.tsx` serves `/orders`.
 

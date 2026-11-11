@@ -167,7 +167,7 @@ another.
 `pnpm run dev` (or `pnpm dev:website` from the workspace root) starts this app on port 3007:
 
 * Storefront — <http://localhost:3007/>
-* Admin panel — separate app, port 3001 (`pnpm dev:admin`)
+* Admin panel — separate app, port 3024 (`pnpm dev:admin`)
 
 ### Internal QA pages
 
