@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive, GripVertical, Upload, Images, Focus, Library, RotateCcw, X } from 'lucide-react';
@@ -9,7 +10,8 @@ import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, IconB
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 import { resolveVariants, variantStockTotal, buildVariantSku, deriveVariantPrice, recomputeVariants, minFromPrice, pruneAdjustments, roundPrice, hasPriceSpread, adjustmentKey, sumAdjustments } from '@/mocks/variants';
-import type { ProductVariant, ProductAttribute, PhotoSettings, ProductDiscount, SizeChart, ProductGender } from '@/mocks/fixtures';
+import type { ProductVariant, ProductAttribute, PhotoSettings, ProductDiscount, SizeChart, ProductGender, StockMovement } from '@/mocks/fixtures';
+import { createProductAction, deleteProductsAction, getProductAction, importListingAction, setProductsStatusAction, updateProductAction } from '@/server/catalog-actions';
 import { parseCompareAtPrice } from '@/lib/productPricing';
 import { groupImportRows, isValidHsnCode, UNCATEGORIZED_CATEGORY } from '@/lib/productImport';
 import type { ImportProductGroup, ImportSourceRow } from '@/lib/productImport';
@@ -17,18 +19,6 @@ import { slugify } from '@/lib/collections';
 import { attributeDisplayLabel, normalizeAttributeDisplayType } from '@/lib/attributePresentation';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
-
-const PRODUCT_CATEGORIES: ProductItem['category'][] = [
-  'T-Shirts',
-  'Hoodies',
-  'Jackets',
-  'Pants',
-  'Accessories',
-  'Home & Living',
-  'Stationery',
-  'Phone Accessories',
-  UNCATEGORIZED_CATEGORY,
-];
 
 // SearchableSelect uses a real value for the selected row; keep the form's
 // empty-string "unspecified" state at the boundary only.
@@ -117,15 +107,30 @@ const attributeGroupLabelStyle: React.CSSProperties = {
 // (fixtures) so the seam persists it verbatim; see the REST note there.
 // swatch dots stay neutral until a value→hex map lands (recorded follow-up).
 
-export default function ProductsView() {
-  const { products, createProduct, createProducts, updateProduct, deleteProduct, canPerformAction, showToast, stockMovements, sizeCharts, createSizeChart, deleteSizeChart, addSizeChartRow, removeSizeChartRow, patchSizeChartCell, libraryAttributes, createLibraryAttribute, addLibraryValue } = useAdminState();
+export default function ProductsView({ initialProducts, categories, perms, storefrontOrigin }: { initialProducts: ProductItem[]; categories: string[]; perms: string[]; storefrontOrigin: string }) {
+  // Product photos with local paths are served by the storefront app.
+  const assetSrc = (url: string) => (url.startsWith('/') ? `${storefrontOrigin}${url}` : url);
+  // Products are real (TL-BE-05); size charts and the attribute library stay
+  // demo state until slice 3.
+  const { showToast, sizeCharts, createSizeChart, deleteSizeChart, addSizeChartRow, removeSizeChartRow, patchSizeChartCell, libraryAttributes, createLibraryAttribute, addLibraryValue } = useAdminState();
+  const router = useRouter();
+  const [products, setProducts] = useState<ProductItem[]>(initialProducts);
+  useEffect(() => setProducts(initialProducts), [initialProducts]);
+  const [stockMovements, setStockMovements] = useState<StockMovement[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [openingId, setOpeningId] = useState<string | null>(null);
+  const can = (permission: string) => perms.includes(permission);
+  const canPerformAction = (_category: 'products') => can('product.update');
+  const refused = (what: string) => showToast({ type: 'warning', title: 'Action Restricted', description: `You do not have permission to ${what}.` });
+  /** Honest save toast: says when the storefront could not be refreshed. */
+  const storefrontNote = (storefront: { ok: true } | { ok: false; reason: string }) =>
+    storefront.ok ? 'The storefront now shows it.' : `${storefront.reason} Shoppers will see it within the hour.`;
 
-  // Base categories plus any category an import brought in. Keeping this
-  // derived means a Category column value never disappears from the picker.
+  // Real categories plus any name already on a product, and Uncategorized.
   const categoryOptions = React.useMemo(() => {
-    const categories = [...new Set([...PRODUCT_CATEGORIES, ...products.map((product) => product.category)])];
-    return categories.filter(Boolean).map((category) => ({ value: category, label: category }));
-  }, [products]);
+    const names = [...new Set([...categories, ...products.map((product) => product.category), UNCATEGORIZED_CATEGORY])];
+    return names.filter(Boolean).map((category) => ({ value: category, label: category }));
+  }, [categories, products]);
 
   const [selectedCat, setSelectedCat] = useState<string>('All');
   const [publicationFilter, setPublicationFilter] = useState<'all' | 'published' | 'draft' | 'archived'>('all');
@@ -163,7 +168,7 @@ export default function ProductsView() {
   // Form State for Create/Edit
   const [formName, setFormName] = useState('');
   const [formSlug, setFormSlug] = useState('');
-  const [formCategory, setFormCategory] = useState<ProductItem['category']>('T-Shirts');
+  const [formCategory, setFormCategory] = useState<ProductItem['category']>(categories[0] ?? UNCATEGORIZED_CATEGORY);
   const [formPrice, setFormPrice] = useState('48.00');
   const [formComparePrice, setFormComparePrice] = useState('');
   const [formCompareError, setFormCompareError] = useState<string | null>(null);
@@ -222,7 +227,7 @@ export default function ProductsView() {
   const addDiscountRef = useRef<HTMLDivElement>(null);
 
   const openCreateDrawer = () => {
-    if (!canPerformAction('products')) return;
+    if (!can('product.create')) return refused('create products');
     setEditingProduct(null);
     setIsCreating(true);
     setBasicCardOpen(false);
@@ -240,7 +245,7 @@ export default function ProductsView() {
     setStageIndex(0);
     setFormName('');
     setFormSlug('');
-    setFormCategory('T-Shirts');
+    setFormCategory(categories[0] ?? UNCATEGORIZED_CATEGORY);
     setFormPrice('48.00');
     setFormComparePrice('');
     setFormCompareError(null);
@@ -878,8 +883,20 @@ export default function ProductsView() {
     );
   };
 
-  const openEditDrawer = (product: ProductItem) => {
-    if (!canPerformAction('products')) return;
+  // The list is light (no variants); the full record loads when a product opens.
+  const openEditDrawer = async (summary: ProductItem) => {
+    if (!can('product.update')) return refused('edit products');
+    if (openingId) return;
+    setOpeningId(summary.id);
+    const result = await getProductAction({ id: summary.id });
+    setOpeningId(null);
+    if (!result.ok) return showToast({ type: 'warning', title: 'Could Not Open Product', description: result.error.message });
+    const { movements, ...detail } = result.data;
+    setStockMovements(movements as StockMovement[]);
+    loadEditDrawer(detail as unknown as ProductItem);
+  };
+
+  const loadEditDrawer = (product: ProductItem) => {
     setIsCreating(false);
     setEditingProduct(product);
     setBasicCardOpen(false);
@@ -987,8 +1004,22 @@ export default function ProductsView() {
     setFormDescription(product.description);
   };
 
-  const handleEditSubmit = (e: React.FormEvent) => {
+  /** Field errors from the server decide which tab the editor shows. */
+  const showSaveError = (error: { message: string; details: { field?: string }[] }) => {
+    const fieldName = error.details[0]?.field ?? '';
+    if (fieldName.startsWith('variants')) setProductTab('variants');
+    else if (fieldName.startsWith('images')) setProductTab('media');
+    else if (fieldName) {
+      setProductTab('general');
+      setBasicCardOpen(true);
+      setPricingCardOpen(true);
+    }
+    showToast({ type: 'warning', title: 'Not Saved', description: error.message });
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (saving) return;
     if (!isValidHsnCode(formHsn)) {
       setPricingCardOpen(true);
       setProductTab('general');
@@ -1011,9 +1042,10 @@ export default function ProductsView() {
         return;
       }
       setFormCompareError(null);
-      createProduct({
-        name: formName || 'Untitled Garment',
-        slug: formSlug || formName.toLowerCase().replace(/\s+/g, '-'),
+      setSaving(true);
+      const created = await createProductAction({
+        name: formName,
+        slug: formSlug,
         category: formCategory,
         price: priceNum,
         compareAtPrice: compare.value,
@@ -1028,7 +1060,6 @@ export default function ProductsView() {
         gender: formGender || undefined,
         taxRate: formTax.trim() !== '' && !isNaN(parseFloat(formTax)) ? parseFloat(formTax) : undefined,
         hsnCode: formHsn.trim() || undefined,
-        sizeChartId: formSizeChartId || undefined,
         partner: formPartner,
         publicationStatus: formStatus,
         description: formDescription,
@@ -1048,6 +1079,11 @@ export default function ProductsView() {
             }
           : undefined,
       });
+      setSaving(false);
+      // A refused save keeps the drawer open with every input intact.
+      if (!created.ok) return showSaveError(created.error);
+      setProducts((list) => [created.data.product as unknown as ProductItem, ...list]);
+      showToast({ type: 'success', title: 'Product Created', description: `"${created.data.product.name}" was saved. ${created.data.product.publicationStatus === 'published' ? storefrontNote(created.data.storefront) : 'It stays hidden until published.'}` });
       const droppedCount = formImages.filter((im) => !im.persisted).length;
       if (droppedCount > 0) {
         showToast({
@@ -1092,7 +1128,13 @@ export default function ProductsView() {
     setFormCompareError(null);
     const cleanAdjustments = pruneAdjustments(formAdjustments, formAttributes).next;
 
-    updateProduct(editingProduct.id, {
+    setSaving(true);
+    const updated = await updateProductAction({
+      id: editingProduct.id,
+      expectedUpdatedAt: editingProduct.updatedAt,
+      colors: colorValues,
+      sizes: sizeValues,
+      stock: submitVariants.reduce((n, v) => n + v.stock, 0),
       name: formName,
       slug: formSlug,
       category: formCategory,
@@ -1111,7 +1153,6 @@ export default function ProductsView() {
       gender: formGender || undefined,
       taxRate: formTax.trim() !== '' && !isNaN(parseFloat(formTax)) ? parseFloat(formTax) : undefined,
       hsnCode: formHsn.trim() || undefined,
-      sizeChartId: formSizeChartId || undefined,
       photoSettings: formPhoto,
       discounts: formDiscounts,
       images: formImages.filter((im) => im.persisted).map((im) => im.src),
@@ -1129,6 +1170,10 @@ export default function ProductsView() {
           }
         : undefined,
     });
+    setSaving(false);
+    if (!updated.ok) return showSaveError(updated.error);
+    setProducts((list) => list.map((p) => (p.id === editingProduct.id ? (updated.data.product as unknown as ProductItem) : p)));
+    showToast({ type: 'success', title: 'Product Updated', description: `Changes saved. ${storefrontNote(updated.data.storefront)}` });
 
     const droppedCount = formImages.filter((im) => !im.persisted).length;
     if (droppedCount > 0) {
@@ -1157,8 +1202,8 @@ export default function ProductsView() {
       stockFilter === 'all'
         ? true
         : stockFilter === 'low'
-          ? p.stock > 0 && p.stock <= 10
-          : p.stock === 0;
+          ? !p.madeToOrder && p.stock > 0 && p.stock <= 10
+          : !p.madeToOrder && p.stock === 0;
     return matchesSearch && matchesCat && matchesPub && matchesStock;
   });
 
@@ -1279,9 +1324,11 @@ export default function ProductsView() {
   const [importPreview, setImportPreview] = useState<{
     fileName: string;
     groups: ImportProductGroup[];
+    rows: ImportSourceRow[];
     errors: Array<{ row: number; message: string }>;
     hasCategoryColumn: boolean;
   } | null>(null);
+  const [importing, setImporting] = useState(false);
   const csvInputRef = useRef<HTMLInputElement>(null);
   const importVariantTotal =
     importPreview?.groups.reduce((total, group) => total + group.variants.length, 0) ?? 0;
@@ -1474,6 +1521,7 @@ export default function ProductsView() {
       setImportPreview({
         fileName: file.name,
         groups: grouped.groups,
+        rows,
         errors: [...errors, ...grouped.errors],
         hasCategoryColumn: cCategory >= 0,
       });
@@ -1481,91 +1529,46 @@ export default function ProductsView() {
     reader.readAsText(file);
   };
 
-  const applyImport = () => {
-    if (!importPreview || importPreview.groups.length === 0) return;
-    if (!canPerformAction('products')) return;
-    const stamp = Date.now().toString(36);
-    const stagedVariants = importPreview.groups.reduce(
-      (total, group) => total + group.variants.length,
-      0
-    );
-
-    const drafts = importPreview.groups.map((group, i) => {
-      const minPrice =
-        group.variants.length > 0 ? Math.min(...group.variants.map((variant) => variant.price)) : 0;
-      const lowestVariant = group.variants.reduce<ImportProductGroup['variants'][number] | undefined>(
-        (lowest, variant) => (!lowest || variant.price < lowest.price ? variant : lowest),
-        undefined
-      );
-      const compareAtPrice =
-        lowestVariant?.compareAtPrice !== undefined && lowestVariant.compareAtPrice > minPrice
-          ? lowestVariant.compareAtPrice
-          : undefined;
-      const gender = IMPORT_GENDERS.find(
-        (value) => value.toLowerCase() === group.gender.toLowerCase()
-      );
-
-      return {
-        name: group.name || 'Untitled Garment',
-        slug: `${slugify(group.name) || 'product'}-imp-${stamp}-${i}`,
-        category: group.category || UNCATEGORIZED_CATEGORY,
-        price: minPrice,
-        basePrice: minPrice,
-        compareAtPrice,
-        stock: 0,
-        colors: group.colors.length > 0 ? group.colors : ['Default'],
-        sizes: group.sizes.length > 0 ? group.sizes : ['Standard'],
-        partner: 'Qikink Direct API' as const,
-        publicationStatus: 'draft' as const,
-        description: '',
-        images: [],
-        styleCode: group.styleCode || undefined,
-        internalSerialNo: group.serialNo,
-        sourceGroupKey: group.key,
-        weight: group.weight || undefined,
-        shippingWeight: group.shippingWeight || undefined,
-        dimensions: group.dimensions || undefined,
-        gender,
-        taxRate: group.taxRate,
-        hsnCode: group.hsnCode || undefined,
-        sourceRows: group.sourceRows,
-        variants: group.variants.map((variant) => ({
-          id: '',
-          sku: '',
-          color: variant.color,
-          size: variant.size,
-          price: variant.price,
-          priceOverridden: true,
-          stock: 0,
-          weight: variant.weight,
-          shippingWeight: variant.shippingWeight,
-          dimensions: variant.dimensions,
-          sourceSerialNo: variant.sourceSerialNo,
-        })),
-        attributes: [
-          { name: 'Color', values: group.colors, builtin: true, displayType: 'swatch' as const, swatchHex: {} },
-          { name: 'Size', values: group.sizes, builtin: true, displayType: 'pill' as const, swatchHex: {} },
-          { name: 'Placements', values: group.placements, builtin: true, displayType: 'radio' as const, swatchHex: {} },
-        ],
-      };
+  // The server re-validates every row and creates drafts (import_jobs); the
+  // preview above is only a convenience.
+  const applyImport = async () => {
+    if (!importPreview || importPreview.rows.length === 0 || importing) return;
+    if (!can('product.import')) return refused('import products');
+    setImporting(true);
+    const result = await importListingAction({
+      rows: importPreview.rows.map((r) => ({
+        qikinkId: r.serialNo ?? r.rowNo,
+        gender: r.gender,
+        style: r.styleCode ? `${r.name} | ${r.styleCode}` : r.name,
+        sizes: r.sizes.join(','),
+        colors: r.colors.join(','),
+        placements: r.placements.join(','),
+        basePriceINR: r.price,
+        weightGrams: r.weight,
+        shippingWeightGrams: r.shippingWeight,
+        packageDimensionsCm: r.dimensions,
+        taxRatePercent: r.tax,
+        hsn: r.hsnCode,
+        category: r.category,
+      })),
     });
-
-    const staged = createProducts(drafts, true);
+    setImporting(false);
+    if (!result.ok) return showToast({ type: 'warning', title: 'Import Failed', description: result.error.message });
     setImportPreview(null);
     if (csvInputRef.current) csvInputRef.current.value = '';
+    const { created, updated, failedRows } = result.data;
     showToast({
-      type: 'success',
-      title: 'Import Staged',
-      description: `${staged} draft product${staged === 1 ? '' : 's'} with ${stagedVariants} variant${
-        stagedVariants === 1 ? '' : 's'
-      } added — review and publish each from the catalog. Demo catalog persists locally.`,
+      type: failedRows ? 'warning' : 'success',
+      title: failedRows ? 'Import Partly Done' : 'Import Staged',
+      description: `${created} new draft${created === 1 ? '' : 's'}, ${updated} already in the catalog${failedRows ? `, ${failedRows} row${failedRows === 1 ? '' : 's'} refused` : ''}. Review prices and publish each from the catalog.`,
     });
+    router.refresh();
   };
 
   // Customer-view gallery slides: the ordered image list (persisted + previews).
   const gallerySlides: Array<{ type: 'image'; src: string; alt: string }> = formImages.map((im) => ({
     type: 'image' as const,
-    src: im.src,
+    src: assetSrc(im.src),
     alt: formName || 'Product image',
   }));
 
@@ -1616,58 +1619,52 @@ export default function ProductsView() {
     clearSelection();
   };
 
-  const handleBulkStatus = (status: 'published' | 'archived', label: string) => {
+  const handleBulkStatus = async (status: 'published' | 'archived', label: string) => {
     const ids = [...selectedIds];
-    if (ids.length === 0) return;
-    if (!canPerformAction('products')) {
-      showToast({
-        type: 'warning',
-        title: 'Action Restricted',
-        description: 'Your demo role cannot update products.',
-      });
-      return;
-    }
-    ids.forEach((id) => updateProduct(id, { publicationStatus: status }, true));
-    if (editingProduct && selectedIds.has(editingProduct.id)) {
-      setEditingProduct({ ...editingProduct, publicationStatus: status });
-    }
+    if (ids.length === 0 || saving) return;
+    if (!can(status === 'archived' ? 'product.archive' : 'product.update')) return refused('change product status');
+    setSaving(true);
+    const result = await setProductsStatusAction({ ids, status });
+    setSaving(false);
+    if (!result.ok) return showToast({ type: 'warning', title: 'Not Updated', description: result.error.message });
+    const done = new Set(result.data.updated);
+    setProducts((list) => list.map((p) => (done.has(p.id) ? { ...p, publicationStatus: status } : p)));
+    if (editingProduct && done.has(editingProduct.id)) setEditingProduct({ ...editingProduct, publicationStatus: status });
     setPublicationFilter('all');
     setCurrentPage(1);
+    const { refused: skipped } = result.data;
     showToast({
-      type: 'success',
-      title: 'Bulk Update Applied',
-      description: `${ids.length} product${ids.length === 1 ? '' : 's'} marked ${label}.`,
+      type: skipped.length ? 'warning' : 'success',
+      title: skipped.length ? 'Partly Updated' : 'Bulk Update Applied',
+      description: `${done.size} product${done.size === 1 ? '' : 's'} marked ${label}.${skipped.length ? ` Skipped: ${skipped.slice(0, 3).map((x) => `${x.name} (${x.reason})`).join(', ')}${skipped.length > 3 ? ` and ${skipped.length - 3} more` : ''}.` : ''}`,
     });
     clearSelection();
   };
 
-  const handleBulkDelete = () => {
+  const removeProducts = async (ids: string[]) => {
+    if (!can('product.archive')) { refused('delete products'); return false; }
+    setSaving(true);
+    const result = await deleteProductsAction({ ids });
+    setSaving(false);
+    if (!result.ok) { showToast({ type: 'warning', title: 'Not Deleted', description: result.error.message }); return false; }
+    const gone = new Set(result.data.deleted);
+    setProducts((list) => list.filter((p) => !gone.has(p.id)));
+    return true;
+  };
+
+  const handleBulkDelete = async () => {
     const ids = [...selectedIds];
-    if (ids.length === 0) return;
-    if (!canPerformAction('products')) {
-      showToast({
-        type: 'warning',
-        title: 'Action Restricted',
-        description: 'Your demo role cannot delete products.',
-      });
-      return;
-    }
-    if (!window.confirm(`Permanently delete ${ids.length} product${ids.length === 1 ? '' : 's'} from catalog?`)) return;
-    ids.forEach((id) => deleteProduct(id, true));
-    if (editingProduct && selectedIds.has(editingProduct.id)) {
-      setEditingProduct(null);
-    }
+    if (ids.length === 0 || saving) return;
+    if (!window.confirm(`Delete ${ids.length} product${ids.length === 1 ? '' : 's'} from the catalog? They disappear from the store; past orders keep their records.`)) return;
+    if (!(await removeProducts(ids))) return;
+    if (editingProduct && selectedIds.has(editingProduct.id)) setEditingProduct(null);
     setCurrentPage(1);
-    showToast({
-      type: 'success',
-      title: 'Bulk Delete Applied',
-      description: `${ids.length} product${ids.length === 1 ? '' : 's'} removed from catalog.`,
-    });
+    showToast({ type: 'success', title: 'Bulk Delete Applied', description: `${ids.length} product${ids.length === 1 ? '' : 's'} removed from the catalog.` });
     clearSelection();
   };
 
-  const lowStockCount = products.filter((p) => p.stock > 0 && p.stock <= 10).length;
-  const outOfStockCount = products.filter((p) => p.stock === 0).length;
+  const lowStockCount = products.filter((p) => !p.madeToOrder && p.stock > 0 && p.stock <= 10).length;
+  const outOfStockCount = products.filter((p) => !p.madeToOrder && p.stock === 0).length;
   const draftCount = products.filter((p) => p.publicationStatus === 'draft').length;
 
   // KPI cards double as filters (shared by grid + table views)
@@ -1777,7 +1774,7 @@ export default function ProductsView() {
       </span>
       <MediaFrame height={40} width={40} radius={8} style={{ flexShrink: 0 }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={im.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        <img src={assetSrc(im.src)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       </MediaFrame>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -1854,7 +1851,7 @@ export default function ProductsView() {
         >
           <MediaFrame height={72} width={72} radius={8} style={{ flexShrink: 0 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={im.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src={assetSrc(im.src)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </MediaFrame>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -2058,12 +2055,15 @@ export default function ProductsView() {
             >
               <span>Attribute Library</span>
             </LinkButton>
+            <LinkButton href="/products/categories" variant="secondary" size="md" icon={<Tag size={16} />}>
+              Categories
+            </LinkButton>
             <Button
               variant="secondary"
               size="md"
               icon={<Upload size={16} />}
               onClick={() => {
-                if (!canPerformAction('products')) return;
+                if (!can('product.import')) return refused('import products');
                 csvInputRef.current?.click();
               }}
             >
@@ -2097,7 +2097,7 @@ export default function ProductsView() {
         <StatCard
           label="Total Products"
           value={String(products.length)}
-          trend="Managed in local memory"
+          trend="In the database"
           trendType="up"
           hoverable
           role="button"
@@ -2265,7 +2265,8 @@ export default function ProductsView() {
                 >
                   {p.images[0] ? (
                     <Image
-                      src={p.images[0]}
+                      src={assetSrc(p.images[0])}
+                      unoptimized
                       alt={p.name}
                       fill
                       sizes="(max-width: 768px) 100vw, 320px"
@@ -2300,8 +2301,8 @@ export default function ProductsView() {
                       {p.category} · {p.partner}
                     </span>
                   </div>
-                  <Badge variant={p.stock > 10 ? 'success' : p.stock > 0 ? 'warning' : 'danger'}>
-                    {p.stock > 10 ? `${p.stock} in stock` : p.stock > 0 ? `Low: ${p.stock}` : 'Out of stock'}
+                  <Badge variant={p.madeToOrder || p.stock > 10 ? 'success' : p.stock > 0 ? 'warning' : 'danger'}>
+                    {p.madeToOrder ? 'Made to order' : p.stock > 10 ? `${p.stock} in stock` : p.stock > 0 ? `Low: ${p.stock}` : 'Out of stock'}
                   </Badge>
                 </div>
 
@@ -2316,7 +2317,7 @@ export default function ProductsView() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 14, paddingTop: 10, borderTop: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
                   <div>
                     <span className="tuw-tabular-nums" style={{ fontSize: '18px', fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-                      {hasPriceSpread(resolveVariants(p)) && (
+                      {p.priceSpread && (
                         <span style={{ fontSize: '12px', fontWeight: 400, color: 'var(--tuw-text-secondary, #5D6772)', marginRight: 5 }}>From</span>
                       )}
                       ₹{p.price.toFixed(2)}
@@ -2328,7 +2329,7 @@ export default function ProductsView() {
                     )}
                   </div>
 
-                  <Button variant="secondary" size="sm" icon={<Edit3 size={14} />} onClick={() => openEditDrawer(p)}>
+                  <Button variant="secondary" size="sm" icon={<Edit3 size={14} />} disabled={openingId === p.id} aria-busy={openingId === p.id} onClick={() => void openEditDrawer(p)}>
                     Manage
                   </Button>
                 </div>
@@ -2409,7 +2410,7 @@ export default function ProductsView() {
               paginatedProducts.map((p) => (
                 <TableRow
                   key={p.id}
-                  onClick={() => openEditDrawer(p)}
+                  onClick={() => void openEditDrawer(p)}
                   style={{ cursor: 'pointer', backgroundColor: selectedIds.has(p.id) ? 'var(--tuw-bg-canvas, #F7F8F9)' : 'transparent' }}
                 >
                   <TableCell style={{ padding: '14px 16px' }}>
@@ -2424,7 +2425,7 @@ export default function ProductsView() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                       <div style={{ width: 40, height: 40, borderRadius: 8, overflow: 'hidden', position: 'relative', flexShrink: 0, background: 'var(--tuw-bg-canvas, #F7F8F9)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--tuw-border-subtle, #E5E7EB)' }}>
                         {p.images[0] ? (
-                          <Image src={p.images[0]} alt={p.name} fill sizes="80px" style={{ objectFit: 'cover' }} />
+                          <Image src={assetSrc(p.images[0])} unoptimized alt={p.name} fill sizes="80px" style={{ objectFit: 'cover' }} />
                         ) : (
                           <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)' }}>
                             {p.name.slice(0, 2).toUpperCase()}
@@ -2447,7 +2448,7 @@ export default function ProductsView() {
                   <TableCell className="tuw-tabular-nums" style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', textAlign: 'right' }}>
                     {/* "From" reads as a quiet label (VPRICE-3); the amount
                         stays the loud part of the cell. */}
-                    {hasPriceSpread(resolveVariants(p)) && (
+                    {p.priceSpread && (
                       <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--tuw-text-secondary, #5D6772)', marginRight: 4 }}>From</span>
                     )}
                     ₹{p.price.toFixed(2)}
@@ -2458,8 +2459,8 @@ export default function ProductsView() {
                     )}
                   </TableCell>
                   <TableCell style={{ padding: '14px 16px' }}>
-                    <div style={{ fontSize: 14, fontWeight: 500, color: p.stock === 0 ? 'var(--tuw-text-error, #C91818)' : p.stock <= 10 ? 'var(--tuw-text-warning, #856300)' : 'var(--tuw-text-primary, #262626)' }}>
-                      {p.stock} in stock
+                    <div style={{ fontSize: 14, fontWeight: 500, color: p.madeToOrder ? 'var(--tuw-text-primary, #262626)' : p.stock === 0 ? 'var(--tuw-text-error, #C91818)' : p.stock <= 10 ? 'var(--tuw-text-warning, #856300)' : 'var(--tuw-text-primary, #262626)' }}>
+                      {p.madeToOrder ? 'Made to order' : `${p.stock} in stock`}
                     </div>
                     <div className="tuw-tabular-nums" style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
                       {p.soldCount} sold
@@ -2479,7 +2480,7 @@ export default function ProductsView() {
                     </Badge>
                   </TableCell>
                   <TableCell style={{ padding: '14px 16px', textAlign: 'right' }}>
-                    <Button variant="secondary" size="sm" icon={<Edit3 size={14} />} onClick={(e) => { e.stopPropagation(); openEditDrawer(p); }}>
+                    <Button variant="secondary" size="sm" icon={<Edit3 size={14} />} disabled={openingId === p.id} aria-busy={openingId === p.id} onClick={(e) => { e.stopPropagation(); void openEditDrawer(p); }}>
                       Manage
                     </Button>
                   </TableCell>
@@ -2592,9 +2593,12 @@ export default function ProductsView() {
                 size="sm"
                 icon={<Trash2 size={14} />}
                 onClick={() => {
-                  if (window.confirm(`Permanently delete "${editingProduct.name}" from catalog?`)) {
-                    deleteProduct(editingProduct.id);
-                    setEditingProduct(null);
+                  if (window.confirm(`Delete "${editingProduct.name}" from the catalog? It disappears from the store; past orders keep their records.`)) {
+                    void removeProducts([editingProduct.id]).then((ok) => {
+                      if (!ok) return;
+                      showToast({ type: 'info', title: 'Product Deleted', description: `"${editingProduct.name}" was removed from the catalog.` });
+                      setEditingProduct(null);
+                    });
                   }
                 }}
               >
@@ -2604,8 +2608,8 @@ export default function ProductsView() {
                 <Button variant="secondary" size="sm" onClick={() => setEditingProduct(null)}>
                   Cancel
                 </Button>
-                <Button variant="primary" size="sm" onClick={handleEditSubmit}>
-                  Save Changes
+                <Button variant="primary" size="sm" onClick={handleEditSubmit} disabled={saving}>
+                  {saving ? 'Saving…' : 'Save Changes'}
                 </Button>
               </div>
             </div>
@@ -3542,6 +3546,9 @@ export default function ProductsView() {
                     onSelect={(v) => setFormSizeChartId(v)}
                   />
                 </div>
+                <p style={{ margin: 0, fontSize: 12, color: 'var(--tuw-text-warning, #856300)' }}>
+                  Demo for now — size charts and this link are not saved yet.
+                </p>
                 <Disclosure
                   title={`Size charts (${sizeCharts.length})`}
                   subtitle="Measuring sets by garment. Columns vary — hoodies track sleeve, pants track waist."
@@ -3752,10 +3759,10 @@ export default function ProductsView() {
               variant="primary"
               size="md"
               type="button"
-              disabled={!importPreview || importPreview.groups.length === 0}
+              disabled={!importPreview || importPreview.groups.length === 0 || importing}
               onClick={applyImport}
             >
-              Stage {importPreview?.groups.length ?? 0} Product
+              {importing ? 'Importing… ' : 'Stage '}{importPreview?.groups.length ?? 0} Product
               {(importPreview?.groups.length ?? 0) === 1 ? '' : 's'}
             </Button>
           </>
@@ -3776,7 +3783,7 @@ export default function ProductsView() {
                   return (
                     <div key={i} style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
                       {group.name} · {group.variants.length} variant
-                      {group.variants.length === 1 ? '' : 's'} · ₹{fromPrice.toLocaleString()}
+                      {group.variants.length === 1 ? '' : 's'} · partner cost from ₹{fromPrice.toLocaleString()}
                       {group.styleCode ? ` · ${group.styleCode}` : ''}
                       {group.gender ? ` · ${group.gender}` : ''}
                     </div>
@@ -3787,6 +3794,9 @@ export default function ProductsView() {
                     …and {importPreview.groups.length - 20} more
                   </div>
                 ) : null}
+              </div>
+              <div style={{ marginTop: 8, fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                Base Price is treated as the partner’s cost. Drafts get a draft retail price (cost × 2.5, rounded up to ₹_99, minimum ₹299) that you can change before publishing.
               </div>
               {!importPreview.hasCategoryColumn ? (
                 <div style={{ marginTop: 8, fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>

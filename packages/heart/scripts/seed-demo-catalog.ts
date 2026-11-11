@@ -117,7 +117,7 @@ async function uniqueSlug(tx: Transaction, base: string, productId: string) {
 
 async function categoryIds(tx: Transaction) {
   for (const [i, [slug, name]] of CATEGORIES.entries()) {
-    await tx.execute(sql`INSERT INTO categories (id, name, slug, sort_order, show_in_navbar) VALUES (${uuidv7()}, ${name}, ${slug}, ${i}, false)
+    await tx.execute(sql`INSERT INTO categories (id, name, slug, sort_order, show_in_navbar, show_in_megamenu) VALUES (${uuidv7()}, ${name}, ${slug}, ${i}, false, true)
       ON CONFLICT (slug) DO NOTHING`);
   }
   const { rows } = await tx.execute<{ id: string; slug: string }>(sql`SELECT id, slug FROM categories`);
@@ -157,7 +157,7 @@ async function applyCurated(tx: Transaction, productId: string, c: Curated, cats
       short_description = ${c.subtitle}, external_id = ${c.id}, description = ${c.description}, details = ${textArray(c.details)},
       care_instructions = ${c.careInstructions.join('\n')}, composition = ${c.composition}, spec_table = ${c.specTable ? JSON.stringify(c.specTable) : null}::jsonb,
       category_id = ${cats[c.category]!}, product_type = ${type}, variant_label = ${type === 'kids-apparel' ? 'Age' : 'Size'},
-      badge = ${c.sustainabilityBadge ?? null}, tags = ${textArray(c.isNew ? ['new'] : [])}::varchar(50)[], price = ${toRupees(pricePaise)},
+      badge = ${c.sustainabilityBadge ?? null}, tags = ${textArray(c.isNew ? ['new'] : [])}::varchar(50)[], price = ${toRupees(pricePaise)}, base_price = ${toRupees(pricePaise)},
       price_is_draft = false, status = 'active', updated_at = now()
     WHERE id = ${productId}`);
 

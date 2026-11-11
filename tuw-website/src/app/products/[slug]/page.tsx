@@ -15,7 +15,7 @@ import { EditorialFeatureSplit } from '@storefront/components/editorial';
 import { useStore } from '@storefront/mocks/store';
 import type { Product, ProductColor, ProductSpecTable, ProductType } from '@storefront/lib/types';
 import {
-  CATEGORY_LABELS,
+  categoryLabel,
   RETURN_WINDOW_DAYS,
   deliveryEstimate,
   isWearable,
@@ -38,7 +38,7 @@ const SECTION_TITLES: Record<'details' | 'material' | 'care' | 'delivery', (type
 // Spec table for products that don't carry a hand-written one.
 function specTableFor(product: Product, type: ProductType): ProductSpecTable {
   const rows: Record<string, string>[] = [
-    { spec: 'Product', value: CATEGORY_LABELS[product.category] },
+    { spec: 'Product', value: categoryLabel(product.category) },
     {
       spec: `${variantLabelOf(product)}s`,
       value: product.sizes.map((s) => s.size).join(', ') || 'One size',
@@ -209,7 +209,7 @@ export default function ProductDetailPage({
 
   const type = productTypeOf(product);
   const wearable = isWearable(type);
-  const categoryLabel = CATEGORY_LABELS[product.category];
+  const categoryName = categoryLabel(product.category);
   const activeColor = selectedColor || product.colors[0];
   const specTable = product.specTable ?? specTableFor(product, type);
   const toggle = (name: string) => setOpenSection(openSection === name ? null : name);
@@ -224,7 +224,7 @@ export default function ProductDetailPage({
             items={[
               { label: 'Home', href: '/' },
               { label: 'Shop', href: '/shop' },
-              { label: categoryLabel, href: `/shop?category=${product.category}` },
+              { label: categoryName, href: `/shop?category=${product.category}` },
               { label: product.title },
             ]}
           />
@@ -244,7 +244,7 @@ export default function ProductDetailPage({
             <div>
               <p className="text-xs uppercase tracking-wider text-store-text-secondary mb-3">
                 <Link href={`/shop?category=${product.category}`} className="hover:text-store-charcoal">
-                  {categoryLabel}
+                  {categoryName}
                 </Link>
               </p>
               <h1 className="font-heading text-[clamp(1.75rem,2.5vw+1rem,2.5rem)] font-medium tracking-tight text-store-charcoal leading-tight">
@@ -337,7 +337,7 @@ export default function ProductDetailPage({
             products={related}
             title="Pairs well with"
             catalogLink={`/shop?category=${product.category}`}
-            catalogLabel={`More ${categoryLabel}`}
+            catalogLabel={`More ${categoryName}`}
           />
         )}
 

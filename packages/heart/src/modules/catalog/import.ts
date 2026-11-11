@@ -127,6 +127,21 @@ async function uniqueSku(db: Db, base: string): Promise<string> {
   }
 }
 
+/** Category by name (explicit Category column only — never guessed). */
+async function ensureCategory(db: Db, name: string): Promise<string> {
+  const found = await db.execute<{ id: string }>(sql`SELECT id FROM categories WHERE lower(name) = lower(${name}) AND deleted_at IS NULL LIMIT 1`);
+  if (found.rows[0]) return found.rows[0].id;
+  const slug = await (async () => {
+    const base = slugify(name);
+    const { rows } = await db.execute<{ slug: string }>(sql`SELECT slug FROM categories WHERE slug = ${base} OR slug LIKE ${`${base}-%`}`);
+    const taken = new Set(rows.map((r) => r.slug));
+    for (let n = 1; ; n += 1) if (!taken.has(n === 1 ? base : `${base}-${n}`)) return n === 1 ? base : `${base}-${n}`;
+  })();
+  const id = uuidv7();
+  await db.execute(sql`INSERT INTO categories (id, name, slug) VALUES (${id}, ${name}, ${slug})`);
+  return id;
+}
+
 async function importGroup(tx: Transaction, group: ImportProductGroup, defs: Record<string, string>, opts: Required<Pick<ImportOptions, 'source'>> & ImportOptions): Promise<ImportedProduct> {
   // Serialise imports of the same group: FOR UPDATE cannot lock a row that
   // does not exist yet, so two parallel runs would both try to create it.
@@ -137,7 +152,9 @@ async function importGroup(tx: Transaction, group: ImportProductGroup, defs: Rec
   let productSku = existing.rows[0]?.sku;
   const created = !productId;
   const retail = group.variants.map((v) => draftRetailPaise(v.costPaise));
-  const minCost = Math.min(...group.variants.map((v) => v.costPaise));
+  // base_price is the retail anchor the admin derives prices from; partner
+  // cost stays in the source rows and never touches the pricing columns.
+  const minRetail = Math.min(...retail);
 
   if (!productId) {
     productId = uuidv7();
@@ -146,12 +163,12 @@ async function importGroup(tx: Transaction, group: ImportProductGroup, defs: Rec
     await tx.execute(sql`
       INSERT INTO products (id, sku, name, slug, style_code, price, base_price, status, partner_provider, partner_availability,
                             source, source_group_key, internal_serial_no, weight_g, shipping_weight_g, dimensions, gender,
-                            tax_rate, hsn_code, variant_label, price_is_draft)
-      VALUES (${productId}, ${productSku}, ${group.name}, ${slug}, ${group.styleCode}, ${toRupees(Math.min(...retail))}, ${toRupees(minCost)},
+                            tax_rate, hsn_code, variant_label, price_is_draft, category_id)
+      VALUES (${productId}, ${productSku}, ${group.name}, ${slug}, ${group.styleCode}, ${toRupees(minRetail)}, ${toRupees(minRetail)},
               'draft', ${opts.providerSlug ?? null}, ${opts.providerSlug ? 'ready_to_print' : null},
               ${PRODUCT_SOURCE}, ${group.key}, ${group.rows[0]?.serialNo ?? null}, ${group.weightG ?? null}, ${group.shippingWeightG ?? null},
               ${group.dimensions ?? null}, ${group.gender}, ${group.taxRate === undefined ? null : group.taxRate.toFixed(2)},
-              ${group.hsnCode}, ${AXIS_LABEL[group.optionAxis]}, true)`);
+              ${group.hsnCode}, ${AXIS_LABEL[group.optionAxis]}, true, ${group.category ? await ensureCategory(tx, group.category) : null})`);
   }
 
   // Attribute library (one batch), then the product's links: colour axis
@@ -205,14 +222,14 @@ async function importGroup(tx: Transaction, group: ImportProductGroup, defs: Rec
     return {
       id: uuidv7(), key, row_id: rowIds.get(v.rowNo) ?? null,
       sku,
-      price: toRupees(retail[i]!), weight: v.weightG ?? null, ship: v.shippingWeightG ?? null, dims: v.dimensions ?? null,
+      price: toRupees(retail[i]!), pinned: retail[i] !== minRetail, weight: v.weightG ?? null, ship: v.shippingWeightG ?? null, dims: v.dimensions ?? null,
       color_id: v.color ? idOf(defs.color!, titleCase(v.color)) : null, option_id: idOf(optionDef, v.option),
     };
   });
   const { rows: added } = await tx.execute<{ id: string }>(sql`
-    INSERT INTO product_variants (id, product_id, source_row_id, sku, variant_key, price, stock, weight_g, shipping_weight_g, dimensions)
-    SELECT x.id, ${productId}, x.row_id, x.sku, x.key, x.price, 0, x.weight, x.ship, x.dims
-    FROM ${records(drafts)} AS x(id uuid, key text, row_id uuid, sku text, price numeric, weight int, ship int, dims text)
+    INSERT INTO product_variants (id, product_id, source_row_id, sku, variant_key, price, price_overridden, stock, weight_g, shipping_weight_g, dimensions)
+    SELECT x.id, ${productId}, x.row_id, x.sku, x.key, x.price, x.pinned, 0, x.weight, x.ship, x.dims
+    FROM ${records(drafts)} AS x(id uuid, key text, row_id uuid, sku text, price numeric, pinned boolean, weight int, ship int, dims text)
     ON CONFLICT (product_id, variant_key) DO NOTHING RETURNING id`);
   const addedIds = new Set(added.map((r) => r.id));
   const pvav = drafts.filter((d) => addedIds.has(d.id)).flatMap((d) => [

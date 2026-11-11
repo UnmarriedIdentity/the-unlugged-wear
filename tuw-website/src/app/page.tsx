@@ -109,7 +109,7 @@ export default function HomePage() {
   const filteredProducts = (
     activeCategory === 'All Collection'
       ? HOME_PRODUCTS
-      : HOME_PRODUCTS.filter((p) => CATEGORY_LABELS[p.category].toLowerCase() === activeCategory.toLowerCase())
+      : HOME_PRODUCTS.filter((p) => CATEGORY_LABELS[p.category]?.toLowerCase() === activeCategory.toLowerCase())
   ).slice(0, 10);
 
   // Collection carousel: native scroll-snap track with prev/next controls

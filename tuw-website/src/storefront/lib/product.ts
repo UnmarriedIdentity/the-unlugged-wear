@@ -129,6 +129,10 @@ export function shopHref(filter: ShopFilter): string {
 
 // ---- Price tiers (partner prices some sizes higher; TL-BE-05) ----------
 
+/** Display name for a category; staff-created categories fall back to their slug. */
+export const categoryLabel = (category: string): string =>
+  CATEGORY_LABELS[category as Product['category']] ?? category.replace(/-/g, ' ').replace(/^./, (c) => c.toUpperCase());
+
 /** True when sizes carry their own prices; the product price is then "From". */
 export const hasPriceTiers = (p: Product): boolean => p.sizes.some((s) => s.priceINR !== undefined);
 

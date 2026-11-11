@@ -2351,14 +2351,14 @@
       "id": "TL-WEB-BE-12",
       "title": "Header megamenu and navigation from the DB",
       "category": "backend",
-      "status": "backlog",
+      "status": "in_progress",
       "owner": "unassigned",
       "parent": "TL-WEB-BE",
-      "started": null,
+      "started": "2026-11-11",
       "finished": null,
       "verified": false,
       "design_match": null,
-      "pushed": false,
+      "pushed": true,
       "admin_ref": "TL-BE-05.02",
       "depends_on": [
         "TL-BE-05"
@@ -2369,7 +2369,8 @@
       ],
       "description": "Cached with cacheTag('nav').",
       "key_decisions": [],
-      "follow_ups": []
+      "follow_ups": [],
+      "log": "Header and mobile menu hide links to categories staff switched off (catalog hiddenCategories, products tag). The menu structure itself stays in navigation.ts until the CMS navigation editor (TL-BE-13.06)."
     },
     {
       "id": "TL-WEB-BE-13",

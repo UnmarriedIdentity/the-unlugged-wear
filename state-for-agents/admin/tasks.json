@@ -5951,7 +5951,7 @@
       "parent": "TL-BE-CORE",
       "started": "2026-11-11",
       "finished": null,
-      "log": "Slice 1 of 3 done (commit 794eb68): catalog module (planner, import job, storefront read model), migration 018, demo catalog seed (155 products / 2,348 variants from the Qikink listing + 14 curated + 4 collections), storefront reads products and collections from the DB (cached, products tag expires immediately), catalog.generated.ts retired, price tiers. Slice 2: admin products/collections + categories/megamenu. Slice 3: search, size charts, reviews, attribute library, SKU mappings.",
+      "log": "Slice 1 of 3 done (commit 794eb68): catalog module (planner, import job, storefront read model), migration 018, demo catalog seed (155 products / 2,348 variants from the Qikink listing + 14 curated + 4 collections), storefront reads products and collections from the DB (cached, products tag expires immediately), catalog.generated.ts retired, price tiers. Slice 2 of 3 done (commit: see TL-BE-05.13 log): admin products list + editor, CSV import through the job, collections with drop dates, categories screen, storefront menu respects category flags, pricing anchor corrected (migration 019). Slice 3: search, size charts, reviews, attribute library, SKU mappings, exchange_policy/product_kind fields.",
       "wiring": "modules/catalog (reads cached with product/collection tags); admin product editor + import; storefront shop/collections/PDP/search as cached Server Components per the rendering skills.",
       "done_when": "Products imported from tuw-website/data/qikink-listing.json appear in admin and on the storefront from the DB; editing a product updates the storefront via tag revalidation; catalog.generated.ts no longer used.",
       "depends_on": [
@@ -5964,7 +5964,10 @@
         "Price tiers: product price is 'From' (lowest variant); sizes carry their own price; checkout route charges the chosen size",
         "Made-to-order variants: available while partner is ready_to_print, capped at 100 per order; stock only for stocked items",
         "'products' cache tag expires immediately on revalidate (prices shown)",
-        "Bulk SQL (jsonb_to_recordset) + advisory locks: parallel imports never duplicate; one style sold for 4 genders gets 4 slugs"
+        "Bulk SQL (jsonb_to_recordset) + advisory locks: parallel imports never duplicate; one style sold for 4 genders gets 4 slugs",
+        "products.base_price is the retail anchor; partner cost lives only in source rows (migration 019)",
+        "Removing a variant switches it off; deleting a product is soft; renamed products keep their old URL",
+        "Publishing needs a category and a priced variant; stale edits are refused"
       ],
       "verified": false,
       "pushed": true,
@@ -5972,7 +5975,10 @@
         "Qikink sheet: Polo MP25 XXL White has HSN 610990 vs 61091000 on every other row — split into 2 products until fixed",
         "Storefront demo checkout reads the cached catalog; the real checkout (TL-BE-08) must price from live variant rows",
         "Poster/dimension options keep sheet order (A3, 16x24, 16x16, …); sort by size when the attribute library editor lands",
-        "First uncached catalog read is ~5.5 s from India (US East DB); fine when cached, revisit with the region decision"
+        "First uncached catalog read is ~5.5 s from India (US East DB); fine when cached, revisit with the region decision",
+        "Admin /products loads every product (light, no variants); add server paging before the catalog reaches thousands",
+        "Admin orders, discounts, designs, reports and the header search still read demo products until their modules move",
+        "Image uploads stay session previews until TL-INT-R2; only URLs persist"
       ],
       "storefront_tasks": [
         "TL-WEB-BE-08",
@@ -6002,16 +6008,16 @@
     {
       "id": "TL-BE-05.02",
       "title": "Categories + megamenu navigation (navigation_settings, category flags)",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-05",
-      "started": null,
-      "finished": null,
-      "log": "Not started.",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "Categories screen (/products/categories): names, order, active, in-storefront-menu; delete refused while in use. Storefront header and mobile menu drop links to hidden categories. Editing the menu links themselves is TL-BE-13.06.",
       "design_match": null,
       "key_decisions": [],
-      "verified": false,
-      "pushed": false,
+      "verified": true,
+      "pushed": true,
       "follow_ups": [],
       "storefront_tasks": [
         "TL-WEB-BE-12"
@@ -6020,16 +6026,16 @@
     {
       "id": "TL-BE-05.03",
       "title": "Admin product CRUD: create/edit/archive, variants, pricing overrides, images (mock storage adapter)",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-05",
-      "started": null,
-      "finished": null,
-      "log": "Not started.",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "modules/catalog/admin.ts: create/edit/archive/soft-delete, variants, price ladder + pins, images by URL, discounts, attributes, monogram, stock ledger, stale-edit refusal. Uploads remain previews until TL-INT-R2.",
       "design_match": null,
       "key_decisions": [],
-      "verified": false,
-      "pushed": false,
+      "verified": true,
+      "pushed": true,
       "follow_ups": []
     },
     {
@@ -6053,16 +6059,16 @@
     {
       "id": "TL-BE-05.05",
       "title": "Collections + size charts + exchange_policy / product_kind fields in the editor",
-      "status": "backlog",
+      "status": "in_progress",
       "owner": "unassigned",
       "parent": "TL-BE-05",
-      "started": null,
+      "started": "2026-11-11",
       "finished": null,
-      "log": "Not started.",
+      "log": "Collections done (membership order, drop dates, slug rules). Remaining for slice 3: size charts and exchange_policy / product_kind fields in the editor.",
       "design_match": null,
       "key_decisions": [],
       "verified": false,
-      "pushed": false,
+      "pushed": true,
       "follow_ups": [],
       "storefront_tasks": [
         "TL-WEB-BE-13"
@@ -6144,7 +6150,7 @@
       "parent": "TL-BE-05",
       "started": "2026-11-11",
       "finished": null,
-      "log": "planner.test.ts (6) + catalog.int.test.ts (7): hostile rows, grouping, HSN split, price ladder, idempotent + parallel imports, slug/SKU races, hidden states. Search ranking tests come with TL-BE-05.06.",
+      "log": "planner.test.ts (6), catalog.int.test.ts (7), admin.int.test.ts (8): hostile input, tier round trip, rename aliases, stale edits, parallel saves, SKU clashes, bulk refusals, soft delete, collections, categories. Search ranking tests come with TL-BE-05.06.",
       "design_match": null,
       "key_decisions": [],
       "verified": false,
@@ -6201,20 +6207,20 @@
     {
       "id": "TL-BE-05.13",
       "title": "Wire admin /products (ProductsView) and /collections pages; drop their localStorage state",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-05",
-      "started": null,
-      "finished": null,
-      "log": "Not started.",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "SLICE2 — /products and /collections are Server Components on the DB; ProductsView and collection drawers call guarded actions; demo product writes removed from these screens.",
       "files": [
         "tuw-admin/src/app/(dashboard)/products/_components/ProductsView.tsx",
         "tuw-admin/src/app/(dashboard)/collections/page.tsx"
       ],
       "design_match": null,
       "key_decisions": [],
-      "verified": false,
-      "pushed": false,
+      "verified": true,
+      "pushed": true,
       "follow_ups": [
         "Added by the 2026-11-10 admin screen audit"
       ]

@@ -346,7 +346,16 @@ const SOCIAL_LINKS = [
 
 export default function Header() {
   const pathname = usePathname();
-  const { cartCount, wishlist, setIsCartDrawerOpen, products } = useStore();
+  const { cartCount, wishlist, setIsCartDrawerOpen, products, hiddenCategories } = useStore();
+  // Categories staff switched off in the admin drop out of the menu.
+  const navItems = React.useMemo(() => {
+    if (!hiddenCategories.length) return NAV_ITEMS;
+    const hidden = new Set<string>(hiddenCategories);
+    return NAV_ITEMS.map((item) => ({
+      ...item,
+      columns: item.columns?.map((column) => ({ ...column, links: column.links.filter((link) => !link.filter?.category || !hidden.has(link.filter.category)) })),
+    }));
+  }, [hiddenCategories]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchVal, setSearchVal] = useState('');
@@ -479,7 +488,7 @@ export default function Header() {
                   tops[next].focus();
                 }}
               >
-                {NAV_ITEMS.map((item) => {
+                {navItems.map((item) => {
                   const isActive = pathname === item.href.split('?')[0] && item.href.split('?')[0] !== '/shop';
                   const hasPanel = Boolean(item.columns?.length);
                   const isOpen = hasPanel && openMenu === item.label;
@@ -625,7 +634,7 @@ export default function Header() {
       <MobileMenu
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
-        items={NAV_ITEMS}
+        items={navItems}
         links={MOBILE_MENU_LINKS}
         products={products}
         socialLinks={SOCIAL_LINKS.filter((social) => social.href)}

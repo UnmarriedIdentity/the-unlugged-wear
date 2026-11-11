@@ -3,8 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Button, Drawer, Input, SearchableMultiSelect, SearchableSelect, Textarea } from '@/components/ui';
 import type { SearchableSelectOption } from '@/components/ui';
-import { useAdminState } from '@/mocks/state';
-import type { CollectionItem } from '@/mocks/fixtures';
+import type { CollectionItem, ProductItem } from '@/mocks/fixtures';
 import {
   draftFromCollection,
   draftToPayload,
@@ -29,15 +28,24 @@ export interface CollectionFormDrawerProps {
   onClose: () => void;
   /** Fired after a successful edit save with the collection id. */
   onSaved?: (id: string) => void;
+  collections: CollectionItem[];
+  products: ProductItem[];
+  onSave: (id: string | undefined, payload: Omit<CollectionItem, 'id' | 'updatedAt'>) => Promise<CollectionSaveResult>;
 }
+
+export type CollectionSaveResult = { ok: true } | { ok: false; message: string; field?: string };
 
 export default function CollectionFormDrawer({
   isOpen,
   collection,
   onClose,
   onSaved,
+  collections,
+  products,
+  onSave,
 }: CollectionFormDrawerProps) {
-  const { collections, products, createCollection, updateCollection } = useAdminState();
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const [draft, setDraft] = useState<CollectionDraft>(emptyDraft);
   const [errors, setErrors] = useState<CollectionDraftErrors>({});
 
@@ -45,6 +53,7 @@ export default function CollectionFormDrawer({
     if (!isOpen) return;
     setDraft(collection ? draftFromCollection(collection, products) : emptyDraft());
     setErrors({});
+    setFormError(null);
   }, [isOpen, collection, products]);
 
   const productOptions = useMemo(() => toProductOptions(products), [products]);
@@ -58,17 +67,24 @@ export default function CollectionFormDrawer({
     });
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (saving) return;
     const nextErrors = validateDraft(draft, collections, collection?.id);
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
     const payload = draftToPayload(draft);
-    // A refused mutation (demo role gate) keeps this drawer open with every
-    // input preserved — only a real success closes it.
-    const saved = collection ? updateCollection(collection.id, payload) : createCollection(payload);
-    if (!saved) return;
+    // A refused save keeps this drawer open with every input preserved —
+    // only a real success closes it.
+    setSaving(true);
+    const saved = await onSave(collection?.id, payload);
+    setSaving(false);
+    if (!saved.ok) {
+      if (saved.field === 'slug' || saved.field === 'name' || saved.field === 'publishedAt') setErrors({ [saved.field]: saved.message });
+      else setFormError(saved.message);
+      return;
+    }
 
     if (collection) onSaved?.(collection.id);
     onClose();
@@ -86,8 +102,8 @@ export default function CollectionFormDrawer({
           <Button variant="secondary" size="md" type="button" onClick={onClose}>
             Cancel
           </Button>
-          <Button variant="primary" size="md" type="submit" form="collection-form">
-            {collection ? 'Save Changes' : 'Create Collection'}
+          <Button variant="primary" size="md" type="submit" form="collection-form" disabled={saving}>
+            {saving ? 'Saving…' : collection ? 'Save Changes' : 'Create Collection'}
           </Button>
         </>
       }
@@ -149,6 +165,20 @@ export default function CollectionFormDrawer({
           }
         />
 
+        {draft.visibility === 'scheduled' && (
+          <Input
+            label="Drop date"
+            type="datetime-local"
+            value={draft.publishedAt}
+            onChange={(event) => {
+              setDraft({ ...draft, publishedAt: event.target.value });
+              clearError('publishedAt');
+            }}
+            error={errors.publishedAt}
+            helperText={errors.publishedAt ? undefined : 'The collection goes live at this time.'}
+          />
+        )}
+
         <Textarea
           label="Editorial Description"
           rows={3}
@@ -170,16 +200,11 @@ export default function CollectionFormDrawer({
           helperText="Selection order becomes the storefront display order."
         />
 
-        <p
-          style={{
-            margin: 0,
-            fontSize: 12,
-            color: 'var(--tuw-text-secondary, #5D6772)',
-            fontFamily: 'var(--font-main)',
-          }}
-        >
-          Demo workspace — changes are stored locally in this browser only.
-        </p>
+        {formError && (
+          <p role="alert" style={{ margin: 0, fontSize: 13, color: 'var(--tuw-text-error, #C91818)' }}>
+            {formError}
+          </p>
+        )}
       </form>
     </Drawer>
   );

@@ -36,6 +36,7 @@ interface StoreContextType {
   // Products (from the database via the root layout — TL-BE-05)
   products: Product[];
   collections: Collection[];
+  hiddenCategories: string[];
   getProductBySlug: (slug: string) => Product | undefined;
 
   // Cart
@@ -102,7 +103,7 @@ const StoreContext = createContext<StoreContextType | null>(null);
 // date, which is still "yesterday" in India until 05:30).
 const localDate = (d: Date) => d.toLocaleDateString('en-CA');
 
-export function StoreProvider({ children, catalog }: { children: React.ReactNode; catalog: { products: Product[]; collections: Collection[] } }) {
+export function StoreProvider({ children, catalog }: { children: React.ReactNode; catalog: { products: Product[]; collections: Collection[]; hiddenCategories: string[] } }) {
   const STORE_PRODUCTS = catalog.products;
   // Fees come from admin Settings (store_settings). The demo cart works in
   // whole rupees until the cart module replaces it (TL-BE-07).
@@ -504,6 +505,7 @@ export function StoreProvider({ children, catalog }: { children: React.ReactNode
         retryConnection,
         products,
         collections: catalog.collections,
+        hiddenCategories: catalog.hiddenCategories,
         getProductBySlug,
         cart,
         addToCart,

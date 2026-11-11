@@ -109,8 +109,8 @@ BIFF parsing would buy a dependency for one legacy format).
   `610990`, the rest `61091000`, so MP25 was split — fix it in the sheet.
 - Products are created as **drafts**, uncategorised, with variant prices
   from the draft rule (partner cost × 2.5 up to ₹_99, min ₹299, integer
-  math) and `price_is_draft`. Partner cost is kept in `base_price` and the
-  source rows only.
+  math) and `price_is_draft`. `base_price` is the retail anchor (lowest
+  tier); partner cost is kept in the source rows only.
 - Each group is its own transaction, four at a time, written with bulk
   statements (`jsonb_to_recordset`, ~13 round trips per group). An advisory
   lock per group key makes parallel runs safe; slug and SKU allocation take

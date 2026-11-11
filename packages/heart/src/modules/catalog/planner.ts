@@ -26,6 +26,8 @@ export interface ImportSourceRow {
   dimensions?: string;
   taxRate?: number;
   hsnCode: string;
+  /** Explicit Category column; absent stages as uncategorised. */
+  category?: string;
   raw: Record<string, unknown>;
 }
 
@@ -49,6 +51,7 @@ export interface ImportProductGroup {
   gender: string;
   hsnCode: string | null;
   taxRate?: number;
+  category?: string;
   colors: string[];
   options: string[];
   optionAxis: OptionAxis;
@@ -90,7 +93,7 @@ function rupeesToPaise(v: unknown): number | null {
 
 const optionalInt = (v: unknown) => {
   const n = Number(v);
-  return Number.isFinite(n) && n >= 0 && n < 1_000_000 ? Math.round(n) : undefined;
+  return Number.isFinite(n) && n > 0 && n < 1_000_000 ? Math.round(n) : undefined;
 };
 
 /**
@@ -133,6 +136,7 @@ export function parseQikinkListing(rows: unknown[]): { rows: ImportSourceRow[]; 
       dimensions: clean(String(r.packageDimensionsCm ?? '')) || undefined,
       taxRate: tax,
       hsnCode: hsn,
+      category: clean(String(r.category ?? '')).slice(0, 150) || undefined,
       raw: r,
     });
   });
@@ -215,6 +219,7 @@ export function groupImportRows(rows: ImportSourceRow[]): { groups: ImportProduc
         gender: genders[0] ?? 'Unisex',
         hsnCode: groupRows.find((r) => r.hsnCode)?.hsnCode ?? null,
         taxRate: taxes[0],
+        category: groupRows.find((r) => r.category)?.category,
         colors: uniqueBy(variants.map((v) => v.color).filter((c): c is string => c !== null)),
         options: sortOptions(options, axis),
         optionAxis: axis,

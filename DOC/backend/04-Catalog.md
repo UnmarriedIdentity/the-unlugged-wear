@@ -417,8 +417,8 @@ variant. Shaped exactly like the storefront `Product` type.
   partner is `ready_to_print`, capped at 100 per order; stock counts only
   apply to stocked items (the inventory module, TL-BE-06).
 - No colour axis → one neutral "Standard" swatch.
-- Partner cost (`products.base_price`), source rows and staff fields never
-  leave `read.ts` (test: "partner cost never reaches the storefront").
+- Partner cost (kept only in `product_source_rows.raw_data`), source rows
+  and staff fields never leave `read.ts` (test: "partner cost never reaches the storefront").
 
 **Storefront wiring.** `src/server/catalog.ts` → `getCatalog()`
 (`'use cache'`, tag `products`, `cacheLife('hours')`, no silent fallback),
@@ -434,8 +434,47 @@ the old storefront classification + the 14 curated products and 4
 collections (`db/seed/catalog/*.json`) and publishes: 155 products,
 2,348 active variants. Re-running classifies only new products.
 
-**Not yet (slices 2–3):** admin product list/editor and collections on the
-database; categories + megamenu; search ranking; size charts; reviews;
-attribute library editor; provider SKU mappings. Shop/PDP are still Client
+**Not yet (slice 3):** search ranking; size charts; reviews; attribute
+library editor; provider SKU mappings; `exchange_policy` / `product_kind`
+fields in the editor. Shop/PDP are still Client
 Components reading the catalog from the provider (≈25 KB gzipped, same as
 the old bundle); moving them to Server Components is TL-WEB-BE-08/10.
+
+## As built (TL-BE-05 slice 2, 2026-11-11)
+
+`modules/catalog/admin.ts` + `schemas.ts`; actions in
+`tuw-admin/src/server/catalog-actions.ts`.
+
+**Pricing anchor.** `products.base_price` is the retail anchor the editor
+derives prices from (`base + Σ adjustments`). Migration 019 corrected the
+first import, which had stored the partner's cost there. Tiers are pinned
+(`price_overridden`). `products.price` is always the lowest active variant.
+
+**Permissions** (checked per action, not only on the page): any staff member
+can read the catalog; `product.create`, `product.update`, `product.archive`
+(archive + delete, also when archiving through the editor), `product.import`,
+`category.manage`. Collections use `product.update`.
+
+**Rules the service enforces:**
+
+- Publishing needs a category and at least one variant priced above ₹0
+  (bulk publish reports which products were skipped and why).
+- Slugs are unique across slugs *and* aliases; a renamed product keeps its
+  old URL as an alias and may take it back.
+- Stale edits are refused (`expectedUpdatedAt`); saves lock the product row.
+- Removing a variant switches it off (orders reference it); deleting a
+  product is a soft delete and its URL stays reserved.
+- Manual stock changes write `stock_movements` (`admin_adjustment`).
+- Images are matched by URL, so labels and colour links survive a reorder.
+  Local paths are served by the storefront: the admin prefixes
+  `STOREFRONT_URL` for display and stores the path unchanged.
+- Image URLs must be a `/path` or http(s) — no `javascript:`/`data:`.
+- Every write is audited and expires the storefront's `products` tag.
+
+**Screens.** `/products` (light list without variants; the full record
+loads when a product opens; CSV import goes through the real import job),
+`/collections` (scheduled collections now have a drop date),
+`/products/categories` (names, order, active, "in storefront menu").
+The storefront menu drops links to categories hidden there; editing the
+menu's own links belongs to the CMS task (TL-BE-13.06).
+

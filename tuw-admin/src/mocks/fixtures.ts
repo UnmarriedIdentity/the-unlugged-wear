@@ -24,6 +24,12 @@ export interface ProductItem {
    * product_attribute_link_values.price_adjustment. */
   priceAdjustments?: Record<string, number>;
   stock: number;
+  /** Partner prints to order: stock numbers do not apply (database products). */
+  madeToOrder?: boolean;
+  /** Sizes are priced differently, so the list shows "From". */
+  priceSpread?: boolean;
+  /** Row version for stale-edit protection. */
+  updatedAt?: string;
   publicationStatus: 'published' | 'draft' | 'archived';
   description: string;
   colors: string[];
@@ -265,6 +271,8 @@ export interface CollectionItem {
   /** Ordered product links — the single source of truth for count + content. */
   productIds: string[];
   visibility: 'published' | 'draft' | 'scheduled';
+  /** Drop date (required when scheduled). */
+  publishedAt?: string;
   updatedAt: string;
   description: string;
 }

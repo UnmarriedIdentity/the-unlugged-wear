@@ -15,6 +15,8 @@ export interface CollectionDraft {
   slugTouched: boolean;
   season: string;
   visibility: CollectionVisibility;
+  /** datetime-local value; required when scheduled. */
+  publishedAt: string;
   description: string;
   productIds: string[];
 }
@@ -23,7 +25,15 @@ export interface CollectionDraftErrors {
   name?: string;
   slug?: string;
   season?: string;
+  publishedAt?: string;
 }
+
+/** ISO → the local "YYYY-MM-DDTHH:mm" a datetime-local input expects. */
+const toLocalInput = (iso?: string): string => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
+};
 
 export function emptyDraft(): CollectionDraft {
   return {
@@ -32,6 +42,7 @@ export function emptyDraft(): CollectionDraft {
     slugTouched: false,
     season: 'AW26',
     visibility: 'published',
+    publishedAt: '',
     description: '',
     productIds: [],
   };
@@ -51,6 +62,7 @@ export function draftFromCollection(
     slugTouched: true,
     season: collection.season,
     visibility: collection.visibility,
+    publishedAt: toLocalInput(collection.publishedAt),
     description: collection.description,
     productIds: collection.productIds.filter((id) => validProductIds.has(id)),
   };
@@ -79,6 +91,7 @@ export function validateDraft(
     errors.slug = 'Another collection already uses this slug.';
   }
   if (!draft.season.trim()) errors.season = 'Season is required.';
+  if (draft.visibility === 'scheduled' && !draft.publishedAt) errors.publishedAt = 'Choose the drop date.';
   return errors;
 }
 
@@ -88,6 +101,7 @@ export function draftToPayload(draft: CollectionDraft): Omit<CollectionItem, 'id
     slug: draft.slug.trim(),
     season: draft.season.trim(),
     visibility: draft.visibility,
+    ...(draft.visibility === 'scheduled' && draft.publishedAt ? { publishedAt: new Date(draft.publishedAt).toISOString() } : {}),
     description: draft.description.trim(),
     productIds: [...draft.productIds],
   };
