@@ -5951,7 +5951,7 @@
       "parent": "TL-BE-CORE",
       "started": "2026-11-11",
       "finished": null,
-      "log": "Slice 1 of 3 done (commit 794eb68): catalog module (planner, import job, storefront read model), migration 018, demo catalog seed (155 products / 2,348 variants from the Qikink listing + 14 curated + 4 collections), storefront reads products and collections from the DB (cached, products tag expires immediately), catalog.generated.ts retired, price tiers. Slice 2 of 3 done (commit: see TL-BE-05.13 log): admin products list + editor, CSV import through the job, collections with drop dates, categories screen, storefront menu respects category flags, pricing anchor corrected (migration 019). Slice 3: search, size charts, reviews, attribute library, SKU mappings, exchange_policy/product_kind fields.",
+      "log": "Slice 1 of 3 done (commit 794eb68): catalog module (planner, import job, storefront read model), migration 018, demo catalog seed (155 products / 2,348 variants from the Qikink listing + 14 curated + 4 collections), storefront reads products and collections from the DB (cached, products tag expires immediately), catalog.generated.ts retired, price tiers. Slice 2 of 3 done (commit f966eaa): admin products list + editor, CSV import through the job, collections with drop dates, categories screen, storefront menu respects category flags, pricing anchor corrected (migration 019). Slice 3: search, size charts, reviews, attribute library, SKU mappings, exchange_policy/product_kind fields.",
       "wiring": "modules/catalog (reads cached with product/collection tags); admin product editor + import; storefront shop/collections/PDP/search as cached Server Components per the rendering skills.",
       "done_when": "Products imported from tuw-website/data/qikink-listing.json appear in admin and on the storefront from the DB; editing a product updates the storefront via tag revalidation; catalog.generated.ts no longer used.",
       "depends_on": [
@@ -6212,7 +6212,7 @@
       "parent": "TL-BE-05",
       "started": "2026-11-11",
       "finished": "2026-11-11",
-      "log": "SLICE2 — /products and /collections are Server Components on the DB; ProductsView and collection drawers call guarded actions; demo product writes removed from these screens.",
+      "log": "f966eaa — /products and /collections are Server Components on the DB; ProductsView and collection drawers call guarded actions; demo product writes removed from these screens.",
       "files": [
         "tuw-admin/src/app/(dashboard)/products/_components/ProductsView.tsx",
         "tuw-admin/src/app/(dashboard)/collections/page.tsx"
