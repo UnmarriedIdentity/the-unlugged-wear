@@ -6244,7 +6244,7 @@
       "parent": "TL-BE-CORE",
       "started": "2026-11-11",
       "finished": null,
-      "log": "Inventory module, staff alerts, back-in-stock requests and the restock job are done (commit INVHASH). Remaining for done_when: checkout calling reserve and cancel calling release, which arrive with TL-BE-08.",
+      "log": "Inventory module, staff alerts, back-in-stock requests and the restock job are done (commit bbbc924). Remaining for done_when: checkout calling reserve and cancel calling release, which arrive with TL-BE-08.",
       "wiring": "modules/inventory called by checkout/cancel via index.ts; emits stock.restocked; notifications module subscribes.",
       "done_when": "Checkout decrements atomically, cancel restores once, staff get inventory bell alerts, 'notify me' works for guests/customers.",
       "depends_on": [
