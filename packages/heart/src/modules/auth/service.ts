@@ -1,6 +1,6 @@
 import 'server-only';
 import { sql } from 'drizzle-orm';
-import { getDb, withTransaction, type Transaction } from '../../platform/db/index.ts';
+import { getDb, withTransaction, type Database, type Transaction } from '../../platform/db/index.ts';
 import { AppError } from '../../platform/errors/index.ts';
 import { uuidv7 } from '../../platform/ids/index.ts';
 import { emit } from '../../platform/events/index.ts';
@@ -313,6 +313,17 @@ export interface PendingInvite {
   email: string;
   role: string;
   expiresAt: string;
+}
+
+/** Active users holding a permission through any role. */
+export async function usersWithPermission(permission: string, db: Pick<Database, 'execute'> = getDb()): Promise<string[]> {
+  const { rows } = await db.execute<{ id: string }>(sql`
+    SELECT DISTINCT u.id FROM users u
+      JOIN user_roles ur ON ur.user_id = u.id
+      JOIN role_permissions rp ON rp.role_id = ur.role_id
+      JOIN permissions pm ON pm.id = rp.permission_id
+     WHERE pm.slug = ${permission} AND u.status = 'active'`);
+  return rows.map((r) => r.id);
 }
 
 export async function listStaff(): Promise<{ members: StaffMember[]; invites: PendingInvite[] }> {

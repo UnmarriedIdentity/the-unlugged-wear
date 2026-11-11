@@ -3,6 +3,7 @@ import { sql } from 'drizzle-orm';
 import { getDb } from '../../platform/db/index.ts';
 import { toPaise } from '../../platform/money/index.ts';
 import { slugify } from './planner.ts';
+import { isMadeToOrder } from '../inventory/index.ts';
 
 // Storefront read model: what shoppers may see — active, not deleted
 // products with their active variants — shaped exactly like the
@@ -191,7 +192,7 @@ export async function getStorefrontCatalog(): Promise<StorefrontCatalog> {
     const colorLinks = links.filter((l) => l.slug === 'color' && l.is_variant_axis);
     const optionLinks = links.filter((l) => l.is_variant_axis && l.slug !== 'color');
     const optionSlug = optionLinks[0]?.slug;
-    const madeToOrder = Boolean(p.partner_provider);
+    const madeToOrder = isMadeToOrder(p.partner_provider);
     const available = (v: (typeof vs)[number]) => (madeToOrder ? p.partner_availability === 'ready_to_print' : v.stock > 0);
 
     const usedColors = new Set(vs.map((v) => v.values.get('color')).filter(Boolean));

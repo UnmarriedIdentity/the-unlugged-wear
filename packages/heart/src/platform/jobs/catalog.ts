@@ -1,6 +1,7 @@
 import 'server-only';
 import { registerJob, listJobs, runJob } from './index.ts';
 import { sweepExpired } from '../idempotency/index.ts';
+import { notifyRestocked } from '../../modules/inventory/index.ts';
 
 // Every job the system runs, registered in one place so any trigger (Cron
 // route, CLI, worker) sees the same list. Modules add theirs here as they
@@ -14,6 +15,11 @@ export function loadJobs(): void {
     name: 'platform.sweepIdempotencyKeys',
     description: 'Delete expired idempotency_keys rows (TTL sweep, DOC/backend/21).',
     run: async () => ({ processed: await sweepExpired() }),
+  });
+  registerJob({
+    name: 'inventory.notifyRestocked',
+    description: 'Email everyone waiting on an item that is buyable again (DOC/backend/22).',
+    run: notifyRestocked,
   });
 }
 

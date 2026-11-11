@@ -87,3 +87,42 @@ cannot ring twice.
 
 See the task tracker entry `TL-DB-COMMERCE-EXTRAS` for the questions on
 gift-card purchase flow, expiry and exchange price differences.
+
+## As built (TL-BE-06, 2026-11-11)
+
+`packages/heart/src/modules/inventory/` (`stock.ts`, `alerts.ts`) and a first
+slice of `modules/notifications/`. Tests: `inventory.int.test.ts`.
+
+**Who has stock.** Qikink and Printrove print to order, so counts do not apply.
+Custom Atelier (in-house) and products with no partner use real counts.
+
+**Moving stock.** Only the inventory module writes the balance columns.
+
+- `reserve(tx, { orderId, lines })` takes stock for all lines or none, and
+  throws `STOCK_INSUFFICIENT` naming each short line. A retried line takes
+  nothing more.
+- `release(tx, { orderId, orderItemIds? })` gives stock back once per line.
+- `adjustStock(tx, changes)` applies staff edits as changes. The editor sends
+  the stock it loaded, so a sale made while it was open is kept. A cut larger
+  than what is left stops at zero and the ledger records what moved.
+- Every write locks products, then variants, in id order, so parallel orders
+  cannot deadlock or oversell.
+
+`reserve` and `release` take the caller's transaction. Checkout (TL-BE-08) and
+cancellation will call them; nothing in the app does yet.
+
+**Staff alerts.** Written in the same transaction as the stock change, so a
+rolled-back order rings nothing. Active products with tracked stock only. The
+level is the product's "Low stock alert at", else
+`inventory.low_stock_threshold`. Keys are per variant, per level, per day in
+India, per recipient. Recipients hold `product.update`. The admin bell shows
+these from the database; its order, payment and support items stay demo until
+TL-BE-14.
+
+**Back in stock.** Requests are rows, so a crash cannot lose one.
+`inventory.notifyRestocked` emails everyone whose item is buyable and marks
+them `notified`. It runs right after a product save and daily from Cron.
+Retries are harmless through `one_waiting_stock_alert` and the email
+`dedupe_key`, so the form needs no idempotency key. An address can wait on at
+most 25 items. Email is the mock sender until TL-INT-EMAIL, and the form says so.
+

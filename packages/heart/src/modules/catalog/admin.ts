@@ -6,6 +6,8 @@ import { recordAudit } from '../../platform/audit/index.ts';
 import { uuidv7 } from '../../platform/ids/index.ts';
 import { toPaise, toRupees } from '../../platform/money/index.ts';
 import { ensureAttributeValues, records, textArray } from './import.ts';
+import { adjustStock, isMadeToOrder, syncProductStock } from '../inventory/index.ts';
+import { getSetting } from '../settings/index.ts';
 import { skuPart, slugify, variantKey } from './planner.ts';
 import type { ProductInput } from './schemas.ts';
 import type { z } from 'zod';
@@ -29,11 +31,13 @@ const uniqueConflict = (error: unknown) => {
 };
 
 export interface AdminVariant {
-  id: string; color: string; size: string; sku: string; variantKey: string; price: number; priceOverridden?: true; stock: number;
+  id: string; color: string; size: string; sku: string; variantKey: string; price: number; priceOverridden?: true; stock: number; loadedStock: number;
   weight?: string; shippingWeight?: string; dimensions?: string;
 }
 export interface AdminProduct {
   id: string; name: string; slug: string; category: string; price: number; compareAtPrice?: number; stock: number;
+  /** At or below this many units the product counts as low. */
+  lowStockAt: number;
   /** Partner prints to order: stock numbers do not apply. */
   madeToOrder: boolean; priceSpread: boolean; updatedAt: string;
   publicationStatus: 'published' | 'draft' | 'archived'; description: string; colors: string[]; sizes: string[];
@@ -47,21 +51,22 @@ export interface AdminProductDetail extends AdminProduct {
   fabricGsm?: string; cut?: string; modelDims?: string; care?: string; weight?: string; shippingWeight?: string; dimensions?: string;
   gender?: NonNullable<ProductInput['gender']>; taxRate?: number; photoSettings?: ProductInput['photoSettings'];
   monogram?: { enabled: boolean; maxChars: number; upcharge: number };
-  sizeChartId?: string; exchangePolicy: NonNullable<ProductInput['exchangePolicy']>; productKind: NonNullable<ProductInput['productKind']>;
+  lowStockThreshold?: number; sizeChartId?: string; exchangePolicy: NonNullable<ProductInput['exchangePolicy']>; productKind: NonNullable<ProductInput['productKind']>;
   movements: { id: string; productId: string; variantId?: string; qtyChange: number; reason: string; qtyAfter: number; createdAt: string }[];
 }
 
 type Db = Transaction | ReturnType<typeof getDb>;
 type Row = {
   id: string; name: string; slug: string; category: string | null; price: string; compare_at_price: string | null; status: keyof typeof fromStatus;
-  description: string | null; partner_provider: string | null; style_code: string | null; internal_serial_no: number | null; hsn_code: string | null; updated_at: string;
+  description: string | null; partner_provider: string | null; style_code: string | null; internal_serial_no: number | null; hsn_code: string | null; updated_at: string; low_stock_threshold: number | null;
 };
 
 async function summaries(db: Db, only?: string[]): Promise<AdminProduct[]> {
   const filter = only ? sql`AND p.id IN (${sql.join(only.map((i) => sql`${i}::uuid`), sql`, `)})` : sql``;
-  const [products, variants, links, images, sold, ratings] = await Promise.all([
+  const [storeLowAt, products, variants, links, images, sold, ratings] = await Promise.all([
+    getSetting('inventory.low_stock_threshold', db),
     db.execute<Row>(sql`SELECT p.id, p.name, p.slug, c.name AS category, p.price, p.compare_at_price, p.status, p.description, p.partner_provider,
-        p.style_code, p.internal_serial_no, p.hsn_code, p.updated_at
+        p.style_code, p.internal_serial_no, p.hsn_code, p.updated_at, p.low_stock_threshold
       FROM products p LEFT JOIN categories c ON c.id = p.category_id AND c.deleted_at IS NULL
       WHERE p.deleted_at IS NULL ${filter} ORDER BY p.created_at DESC, p.id DESC`),
     db.execute<{ product_id: string; min: string | null; max: string | null; stock: number }>(sql`
@@ -99,7 +104,7 @@ async function summaries(db: Db, only?: string[]): Promise<AdminProduct[]> {
     return {
       id: p.id, name: p.name, slug: p.slug, category: p.category ?? UNCATEGORIZED, price: rupees(min),
       ...(p.compare_at_price ? { compareAtPrice: rupees(p.compare_at_price) } : {}),
-      stock: v?.stock ?? 0, madeToOrder: Boolean(p.partner_provider), priceSpread: Boolean(v?.min && v?.max && v.min !== v.max),
+      stock: v?.stock ?? 0, lowStockAt: p.low_stock_threshold ?? storeLowAt, madeToOrder: isMadeToOrder(p.partner_provider), priceSpread: Boolean(v?.min && v?.max && v.min !== v.max),
       updatedAt: new Date(p.updated_at).toISOString(), publicationStatus: fromStatus[p.status], description: p.description ?? '',
       colors: colorsBy.get(p.id) ?? [NO_COLOR], sizes: sizesBy.get(p.id) ?? [], partner: PARTNER_LABEL[p.partner_provider ?? ''] ?? 'Custom Atelier',
       soldCount: soldBy.get(p.id) ?? 0, rating: rateBy.get(p.id) ?? 0, images: imgBy.get(p.id) ?? [],
@@ -117,8 +122,8 @@ export async function adminGetProduct(id: string, db: Db = getDb()): Promise<Adm
   const [summary] = await summaries(db, [id]);
   if (!summary) throw new AppError('NOT_FOUND', 'That product does not exist.');
   const [full, variants, values, links, discounts, movements] = await Promise.all([
-    db.execute<{ base_price: string | null; fabric_spec: string | null; cut: string | null; model_dims: string | null; care_instructions: string | null; weight_g: number | null; shipping_weight_g: number | null; dimensions: string | null; gender: AdminProductDetail['gender'] | null; tax_rate: string | null; photo_settings: Record<string, unknown>; monogram_enabled: boolean; monogram_max_chars: number; monogram_upcharge: string; size_chart_id: string | null; exchange_policy: AdminProductDetail['exchangePolicy']; product_kind: AdminProductDetail['productKind'] }>(sql`
-      SELECT base_price, fabric_spec, cut, model_dims, care_instructions, weight_g, shipping_weight_g, dimensions, gender, tax_rate, photo_settings, monogram_enabled, monogram_max_chars, monogram_upcharge, size_chart_id, exchange_policy, product_kind FROM products WHERE id = ${id}`),
+    db.execute<{ base_price: string | null; fabric_spec: string | null; cut: string | null; model_dims: string | null; care_instructions: string | null; weight_g: number | null; shipping_weight_g: number | null; dimensions: string | null; gender: AdminProductDetail['gender'] | null; tax_rate: string | null; photo_settings: Record<string, unknown>; monogram_enabled: boolean; monogram_max_chars: number; monogram_upcharge: string; size_chart_id: string | null; exchange_policy: AdminProductDetail['exchangePolicy']; product_kind: AdminProductDetail['productKind']; low_stock_threshold: number | null }>(sql`
+      SELECT base_price, fabric_spec, cut, model_dims, care_instructions, weight_g, shipping_weight_g, dimensions, gender, tax_rate, photo_settings, monogram_enabled, monogram_max_chars, monogram_upcharge, size_chart_id, exchange_policy, product_kind, low_stock_threshold FROM products WHERE id = ${id}`),
     db.execute<{ id: string; sku: string; variant_key: string; price: string; price_overridden: boolean; stock: number; weight_g: number | null; shipping_weight_g: number | null; dimensions: string | null }>(sql`
       SELECT id, sku, variant_key, price, price_overridden, stock, weight_g, shipping_weight_g, dimensions FROM product_variants WHERE product_id = ${id} AND is_active ORDER BY created_at, id`),
     db.execute<{ variant_id: string; slug: string; value: string }>(sql`
@@ -149,7 +154,7 @@ export async function adminGetProduct(id: string, db: Db = getDb()): Promise<Adm
     const price = rupees(v.price);
     const derived = Math.round((base + (adjustments[`Color:${color}`] ?? 0) + (adjustments[`Size:${size}`] ?? 0)) * 100) / 100;
     return {
-      id: v.id, color, size, sku: v.sku, variantKey: v.variant_key, price, stock: v.stock,
+      id: v.id, color, size, sku: v.sku, variantKey: v.variant_key, price, stock: v.stock, loadedStock: v.stock,
       // Pinned when flagged or when the price is not what the ladder derives.
       ...(v.price_overridden || derived !== price ? { priceOverridden: true as const } : {}),
       ...(v.weight_g ? { weight: String(v.weight_g) } : {}), ...(v.shipping_weight_g ? { shippingWeight: String(v.shipping_weight_g) } : {}), ...(v.dimensions ? { dimensions: v.dimensions } : {}),
@@ -179,6 +184,7 @@ export async function adminGetProduct(id: string, db: Db = getDb()): Promise<Adm
     ...(photo && 'layout' in photo ? { photoSettings: photo as ProductInput['photoSettings'] } : {}),
     ...(p.monogram_enabled ? { monogram: { enabled: true, maxChars: p.monogram_max_chars, upcharge: rupees(p.monogram_upcharge) } } : {}),
     ...(p.size_chart_id ? { sizeChartId: p.size_chart_id } : {}), exchangePolicy: p.exchange_policy, productKind: p.product_kind,
+    ...(p.low_stock_threshold !== null ? { lowStockThreshold: p.low_stock_threshold } : {}),
     movements: movements.rows.map((m) => ({ id: m.id, productId: id, ...(m.variant_id ? { variantId: m.variant_id } : {}), qtyChange: m.qty_change, reason: m.reason, qtyAfter: m.qty_after, createdAt: new Date(m.created_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) })),
   };
 }
@@ -206,14 +212,14 @@ async function claimSlug(tx: Transaction, slug: string, productId: string | null
   if (rows.length) throw field('slug', 'Another product already uses this URL slug.', 'CONFLICT');
 }
 
-interface VariantDraft { color: string | null; size: string; sku?: string; paise: number; pinned: boolean; stock: number; weight: number | null; ship: number | null; dims: string | null }
+interface VariantDraft { color: string | null; size: string; sku?: string; paise: number; pinned: boolean; stock: number; loadedStock?: number; weight: number | null; ship: number | null; dims: string | null }
 
 function variantDrafts(input: ProductInput): VariantDraft[] {
   const rows = input.variants ?? (input.colors.length ? input.colors : [NO_COLOR]).flatMap((color, ci, colors) =>
     (input.sizes.length ? input.sizes : ['One size']).map((size, si, sizes) => {
       // Spread the opening stock across the matrix, conserving the total.
       const n = colors.length * sizes.length; const i = ci * sizes.length + si;
-      return { color, size, price: input.price, stock: Math.floor(input.stock / n) + (i < input.stock % n ? 1 : 0), weight: undefined, shippingWeight: undefined, dimensions: undefined, priceOverridden: false, sku: undefined };
+      return { color, size, price: input.price, stock: Math.floor(input.stock / n) + (i < input.stock % n ? 1 : 0), loadedStock: undefined, weight: undefined, shippingWeight: undefined, dimensions: undefined, priceOverridden: false, sku: undefined };
     }));
   const seen = new Set<string>();
   return rows.map((v) => {
@@ -221,7 +227,7 @@ function variantDrafts(input: ProductInput): VariantDraft[] {
     const key = variantKey(color, v.size);
     if (seen.has(key)) throw field('variants', `${color ?? 'No colour'} / ${v.size} appears twice.`);
     seen.add(key);
-    return { color, size: v.size, sku: v.sku || undefined, paise: toPaise(v.price), pinned: Boolean(v.priceOverridden), stock: v.stock, weight: grams('variants', v.weight), ship: grams('variants', v.shippingWeight), dims: v.dimensions ?? null };
+    return { color, size: v.size, sku: v.sku || undefined, paise: toPaise(v.price), pinned: Boolean(v.priceOverridden), stock: v.stock, loadedStock: v.loadedStock, weight: grams('variants', v.weight), ship: grams('variants', v.shippingWeight), dims: v.dimensions ?? null };
   });
 }
 
@@ -269,28 +275,21 @@ async function writeVariants(tx: Transaction, productId: string, productSku: str
     let sku = given ?? old?.sku ?? `${productSku}${d.color ? `-${skuPart(d.color)}` : ''}-${skuPart(d.size)}`.slice(0, 64);
     if (used.has(sku)) sku = `${sku.slice(0, 55)}-${uuidv7().slice(-8)}`;
     used.add(sku);
-    return { id: old?.id ?? uuidv7(), key, sku, price: toRupees(d.paise), pinned: d.pinned, stock: d.stock, weight: d.weight, ship: d.ship, dims: d.dims, color_id: d.color ? idOf(defs.color!, d.color) : null, option_id: idOf(optionDef, d.size) };
+    // Apply what the editor changed, so a sale made meanwhile is kept.
+    const delta = old ? d.stock - (d.loadedStock ?? old.stock) : d.stock;
+    return { id: old?.id ?? uuidv7(), key, sku, price: toRupees(d.paise), pinned: d.pinned, delta, weight: d.weight, ship: d.ship, dims: d.dims, color_id: d.color ? idOf(defs.color!, d.color) : null, option_id: idOf(optionDef, d.size) };
   });
   await tx.execute(sql`UPDATE product_variants SET is_active = false, updated_at = now() WHERE product_id = ${productId} AND variant_key NOT IN (${sql.join(rows.map((r) => sql`${r.key}`), sql`, `)})`);
   await tx.execute(sql`INSERT INTO product_variants (id, product_id, sku, variant_key, price, price_overridden, stock, weight_g, shipping_weight_g, dimensions, is_active)
-    SELECT x.id, ${productId}, x.sku, x.key, x.price, x.pinned, x.stock, x.weight, x.ship, x.dims, true
-    FROM ${records(rows)} AS x(id uuid, key text, sku text, price numeric, pinned boolean, stock int, weight int, ship int, dims text)
-    ON CONFLICT (product_id, variant_key) DO UPDATE SET sku = EXCLUDED.sku, price = EXCLUDED.price, price_overridden = EXCLUDED.price_overridden, stock = EXCLUDED.stock,
+    SELECT x.id, ${productId}, x.sku, x.key, x.price, x.pinned, 0, x.weight, x.ship, x.dims, true
+    FROM ${records(rows)} AS x(id uuid, key text, sku text, price numeric, pinned boolean, weight int, ship int, dims text)
+    ON CONFLICT (product_id, variant_key) DO UPDATE SET sku = EXCLUDED.sku, price = EXCLUDED.price, price_overridden = EXCLUDED.price_overridden,
       weight_g = EXCLUDED.weight_g, shipping_weight_g = EXCLUDED.shipping_weight_g, dimensions = EXCLUDED.dimensions, is_active = true, updated_at = now()`);
   await tx.execute(sql`INSERT INTO product_variant_attribute_values (variant_id, product_id, definition_id, value_id)
     SELECT x.vid, ${productId}, x.def, x.val FROM ${records(rows.flatMap((r) => [...(r.color_id ? [{ vid: r.id, def: defs.color!, val: r.color_id }] : []), { vid: r.id, def: optionDef, val: r.option_id }]))} AS x(vid uuid, def uuid, val uuid)
     ON CONFLICT (variant_id, definition_id) DO UPDATE SET value_id = EXCLUDED.value_id`);
 
-  // Stock ledger: every manual change is an admin_adjustment row.
-  const moves = rows.flatMap((r) => {
-    const delta = r.stock - (prior.get(r.key)?.stock ?? 0);
-    return delta ? [{ id: uuidv7(), vid: r.id, delta, after: r.stock }] : [];
-  });
-  if (moves.length) {
-    await tx.execute(sql`INSERT INTO stock_movements (id, product_id, variant_id, qty_change, reason, qty_after)
-      SELECT x.id, ${productId}, x.vid, x.delta, 'admin_adjustment', x.after FROM ${records(moves)} AS x(id uuid, vid uuid, delta int, after int)`);
-  }
-  return { minPaise: Math.min(...drafts.map((d) => d.paise)), stock: drafts.reduce((n, d) => n + d.stock, 0) };
+  return { minPaise: Math.min(...drafts.map((d) => d.paise)), changes: rows.map((r) => ({ variantId: r.id, delta: r.delta })) };
 }
 
 async function writeExtras(tx: Transaction, productId: string, input: ProductInput) {
@@ -380,17 +379,30 @@ export async function adminCreateProduct(input: ProductInput, actorId: string): 
 
 async function applyProduct(tx: Transaction, id: string, sku: string, input: ProductInput, drafts: VariantDraft[], categoryId: string | null, slug: string, aliases: string[]) {
   const defs = await definitions(tx);
-  const { minPaise, stock } = await writeVariants(tx, id, sku, drafts, input, defs);
+  const { minPaise, changes } = await writeVariants(tx, id, sku, drafts, input, defs);
   await writeExtras(tx, id, input);
   const base = input.basePrice ?? input.price;
   await tx.execute(sql`UPDATE products SET name = ${input.name}, slug = ${slug}, slug_aliases = ${textArray(aliases)}::varchar(280)[], category_id = ${categoryId},
       price = ${toRupees(minPaise)}, base_price = ${toRupees(toPaise(base))}, compare_at_price = ${input.compareAtPrice === undefined ? null : toRupees(toPaise(input.compareAtPrice))},
-      stock = ${stock}, status = ${toStatus[input.publicationStatus]}, partner_provider = ${PARTNER_SLUG[input.partner]}, description = ${input.description},
+      status = ${toStatus[input.publicationStatus]}, partner_provider = ${PARTNER_SLUG[input.partner]}, low_stock_threshold = ${input.lowStockThreshold ?? null}, description = ${input.description},
       style_code = ${input.styleCode ?? null}, internal_serial_no = ${input.internalSerialNo ?? null}, weight_g = ${grams('weight', input.weight)}, shipping_weight_g = ${grams('shippingWeight', input.shippingWeight)},
       dimensions = ${input.dimensions ?? null}, gender = ${input.gender ?? null}, tax_rate = ${input.taxRate === undefined ? null : input.taxRate.toFixed(2)}, hsn_code = ${input.hsnCode ?? null},
       fabric_spec = ${input.fabricGsm ?? null}, cut = ${input.cut ?? null}, model_dims = ${input.modelDims ?? null}, care_instructions = ${input.care ?? null},
       photo_settings = ${JSON.stringify(input.photoSettings ?? {})}::jsonb, monogram_enabled = ${input.monogram?.enabled ?? false}, monogram_max_chars = ${input.monogram?.maxChars ?? 3},
       monogram_upcharge = ${toRupees(toPaise(input.monogram?.upcharge ?? 0))}, size_chart_id = ${input.sizeChartId ?? null}, exchange_policy = ${input.exchangePolicy}, product_kind = ${input.productKind}, updated_at = now() WHERE id = ${id}`);
+  // After the product row, so alerts see its new status, partner and level.
+  await adjustStock(tx, changes);
+  await syncProductStock(tx, [id]);
+}
+
+/** The variant a shopper picked; null when the product has no such axis, so any variant counts. */
+export async function findVariantId(productId: string, color: string | undefined, size: string | undefined): Promise<string | null> {
+  const { rows } = await getDb().execute<{ id: string; variant_key: string }>(sql`SELECT id, variant_key FROM product_variants WHERE product_id = ${productId} AND is_active`);
+  if (!size || size === 'One size') return rows.length === 1 ? rows[0]!.id : null;
+  const wanted = [variantKey(color ?? null, size), variantKey(null, size)];
+  const match = wanted.map((key) => rows.find((r) => r.variant_key === key)).find(Boolean);
+  if (!match) throw new AppError('NOT_FOUND', 'That option is not available.');
+  return match.id;
 }
 
 export async function adminUpdateProduct(id: string, input: ProductInput, actorId: string, expectedUpdatedAt?: string): Promise<AdminProductDetail> {

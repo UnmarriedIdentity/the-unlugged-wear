@@ -1,27 +1,32 @@
 'use client';
 
 import React from 'react';
-import type { Notification, NotificationRepository } from './types';
+import type { Notification, NotificationRepository, RemoteReadState } from './types';
 
-// Session-local repository (N1): read state lives in a Set, resets on
-// reload like the rest of demo UI. Implements the repository contract, so
-// a future database adapter slots in behind this same hook.
-export function useNotifications(source: Notification[]): NotificationRepository {
+// Repository (N1): demo items keep read state in a Set for the session;
+// database items also report to `remote`, so their state survives a reload.
+export function useNotifications(source: Notification[], remote?: RemoteReadState): NotificationRepository {
   const [readIds, setReadIds] = React.useState<ReadonlySet<string>>(new Set());
 
-  const unreadCount = source.filter((n) => !readIds.has(n.id)).length;
+  const isRead = (id: string) => readIds.has(id) || Boolean(remote?.readIds.has(id));
+  const unreadCount = source.filter((n) => !isRead(n.id)).length;
 
   return {
     all: source,
     unreadCount,
-    isRead: (id: string) => readIds.has(id),
-    markRead: (id: string) =>
+    isRead,
+    markRead: (id: string) => {
+      if (!isRead(id)) remote?.markRead(id);
       setReadIds((prev) => {
         if (prev.has(id)) return prev;
         const next = new Set(prev);
         next.add(id);
         return next;
-      }),
-    markAllRead: () => setReadIds(new Set(source.map((n) => n.id))),
+      });
+    },
+    markAllRead: () => {
+      remote?.markAllRead();
+      setReadIds(new Set(source.map((n) => n.id)));
+    },
   };
 }

@@ -91,13 +91,13 @@ export default function VariantPillSelector({
               type="button"
               role="radio"
               aria-checked={isSelected}
-              disabled={!s.inStock}
+              aria-label={s.inStock ? s.size : `${s.size}, sold out`}
               onClick={() => onSelect(s)}
               className={`${
                 isLong ? 'h-12 px-3 py-1.5' : 'h-11'
               } text-xs font-medium uppercase transition-all flex flex-col items-center justify-center cursor-pointer border ${
                 !s.inStock
-                  ? 'opacity-40 cursor-not-allowed bg-store-canvas border-store-card-border line-through text-store-muted'
+                  ? `bg-store-canvas line-through text-store-text-secondary ${isSelected ? 'border-store-charcoal' : 'border-store-card-border hover:border-store-charcoal'}`
                   : isSelected
                   ? 'border-store-charcoal bg-store-charcoal text-white shadow-xs'
                   : 'border-store-card-border bg-store-surface text-store-text-primary hover:border-store-charcoal'

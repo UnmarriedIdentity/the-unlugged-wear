@@ -11,11 +11,11 @@
   "_demo": "Figma source of truth established. First track TL-WEB-001 closed.",
   "summary": {
     "total": 114,
-    "done": 85,
+    "done": 86,
     "in_progress": 4,
-    "backlog": 25,
+    "backlog": 24,
     "total_tasks": 114,
-    "pending": 25
+    "pending": 24
   },
   "session": {
     "branch": "urvil-ui",
@@ -2429,14 +2429,14 @@
       "id": "TL-WEB-BE-15",
       "title": "PDP 'notify me when back in stock'",
       "category": "backend",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-WEB-BE",
-      "started": null,
-      "finished": null,
-      "verified": false,
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "verified": true,
       "design_match": null,
-      "pushed": false,
+      "pushed": true,
       "admin_ref": "TL-BE-06.03",
       "depends_on": [
         "TL-BE-06"
@@ -2446,7 +2446,8 @@
       ],
       "description": "Guest email or customer; one waiting request per product/variant.",
       "key_decisions": [],
-      "follow_ups": []
+      "follow_ups": [],
+      "log": "Sold-out options are selectable on the PDP and show a notify-me form; guests give an email, signed-in customers are linked. Buy now is blocked on a sold-out option."
     },
     {
       "id": "TL-WEB-BE-16",

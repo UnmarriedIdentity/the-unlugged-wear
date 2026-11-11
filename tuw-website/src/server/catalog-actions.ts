@@ -2,6 +2,7 @@
 
 import { z } from 'zod';
 import * as catalog from '@tuw/heart/modules/catalog';
+import * as inventory from '@tuw/heart/modules/inventory';
 import { catalogSchemas as s } from '@tuw/heart/modules/catalog';
 import { guards } from './session';
 import { cachedReviews, cachedSearch } from './catalog';
@@ -21,6 +22,13 @@ export const getReviewsAction = guards.action({ access: 'public', input: z.objec
   // Per-person state is never cached.
   ...(ctx.user ? await catalog.myReviewState(ctx.user.id, input.productId) : { canReview: false, mine: null }),
 }));
+
+/** Guests give an email; a signed-in customer is linked to the request too. */
+export const notifyMeAction = guards.action({ access: 'public', input: inventory.inventorySchemas.backInStock }, async ({ input, ctx }) => {
+  const variantId = await catalog.findVariantId(input.productId, input.color, input.size);
+  await inventory.requestBackInStock({ productId: input.productId, variantId, email: input.email, userId: ctx.user?.id ?? null });
+  return { ok: true };
+});
 
 export const submitReviewAction = guards.action({ access: 'customer', input: s.reviewSubmit }, async ({ input, ctx }) => {
   await catalog.submitReview(ctx.user!.id, input);

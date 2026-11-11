@@ -13,6 +13,7 @@ export {
   verifyEmail,
   changePassword,
   listStaff,
+  usersWithPermission,
   inviteStaff,
   revokeInvite,
   acceptInvite,

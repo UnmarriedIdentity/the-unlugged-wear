@@ -1,6 +1,8 @@
 'use server';
 
+import { after } from 'next/server';
 import * as catalog from '@tuw/heart/modules/catalog';
+import { notifyRestocked } from '@tuw/heart/modules/inventory';
 import { catalogSchemas as s, PRODUCTS_TAG } from '@tuw/heart/modules/catalog';
 import { AppError } from '@tuw/heart/platform/errors';
 import { guards } from './session';
@@ -24,6 +26,8 @@ export const updateProductAction = guards.action({ permission: 'product.update',
   }
   const { id, expectedUpdatedAt, ...fields } = input;
   const product = await catalog.adminUpdateProduct(id, fields, ctx.user!.id, expectedUpdatedAt);
+  // A restock tells waiting shoppers right away; the daily job catches anything missed.
+  after(() => notifyRestocked().catch((error) => console.warn('[inventory] restock emails failed', error)));
   return { product, storefront: await refresh() };
 });
 

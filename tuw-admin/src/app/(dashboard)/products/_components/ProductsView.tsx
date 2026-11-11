@@ -291,6 +291,7 @@ export default function ProductsView({ initialProducts, categories, perms, store
   const [formPartner, setFormPartner] = useState<ProductItem['partner']>('Qikink Direct API');
   const [formExchangePolicy, setFormExchangePolicy] = useState<NonNullable<ProductItem['exchangePolicy']>>('defects_only');
   const [formProductKind, setFormProductKind] = useState<NonNullable<ProductItem['productKind']>>('physical');
+  const [formLowStock, setFormLowStock] = useState('');
   const [formStatus, setFormStatus] = useState<ProductItem['publicationStatus']>('published');
   const [formDescription, setFormDescription] = useState('Pre-shrunk premium heavyweight combed cotton with reinforced seams.');
 
@@ -357,6 +358,7 @@ export default function ProductsView({ initialProducts, categories, perms, store
     setFormPartner('Qikink Direct API');
     setFormExchangePolicy('defects_only');
     setFormProductKind('physical');
+    setFormLowStock('');
     setFormStatus('published');
     setFormDescription('Pre-shrunk premium heavyweight combed cotton with reinforced seams.');
     setFormPhoto({ layout: 'carousel', ratio: '4:3', showPhotos: true });
@@ -1093,6 +1095,7 @@ export default function ProductsView({ initialProducts, categories, perms, store
     setFormPartner(product.partner);
     setFormExchangePolicy(product.exchangePolicy ?? 'defects_only');
     setFormProductKind(product.productKind ?? 'physical');
+    setFormLowStock(product.lowStockThreshold !== undefined ? String(product.lowStockThreshold) : '');
     setFormStatus(product.publicationStatus);
     setFormDescription(product.description);
   };
@@ -1155,6 +1158,7 @@ export default function ProductsView({ initialProducts, categories, perms, store
         hsnCode: formHsn.trim() || undefined,
         sizeChartId: formSizeChartId || undefined,
         exchangePolicy: formExchangePolicy,
+        lowStockThreshold: formLowStock === '' ? undefined : Number(formLowStock),
         productKind: formProductKind,
         partner: formPartner,
         publicationStatus: formStatus,
@@ -1251,6 +1255,7 @@ export default function ProductsView({ initialProducts, categories, perms, store
       hsnCode: formHsn.trim() || undefined,
       sizeChartId: formSizeChartId || undefined,
       exchangePolicy: formExchangePolicy,
+      lowStockThreshold: formLowStock === '' ? undefined : Number(formLowStock),
       productKind: formProductKind,
       photoSettings: formPhoto,
       discounts: formDiscounts,
@@ -1301,7 +1306,7 @@ export default function ProductsView({ initialProducts, categories, perms, store
       stockFilter === 'all'
         ? true
         : stockFilter === 'low'
-          ? !p.madeToOrder && p.stock > 0 && p.stock <= 10
+          ? !p.madeToOrder && p.stock > 0 && p.stock <= (p.lowStockAt ?? 10)
           : !p.madeToOrder && p.stock === 0;
     return matchesSearch && matchesCat && matchesPub && matchesStock;
   });
@@ -1667,7 +1672,7 @@ export default function ProductsView({ initialProducts, categories, perms, store
     clearSelection();
   };
 
-  const lowStockCount = products.filter((p) => !p.madeToOrder && p.stock > 0 && p.stock <= 10).length;
+  const lowStockCount = products.filter((p) => !p.madeToOrder && p.stock > 0 && p.stock <= (p.lowStockAt ?? 10)).length;
   const outOfStockCount = products.filter((p) => !p.madeToOrder && p.stock === 0).length;
   const draftCount = products.filter((p) => p.publicationStatus === 'draft').length;
 
@@ -2119,7 +2124,7 @@ export default function ProductsView({ initialProducts, categories, perms, store
         <StatCard
           label="Low Stock Alerts"
           value={String(lowStockCount)}
-          subtitle="Stock ≤ 10 units"
+          subtitle="At or below each product's alert level"
           trendType={lowStockCount > 0 ? 'down' : 'up'}
           hoverable
           role="button"
@@ -2308,8 +2313,8 @@ export default function ProductsView({ initialProducts, categories, perms, store
                       {p.category} · {p.partner}
                     </span>
                   </div>
-                  <Badge variant={p.madeToOrder || p.stock > 10 ? 'success' : p.stock > 0 ? 'warning' : 'danger'}>
-                    {p.madeToOrder ? 'Made to order' : p.stock > 10 ? `${p.stock} in stock` : p.stock > 0 ? `Low: ${p.stock}` : 'Out of stock'}
+                  <Badge variant={p.madeToOrder || p.stock > (p.lowStockAt ?? 10) ? 'success' : p.stock > 0 ? 'warning' : 'danger'}>
+                    {p.madeToOrder ? 'Made to order' : p.stock > (p.lowStockAt ?? 10) ? `${p.stock} in stock` : p.stock > 0 ? `Low: ${p.stock}` : 'Out of stock'}
                   </Badge>
                 </div>
 
@@ -2971,6 +2976,13 @@ export default function ProductsView({ initialProducts, categories, perms, store
                   ]}
                   value={formProductKind}
                   onChange={(value) => setFormProductKind(value as typeof formProductKind)}
+                />
+                <Input
+                  label="Low stock alert at"
+                  placeholder="Store default"
+                  inputMode="numeric"
+                  value={formLowStock}
+                  onChange={(e) => setFormLowStock(e.target.value.replace(/\D/g, ''))}
                 />
               </div>
               <div style={pairedFieldGrid}>

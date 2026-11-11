@@ -19,6 +19,8 @@ const variant = z.object({
   price: money,
   priceOverridden: z.boolean().optional(),
   stock: z.number().int('Stock must be a whole number').min(0, 'Stock cannot be negative').max(1_000_000),
+  /** The stock the editor loaded; the change from it is what gets applied. */
+  loadedStock: z.number().int().min(0).max(1_000_000).optional(),
   weight: optionalText(30),
   shippingWeight: optionalText(30),
   dimensions: optionalText(50),
@@ -75,6 +77,8 @@ export const productFields = z.object({
   sizeChartId: uuid.optional(),
   exchangePolicy: z.enum(['defects_only', 'exchangeable', 'none']).default('defects_only'),
   productKind: z.enum(['physical', 'gift_card']).default('physical'),
+  /** Empty uses the store-wide level. */
+  lowStockThreshold: z.number().int('Use a whole number').min(0, 'Cannot be negative').max(100_000).optional(),
 });
 export type ProductInput = z.infer<typeof productFields>;
 

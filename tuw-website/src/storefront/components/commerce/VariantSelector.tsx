@@ -10,6 +10,7 @@ import SizeGuideModal from './SizeGuideModal';
 import ColorSwatchSelector from './ColorSwatchSelector';
 import VariantPillSelector from './VariantPillSelector';
 import RadioOptionSelector from './RadioOptionSelector';
+import NotifyMe from './NotifyMe';
 import { useSiteSettings, rupeesLabel } from '@storefront/lib/site-settings';
 import {
   sizePriceINR,
@@ -52,7 +53,8 @@ export default function VariantSelector({
     hasColors ? product.colors![0] : undefined
   );
   const [internalSize, setInternalSize] = useState<ProductSize | null>(
-    hasSizes ? product.sizes!.find((s) => s.inStock) || null : null
+    // A single sold-out option starts selected, so "notify me" is on show.
+    hasSizes ? product.sizes!.find((s) => s.inStock) || (product.sizes!.length === 1 ? product.sizes![0]! : null) : null
   );
 
   const selectedColor = controlledColor !== undefined ? controlledColor : internalColor;
@@ -160,6 +162,10 @@ export default function VariantSelector({
       setValidationError(`Please choose a ${variantLabel.toLowerCase()} to continue.`);
       return;
     }
+    if (hasSizes && selectedSize && !selectedSize.inStock) {
+      setValidationError(`This ${variantLabel.toLowerCase()} is currently sold out.`);
+      return;
+    }
     handleAddToCart();
     router.push('/checkout');
   };
@@ -187,6 +193,15 @@ export default function VariantSelector({
           onSizeGuideClick={sizeChart ? () => setIsSizeGuideOpen(true) : undefined}
           sizeGuideLabel="Size guide"
           validationError={validationError}
+        />
+      )}
+
+      {hasSizes && selectedSize && !selectedSize.inStock && product.productId && (
+        <NotifyMe
+          key={`${selectedColor?.name ?? ''}|${selectedSize.size}`}
+          productId={product.productId}
+          color={selectedColor?.name}
+          size={selectedSize.size}
         />
       )}
 

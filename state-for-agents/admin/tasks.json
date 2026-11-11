@@ -9,15 +9,15 @@
   },
   "summary": {
     "total": 440,
-    "done": 329,
-    "in_progress": 1,
-    "backlog": 110
+    "done": 333,
+    "in_progress": 2,
+    "backlog": 105
   },
   "session": {
     "branch": "urvil-ui",
     "tip": "9519313",
     "unpushed": [],
-    "next_up": "TL-BE-03.01 — customers module (profiles, addresses, households); storefront TL-WEB-BE-05",
+    "next_up": "TL-BE-07",
     "pending_verifications": [
       "admin journal editor + list full keyboard/focus/Reset Demo pass at 360/768/1024/1440 (CDP route-load check passed; interactive pass pending)",
       "SQL dry-run: apply 001 + 002 + 006-cms.sql against a real PostgreSQL instance; verify generated blogs.search_vector, slug/CHECK constraints, FK RESTRICT/CASCADE behavior, and partial indexes. psql remains unavailable locally.",
@@ -6239,21 +6239,26 @@
     {
       "id": "TL-BE-06",
       "title": "Inventory & stock alerts",
-      "status": "backlog",
+      "status": "in_progress",
       "owner": "unassigned",
       "parent": "TL-BE-CORE",
-      "started": null,
+      "started": "2026-11-11",
       "finished": null,
-      "log": "Not started. Scope: Stock ledger, atomic reserve/release, staff low/out-of-stock alerts, back-in-stock requests.",
+      "log": "Inventory module, staff alerts, back-in-stock requests and the restock job are done (commit INVHASH). Remaining for done_when: checkout calling reserve and cancel calling release, which arrive with TL-BE-08.",
       "wiring": "modules/inventory called by checkout/cancel via index.ts; emits stock.restocked; notifications module subscribes.",
       "done_when": "Checkout decrements atomically, cancel restores once, staff get inventory bell alerts, 'notify me' works for guests/customers.",
       "depends_on": [
         "TL-BE-05"
       ],
       "design_match": null,
-      "key_decisions": [],
+      "key_decisions": [
+        "Qikink and Printrove are made to order; Custom Atelier and no-partner products use real stock",
+        "Inventory owns products.stock and product_variants.stock",
+        "Restock emails are driven by rows and a job, not an in-process event, so a crash cannot lose one",
+        "Staff stock edits are applied as changes from what the editor loaded"
+      ],
       "verified": false,
-      "pushed": false,
+      "pushed": true,
       "follow_ups": [],
       "storefront_tasks": [
         "TL-WEB-BE-15"
@@ -6262,46 +6267,48 @@
     {
       "id": "TL-BE-06.01",
       "title": "reserve/release with one sale/cancel movement per order line (guards from TL-DB-IDEMPOTENCY-AUDIT)",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-06",
-      "started": null,
-      "finished": null,
-      "log": "Not started.",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "modules/inventory/stock.ts: reserve and release with one sale/cancel movement per line, all-or-nothing, ordered locks. Tested for overselling, deadlocks, parallel retries and repeat cancels.",
       "design_match": null,
       "key_decisions": [],
-      "verified": false,
-      "pushed": false,
-      "follow_ups": []
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "Not called by the app until checkout exists (TL-BE-08)"
+      ]
     },
     {
       "id": "TL-BE-06.02",
       "title": "Low-stock / out-of-stock staff notifications (threshold from product or settings, dedupe_key)",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-06",
-      "started": null,
-      "finished": null,
-      "log": "Not started.",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "Alerts written in the stock transaction; product level, else the store setting; dedupe per variant, level, day and recipient. First slice of modules/notifications; the admin bell reads them.",
       "design_match": null,
       "key_decisions": [],
-      "verified": false,
-      "pushed": false,
+      "verified": true,
+      "pushed": true,
       "follow_ups": []
     },
     {
       "id": "TL-BE-06.03",
       "title": "Back-in-stock subscriptions + job inventory.notifyRestocked (mock email)",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-06",
-      "started": null,
-      "finished": null,
-      "log": "Not started.",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "stock_alert_subscriptions requests, job inventory.notifyRestocked (mock email), run after a product save and daily from Cron.",
       "design_match": null,
       "key_decisions": [],
-      "verified": false,
-      "pushed": false,
+      "verified": true,
+      "pushed": true,
       "follow_ups": [],
       "storefront_tasks": [
         "TL-WEB-BE-15"
@@ -6310,16 +6317,16 @@
     {
       "id": "TL-BE-06.04",
       "title": "Wire admin stock edits (admin_adjustment movements) + storefront 'notify me'",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-06",
-      "started": null,
-      "finished": null,
-      "log": "Not started.",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "Editor stock saves go through inventory.adjustStock as changes, so a sale during an edit is kept; low-stock level field; PDP notify-me on sold-out options.",
       "design_match": null,
       "key_decisions": [],
-      "verified": false,
-      "pushed": false,
+      "verified": true,
+      "pushed": true,
       "follow_ups": []
     },
     {
@@ -6452,7 +6459,9 @@
       "key_decisions": [],
       "verified": false,
       "pushed": false,
-      "follow_ups": [],
+      "follow_ups": [
+        "Call inventory.reserve inside the checkout transaction and inventory.release on cancel; that closes TL-BE-06"
+      ],
       "storefront_tasks": [
         "TL-WEB-BE-19",
         "TL-WEB-BE-20",

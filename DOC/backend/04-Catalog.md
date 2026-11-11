@@ -413,9 +413,9 @@ variant. Shaped exactly like the storefront `Product` type.
   priced differently (31 Qikink styles, e.g. posters ₹399–₹1,499), each size
   carries `priceINR`/`priceMinorINR`; cards and the PDP headline say
   "From ₹…", add-to-bag and the checkout route charge the chosen size.
-- Made-to-order (partner) variants are available while active and the
-  partner is `ready_to_print`, capped at 100 per order; stock counts only
-  apply to stocked items (the inventory module, TL-BE-06).
+- Made-to-order variants (Qikink, Printrove) are available while active and
+  the partner is `ready_to_print`, capped at 100 per order. Custom Atelier is
+  in-house, so its items use real stock counts (see `22-Commerce-Extras.md`).
 - No colour axis → one neutral "Standard" swatch.
 - Partner cost (kept only in `product_source_rows.raw_data`), source rows
   and staff fields never leave `read.ts` (test: "partner cost never reaches the storefront").

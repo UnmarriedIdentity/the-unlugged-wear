@@ -31,6 +31,10 @@ export interface ProductItem {
   /** Row version for stale-edit protection. */
   updatedAt?: string;
   exchangePolicy?: 'defects_only' | 'exchangeable' | 'none';
+  /** At or below this many units the product counts as low. */
+  lowStockAt?: number;
+  /** This product's own level; empty uses the store default. */
+  lowStockThreshold?: number;
   productKind?: 'physical' | 'gift_card';
   publicationStatus: 'published' | 'draft' | 'archived';
   description: string;
@@ -112,6 +116,8 @@ export interface ProductVariant {
   sku: string;
   /** Sorted axis-value signature; unique per product in the DB. */
   variantKey?: string;
+  /** Stock when the editor opened; the save applies only the change from it. */
+  loadedStock?: number;
   price: number;
   /** Explicit cell override (R1): true pins this price through recomputes
    * until reset. Absent = derived pipeline value. Mirrors

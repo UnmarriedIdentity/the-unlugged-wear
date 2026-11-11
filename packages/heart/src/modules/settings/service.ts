@@ -48,8 +48,9 @@ export async function getSettings(): Promise<SettingsValues> {
   return (await readAll(getDb())).values;
 }
 
-export async function getSetting<K extends SettingKey>(key: K): Promise<SettingsValues[K]> {
-  return (await getSettings())[key];
+/** Pass the open transaction when there is one: waiting for a second connection while holding one can starve the pool. */
+export async function getSetting<K extends SettingKey>(key: K, db: Db = getDb()): Promise<SettingsValues[K]> {
+  return (await readAll(db)).values[key];
 }
 
 export interface PublicSettings {
