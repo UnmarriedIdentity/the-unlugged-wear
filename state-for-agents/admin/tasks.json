@@ -9,9 +9,9 @@
   },
   "summary": {
     "total": 440,
-    "done": 304,
+    "done": 329,
     "in_progress": 1,
-    "backlog": 135
+    "backlog": 110
   },
   "session": {
     "branch": "urvil-ui",
@@ -5946,12 +5946,12 @@
     {
       "id": "TL-BE-05",
       "title": "Catalog — products, variants, categories, collections, import",
-      "status": "in_progress",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-CORE",
       "started": "2026-11-11",
-      "finished": null,
-      "log": "Slice 1 of 3 done (commit 794eb68): catalog module (planner, import job, storefront read model), migration 018, demo catalog seed (155 products / 2,348 variants from the Qikink listing + 14 curated + 4 collections), storefront reads products and collections from the DB (cached, products tag expires immediately), catalog.generated.ts retired, price tiers. Slice 2 of 3 done (commit f966eaa): admin products list + editor, CSV import through the job, collections with drop dates, categories screen, storefront menu respects category flags, pricing anchor corrected (migration 019). Slice 3: search, size charts, reviews, attribute library, SKU mappings, exchange_policy/product_kind fields.",
+      "finished": "2026-11-11",
+      "log": "Slice 1 of 3 done (commit 794eb68): catalog module (planner, import job, storefront read model), migration 018, demo catalog seed (155 products / 2,348 variants from the Qikink listing + 14 curated + 4 collections), storefront reads products and collections from the DB (cached, products tag expires immediately), catalog.generated.ts retired, price tiers. Slice 2 of 3 done (commit f966eaa): admin products list + editor, CSV import through the job, collections with drop dates, categories screen, storefront menu respects category flags, pricing anchor corrected (migration 019). Slice 3 of 3 done (commit SLICE3HASH): search, size charts, reviews, attribute library, SKU mappings, exchange_policy/product_kind fields, pure logic moved to the shared package.",
       "wiring": "modules/catalog (reads cached with product/collection tags); admin product editor + import; storefront shop/collections/PDP/search as cached Server Components per the rendering skills.",
       "done_when": "Products imported from tuw-website/data/qikink-listing.json appear in admin and on the storefront from the DB; editing a product updates the storefront via tag revalidation; catalog.generated.ts no longer used.",
       "depends_on": [
@@ -5967,9 +5967,11 @@
         "Bulk SQL (jsonb_to_recordset) + advisory locks: parallel imports never duplicate; one style sold for 4 genders gets 4 slugs",
         "products.base_price is the retail anchor; partner cost lives only in source rows (migration 019)",
         "Removing a variant switches it off; deleting a product is soft; renamed products keep their old URL",
-        "Publishing needs a category and a priced variant; stale edits are refused"
+        "Publishing needs a category and a priced variant; stale edits are refused",
+        "Size chart column order is stored explicitly (jsonb loses key order)",
+        "Reviews require a delivered order; approved only on the storefront"
       ],
-      "verified": false,
+      "verified": true,
       "pushed": true,
       "follow_ups": [
         "Qikink sheet: Polo MP25 XXL White has HSN 610990 vs 61091000 on every other row — split into 2 products until fixed",
@@ -5978,7 +5980,8 @@
         "First uncached catalog read is ~5.5 s from India (US East DB); fine when cached, revisit with the region decision",
         "Admin /products loads every product (light, no variants); add server paging before the catalog reaches thousands",
         "Admin orders, discounts, designs, reports and the header search still read demo products until their modules move",
-        "Image uploads stay session previews until TL-INT-R2; only URLs persist"
+        "Image uploads stay session previews until TL-INT-R2; only URLs persist",
+        "Returns copy still pending (TL-BE-10)"
       ],
       "storefront_tasks": [
         "TL-WEB-BE-08",
@@ -6059,15 +6062,15 @@
     {
       "id": "TL-BE-05.05",
       "title": "Collections + size charts + exchange_policy / product_kind fields in the editor",
-      "status": "in_progress",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-05",
       "started": "2026-11-11",
-      "finished": null,
-      "log": "Collections done (membership order, drop dates, slug rules). Remaining for slice 3: size charts and exchange_policy / product_kind fields in the editor.",
+      "finished": "2026-11-11",
+      "log": "Collections, size charts (library, ordered columns, migration 020, auto-save editor, seed) and exchange_policy / product_kind in the editor. /size-guide and the PDP modal read the same rows.",
       "design_match": null,
       "key_decisions": [],
-      "verified": false,
+      "verified": true,
       "pushed": true,
       "follow_ups": [],
       "storefront_tasks": [
@@ -6077,17 +6080,19 @@
     {
       "id": "TL-BE-05.06",
       "title": "Search: tsvector ranked query + suggest; search_terms logging",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-05",
-      "started": null,
-      "finished": null,
-      "log": "Not started.",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "modules/catalog/search.ts: prefix tsquery from letters/digits, ranked exact/prefix/name/ts_rank, style code + category, suggest, search_terms logging including zero results.",
       "design_match": null,
       "key_decisions": [],
-      "verified": false,
-      "pushed": false,
-      "follow_ups": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "No typo tolerance: pg_trgm is not installed"
+      ],
       "storefront_tasks": [
         "TL-WEB-BE-11"
       ]
@@ -6095,17 +6100,19 @@
     {
       "id": "TL-BE-05.07",
       "title": "Wire storefront /shop, /collections/[slug], /products/[slug], /search with cacheTag + generateStaticParams",
-      "status": "in_progress",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-05",
       "started": "2026-11-11",
-      "finished": null,
-      "log": "Storefront /shop, /collections, /products/[slug], /search read DB products via getCatalog() (root layout → store provider); PDP/collection layouts use it for static params, metadata and 404s. Remaining: render shop/PDP/search as Server Components (TL-WEB-BE-08/10/11).",
+      "finished": "2026-11-11",
+      "log": "Storefront /shop, /collections, /products/[slug] read DB products via getCatalog(); /search is a Server Component with a cached ranked query.",
       "design_match": null,
       "key_decisions": [],
-      "verified": false,
+      "verified": true,
       "pushed": true,
-      "follow_ups": [],
+      "follow_ups": [
+        "Server Component shop grid and PDP body remain as TL-WEB-BE-08 and TL-WEB-BE-10"
+      ],
       "storefront_tasks": [
         "TL-WEB-BE-08",
         "TL-WEB-BE-09",
@@ -6115,64 +6122,68 @@
     {
       "id": "TL-BE-05.08",
       "title": "provider_product_mappings editor (Qikink SKU, print type, designs, unit cost)",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-05",
-      "started": null,
-      "finished": null,
-      "log": "Not started. Depends on TL-BE-00.04 answer.",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "Partner SKU tab: per-variant SKU and unit cost with the sheet cost as a hint; duplicates and foreign variants refused; blank removes.",
       "design_match": null,
       "key_decisions": [],
-      "verified": false,
-      "pushed": false,
-      "follow_ups": []
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "Strategy B design fields are stored but have no editor yet"
+      ]
     },
     {
       "id": "TL-BE-05.09",
       "title": "Reviews (approved only on PDP; one per user/product)",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-05",
-      "started": null,
-      "finished": null,
-      "log": "Not started.",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "modules/catalog/reviews.ts + /products/reviews moderation + PDP reviews: delivered order required, one per user/product, edit re-queues, approved only, no fabricated numbers.",
       "design_match": null,
       "key_decisions": [],
-      "verified": false,
-      "pushed": false,
-      "follow_ups": []
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "No review can be written until orders exist (TL-BE-08)"
+      ]
     },
     {
       "id": "TL-BE-05.10",
       "title": "Tests: pricing ladder, import grouping, search ranking",
-      "status": "in_progress",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-05",
       "started": "2026-11-11",
-      "finished": null,
-      "log": "planner.test.ts (6), catalog.int.test.ts (7), admin.int.test.ts (8): hostile input, tier round trip, rename aliases, stale edits, parallel saves, SKU clashes, bulk refusals, soft delete, collections, categories. Search ranking tests come with TL-BE-05.06.",
+      "finished": "2026-11-11",
+      "log": "planner.test.ts, rules.test.mjs, catalog.int.test.ts, admin.int.test.ts, extras.int.test.ts: search ranking and hostile input, library guards, size charts, mappings, reviews, plus the earlier pricing and import cases.",
       "design_match": null,
       "key_decisions": [],
-      "verified": false,
+      "verified": true,
       "pushed": true,
       "follow_ups": []
     },
     {
       "id": "TL-BE-05.11",
       "title": "/settings/attributes → attribute library editor (attribute_definitions + attribute_values)",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-05",
-      "started": null,
-      "finished": null,
-      "log": "Not started. New option types are data rows, never schema changes.",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "/settings/attributes on attribute_definitions + attribute_values: create, edit surfaces, add/remove values; core attributes and in-use rows protected.",
       "files": [
         "tuw-admin/src/app/(dashboard)/settings/attributes/page.tsx"
       ],
       "design_match": null,
       "key_decisions": [],
-      "verified": false,
-      "pushed": false,
+      "verified": true,
+      "pushed": true,
       "follow_ups": [
         "Added by the 2026-11-10 admin screen audit"
       ]
@@ -6180,12 +6191,12 @@
     {
       "id": "TL-BE-05.12",
       "title": "Move pure catalog logic into modules/catalog: lib/productPricing.ts, productImport.ts, attributePresentation.ts, collections.ts (tests move with it)",
-      "status": "in_progress",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-05",
       "started": "2026-11-11",
-      "finished": null,
-      "log": "Import grouping/pricing rules moved to packages/heart/src/modules/catalog/planner.ts. The admin copies (lib/productImport.ts etc.) stay until the admin editor moves to the DB (TL-BE-05.13).",
+      "finished": "2026-11-11",
+      "log": "Pure logic in modules/catalog/rules.ts and planner.ts, exported from @tuw/heart; admin lib copies deleted; tests moved to real imports in the shared package.",
       "files": [
         "tuw-admin/src/lib/productPricing.ts",
         "tuw-admin/src/lib/productImport.ts",
@@ -6198,7 +6209,7 @@
       ],
       "design_match": null,
       "key_decisions": [],
-      "verified": false,
+      "verified": true,
       "pushed": true,
       "follow_ups": [
         "Added by the 2026-11-10 admin screen audit"

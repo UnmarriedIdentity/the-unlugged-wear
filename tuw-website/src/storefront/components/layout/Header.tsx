@@ -20,6 +20,7 @@ import TuwEmblem from './TuwEmblem';
 import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
 import type { Product } from '@storefront/lib/types';
 import { NAV_ITEMS, type NavItem, type NavLink } from './navigation';
+import { suggestAction } from '@/server/catalog-actions';
 import { matchesShopFilter } from '@storefront/lib/product';
 import { site } from '@storefront/lib/site';
 
@@ -160,11 +161,17 @@ function SearchPanel({
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
   const query = value.trim().toLowerCase();
-  const results = query
-    ? products
-        .filter((p) => p.publicationStatus !== 'draft' && `${p.title} ${p.subtitle}`.toLowerCase().includes(query))
-        .slice(0, 6)
-    : [];
+  // Ranked suggestions from the database, a beat after typing stops.
+  const [rankedIds, setRankedIds] = useState<string[]>([]);
+  useEffect(() => {
+    if (query.length < 2) { setRankedIds([]); return; }
+    let live = true;
+    const timer = setTimeout(() => {
+      void suggestAction({ q: query }).then((r) => { if (live && r.ok) setRankedIds(r.data); });
+    }, 200);
+    return () => { live = false; clearTimeout(timer); };
+  }, [query]);
+  const results = query ? rankedIds.flatMap((id) => products.filter((p) => p.id === id)).slice(0, 6) : [];
 
   // Close on Escape or a click outside the panel.
   useEffect(() => {

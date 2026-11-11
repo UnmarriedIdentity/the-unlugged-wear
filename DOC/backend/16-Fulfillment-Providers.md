@@ -182,3 +182,16 @@ Registry rules (tests: `registry.int.test.ts`):
 5. Unknown Qikink status words map to `on_hold` (ops alert), never to a
    happy state.
 
+## 10. Partner SKU editor (TL-BE-05 slice 3, 2026-11-11)
+
+Product editor → **Partner SKU** tab, backed by `modules/catalog/mappings.ts`
+and `provider_product_mappings`. One row per variant: the partner SKU (strategy
+A) and unit cost, with the cost from the imported sheet shown as a hint.
+
+- A SKU may be used once: duplicates are refused within a save and across
+  products.
+- A variant from another product is refused.
+- Clearing the SKU removes the mapping.
+- Strategy B design fields (§6) are stored in `payload` when sent; there is no
+  editor for them yet.
+

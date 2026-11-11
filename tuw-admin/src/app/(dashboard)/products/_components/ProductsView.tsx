@@ -10,13 +10,13 @@ import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, IconB
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 import { resolveVariants, variantStockTotal, buildVariantSku, deriveVariantPrice, recomputeVariants, minFromPrice, pruneAdjustments, roundPrice, hasPriceSpread, adjustmentKey, sumAdjustments } from '@/mocks/variants';
-import type { ProductVariant, ProductAttribute, PhotoSettings, ProductDiscount, SizeChart, ProductGender, StockMovement } from '@/mocks/fixtures';
-import { createProductAction, deleteProductsAction, getProductAction, importListingAction, setProductsStatusAction, updateProductAction } from '@/server/catalog-actions';
-import { parseCompareAtPrice } from '@/lib/productPricing';
-import { groupImportRows, isValidHsnCode, UNCATEGORIZED_CATEGORY } from '@/lib/productImport';
-import type { ImportProductGroup, ImportSourceRow } from '@/lib/productImport';
-import { slugify } from '@/lib/collections';
-import { attributeDisplayLabel, normalizeAttributeDisplayType } from '@/lib/attributePresentation';
+import type { ProductVariant, ProductAttribute, PhotoSettings, ProductDiscount, ProductGender, StockMovement } from '@/mocks/fixtures';
+import type { LibraryAttribute, SizeChart } from '@tuw/heart/modules/catalog';
+import PartnerSkuPanel from './PartnerSkuPanel';
+import { saveSizeChartAction, deleteSizeChartAction, createProductAction, deleteProductsAction, getProductAction, importListingAction, setProductsStatusAction, updateProductAction } from '@/server/catalog-actions';
+import { attributeDisplayLabel, normalizeAttributeDisplayType, parseCompareAtPrice, slugify, UNCATEGORIZED_CATEGORY } from '@tuw/heart/modules/catalog/rules';
+import { groupImportRows, isValidHsnCode, parseQikinkListing } from '@tuw/heart/modules/catalog/planner';
+import type { ImportProductGroup } from '@tuw/heart/modules/catalog/planner';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
 
@@ -31,8 +31,6 @@ const GENDER_OPTIONS = [
   { value: 'Boy', label: 'Boy' },
   { value: 'Girl', label: 'Girl' },
 ];
-
-const IMPORT_GENDERS = ['Female', 'Male', 'Unisex', 'Kids', 'Boy', 'Girl'] as const;
 
 const PUBLICATION_OPTIONS: Array<{ value: ProductItem['publicationStatus']; label: string }> = [
   { value: 'published', label: 'Published (Live)' },
@@ -107,19 +105,108 @@ const attributeGroupLabelStyle: React.CSSProperties = {
 // (fixtures) so the seam persists it verbatim; see the REST note there.
 // swatch dots stay neutral until a value→hex map lands (recorded follow-up).
 
-export default function ProductsView({ initialProducts, categories, perms, storefrontOrigin }: { initialProducts: ProductItem[]; categories: string[]; perms: string[]; storefrontOrigin: string }) {
+export default function ProductsView({ initialProducts, categories, perms, storefrontOrigin, initialLibrary, initialSizeCharts }: { initialProducts: ProductItem[]; categories: string[]; perms: string[]; storefrontOrigin: string; initialLibrary: LibraryAttribute[]; initialSizeCharts: SizeChart[] }) {
   // Product photos with local paths are served by the storefront app.
   const assetSrc = (url: string) => (url.startsWith('/') ? `${storefrontOrigin}${url}` : url);
-  // Products are real (TL-BE-05); size charts and the attribute library stay
-  // demo state until slice 3.
-  const { showToast, sizeCharts, createSizeChart, deleteSizeChart, addSizeChartRow, removeSizeChartRow, patchSizeChartCell, libraryAttributes, createLibraryAttribute, addLibraryValue } = useAdminState();
+  // Everything here is real (TL-BE-05).
+  const { showToast } = useAdminState();
   const router = useRouter();
   const [products, setProducts] = useState<ProductItem[]>(initialProducts);
   useEffect(() => setProducts(initialProducts), [initialProducts]);
   const [stockMovements, setStockMovements] = useState<StockMovement[]>([]);
   const [saving, setSaving] = useState(false);
   const [openingId, setOpeningId] = useState<string | null>(null);
+
+  // Attribute library: read-only here (/settings/attributes edits it). New
+  // names and values typed in a product are registered when the product saves.
+  const [libraryAttributes, setLibraryAttributes] = useState<LibraryAttribute[]>(initialLibrary);
+  const createLibraryAttribute = (name: string): string => {
+    const id = `new:${name}`;
+    setLibraryAttributes((list) => [...list, { id, name, slug: '', values: [], swatchHex: {}, displayType: 'pill', enabled: true, showOnPdp: true, showOnCheckout: false, showOnAdmin: true, productCount: 0, core: false }]);
+    return id;
+  };
+  const addLibraryValue = (id: string, value: string) =>
+    setLibraryAttributes((list) => list.map((a) => (a.id === id ? { ...a, values: [...a.values, value] } : a)));
+
+  // Size charts save themselves: structure at once, typed cells after a pause.
+  const [sizeCharts, setSizeCharts] = useState<SizeChart[]>(initialSizeCharts);
+  const chartTimers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
+  // Cells hold what was typed; numbers are converted only when saving.
+  const cellValue = (v: number | string): number | string | null => {
+    if (typeof v === 'number') return v;
+    const text = v.trim();
+    if (text === '') return 0;
+    if (/^\d+(\.\d+)?$/.test(text)) return Number(text);
+    return /^\d+(\.\d+)?\s*[–-]\s*\d+(\.\d+)?$/.test(text) ? text : null;
+  };
+  const persistChart = (chart: SizeChart, delay = 0) => {
+    const pending = chartTimers.current.get(chart.id);
+    if (pending) clearTimeout(pending);
+    chartTimers.current.set(chart.id, setTimeout(() => {
+      // A half-typed range waits until it is complete.
+      if (chart.rows.some((r) => Object.values(r.measures).some((v) => cellValue(v) === null))) return;
+      const rows = chart.rows.map((r) => ({ ...r, measures: Object.fromEntries(Object.entries(r.measures).map(([k, v]) => [k, cellValue(v)!])) }));
+      void saveSizeChartAction({ id: chart.id, name: chart.name, columns: chart.columns, rows }).then((r) => {
+        if (!r.ok) showToast({ type: 'warning', title: 'Size Chart Not Saved', description: r.error.message });
+      });
+    }, delay));
+  };
+  const updateChart = (chartId: string, change: (c: SizeChart) => SizeChart, delay = 0) => {
+    const chart = sizeCharts.find((c) => c.id === chartId);
+    if (!chart) return false;
+    const next = change(chart);
+    setSizeCharts((list) => list.map((c) => (c.id === chartId ? next : c)));
+    persistChart(next, delay);
+    return true;
+  };
+  const createSizeChart = (name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return false;
+    if (sizeCharts.some((c) => c.name.toLowerCase() === trimmed.toLowerCase())) {
+      showToast({ type: 'warning', title: 'Duplicate Chart', description: `"${trimmed}" already exists.` });
+      return false;
+    }
+    void saveSizeChartAction({ name: trimmed, columns: [], rows: [] }).then((r) => {
+      if (r.ok) setSizeCharts(r.data);
+      else showToast({ type: 'warning', title: 'Size Chart Not Saved', description: r.error.message });
+    });
+    return true;
+  };
+  const deleteSizeChart = (id: string) => {
+    void deleteSizeChartAction({ id }).then((r) => {
+      if (r.ok) setSizeCharts(r.data);
+      else showToast({ type: 'warning', title: 'Not Deleted', description: r.error.message });
+    });
+  };
+  const addSizeChartRow = (chartId: string, size: string) => {
+    const trimmed = size.trim();
+    const chart = sizeCharts.find((c) => c.id === chartId);
+    if (!trimmed || !chart) return false;
+    if (chart.rows.some((r) => r.size.toLowerCase() === trimmed.toLowerCase())) {
+      showToast({ type: 'warning', title: 'Duplicate Size', description: `"${trimmed}" is already in ${chart.name}.` });
+      return false;
+    }
+    // A new row starts with the chart's existing columns.
+    const blank = Object.fromEntries(chart.columns.map((k) => [k, 0]));
+    return updateChart(chartId, (c) => ({ ...c, rows: [...c.rows, { size: trimmed, measures: blank }] }));
+  };
+  const removeSizeChartRow = (chartId: string, size: string) => updateChart(chartId, (c) => ({ ...c, rows: c.rows.filter((r) => r.size !== size) }));
+  const addSizeChartColumn = (chartId: string, column: string) => {
+    const name = column.trim();
+    const chart = sizeCharts.find((c) => c.id === chartId);
+    if (!name || !chart) return false;
+    if (chart.columns.some((c) => c.toLowerCase() === name.toLowerCase())) {
+      showToast({ type: 'warning', title: 'Duplicate Column', description: `"${name}" is already in ${chart.name}.` });
+      return false;
+    }
+    return updateChart(chartId, (c) => ({ ...c, columns: [...c.columns, name], rows: c.rows.map((r) => ({ ...r, measures: { ...r.measures, [name]: 0 } })) }));
+  };
+  const patchSizeChartCell = (chartId: string, size: string, key: string, raw: string) => {
+    return updateChart(chartId, (c) => ({ ...c, rows: c.rows.map((r) => (r.size === size ? { ...r, measures: { ...r.measures, [key]: raw } } : r)) }), 700);
+  };
+  const [chartColDrafts, setChartColDrafts] = useState<Record<string, string>>({});
   const can = (permission: string) => perms.includes(permission);
+  const libId = (name: string) => initialLibrary.find((l) => l.name.toLowerCase() === name.toLowerCase())?.id;
   const canPerformAction = (_category: 'products') => can('product.update');
   const refused = (what: string) => showToast({ type: 'warning', title: 'Action Restricted', description: `You do not have permission to ${what}.` });
   /** Honest save toast: says when the storefront could not be refreshed. */
@@ -200,8 +287,10 @@ export default function ProductsView({ initialProducts, categories, perms, store
   const [chartRowDrafts, setChartRowDrafts] = useState<Record<string, string>>({});
   const [newChartName, setNewChartName] = useState('');
   const [formSizeChartId, setFormSizeChartId] = useState('');
-  const chartColumns = (chart: SizeChart) => [...new Set(chart.rows.flatMap((r) => Object.keys(r.measures)))];
+  const chartColumns = (chart: SizeChart) => chart.columns;
   const [formPartner, setFormPartner] = useState<ProductItem['partner']>('Qikink Direct API');
+  const [formExchangePolicy, setFormExchangePolicy] = useState<NonNullable<ProductItem['exchangePolicy']>>('defects_only');
+  const [formProductKind, setFormProductKind] = useState<NonNullable<ProductItem['productKind']>>('physical');
   const [formStatus, setFormStatus] = useState<ProductItem['publicationStatus']>('published');
   const [formDescription, setFormDescription] = useState('Pre-shrunk premium heavyweight combed cotton with reinforced seams.');
 
@@ -261,11 +350,13 @@ export default function ProductsView({ initialProducts, categories, perms, store
     setFormDiscounts([]);
     setFormSizeChartId('');
     setFormAttributes([
-      { name: 'Color', values: ['Black', 'Chalk White', 'Olive'], builtin: true, displayType: 'swatch', swatchHex: {}, libraryId: 'LIB-01' },
-      { name: 'Size', values: ['S', 'M', 'L', 'XL'], builtin: true, displayType: 'pill', swatchHex: {}, libraryId: 'LIB-02' },
-      { name: 'Placements', values: ['Front'], builtin: true, displayType: 'radio', swatchHex: {}, libraryId: 'LIB-03' },
+      { name: 'Color', values: ['Black', 'Chalk White', 'Olive'], builtin: true, displayType: 'swatch', swatchHex: {}, libraryId: libId('Color') },
+      { name: 'Size', values: ['S', 'M', 'L', 'XL'], builtin: true, displayType: 'pill', swatchHex: {}, libraryId: libId('Size') },
+      { name: 'Placements', values: ['Front'], builtin: true, displayType: 'radio', swatchHex: {}, libraryId: libId('Placements') },
     ]);
     setFormPartner('Qikink Direct API');
+    setFormExchangePolicy('defects_only');
+    setFormProductKind('physical');
     setFormStatus('published');
     setFormDescription('Pre-shrunk premium heavyweight combed cotton with reinforced seams.');
     setFormPhoto({ layout: 'carousel', ratio: '4:3', showPhotos: true });
@@ -285,7 +376,7 @@ export default function ProductsView({ initialProducts, categories, perms, store
   };
 
   // Drawer tab + media draft state (elastic workspace; tabs grow per phase)
-  const [productTab, setProductTab] = useState<'general' | 'media' | 'variants' | 'specs'>('general');
+  const [productTab, setProductTab] = useState<'general' | 'media' | 'variants' | 'specs' | 'partner'>('general');
   // Gallery presentation draft (P1a): PDP stage layout + ratio + visibility.
   const [formPhoto, setFormPhoto] = useState<PhotoSettings>({ layout: 'carousel', ratio: '4:3', showPhotos: true });
   const photoAspect = formPhoto.ratio === '1:1' ? '1 / 1' : formPhoto.ratio === '16:9' ? '16 / 9' : '4 / 3';
@@ -367,7 +458,7 @@ export default function ProductsView({ initialProducts, categories, perms, store
   // drawer (no 520↔880 yoyo while hopping tabs).
   const [drawerView, setDrawerView] = useState<'compact' | 'matrix' | 'full'>('compact');
   const autoExpandedRef = useRef(false);
-  const prevTab = useRef<'general' | 'media' | 'variants' | 'specs'>('general');
+  const prevTab = useRef<'general' | 'media' | 'variants' | 'specs' | 'partner'>('general');
   React.useEffect(() => {
     const entered = prevTab.current !== 'variants' && productTab === 'variants';
     prevTab.current = productTab;
@@ -642,7 +733,7 @@ export default function ProductsView({ initialProducts, categories, perms, store
     setFormAttributes((prev) => [...prev, { name, values: [], builtin: false, displayType: 'pill', swatchHex: {}, libraryId: linkedId }]);
     setNewAttrName('');
     if (!lib) {
-      showToast({ type: 'info', title: 'Registered in Library', description: `"${name}" now lives in the attribute library too.` });
+      showToast({ type: 'info', title: 'New Library Attribute', description: `"${name}" joins the attribute library when you save this product.` });
     }
   };
   const removeAttribute = (name: string) => {
@@ -946,9 +1037,9 @@ export default function ProductsView({ initialProducts, categories, perms, store
       };
     });
     const builtinAttributes: ProductAttribute[] = [
-      { name: 'Color', values: [...product.colors], builtin: true, displayType: 'swatch', swatchHex: {}, libraryId: 'LIB-01' },
-      { name: 'Size', values: [...product.sizes], builtin: true, displayType: 'pill', swatchHex: {}, libraryId: 'LIB-02' },
-      { name: 'Placements', values: [], builtin: true, displayType: 'radio', swatchHex: {}, libraryId: 'LIB-03' },
+      { name: 'Color', values: [...product.colors], builtin: true, displayType: 'swatch', swatchHex: {}, libraryId: libId('Color') },
+      { name: 'Size', values: [...product.sizes], builtin: true, displayType: 'pill', swatchHex: {}, libraryId: libId('Size') },
+      { name: 'Placements', values: [], builtin: true, displayType: 'radio', swatchHex: {}, libraryId: libId('Placements') },
     ];
     const loadedAttributes: ProductAttribute[] = [
       ...builtinAttributes.map((base) => {
@@ -1000,6 +1091,8 @@ export default function ProductsView({ initialProducts, categories, perms, store
     setFormSizeChartId(product.sizeChartId ?? '');
     setFormAttributes(loadedAttributes);
     setFormPartner(product.partner);
+    setFormExchangePolicy(product.exchangePolicy ?? 'defects_only');
+    setFormProductKind(product.productKind ?? 'physical');
     setFormStatus(product.publicationStatus);
     setFormDescription(product.description);
   };
@@ -1060,6 +1153,9 @@ export default function ProductsView({ initialProducts, categories, perms, store
         gender: formGender || undefined,
         taxRate: formTax.trim() !== '' && !isNaN(parseFloat(formTax)) ? parseFloat(formTax) : undefined,
         hsnCode: formHsn.trim() || undefined,
+        sizeChartId: formSizeChartId || undefined,
+        exchangePolicy: formExchangePolicy,
+        productKind: formProductKind,
         partner: formPartner,
         publicationStatus: formStatus,
         description: formDescription,
@@ -1153,6 +1249,9 @@ export default function ProductsView({ initialProducts, categories, perms, store
       gender: formGender || undefined,
       taxRate: formTax.trim() !== '' && !isNaN(parseFloat(formTax)) ? parseFloat(formTax) : undefined,
       hsnCode: formHsn.trim() || undefined,
+      sizeChartId: formSizeChartId || undefined,
+      exchangePolicy: formExchangePolicy,
+      productKind: formProductKind,
       photoSettings: formPhoto,
       discounts: formDiscounts,
       images: formImages.filter((im) => im.persisted).map((im) => im.src),
@@ -1324,7 +1423,8 @@ export default function ProductsView({ initialProducts, categories, perms, store
   const [importPreview, setImportPreview] = useState<{
     fileName: string;
     groups: ImportProductGroup[];
-    rows: ImportSourceRow[];
+    /** Exactly what the server import receives. */
+    listing: Record<string, unknown>[];
     errors: Array<{ row: number; message: string }>;
     hasCategoryColumn: boolean;
   } | null>(null);
@@ -1364,9 +1464,6 @@ export default function ProductsView({ initialProducts, categories, perms, store
     }
     return rows.filter((r) => r.some((c) => c.trim() !== ''));
   };
-
-  const splitList = (s: string) =>
-    s.split(',').map((x) => x.trim()).filter(Boolean);
 
   const handleImportFile = (file: File | undefined) => {
     if (!file) return;
@@ -1420,109 +1517,30 @@ export default function ProductsView({ initialProducts, categories, perms, store
       const cWeight = col(['weight']);
       const cShip = col(['shipping weight', 'ship weight']);
       const cPrice = col(['base price', 'price']);
-      const cCompare = col(['compare at price', 'compare price', 'compare-at price', 'was price', 'original price']);
       const cPlace = col(['placements', 'placement']);
       const cDims = col(['package dimensions (lxbxh)', 'package dimensions', 'dimensions', 'package dimension']);
       const cTax = col(['tax rate', 'tax']);
       const cGender = col(['gender']);
       const cHsn = col(['hsn', 'hsn code', 'hsn/sac']);
       const cCategory = col(['category', 'product category']);
-      const rows: ImportSourceRow[] = [];
-      const errors: Array<{ row: number; message: string }> = [];
-
-      grid.slice(headerRowIndex + 1).forEach((cells, i) => {
-        const rowNo = headerRowIndex + i + 2;
+      // The same planner the server import runs, so the preview cannot drift
+      // from what actually gets created.
+      const sheetRows: number[] = [];
+      const listing = grid.slice(headerRowIndex + 1).map((cells, i) => {
+        sheetRows.push(headerRowIndex + i + 2);
         const get = (c: number) => (c >= 0 ? (cells[c] ?? '').trim() : '');
-        const styleRaw = get(cStyle);
-        const [namePart, ...codeParts] = styleRaw.split('|');
-        const name = namePart?.trim() ?? '';
-        const styleCode = codeParts.join('|').trim();
-        const priceRaw = get(cPrice);
-        if (!name) {
-          errors.push({ row: rowNo, message: 'Style is required.' });
-          return;
-        }
-        const price = parseFloat(priceRaw);
-        if (priceRaw === '' || isNaN(price) || price < 0) {
-          errors.push({ row: rowNo, message: `"${name}": Base Price must be zero or more.` });
-          return;
-        }
-        const compareRaw = get(cCompare);
-        let compareAtPrice: number | undefined;
-        if (compareRaw !== '') {
-          const parsedCompare = parseCompareAtPrice(compareRaw, price);
-          if (parsedCompare.error) {
-            errors.push({
-              row: rowNo,
-              message: `"${name}": Compare-at price must be a valid amount above the base price (₹${price.toFixed(2)}).`,
-            });
-            return;
-          }
-          compareAtPrice = parsedCompare.value;
-        }
-        const serialRaw = get(cSerial);
-        let serialNo: number | undefined;
-        if (serialRaw !== '') {
-          serialNo = Number(serialRaw);
-          if (!Number.isInteger(serialNo) || serialNo <= 0) {
-            errors.push({ row: rowNo, message: `"${name}": S.No must be a positive whole number.` });
-            return;
-          }
-        }
-        const taxRaw = get(cTax);
-        if (taxRaw !== '' && (isNaN(parseFloat(taxRaw)) || parseFloat(taxRaw) < 0)) {
-          errors.push({ row: rowNo, message: `"${name}": Tax Rate must be zero or more.` });
-          return;
-        }
-        const genderRaw = get(cGender);
-        const canonicalGender = IMPORT_GENDERS.find(
-          (gender) => gender.toLowerCase() === genderRaw.toLowerCase()
-        );
-        if (genderRaw !== '' && !canonicalGender) {
-          errors.push({
-            row: rowNo,
-            message: `"${name}": Gender must be Female, Male, Unisex, Kids, Boy, or Girl.`,
-          });
-          return;
-        }
-        const hsnRaw = get(cHsn);
-        if (!isValidHsnCode(hsnRaw)) {
-          errors.push({ row: rowNo, message: `"${name}": HSN must be 4–8 digits, or blank.` });
-          return;
-        }
-
-        const raw: Record<string, string> = {};
-        headers.forEach((header, index) => {
-          if (header && header !== 'id') raw[header] = (cells[index] ?? '').trim();
-        });
-
-        rows.push({
-          rowNo,
-          serialNo,
-          name,
-          styleCode,
-          gender: canonicalGender ?? '',
-          colors: splitList(get(cColors)),
-          sizes: splitList(get(cSizes)),
-          placements: splitList(get(cPlace)),
-          price,
-          compareAtPrice,
-          weight: get(cWeight),
-          shippingWeight: get(cShip),
-          dimensions: get(cDims),
-          tax: taxRaw,
-          hsnCode: hsnRaw,
-          category: get(cCategory),
-          raw,
-        });
+        return {
+          qikinkId: get(cSerial), gender: get(cGender), style: get(cStyle), sizes: get(cSizes), colors: get(cColors), placements: get(cPlace), basePriceINR: get(cPrice),
+          weightGrams: get(cWeight), shippingWeightGrams: get(cShip), packageDimensionsCm: get(cDims), taxRatePercent: get(cTax), hsn: get(cHsn), category: get(cCategory),
+        };
       });
-
-      const grouped = groupImportRows(rows);
+      const parsed = parseQikinkListing(listing);
+      const grouped = groupImportRows(parsed.rows);
       setImportPreview({
         fileName: file.name,
         groups: grouped.groups,
-        rows,
-        errors: [...errors, ...grouped.errors],
+        listing,
+        errors: [...parsed.issues, ...grouped.issues].map((issue) => ({ row: sheetRows[issue.row - 1] ?? issue.row, message: issue.message })),
         hasCategoryColumn: cCategory >= 0,
       });
     };
@@ -1532,25 +1550,11 @@ export default function ProductsView({ initialProducts, categories, perms, store
   // The server re-validates every row and creates drafts (import_jobs); the
   // preview above is only a convenience.
   const applyImport = async () => {
-    if (!importPreview || importPreview.rows.length === 0 || importing) return;
+    if (!importPreview || importPreview.groups.length === 0 || importing) return;
     if (!can('product.import')) return refused('import products');
     setImporting(true);
     const result = await importListingAction({
-      rows: importPreview.rows.map((r) => ({
-        qikinkId: r.serialNo ?? r.rowNo,
-        gender: r.gender,
-        style: r.styleCode ? `${r.name} | ${r.styleCode}` : r.name,
-        sizes: r.sizes.join(','),
-        colors: r.colors.join(','),
-        placements: r.placements.join(','),
-        basePriceINR: r.price,
-        weightGrams: r.weight,
-        shippingWeightGrams: r.shippingWeight,
-        packageDimensionsCm: r.dimensions,
-        taxRatePercent: r.tax,
-        hsn: r.hsnCode,
-        category: r.category,
-      })),
+      rows: importPreview.listing,
     });
     setImporting(false);
     if (!result.ok) return showToast({ type: 'warning', title: 'Import Failed', description: result.error.message });
@@ -2057,6 +2061,9 @@ export default function ProductsView({ initialProducts, categories, perms, store
             </LinkButton>
             <LinkButton href="/products/categories" variant="secondary" size="md" icon={<Tag size={16} />}>
               Categories
+            </LinkButton>
+            <LinkButton href="/products/reviews" variant="secondary" size="md" icon={<CheckCircle2 size={16} />}>
+              Reviews
             </LinkButton>
             <Button
               variant="secondary"
@@ -2569,6 +2576,7 @@ export default function ProductsView({ initialProducts, categories, perms, store
                     { id: 'media', label: 'Media', badge: formImages.length },
                     { id: 'variants', label: 'Variants & Stock', badge: formVariants.length },
                     { id: 'specs', label: 'Clothing Specs' },
+                    { id: 'partner', label: 'Partner SKUs' },
                   ]
             }
             activeTab={productTab}
@@ -2618,7 +2626,9 @@ export default function ProductsView({ initialProducts, categories, perms, store
         }
       >
         {(editingProduct || isCreating) && (
-          productTab === 'general' ? (
+          productTab === 'partner' && editingProduct ? (
+            <PartnerSkuPanel productId={editingProduct.id} />
+          ) : productTab === 'general' ? (
           <form
             onSubmit={handleEditSubmit}
             className={`tuw-pedit-general-grid${drawerView !== 'compact' ? ' is-expanded' : ''}`}
@@ -2940,6 +2950,27 @@ export default function ProductsView({ initialProducts, categories, perms, store
                   value={formPartner}
                   onChange={(value) => setFormPartner(value as ProductItem['partner'])}
                   required
+                />
+                <SearchableSelect
+                  label="Exchange policy"
+                  options={[
+                    { value: 'defects_only', label: 'Defects only', description: 'Replaced if damaged, misprinted or wrong' },
+                    { value: 'exchangeable', label: 'Exchangeable', description: 'Another variant within the exchange window' },
+                    { value: 'none', label: 'No exchanges', description: 'Final sale' },
+                  ]}
+                  value={formExchangePolicy}
+                  onChange={(value) => setFormExchangePolicy(value as typeof formExchangePolicy)}
+                />
+              </div>
+              <div style={pairedFieldGrid}>
+                <SearchableSelect
+                  label="Product kind"
+                  options={[
+                    { value: 'physical', label: 'Physical product', description: 'Printed and shipped' },
+                    { value: 'gift_card', label: 'Gift card', description: 'Hidden from the catalog; sold through gift cards' },
+                  ]}
+                  value={formProductKind}
+                  onChange={(value) => setFormProductKind(value as typeof formProductKind)}
                 />
               </div>
               <div style={pairedFieldGrid}>
@@ -3546,9 +3577,6 @@ export default function ProductsView({ initialProducts, categories, perms, store
                     onSelect={(v) => setFormSizeChartId(v)}
                   />
                 </div>
-                <p style={{ margin: 0, fontSize: 12, color: 'var(--tuw-text-warning, #856300)' }}>
-                  Demo for now — size charts and this link are not saved yet.
-                </p>
                 <Disclosure
                   title={`Size charts (${sizeCharts.length})`}
                   subtitle="Measuring sets by garment. Columns vary — hoodies track sleeve, pants track waist."
@@ -3601,8 +3629,8 @@ export default function ProductsView({ initialProducts, categories, perms, store
                                       <TableCell key={col} style={{ padding: '10px 16px' }}>
                                         <Input
                                           aria-label={`${row.size} ${col} in cm`}
-                                          type="number"
-                                          min="0"
+                                          type="text"
+                                          inputMode="decimal"
                                           value={row.measures[col] ?? ''}
                                           onChange={(e) => patchSizeChartCell(chart.id, row.size, col, e.target.value)}
                                           style={{ height: 36 }}
@@ -3659,6 +3687,29 @@ export default function ProductsView({ initialProducts, categories, perms, store
                               disabled={(chartRowDrafts[chart.id] ?? '').trim() === ''}
                             >
                               Add
+                            </Button>
+                          </div>
+                          <div style={{ display: 'flex', gap: 8 }}>
+                            <div style={{ flex: 1 }}>
+                              <Input
+                                aria-label={`Add measurement column to ${chart.name}`}
+                                placeholder="Measurement, e.g. Chest"
+                                value={chartColDrafts[chart.id] ?? ''}
+                                onChange={(e) => setChartColDrafts((prev) => ({ ...prev, [chart.id]: e.target.value }))}
+                              />
+                            </div>
+                            <Button
+                              variant="secondary"
+                              size="md"
+                              type="button"
+                              onClick={() => {
+                                if (addSizeChartColumn(chart.id, chartColDrafts[chart.id] ?? '')) {
+                                  setChartColDrafts((prev) => ({ ...prev, [chart.id]: '' }));
+                                }
+                              }}
+                              disabled={(chartColDrafts[chart.id] ?? '').trim() === ''}
+                            >
+                              Add column
                             </Button>
                           </div>
                         </div>
@@ -3778,7 +3829,7 @@ export default function ProductsView({ initialProducts, categories, perms, store
                 {importPreview.groups.slice(0, 20).map((group, i) => {
                   const fromPrice =
                     group.variants.length > 0
-                      ? Math.min(...group.variants.map((variant) => variant.price))
+                      ? Math.min(...group.variants.map((variant) => variant.costPaise)) / 100
                       : 0;
                   return (
                     <div key={i} style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>

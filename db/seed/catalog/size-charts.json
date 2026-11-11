@@ -1,0 +1,213 @@
+[
+ {
+  "key": "tops",
+  "name": "Tops, hoodies & jackets",
+  "rows": [
+   {
+    "size": "XS",
+    "measures": {
+     "Chest": 96,
+     "Length": 66,
+     "Shoulder": 44,
+     "Sleeve": 20
+    }
+   },
+   {
+    "size": "S",
+    "measures": {
+     "Chest": 101,
+     "Length": 69,
+     "Shoulder": 46,
+     "Sleeve": 21
+    }
+   },
+   {
+    "size": "M",
+    "measures": {
+     "Chest": 106,
+     "Length": 71,
+     "Shoulder": 48,
+     "Sleeve": 22
+    }
+   },
+   {
+    "size": "L",
+    "measures": {
+     "Chest": 112,
+     "Length": 73,
+     "Shoulder": 50,
+     "Sleeve": 23
+    }
+   },
+   {
+    "size": "XL",
+    "measures": {
+     "Chest": 117,
+     "Length": 75,
+     "Shoulder": 52,
+     "Sleeve": 24
+    }
+   },
+   {
+    "size": "XXL",
+    "measures": {
+     "Chest": 122,
+     "Length": 77,
+     "Shoulder": 54,
+     "Sleeve": 25
+    }
+   },
+   {
+    "size": "3XL",
+    "measures": {
+     "Chest": 127,
+     "Length": 79,
+     "Shoulder": 56,
+     "Sleeve": 26
+    }
+   },
+   {
+    "size": "4XL",
+    "measures": {
+     "Chest": 132,
+     "Length": 81,
+     "Shoulder": 58,
+     "Sleeve": 27
+    }
+   },
+   {
+    "size": "5XL",
+    "measures": {
+     "Chest": 137,
+     "Length": 83,
+     "Shoulder": 60,
+     "Sleeve": 28
+    }
+   }
+  ]
+ },
+ {
+  "key": "bottoms",
+  "name": "Joggers, shorts & bottoms",
+  "rows": [
+   {
+    "size": "XS",
+    "measures": {
+     "Waist (relaxed)": 66,
+     "Hip": 92,
+     "Outseam": 96
+    }
+   },
+   {
+    "size": "S",
+    "measures": {
+     "Waist (relaxed)": 71,
+     "Hip": 97,
+     "Outseam": 98
+    }
+   },
+   {
+    "size": "M",
+    "measures": {
+     "Waist (relaxed)": 76,
+     "Hip": 102,
+     "Outseam": 100
+    }
+   },
+   {
+    "size": "L",
+    "measures": {
+     "Waist (relaxed)": 81,
+     "Hip": 107,
+     "Outseam": 102
+    }
+   },
+   {
+    "size": "XL",
+    "measures": {
+     "Waist (relaxed)": 86,
+     "Hip": 112,
+     "Outseam": 104
+    }
+   },
+   {
+    "size": "XXL",
+    "measures": {
+     "Waist (relaxed)": 91,
+     "Hip": 117,
+     "Outseam": 106
+    }
+   },
+   {
+    "size": "3XL",
+    "measures": {
+     "Waist (relaxed)": 96,
+     "Hip": 122,
+     "Outseam": 108
+    }
+   }
+  ]
+ },
+ {
+  "key": "kids",
+  "name": "Kids",
+  "rows": [
+   {
+    "size": "1Yrs",
+    "measures": {
+     "Child height": "76–86",
+     "Chest": 56,
+     "Length": 36
+    }
+   },
+   {
+    "size": "3Yrs",
+    "measures": {
+     "Child height": "92–98",
+     "Chest": 60,
+     "Length": 40
+    }
+   },
+   {
+    "size": "5Yrs",
+    "measures": {
+     "Child height": "104–110",
+     "Chest": 66,
+     "Length": 44
+    }
+   },
+   {
+    "size": "7Yrs",
+    "measures": {
+     "Child height": "116–122",
+     "Chest": 70,
+     "Length": 48
+    }
+   },
+   {
+    "size": "9Yrs",
+    "measures": {
+     "Child height": "128–134",
+     "Chest": 76,
+     "Length": 52
+    }
+   },
+   {
+    "size": "11Yrs",
+    "measures": {
+     "Child height": "140–146",
+     "Chest": 80,
+     "Length": 56
+    }
+   },
+   {
+    "size": "13Yrs",
+    "measures": {
+     "Child height": "152–158",
+     "Chest": 86,
+     "Length": 60
+    }
+   }
+  ]
+ }
+]

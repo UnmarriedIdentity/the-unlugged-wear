@@ -6,6 +6,8 @@
   "description": "Shared backend for The Unplugged Wear: platform plumbing, domain modules and integration adapters. Bundled into tuw-admin and tuw-website; never deployed on its own.",
   "exports": {
     "./platform/*": "./src/platform/*/index.ts",
+    "./modules/catalog/rules": "./src/modules/catalog/rules.ts",
+    "./modules/catalog/planner": "./src/modules/catalog/planner.ts",
     "./modules/*": "./src/modules/*/index.ts",
     "./integrations/*": "./src/integrations/*/index.ts",
     "./platform/jobs/catalog": "./src/platform/jobs/catalog.ts",
@@ -17,7 +19,7 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "node --env-file-if-exists=../../.env.local --conditions=react-server --test \"src/**/*.test.ts\""
+    "test": "node --env-file-if-exists=../../.env.local --conditions=react-server --test \"src/**/*.test.ts\" \"src/**/*.test.mjs\""
   },
   "dependencies": {
     "drizzle-orm": "0.45.4",

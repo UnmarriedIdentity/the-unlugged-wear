@@ -32,6 +32,7 @@ export interface StorefrontProduct {
   /** priceINR/priceMinorINR only when sizes are priced differently (Qikink ladders). */
   sizes: { size: string; inStock: boolean; stockCount: number; priceINR?: number; priceMinorINR?: number }[];
   specTable?: unknown;
+  sizeChartId?: string;
   faqs?: { id: string; question: string; answer: string }[];
   description: string;
   details: string[];
@@ -73,7 +74,15 @@ export interface StorefrontCategory {
   sortOrder: number;
 }
 
+export interface StorefrontSizeChart {
+  id: string;
+  name: string;
+  columns: string[];
+  rows: { size: string; measures: Record<string, number | string> }[];
+}
+
 export interface StorefrontCatalog {
+  sizeCharts: StorefrontSizeChart[];
   products: StorefrontProduct[];
   collections: StorefrontCollection[];
   categories: StorefrontCategory[];
@@ -93,23 +102,30 @@ export const MADE_TO_ORDER_CAP = 100;
 
 const rupees = (paise: number) => paise / 100;
 
+/** Extra attributes staff chose to show on the product page ("Fabric: Cotton"). */
+function extraDetails(links: { slug: string; def_name: string; visible: boolean; is_variant_axis: boolean; value: string }[]): string[] {
+  const by = new Map<string, string[]>();
+  for (const l of links) if (!l.is_variant_axis && l.visible) by.set(l.def_name, [...(by.get(l.def_name) ?? []), l.value]);
+  return [...by].map(([name, values]) => `${name}: ${values.join(', ')}`);
+}
+
 type ProductRow = {
   id: string; external_id: string | null; slug: string; slug_aliases: string[]; name: string; short_description: string | null;
   description: string | null; category_slug: string | null; gender: string | null; style_code: string | null;
   compare_at_price: string | null; spec_table: unknown; details: string[]; care_instructions: string | null;
   composition: string | null; partner_provider: string | null; partner_availability: StorefrontProduct['partnerAvailability'] | null;
   badge: string | null; tags: string[] | null; product_type: ProductType | null; variant_label: string | null;
-  price_is_draft: boolean; weight_g: number | null; tax_rate: string | null; hsn_code: string | null;
+  price_is_draft: boolean; weight_g: number | null; tax_rate: string | null; hsn_code: string | null; size_chart_id: string | null;
 };
 
 export async function getStorefrontCatalog(): Promise<StorefrontCatalog> {
   const db = getDb();
-  const [products, variants, variantValues, linkValues, images, faqs, collections, members, categories] = await Promise.all([
+  const [products, variants, variantValues, linkValues, images, faqs, collections, members, categories, charts] = await Promise.all([
     db.execute<ProductRow>(sql`
       SELECT p.id, p.external_id, p.slug, p.slug_aliases, p.name, p.short_description, p.description, c.slug AS category_slug,
              p.gender, p.style_code, p.compare_at_price, p.spec_table, p.details, p.care_instructions, p.composition,
              p.partner_provider, p.partner_availability, p.badge, p.tags, p.product_type, p.variant_label, p.price_is_draft,
-             p.weight_g, p.tax_rate, p.hsn_code
+             p.weight_g, p.tax_rate, p.hsn_code, p.size_chart_id
       FROM products p LEFT JOIN categories c ON c.id = p.category_id AND c.deleted_at IS NULL
       WHERE p.status = 'active' AND p.deleted_at IS NULL AND p.product_kind = 'physical'
       ORDER BY p.created_at, p.id`),
@@ -121,8 +137,8 @@ export async function getStorefrontCatalog(): Promise<StorefrontCatalog> {
       SELECT pvav.variant_id, d.slug, pvav.value_id FROM product_variant_attribute_values pvav
       JOIN attribute_definitions d ON d.id = pvav.definition_id
       JOIN products p ON p.id = pvav.product_id AND p.status = 'active' AND p.deleted_at IS NULL`),
-    db.execute<{ product_id: string; slug: string; is_variant_axis: boolean; variant_axis_position: number | null; axis_label: string | null; value_id: string; value: string; swatch_hex: string | null; position: number }>(sql`
-      SELECT l.product_id, d.slug, l.is_variant_axis, l.variant_axis_position, l.axis_label, lv.value_id, av.value, av.swatch_hex, lv.position
+    db.execute<{ product_id: string; slug: string; def_name: string; visible: boolean; is_variant_axis: boolean; variant_axis_position: number | null; axis_label: string | null; value_id: string; value: string; swatch_hex: string | null; position: number }>(sql`
+      SELECT l.product_id, d.slug, d.name AS def_name, (d.is_active AND d.show_on_pdp) AS visible, l.is_variant_axis, l.variant_axis_position, l.axis_label, lv.value_id, av.value, av.swatch_hex, lv.position
       FROM product_attribute_links l
       JOIN attribute_definitions d ON d.id = l.definition_id
       JOIN product_attribute_link_values lv ON lv.product_id = l.product_id AND lv.definition_id = l.definition_id
@@ -148,6 +164,7 @@ export async function getStorefrontCatalog(): Promise<StorefrontCatalog> {
       SELECT c.slug, c.name, parent.slug AS parent_slug, c.show_in_navbar, c.show_in_megamenu, c.sort_order
       FROM categories c LEFT JOIN categories parent ON parent.id = c.parent_id
       WHERE c.is_active AND c.deleted_at IS NULL ORDER BY c.sort_order, c.name`),
+    db.execute<{ id: string; name: string; columns: string[]; rows: StorefrontSizeChart['rows'] }>(sql`SELECT id, name, columns, rows FROM size_charts ORDER BY created_at, id`),
   ]);
 
   const byProduct = <T extends { product_id: string }>(rows: T[]) => {
@@ -221,9 +238,10 @@ export async function getStorefrontCatalog(): Promise<StorefrontCatalog> {
       colors: colors.length ? colors : [{ name: 'Standard', hex: '#D9D4C7', value: 'standard' }],
       sizes,
       ...(p.spec_table ? { specTable: p.spec_table } : {}),
+      ...(p.size_chart_id ? { sizeChartId: p.size_chart_id } : {}),
       ...(productFaqs.length ? { faqs: productFaqs } : {}),
       description: p.description ?? '',
-      details: p.details ?? [],
+      details: [...(p.details ?? []), ...extraDetails(links)],
       careInstructions: (p.care_instructions ?? '').split('\n').map((s) => s.trim()).filter(Boolean),
       composition: p.composition ?? '',
       publicationStatus: 'published',
@@ -249,6 +267,7 @@ export async function getStorefrontCatalog(): Promise<StorefrontCatalog> {
     if (id) membersBy.set(m.collection_id, [...(membersBy.get(m.collection_id) ?? []), id]);
   }
   return {
+    sizeCharts: charts.rows.map((c) => ({ id: c.id, name: c.name, columns: [...new Set([...(c.columns ?? []), ...(c.rows ?? []).flatMap((r) => Object.keys(r.measures))])], rows: c.rows ?? [] })),
     products: out,
     collections: collections.rows.map((c) => {
       const ids = membersBy.get(c.id) ?? [];

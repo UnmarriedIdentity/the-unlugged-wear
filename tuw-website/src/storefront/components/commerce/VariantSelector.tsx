@@ -16,7 +16,6 @@ import {
   RETURN_WINDOW_DAYS,
   isWearable,
   productTypeOf,
-  sizeChartOf,
   variantLabelOf,
 } from '@storefront/lib/product';
 
@@ -37,11 +36,12 @@ export default function VariantSelector({
 }: VariantSelectorProps) {
   const { freeThresholdPaise } = useSiteSettings().shipping;
   const router = useRouter();
-  const { addToCart, isInWishlist, toggleWishlist } = useStore();
+  const { addToCart, isInWishlist, toggleWishlist, sizeCharts } = useStore();
 
   const productType = productTypeOf(product);
   const variantLabel = variantLabelOf(product);
-  const sizeChart = sizeChartOf(product);
+  // The chart staff linked to this product, if any.
+  const sizeChart = sizeCharts.find((c) => c.id === product.sizeChartId) ?? null;
   const wearable = isWearable(productType);
 
   const hasColors = Boolean(product.colors && product.colors.length > 0);
@@ -303,6 +303,7 @@ export default function VariantSelector({
           isOpen={isSizeGuideOpen}
           onClose={() => setIsSizeGuideOpen(false)}
           chart={sizeChart}
+          sizeHeader={product.variantLabel}
           sizes={product.sizes.map((s) => s.size)}
         />
       )}

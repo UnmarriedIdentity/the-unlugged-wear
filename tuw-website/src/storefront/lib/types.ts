@@ -74,6 +74,8 @@ export type Product = {
   id: string;
   /** Database id (the public `id` keeps the legacy demo id for saved bags/wishlists). */
   productId?: string;
+  /** Linked size chart (see SizeChartData); none means no size guide. */
+  sizeChartId?: string;
   slug: string;
   aliases?: string[];
   title: string;
@@ -132,6 +134,14 @@ export type ProductType =
   | 'bag'
   | 'stationery'
   | 'home';
+
+export type SizeChartData = {
+  id: string;
+  name: string;
+  /** Measurement names, in display order. */
+  columns: string[];
+  rows: { size: string; measures: Record<string, number | string> }[];
+};
 
 export type Collection = {
   id: string;

@@ -434,11 +434,10 @@ the old storefront classification + the 14 curated products and 4
 collections (`db/seed/catalog/*.json`) and publishes: 155 products,
 2,348 active variants. Re-running classifies only new products.
 
-**Not yet (slice 3):** search ranking; size charts; reviews; attribute
-library editor; provider SKU mappings; `exchange_policy` / `product_kind`
-fields in the editor. Shop/PDP are still Client
-Components reading the catalog from the provider (≈25 KB gzipped, same as
-the old bundle); moving them to Server Components is TL-WEB-BE-08/10.
+**Not yet:** Shop/PDP are still Client Components reading the catalog from
+the provider (≈25 KB gzipped, same as the old bundle); moving them to Server
+Components is TL-WEB-BE-08/10. Everything else listed for this task landed in
+slice 3, below.
 
 ## As built (TL-BE-05 slice 2, 2026-11-11)
 
@@ -478,3 +477,42 @@ loads when a product opens; CSV import goes through the real import job),
 The storefront menu drops links to categories hidden there; editing the
 menu's own links belongs to the CMS task (TL-BE-13.06).
 
+## As built (TL-BE-05 slice 3, 2026-11-11)
+
+`packages/heart/src/modules/catalog/`: `search.ts`, `library.ts`,
+`mappings.ts`, `reviews.ts`, `rules.ts`. Tests: `extras.int.test.ts`,
+`rules.test.mjs`.
+
+**Search.** Letters and digits only become a prefix `tsquery`, so hostile
+input cannot break the query. Order: exact name, name prefix, name hit, then
+`ts_rank`; name, style code and category also match by `ILIKE`. Results are
+cached per term (`products` tag); every search is logged to `search_terms`
+after the response, including zero-result terms. There is no typo tolerance
+because `pg_trgm` is not installed.
+
+**Attribute library** (`/settings/attributes`). New option types are rows,
+never schema changes. Colour and size cannot be deleted or disabled; an
+attribute or value in use cannot be deleted; an attribute must stay visible
+on at least one surface. Non-axis attributes with `show_on_pdp` appear in the
+product details on the storefront.
+
+**Size charts** (migration 020, `size_charts.columns text[]`). `jsonb` does
+not keep key order, so column order is stored explicitly. Cells hold a number
+or a range such as `76–86`. Charts are edited inside the product editor and
+save on a short delay; a chart linked to products cannot be deleted. The seed
+is `db/seed/catalog/size-charts.json`. `/size-guide` and the product-page
+modal now read the same rows.
+
+**Editor fields.** `size_chart_id`, `exchange_policy` (default
+`defects_only`) and `product_kind` are saved with the product.
+
+**Reviews** (`/products/reviews`). A customer can review a product only after
+an order containing it is delivered, once per product; editing sends the
+review back to moderation. The storefront shows approved reviews only and
+never invents counts or ratings. Cached under the `reviews` tag. Until orders
+exist (TL-BE-08) no review can be written.
+
+**Shared rules.** Pure catalog logic the admin needs in the browser
+(`rules.ts`, `planner.ts`) is exported from `@tuw/heart`; the admin's
+`lib/productPricing`, `productImport`, `attributePresentation` and
+`collections` copies are gone, and their tests now import the real code.

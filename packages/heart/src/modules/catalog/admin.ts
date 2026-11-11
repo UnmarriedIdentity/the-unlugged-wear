@@ -47,6 +47,7 @@ export interface AdminProductDetail extends AdminProduct {
   fabricGsm?: string; cut?: string; modelDims?: string; care?: string; weight?: string; shippingWeight?: string; dimensions?: string;
   gender?: NonNullable<ProductInput['gender']>; taxRate?: number; photoSettings?: ProductInput['photoSettings'];
   monogram?: { enabled: boolean; maxChars: number; upcharge: number };
+  sizeChartId?: string; exchangePolicy: NonNullable<ProductInput['exchangePolicy']>; productKind: NonNullable<ProductInput['productKind']>;
   movements: { id: string; productId: string; variantId?: string; qtyChange: number; reason: string; qtyAfter: number; createdAt: string }[];
 }
 
@@ -116,8 +117,8 @@ export async function adminGetProduct(id: string, db: Db = getDb()): Promise<Adm
   const [summary] = await summaries(db, [id]);
   if (!summary) throw new AppError('NOT_FOUND', 'That product does not exist.');
   const [full, variants, values, links, discounts, movements] = await Promise.all([
-    db.execute<{ base_price: string | null; fabric_spec: string | null; cut: string | null; model_dims: string | null; care_instructions: string | null; weight_g: number | null; shipping_weight_g: number | null; dimensions: string | null; gender: AdminProductDetail['gender'] | null; tax_rate: string | null; photo_settings: Record<string, unknown>; monogram_enabled: boolean; monogram_max_chars: number; monogram_upcharge: string }>(sql`
-      SELECT base_price, fabric_spec, cut, model_dims, care_instructions, weight_g, shipping_weight_g, dimensions, gender, tax_rate, photo_settings, monogram_enabled, monogram_max_chars, monogram_upcharge FROM products WHERE id = ${id}`),
+    db.execute<{ base_price: string | null; fabric_spec: string | null; cut: string | null; model_dims: string | null; care_instructions: string | null; weight_g: number | null; shipping_weight_g: number | null; dimensions: string | null; gender: AdminProductDetail['gender'] | null; tax_rate: string | null; photo_settings: Record<string, unknown>; monogram_enabled: boolean; monogram_max_chars: number; monogram_upcharge: string; size_chart_id: string | null; exchange_policy: AdminProductDetail['exchangePolicy']; product_kind: AdminProductDetail['productKind'] }>(sql`
+      SELECT base_price, fabric_spec, cut, model_dims, care_instructions, weight_g, shipping_weight_g, dimensions, gender, tax_rate, photo_settings, monogram_enabled, monogram_max_chars, monogram_upcharge, size_chart_id, exchange_policy, product_kind FROM products WHERE id = ${id}`),
     db.execute<{ id: string; sku: string; variant_key: string; price: string; price_overridden: boolean; stock: number; weight_g: number | null; shipping_weight_g: number | null; dimensions: string | null }>(sql`
       SELECT id, sku, variant_key, price, price_overridden, stock, weight_g, shipping_weight_g, dimensions FROM product_variants WHERE product_id = ${id} AND is_active ORDER BY created_at, id`),
     db.execute<{ variant_id: string; slug: string; value: string }>(sql`
@@ -177,6 +178,7 @@ export async function adminGetProduct(id: string, db: Db = getDb()): Promise<Adm
     ...(p.gender ? { gender: p.gender } : {}), ...(p.tax_rate ? { taxRate: Number(p.tax_rate) } : {}),
     ...(photo && 'layout' in photo ? { photoSettings: photo as ProductInput['photoSettings'] } : {}),
     ...(p.monogram_enabled ? { monogram: { enabled: true, maxChars: p.monogram_max_chars, upcharge: rupees(p.monogram_upcharge) } } : {}),
+    ...(p.size_chart_id ? { sizeChartId: p.size_chart_id } : {}), exchangePolicy: p.exchange_policy, productKind: p.product_kind,
     movements: movements.rows.map((m) => ({ id: m.id, productId: id, ...(m.variant_id ? { variantId: m.variant_id } : {}), qtyChange: m.qty_change, reason: m.reason, qtyAfter: m.qty_after, createdAt: new Date(m.created_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) })),
   };
 }
@@ -349,6 +351,7 @@ function assertCompare(input: ProductInput, minPaise: number) {
 }
 
 const translate = (error: unknown): never => {
+  if ((error as { cause?: { code?: string; constraint?: string } }).cause?.code === '23503' && (error as { cause?: { constraint?: string } }).cause?.constraint?.includes('size_chart')) throw field('sizeChartId', 'That size chart no longer exists.');
   const constraint = uniqueConflict(error);
   if (constraint?.includes('sku')) throw field('variants', 'One of these SKUs is already used by another product.', 'CONFLICT');
   if (constraint?.includes('slug')) throw field('slug', 'Another product already uses this URL slug.', 'CONFLICT');
@@ -387,7 +390,7 @@ async function applyProduct(tx: Transaction, id: string, sku: string, input: Pro
       dimensions = ${input.dimensions ?? null}, gender = ${input.gender ?? null}, tax_rate = ${input.taxRate === undefined ? null : input.taxRate.toFixed(2)}, hsn_code = ${input.hsnCode ?? null},
       fabric_spec = ${input.fabricGsm ?? null}, cut = ${input.cut ?? null}, model_dims = ${input.modelDims ?? null}, care_instructions = ${input.care ?? null},
       photo_settings = ${JSON.stringify(input.photoSettings ?? {})}::jsonb, monogram_enabled = ${input.monogram?.enabled ?? false}, monogram_max_chars = ${input.monogram?.maxChars ?? 3},
-      monogram_upcharge = ${toRupees(toPaise(input.monogram?.upcharge ?? 0))}, updated_at = now() WHERE id = ${id}`);
+      monogram_upcharge = ${toRupees(toPaise(input.monogram?.upcharge ?? 0))}, size_chart_id = ${input.sizeChartId ?? null}, exchange_policy = ${input.exchangePolicy}, product_kind = ${input.productKind}, updated_at = now() WHERE id = ${id}`);
 }
 
 export async function adminUpdateProduct(id: string, input: ProductInput, actorId: string, expectedUpdatedAt?: string): Promise<AdminProductDetail> {

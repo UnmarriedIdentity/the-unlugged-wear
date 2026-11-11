@@ -1,4 +1,4 @@
-import { adminListCategories, adminListProducts } from '@tuw/heart/modules/catalog';
+import { adminListCategories, adminListProducts, listLibrary, listSizeCharts } from '@tuw/heart/modules/catalog';
 import { session } from '@/server/session';
 import type { ProductItem } from '@/mocks/fixtures';
 import ProductsView from './_components/ProductsView';
@@ -7,6 +7,6 @@ import ProductsView from './_components/ProductsView';
 // its own permission again in server/catalog-actions.ts.
 export default async function ProductsPage() {
   const claims = await session.requireStaff(undefined, '/products');
-  const [products, categories] = await Promise.all([adminListProducts(), adminListCategories()]);
-  return <ProductsView initialProducts={products as unknown as ProductItem[]} categories={categories.map((c) => c.name)} perms={claims.perms} storefrontOrigin={process.env.STOREFRONT_URL ?? ''} />;
+  const [products, categories, library, sizeCharts] = await Promise.all([adminListProducts(), adminListCategories(), listLibrary(), listSizeCharts()]);
+  return <ProductsView initialProducts={products as unknown as ProductItem[]} categories={categories.map((c) => c.name)} perms={claims.perms} storefrontOrigin={process.env.STOREFRONT_URL ?? ''} initialLibrary={library} initialSizeCharts={sizeCharts} />;
 }

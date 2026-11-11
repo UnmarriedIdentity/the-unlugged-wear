@@ -72,6 +72,9 @@ export const productFields = z.object({
   modelDims: optionalText(255),
   care: optionalText(5000),
   monogram: z.object({ enabled: z.boolean(), maxChars: z.number().int().min(1).max(30), upcharge: money }).optional(),
+  sizeChartId: uuid.optional(),
+  exchangePolicy: z.enum(['defects_only', 'exchangeable', 'none']).default('defects_only'),
+  productKind: z.enum(['physical', 'gift_card']).default('physical'),
 });
 export type ProductInput = z.infer<typeof productFields>;
 
@@ -102,3 +105,39 @@ export const categoryFields = z.object({
   showInMegamenu: z.boolean().default(true),
   sortOrder: z.number().int().min(0).max(100_000).default(0),
 });
+
+// Attribute library, size charts, partner SKUs, reviews, search.
+const displayType = z.enum(['pill', 'swatch', 'radio']);
+export const attributeCreate = z.object({ name: z.string().trim().min(1, 'Enter an attribute name').max(100), displayType: displayType.default('pill') });
+export const attributeUpdate = z.object({ id: uuid, enabled: z.boolean().optional(), displayType: displayType.optional(), showOnPdp: z.boolean().optional(), showOnCheckout: z.boolean().optional(), showOnAdmin: z.boolean().optional() });
+export const attributeValue = z.object({ id: uuid, value: z.string().trim().min(1, 'Enter a value').max(150) });
+
+/** A measurement in cm: a number, or a range such as "76–86". */
+const measure = z.union([z.number().min(0).max(1000), z.string().trim().regex(/^\d+(\.\d+)?\s*[–-]\s*\d+(\.\d+)?$/, 'Use a number or a range like 76–86')]);
+export const sizeChartFields = z.object({
+  id: uuid.optional(),
+  name: z.string().trim().min(1, 'Enter a chart name').max(150),
+  /** Measurement names in display order. */
+  columns: z.array(z.string().trim().min(1).max(50)).max(30).default([]),
+  rows: z.array(z.object({ size: z.string().trim().min(1, 'Every row needs a size').max(50), measures: z.record(z.string().trim().min(1).max(50), measure) })).max(100).default([]),
+});
+
+export const mappingSave = z.object({
+  productId: uuid,
+  rows: z.array(z.object({
+    variantId: uuid,
+    providerSku: z.string().trim().max(100),
+    unitCost: money.nullable().optional(),
+    // Strategy B design fields (DOC/backend/16 §6) are stored as sent.
+    payload: z.record(z.string().max(50), z.unknown()).default({}),
+  })).max(5000),
+});
+
+export const reviewSubmit = z.object({
+  productId: uuid,
+  rating: z.number().int('Choose 1 to 5 stars').min(1, 'Choose 1 to 5 stars').max(5, 'Choose 1 to 5 stars'),
+  title: z.string().trim().min(1, 'Add a short headline').max(255),
+  body: z.string().trim().min(10, 'Tell us a little more (at least 10 characters)').max(5000),
+});
+export const reviewModerate = z.object({ id: uuid, approved: z.boolean() });
+export const searchQuery = z.object({ q: z.string().max(200) });

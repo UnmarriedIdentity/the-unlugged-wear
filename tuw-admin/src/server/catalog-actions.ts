@@ -65,3 +65,39 @@ export const deleteCategoryAction = guards.action({ permission: 'category.manage
   const categories = await catalog.adminDeleteCategory(input.id, ctx.user!.id);
   return { categories, storefront: await refresh() };
 });
+
+// ---- attribute library, size charts, partner SKUs, reviews (product.update)
+
+export const createAttributeAction = guards.action({ permission: 'product.update', input: s.attributeCreate }, async ({ input, ctx }) => catalog.createAttribute(input, ctx.user!.id));
+export const updateAttributeAction = guards.action({ permission: 'product.update', input: s.attributeUpdate }, async ({ input, ctx }) => {
+  const library = await catalog.updateAttribute(input, ctx.user!.id);
+  await refresh(); // visibility changes what the product page lists
+  return library;
+});
+export const deleteAttributeAction = guards.action({ permission: 'product.update', input: s.productRef }, async ({ input, ctx }) => catalog.deleteAttribute(input.id, ctx.user!.id));
+export const addAttributeValueAction = guards.action({ permission: 'product.update', input: s.attributeValue }, async ({ input, ctx }) => catalog.addAttributeValue(input.id, input.value, ctx.user!.id));
+export const removeAttributeValueAction = guards.action({ permission: 'product.update', input: s.attributeValue }, async ({ input, ctx }) => catalog.removeAttributeValue(input.id, input.value, ctx.user!.id));
+
+export const saveSizeChartAction = guards.action({ permission: 'product.update', input: s.sizeChartFields }, async ({ input, ctx }) => {
+  const charts = await catalog.saveSizeChart(input, ctx.user!.id);
+  await refresh();
+  return charts;
+});
+export const deleteSizeChartAction = guards.action({ permission: 'product.update', input: s.productRef }, async ({ input, ctx }) => {
+  const charts = await catalog.deleteSizeChart(input.id, ctx.user!.id);
+  await refresh();
+  return charts;
+});
+
+export const getMappingsAction = guards.action({ permission: 'product.update', input: s.productRef }, async ({ input }) => catalog.listMappings(input.id));
+export const saveMappingsAction = guards.action({ permission: 'product.update', input: s.mappingSave }, async ({ input, ctx }) => catalog.saveMappings(input, ctx.user!.id));
+
+const refreshReviews = () => refreshStorefront([catalog.REVIEWS_TAG]);
+export const moderateReviewAction = guards.action({ permission: 'product.update', input: s.reviewModerate }, async ({ input, ctx }) => {
+  const reviews = await catalog.adminModerateReview(input.id, input.approved, ctx.user!.id);
+  return { reviews, storefront: await refreshReviews() };
+});
+export const deleteReviewAction = guards.action({ permission: 'product.update', input: s.productRef }, async ({ input, ctx }) => {
+  const reviews = await catalog.adminDeleteReview(input.id, ctx.user!.id);
+  return { reviews, storefront: await refreshReviews() };
+});

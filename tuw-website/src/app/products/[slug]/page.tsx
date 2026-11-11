@@ -1,6 +1,7 @@
 'use client';
 
 import React, { use, useEffect, useMemo, useState } from 'react';
+import ProductReviews from '@storefront/components/commerce/ProductReviews';
 import Link from 'next/link';
 import Header from '@storefront/components/layout/Header';
 import Footer from '@storefront/components/layout/Footer';
@@ -25,7 +26,7 @@ import {
   priceLabel,
 } from '@storefront/lib/product';
 import { formatShortDate } from '@storefront/lib/format';
-import { ArrowRight, ChevronDown, MapPin, MessageSquare } from 'lucide-react';
+import { ArrowRight, ChevronDown, MapPin } from 'lucide-react';
 
 // Accordion headings per product family; wearables share one set.
 const SECTION_TITLES: Record<'details' | 'material' | 'care' | 'delivery', (type: ProductType) => string> = {
@@ -319,18 +320,8 @@ export default function ProductDetailPage({
           <DynamicDataTable table={specTable} />
         </section>
 
-        {/* No fabricated ratings: reviews appear only once real, verified orders exist. */}
-        <section id="reviews" aria-labelledby="reviews-heading" className="my-16 pt-8 border-t border-store-card-border">
-          <h2 id="reviews-heading" className="font-heading text-2xl font-medium text-store-charcoal">
-            Reviews
-          </h2>
-          <div className="mt-6 p-8 border border-store-card-border bg-store-surface flex flex-col sm:flex-row sm:items-center gap-4">
-            <MessageSquare size={24} className="text-store-text-secondary shrink-0" aria-hidden="true" />
-            <p className="text-sm text-store-text-secondary">
-              No reviews yet. Reviews from verified orders will appear here once live ordering opens.
-            </p>
-          </div>
-        </section>
+        {/* Real reviews only: delivered orders, approved by staff. */}
+        {product.productId && <ProductReviews productId={product.productId} productTitle={product.title} />}
 
         {related.length > 0 && (
           <RelatedProductsSection

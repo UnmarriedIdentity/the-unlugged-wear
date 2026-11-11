@@ -16,8 +16,6 @@ import {
   StockMovement,
   DiscountCode,
   AbandonedCart,
-  SizeChart,
-  LibraryAttribute,
   ProductAttribute,
   initialProducts,
   initialOrders,
@@ -32,9 +30,6 @@ import {
   initialStockMovements,
   initialDiscountCodes,
   initialAbandonedCarts,
-  initialSizeCharts,
-  initialLibraryAttributes,
-  defaultLibraryVisibility,
 } from './fixtures';
 import {
   initialBlogAuthors,
@@ -68,8 +63,7 @@ import {
   uniqueBlogSlug,
   validateBlogDraft,
 } from '@/lib/blog';
-import { normalizeCollection, nextCollectionId, type LegacyCollection } from '@/lib/collections';
-import { normalizeAttributeDisplayType } from '@/lib/attributePresentation';
+import { normalizeCollection, nextCollectionId, type LegacyCollection } from '@tuw/heart/modules/catalog/rules';
 
 /** Legacy single-value print placement → the workbook's multi-select
  * Placements attribute. Unknown values are preserved as product-local values
@@ -120,8 +114,6 @@ interface AdminStateContextType {
   stockMovements: StockMovement[];
   discountCodes: DiscountCode[];
   abandonedCarts: AbandonedCart[];
-  sizeCharts: SizeChart[];
-  libraryAttributes: LibraryAttribute[];
 
   blogCategories: BlogCategory[];
   blogAuthors: BlogAuthor[];
@@ -184,19 +176,7 @@ interface AdminStateContextType {
 
   remindAbandonedCart: (id: string) => boolean;
 
-  createSizeChart: (name: string) => boolean;
-  deleteSizeChart: (id: string) => boolean;
-  addSizeChartRow: (chartId: string, size: string) => boolean;
-  removeSizeChartRow: (chartId: string, size: string) => boolean;
-  patchSizeChartCell: (chartId: string, size: string, key: string, raw: string) => boolean;
 
-  createLibraryAttribute: (name: string, displayType?: LibraryAttribute['displayType']) => string | false;
-  deleteLibraryAttribute: (id: string) => boolean;
-  toggleLibraryAttribute: (id: string) => boolean;
-  setLibraryDisplayType: (id: string, displayType: LibraryAttribute['displayType']) => boolean;
-  setLibraryVisibility: (id: string, surface: 'pdp' | 'checkout' | 'admin', on: boolean) => boolean;
-  addLibraryValue: (id: string, value: string) => boolean;
-  removeLibraryValue: (id: string, value: string) => boolean;
 
   saveBlogPost: (draft: BlogDraft, mode: 'draft' | 'publish') => { ok: boolean; errors?: Partial<Record<keyof BlogDraft | 'content', string>> };
   deleteBlogPost: (id: string) => boolean;
@@ -231,8 +211,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
   const [stockMovements, setStockMovements] = useState<StockMovement[]>(initialStockMovements);
   const [discountCodes, setDiscountCodes] = useState<DiscountCode[]>(initialDiscountCodes);
   const [abandonedCarts, setAbandonedCarts] = useState<AbandonedCart[]>(initialAbandonedCarts);
-  const [sizeCharts, setSizeCharts] = useState<SizeChart[]>(initialSizeCharts);
-  const [libraryAttributes, setLibraryAttributes] = useState<LibraryAttribute[]>(initialLibraryAttributes);
   const [blogCategories, setBlogCategories] = useState<BlogCategory[]>(initialBlogCategories);
   const [blogAuthors, setBlogAuthors] = useState<BlogAuthor[]>(initialBlogAuthors);
   const [blogTags, setBlogTags] = useState<BlogTag[]>(initialBlogTags);
@@ -320,7 +298,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
             ((parsed.products as ProductItem[] | undefined) ?? initialProducts).map((p) => p.id)
           );
           setCollections(
-            (parsed.collections as LegacyCollection[]).map((c) => normalizeCollection(c, validProductIds))
+            (parsed.collections as LegacyCollection<CollectionItem>[]).map((c) => normalizeCollection(c, validProductIds))
           );
         }
         if (parsed.designs) setDesigns(parsed.designs);
@@ -328,18 +306,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         if (parsed.stockMovements) setStockMovements(parsed.stockMovements);
         if (parsed.discountCodes) setDiscountCodes(parsed.discountCodes);
         if (parsed.abandonedCarts) setAbandonedCarts(parsed.abandonedCarts);
-        if (parsed.sizeCharts) setSizeCharts(parsed.sizeCharts);
-        if (parsed.libraryAttributes) {
-          // One-time normalization: visibility moved from per-product rows
-          // to the definition. Legacy records gain the global defaults.
-          setLibraryAttributes(
-            (parsed.libraryAttributes as LibraryAttribute[]).map((a) => ({
-              ...defaultLibraryVisibility(a.name),
-              ...a,
-              displayType: normalizeAttributeDisplayType(a.displayType),
-            }))
-          );
-        }
         if (parsed.blogCategories) setBlogCategories(parsed.blogCategories);
         if (parsed.blogAuthors) setBlogAuthors(parsed.blogAuthors);
         if (parsed.blogTags) setBlogTags(parsed.blogTags);
@@ -370,8 +336,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
       stockMovements?: StockMovement[];
       discountCodes?: DiscountCode[];
       abandonedCarts?: AbandonedCart[];
-      sizeCharts?: SizeChart[];
-      libraryAttributes?: LibraryAttribute[];
       blogCategories?: BlogCategory[];
       blogAuthors?: BlogAuthor[];
       blogTags?: BlogTag[];
@@ -396,8 +360,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
           stockMovements,
           discountCodes,
           abandonedCarts,
-          sizeCharts,
-          libraryAttributes,
           blogCategories,
           blogAuthors,
           blogTags,
@@ -412,7 +374,7 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         // Storage quota / privacy protection
       }
     },
-    [activeRole, products, orders, shipments, refunds, returns, customers, supportTickets, collections, designs, team, stockMovements, discountCodes, abandonedCarts, sizeCharts, libraryAttributes, blogCategories, blogAuthors, blogTags, blogMedia, blogPosts, blogRevisions, blogSlugHistory]
+    [activeRole, products, orders, shipments, refunds, returns, customers, supportTickets, collections, designs, team, stockMovements, discountCodes, abandonedCarts, blogCategories, blogAuthors, blogTags, blogMedia, blogPosts, blogRevisions, blogSlugHistory]
   );
 
   const showToast = useCallback((toast: Omit<ToastMessage, 'id'>) => {
@@ -1123,224 +1085,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
   };
 
   // Size charts: sparse-measure rows (columns vary by garment).
-  const createSizeChart = (name: string) => {
-    if (!canPerformAction('products')) return false;
-    const trimmed = name.trim();
-    if (!trimmed) return false;
-    if (sizeCharts.some((c) => c.name.toLowerCase() === trimmed.toLowerCase())) {
-      showToast({ type: 'warning', title: 'Duplicate Chart', description: `"${trimmed}" already exists.` });
-      return false;
-    }
-    const next = [...sizeCharts, { id: `SC-${Date.now()}`, name: trimmed, rows: [] }];
-    setSizeCharts(next);
-    persistState({ sizeCharts: next });
-    return true;
-  };
-  const deleteSizeChart = (id: string) => {
-    if (!canPerformAction('products')) return false;
-    const next = sizeCharts.filter((c) => c.id !== id);
-    setSizeCharts(next);
-    persistState({ sizeCharts: next });
-    return true;
-  };
-  const addSizeChartRow = (chartId: string, size: string) => {
-    if (!canPerformAction('products')) return false;
-    const trimmed = size.trim();
-    if (!trimmed) return false;
-    const chart = sizeCharts.find((c) => c.id === chartId);
-    if (!chart || chart.rows.some((r) => r.size.toLowerCase() === trimmed.toLowerCase())) {
-      if (chart) showToast({ type: 'warning', title: 'Duplicate Size', description: `"${trimmed}" is already in ${chart.name}.` });
-      return false;
-    }
-    const next = sizeCharts.map((c) =>
-      c.id === chartId ? { ...c, rows: [...c.rows, { size: trimmed, measures: {} }] } : c
-    );
-    setSizeCharts(next);
-    persistState({ sizeCharts: next });
-    return true;
-  };
-  const removeSizeChartRow = (chartId: string, size: string) => {
-    if (!canPerformAction('products')) return false;
-    const next = sizeCharts.map((c) =>
-      c.id === chartId ? { ...c, rows: c.rows.filter((r) => r.size !== size) } : c
-    );
-    setSizeCharts(next);
-    persistState({ sizeCharts: next });
-    return true;
-  };
-  const patchSizeChartCell = (chartId: string, size: string, key: string, raw: string) => {
-    if (!canPerformAction('products')) return false;
-    const trimmed = raw.trim();
-    const next = sizeCharts.map((c) => {
-      if (c.id !== chartId) return c;
-      return {
-        ...c,
-        rows: c.rows.map((r) => {
-          if (r.size !== size) return r;
-          const measures = { ...r.measures };
-          if (trimmed === '') delete measures[key];
-          else {
-            const n = parseFloat(trimmed);
-            if (isNaN(n) || n < 0) return r;
-            measures[key] = n;
-          }
-          return { ...r, measures };
-        }),
-      };
-    });
-    setSizeCharts(next);
-    persistState({ sizeCharts: next });
-    return true;
-  };
-
-  // Attribute library (settings manager): copy-source for drawer drafts.
-  // Delete guards read persisted products (real check, not theater);
-  // disable always allowed — data preserved, picker hides it.
-  const createLibraryAttribute = (
-    name: string,
-    displayType: LibraryAttribute['displayType'] = 'pill'
-  ): string | false => {
-    if (!canPerformAction('products')) return false;
-    const trimmed = name.trim();
-    if (!trimmed) return false;
-    if (libraryAttributes.some((a) => a.name.toLowerCase() === trimmed.toLowerCase())) {
-      showToast({ type: 'warning', title: 'Duplicate Attribute', description: `"${trimmed}" is already in the library.` });
-      return false;
-    }
-    const id = `LIB-${Date.now()}`;
-    const next = [
-      ...libraryAttributes,
-      {
-        id,
-        name: trimmed,
-        values: [],
-        displayType: normalizeAttributeDisplayType(displayType),
-        enabled: true,
-        ...defaultLibraryVisibility(trimmed),
-      },
-    ];
-    setLibraryAttributes(next);
-    persistState({ libraryAttributes: next });
-    return id;
-  };
-  const libraryUsedBy = (id: string, value?: string): string | null => {
-    const lib = libraryAttributes.find((a) => a.id === id);
-    const hit = products.find((p) =>
-      (p.attributes ?? []).some(
-        (a) =>
-          // id match first; name fallback catches legacy rows persisted
-          // before links existed (belt + suspenders, never silent).
-          (a.libraryId === id ||
-            (!a.libraryId && lib !== undefined && a.name.toLowerCase() === lib.name.toLowerCase())) &&
-          (value === undefined || a.values.some((v) => v.toLowerCase() === value.toLowerCase()))
-      )
-    );
-    return hit ? hit.name : null;
-  };
-  const deleteLibraryAttribute = (id: string) => {
-    if (!canPerformAction('products')) return false;
-    const target = libraryAttributes.find((a) => a.id === id);
-    if (!target) return false;
-    const usedBy = libraryUsedBy(id);
-    if (usedBy) {
-      showToast({ type: 'warning', title: 'Attribute In Use', description: `"${target.name}" is linked by ${usedBy} — unlink it there first.` });
-      return false;
-    }
-    const next = libraryAttributes.filter((a) => a.id !== id);
-    setLibraryAttributes(next);
-    persistState({ libraryAttributes: next });
-    return true;
-  };
-  const toggleLibraryAttribute = (id: string) => {
-    if (!canPerformAction('products')) return false;
-    const next = libraryAttributes.map((a) => (a.id === id ? { ...a, enabled: !a.enabled } : a));
-    setLibraryAttributes(next);
-    persistState({ libraryAttributes: next });
-    return true;
-  };
-  // Global showcase type: the definition controls how linked products render.
-  // Individual products still choose which attributes/values they offer.
-  const setLibraryDisplayType = (
-    id: string,
-    displayType: LibraryAttribute['displayType']
-  ) => {
-    if (!canPerformAction('products')) return false;
-    const target = libraryAttributes.find((a) => a.id === id);
-    if (!target) return false;
-    const normalized = normalizeAttributeDisplayType(displayType);
-    if (target.displayType === normalized) return true;
-    const next = libraryAttributes.map((a) =>
-      a.id === id ? { ...a, displayType: normalized } : a
-    );
-    setLibraryAttributes(next);
-    persistState({ libraryAttributes: next });
-    return true;
-  };
-  // Global visibility (X1a): one definition controls every product using it.
-  // Refusing the last surface keeps at least one render target alive.
-  const setLibraryVisibility = (
-    id: string,
-    surface: 'pdp' | 'checkout' | 'admin',
-    on: boolean
-  ) => {
-    if (!canPerformAction('products')) return false;
-    const target = libraryAttributes.find((a) => a.id === id);
-    if (!target) return false;
-    const nextTarget: LibraryAttribute = {
-      ...target,
-      ...(surface === 'pdp'
-        ? { showOnPdp: on }
-        : surface === 'checkout'
-          ? { showOnCheckout: on }
-          : { showOnAdmin: on }),
-    };
-    if (!nextTarget.showOnPdp && !nextTarget.showOnCheckout && !nextTarget.showOnAdmin) {
-      showToast({
-        type: 'warning',
-        title: 'Visibility Required',
-        description: `"${target.name}" must show on at least one surface.`,
-      });
-      return false;
-    }
-    const next = libraryAttributes.map((a) => (a.id === id ? nextTarget : a));
-    setLibraryAttributes(next);
-    persistState({ libraryAttributes: next });
-    return true;
-  };
-  const addLibraryValue = (id: string, value: string) => {
-    if (!canPerformAction('products')) return false;
-    const trimmed = value.trim();
-    if (!trimmed) return false;
-    const target = libraryAttributes.find((a) => a.id === id);
-    if (!target) return false;
-    if (target.values.some((v) => v.toLowerCase() === trimmed.toLowerCase())) {
-      showToast({ type: 'warning', title: 'Duplicate Value', description: `"${trimmed}" is already a ${target.name} value.` });
-      return false;
-    }
-    const next = libraryAttributes.map((a) =>
-      a.id === id ? { ...a, values: [...a.values, trimmed] } : a
-    );
-    setLibraryAttributes(next);
-    persistState({ libraryAttributes: next });
-    return true;
-  };
-  const removeLibraryValue = (id: string, value: string) => {
-    if (!canPerformAction('products')) return false;
-    const target = libraryAttributes.find((a) => a.id === id);
-    if (!target) return false;
-    const usedBy = libraryUsedBy(id, value);
-    if (usedBy) {
-      showToast({ type: 'warning', title: 'Value In Use', description: `"${value}" is linked by ${usedBy} — remove it there first.` });
-      return false;
-    }
-    const next = libraryAttributes.map((a) =>
-      a.id === id ? { ...a, values: a.values.filter((v) => v !== value) } : a
-    );
-    setLibraryAttributes(next);
-    persistState({ libraryAttributes: next });
-    return true;
-  };
-
   // Blog authoring (demo-backed model mirrors 006-cms.sql):
   // validation/normalization live in one seam, so the editor and state
   // cannot drift. Publishes snapshot a revision; slug changes on published
@@ -1665,8 +1409,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
       setStockMovements(initialStockMovements);
       setDiscountCodes(initialDiscountCodes);
       setAbandonedCarts(initialAbandonedCarts);
-      setSizeCharts(initialSizeCharts);
-      setLibraryAttributes(initialLibraryAttributes);
       setBlogCategories(initialBlogCategories);
       setBlogAuthors(initialBlogAuthors);
       setBlogTags(initialBlogTags);
@@ -1717,8 +1459,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
     setStockMovements(initialStockMovements);
     setDiscountCodes(initialDiscountCodes);
     setAbandonedCarts(initialAbandonedCarts);
-    setSizeCharts(initialSizeCharts);
-    setLibraryAttributes(initialLibraryAttributes);
     setBlogCategories(initialBlogCategories);
     setBlogAuthors(initialBlogAuthors);
     setBlogTags(initialBlogTags);
@@ -1757,8 +1497,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         stockMovements,
         discountCodes,
         abandonedCarts,
-        sizeCharts,
-        libraryAttributes,
         blogCategories,
         blogAuthors,
         blogTags,
@@ -1792,18 +1530,6 @@ export function AdminStateProvider({ children }: { children: React.ReactNode }) 
         toggleDiscountCode,
         deleteDiscountCode,
         remindAbandonedCart,
-        createSizeChart,
-        deleteSizeChart,
-        addSizeChartRow,
-        removeSizeChartRow,
-        patchSizeChartCell,
-        createLibraryAttribute,
-        deleteLibraryAttribute,
-        toggleLibraryAttribute,
-        setLibraryDisplayType,
-        setLibraryVisibility,
-        addLibraryValue,
-        removeLibraryValue,
         saveBlogPost,
         deleteBlogPost,
         archiveBlogPost,

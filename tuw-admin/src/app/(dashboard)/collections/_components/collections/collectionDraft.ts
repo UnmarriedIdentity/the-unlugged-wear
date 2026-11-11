@@ -2,7 +2,7 @@
 // No React, no storage — mirrored by tests/collections.test.mjs.
 
 import type { CollectionItem, ProductItem } from '@/mocks/fixtures';
-import { isValidSlug, isSlugTaken, slugify } from '@/lib/collections';
+import { isValidSlug, isSlugTaken, slugify } from '@tuw/heart/modules/catalog/rules';
 import type { SearchableSelectOption } from '@/components/ui';
 
 export type CollectionVisibility = CollectionItem['visibility'];

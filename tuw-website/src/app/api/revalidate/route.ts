@@ -6,7 +6,7 @@ import { guards } from '@/server/session';
 // only known tags. Settings and products change prices shown to shoppers,
 // so they expire at once ({ expire: 0 }: the next request re-reads instead of
 // being served one stale page); content tags use 'max'.
-const TAGS = ['settings', 'products', 'nav', 'faqs'] as const;
+const TAGS = ['settings', 'products', 'nav', 'faqs', 'reviews'] as const;
 const IMMEDIATE: ReadonlySet<string> = new Set(['settings', 'products']);
 
 export const POST = guards.route(

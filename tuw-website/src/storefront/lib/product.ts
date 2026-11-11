@@ -36,16 +36,6 @@ export function variantLabelOf(product: Product): string {
   return isWearable(type) ? 'Size' : 'Option';
 }
 
-/** Which size chart applies, if any. */
-export type SizeChartKind = 'tops' | 'bottoms' | 'kids';
-export function sizeChartOf(product: Product): SizeChartKind | null {
-  const type = productTypeOf(product);
-  if (type === 'kids-apparel') return 'kids';
-  if (type !== 'apparel') return null;
-  if (product.category === 'pants' || /skirt|legging/i.test(product.title)) return 'bottoms';
-  return 'tops';
-}
-
 /** Images on the page are sample shots until real product photography exists. */
 export const isPlaceholderImage = (alt: string) => /^placeholder/i.test(alt);
 

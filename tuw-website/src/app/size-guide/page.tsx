@@ -5,37 +5,21 @@ import Header from '@storefront/components/layout/Header';
 import Footer from '@storefront/components/layout/Footer';
 import Breadcrumb from '@storefront/components/ui/Breadcrumb';
 import Tabs from '@storefront/components/ui/Tabs';
+import { useStore } from '@storefront/mocks/store';
 
 export default function StandaloneSizeGuidePage() {
-  const [activeCategory, setActiveCategory] = useState<'hoodies' | 'tees' | 'pants'>('hoodies');
+  // Charts come from the database (admin → Products → size charts).
+  const { sizeCharts } = useStore();
+  const [activeChart, setActiveChart] = useState(sizeCharts[0]?.id ?? '');
   const [unit, setUnit] = useState<'cm' | 'inches'>('cm');
+  const chart = sizeCharts.find((c) => c.id === activeChart) ?? sizeCharts[0];
 
   const toInches = (cm: number) => (cm / 2.54).toFixed(1);
-
-  const hoodieData = [
-    { size: 'XS', chest: 108, length: 66, shoulder: 54, sleeve: 59 },
-    { size: 'S', chest: 114, length: 69, shoulder: 57, sleeve: 61 },
-    { size: 'M', chest: 120, length: 72, shoulder: 60, sleeve: 63 },
-    { size: 'L', chest: 126, length: 74, shoulder: 63, sleeve: 64 },
-    { size: 'XL', chest: 132, length: 76, shoulder: 66, sleeve: 65 },
-    { size: 'XXL', chest: 138, length: 78, shoulder: 69, sleeve: 66 },
-  ];
-
-  const teeData = [
-    { size: 'XS', chest: 104, length: 68, shoulder: 50, sleeve: 22 },
-    { size: 'S', chest: 110, length: 71, shoulder: 53, sleeve: 23 },
-    { size: 'M', chest: 116, length: 74, shoulder: 56, sleeve: 24 },
-    { size: 'L', chest: 122, length: 76, shoulder: 59, sleeve: 25 },
-    { size: 'XL', chest: 128, length: 78, shoulder: 62, sleeve: 26 },
-    { size: 'XXL', chest: 134, length: 80, shoulder: 65, sleeve: 27 },
-  ];
-
-  const pantsData = [
-    { size: 'S (30)', waist: 78, hip: 106, length: 102, thigh: 66 },
-    { size: 'M (32)', waist: 83, hip: 112, length: 104, thigh: 69 },
-    { size: 'L (34)', waist: 88, hip: 118, length: 106, thigh: 72 },
-    { size: 'XL (36)', waist: 93, hip: 124, length: 108, thigh: 75 },
-  ];
+  const format = (value: number | string | undefined) => {
+    if (value === undefined) return '—';
+    if (typeof value === 'string') return unit === 'cm' ? `${value} cm` : `${value.split(/[–-]/).map((v) => toInches(Number(v))).join('–')}"`;
+    return unit === 'cm' ? `${value} cm` : `${toInches(value)}"`;
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF9F6]">
@@ -82,78 +66,35 @@ export default function StandaloneSizeGuidePage() {
           </div>
         </div>
 
-        {/* Category Tabs */}
+        {/* Chart Tabs */}
         <div className="mb-6">
-          <Tabs
-            variant="pills"
-            activeTab={activeCategory}
-            onChange={(c) => setActiveCategory(c as any)}
-            tabs={[
-              { id: 'hoodies', label: 'Hoodies & Sweats' },
-              { id: 'tees', label: 'T-Shirts' },
-              { id: 'pants', label: 'Pleated Canvas Trousers' },
-            ]}
-          />
+          <Tabs variant="pills" activeTab={chart?.id ?? ''} onChange={setActiveChart} tabs={sizeCharts.map((c) => ({ id: c.id, label: c.name }))} />
         </div>
 
         {/* Measurements Table */}
-        <div className="bg-white rounded-3xl border border-[#E2DDCF] overflow-hidden shadow-xs">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-[#F4F1EA] border-b border-[#E2DDCF] text-xs font-bold text-[#1A1A1A] uppercase tracking-wider">
-              {activeCategory === 'pants' ? (
+        <div className="bg-white rounded-3xl border border-[#E2DDCF] overflow-x-auto shadow-xs">
+          {chart ? (
+            <table className="w-full text-left text-sm">
+              <thead className="bg-[#F4F1EA] border-b border-[#E2DDCF] text-xs font-bold text-[#1A1A1A] uppercase tracking-wider">
                 <tr>
-                  <th className="p-4">Size (Waist)</th>
-                  <th className="p-4">Relaxed Waist</th>
-                  <th className="p-4">Seat / Hip</th>
-                  <th className="p-4">Outseam Length</th>
-                  <th className="p-4">Thigh Circumference</th>
+                  <th scope="col" className="p-4">Size</th>
+                  {chart.columns.map((c) => <th key={c} scope="col" className="p-4">{c}</th>)}
                 </tr>
-              ) : (
-                <tr>
-                  <th className="p-4">Size</th>
-                  <th className="p-4">Chest Width</th>
-                  <th className="p-4">Garment Length</th>
-                  <th className="p-4">Shoulder Drop</th>
-                  <th className="p-4">Sleeve Length</th>
-                </tr>
-              )}
-            </thead>
-            <tbody className="divide-y divide-[#E2DDCF] font-medium text-[#5A5A5A] text-xs sm:text-sm">
-              {activeCategory === 'hoodies' &&
-                hoodieData.map((row) => (
+              </thead>
+              <tbody className="divide-y divide-[#E2DDCF] font-medium text-[#5A5A5A] text-xs sm:text-sm">
+                {chart.rows.map((row) => (
                   <tr key={row.size} className="hover:bg-[#FAF9F6]">
-                    <td className="p-4 font-bold text-[#1A1A1A]">{row.size}</td>
-                    <td className="p-4">{unit === 'cm' ? `${row.chest} cm` : `${toInches(row.chest)}"`}</td>
-                    <td className="p-4">{unit === 'cm' ? `${row.length} cm` : `${toInches(row.length)}"`}</td>
-                    <td className="p-4">{unit === 'cm' ? `${row.shoulder} cm` : `${toInches(row.shoulder)}"`}</td>
-                    <td className="p-4">{unit === 'cm' ? `${row.sleeve} cm` : `${toInches(row.sleeve)}"`}</td>
+                    <th scope="row" className="p-4 font-bold text-[#1A1A1A]">{row.size}</th>
+                    {chart.columns.map((c) => <td key={c} className="p-4">{format(row.measures[c])}</td>)}
                   </tr>
                 ))}
-
-              {activeCategory === 'tees' &&
-                teeData.map((row) => (
-                  <tr key={row.size} className="hover:bg-[#FAF9F6]">
-                    <td className="p-4 font-bold text-[#1A1A1A]">{row.size}</td>
-                    <td className="p-4">{unit === 'cm' ? `${row.chest} cm` : `${toInches(row.chest)}"`}</td>
-                    <td className="p-4">{unit === 'cm' ? `${row.length} cm` : `${toInches(row.length)}"`}</td>
-                    <td className="p-4">{unit === 'cm' ? `${row.shoulder} cm` : `${toInches(row.shoulder)}"`}</td>
-                    <td className="p-4">{unit === 'cm' ? `${row.sleeve} cm` : `${toInches(row.sleeve)}"`}</td>
-                  </tr>
-                ))}
-
-              {activeCategory === 'pants' &&
-                pantsData.map((row) => (
-                  <tr key={row.size} className="hover:bg-[#FAF9F6]">
-                    <td className="p-4 font-bold text-[#1A1A1A]">{row.size}</td>
-                    <td className="p-4">{unit === 'cm' ? `${row.waist} cm` : `${toInches(row.waist)}"`}</td>
-                    <td className="p-4">{unit === 'cm' ? `${row.hip} cm` : `${toInches(row.hip)}"`}</td>
-                    <td className="p-4">{unit === 'cm' ? `${row.length} cm` : `${toInches(row.length)}"`}</td>
-                    <td className="p-4">{unit === 'cm' ? `${row.thigh} cm` : `${toInches(row.thigh)}"`}</td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          ) : (
+            <p className="p-8 text-sm text-[#5A5A5A]">Size charts are being prepared.</p>
+          )}
         </div>
+        <p className="mt-3 text-xs text-[#5A5A5A]">Draft measurements, to be confirmed with our print partner.</p>
 
         {/* Fit recommendations */}
         <div className="mt-8 p-6 rounded-3xl bg-[#F4F1EA] border border-[#E2DDCF] space-y-3 text-xs text-[#5A5A5A] leading-relaxed">

@@ -11,11 +11,11 @@
   "_demo": "Figma source of truth established. First track TL-WEB-001 closed.",
   "summary": {
     "total": 114,
-    "done": 79,
-    "in_progress": 0,
-    "backlog": 35,
+    "done": 85,
+    "in_progress": 4,
+    "backlog": 25,
     "total_tasks": 114,
-    "pending": 35
+    "pending": 25
   },
   "session": {
     "branch": "urvil-ui",
@@ -2328,14 +2328,14 @@
       "id": "TL-WEB-BE-11",
       "title": "/search on the DB (ranked results + suggestions)",
       "category": "backend",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-WEB-BE",
-      "started": null,
-      "finished": null,
-      "verified": false,
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "verified": true,
       "design_match": null,
-      "pushed": false,
+      "pushed": true,
       "admin_ref": "TL-BE-05.06",
       "depends_on": [
         "TL-BE-05"
@@ -2345,7 +2345,10 @@
       ],
       "description": "Results inside Suspense; zero-result terms logged.",
       "key_decisions": [],
-      "follow_ups": []
+      "follow_ups": [
+        "No typo tolerance"
+      ],
+      "log": "Server Component search page, ranked cached results, debounced header suggestions, every search logged after the response."
     },
     {
       "id": "TL-WEB-BE-12",
@@ -2376,14 +2379,14 @@
       "id": "TL-WEB-BE-13",
       "title": "/size-guide from size_charts",
       "category": "backend",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-WEB-BE",
-      "started": null,
-      "finished": null,
-      "verified": false,
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "verified": true,
       "design_match": null,
-      "pushed": false,
+      "pushed": true,
       "admin_ref": "TL-BE-05.05",
       "depends_on": [
         "TL-BE-05"
@@ -2393,7 +2396,8 @@
       ],
       "description": "Cached; per product type.",
       "key_decisions": [],
-      "follow_ups": []
+      "follow_ups": [],
+      "log": "/size-guide and the PDP modal read size_charts through the catalog; column order comes from the chart."
     },
     {
       "id": "TL-WEB-BE-14",

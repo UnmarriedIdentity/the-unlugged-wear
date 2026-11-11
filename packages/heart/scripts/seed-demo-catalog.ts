@@ -218,7 +218,26 @@ async function applyCurated(tx: Transaction, productId: string, c: Curated, cats
   }
 }
 
+/** Draft charts + the same product → chart rule the storefront used. Only a chart created by this run links products, so staff edits survive. */
+async function seedSizeCharts() {
+  const charts = JSON.parse(readFileSync(join(ROOT, 'db/seed/catalog/size-charts.json'), 'utf8')) as { key: 'tops' | 'bottoms' | 'kids'; name: string; rows: unknown[] }[];
+  const bottoms = sql`(c.slug = 'pants' OR p.name ~* 'skirt|legging')`;
+  const rule = { kids: sql`p.product_type = 'kids-apparel'`, bottoms: sql`p.product_type = 'apparel' AND ${bottoms}`, tops: sql`p.product_type = 'apparel' AND NOT ${bottoms}` };
+  await withTransaction(async (tx) => {
+    for (const chart of charts) {
+      const { rows } = await tx.execute(sql`SELECT 1 FROM size_charts WHERE lower(name) = lower(${chart.name})`);
+      if (rows.length) continue;
+      const id = uuidv7();
+      const columns = [...new Set((chart.rows as { measures: Record<string, unknown> }[]).flatMap((r) => Object.keys(r.measures)))];
+      await tx.execute(sql`INSERT INTO size_charts (id, name, columns, rows) VALUES (${id}, ${chart.name}, ${textArray(columns)}, ${JSON.stringify(chart.rows)}::jsonb)`);
+      const { rowCount } = await tx.execute(sql`UPDATE products p SET size_chart_id = ${id} FROM categories c WHERE c.id = p.category_id AND p.size_chart_id IS NULL AND ${rule[chart.key]}`);
+      console.log(`size chart "${chart.name}": ${rowCount} products linked`);
+    }
+  });
+}
+
 async function main() {
+  if (process.argv.includes('--only=size-charts')) return seedSizeCharts();
   const parsed = parseQikinkListing(listing);
   const grouped = groupImportRows(parsed.rows);
   // A style split by conflicting HSN codes ("code:mp25|hsn:…") attaches the
@@ -294,6 +313,7 @@ async function main() {
       }
     }
   });
+  await seedSizeCharts();
   const { rows: [counts] } = await db.execute<{ active: number; draft: number }>(sql`
     SELECT count(*) FILTER (WHERE status = 'active')::int AS active, count(*) FILTER (WHERE status = 'draft')::int AS draft FROM products WHERE deleted_at IS NULL`);
   console.log(`classified ${classified} products; catalog now ${counts!.active} active, ${counts!.draft} draft`);

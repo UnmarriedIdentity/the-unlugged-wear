@@ -24,7 +24,7 @@ import { Plus, Search, MoreHorizontal } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import type { CollectionItem, ProductItem } from '@/mocks/fixtures';
 import { deleteCollectionAction, saveCollectionAction } from '@/server/catalog-actions';
-import { collectionCount, uniqueSlug } from '@/lib/collections';
+import { collectionCount, uniqueSlug } from '@tuw/heart/modules/catalog/rules';
 import CollectionFormDrawer, { type CollectionSaveResult } from './collections/CollectionFormDrawer';
 import CollectionDetailDrawer from './collections/CollectionDetailDrawer';
 

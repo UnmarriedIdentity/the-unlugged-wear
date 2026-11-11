@@ -67,3 +67,13 @@ test('slugs and variant keys are safe and stable', () => {
   assert.equal(variantKey('Navy Blue', '3XL'), 'color=navy-blue|opt=3xl');
   assert.equal(variantKey(null, '11oz'), 'opt=11oz');
 });
+
+test('placements stay product-level; a missing Category stays uncategorised', () => {
+  const { rows } = parseQikinkListing([row({ placements: 'Front,Back', sizes: 'S', colors: 'Black' }), row({ qikinkId: 2, style: 'Other Tee | OT01', category: ' Tees ' })]);
+  const { groups } = groupImportRows(rows);
+  const tee = groups.find((g) => g.key === 'code:uc22')!;
+  assert.deepEqual(tee.placements, ['Front', 'Back']);
+  assert.equal(tee.variants.length, 1, 'placements never multiply variants');
+  assert.equal(tee.category, undefined);
+  assert.equal(groups.find((g) => g.key === 'code:ot01')!.category, 'Tees');
+});

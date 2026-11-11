@@ -1,151 +1,87 @@
-'use client';
-
-import React, { useState, useMemo, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
+import Link from 'next/link';
+import { after } from 'next/server';
+import { logSearch, normalizeTerm } from '@tuw/heart/modules/catalog';
 import Header from '@storefront/components/layout/Header';
 import Footer from '@storefront/components/layout/Footer';
 import Breadcrumb from '@storefront/components/ui/Breadcrumb';
 import ProductGrid from '@storefront/components/commerce/ProductGrid';
-import { useStore } from '@storefront/mocks/store';
-import { Search as SearchIcon, X, Tag } from 'lucide-react';
-import Link from 'next/link';
+import { cachedSearch, getCatalog } from '@/server/catalog';
+import SearchBox from './_components/SearchBox';
 
-function SearchPageContent() {
-  const searchParams = useSearchParams();
-  const initialQuery = searchParams.get('q') || '';
-  const { products } = useStore();
+type Params = Promise<{ q?: string | string[] }>;
 
-  const [query, setQuery] = useState(initialQuery);
+const SHOP_LINKS = [
+  { href: '/shop?category=hoodies', label: 'Hoodies' },
+  { href: '/shop?category=tees', label: 'Tees' },
+  { href: '/shop?category=pants', label: 'Joggers' },
+];
 
-  const suggestedTerms = ['Hoodies', 'Sweatshirt', 'Oversized Tee', 'Acid Wash', 'Joggers', 'Mug'];
+// Results are the dynamic hole; the page around them is static.
+async function Results({ searchParams }: { searchParams: Params }) {
+  const { q } = await searchParams;
+  const term = normalizeTerm(typeof q === 'string' ? q : '');
+  const { products } = await getCatalog();
 
-  const searchResults = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return [];
+  if (!term) {
+    return (
+      <div>
+        <h2 className="text-base font-bold text-[#1A1A1A] mb-6">Explore Active Essentials</h2>
+        <ProductGrid products={products.slice(0, 3)} />
+      </div>
+    );
+  }
 
-    return products.filter((p) => {
-      const matchTitle = p.title.toLowerCase().includes(q);
-      const matchSub = p.subtitle.toLowerCase().includes(q);
-      const matchCat = p.category.toLowerCase().includes(q);
-      const matchDesc = p.description.toLowerCase().includes(q);
-      const matchDetails = p.details.some((d) => d.toLowerCase().includes(q));
-      return matchTitle || matchSub || matchCat || matchDesc || matchDetails;
-    });
-  }, [products, query]);
+  const { ids, total } = await cachedSearch(term);
+  // Logged after the response, so analytics never slows a search down.
+  after(() => logSearch(term, total).catch((error) => console.warn('[search] log failed', (error as Error).message)));
+  const byId = new Map(products.map((p) => [p.id, p]));
+  const results = ids.flatMap((id) => byId.get(id) ?? []);
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-      <Breadcrumb
-        items={[
-          { label: 'Home', href: '/' },
-          { label: 'Catalog Search' },
-        ]}
-      />
-
-      <div className="max-w-2xl my-6">
-        <h1 className="text-[clamp(1.75rem,3vw+0.5rem,2.25rem)] font-extrabold tracking-tight text-[#1A1A1A]">
-          Search Catalog
-        </h1>
-        <p className="text-sm text-[#666] mt-1">
-          Find garments by fabric specification, garment silhouette, or dye tone.
-        </p>
-
-        {/* Search Input Bar */}
-        <div className="relative mt-6">
-          <SearchIcon size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8A8A8A]" />
-          <input
-            type="search"
-            aria-label="Search the catalog"
-            placeholder="Search by keywords (e.g. hoodie, oversized tee, acid wash)..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="w-full h-14 pl-12 pr-12 rounded-2xl border border-[#E2DDCF] bg-white text-base outline-none shadow-xs focus:border-[#1A1A1A] transition-colors"
-          />
-          {query && (
-            <button
-              type="button"
-              onClick={() => setQuery('')}
-              aria-label="Clear search query"
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#8A8A8A] hover:text-[#1A1A1A]"
-            >
-              <X size={18} />
-            </button>
-          )}
-        </div>
-
-        {/* Suggested Quick Terms */}
-        <div className="flex items-center gap-2 flex-wrap mt-4">
-          <span className="text-xs text-[#8A8A8A] font-medium flex items-center gap-1">
-            <Tag size={12} /> Popular:
-          </span>
-          {suggestedTerms.map((term) => (
-            <button
-              key={term}
-              type="button"
-              onClick={() => setQuery(term)}
-              className="px-3 py-1 rounded-full bg-[#F4F1EA] text-xs font-medium text-[#1A1A1A] hover:bg-[#EAE5D9] transition-colors cursor-pointer"
-            >
-              {term}
-            </button>
+  if (!results.length) {
+    return (
+      <div className="text-center py-16 bg-white rounded-3xl border border-[#E2DDCF] p-8 max-w-xl mx-auto shadow-xs">
+        <h2 className="text-lg font-bold text-[#1A1A1A]">No matches for &ldquo;{term}&rdquo;</h2>
+        <p className="text-xs text-[#666] mt-2 leading-relaxed">Check your spelling or browse a category:</p>
+        <div className="flex justify-center gap-3 mt-6 flex-wrap">
+          {SHOP_LINKS.map((l) => (
+            <Link key={l.href} href={l.href} className="px-4 py-2 rounded-full bg-[#F4F1EA] text-xs font-semibold hover:bg-[#1A1A1A] hover:text-white transition-colors">{l.label}</Link>
           ))}
         </div>
       </div>
+    );
+  }
 
-      {/* Results Section */}
-      <div className="pt-8 border-t border-[#E2DDCF]">
-        {query.trim() === '' ? (
-          <div>
-            <h2 className="text-base font-bold text-[#1A1A1A] mb-6">Explore Active Essentials</h2>
-            <ProductGrid products={products.slice(0, 3)} />
-          </div>
-        ) : searchResults.length > 0 ? (
-          <div>
-            <div className="text-xs text-[#8A8A8A] uppercase font-bold tracking-wider mb-6">
-              Found {searchResults.length} matching piece{searchResults.length === 1 ? '' : 's'} for &ldquo;{query}&rdquo;
-            </div>
-            <ProductGrid products={searchResults} />
-          </div>
-        ) : (
-          <div className="text-center py-16 bg-white rounded-3xl border border-[#E2DDCF] p-8 max-w-xl mx-auto shadow-xs">
-            <h2 className="text-lg font-bold text-[#1A1A1A]">No matches for &ldquo;{query}&rdquo;</h2>
-            <p className="text-xs text-[#666] mt-2 leading-relaxed">
-              We couldn&apos;t find any garments matching this term. Check your spelling or browse our curated categories:
-            </p>
-            <div className="flex justify-center gap-3 mt-6 flex-wrap">
-              <Link
-                href="/shop?category=hoodies"
-                className="px-4 py-2 rounded-full bg-[#F4F1EA] text-xs font-semibold hover:bg-[#1A1A1A] hover:text-white transition-colors"
-              >
-                Heavy Hoodies
-              </Link>
-              <Link
-                href="/shop?category=tees"
-                className="px-4 py-2 rounded-full bg-[#F4F1EA] text-xs font-semibold hover:bg-[#1A1A1A] hover:text-white transition-colors"
-              >
-                Oversized Tees
-              </Link>
-              <Link
-                href="/shop?category=pants"
-                className="px-4 py-2 rounded-full bg-[#F4F1EA] text-xs font-semibold hover:bg-[#1A1A1A] hover:text-white transition-colors"
-              >
-                Pleated Pants
-              </Link>
-            </div>
-          </div>
-        )}
+  return (
+    <div>
+      <div className="text-xs text-[#8A8A8A] uppercase font-bold tracking-wider mb-6" role="status">
+        Found {total} matching piece{total === 1 ? '' : 's'} for &ldquo;{term}&rdquo;
       </div>
+      <ProductGrid products={results} />
     </div>
   );
 }
 
-export default function SearchPage() {
+export default function SearchPage({ searchParams }: { searchParams: Params }) {
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF9F6]">
       <Header />
       <main className="flex-1">
-        <Suspense fallback={<div className="p-12 text-center text-sm">Loading search...</div>}>
-          <SearchPageContent />
-        </Suspense>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+          <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Catalog Search' }]} />
+          <div className="max-w-2xl my-6">
+            <h1 className="text-[clamp(1.75rem,3vw+0.5rem,2.25rem)] font-extrabold tracking-tight text-[#1A1A1A]">Search Catalog</h1>
+            <p className="text-sm text-[#666] mt-1">Find pieces by name, type or style.</p>
+            <Suspense fallback={<div className="mt-6 h-14 rounded-2xl border border-[#E2DDCF] bg-white" />}>
+              <SearchBox />
+            </Suspense>
+          </div>
+          <div className="pt-8 border-t border-[#E2DDCF]">
+            <Suspense fallback={<p className="py-12 text-center text-sm text-[#666]" role="status">Searching…</p>}>
+              <Results searchParams={searchParams} />
+            </Suspense>
+          </div>
+        </div>
       </main>
       <Footer />
     </div>

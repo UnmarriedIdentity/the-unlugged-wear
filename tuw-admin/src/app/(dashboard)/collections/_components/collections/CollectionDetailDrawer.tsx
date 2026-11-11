@@ -14,7 +14,7 @@ import {
 } from '@/components/ui';
 import { Edit3, Layers } from 'lucide-react';
 import type { CollectionItem, ProductItem } from '@/mocks/fixtures';
-import { collectionCount, resolveCollectionProducts } from '@/lib/collections';
+import { collectionCount, resolveCollectionProducts } from '@tuw/heart/modules/catalog/rules';
 
 export interface CollectionDetailDrawerProps {
   collection: CollectionItem | null;
