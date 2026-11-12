@@ -18,6 +18,9 @@ import {
 } from '@storefront/lib/types';
 import { INITIAL_ORDERS, toLongContentProducts } from './fixtures';
 import { useBag } from '@storefront/lib/bag';
+import { previewDiscountAction } from '@/server/order-actions';
+import { formatPaise } from '@storefront/lib/format';
+import type { DiscountRule } from '@tuw/heart/modules/orders';
 import type { Collection, SizeChartData } from '@storefront/lib/types';
 
 export interface ToastMessage {
@@ -56,7 +59,7 @@ interface StoreContextType {
   freeShippingRemaining: number;
   promoCode: string;
   discountAmount: number;
-  applyPromoCode: (code: string) => boolean;
+  applyPromoCode: (code: string) => Promise<boolean>;
   removePromoCode: () => void;
   isCartDrawerOpen: boolean;
   setIsCartDrawerOpen: (open: boolean) => void;
@@ -97,6 +100,9 @@ interface StoreContextType {
 
   // Reset Demo
   resetStoreData: () => void;
+
+  /** Reload the bag and wishlist from the database (after an order is placed). */
+  refreshBag: () => Promise<void>;
 }
 
 const StoreContext = createContext<StoreContextType | null>(null);
@@ -123,7 +129,8 @@ export function StoreProvider({ children, catalog, session }: { children: React.
   const [orders, setOrders] = useState<Order[]>(INITIAL_ORDERS);
   const [returns, setReturns] = useState<ReturnRequest[]>([]);
   const [promoCode, setPromoCode] = useState<string>('');
-  const [discountPercent, setDiscountPercent] = useState<number>(0);
+  const [promoRule, setPromoRule] = useState<DiscountRule | null>(null);
+  const [promoMinPaise, setPromoMinPaise] = useState<number | null>(null);
   const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -199,34 +206,33 @@ export function StoreProvider({ children, catalog, session }: { children: React.
 
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
   const cartSubtotal = cart.reduce((acc, item) => acc + item.priceINR * item.quantity, 0);
-  const discountAmount = Math.round((cartSubtotal * discountPercent) / 100);
+  // Same rule the server applies; shown here, recomputed at checkout.
+  const subtotalPaise = Math.round(cartSubtotal * 100);
+  const discountPaise = !promoRule || (promoMinPaise !== null && subtotalPaise < promoMinPaise) ? 0
+    : promoRule.type === 'percent' ? Math.round((subtotalPaise * promoRule.percent) / 100) : Math.min(subtotalPaise, promoRule.paise);
+  const discountAmount = discountPaise / 100;
   const eligibleSubtotal = cartSubtotal - discountAmount;
   const shippingFee = cartSubtotal === 0 || eligibleSubtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_FEE;
   const freeShippingRemaining = Math.max(0, FREE_SHIPPING_THRESHOLD - eligibleSubtotal);
 
-  const applyPromoCode = (code: string): boolean => {
-    const clean = code.trim().toUpperCase();
-    if (clean === 'UNPLUGGED10' || clean === 'MINIMAL10') {
-      setPromoCode(clean);
-      setDiscountPercent(10);
-      addToast({
-        type: 'success',
-        title: 'Promo Applied',
-        description: '10% discount applied to your order.',
-      });
+  /** Checked on the server against the bag; the order total is decided again at checkout. */
+  const applyPromoCode = async (code: string): Promise<boolean> => {
+    const result = await previewDiscountAction({ code });
+    if (result.ok) {
+      setPromoCode(result.data.code);
+      setPromoRule(result.data.rule);
+      setPromoMinPaise(result.data.minOrderPaise);
+      addToast({ type: 'success', title: 'Code applied', description: `${result.data.code} takes ${formatPaise(result.data.discountPaise)} off this bag.` });
       return true;
     }
-    addToast({
-      type: 'error',
-      title: 'Invalid Promo Code',
-      description: 'Code not recognized or expired. Try "UNPLUGGED10".',
-    });
+    addToast({ type: 'error', title: 'Code not applied', description: result.error.message });
     return false;
   };
 
   const removePromoCode = () => {
     setPromoCode('');
-    setDiscountPercent(0);
+    setPromoRule(null);
+    setPromoMinPaise(null);
   };
 
   // Wishlist: customers only, so a guest's heart asks them to sign in.
@@ -398,7 +404,8 @@ export function StoreProvider({ children, catalog, session }: { children: React.
     setOrders(INITIAL_ORDERS);
     setReturns([]);
     setPromoCode('');
-    setDiscountPercent(0);
+    setPromoRule(null);
+    setPromoMinPaise(null);
     try {
       localStorage.removeItem('tuw_website_v5_cart');
       localStorage.removeItem('tuw_website_v5_wishlist');
@@ -469,6 +476,7 @@ export function StoreProvider({ children, catalog, session }: { children: React.
         addToast,
         dismissToast,
         resetStoreData,
+        refreshBag: bag.refreshBag,
       }}
     >
       {children}

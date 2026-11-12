@@ -1,6 +1,6 @@
 'use client';
 
-import React, { use } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import Header from '@storefront/components/layout/Header';
 import Footer from '@storefront/components/layout/Footer';
@@ -8,6 +8,8 @@ import Breadcrumb from '@storefront/components/ui/Breadcrumb';
 import Badge from '@storefront/components/ui/Badge';
 import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
 import { useStore } from '@storefront/mocks/store';
+import { cancelOrderAction, getOrderAction } from '@/server/order-actions';
+import { toStoreOrder } from '@storefront/lib/orders';
 import type { FulfillmentStatus, Order, PaymentStatus } from '@storefront/lib/types';
 import { formatPaise, formatShortDate } from '@storefront/lib/format';
 import { RETURN_WINDOW_DAYS, deliveryEstimate } from '@storefront/lib/product';
@@ -46,10 +48,47 @@ const CARD_TITLE = 'font-heading text-xl font-medium text-store-charcoal';
 
 export default function OrderDetailPage({ params }: PageProps) {
   const { id } = use(params);
-  const { getOrderById, getOrderByNumber, products } = useStore();
-  const order = getOrderById(id) || getOrderByNumber(id);
+  const orderNumber = decodeURIComponent(id);
+  const { products } = useStore();
+  const [order, setOrder] = useState<Order | null | undefined>(undefined);
+  const [confirmingCancel, setConfirmingCancel] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelNote, setCancelNote] = useState<{ ok: boolean; text: string } | null>(null);
   const { session } = useSession();
   const { supportEmail } = useSiteSettings();
+
+  useEffect(() => {
+    let live = true;
+    void getOrderAction({ orderNumber }).then((result) => { if (live) setOrder(result.ok ? toStoreOrder(result.data) : null); });
+    return () => { live = false; };
+  }, [orderNumber]);
+
+  // Free cancel inside the window; the server decides, the button only asks.
+  const cancel = async () => {
+    setCancelling(true);
+    const result = await cancelOrderAction({ orderNumber });
+    setCancelling(false);
+    setConfirmingCancel(false);
+    if (result.ok) {
+      setOrder(toStoreOrder(result.data.order));
+      setCancelNote({ ok: true, text: result.data.refunded ? 'Order cancelled. The demo payment has been refunded to its source.' : 'Order cancelled. Nothing was charged.' });
+    } else {
+      setCancelNote({ ok: false, text: result.error.message });
+    }
+  };
+
+  if (order === undefined) {
+    return (
+      <div className="min-h-screen flex flex-col bg-store-canvas">
+        <Header />
+        <main className="flex-1 py-24 text-center" role="status">
+          <div className="w-10 h-10 border-2 border-store-charcoal border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-sm text-store-text-secondary">Loading your order…</p>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!order) {
     return (
@@ -75,7 +114,9 @@ export default function OrderDetailPage({ params }: PageProps) {
   const hasShipped = fulfilment === 'shipped' || fulfilment === 'delivered';
   const estimate = deliveryEstimate(order.shippingAddress.postalCode, new Date(order.date));
   const subtotal = order.items.reduce((sum, item) => sum + linePaise(item), 0);
-  const total = subtotal - order.discountINR * 100 + order.shippingINR * 100;
+  const total = Math.round(order.totalINR * 100);
+  void subtotal;
+  const isCancelled = order.sqlStatus === 'cancelled';
   const address = order.shippingAddress;
 
   return (
@@ -104,10 +145,36 @@ export default function OrderDetailPage({ params }: PageProps) {
               <Badge variant={payment === 'failed' ? 'error' : payment === 'paid' ? 'outline' : 'neutral'}>
                 {PAYMENT_LABELS[payment]}
               </Badge>
-              <Badge variant={fulfilment === 'submission_failed' ? 'error' : fulfilment === 'delivered' ? 'dark' : 'neutral'}>
-                {FULFILMENT_LABELS[fulfilment]}
+              <Badge variant={isCancelled || fulfilment === 'submission_failed' ? 'error' : fulfilment === 'delivered' ? 'dark' : 'neutral'}>
+                {isCancelled ? 'Cancelled' : FULFILMENT_LABELS[fulfilment]}
               </Badge>
             </div>
+            {order.canCancel && order.cancellableUntil && (
+              <div className="mt-4 text-sm text-store-text-secondary">
+                {confirmingCancel ? (
+                  <div className="flex flex-wrap items-center gap-3" role="group" aria-label="Confirm cancellation">
+                    <span>Cancel this order?</span>
+                    <button type="button" onClick={cancel} disabled={cancelling} className="inline-flex items-center h-10 px-5 rounded-full bg-[#111111] text-white text-sm font-medium hover:bg-black disabled:opacity-60">
+                      {cancelling ? 'Cancelling…' : 'Yes, cancel it'}
+                    </button>
+                    <button type="button" onClick={() => setConfirmingCancel(false)} disabled={cancelling} className="inline-flex items-center h-10 px-5 rounded-full border border-store-card-border text-sm font-medium text-store-charcoal hover:border-store-charcoal">
+                      Keep my order
+                    </button>
+                  </div>
+                ) : (
+                  <p>
+                    Free to cancel until{' '}
+                    <strong className="font-medium text-store-charcoal">{new Date(order.cancellableUntil).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Kolkata' })}</strong>.{' '}
+                    <button type="button" onClick={() => setConfirmingCancel(true)} className="underline underline-offset-4 text-store-charcoal hover:text-black">
+                      Cancel order
+                    </button>
+                  </p>
+                )}
+              </div>
+            )}
+            {cancelNote && (
+              <p role={cancelNote.ok ? 'status' : 'alert'} className={`mt-4 text-sm ${cancelNote.ok ? 'text-store-charcoal' : 'text-red-700'}`}>{cancelNote.text}</p>
+            )}
           </div>
           <div className="flex flex-wrap gap-3">
             {!hasIssue && (

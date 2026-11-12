@@ -9,7 +9,9 @@ import { getSetting } from '../settings/index.ts';
 // The only code that moves stock (DOC/backend/04, 21). Inventory owns the
 // ledger and the balance columns products.stock and product_variants.stock.
 // Every write locks products, then variants, in id order, so parallel orders
-// cannot deadlock and each one reads the balance the last one left.
+// cannot deadlock and each one reads the balance the last one left. The lock
+// is FOR NO KEY UPDATE: an order line referencing the product holds a key-share
+// lock, and a full FOR UPDATE would deadlock against a second checkout.
 
 /** Print-on-demand partners make each item to order, so counts do not apply. */
 export const MADE_TO_ORDER_PARTNERS = ['qikink', 'printrove'] as const;
@@ -34,8 +36,8 @@ async function lockVariants(tx: Transaction, variantIds: string[]): Promise<Map<
   const ids = [...new Set(variantIds)].sort();
   if (!ids.length) return new Map();
   const { rows: owners } = await tx.execute<{ product_id: string }>(sql`SELECT DISTINCT product_id FROM product_variants WHERE id IN (${uuids(ids)})`);
-  if (owners.length) await tx.execute(sql`SELECT id FROM products WHERE id IN (${uuids(owners.map((o) => o.product_id))}) ORDER BY id FOR UPDATE`);
-  await tx.execute(sql`SELECT id FROM product_variants WHERE id IN (${uuids(ids)}) ORDER BY id FOR UPDATE`);
+  if (owners.length) await tx.execute(sql`SELECT id FROM products WHERE id IN (${uuids(owners.map((o) => o.product_id))}) ORDER BY id FOR NO KEY UPDATE`);
+  await tx.execute(sql`SELECT id FROM product_variants WHERE id IN (${uuids(ids)}) ORDER BY id FOR NO KEY UPDATE`);
   const { rows } = await tx.execute<Locked>(sql`
     SELECT v.id, v.product_id, v.sku, v.stock, v.is_active, p.partner_provider, p.partner_availability, p.product_kind, p.status AS product_status, p.deleted_at IS NOT NULL AS product_deleted
     FROM product_variants v JOIN products p ON p.id = v.product_id WHERE v.id IN (${uuids(ids)})`);

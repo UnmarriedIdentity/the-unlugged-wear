@@ -7,6 +7,8 @@ import Header from '@storefront/components/layout/Header';
 import Footer from '@storefront/components/layout/Footer';
 import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
 import { useStore } from '@storefront/mocks/store';
+import { getOrderAction } from '@/server/order-actions';
+import { toStoreOrder } from '@storefront/lib/orders';
 import { useSession } from '@storefront/lib/session';
 import type { Order } from '@storefront/lib/types';
 import { formatPaise, formatShortDate } from '@storefront/lib/format';
@@ -26,7 +28,8 @@ const linePaise = (item: Order['items'][number]) =>
 function OrderSuccessContent() {
   const searchParams = useSearchParams();
   const orderNumber = searchParams.get('order') || searchParams.get('id');
-  const { getOrderByNumber, getOrderById, products } = useStore();
+  const receipt = searchParams.get('t') ?? undefined;
+  const { products } = useStore();
   const { session } = useSession();
   const { supportEmail } = useSiteSettings();
 
@@ -38,9 +41,15 @@ function OrderSuccessContent() {
       setLoading(false);
       return;
     }
-    setOrder(getOrderByNumber(orderNumber) || getOrderById(orderNumber) || null);
-    setLoading(false);
-  }, [orderNumber, getOrderByNumber, getOrderById]);
+    let live = true;
+    // The account that placed it, or whoever holds its receipt link, may see it.
+    void getOrderAction({ orderNumber, receipt }).then((result) => {
+      if (!live) return;
+      setOrder(result.ok ? toStoreOrder(result.data) : null);
+      setLoading(false);
+    });
+    return () => { live = false; };
+  }, [orderNumber, receipt]);
 
   if (loading) {
     return (
@@ -77,7 +86,9 @@ function OrderSuccessContent() {
   const step = STEP_INDEX[order.fulfillmentStatus ?? 'queued'] ?? 0;
   const estimate = deliveryEstimate(order.shippingAddress.postalCode, new Date(order.date));
   const subtotal = order.items.reduce((sum, item) => sum + linePaise(item), 0);
-  const total = subtotal - order.discountINR * 100 + order.shippingINR * 100;
+  // The total the server charged (includes any tax or cash-on-delivery fee).
+  const total = Math.round(order.totalINR * 100);
+  void subtotal;
   const hasShipped = order.fulfillmentStatus === 'shipped' || order.fulfillmentStatus === 'delivered';
   const address = order.shippingAddress;
 
@@ -108,6 +119,15 @@ function OrderSuccessContent() {
             ? `Confirmation sent to ${session.email} (demo — no email is sent)`
             : 'A confirmation would be emailed to you (demo — no email is sent)'}
         </p>
+        {order.cancellableUntil && order.sqlStatus === 'pending' && (
+          <p className="mt-4 text-sm text-store-text-secondary">
+            Changed your mind? You can cancel free of charge until{' '}
+            <strong className="font-medium text-store-charcoal">
+              {new Date(order.cancellableUntil).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Kolkata' })}
+            </strong>
+            {session ? ' from your order page.' : '. Sign up with this email to manage it from your account, or contact us.'}
+          </p>
+        )}
       </header>
 
       {/* What happens next */}
@@ -234,7 +254,7 @@ function OrderSuccessContent() {
           <ArrowRight size={16} aria-hidden="true" />
         </Link>
         <Link
-          href={`/account/orders/${order.id}`}
+          href={`/account/orders/${encodeURIComponent(order.orderNumber)}`}
           className="inline-flex items-center h-11 px-6 rounded-full border border-store-charcoal text-sm font-medium text-store-charcoal hover:bg-store-charcoal hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-store-gold"
         >
           View order details

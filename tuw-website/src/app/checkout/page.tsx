@@ -9,6 +9,8 @@ import PaymentSimulationPanel from '@storefront/components/commerce/PaymentSimul
 import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
 import Listbox from '@storefront/components/ui/Listbox';
 import { useStore } from '@storefront/mocks/store';
+import { useSiteSettings } from '@storefront/lib/site-settings';
+import { placeOrderAction } from '@/server/order-actions';
 import { useSession } from '@storefront/lib/session';
 import { useAccount } from '@storefront/lib/account';
 import { RETURN_WINDOW_DAYS, deliveryEstimate, variantLabelOf } from '@storefront/lib/product';
@@ -30,8 +32,6 @@ import {
   Tag,
 } from 'lucide-react';
 
-const EXPRESS_FEE = 250;
-
 export default function CheckoutPage() {
   const router = useRouter();
   const {
@@ -49,9 +49,14 @@ export default function CheckoutPage() {
     removeFromCart,
     isInWishlist,
     toggleWishlist,
-    createOrder,
+    refreshBag,
     products,
   } = useStore();
+  const EXPRESS_FEE = useSiteSettings().shipping.expressFeePaise / 100;
+  // One key per checkout attempt: a retried or double-clicked payment returns the same order.
+  const [checkoutKey] = useState(() => crypto.randomUUID());
+  const [placeError, setPlaceError] = useState<string | null>(null);
+  const [placing, setPlacing] = useState(false);
 
   const { session } = useSession();
   // Saved addresses come from the real address book (TL-BE-03); guests have none.
@@ -137,15 +142,15 @@ export default function CheckoutPage() {
     return Object.keys(errs).length === 0;
   };
 
-  const handleApplyPromo = (e: React.FormEvent) => {
+  const handleApplyPromo = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!promoInput.trim()) return;
-    const ok = applyPromoCode(promoInput.trim());
+    const ok = await applyPromoCode(promoInput.trim());
     if (ok) {
-      setPromoMessage({ type: 'success', text: 'Coupon applied: 10% off' });
+      setPromoMessage({ type: 'success', text: 'Code applied.' });
       setPromoInput('');
     } else {
-      setPromoMessage({ type: 'error', text: 'Invalid coupon. Try UNPLUGGED10.' });
+      setPromoMessage({ type: 'error', text: 'That code was not applied. Check it and try again.' });
     }
   };
 
@@ -160,31 +165,38 @@ export default function CheckoutPage() {
     }
   };
 
-  const handlePaymentSuccess = (paymentMethod: 'UPI' | 'Card' | 'COD (Demo)') => {
-    const shippingAddress: Address = {
-      id: `addr-${Date.now()}`,
-      fullName: `${firstName} ${lastName}`.trim(),
-      addressLine1,
-      addressLine2,
-      city,
-      state,
-      postalCode,
-      country,
-      phone,
-    };
-
-    const newOrder = createOrder({
-      items: cart,
-      subtotalINR: cartSubtotal,
-      shippingINR: deliveryFee,
-      discountINR: discountAmount,
-      totalINR: total,
-      shippingAddress,
-      paymentMethod,
-      deliverySpeed,
+  // The server reads the bag, prices it, takes the stock and the (demo) payment
+  // in one step. On a refusal every typed value stays as it was.
+  const handlePaymentSuccess = async (paymentMethod: 'UPI' | 'Card' | 'COD (Demo)') => {
+    if (placing) return;
+    setPlacing(true);
+    setPlaceError(null);
+    const result = await placeOrderAction({
+      checkoutKey,
+      email: email.trim() || undefined,
+      shippingAddress: {
+        fullName: `${firstName} ${lastName}`.trim(),
+        line1: addressLine1,
+        line2: addressLine2 || undefined,
+        city,
+        state,
+        postalCode,
+        country: 'India',
+        phone,
+      },
+      speed: deliverySpeed,
+      method: paymentMethod === 'Card' ? 'card' : paymentMethod === 'UPI' ? 'upi' : 'cod',
+      discountCode: promoCode || undefined,
     });
-
-    router.push(`/checkout/success?order=${encodeURIComponent(newOrder.orderNumber)}`);
+    if (!result.ok) {
+      setPlacing(false);
+      setPlaceError(result.error.details[0]?.message && result.error.code === 'VALIDATION_FAILED' ? `${result.error.message} ${result.error.details[0].message}` : result.error.message);
+      return;
+    }
+    removePromoCode();
+    router.push(`/checkout/success?order=${encodeURIComponent(result.data.orderNumber)}&t=${encodeURIComponent(result.data.receipt)}`);
+    // After leaving, so the page does not flash "your bag is empty" first.
+    setTimeout(() => void refreshBag(), 500);
   };
 
   // Empty cart fallback
@@ -543,7 +555,7 @@ export default function CheckoutPage() {
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="urvil.kargathala@example.com"
+                        placeholder="asha.rao@example.com"
                         className="w-full px-4 py-3 rounded-xl border border-store-input-border bg-store-input-bg text-store-text-primary text-sm focus:border-store-input-focus outline-hidden transition-colors"
                         required
                       />
@@ -613,7 +625,7 @@ export default function CheckoutPage() {
                         type="text"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
-                        placeholder="Urvil"
+                        placeholder="Asha"
                         className="w-full px-4 py-3 rounded-xl border border-store-input-border bg-store-input-bg text-store-text-primary text-sm focus:border-store-input-focus outline-hidden transition-colors"
                         required
                       />
@@ -632,7 +644,7 @@ export default function CheckoutPage() {
                         type="text"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
-                        placeholder="Kargathala"
+                        placeholder="Rao"
                         className="w-full px-4 py-3 rounded-xl border border-store-input-border bg-store-input-bg text-store-text-primary text-sm focus:border-store-input-focus outline-hidden transition-colors"
                         required
                       />
@@ -653,7 +665,7 @@ export default function CheckoutPage() {
                       type="text"
                       value={addressLine1}
                       onChange={(e) => setAddressLine1(e.target.value)}
-                      placeholder="D-603 Regency Height"
+                      placeholder="12, 100 Feet Road"
                       className="w-full px-4 py-3 rounded-xl border border-store-input-border bg-store-input-bg text-store-text-primary text-sm focus:border-store-input-focus outline-hidden transition-colors"
                       required
                     />
@@ -671,7 +683,7 @@ export default function CheckoutPage() {
                       type="text"
                       value={addressLine2}
                       onChange={(e) => setAddressLine2(e.target.value)}
-                      placeholder="Shree Shradha Society, Dahin Nagar"
+                      placeholder="HAL 2nd Stage, Indiranagar"
                       className="w-full px-4 py-3 rounded-xl border border-store-input-border bg-store-input-bg text-store-text-primary text-sm focus:border-store-input-focus outline-hidden transition-colors"
                     />
                   </div>
@@ -688,7 +700,7 @@ export default function CheckoutPage() {
                         type="text"
                         value={city}
                         onChange={(e) => setCity(e.target.value)}
-                        placeholder="Surat"
+                        placeholder="Bengaluru"
                         className="w-full px-4 py-3 rounded-xl border border-store-input-border bg-store-input-bg text-store-text-primary text-sm focus:border-store-input-focus outline-hidden transition-colors"
                         required
                       />
@@ -705,7 +717,7 @@ export default function CheckoutPage() {
                         type="text"
                         value={state}
                         onChange={(e) => setState(e.target.value)}
-                        placeholder="Gujarat"
+                        placeholder="Karnataka"
                         className="w-full px-4 py-3 rounded-xl border border-store-input-border bg-store-input-bg text-store-text-primary text-sm focus:border-store-input-focus outline-hidden transition-colors"
                         required
                       />
@@ -721,7 +733,7 @@ export default function CheckoutPage() {
                         type="text"
                         value={postalCode}
                         onChange={(e) => setPostalCode(e.target.value)}
-                        placeholder="395005"
+                        placeholder="560038"
                         className="w-full px-4 py-3 rounded-xl border border-store-input-border bg-store-input-bg text-store-text-primary text-sm focus:border-store-input-focus outline-hidden transition-colors"
                         required
                       />
@@ -831,6 +843,15 @@ export default function CheckoutPage() {
                   </span>
                 </div>
 
+                {placeError && (
+                  <div role="alert" className="p-4 border border-red-200 bg-red-50 text-sm text-red-800">
+                    {placeError}
+                  </div>
+                )}
+                {placing && (
+                  <p role="status" className="text-sm text-store-text-secondary">Placing your order…</p>
+                )}
+
                 <PaymentSimulationPanel
                   totalAmount={total}
                   onPaymentSuccess={handlePaymentSuccess}
@@ -929,7 +950,7 @@ export default function CheckoutPage() {
                         maxLength={6}
                         value={summaryPin}
                         onChange={(e) => setSummaryPin(e.target.value.replace(/\D/g, ''))}
-                        placeholder="395005"
+                        placeholder="560038"
                         className="w-24 bg-transparent border-b border-white/30 focus:border-white/80 outline-none text-white placeholder-white/30 py-0.5 tuw-tabular-nums"
                       />
                     </label>

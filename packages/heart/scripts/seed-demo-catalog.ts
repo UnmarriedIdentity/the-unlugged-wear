@@ -236,8 +236,18 @@ async function seedSizeCharts() {
   });
 }
 
+/** Demo discount codes the storefront has always advertised in its demo copy (DEMO ONLY — not for production). */
+async function seedDiscountCodes() {
+  const db = getDb();
+  for (const code of ['UNPLUGGED10', 'MINIMAL10']) {
+    await db.execute(sql`INSERT INTO discount_codes (id, code, discount_type, value) VALUES (${uuidv7()}, ${code}, 'percent', 10) ON CONFLICT (code) DO NOTHING`);
+  }
+  console.log('demo discount codes: UNPLUGGED10, MINIMAL10 (10% off)');
+}
+
 async function main() {
   if (process.argv.includes('--only=size-charts')) return seedSizeCharts();
+  if (process.argv.includes('--only=discounts')) return seedDiscountCodes();
   const parsed = parseQikinkListing(listing);
   const grouped = groupImportRows(parsed.rows);
   // A style split by conflicting HSN codes ("code:mp25|hsn:…") attaches the
@@ -314,6 +324,7 @@ async function main() {
     }
   });
   await seedSizeCharts();
+  await seedDiscountCodes();
   const { rows: [counts] } = await db.execute<{ active: number; draft: number }>(sql`
     SELECT count(*) FILTER (WHERE status = 'active')::int AS active, count(*) FILTER (WHERE status = 'draft')::int AS draft FROM products WHERE deleted_at IS NULL`);
   console.log(`classified ${classified} products; catalog now ${counts!.active} active, ${counts!.draft} draft`);

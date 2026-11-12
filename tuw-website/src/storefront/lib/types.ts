@@ -198,7 +198,13 @@ export type Order = {
   id: string;
   orderNumber: string;
   date: string;
-  status: 'Confirmed' | 'Printing' | 'Shipped' | 'Delivered' | 'Returned' | 'Failed' | 'Refunded';
+  status: 'Confirmed' | 'Printing' | 'Shipped' | 'Delivered' | 'Returned' | 'Failed' | 'Refunded' | 'Cancelled';
+  /** The database status (SQL vocabulary), when the order came from the database. */
+  sqlStatus?: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'failed' | 'refunded';
+  /** End of the free-cancel window (ISO). */
+  cancellableUntil?: string;
+  /** True while the account that placed it may still cancel. */
+  canCancel?: boolean;
   paymentStatus?: PaymentStatus;
   fulfillmentStatus?: FulfillmentStatus;
   items: CartItem[];

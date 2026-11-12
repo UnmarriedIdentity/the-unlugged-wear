@@ -11,11 +11,11 @@
   "_demo": "Figma source of truth established. First track TL-WEB-001 closed.",
   "summary": {
     "total": 114,
-    "done": 88,
-    "in_progress": 4,
-    "backlog": 22,
+    "done": 92,
+    "in_progress": 5,
+    "backlog": 17,
     "total_tasks": 114,
-    "pending": 22
+    "pending": 17
   },
   "session": {
     "branch": "urvil-ui",
@@ -2526,14 +2526,14 @@
       "id": "TL-WEB-BE-19",
       "title": "/checkout on the DB (guest + account) — replaces api/checkout stub",
       "category": "backend",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-WEB-BE",
-      "started": null,
-      "finished": null,
-      "verified": false,
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "verified": true,
       "design_match": null,
-      "pushed": false,
+      "pushed": true,
       "admin_ref": "TL-BE-08.07",
       "depends_on": [
         "TL-BE-08"
@@ -2544,20 +2544,21 @@
       ],
       "description": "Server action with idempotent:true; mock payment with truthful demo copy; cancel window explained.",
       "key_decisions": [],
-      "follow_ups": []
+      "follow_ups": [],
+      "log": "Checkout sends the form to placeOrderAction (one key per attempt, typed values kept on refusal); prices from the server bag; demo payment copy kept; api/checkout removed."
     },
     {
       "id": "TL-WEB-BE-20",
       "title": "/checkout/success on the DB",
       "category": "backend",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-WEB-BE",
-      "started": null,
-      "finished": null,
-      "verified": false,
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "verified": true,
       "design_match": null,
-      "pushed": false,
+      "pushed": true,
       "admin_ref": "TL-BE-08.07",
       "depends_on": [
         "TL-BE-08"
@@ -2567,20 +2568,21 @@
       ],
       "description": "Reads the placed order; shows cancel-until time.",
       "key_decisions": [],
-      "follow_ups": []
+      "follow_ups": [],
+      "log": "Success page reads the order (owner or receipt token) and shows the free-cancel deadline."
     },
     {
       "id": "TL-WEB-BE-21",
       "title": "/account/orders and /account/orders/[id] on the DB — replaces api/orders/[id] stub",
       "category": "backend",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-WEB-BE",
-      "started": null,
-      "finished": null,
-      "verified": false,
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "verified": true,
       "design_match": null,
-      "pushed": false,
+      "pushed": true,
       "admin_ref": "TL-BE-08.05",
       "depends_on": [
         "TL-BE-08"
@@ -2592,7 +2594,8 @@
       ],
       "description": "Per-user cached data with cacheTag('orders:<userId>').",
       "key_decisions": [],
-      "follow_ups": []
+      "follow_ups": [],
+      "log": "/account/orders and /account/orders/[number] read the database (per-person, not cached); api/orders/[id] removed."
     },
     {
       "id": "TL-WEB-BE-22",
@@ -2645,14 +2648,14 @@
       "id": "TL-WEB-BE-24",
       "title": "Customer cancel inside the cancel window (order detail)",
       "category": "backend",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-WEB-BE",
-      "started": null,
-      "finished": null,
-      "verified": false,
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "verified": true,
       "design_match": null,
-      "pushed": false,
+      "pushed": true,
       "admin_ref": "TL-BE-08.04",
       "depends_on": [
         "TL-BE-08"
@@ -2662,16 +2665,17 @@
       ],
       "description": "Button disappears after cancellable_until.",
       "key_decisions": [],
-      "follow_ups": []
+      "follow_ups": [],
+      "log": "Order page shows \"free to cancel until\" and cancels with a confirm step; refund shown."
     },
     {
       "id": "TL-WEB-BE-25",
       "title": "Discount code and gift card entry at checkout",
       "category": "backend",
-      "status": "backlog",
+      "status": "in_progress",
       "owner": "unassigned",
       "parent": "TL-WEB-BE",
-      "started": null,
+      "started": "2026-11-12",
       "finished": null,
       "verified": false,
       "design_match": null,
@@ -2686,7 +2690,8 @@
       ],
       "description": "Discount applies first, then gift card.",
       "key_decisions": [],
-      "follow_ups": []
+      "follow_ups": [],
+      "log": "Discount codes checked on the server and applied at checkout. Gift cards come with TL-BE-12."
     },
     {
       "id": "TL-WEB-BE-26",

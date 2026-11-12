@@ -44,8 +44,8 @@ async function readAll(db: Db, forUpdate = false): Promise<{ values: SettingsVal
 }
 
 /** Every setting (staff screens). */
-export async function getSettings(): Promise<SettingsValues> {
-  return (await readAll(getDb())).values;
+export async function getSettings(db: Db = getDb()): Promise<SettingsValues> {
+  return (await readAll(db)).values;
 }
 
 /** Pass the open transaction when there is one: waiting for a second connection while holding one can starve the pool. */
@@ -60,7 +60,7 @@ export interface PublicSettings {
   timezone: string;
   tagline: string;
   taxIncluded: boolean;
-  shipping: { freeThresholdPaise: number; standardFeePaise: number; codFeePaise: number };
+  shipping: { freeThresholdPaise: number; standardFeePaise: number; codFeePaise: number; expressFeePaise: number };
   cancelWindowMinutes: number;
   exchangeWindowDays: number;
   giftCardValidityMonths: number;
@@ -78,6 +78,7 @@ export function toPublic(v: SettingsValues): PublicSettings {
       freeThresholdPaise: v['shipping.free_threshold'],
       standardFeePaise: v['shipping.standard_fee'],
       codFeePaise: v['shipping.cod_fee'],
+      expressFeePaise: v['shipping.express_fee'],
     },
     cancelWindowMinutes: v['orders.cancel_window_minutes'],
     exchangeWindowDays: v['exchange.window_days'],

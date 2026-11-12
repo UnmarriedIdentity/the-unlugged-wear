@@ -9,9 +9,9 @@
   },
   "summary": {
     "total": 440,
-    "done": 339,
-    "in_progress": 2,
-    "backlog": 99
+    "done": 345,
+    "in_progress": 4,
+    "backlog": 91
   },
   "session": {
     "branch": "urvil-ui",
@@ -6239,12 +6239,12 @@
     {
       "id": "TL-BE-06",
       "title": "Inventory & stock alerts",
-      "status": "in_progress",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-CORE",
       "started": "2026-11-11",
-      "finished": null,
-      "log": "Inventory module, staff alerts, back-in-stock requests and the restock job are done (commit bbbc924). Remaining for done_when: checkout calling reserve and cancel calling release, which arrive with TL-BE-08.",
+      "finished": "2026-11-12",
+      "log": "Inventory module, staff alerts, back-in-stock requests and the restock job are done (commit bbbc924). Checkout now calls reserve and cancel calls release (TL-BE-08 slice 1), so done_when is met.",
       "wiring": "modules/inventory called by checkout/cancel via index.ts; emits stock.restocked; notifications module subscribes.",
       "done_when": "Checkout decrements atomically, cancel restores once, staff get inventory bell alerts, 'notify me' works for guests/customers.",
       "depends_on": [
@@ -6257,7 +6257,7 @@
         "Restock emails are driven by rows and a job, not an in-process event, so a crash cannot lose one",
         "Staff stock edits are applied as changes from what the editor loaded"
       ],
-      "verified": false,
+      "verified": true,
       "pushed": true,
       "follow_ups": [],
       "storefront_tasks": [
@@ -6452,12 +6452,12 @@
     {
       "id": "TL-BE-08",
       "title": "Checkout & orders",
-      "status": "backlog",
+      "status": "in_progress",
       "owner": "unassigned",
       "parent": "TL-BE-CORE",
-      "started": null,
+      "started": "2026-11-12",
       "finished": null,
-      "log": "Not started. Scope: Pricing, guest/account checkout, mock payment, cancel window, order history, tracking, claim guest orders, admin order management.",
+      "log": "Slice 1 of 3 done (commit ORDHASH): pricing, discount codes, checkout transaction, demo payment, cancel window, storefront checkout/success/account orders on the DB. Slice 2: admin orders + discount codes admin, track-order, claim guest orders. Slice 3: admin global search (08.09).",
       "wiring": "modules/checkout orchestrates cart + inventory + payments + gift-cards + orders via index.ts in one transaction; emits order.placed / order.paid; admin orders module views.",
       "done_when": "A guest and a customer can place an order with the mock payment; double submit returns the same order; customer can cancel inside the cancel window; admin can list/filter orders and change status with history.",
       "depends_on": [
@@ -6466,13 +6466,17 @@
         "TL-BE-06"
       ],
       "design_match": null,
-      "key_decisions": [],
-      "verified": false,
-      "pushed": false,
-      "follow_ups": [
-        "Call inventory.reserve inside the checkout transaction and inventory.release on cancel; that closes TL-BE-06",
-        "Refuse checkout while cart.checkoutBlockers() returns anything; convert the cart after the order is placed"
+      "key_decisions": [
+        "Checkout lives in modules/orders (it owns the tables) and calls cart, inventory, payments and customers through their index files",
+        "A declined payment rolls the whole checkout back; nothing is written",
+        "The checkout key is re-checked after the bag lock, so a double submit returns the first order",
+        "Stock locks are FOR NO KEY UPDATE to avoid deadlocks with order-line foreign keys",
+        "Express delivery fee is a setting (migration 022)",
+        "Order access: placing account, or the receipt token from the success URL"
       ],
+      "verified": false,
+      "pushed": true,
+      "follow_ups": [],
       "storefront_tasks": [
         "TL-WEB-BE-19",
         "TL-WEB-BE-20",
@@ -6486,17 +6490,19 @@
     {
       "id": "TL-BE-08.01",
       "title": "Pricing service: subtotal, discount code, shipping (settings), tax (inclusive), gift card amount, grand total — paise tests",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-08",
-      "started": null,
-      "finished": null,
-      "log": "Not started.",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "log": "orders/pricing.ts: subtotal, discount first, shipping from settings (free threshold, standard, express, COD), tax inclusive or per-line exclusive, grand total; paise tests incl. 200 random orders.",
       "design_match": null,
       "key_decisions": [],
-      "verified": false,
-      "pushed": false,
-      "follow_ups": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "Gift card amount is 0 until TL-BE-12"
+      ],
       "storefront_tasks": [
         "TL-WEB-BE-25"
       ]
@@ -6504,47 +6510,49 @@
     {
       "id": "TL-BE-08.02",
       "title": "Checkout transaction: orders + order_items + stock reserve + cart converted + discount uses, idempotency_key, guest vs account identity",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-08",
-      "started": null,
-      "finished": null,
-      "log": "Not started.",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "log": "orders/checkout.ts: one transaction for order, lines, stock reserve, discount use, payment, history, converted bag; checkout key returns the same order (parallel and later); guest vs account identity.",
       "design_match": null,
       "key_decisions": [],
-      "verified": false,
-      "pushed": false,
+      "verified": true,
+      "pushed": true,
       "follow_ups": []
     },
     {
       "id": "TL-BE-08.03",
       "title": "Mock payment adapter + payments rows (one captured payment per order); order.paid event",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-08",
-      "started": null,
-      "finished": null,
-      "log": "Not started.",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "log": "modules/payments: demo gateway capture for card/UPI, COD pending, refund to source on cancel; a decline rolls the whole checkout back. order.placed / order.cancelled emitted after commit.",
       "design_match": null,
       "key_decisions": [],
-      "verified": false,
-      "pushed": false,
+      "verified": true,
+      "pushed": true,
       "follow_ups": []
     },
     {
       "id": "TL-BE-08.04",
       "title": "Cancel window: cancellable_until, customer cancel (order.cancel), status → confirmed after window (job in TL-BE-11)",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-08",
-      "started": null,
-      "finished": null,
-      "log": "Not started.",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "log": "cancellable_until from the setting; customer cancel by one conditional update; stock released; payment refunded.",
       "design_match": null,
       "key_decisions": [],
-      "verified": false,
-      "pushed": false,
-      "follow_ups": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "Guests cannot cancel online (refund needs a user actor); job to confirm after the window is TL-BE-11"
+      ],
       "storefront_tasks": [
         "TL-WEB-BE-24"
       ]
@@ -6552,16 +6560,16 @@
     {
       "id": "TL-BE-08.05",
       "title": "Customer views: /account/orders, order detail; guest /track-order (number + email); claim guest orders after sign-up",
-      "status": "backlog",
+      "status": "in_progress",
       "owner": "unassigned",
       "parent": "TL-BE-08",
-      "started": null,
+      "started": "2026-11-12",
       "finished": null,
-      "log": "Not started.",
+      "log": "Slice 1: /account/orders and order detail on the DB. Remaining: guest /track-order, claim guest orders (slice 2).",
       "design_match": null,
       "key_decisions": [],
       "verified": false,
-      "pushed": false,
+      "pushed": true,
       "follow_ups": [],
       "storefront_tasks": [
         "TL-WEB-BE-21",
@@ -6587,16 +6595,16 @@
     {
       "id": "TL-BE-08.07",
       "title": "Wire storefront /checkout and /checkout/success; remove demo checkout adapter",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-08",
-      "started": null,
-      "finished": null,
-      "log": "Not started.",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "log": "/checkout, /checkout/success on the DB; demo api/checkout and api/orders/[id] removed.",
       "design_match": null,
       "key_decisions": [],
-      "verified": false,
-      "pushed": false,
+      "verified": true,
+      "pushed": true,
       "follow_ups": [],
       "storefront_tasks": [
         "TL-WEB-BE-19",
@@ -6606,16 +6614,16 @@
     {
       "id": "TL-BE-08.08",
       "title": "Tests: idempotent checkout, oversell, cancel window, totals",
-      "status": "backlog",
+      "status": "in_progress",
       "owner": "unassigned",
       "parent": "TL-BE-08",
-      "started": null,
+      "started": "2026-11-12",
       "finished": null,
-      "log": "Not started.",
+      "log": "pricing.test.ts (6) and orders.int.test.ts (8): totals, double submit, decline rollback, refusals, discount rules and last-use race, account identity, cancel window, parallel buyers. Admin tests come with slice 2.",
       "design_match": null,
       "key_decisions": [],
       "verified": false,
-      "pushed": false,
+      "pushed": true,
       "follow_ups": []
     },
     {

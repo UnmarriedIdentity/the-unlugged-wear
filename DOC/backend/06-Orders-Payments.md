@@ -344,3 +344,74 @@ column is declared at the end of `004` because `002` applies first — one of th
 two file-order exceptions in the build (`orders.for_household_id` is the
 other, added at the end of `011`). Both are from-scratch columns, not forward
 migrations (`migrate/README.md`).
+
+## As built (TL-BE-08 slice 1, 2026-11-12)
+
+`packages/heart/src/modules/orders/` (`pricing.ts`, `discounts.ts`,
+`checkout.ts`, `read.ts`) and `modules/payments/`. Tests: `pricing.test.ts`,
+`orders.int.test.ts`. Migration `022-express-fee.sql` adds the
+`shipping.express_fee` setting (₹250), which replaces a fee written into the
+checkout page.
+
+**Pricing (paise, pure function).** The discount comes off first. Delivery is
+free at or above `shipping.free_threshold` after the discount, else
+`shipping.standard_fee`; express is a flat `shipping.express_fee`; cash on
+delivery adds `shipping.cod_fee`. With `tax.included` (the default) the tax
+column is 0 and the GST split belongs to the invoice. Otherwise each line pays
+its own rate on its share of the discounted subtotal. Gift cards come with
+TL-BE-12 (`gift_card_amount` is 0 for now).
+
+**Checkout transaction.** It locks the bag, then in one transaction:
+
+1. Refuse what `cart.checkoutBlockers` names.
+2. Price the order from the bag (never from the form).
+3. Write the order (account: buyer, own profile and household; guest: email,
+   name and phone) and its lines (SKU, options, exchange policy, approved
+   preview).
+4. Take stock with `inventory.reserve`.
+5. Count the discount use with an atomic UPDATE.
+6. Take the demo payment.
+7. Write the status history and convert the bag.
+
+A declined payment rolls all of it back. The same `checkoutKey` returns the
+same order, whether it is a parallel double click or a retry a week later
+(`one_order_per_idempotency_key`, checked again after taking the bag lock).
+Order numbers look like `TUW-261112-K7Q4M`.
+
+**Payment.** Card and UPI are captured by the active gateway (the demo one
+until TL-INT-RAZORPAY). Cash on delivery is recorded as `pending`.
+
+**Cancel window.** Every order gets `cancellable_until` = now + the
+`orders.cancel_window_minutes` setting. One conditional UPDATE decides a
+cancel, so it happens once:
+
+- `pending`, before the deadline, by the account that placed it.
+- Stock comes back through `inventory.release`.
+- A captured payment is refunded to source: a `refunds` row, the payment
+  becomes `refunded`, and the order's `payment_status` becomes `refunded`.
+- Cash on delivery took nothing, so it has nothing to refund.
+
+Guests cannot cancel online yet, because a refund needs a user as its actor.
+They can sign up and claim the order (slice 2) or contact support. The job
+that moves orders to `confirmed` after the window is TL-BE-11.
+
+**Who sees an order.** The account that placed it, or whoever holds its
+receipt token (an HMAC returned at checkout and put in the success URL).
+Everyone else gets "not found". A receipt only lets you look, never cancel.
+
+**Locks.** Stock writes take `FOR NO KEY UPDATE` on products and variants.
+An order line referencing the product holds a key-share lock, and a full
+`FOR UPDATE` deadlocked two checkouts of the same product (found by the
+parallel discount test).
+
+**Storefront.**
+
+- `/checkout` sends the form to `placeOrderAction`, which uses one key per
+  attempt and keeps typed values on a refusal.
+- Discount codes are checked on the server against the bag. The demo codes
+  UNPLUGGED10 and MINIMAL10 are rows from `pnpm db:seed-catalog`.
+- `/checkout/success`, `/account/orders` and `/account/orders/[number]` read
+  the database. The order page cancels inside the window.
+- The demo routes `api/checkout` and `api/orders/[id]` are removed.
+- Track-order, claiming guest orders and the admin orders screen are slice 2.
+

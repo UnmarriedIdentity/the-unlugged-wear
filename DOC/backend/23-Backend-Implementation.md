@@ -126,7 +126,7 @@ card validity and low-stock threshold.
 
 **As built (TL-BE-04, 2026-11-11).** `modules/settings` keeps one registry
 entry per key (`keys.ts`: zod rule, fallback, admin tab, public or staff).
-The seed has exactly the registry's 20 keys (a test checks both ways).
+The seed has exactly the registry's keys (21 since `shipping.express_fee`, migration 022; a test checks both ways).
 
 - Money keys are rupee strings (`"150.00"`) in jsonb and paise in code;
   `017-settings-registry.sql` rewrote the old numeric rows.

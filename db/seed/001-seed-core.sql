@@ -233,6 +233,7 @@ INSERT INTO store_settings (key, value) VALUES
   ('shipping.free_threshold',    to_jsonb('3000.00'::text)),
   ('shipping.standard_fee',      to_jsonb('150.00'::text)),
   ('shipping.cod_fee',           to_jsonb('0.00'::text)),
+  ('shipping.express_fee',       to_jsonb('250.00'::text)),
   -- Exchanges: days after delivery a customer may request a size/variant swap.
   ('exchange.window_days',       to_jsonb(7)),
   -- Admin low-stock alert level (products.low_stock_threshold overrides).

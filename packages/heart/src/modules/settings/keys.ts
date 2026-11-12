@@ -77,6 +77,7 @@ export const SETTING_KEYS = {
   'shipping.free_threshold': money('3000'),
   'shipping.standard_fee': money('150'),
   'shipping.cod_fee': money('0'),
+  'shipping.express_fee': money('250'),
   'tax.included': def({ group: 'taxes', public: true, schema: bool, fallback: true }),
   'invoice.seller_legal_name': def({ group: 'taxes', public: false, schema: z.string().trim().max(200), fallback: '' }),
   'invoice.seller_address': def({ group: 'taxes', public: false, schema: z.string().trim().max(500), fallback: '' }),

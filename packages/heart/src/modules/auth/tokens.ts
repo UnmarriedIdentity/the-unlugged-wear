@@ -35,6 +35,16 @@ function secretFor(app: AuthApp, env: NodeJS.ProcessEnv = process.env): Buffer {
   return createHmac('sha256', secret).update(`tuw:${app}`).digest();
 }
 
+/** Proof that whoever holds it placed this order: lets a guest see their own receipt. */
+export const signReceipt = (orderId: string): string => b64url(createHmac('sha256', secretFor('storefront')).update(`receipt:${orderId}`).digest()).slice(0, 32);
+
+export function verifyReceipt(orderId: string, token: string | undefined | null): boolean {
+  if (!token || !/^[A-Za-z0-9_-]{32}$/.test(token)) return false;
+  const expected = Buffer.from(signReceipt(orderId));
+  const given = Buffer.from(token);
+  return given.length === expected.length && timingSafeEqual(given, expected);
+}
+
 /** A new guest session: random id plus its signature, so a cookie cannot be guessed or forged. */
 export function newGuestCookie(): { id: string; value: string } {
   const id = randomBytes(16).toString('hex');

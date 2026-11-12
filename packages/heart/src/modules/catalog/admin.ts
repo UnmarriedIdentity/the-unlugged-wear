@@ -624,3 +624,13 @@ export async function cartSnapshot(ref: string, color: string | undefined, size:
     monogram: p!.monogram_enabled ? { maxChars: p!.monogram_max_chars } : null,
   };
 }
+
+/** What an order line copies from the catalogue: SKU, GST rate and exchange rule. */
+export async function orderLineFacts(db: Pick<Transaction, 'execute'>, variantIds: string[]): Promise<Map<string, { sku: string; taxRate: number | null; exchangePolicy: 'defects_only' | 'exchangeable' | 'none' }>> {
+  if (!variantIds.length) return new Map();
+  const { rows } = await db.execute<{ id: string; sku: string; tax_rate: string | null; exchange_policy: 'defects_only' | 'exchangeable' | 'none' }>(sql`
+    SELECT v.id, v.sku, p.tax_rate, p.exchange_policy FROM product_variants v JOIN products p ON p.id = v.product_id
+    WHERE v.id IN (${sql.join([...new Set(variantIds)].map((i) => sql`${i}::uuid`), sql`, `)})`);
+  return new Map(rows.map((r) => [r.id, { sku: r.sku, taxRate: r.tax_rate === null ? null : Number(r.tax_rate), exchangePolicy: r.exchange_policy }]));
+}
+

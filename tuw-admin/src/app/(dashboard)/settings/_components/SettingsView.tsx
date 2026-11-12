@@ -52,6 +52,7 @@ const FIELDS: Partial<Record<SettingsTab, { title: string; intro?: string; field
       { key: 'shipping.free_threshold', label: 'Free delivery from (₹)', kind: 'money', helper: 'Order subtotal at or above this ships free' },
       { key: 'shipping.standard_fee', label: 'Standard delivery fee (₹)', kind: 'money', helper: 'Charged below the free-delivery amount' },
       { key: 'shipping.cod_fee', label: 'Cash on delivery fee (₹)', kind: 'money', helper: 'Added when the customer pays on delivery (0 = free)' },
+      { key: 'shipping.express_fee', label: 'Express delivery fee (₹)', kind: 'money', helper: 'Flat fee when the customer picks express delivery' },
     ],
   },
   taxes: {

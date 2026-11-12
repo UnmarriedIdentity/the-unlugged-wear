@@ -109,5 +109,5 @@ test('reads survive a corrupt or missing row (fallback, never a crash)', { skip 
   const pub = await s.getPublicSettings();
   assert.equal(pub.exchangeWindowDays, 7);
   assert.equal(pub.timezone, 'Asia/Kolkata');
-  assert.deepEqual(s.fallbackPublicSettings().shipping, { freeThresholdPaise: 300000, standardFeePaise: 15000, codFeePaise: 0 });
+  assert.deepEqual(s.fallbackPublicSettings().shipping, { freeThresholdPaise: 300000, standardFeePaise: 15000, codFeePaise: 0, expressFeePaise: 25000 });
 });

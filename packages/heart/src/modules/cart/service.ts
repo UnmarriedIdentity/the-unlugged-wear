@@ -286,3 +286,16 @@ export async function mergeGuestCart(sessionId: string, userId: string): Promise
     return view(tx, cartId);
   });
 }
+
+/** Checkout: the bag under its owner's lock, inside the order transaction. */
+export async function lockForCheckout(tx: Transaction, owner: CartOwner): Promise<CartView> {
+  await lockOwner(tx, owner);
+  const id = await activeCartId(tx, owner);
+  return id ? { id, lines: await readLines(tx, id) } : { id: null, lines: [] };
+}
+
+/** The order is placed: this bag is done. Kept, not deleted, for conversion numbers. */
+export async function markConverted(tx: Transaction, cartId: string): Promise<void> {
+  await tx.execute(sql`UPDATE carts SET status = 'converted', updated_at = now() WHERE id = ${cartId} AND status = 'active'`);
+}
+
