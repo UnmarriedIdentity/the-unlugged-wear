@@ -105,7 +105,7 @@ const attributeGroupLabelStyle: React.CSSProperties = {
 // (fixtures) so the seam persists it verbatim; see the REST note there.
 // swatch dots stay neutral until a value→hex map lands (recorded follow-up).
 
-export default function ProductsView({ initialProducts, categories, perms, storefrontOrigin, initialLibrary, initialSizeCharts }: { initialProducts: ProductItem[]; categories: string[]; perms: string[]; storefrontOrigin: string; initialLibrary: LibraryAttribute[]; initialSizeCharts: SizeChart[] }) {
+export default function ProductsView({ initialProducts, categories, perms, storefrontOrigin, initialLibrary, initialSizeCharts, openId }: { initialProducts: ProductItem[]; categories: string[]; perms: string[]; storefrontOrigin: string; initialLibrary: LibraryAttribute[]; initialSizeCharts: SizeChart[]; openId?: string }) {
   // Product photos with local paths are served by the storefront app.
   const assetSrc = (url: string) => (url.startsWith('/') ? `${storefrontOrigin}${url}` : url);
   // Everything here is real (TL-BE-05).
@@ -988,6 +988,16 @@ export default function ProductsView({ initialProducts, categories, perms, store
     setStockMovements(movements as StockMovement[]);
     loadEditDrawer(detail as unknown as ProductItem);
   };
+
+  // Spotlight deep link (?open=<id>): open that product once on arrival.
+  const openedFromLink = useRef<string | null>(null);
+  useEffect(() => {
+    if (!openId || openedFromLink.current === openId) return;
+    openedFromLink.current = openId;
+    const summary = initialProducts.find((p) => p.id === openId);
+    if (summary) void openEditDrawer(summary);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openId]);
 
   const loadEditDrawer = (product: ProductItem) => {
     setIsCreating(false);

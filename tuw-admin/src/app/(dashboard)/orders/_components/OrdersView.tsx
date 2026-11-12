@@ -52,7 +52,7 @@ const METHOD_LABEL: Record<string, string> = { card: 'Card', upi: 'UPI', cod: 'C
 /** What the button says for each move a staff member can make. */
 const MOVE_LABEL: Partial<Record<OrderStatus, string>> = { confirmed: 'Confirm order', processing: 'Mark printing', shipped: 'Mark shipped', delivered: 'Mark delivered', cancelled: 'Cancel order' };
 
-export default function OrdersView({ initial, perms }: { initial: ListResult; perms: string[] }) {
+export default function OrdersView({ initial, perms, openOrder: openFromLink }: { initial: ListResult; perms: string[]; openOrder?: string }) {
   const { showToast } = useAdminState();
   const canUpdate = perms.includes('order.update_status');
   const canRefund = perms.includes('order.refund');
@@ -115,6 +115,12 @@ export default function OrdersView({ initial, perms }: { initial: ListResult; pe
     setConfirmCancel(false);
     setDetail(result.data);
   };
+
+  // Spotlight deep link (?open=<order number>): open that order on arrival.
+  useEffect(() => {
+    if (openFromLink) void openOrder(openFromLink);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openFromLink]);
 
   const move = async (to: OrderStatus) => {
     if (!detail) return;

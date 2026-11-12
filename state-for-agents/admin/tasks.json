@@ -9,15 +9,15 @@
   },
   "summary": {
     "total": 440,
-    "done": 348,
-    "in_progress": 2,
-    "backlog": 90
+    "done": 350,
+    "in_progress": 1,
+    "backlog": 89
   },
   "session": {
     "branch": "urvil-ui",
     "tip": "9519313",
     "unpushed": [],
-    "next_up": "TL-BE-08",
+    "next_up": "TL-BE-09",
     "pending_verifications": [
       "admin journal editor + list full keyboard/focus/Reset Demo pass at 360/768/1024/1440 (CDP route-load check passed; interactive pass pending)",
       "SQL dry-run: apply 001 + 002 + 006-cms.sql against a real PostgreSQL instance; verify generated blogs.search_vector, slug/CHECK constraints, FK RESTRICT/CASCADE behavior, and partial indexes. psql remains unavailable locally.",
@@ -6452,12 +6452,12 @@
     {
       "id": "TL-BE-08",
       "title": "Checkout & orders",
-      "status": "in_progress",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-CORE",
       "started": "2026-11-12",
-      "finished": null,
-      "log": "Slice 1 of 3 done (commit 224a785): pricing, discount codes, checkout transaction, demo payment, cancel window, storefront checkout/success/account orders on the DB. Slice 2 of 3 done (commit 45f6a6e): admin orders and discounts on the DB, guest tracking, claiming guest orders, shared rate limiter (migration 023). Slice 3: admin global search (08.09).",
+      "finished": "2026-11-12",
+      "log": "Slice 1 of 3 done (commit 224a785): pricing, discount codes, checkout transaction, demo payment, cancel window, storefront checkout/success/account orders on the DB. Slice 2 of 3 done (commit 45f6a6e): admin orders and discounts on the DB, guest tracking, claiming guest orders, shared rate limiter (migration 023). Slice 3 of 3 done (commit SRCHHASH): admin spotlight search on the database. done_when met.",
       "wiring": "modules/checkout orchestrates cart + inventory + payments + gift-cards + orders via index.ts in one transaction; emits order.placed / order.paid; admin orders module views.",
       "done_when": "A guest and a customer can place an order with the mock payment; double submit returns the same order; customer can cancel inside the cancel window; admin can list/filter orders and change status with history.",
       "depends_on": [
@@ -6478,7 +6478,7 @@
         "Claiming guest orders needs a verified email",
         "Customers see only their own notes on the timeline"
       ],
-      "verified": false,
+      "verified": true,
       "pushed": true,
       "follow_ups": [],
       "storefront_tasks": [
@@ -6637,12 +6637,12 @@
     {
       "id": "TL-BE-08.09",
       "title": "Admin global search modal (orders, products, customers, pages) from the DB",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-08",
-      "started": null,
-      "finished": null,
-      "log": "Not started. Server-side search across modules; 'frequent queries' may stay in localStorage (per-user UI preference only).",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "log": "Spotlight searches orders, products (incl. drafts, SKUs) and customers on the server by permission, page shortcuts stay local, every hit deep-links (?open=, ?customer=); recent queries stay in localStorage.",
       "files": [
         "tuw-admin/src/components/search/localSearch.ts",
         "tuw-admin/src/components/search/useFrequentQueries.ts",
@@ -6650,10 +6650,11 @@
       ],
       "design_match": null,
       "key_decisions": [],
-      "verified": false,
-      "pushed": false,
+      "verified": true,
+      "pushed": true,
       "follow_ups": [
-        "Added by the 2026-11-10 admin screen audit"
+        "Added by the 2026-11-10 admin screen audit",
+        "Shipments join the search with TL-BE-11"
       ]
     },
     {

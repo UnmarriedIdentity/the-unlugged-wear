@@ -473,3 +473,21 @@ written by the customer (or at their checkout), and uses customer words
 ("Sent to print", not "confirmed"). The account page's order list now reads
 the database as well.
 
+## As built (TL-BE-08 slice 3, 2026-11-12): admin spotlight search
+
+`tuw-admin/src/server/search-actions.ts` searches every area the staff
+member may read, in parallel, with five hits per area:
+
+- Orders (`order.view`): `orders.adminListOrders`.
+- Products (any staff): `catalog.adminSearchProducts`. It matches name,
+  style code, slug or a variant SKU, includes drafts, ranks exact and prefix
+  names first, and treats `%` and `_` as plain characters.
+- Customers (`customer.view`): `customers.listCustomers`.
+
+An area without permission is left out, never an error. Page shortcuts stay
+local. Results deep-link to the record: `/orders?open=<number>`,
+`/products?open=<id>`, `/customers?customer=<profile id>`. The scope prefixes
+(`#orders`, `@customer`, `!inv`) narrow the server search. `!ship` explains
+that shipments arrive with TL-BE-11. Recent queries stay in localStorage, a
+per-person preference. Test: `catalog/staff-search.int.test.ts`.
+

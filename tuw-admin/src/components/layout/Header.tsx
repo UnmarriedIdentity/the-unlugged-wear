@@ -31,9 +31,6 @@ export default function Header({
     retryConnection,
     supportTickets,
     orders,
-    products,
-    customers,
-    shipments,
   } = useAdminState();
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -224,10 +221,6 @@ export default function Header({
           onClick={() => setIsSearchOpen(false)}
         >
           <SearchModal
-            orders={orders}
-            products={products}
-            customers={customers}
-            shipments={shipments}
             onNavigate={handleNavigate}
             onClose={() => setIsSearchOpen(false)}
           />

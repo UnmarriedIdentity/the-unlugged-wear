@@ -653,3 +653,24 @@ export async function setProductDiscountActive(id: string, isActive: boolean, ac
   return listProductDiscounts();
 }
 
+export interface ProductHit { id: string; name: string; category: string; status: 'published' | 'draft' | 'archived'; pricePaise: number; stock: number; madeToOrder: boolean }
+
+/**
+ * Staff spotlight: name, style code, slug or a variant SKU, drafts included.
+ * Exact name and prefix matches first; % and _ are plain characters.
+ */
+export async function adminSearchProducts(term: string, limit = 5): Promise<ProductHit[]> {
+  const q = term.trim().slice(0, 100);
+  if (q.length < 2) return [];
+  const like = `%${q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+  const prefix = `${q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+  const { rows } = await getDb().execute<{ id: string; name: string; category: string | null; status: keyof typeof fromStatus; price: string; stock: number; partner_provider: string | null }>(sql`
+    SELECT p.id, p.name, c.name AS category, p.status, p.price, p.stock, p.partner_provider
+    FROM products p LEFT JOIN categories c ON c.id = p.category_id AND c.deleted_at IS NULL
+    WHERE p.deleted_at IS NULL AND (p.name ILIKE ${like} OR p.style_code ILIKE ${like} OR p.slug ILIKE ${like}
+      OR EXISTS (SELECT 1 FROM product_variants v WHERE v.product_id = p.id AND v.sku ILIKE ${like}))
+    ORDER BY (lower(p.name) = lower(${q})) DESC, (p.name ILIKE ${prefix}) DESC, p.status = 'active' DESC, p.updated_at DESC
+    LIMIT ${Math.min(Math.max(limit, 1), 20)}`);
+  return rows.map((r) => ({ id: r.id, name: r.name, category: r.category ?? UNCATEGORIZED, status: fromStatus[r.status], pricePaise: toPaise(r.price), stock: r.stock, madeToOrder: isMadeToOrder(r.partner_provider) }));
+}
+
