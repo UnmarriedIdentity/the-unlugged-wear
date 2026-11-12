@@ -192,7 +192,7 @@ export type Address = {
 };
 
 export type PaymentStatus = 'paid' | 'pending' | 'failed' | 'refunded';
-export type FulfillmentStatus = 'queued' | 'printing' | 'shipped' | 'delivered' | 'submission_failed';
+export type FulfillmentStatus = 'queued' | 'printing' | 'shipped' | 'delivered' | 'submission_failed' | 'cancelled';
 
 export type Order = {
   id: string;

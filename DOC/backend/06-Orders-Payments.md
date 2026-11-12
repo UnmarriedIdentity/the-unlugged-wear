@@ -415,3 +415,61 @@ parallel discount test).
 - The demo routes `api/checkout` and `api/orders/[id]` are removed.
 - Track-order, claiming guest orders and the admin orders screen are slice 2.
 
+## As built (TL-BE-08 slice 2, 2026-11-12)
+
+`modules/orders/admin.ts`, `guest.ts`, discount management in
+`discounts.ts`, `platform/ratelimit`. Tests: `orders-admin.int.test.ts`.
+Migration `023-rate-limits.sql` adds `rate_limit_hits`.
+
+**Admin orders (`/orders`).** Filters (all, unfulfilled, unpaid, cancelled,
+delivered), search (number, email, name; `%` and `_` are literal) and paging
+run in SQL, and the stats count every order.
+
+A status change is one conditional update plus its history row, and the
+allowed moves are fixed:
+
+| From | To |
+|---|---|
+| pending | confirmed, cancelled |
+| confirmed | processing, cancelled |
+| processing | shipped, cancelled |
+| shipped | delivered |
+| failed | confirmed (retry), cancelled |
+
+Staff cancels work like the customer's: stock comes back and the payment is
+refunded. Refunding needs `order.refund`, checked in the action and again in
+the service. Bulk "mark as" handles each order on its own and names every
+refusal. The history shows who acted and any note.
+
+Removed from this screen until their modules exist:
+
+- Partial refunds (TL-BE-09).
+- Partner sync. "Retry" is the move from failed to confirmed; the real retry
+  is TL-BE-11.
+- The demo "Create order" form. Manual orders are not planned yet; the owner
+  can decide later.
+
+**Discount codes (`/discounts`).** Codes and product discount schedules come
+from the database. A code is 3–50 letters, numbers, dashes or underscores. A
+percent code runs from 1 to 100. Dates are whole days in India. Duplicates are
+refused. The kill switch also stops the code at checkout. A used code is never
+deleted, only switched off. Every change is audited.
+
+**Guest tracking (`/track-order`).** The order number and the order's email
+(the guest email, or the account email for account orders). A wrong pair and
+an unknown number get the same message. Lookups are limited to 20 per visitor
+and 10 per order number per 10 minutes, through `platform/ratelimit`. That
+helper stores only HMAC hashes of the keys and is swept daily by
+`platform.sweepRateLimits`. A signed-in customer opening their own order from
+a link needs no email.
+
+**Claiming guest orders.** The account page offers to add guest orders placed
+with the account's email, but only once that email is verified. They become
+account orders: buyer, own profile and household set, guest fields cleared,
+history noted. Running it twice changes nothing.
+
+**Customers never see staff notes.** The customer timeline keeps only notes
+written by the customer (or at their checkout), and uses customer words
+("Sent to print", not "confirmed"). The account page's order list now reads
+the database as well.
+

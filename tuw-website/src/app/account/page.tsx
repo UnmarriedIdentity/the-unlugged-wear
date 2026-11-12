@@ -17,6 +17,7 @@ import { useRouter } from 'next/navigation';
 import { useStore } from '@storefront/mocks/store';
 import { useSession } from '@storefront/lib/session';
 import { useAccount } from '@storefront/lib/account';
+import { useMyOrders } from '@storefront/lib/my-orders';
 import AccountProfileSection from '@storefront/components/commerce/AccountProfileSection';
 import { formatPaise, formatShortDate } from '@storefront/lib/format';
 import { downloadInvoicePdf } from '@storefront/lib/invoice';
@@ -63,6 +64,7 @@ const FULFILLMENT_LABELS: Record<FulfillmentStatus, string> = {
   shipped: 'Shipped',
   delivered: 'Delivered',
   submission_failed: 'Print submission failed',
+  cancelled: 'Cancelled',
 };
 
 // Fulfilment progress steps; queued orders sit on "Placed".
@@ -215,7 +217,6 @@ function OrderProgress({ order }: { order: Order }) {
 
 export default function AccountPage() {
   const {
-    orders,
     returns,
     submitReturnRequest,
     addToast,
@@ -227,6 +228,10 @@ export default function AccountPage() {
   const router = useRouter();
   // AccountGate only renders this page once a demo session exists.
   const { session, signOut } = useSession();
+  // Orders are real (TL-BE-08); returns are still demo until TL-BE-10.
+  const { orders, claimable, claim } = useMyOrders();
+  const [claimNote, setClaimNote] = useState<{ ok: boolean; text: string } | null>(null);
+  const [claiming, setClaiming] = useState(false);
   const { supportEmail } = useSiteSettings();
   // Real address book, profile and household (TL-BE-03).
   const accountState = useAccount();
@@ -431,7 +436,7 @@ export default function AccountPage() {
                   <p className="text-xs uppercase tracking-wider text-store-text-secondary">Latest order</p>
                   {latestOrder && (
                     <Link
-                      href={`/account/orders/${latestOrder.id}`}
+                      href={`/account/orders/${encodeURIComponent(latestOrder.orderNumber)}`}
                       className="text-sm font-medium text-store-charcoal underline underline-offset-4 decoration-store-gold hover:decoration-store-charcoal"
                     >
                       {latestOrder.orderNumber}
@@ -473,6 +478,32 @@ export default function AccountPage() {
             {/* ORDERS */}
             {activeSection === 'orders' && (
               <section aria-labelledby="orders-heading" className="space-y-5">
+                {claimable.count > 0 && (
+                  <div className="p-4 border border-store-card-border bg-store-cream text-sm text-store-charcoal space-y-2">
+                    <p>
+                      You have {claimable.count} order{claimable.count === 1 ? '' : 's'} placed as a guest with this email.
+                      {claimable.verified ? ' Add them here to track and manage them.' : ' Verify your email first, so we know they are yours.'}
+                    </p>
+                    {claimable.verified && (
+                      <Button
+                        variant="dark"
+                        size="sm"
+                        disabled={claiming}
+                        onClick={async () => {
+                          setClaiming(true);
+                          const result = await claim();
+                          setClaiming(false);
+                          setClaimNote({ ok: result.ok, text: result.message });
+                        }}
+                      >
+                        {claiming ? 'Adding…' : 'Add them to my account'}
+                      </Button>
+                    )}
+                  </div>
+                )}
+                {claimNote && (
+                  <p role={claimNote.ok ? 'status' : 'alert'} className={`text-sm ${claimNote.ok ? 'text-store-charcoal' : 'text-red-700'}`}>{claimNote.text}</p>
+                )}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <h2 id="orders-heading" className="font-heading text-xl font-medium text-store-charcoal">
                     Order history
@@ -612,7 +643,7 @@ export default function AccountPage() {
                               </div>
 
                               <div className="flex flex-wrap items-center gap-2 pt-2">
-                                <Button variant="dark" size="sm" href={`/account/orders/${order.id}`}>
+                                <Button variant="dark" size="sm" href={`/account/orders/${encodeURIComponent(order.orderNumber)}`}>
                                   View order details
                                 </Button>
                                 {(fulfillmentOf(order) === 'shipped' || fulfillmentOf(order) === 'delivered') && (
@@ -795,7 +826,7 @@ export default function AccountPage() {
         {/* Demo controls, kept apart from the customer actions */}
         <aside className="mt-16 pt-6 border-t border-dashed border-store-card-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <p className="text-xs text-store-text-secondary">
-            Demo store: orders and returns are still saved in this browser only (your profile and addresses are saved to your account).
+            Demo store: return requests are still saved in this browser only. Your orders, profile and addresses are saved to your account.
           </p>
           <button
             type="button"

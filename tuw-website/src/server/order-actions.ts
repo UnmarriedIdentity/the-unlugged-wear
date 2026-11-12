@@ -4,7 +4,8 @@ import * as cart from '@tuw/heart/modules/cart';
 import * as orders from '@tuw/heart/modules/orders';
 import { orderSchemas as s } from '@tuw/heart/modules/orders';
 import { z } from 'zod';
-import { guards } from './session';
+import { hitRateLimit } from '@tuw/heart/platform/ratelimit';
+import { guards, session } from './session';
 
 // Checkout and the shopper's orders (TL-BE-08). Prices, stock and totals are
 // decided on the server from the bag; the form only says where and how to pay.
@@ -33,3 +34,21 @@ export const cancelOrderAction = guards.action({ access: 'customer', input: s.or
   const result = await orders.cancelOrder(ctx.user!.id, input.orderNumber);
   return { ...result, order: await orders.getOrderForViewer(input.orderNumber, { userId: ctx.user!.id }) };
 });
+
+/**
+ * Guest tracking: order number + email. Limited per visitor and per order
+ * number, so the form cannot be used to guess either.
+ */
+export const trackOrderAction = guards.action({ access: 'public', input: s.trackOrder }, async ({ input }) => {
+  const { ip } = await session.requestMeta();
+  await hitRateLimit('orders.track', [
+    { key: ip ?? '', max: 20, windowSeconds: 600 },
+    { key: input.orderNumber.toUpperCase(), max: 10, windowSeconds: 600 },
+  ]);
+  return orders.trackOrder(input.orderNumber, input.email);
+});
+
+export const claimStatusAction = guards.action({ access: 'customer', input: z.object({}) }, async ({ ctx }) => orders.claimableGuestOrders(ctx.user!.id));
+
+export const claimOrdersAction = guards.action({ access: 'customer', input: z.object({}) }, async ({ ctx }) => orders.claimGuestOrders(ctx.user!.id));
+

@@ -31,3 +31,30 @@ export type PlaceOrderInput = z.infer<typeof placeOrder>;
 export const discountPreview = z.object({ code: z.string().trim().toUpperCase().min(1, 'Enter a code').max(50) });
 export const orderRef = z.object({ orderNumber: z.string().trim().max(30) });
 export const receiptRef = orderRef.extend({ receipt: z.string().max(64).optional() });
+
+const status = z.enum(['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'failed', 'refunded']);
+export const adminList = z.object({
+  q: z.string().trim().max(100).optional(),
+  tab: z.enum(['all', 'unfulfilled', 'unpaid', 'cancelled', 'finished']).default('all'),
+  page: z.number().int().min(1).max(100_000).default(1),
+  perPage: z.number().int().min(1).max(5000).default(20),
+});
+export const adminStatus = z.object({ orderNumber: z.string().trim().max(30), to: status, note: z.string().trim().max(500).optional() });
+export const adminBulkStatus = z.object({ orderNumbers: z.array(z.string().trim().max(30)).min(1).max(200), to: status });
+export const trackOrder = z.object({ orderNumber: z.string().trim().min(5, 'Enter your order number').max(30), email: z.string().trim().email('Enter the email used for the order').max(255) });
+
+const rupees = z.number().finite().min(0).max(10_000_000).refine((n) => Math.abs(n * 100 - Math.round(n * 100)) < 1e-6, 'Use at most 2 decimal places');
+const isoDate = z.string().refine((v) => !Number.isNaN(Date.parse(v)), 'Enter a valid date');
+export const discountCreate = z.object({
+  code: z.string().trim().toUpperCase().regex(/^[A-Z0-9][A-Z0-9_-]{2,49}$/, 'Use 3–50 letters, numbers, dashes or underscores'),
+  discountType: z.enum(['percent', 'fixed']),
+  value: rupees.refine((v) => v > 0, 'The value must be above zero'),
+  minOrderAmount: rupees.nullable().optional(),
+  maxUses: z.number().int().min(1).max(10_000_000).nullable().optional(),
+  startsAt: isoDate.nullable().optional(),
+  endsAt: isoDate.nullable().optional(),
+  isActive: z.boolean().default(true),
+});
+export const discountToggle = z.object({ id: z.string().uuid(), isActive: z.boolean() });
+export const discountRef = z.object({ id: z.string().uuid() });
+

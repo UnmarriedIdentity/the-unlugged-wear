@@ -145,6 +145,16 @@ export async function placeOrder(buyer: Buyer, input: PlaceOrderInput): Promise<
   }
 }
 
+/** What every cancel does once the status has flipped: stock back, payment refunded, history written. */
+export async function afterCancel(tx: Transaction, gateway: Awaited<ReturnType<typeof getPaymentGateway>>, input: { orderId: string; actorId: string; from: string; note: string }): Promise<{ refunded: boolean }> {
+  await release(tx, { orderId: input.orderId });
+  const { refunded } = await refundCancelledOrder(tx, gateway, { orderId: input.orderId, actorId: input.actorId, reason: input.note });
+  if (refunded) await tx.execute(sql`UPDATE orders SET payment_status = 'refunded' WHERE id = ${input.orderId}`);
+  await tx.execute(sql`INSERT INTO order_status_history (id, order_id, from_status, to_status, note, actor)
+    VALUES (${uuidv7()}, ${input.orderId}, ${input.from}, 'cancelled', ${refunded ? `${input.note}; payment refunded to source` : input.note}, ${input.actorId})`);
+  return { refunded };
+}
+
 /**
  * Free cancel inside the window, for the account that placed the order. One
  * conditional update decides it, so a double click or a race with the submit
@@ -163,11 +173,7 @@ export async function cancelOrder(userId: string, orderNumber: string): Promise<
       if (!seen) throw new AppError('NOT_FOUND', 'We could not find that order.');
       throw new AppError('RULE_VIOLATION', seen.status === 'cancelled' ? 'This order is already cancelled.' : 'The free-cancel window has closed, so this order is already with our print partner. Contact us and we will help.');
     }
-    await release(tx, { orderId: order.id });
-    const { refunded } = await refundCancelledOrder(tx, gateway, { orderId: order.id, actorId: userId });
-    if (refunded) await tx.execute(sql`UPDATE orders SET payment_status = 'refunded' WHERE id = ${order.id}`);
-    await tx.execute(sql`INSERT INTO order_status_history (id, order_id, from_status, to_status, note, actor)
-      VALUES (${uuidv7()}, ${order.id}, 'pending', 'cancelled', ${refunded ? 'Cancelled by the customer; payment refunded to source' : 'Cancelled by the customer'}, ${userId})`);
+    const { refunded } = await afterCancel(tx, gateway, { orderId: order.id, actorId: userId, from: 'pending', note: 'Cancelled by the customer' });
     return { orderId: order.id, refunded };
   });
   void emit('order.cancelled', { orderId: result.orderId, orderNumber, refunded: result.refunded });

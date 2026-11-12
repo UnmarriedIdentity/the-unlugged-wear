@@ -634,3 +634,22 @@ export async function orderLineFacts(db: Pick<Transaction, 'execute'>, variantId
   return new Map(rows.map((r) => [r.id, { sku: r.sku, taxRate: r.tax_rate === null ? null : Number(r.tax_rate), exchangePolicy: r.exchange_policy }]));
 }
 
+export interface ProductDiscountRow { id: string; productId: string; productName: string; discountType: 'percent' | 'fixed'; value: number; startsAt: string; endsAt: string; isActive: boolean }
+
+/** Every scheduled product discount, for the Discounts screen's schedule board. */
+export async function listProductDiscounts(): Promise<ProductDiscountRow[]> {
+  const { rows } = await getDb().execute<{ id: string; product_id: string; name: string; discount_type: 'percent' | 'fixed'; value: string; starts_at: string; ends_at: string; is_active: boolean }>(sql`
+    SELECT d.id, d.product_id, p.name, d.discount_type, d.value, d.starts_at, d.ends_at, d.is_active FROM product_discounts d JOIN products p ON p.id = d.product_id AND p.deleted_at IS NULL
+    ORDER BY d.starts_at DESC, d.id`);
+  return rows.map((r) => ({ id: r.id, productId: r.product_id, productName: r.name, discountType: r.discount_type, value: Number(r.value), startsAt: new Date(r.starts_at).toISOString(), endsAt: new Date(r.ends_at).toISOString(), isActive: r.is_active }));
+}
+
+export async function setProductDiscountActive(id: string, isActive: boolean, actorId: string): Promise<ProductDiscountRow[]> {
+  await withTransaction(async (tx) => {
+    const { rows: [d] } = await tx.execute<{ product_id: string }>(sql`UPDATE product_discounts SET is_active = ${isActive} WHERE id = ${id} RETURNING product_id`);
+    if (!d) throw new AppError('NOT_FOUND', 'That schedule no longer exists.');
+    await recordAudit(tx, { actorId, action: 'product.discount', entity: 'products', entityId: d.product_id, diff: { discountActive: { from: !isActive, to: isActive } } });
+  });
+  return listProductDiscounts();
+}
+

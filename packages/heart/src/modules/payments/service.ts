@@ -44,7 +44,7 @@ export async function takePayment(tx: Transaction, gateway: PaymentGateway, inpu
  * source. Cash on delivery took nothing, so there is nothing to refund.
  * Keyed per order, so it can never run twice.
  */
-export async function refundCancelledOrder(tx: Transaction, gateway: PaymentGateway, input: { orderId: string; actorId: string }): Promise<{ refunded: boolean }> {
+export async function refundCancelledOrder(tx: Transaction, gateway: PaymentGateway, input: { orderId: string; actorId: string; reason?: string }): Promise<{ refunded: boolean }> {
   const { rows } = await tx.execute<{ id: string; amount: string; transaction_id: string | null; method: string }>(sql`
     SELECT id, amount, transaction_id, method FROM payments WHERE order_id = ${input.orderId} AND status = 'captured' FOR UPDATE`);
   const payment = rows[0];
@@ -54,7 +54,7 @@ export async function refundCancelledOrder(tx: Transaction, gateway: PaymentGate
     ? await gateway.refund({ providerRef: payment.transaction_id, amountPaise, reference: `cancel-${input.orderId}` })
     : { providerRef: `zero-${input.orderId}`, status: 'refunded' as const };
   await tx.execute(sql`INSERT INTO refunds (id, order_id, payment_id, amount, reason, method, payout_reference, idempotency_key, status, actor)
-    VALUES (${uuidv7()}, ${input.orderId}, ${payment.id}, ${payment.amount}, 'Cancelled by the customer inside the free-cancel window', 'source', ${result.providerRef}, ${`cancel:${input.orderId}`}, 'completed', ${input.actorId})`);
+    VALUES (${uuidv7()}, ${input.orderId}, ${payment.id}, ${payment.amount}, ${(input.reason ?? 'Cancelled by the customer inside the free-cancel window').slice(0, 255)}, 'source', ${result.providerRef}, ${`cancel:${input.orderId}`}, 'completed', ${input.actorId})`);
   await tx.execute(sql`UPDATE payments SET status = 'refunded', updated_at = now() WHERE id = ${payment.id}`);
   return { refunded: true };
 }

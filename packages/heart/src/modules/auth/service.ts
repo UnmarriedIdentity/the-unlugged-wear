@@ -315,6 +315,12 @@ export interface PendingInvite {
   expiresAt: string;
 }
 
+/** A user's sign-in email and whether they proved they own it (claiming guest orders needs that). */
+export async function accountEmail(userId: string): Promise<{ email: string; verified: boolean } | null> {
+  const { rows } = await getDb().execute<{ email: string; verified: boolean }>(sql`SELECT email, email_verified_at IS NOT NULL AS verified FROM users WHERE id = ${userId}`);
+  return rows[0] ?? null;
+}
+
 /** Active users holding a permission through any role. */
 export async function usersWithPermission(permission: string, db: Pick<Database, 'execute'> = getDb()): Promise<string[]> {
   const { rows } = await db.execute<{ id: string }>(sql`

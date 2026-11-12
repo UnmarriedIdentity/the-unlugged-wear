@@ -3,6 +3,7 @@
   "framework": "nextjs",
   "crons": [
     { "path": "/api/cron/platform.sweepIdempotencyKeys", "schedule": "30 21 * * *" },
-    { "path": "/api/cron/inventory.notifyRestocked", "schedule": "0 3 * * *" }
+    { "path": "/api/cron/inventory.notifyRestocked", "schedule": "0 3 * * *" },
+    { "path": "/api/cron/platform.sweepRateLimits", "schedule": "45 21 * * *" }
   ]
 }

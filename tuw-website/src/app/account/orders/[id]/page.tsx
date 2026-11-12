@@ -35,6 +35,7 @@ const FULFILMENT_LABELS: Record<FulfillmentStatus, string> = {
   shipped: 'Shipped',
   delivered: 'Delivered',
   submission_failed: 'Print submission failed',
+  cancelled: 'Cancelled',
 };
 
 const STEPS = ['Order placed', 'Printing', 'Shipped', 'Delivered'] as const;

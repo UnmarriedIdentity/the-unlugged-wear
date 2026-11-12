@@ -14,6 +14,7 @@ export {
   changePassword,
   listStaff,
   usersWithPermission,
+  accountEmail,
   inviteStaff,
   revokeInvite,
   acceptInvite,

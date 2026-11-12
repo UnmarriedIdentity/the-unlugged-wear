@@ -53,8 +53,8 @@ async function load(where: ReturnType<typeof sql>, limit = 1): Promise<Loaded[]>
       SELECT oi.id, oi.order_id, oi.product_id, p.external_id, p.slug, oi.product_name, oi.options, oi.unit_price, oi.qty,
              (SELECT i.url FROM product_images i WHERE i.product_id = oi.product_id ORDER BY i.is_primary DESC, i.sort_order LIMIT 1) AS image
       FROM order_items oi JOIN products p ON p.id = oi.product_id WHERE oi.order_id IN (${ids}) ORDER BY oi.created_at, oi.id`),
-    db.execute<{ order_id: string; to_status: OrderStatus; note: string | null; created_at: string }>(sql`
-      SELECT order_id, to_status, note, created_at FROM order_status_history WHERE order_id IN (${ids}) ORDER BY created_at, id`),
+    db.execute<{ order_id: string; to_status: OrderStatus; note: string | null; created_at: string; actor: string }>(sql`
+      SELECT order_id, to_status, note, created_at, actor FROM order_status_history WHERE order_id IN (${ids}) ORDER BY created_at, id`),
   ]);
   const now = Date.now();
   return orders.map((o) => ({
@@ -67,7 +67,8 @@ async function load(where: ReturnType<typeof sql>, limit = 1): Promise<Loaded[]>
     subtotalPaise: paise(o.subtotal), discountPaise: paise(o.discount), shippingPaise: paise(o.shipping_fee), taxPaise: paise(o.tax), grandTotalPaise: paise(o.grand_total),
     shippingAddress: o.shipping_address, cancellableUntil: o.cancellable_until ? new Date(o.cancellable_until).toISOString() : null,
     canCancel: o.placed_by_user_id !== null && o.status === 'pending' && o.cancellable_until !== null && new Date(o.cancellable_until).getTime() > now,
-    history: history.filter((h) => h.order_id === o.id).map((h) => ({ status: h.to_status, at: new Date(h.created_at).toISOString(), note: h.note })),
+    // Staff notes are internal: a customer sees only notes written by them or the system at checkout.
+    history: history.filter((h) => h.order_id === o.id).map((h) => ({ status: h.to_status, at: new Date(h.created_at).toISOString(), note: h.actor === 'guest' || h.actor === o.placed_by_user_id ? h.note : null })),
   }));
 }
 

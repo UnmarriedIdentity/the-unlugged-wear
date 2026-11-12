@@ -10,7 +10,11 @@ const LEGACY_STATUS: Record<OrderView['status'], Order['status']> = {
 };
 const FULFILMENT: Record<OrderView['status'], FulfillmentStatus> = {
   pending: 'queued', confirmed: 'queued', processing: 'printing', shipped: 'shipped', delivered: 'delivered',
-  cancelled: 'queued', failed: 'submission_failed', refunded: 'queued',
+  cancelled: 'cancelled', failed: 'submission_failed', refunded: 'queued',
+};
+/** What a customer reads on their timeline; staff vocabulary stays in the admin. */
+const TIMELINE: Record<OrderView['status'], string> = {
+  pending: 'Order placed', confirmed: 'Sent to print', processing: 'Printing', shipped: 'Shipped', delivered: 'Delivered', cancelled: 'Cancelled', failed: 'Delayed at the print partner', refunded: 'Refunded',
 };
 const METHOD: Record<string, Order['paymentMethod']> = { card: 'Card', upi: 'UPI', cod: 'COD (Demo)', netbanking: 'UPI', wallet: 'UPI' };
 
@@ -39,7 +43,7 @@ export function toStoreOrder(o: OrderView): Order {
     canCancel: o.canCancel,
     trackingEvents: o.history.map((h) => {
       const at = new Date(h.at);
-      return { date: at.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }), time: at.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' }), status: h.status === 'pending' ? 'Order placed' : h.status === 'cancelled' ? 'Cancelled' : h.status, location: 'The Unplugged Wear', description: h.note ?? '' };
+      return { date: at.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }), time: at.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' }), status: TIMELINE[h.status], location: 'The Unplugged Wear', description: h.note ?? '' };
     }),
   };
 }

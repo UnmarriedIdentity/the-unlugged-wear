@@ -11,11 +11,11 @@
   "_demo": "Figma source of truth established. First track TL-WEB-001 closed.",
   "summary": {
     "total": 114,
-    "done": 92,
+    "done": 94,
     "in_progress": 5,
-    "backlog": 17,
+    "backlog": 15,
     "total_tasks": 114,
-    "pending": 17
+    "pending": 15
   },
   "session": {
     "branch": "urvil-ui",
@@ -2601,14 +2601,14 @@
       "id": "TL-WEB-BE-22",
       "title": "/track-order for guests (order number + email)",
       "category": "backend",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-WEB-BE",
-      "started": null,
-      "finished": null,
-      "verified": false,
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "verified": true,
       "design_match": null,
-      "pushed": false,
+      "pushed": true,
       "admin_ref": "TL-BE-08.05",
       "depends_on": [
         "TL-BE-08"
@@ -2618,20 +2618,21 @@
       ],
       "description": "Rate-limited; never reveals whether an email exists.",
       "key_decisions": [],
-      "follow_ups": []
+      "follow_ups": [],
+      "log": "/track-order asks for order number + email; rate-limited; never says which half was wrong; signed-in owners skip the email."
     },
     {
       "id": "TL-WEB-BE-23",
       "title": "Claim guest orders after sign-up (account banner)",
       "category": "backend",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-WEB-BE",
-      "started": null,
-      "finished": null,
-      "verified": false,
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "verified": true,
       "design_match": null,
-      "pushed": false,
+      "pushed": true,
       "admin_ref": "TL-BE-08.05",
       "depends_on": [
         "TL-BE-08",
@@ -2642,7 +2643,8 @@
       ],
       "description": "Verified email only.",
       "key_decisions": [],
-      "follow_ups": []
+      "follow_ups": [],
+      "log": "Account page banner offers to add guest orders placed with the account email, verified email only."
     },
     {
       "id": "TL-WEB-BE-24",
