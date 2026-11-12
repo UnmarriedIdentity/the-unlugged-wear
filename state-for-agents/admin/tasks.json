@@ -6337,7 +6337,7 @@
       "parent": "TL-BE-CORE",
       "started": "2026-11-12",
       "finished": "2026-11-12",
-      "log": "Done (commit CARTHASH): cart and wishlist module, signed guest sessions, merge on sign-in, personalised-line rules, storefront bag and wishlist on the database.",
+      "log": "Done (commit b5fdf93): cart and wishlist module, signed guest sessions, merge on sign-in, personalised-line rules, storefront bag and wishlist on the database.",
       "wiring": "modules/cart; storefront actions with access guestOrCustomer, updateTag('cart:<id>'); header count in Suspense.",
       "done_when": "Bag and wishlist persist in the DB for guests and customers, merge on login, and the demo store adapter is gone from these screens.",
       "depends_on": [
