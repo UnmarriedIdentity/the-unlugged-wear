@@ -11,11 +11,11 @@
   "_demo": "Figma source of truth established. First track TL-WEB-001 closed.",
   "summary": {
     "total": 114,
-    "done": 86,
+    "done": 88,
     "in_progress": 4,
-    "backlog": 24,
+    "backlog": 22,
     "total_tasks": 114,
-    "pending": 24
+    "pending": 22
   },
   "session": {
     "branch": "urvil-ui",
@@ -2453,14 +2453,14 @@
       "id": "TL-WEB-BE-16",
       "title": "/cart, cart drawer and header bag count on the DB",
       "category": "backend",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-WEB-BE",
-      "started": null,
-      "finished": null,
-      "verified": false,
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "verified": true,
       "design_match": null,
-      "pushed": false,
+      "pushed": true,
       "admin_ref": "TL-BE-07.05",
       "depends_on": [
         "TL-BE-07"
@@ -2471,20 +2471,21 @@
       ],
       "description": "useOptimistic count; updateTag('cart:<id>'); guest cookie cart.",
       "key_decisions": [],
-      "follow_ups": []
+      "follow_ups": [],
+      "log": "Cart drawer, /cart, checkout lines and the header bag count read and write the database cart through storefront/lib/bag.ts; guest cookie cart; + buttons stop at what can be bought."
     },
     {
       "id": "TL-WEB-BE-17",
       "title": "/wishlist and hearts on the DB",
       "category": "backend",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-WEB-BE",
-      "started": null,
-      "finished": null,
-      "verified": false,
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "verified": true,
       "design_match": null,
-      "pushed": false,
+      "pushed": true,
       "admin_ref": "TL-BE-07.04",
       "depends_on": [
         "TL-BE-07"
@@ -2494,7 +2495,8 @@
       ],
       "description": "Customer only; guest heart prompts sign-in.",
       "key_decisions": [],
-      "follow_ups": []
+      "follow_ups": [],
+      "log": "/wishlist and every heart use the database wishlist; guests are asked to sign in."
     },
     {
       "id": "TL-WEB-BE-18",
@@ -2517,7 +2519,8 @@
       ],
       "description": "No unapproved custom print can reach checkout.",
       "key_decisions": [],
-      "follow_ups": []
+      "follow_ups": [],
+      "log": "Backend rules done (TL-BE-07.03). No personalisation form exists on the storefront yet, and real previews need uploads (TL-INT-R2)."
     },
     {
       "id": "TL-WEB-BE-19",

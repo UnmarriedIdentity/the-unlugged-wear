@@ -438,7 +438,9 @@ export default function CheckoutPage() {
                                   type="button"
                                   aria-label="Increase quantity"
                                   onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                  className="w-8 h-full flex items-center justify-center text-store-text-secondary hover:text-store-charcoal cursor-pointer"
+                        disabled={item.maxQty !== undefined && item.quantity >= item.maxQty}
+                        title={item.maxQty !== undefined && item.quantity >= item.maxQty ? 'No more available' : undefined}
+                                  className="w-8 h-full flex items-center justify-center text-store-text-secondary hover:text-store-charcoal cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                                 >
                                   <Plus size={12} />
                                 </button>

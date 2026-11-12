@@ -137,6 +137,7 @@ export default function CartPage() {
                         <div className="flex items-center border border-[#E2DDCF] rounded-full bg-white h-10 px-2">
                           <button
                             type="button"
+                            aria-label="Decrease quantity"
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
                             className="w-7 h-7 flex items-center justify-center text-[#5A5A5A] hover:text-[#1A1A1A]"
                           >
@@ -147,8 +148,11 @@ export default function CartPage() {
                           </span>
                           <button
                             type="button"
+                            aria-label="Increase quantity"
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            className="w-7 h-7 flex items-center justify-center text-[#5A5A5A] hover:text-[#1A1A1A]"
+                        disabled={item.maxQty !== undefined && item.quantity >= item.maxQty}
+                        title={item.maxQty !== undefined && item.quantity >= item.maxQty ? 'No more available' : undefined}
+                            className="w-7 h-7 flex items-center justify-center text-[#5A5A5A] hover:text-[#1A1A1A] disabled:opacity-40 disabled:cursor-not-allowed"
                           >
                             <Plus size={13} />
                           </button>

@@ -582,3 +582,45 @@ export async function adminDeleteCategory(id: string, actorId: string): Promise<
     return adminListCategories(tx);
   });
 }
+
+export interface CartSnapshot {
+  productId: string; publicId: string; variantId: string; name: string; slug: string;
+  image: string | null; color: string | null; size: string; label: string; unitPaise: number; monogram: { maxChars: number } | null;
+}
+
+/** A product reference from the storefront: its public id (legacy 'prod-1') or uuid. */
+export async function resolveProductRef(ref: string): Promise<{ id: string; publicId: string } | null> {
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(ref);
+  const { rows } = await getDb().execute<{ id: string; external_id: string | null }>(sql`
+    SELECT id, external_id FROM products WHERE deleted_at IS NULL AND status = 'active' AND (${isUuid ? sql`id = ${ref}::uuid OR ` : sql``}external_id = ${ref}) LIMIT 1`);
+  return rows[0] ? { id: rows[0].id, publicId: rows[0].external_id ?? rows[0].id } : null;
+}
+
+/** What a cart line freezes when it is added: name, link, picture, the chosen variant and its price. */
+export async function cartSnapshot(ref: string, color: string | undefined, size: string | undefined): Promise<CartSnapshot> {
+  const product = await resolveProductRef(ref);
+  if (!product) throw new AppError('NOT_FOUND', 'That product is not available.');
+  const variantId = await findVariantId(product.id, color, size);
+  if (!variantId) throw new AppError('VALIDATION_FAILED', 'Choose a size first.', [{ field: 'size', message: 'Choose a size first.' }]);
+  const db = getDb();
+  const [{ rows: [p] }, { rows: [v] }, { rows: images }] = await Promise.all([
+    db.execute<{ name: string; slug: string; product_kind: string; monogram_enabled: boolean; monogram_max_chars: number }>(sql`SELECT name, slug, product_kind, monogram_enabled, monogram_max_chars FROM products WHERE id = ${product.id}`),
+    db.execute<{ price: string; color: string | null; size: string | null }>(sql`
+      SELECT v.price,
+        (SELECT av.value FROM product_variant_attribute_values x JOIN attribute_definitions d ON d.id = x.definition_id JOIN attribute_values av ON av.id = x.value_id WHERE x.variant_id = v.id AND d.slug = 'color') AS color,
+        (SELECT av.value FROM product_variant_attribute_values x JOIN attribute_definitions d ON d.id = x.definition_id JOIN attribute_values av ON av.id = x.value_id WHERE x.variant_id = v.id AND d.slug <> 'color' LIMIT 1) AS size
+      FROM product_variants v WHERE v.id = ${variantId}`),
+    db.execute<{ url: string; color: string | null }>(sql`
+      SELECT i.url, av.value AS color FROM product_images i LEFT JOIN attribute_values av ON av.id = i.color_value_id
+      WHERE i.product_id = ${product.id} ORDER BY i.is_primary DESC, i.sort_order, i.created_at`),
+  ]);
+  if (p!.product_kind !== 'physical') throw new AppError('RULE_VIOLATION', 'Gift cards are bought from the gift card page.');
+  const chosenColor = v!.color;
+  const chosenSize = v!.size ?? size ?? 'One size';
+  const image = images.find((i) => chosenColor && i.color?.toLowerCase() === chosenColor.toLowerCase())?.url ?? images[0]?.url ?? null;
+  return {
+    productId: product.id, publicId: product.publicId, variantId, name: p!.name, slug: p!.slug, image, color: chosenColor, size: chosenSize,
+    label: [chosenColor, chosenSize].filter(Boolean).join(' / ').slice(0, 150), unitPaise: toPaise(v!.price),
+    monogram: p!.monogram_enabled ? { maxChars: p!.monogram_max_chars } : null,
+  };
+}

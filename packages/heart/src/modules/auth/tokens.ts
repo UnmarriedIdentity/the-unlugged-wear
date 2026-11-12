@@ -24,6 +24,7 @@ export const COOKIE_NAMES: Record<AuthApp, { access: string; refresh: string }> 
   admin: { access: 'tuw_admin_at', refresh: 'tuw_admin_rt' },
 };
 export const GUEST_COOKIE = 'tuw_sid';
+export const GUEST_TTL_SECONDS = 30 * 24 * 60 * 60;
 
 const b64url = (buf: Buffer | string) => Buffer.from(buf).toString('base64url');
 
@@ -32,6 +33,23 @@ function secretFor(app: AuthApp, env: NodeJS.ProcessEnv = process.env): Buffer {
   if (!secret || secret.length < 32) throw new Error('AUTH_SECRET must be set (at least 32 characters).');
   // Domain-separate the two apps even if they share a secret.
   return createHmac('sha256', secret).update(`tuw:${app}`).digest();
+}
+
+/** A new guest session: random id plus its signature, so a cookie cannot be guessed or forged. */
+export function newGuestCookie(): { id: string; value: string } {
+  const id = randomBytes(16).toString('hex');
+  return { id, value: `${id}.${guestSignature(id)}` };
+}
+
+const guestSignature = (id: string) => b64url(createHmac('sha256', secretFor('storefront')).update(`guest:${id}`).digest()).slice(0, 32);
+
+/** The guest id inside a cookie, or null when it is missing, malformed or not ours. */
+export function verifyGuestCookie(value: string | undefined | null): string | null {
+  const match = /^([0-9a-f]{32})\.([A-Za-z0-9_-]{32})$/.exec(value ?? '');
+  if (!match) return null;
+  const expected = Buffer.from(guestSignature(match[1]!));
+  const given = Buffer.from(match[2]!);
+  return given.length === expected.length && timingSafeEqual(given, expected) ? match[1]! : null;
 }
 
 export function signAccessToken(claims: Omit<AccessClaims, 'iat' | 'exp'>, nowSeconds = Math.floor(Date.now() / 1000)): { token: string; exp: number } {

@@ -177,3 +177,21 @@ export async function adjustStock(tx: Transaction, changes: StockChange[]): Prom
   await syncProductStock(tx, moves.map((m) => m.product_id));
   await raiseLevelAlerts(tx, [...balances.keys()]);
 }
+
+/**
+ * How many of each variant one order line may hold right now: the stock for
+ * in-house items, the per-line cap for print-to-order items, 0 when it cannot
+ * be bought. Read-only; reserve() is the check that counts.
+ */
+export async function availableQty(db: Pick<Transaction, 'execute'>, variantIds: string[]): Promise<Map<string, number>> {
+  const ids = [...new Set(variantIds)];
+  if (!ids.length) return new Map();
+  const { rows } = await db.execute<{ id: string; stock: number; ok: boolean; partner_provider: string | null; partner_availability: string | null; product_kind: string }>(sql`
+    SELECT v.id, v.stock, (v.is_active AND p.status = 'active' AND p.deleted_at IS NULL) AS ok, p.partner_provider, p.partner_availability, p.product_kind
+    FROM product_variants v JOIN products p ON p.id = v.product_id WHERE v.id IN (${uuids(ids)})`);
+  return new Map(rows.map((r) => {
+    if (!r.ok || r.product_kind !== 'physical') return [r.id, 0];
+    if (isMadeToOrder(r.partner_provider)) return [r.id, r.partner_availability === 'ready_to_print' ? MADE_TO_ORDER_LINE_CAP : 0];
+    return [r.id, r.stock];
+  }));
+}

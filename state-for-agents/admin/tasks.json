@@ -9,15 +9,15 @@
   },
   "summary": {
     "total": 440,
-    "done": 333,
+    "done": 339,
     "in_progress": 2,
-    "backlog": 105
+    "backlog": 99
   },
   "session": {
     "branch": "urvil-ui",
     "tip": "9519313",
     "unpushed": [],
-    "next_up": "TL-BE-07",
+    "next_up": "TL-BE-08",
     "pending_verifications": [
       "admin journal editor + list full keyboard/focus/Reset Demo pass at 360/768/1024/1440 (CDP route-load check passed; interactive pass pending)",
       "SQL dry-run: apply 001 + 002 + 006-cms.sql against a real PostgreSQL instance; verify generated blogs.search_vector, slug/CHECK constraints, FK RESTRICT/CASCADE behavior, and partial indexes. psql remains unavailable locally.",
@@ -6332,12 +6332,12 @@
     {
       "id": "TL-BE-07",
       "title": "Cart & wishlist",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-CORE",
-      "started": null,
-      "finished": null,
-      "log": "Not started. Scope: Guest session carts, account carts, merge on login, personalisation + preview approval, wishlist.",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "log": "Done (commit CARTHASH): cart and wishlist module, signed guest sessions, merge on sign-in, personalised-line rules, storefront bag and wishlist on the database.",
       "wiring": "modules/cart; storefront actions with access guestOrCustomer, updateTag('cart:<id>'); header count in Suspense.",
       "done_when": "Bag and wishlist persist in the DB for guests and customers, merge on login, and the demo store adapter is gone from these screens.",
       "depends_on": [
@@ -6345,9 +6345,15 @@
         "TL-BE-02"
       ],
       "design_match": null,
-      "key_decisions": [],
-      "verified": false,
-      "pushed": false,
+      "key_decisions": [
+        "Guest cookie is a random id plus HMAC; unsigned cookies are ignored",
+        "Cart lines keep colour and size as columns (migration 021)",
+        "The bag stays a client mirror of the server cart so 24 components keep one interface",
+        "Wishlist is customers only; a guest heart asks them to sign in",
+        "Reset Demo no longer clears the bag or wishlist (real data now)"
+      ],
+      "verified": true,
+      "pushed": true,
       "follow_ups": [],
       "storefront_tasks": [
         "TL-WEB-BE-16",
@@ -6358,47 +6364,49 @@
     {
       "id": "TL-BE-07.01",
       "title": "modules/cart: get/add/update/remove with snapshots and unique line rule (incl. personalisation)",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-07",
-      "started": null,
-      "finished": null,
-      "log": "Not started.",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "log": "modules/cart/service.ts: get/add/set qty/change variant/remove/clear with frozen snapshots, database price, stock caps, per-owner lock, 100-line cap; migration 021 keeps colour and size.",
       "design_match": null,
       "key_decisions": [],
-      "verified": false,
-      "pushed": false,
+      "verified": true,
+      "pushed": true,
       "follow_ups": []
     },
     {
       "id": "TL-BE-07.02",
       "title": "Guest cart cookie (signed x-session-id) + merge on login (cart.merge idempotent)",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-07",
-      "started": null,
-      "finished": null,
-      "log": "Not started.",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "log": "Signed guest cookie tuw_sid (HMAC, verified in resolveContext); login and sign-up merge the guest bag (capped, guest cart converted, rerun-safe) and clear the cookie.",
       "design_match": null,
       "key_decisions": [],
-      "verified": false,
-      "pushed": false,
+      "verified": true,
+      "pushed": true,
       "follow_ups": []
     },
     {
       "id": "TL-BE-07.03",
       "title": "Personalised lines: preview image + approval before checkout",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-07",
-      "started": null,
-      "finished": null,
-      "log": "Not started.",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "log": "Personalised lines: monogram only where offered, preview URL required, separate line per monogram, approvePreview, approval cleared by a new preview or variant; checkoutBlockers() for checkout.",
       "design_match": null,
       "key_decisions": [],
-      "verified": false,
-      "pushed": false,
-      "follow_ups": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "Storefront personalisation form is TL-WEB-BE-18; real previews need uploads (TL-INT-R2); checkout must call checkoutBlockers (TL-BE-08)"
+      ],
       "storefront_tasks": [
         "TL-WEB-BE-18"
       ]
@@ -6406,16 +6414,16 @@
     {
       "id": "TL-BE-07.04",
       "title": "Wishlist add/remove/list",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-07",
-      "started": null,
-      "finished": null,
-      "log": "Not started.",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "log": "modules/cart/wishlist.ts: customers only, one entry per product, unlisted products drop out, 500 cap.",
       "design_match": null,
       "key_decisions": [],
-      "verified": false,
-      "pushed": false,
+      "verified": true,
+      "pushed": true,
       "follow_ups": [],
       "storefront_tasks": [
         "TL-WEB-BE-17"
@@ -6424,17 +6432,19 @@
     {
       "id": "TL-BE-07.05",
       "title": "Wire storefront cart drawer, /cart, /wishlist, header counts (useOptimistic)",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-07",
-      "started": null,
-      "finished": null,
-      "log": "Not started.",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "log": "Store context backed by storefront/lib/bag.ts: one load action, optimistic changes sent in order, server answer wins; drawer, /cart, checkout, header counts and /wishlist on the DB; localStorage copies removed.",
       "design_match": null,
       "key_decisions": [],
-      "verified": false,
-      "pushed": false,
-      "follow_ups": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "Bag UI is still a Client Component mirror rather than a Server Component; revisit with the shop/PDP move (TL-WEB-BE-08/10)"
+      ],
       "storefront_tasks": [
         "TL-WEB-BE-16"
       ]
@@ -6460,7 +6470,8 @@
       "verified": false,
       "pushed": false,
       "follow_ups": [
-        "Call inventory.reserve inside the checkout transaction and inventory.release on cancel; that closes TL-BE-06"
+        "Call inventory.reserve inside the checkout transaction and inventory.release on cancel; that closes TL-BE-06",
+        "Refuse checkout while cart.checkoutBlockers() returns anything; convert the cart after the order is placed"
       ],
       "storefront_tasks": [
         "TL-WEB-BE-19",

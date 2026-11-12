@@ -11,7 +11,7 @@ export function Providers({ children, session, settings, catalog }: { children: 
   return (
     <SiteSettingsProvider settings={settings}>
       <SessionProvider session={session}>
-        <StoreProvider catalog={catalog}>{children}</StoreProvider>
+        <StoreProvider catalog={catalog} session={session}>{children}</StoreProvider>
       </SessionProvider>
     </SiteSettingsProvider>
   );

@@ -165,6 +165,8 @@ export type CartItem = {
   priceMinorINR?: number;
   quantity: number;
   image: string;
+  /** How many this line may hold right now (from the server; 0 = no longer available). */
+  maxQty?: number;
   selectedRadioOptions?: {
     groupKey: string;
     groupLabel: string;

@@ -2,7 +2,7 @@ import 'server-only';
 import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import * as auth from '../modules/auth/index.ts';
-import { COOKIE_NAMES, GUEST_COOKIE, REFRESH_TTL_SECONDS, verifyAccessToken, type AccessClaims, type AuthApp } from '../modules/auth/tokens.ts';
+import { COOKIE_NAMES, GUEST_COOKIE, GUEST_TTL_SECONDS, REFRESH_TTL_SECONDS, newGuestCookie, verifyAccessToken, verifyGuestCookie, type AccessClaims, type AuthApp } from '../modules/auth/tokens.ts';
 import type { RequestContext } from '../platform/guards/index.ts';
 
 // Next.js session adapter shared by both apps (auth-guards skill). Cookies
@@ -55,11 +55,27 @@ export function createAppSession(app: AuthApp, opts: { loginPath?: string } = {}
   /** Guard resolver: createGuards({ resolveContext }). */
   async function resolveContext(): Promise<Omit<RequestContext, 'requestId'>> {
     const claims = await claimsOrRefresh();
-    const guest = app === 'storefront' ? (await cookies()).get(GUEST_COOKIE)?.value ?? null : null;
+    // Only a cookie we signed counts; anything else is treated as no guest.
+    const guest = app === 'storefront' ? verifyGuestCookie((await cookies()).get(GUEST_COOKIE)?.value) : null;
     return {
       user: claims ? { id: claims.sub, roles: claims.roles, permissions: claims.perms } : null,
       guestSessionId: guest,
     };
+  }
+
+  /** The signed guest id, issuing one when the visitor has none (actions only). */
+  async function ensureGuestId(): Promise<string> {
+    const store = await cookies();
+    const existing = verifyGuestCookie(store.get(GUEST_COOKIE)?.value);
+    if (existing) return existing;
+    const fresh = newGuestCookie();
+    store.set(GUEST_COOKIE, fresh.value, { httpOnly: true, secure: isProd(), sameSite: 'lax', path: '/', maxAge: GUEST_TTL_SECONDS });
+    return fresh.id;
+  }
+
+  /** After sign-in the guest session has been merged; a later guest visit starts clean. */
+  async function clearGuest(): Promise<void> {
+    (await cookies()).delete(GUEST_COOKIE);
   }
 
   /** Request metadata for auth service calls (IP is best-effort). */
@@ -105,7 +121,7 @@ export function createAppSession(app: AuthApp, opts: { loginPath?: string } = {}
     return Response.redirect(new URL(`${loginPath}?next=${encodeURIComponent(next)}`, url), 303);
   }
 
-  return { app, names, currentClaims, claimsOrRefresh, setSession, clearSession, resolveContext, requestMeta, requireUser, requireStaff, refreshRoute };
+  return { app, names, currentClaims, claimsOrRefresh, setSession, clearSession, resolveContext, ensureGuestId, clearGuest, requestMeta, requireUser, requireStaff, refreshRoute };
 }
 
 /** Safe same-site redirect target from user input. */

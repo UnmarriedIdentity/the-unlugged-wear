@@ -620,45 +620,6 @@ export const carts = pgTable("carts", {
 	check("carts_status_check", sql`(status)::text = ANY ((ARRAY['active'::character varying, 'abandoned'::character varying, 'converted'::character varying])::text[])`),
 ]);
 
-export const cartItems = pgTable("cart_items", {
-	id: uuid().primaryKey().notNull(),
-	cartId: uuid("cart_id").notNull(),
-	productId: uuid("product_id").notNull(),
-	variantId: uuid("variant_id"),
-	qty: integer().notNull(),
-	unitPrice: numeric("unit_price", { precision: 12, scale:  2 }).notNull(),
-	productName: varchar("product_name", { length: 255 }).notNull(),
-	productSlug: varchar("product_slug", { length: 280 }),
-	imageUrl: varchar("image_url", { length: 2048 }),
-	variantLabel: varchar("variant_label", { length: 150 }),
-	personalization: jsonb(),
-	previewImageUrl: varchar("preview_image_url", { length: 2048 }),
-	previewApprovedAt: timestamp("preview_approved_at", { withTimezone: true, mode: 'string' }),
-	addedAt: timestamp("added_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-}, (table) => [
-	uniqueIndex("cart_items_cart_product_unique").using("btree", sql`cart_id`, sql`product_id`, sql`variant_id`, sql`COALESCE(personalization, '{}'::jsonb)`),
-	index("idx_cart_items_product_id").using("btree", table.productId.asc().nullsLast().op("uuid_ops")),
-	index("idx_cart_items_variant_id").using("btree", table.variantId.asc().nullsLast().op("uuid_ops")),
-	foreignKey({
-			columns: [table.cartId],
-			foreignColumns: [carts.id],
-			name: "cart_items_cart_id_fkey"
-		}).onDelete("cascade"),
-	foreignKey({
-			columns: [table.productId],
-			foreignColumns: [products.id],
-			name: "cart_items_product_id_fkey"
-		}).onDelete("restrict"),
-	foreignKey({
-			columns: [table.variantId],
-			foreignColumns: [productVariants.id],
-			name: "cart_items_variant_id_fkey"
-		}).onDelete("restrict"),
-	check("cart_items_check", sql`(personalization IS NULL) OR (preview_image_url IS NOT NULL)`),
-	check("cart_items_qty_check", sql`qty > 0`),
-	check("cart_items_unit_price_check", sql`unit_price >= (0)::numeric`),
-]);
-
 export const wishlists = pgTable("wishlists", {
 	id: uuid().primaryKey().notNull(),
 	userId: uuid("user_id").notNull(),
@@ -691,6 +652,47 @@ export const wishlistItems = pgTable("wishlist_items", {
 			foreignColumns: [wishlists.id],
 			name: "wishlist_items_wishlist_id_fkey"
 		}).onDelete("cascade"),
+]);
+
+export const cartItems = pgTable("cart_items", {
+	id: uuid().primaryKey().notNull(),
+	cartId: uuid("cart_id").notNull(),
+	productId: uuid("product_id").notNull(),
+	variantId: uuid("variant_id"),
+	qty: integer().notNull(),
+	unitPrice: numeric("unit_price", { precision: 12, scale:  2 }).notNull(),
+	productName: varchar("product_name", { length: 255 }).notNull(),
+	productSlug: varchar("product_slug", { length: 280 }),
+	imageUrl: varchar("image_url", { length: 2048 }),
+	variantLabel: varchar("variant_label", { length: 150 }),
+	personalization: jsonb(),
+	previewImageUrl: varchar("preview_image_url", { length: 2048 }),
+	previewApprovedAt: timestamp("preview_approved_at", { withTimezone: true, mode: 'string' }),
+	addedAt: timestamp("added_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	color: varchar({ length: 150 }),
+	size: varchar({ length: 150 }),
+}, (table) => [
+	uniqueIndex("cart_items_cart_product_unique").using("btree", sql`cart_id`, sql`product_id`, sql`variant_id`, sql`COALESCE(personalization, '{}'::jsonb)`),
+	index("idx_cart_items_product_id").using("btree", table.productId.asc().nullsLast().op("uuid_ops")),
+	index("idx_cart_items_variant_id").using("btree", table.variantId.asc().nullsLast().op("uuid_ops")),
+	foreignKey({
+			columns: [table.cartId],
+			foreignColumns: [carts.id],
+			name: "cart_items_cart_id_fkey"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.productId],
+			foreignColumns: [products.id],
+			name: "cart_items_product_id_fkey"
+		}).onDelete("restrict"),
+	foreignKey({
+			columns: [table.variantId],
+			foreignColumns: [productVariants.id],
+			name: "cart_items_variant_id_fkey"
+		}).onDelete("restrict"),
+	check("cart_items_check", sql`(personalization IS NULL) OR (preview_image_url IS NOT NULL)`),
+	check("cart_items_qty_check", sql`qty > 0`),
+	check("cart_items_unit_price_check", sql`unit_price >= (0)::numeric`),
 ]);
 
 export const orders = pgTable("orders", {
