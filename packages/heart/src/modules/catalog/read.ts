@@ -89,6 +89,19 @@ export interface StorefrontCatalog {
   categories: StorefrontCategory[];
 }
 
+/**
+ * Categories for the storefront navigation, without the catalogue. The header
+ * only needs visibility flags, so it does not pay for the full read model.
+ */
+export async function getStorefrontNavigation(): Promise<StorefrontCategory[]> {
+  const db = getDb();
+  const { rows } = await db.execute<{ slug: string; name: string; parent_slug: string | null; show_in_navbar: boolean; show_in_megamenu: boolean; sort_order: number }>(sql`
+    SELECT c.slug, c.name, parent.slug AS parent_slug, c.show_in_navbar, c.show_in_megamenu, c.sort_order
+    FROM categories c LEFT JOIN categories parent ON parent.id = c.parent_id
+    WHERE c.is_active AND c.deleted_at IS NULL ORDER BY c.sort_order, c.name`);
+  return rows.map((c) => ({ slug: c.slug, name: c.name, parentSlug: c.parent_slug, showInNavbar: c.show_in_navbar, showInMegamenu: c.show_in_megamenu, sortOrder: c.sort_order }));
+}
+
 const PROVIDER_LABEL: Record<string, StorefrontProduct['partnerProvider']> = {
   qikink: 'Qikink Direct API',
   printrove: 'Printrove Hub',

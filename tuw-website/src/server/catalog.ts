@@ -6,8 +6,6 @@ import type { Collection, Product, SizeChartData } from '@storefront/lib/types';
 export interface Catalog {
   products: Product[];
   collections: Collection[];
-  /** Category slugs staff hid from the storefront menu. */
-  hiddenCategories: string[];
   sizeCharts: SizeChartData[];
 }
 
@@ -25,7 +23,6 @@ export async function getCatalog(): Promise<Catalog> {
     // unions (category, product type) are narrowed here.
     products: catalog.products as unknown as Product[],
     collections: catalog.collections,
-    hiddenCategories: catalog.categories.filter((c) => !c.showInMegamenu).map((c) => c.slug),
     sizeCharts: catalog.sizeCharts,
   };
 }

@@ -6,6 +6,7 @@ import { Providers } from './providers';
 import { getSessionSummary } from '@/server/session';
 import { getStorefrontSettings } from '@/server/settings';
 import { getCatalog } from '@/server/catalog';
+import { getNavigation } from '@/server/nav';
 import BrandIntro from '@storefront/components/layout/BrandIntro';
 
 // Self-hosted Outfit for headings and body (vendored from @fontsource, OFL licensed).
@@ -47,10 +48,10 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  // Both cached ('settings' / 'products' tags) — part of the static shell,
-  // not dynamic holes. The catalog reaches Client Components through the
+  // All cached ('settings' / 'products' / 'nav' tags) — part of the static
+  // shell, not dynamic holes. The catalog reaches Client Components through the
   // store provider until shop/PDP become Server Components (TL-WEB-BE-08/10).
-  const [settings, catalog] = await Promise.all([getStorefrontSettings(), getCatalog()]);
+  const [settings, catalog, nav] = await Promise.all([getStorefrontSettings(), getCatalog(), getNavigation()]);
   return (
     <html lang="en" className={outfit.variable} suppressHydrationWarning>
       <body className="font-sans antialiased bg-store-canvas text-store-text-primary min-h-screen">
@@ -61,7 +62,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           Skip to main content
         </a>
         {/* Un-awaited: read with use() inside Suspense boundaries. */}
-        <Providers session={getSessionSummary()} settings={settings} catalog={catalog}>
+        <Providers session={getSessionSummary()} settings={settings} catalog={catalog} nav={nav}>
           {/* Reads the URL; streamed so dynamic routes keep a static shell. */}
           <Suspense fallback={null}>
             <BrandIntro />

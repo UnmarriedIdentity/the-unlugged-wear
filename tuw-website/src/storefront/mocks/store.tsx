@@ -22,6 +22,7 @@ import { previewDiscountAction } from '@/server/order-actions';
 import { formatPaise } from '@storefront/lib/format';
 import type { DiscountRule } from '@tuw/heart/modules/orders';
 import type { Collection, SizeChartData } from '@storefront/lib/types';
+import type { Navigation } from '@/server/nav';
 
 export interface ToastMessage {
   id: string;
@@ -111,7 +112,7 @@ const StoreContext = createContext<StoreContextType | null>(null);
 // date, which is still "yesterday" in India until 05:30).
 const localDate = (d: Date) => d.toLocaleDateString('en-CA');
 
-export function StoreProvider({ children, catalog, session }: { children: React.ReactNode; session?: unknown; catalog: { products: Product[]; collections: Collection[]; hiddenCategories: string[]; sizeCharts: SizeChartData[] } }) {
+export function StoreProvider({ children, catalog, nav, session }: { children: React.ReactNode; session?: unknown; catalog: { products: Product[]; collections: Collection[]; sizeCharts: SizeChartData[] }; nav: Navigation }) {
   const STORE_PRODUCTS = catalog.products;
   // Fees come from admin Settings (store_settings). The bag and wishlist
   // live in the database (useBag); promo codes and orders are still demo.
@@ -441,7 +442,7 @@ export function StoreProvider({ children, catalog, session }: { children: React.
         retryConnection,
         products,
         collections: catalog.collections,
-        hiddenCategories: catalog.hiddenCategories,
+        hiddenCategories: nav.hiddenCategories,
         sizeCharts: catalog.sizeCharts,
         getProductBySlug,
         cart,
