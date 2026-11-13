@@ -1,410 +1,327 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Save, Store, Palette, CreditCard, Truck, Receipt, Bell, ShieldCheck, Check, AlertCircle, RefreshCw, Library } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
+import { Save, Check, AlertCircle, RefreshCw, Library, ShieldCheck } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { Button, Input, ContentCard, Badge, PageHeader, LinkButton } from '@/components/ui';
+import { Button, Input, Textarea, Select, Switch, ContentCard, Badge, PageHeader, LinkButton } from '@/components/ui';
+import type { SettingsValues, SettingKey } from '@tuw/heart/modules/settings';
+import type { Provider } from '@tuw/heart/integrations/registry';
 import { useAdminState } from '@/mocks/state';
+import { saveSettingsAction, updateProviderAction } from '@/server/settings-actions';
+import { SETTINGS_TABS, type SettingsTab } from './tabs';
 
-const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
+// Store settings on real data (TL-BE-04). Each tab is a route; this view
+// renders the tab's fields from the database values, saves through the
+// guarded action and reports truthfully whether the storefront refreshed.
 
-type SettingsTab = 'general' | 'brand' | 'payments' | 'fulfillment' | 'shipping' | 'taxes' | 'notifications';
+type FieldKind = 'text' | 'email' | 'money' | 'int' | 'bool' | 'select' | 'color' | 'textarea' | 'fixed';
+interface Field {
+  key: SettingKey;
+  label: string;
+  kind: FieldKind;
+  helper?: string;
+  options?: string[];
+  fixedText?: string;
+}
 
-export default function SettingsView() {
-  const { settings, updateSettings, canPerformAction, resetDemoData } = useAdminState();
-  const [activeTab, setActiveTab] = useState<SettingsTab>('general');
+const TIMEZONES = ['Asia/Kolkata', 'UTC', 'Asia/Dubai', 'Asia/Singapore', 'Europe/London', 'America/New_York'];
 
-  // Form states initialized from mock state
-  const [storeName, setStoreName] = useState(settings.storeName);
-  const [legalEntity, setLegalEntity] = useState(settings.legalEntity);
-  const [supportEmail, setSupportEmail] = useState(settings.supportEmail);
-  const currency = 'INR (₹)';
-  const [timezone, setTimezone] = useState(settings.timezone);
+const FIELDS: Partial<Record<SettingsTab, { title: string; intro?: string; fields: Field[] }>> = {
+  general: {
+    title: 'Store information',
+    fields: [
+      { key: 'store.name', label: 'Store name', kind: 'text', helper: 'Shown in the storefront header, emails and invoices' },
+      { key: 'store.legal_entity', label: 'Legal entity', kind: 'text', helper: 'Used on invoices and merchant agreements' },
+      { key: 'store.support_email', label: 'Customer support email', kind: 'email', helper: 'Shown on the contact and policy pages' },
+      { key: 'store.timezone', label: 'Time zone', kind: 'select', options: TIMEZONES, helper: 'Order dates and reports use this zone' },
+      { key: 'store.currency', label: 'Currency', kind: 'fixed', fixedText: 'INR (₹) — Indian Rupee', helper: 'Single-currency store — prices are stored and shown in INR' },
+    ],
+  },
+  brand: {
+    title: 'Brand',
+    fields: [
+      { key: 'brand.tagline', label: 'Tagline', kind: 'text' },
+      { key: 'brand.color', label: 'Admin accent colour', kind: 'color', helper: 'Admin workspace only — storefront purchase buttons stay charcoal' },
+    ],
+  },
+  shipping: {
+    title: 'Shipping fees',
+    intro: 'Changes apply to the storefront within seconds — no deploy needed.',
+    fields: [
+      { key: 'shipping.free_threshold', label: 'Free delivery from (₹)', kind: 'money', helper: 'Order subtotal at or above this ships free' },
+      { key: 'shipping.standard_fee', label: 'Standard delivery fee (₹)', kind: 'money', helper: 'Charged below the free-delivery amount' },
+      { key: 'shipping.cod_fee', label: 'Cash on delivery fee (₹)', kind: 'money', helper: 'Added when the customer pays on delivery (0 = free)' },
+      { key: 'shipping.express_fee', label: 'Express delivery fee (₹)', kind: 'money', helper: 'Flat fee when the customer picks express delivery' },
+    ],
+  },
+  taxes: {
+    title: 'GST & invoice details',
+    intro: 'Draft: rates and invoice format need the accountant’s sign-off before go-live.',
+    fields: [
+      { key: 'tax.included', label: 'Prices include GST', kind: 'bool', helper: 'Storefront prices are tax-inclusive; invoices split the GST out' },
+      { key: 'invoice.seller_legal_name', label: 'Seller legal name', kind: 'text' },
+      { key: 'invoice.seller_address', label: 'Seller address', kind: 'textarea' },
+      { key: 'invoice.seller_state_code', label: 'GST state code', kind: 'text', helper: 'Two digits — Gujarat is 24' },
+      { key: 'invoice.seller_gstin', label: 'GSTIN', kind: 'text', helper: 'Pending — tax invoices cannot be issued until this is set' },
+    ],
+  },
+  policies: {
+    title: 'Orders & policies',
+    fields: [
+      { key: 'orders.cancel_window_minutes', label: 'Free cancellation window (minutes)', kind: 'int', helper: 'Customers can cancel for free until the order goes to print' },
+      { key: 'exchange.window_days', label: 'Exchange window (days after delivery)', kind: 'int' },
+      { key: 'gift_card.validity_months', label: 'Gift card validity (months)', kind: 'int' },
+      { key: 'inventory.low_stock_threshold', label: 'Low-stock alert level (units)', kind: 'int', helper: 'A product’s own threshold overrides this' },
+    ],
+  },
+  notifications: {
+    title: 'Notifications',
+    fields: [{ key: 'notifications.order_email', label: 'Order alerts email', kind: 'email', helper: 'Receives new-order and fulfilment exception alerts' }],
+  },
+};
 
-  const [tagline, setTagline] = useState(settings.brandTagline);
-  const [brandColor, setBrandColor] = useState(settings.brandColor);
+const paiseToRupees = (p: number) => `${Math.floor(p / 100)}.${String(p % 100).padStart(2, '0')}`;
 
-  const [qikinkEnv, setQikinkEnv] = useState(settings.qikinkEnvironment);
-  const [freeShippingThreshold, setFreeShippingThreshold] = useState(String(settings.freeShippingThreshold));
-  const [standardShippingFee, setStandardShippingFee] = useState(String(settings.standardShippingFee));
-  const [taxIncluded, setTaxIncluded] = useState(settings.taxIncluded);
-  const [notifyEmail, setNotifyEmail] = useState(settings.orderNotificationEmail);
+type Draft = Record<string, string | boolean>;
+function toDraft(fields: Field[], values: SettingsValues): Draft {
+  const draft: Draft = {};
+  for (const f of fields) {
+    const v = values[f.key] as unknown;
+    draft[f.key] = f.kind === 'bool' ? Boolean(v) : f.kind === 'money' ? paiseToRupees(v as number) : v == null ? '' : String(v);
+  }
+  return draft;
+}
 
-  const [isDirty, setIsDirty] = useState(false);
-  const [savedSuccess, setSavedSuccess] = useState(false);
+const PROVIDER_NOTES: Record<string, string> = {
+  mock: 'Demo gateway — no money is collected.',
+  qikink: 'Simulator — orders are not sent to Qikink until the integrations phase.',
+  custom_atelier: 'In-house atelier — staff update each order by hand.',
+  mock_email: 'Demo sender — emails are logged, not delivered.',
+};
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!canPerformAction('settings')) return;
+interface Notice { tone: 'ok' | 'warn' | 'error'; text: string }
 
-    updateSettings({
-      storeName,
-      legalEntity,
-      supportEmail,
-      defaultCurrency: currency,
-      timezone,
-      brandTagline: tagline,
-      brandColor,
-      qikinkEnvironment: qikinkEnv,
-      freeShippingThreshold: parseFloat(freeShippingThreshold) || 3000,
-      standardShippingFee: parseFloat(standardShippingFee) || 150,
-      taxIncluded,
-      orderNotificationEmail: notifyEmail,
-    });
+export default function SettingsView({ tab, values, providers: initialProviders }: { tab: SettingsTab; values: SettingsValues; providers: Provider[] }) {
+  const { resetDemoData } = useAdminState();
+  const section = FIELDS[tab];
+  const fields = useMemo(() => section?.fields ?? [], [section]);
+  const [saved, setSaved] = useState(values);
+  const initial = useMemo(() => toDraft(fields, saved), [fields, saved]);
+  const [draft, setDraft] = useState<Draft>(initial);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [notice, setNotice] = useState<Notice | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [providers, setProviders] = useState(initialProviders);
+  const [providerBusy, setProviderBusy] = useState<string | null>(null);
+  const [providerError, setProviderError] = useState<{ slug: string; text: string } | null>(null);
 
-    setIsDirty(false);
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 3000);
+  const isDirty = fields.some((f) => draft[f.key] !== initial[f.key]);
+
+  // Unsaved input survives nothing outside this page — warn before leaving.
+  useEffect(() => {
+    if (!isDirty) return;
+    const warn = (e: BeforeUnloadEvent) => e.preventDefault();
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [isDirty]);
+
+  const set = (key: string, value: string | boolean) => {
+    setDraft((d) => ({ ...d, [key]: value }));
+    setFieldErrors((e) => (e[key] ? { ...e, [key]: '' } : e));
   };
 
-  const markDirty = () => {
-    if (!isDirty) setIsDirty(true);
+  const handleSave = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (saving || !section) return;
+    setSaving(true);
+    const result = await saveSettingsAction({ group: tab as Exclude<SettingsTab, 'payments' | 'fulfillment'>, values: draft });
+    setSaving(false);
+    if (!result.ok) {
+      // Values stay as typed; each field shows its own problem.
+      setFieldErrors(Object.fromEntries(result.error.details.filter((d) => d.field).map((d) => [d.field!, d.message])));
+      setNotice({ tone: 'error', text: result.error.message });
+      return;
+    }
+    const next = { ...saved, ...result.data.values } as SettingsValues;
+    setSaved(next);
+    setDraft(toDraft(fields, next));
+    setFieldErrors({});
+    const { changed, storefront } = result.data;
+    setNotice(
+      changed.length === 0 ? { tone: 'ok', text: 'Nothing changed — the values were already saved.' }
+        : storefront === null ? { tone: 'ok', text: 'Saved.' }
+        : storefront.ok ? { tone: 'ok', text: 'Saved — the storefront now shows the new values.' }
+        : { tone: 'warn', text: `Saved. ${storefront.reason} Shoppers will see the change within the hour.` },
+    );
   };
+
+  const toggleProvider = async (p: Provider, patch: { isActive?: boolean; environment?: 'sandbox' | 'live' }) => {
+    if (providerBusy) return;
+    setProviderBusy(p.slug);
+    setProviderError(null);
+    const result = await updateProviderAction({ slug: p.slug, ...patch });
+    setProviderBusy(null);
+    if (!result.ok) return setProviderError({ slug: p.slug, text: result.error.message });
+    setProviders((list) => list.map((x) => result.data.find((u) => u.slug === x.slug) ?? x));
+  };
+
+  const confirmLeave = (e: React.MouseEvent) => {
+    if (isDirty && !window.confirm('Discard unsaved changes on this tab?')) e.preventDefault();
+  };
+
+  const renderField = (f: Field) => {
+    const common = { label: f.label, helperText: f.helper, error: fieldErrors[f.key] || undefined };
+    const value = draft[f.key];
+    switch (f.kind) {
+      case 'fixed':
+        return (
+          <div key={f.key}>
+            <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>{f.label}</span>
+            <div style={{ display: 'flex', alignItems: 'center', height: 40, padding: '0 10px', borderRadius: 8, border: '1px solid var(--tuw-border-subtle, #E2E4E6)', backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)', fontSize: 13 }}>{f.fixedText}</div>
+            {f.helper && <p style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', margin: '6px 0 0' }}>{f.helper}</p>}
+          </div>
+        );
+      case 'bool':
+        return (
+          <div key={f.key} style={{ gridColumn: '1 / -1' }}>
+            <Switch checked={Boolean(value)} onChange={(v) => set(f.key, v)} label={f.label} description={f.helper} />
+          </div>
+        );
+      case 'select': {
+        const opts = (f.options ?? []).includes(String(value)) ? f.options! : [String(value), ...(f.options ?? [])];
+        return <Select key={f.key} {...common} value={String(value)} onChange={(e) => set(f.key, e.target.value)} options={opts.map((o) => ({ label: o, value: o }))} />;
+      }
+      case 'textarea':
+        return <div key={f.key} style={{ gridColumn: '1 / -1' }}><Textarea {...common} rows={3} value={String(value)} onChange={(e) => set(f.key, e.target.value)} /></div>;
+      case 'color':
+        return (
+          <div key={f.key}>
+            <Input {...common} value={String(value)} onChange={(e) => set(f.key, e.target.value)} />
+            <input type="color" aria-label={`${f.label} picker`} value={/^#[0-9a-fA-F]{6}$/.test(String(value)) ? String(value) : '#000000'} onChange={(e) => set(f.key, e.target.value.toUpperCase())} style={{ marginTop: 8, width: 44, height: 32, border: 'none', cursor: 'pointer', borderRadius: 6 }} />
+          </div>
+        );
+      default:
+        return (
+          <Input key={f.key} {...common}
+            type={f.kind === 'email' ? 'email' : 'text'}
+            inputMode={f.kind === 'money' ? 'decimal' : f.kind === 'int' ? 'numeric' : undefined}
+            value={String(value)} onChange={(e) => set(f.key, e.target.value)} />
+        );
+    }
+  };
+
+  const providerRow = (p: Provider) => (
+    <div key={p.slug} style={{ padding: 16, border: '1px solid var(--tuw-border-subtle, #E2E4E6)', borderRadius: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+      <div style={{ minWidth: 220, flex: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>{p.name}</span>
+          <Badge variant={p.isActive ? 'success' : 'neutral'}>{p.isActive ? 'On' : 'Off'}</Badge>
+          <Badge variant="info">{p.environment === 'live' ? 'Live' : 'Sandbox'}</Badge>
+        </div>
+        <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: '4px 0 0' }}>
+          {PROVIDER_NOTES[p.slug] ?? (p.hasAdapter ? '' : 'Adapter arrives in the integrations phase.')}
+        </p>
+        {providerError?.slug === p.slug && <p role="alert" style={{ fontSize: 13, color: 'var(--tuw-text-error, #C91818)', margin: '6px 0 0' }}>{providerError.text}</p>}
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <Select aria-label={`${p.name} environment`} value={p.environment} disabled={!p.liveReady || providerBusy !== null}
+          onChange={(e) => void toggleProvider(p, { environment: e.target.value as 'sandbox' | 'live' })}
+          options={[{ label: 'Sandbox', value: 'sandbox' }, { label: 'Live', value: 'live' }]} />
+        <Switch checked={p.isActive} disabled={!p.hasAdapter || providerBusy !== null} ariaLabel={`Switch ${p.name} ${p.isActive ? 'off' : 'on'}`}
+          onChange={(v) => void toggleProvider(p, { isActive: v })} />
+      </div>
+    </div>
+  );
+
+  const providerGroups = tab === 'payments' ? [['payment', 'Payment gateways']] : tab === 'fulfillment' ? [['fulfillment', 'Print partners'], ['shipping', 'Couriers']] : [];
 
   return (
     <DashboardShell pageTitle="Settings" activeNav="settings">
       <PageHeader
-        title="Store Settings & Governance"
-        actions={
-          <Button
-            variant="primary"
-            size="md"
-            icon={savedSuccess ? <Check size={16} /> : <Save size={16} />}
-            onClick={handleSave}
-          >
-            <span>{savedSuccess ? 'Saved to Memory' : 'Save Changes'}</span>
+        title="Store Settings"
+        actions={section ? (
+          <Button variant="primary" size="md" icon={notice?.tone === 'ok' && !isDirty ? <Check size={16} /> : <Save size={16} />} onClick={() => void handleSave()} disabled={saving}>
+            <span>{saving ? 'Saving…' : 'Save Changes'}</span>
           </Button>
-        }
+        ) : undefined}
       />
 
-      {/* Unsaved changes warning bar */}
       {isDirty && (
-        <div
-          style={{
-            padding: '12px 16px',
-            backgroundColor: 'var(--tuw-bg-warning, #FEFBF5)',
-            border: '1px solid rgba(133, 99, 0, 0.25)',
-            borderRadius: 'var(--tuw-radius-control, 8px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            fontSize: '13px',
-            color: 'var(--tuw-text-warning, #856300)',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <AlertCircle size={16} />
-            <span>You have unsaved changes. Navigating away will discard these local modifications.</span>
-          </div>
-          <Button variant="primary" size="sm" onClick={handleSave}>
-            Save Now
-          </Button>
+        <div role="status" style={{ padding: '12px 16px', backgroundColor: 'var(--tuw-bg-warning, #FEFBF5)', border: '1px solid rgba(133, 99, 0, 0.25)', borderRadius: 'var(--tuw-radius-control, 8px)', display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--tuw-text-warning, #856300)' }}>
+          <AlertCircle size={16} />
+          <span>You have unsaved changes on this tab.</span>
         </div>
       )}
 
-      {/* Settings Navigation Tabs */}
-      <div style={{ display: 'flex', gap: 8, borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', overflowX: 'auto', paddingBottom: 4 }}>
-        {[
-          { id: 'general', label: 'General', icon: <Store size={15} /> },
-          { id: 'brand', label: 'Brand & Visuals', icon: <Palette size={15} /> },
-          { id: 'payments', label: 'Payments', icon: <CreditCard size={15} /> },
-          { id: 'fulfillment', label: 'Fulfillment & APIs', icon: <Truck size={15} /> },
-          { id: 'shipping', label: 'Shipping Rules', icon: <Truck size={15} /> },
-          { id: 'taxes', label: 'Taxes', icon: <Receipt size={15} /> },
-          { id: 'notifications', label: 'Notifications', icon: <Bell size={15} /> },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => setActiveTab(tab.id as SettingsTab)}
-            style={{
-              padding: '8px 16px',
-              borderRadius: '8px 8px 0 0',
-              border: 'none',
-              background: activeTab === tab.id ? 'var(--tuw-bg-surface, #FFFFFF)' : 'transparent',
-              color: activeTab === tab.id ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-text-secondary, #5D6772)',
-              fontWeight: activeTab === tab.id ? 600 : 500,
-              fontSize: '13px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              borderBottom: activeTab === tab.id ? '2px solid var(--tuw-action-primary, #7539FF)' : '2px solid transparent',
-            }}
-          >
-            {tab.icon}
-            <span>{tab.label}</span>
-          </button>
+      {/* Errors stay visible while the typed values are being fixed; success notes clear on the next edit. */}
+      {notice && (notice.tone !== 'ok' || !isDirty) && (
+        <div role={notice.tone === 'error' ? 'alert' : 'status'} style={{ padding: '12px 16px', borderRadius: 8, fontSize: 13, background: notice.tone === 'error' ? 'var(--tuw-bg-error, #FEF4F4)' : notice.tone === 'warn' ? 'var(--tuw-bg-warning, #FEFBF5)' : 'var(--tuw-bg-success, #F3FAF6)', color: notice.tone === 'error' ? 'var(--tuw-text-error, #C91818)' : notice.tone === 'warn' ? 'var(--tuw-text-warning, #856300)' : 'var(--tuw-text-success, #187343)' }}>
+          {notice.text}
+        </div>
+      )}
+
+      <nav aria-label="Settings sections" style={{ display: 'flex', gap: 8, borderBottom: '1px solid var(--tuw-border-subtle, #E2E4E6)', overflowX: 'auto', paddingBottom: 4 }}>
+        {SETTINGS_TABS.map((t) => (
+          <Link key={t.id} href={`/settings/${t.id}`} onClick={confirmLeave} aria-current={t.id === tab ? 'page' : undefined}
+            style={{ padding: '8px 16px', borderRadius: '8px 8px 0 0', whiteSpace: 'nowrap', textDecoration: 'none', fontSize: 13,
+              background: t.id === tab ? 'var(--tuw-bg-surface, #FFFFFF)' : 'transparent',
+              color: t.id === tab ? 'var(--tuw-action-primary, #7539FF)' : 'var(--tuw-text-secondary, #5D6772)',
+              fontWeight: t.id === tab ? 600 : 500,
+              borderBottom: t.id === tab ? '2px solid var(--tuw-action-primary, #7539FF)' : '2px solid transparent' }}>
+            {t.label}
+          </Link>
         ))}
-      </div>
+      </nav>
 
-      {/* Tab Panels */}
-      <div style={{ marginTop: 16 }}>
-        {/* 1. GENERAL TAB */}
-        {activeTab === 'general' && (
+      <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {section && (
           <ContentCard>
-            <h3 style={{ fontSize: 16, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginBottom: 16 }}>
-              General Storefront Information
-            </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-              <Input
-                label="Store Display Name"
-                value={storeName}
-                onChange={(e) => { setStoreName(e.target.value); markDirty(); }}
-                helperText="Brand title presented in headers and notification footers"
-              />
-              <Input
-                label="Legal Operating Entity"
-                value={legalEntity}
-                onChange={(e) => { setLegalEntity(e.target.value); markDirty(); }}
-                helperText="Entity referenced in invoices, customs, and merchant agreements"
-              />
-              <Input
-                label="Customer Support Email"
-                value={supportEmail}
-                onChange={(e) => { setSupportEmail(e.target.value); markDirty(); }}
-                helperText="Recipient for inbound ticket routing"
-              />
-              <div>
-                <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
-                  Default Store Currency
-                </label>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    height: 40,
-                    padding: '0 10px',
-                    borderRadius: 8,
-                    border: '1px solid var(--tuw-border-subtle, #E2E4E6)',
-                    backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)',
-                    fontSize: 13,
-                    color: 'var(--tuw-text-primary, #262626)',
-                  }}
-                >
-                  INR (₹) — Indian Rupee
-                </div>
-                <p style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', margin: '6px 0 0' }}>
-                  Single-currency store — pricing is stored and displayed in INR.
-                </p>
+            <form onSubmit={handleSave} noValidate>
+              <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', margin: '0 0 4px' }}>{section.title}</h2>
+              {section.intro && <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: '0 0 16px' }}>{section.intro}</p>}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, marginTop: section.intro ? 0 : 12 }}>
+                {fields.map(renderField)}
               </div>
-            </div>
+              <button type="submit" hidden aria-hidden tabIndex={-1} />
+            </form>
 
-            {/* Canonical entry to the Attribute Library (row grammar mirrors
-                the Demo Sandbox row below). */}
-            <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid var(--tuw-border-subtle, #E2E4E6)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-              <div>
-                <h4 style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', margin: 0 }}>
-                  Attribute Library
-                </h4>
-                <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: '4px 0 0' }}>
-                  Define colors, sizes, fabrics, and other product attributes once — link them into any product.
-                </p>
-              </div>
-              <LinkButton href="/settings/attributes" variant="secondary" size="sm" icon={<Library size={14} />}>
-                Open Attribute Library
-              </LinkButton>
-            </div>
-
-            <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid var(--tuw-border-subtle, #E2E4E6)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-              <div>
-                <h4 style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', margin: 0 }}>
-                  Demo Sandbox Environment
-                </h4>
-                <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: '4px 0 0' }}>
-                  Reset all operational mutations, mock orders, and staff changes back to default baseline fixtures.
-                </p>
-              </div>
-              <Button
-                variant="secondary"
-                size="sm"
-                icon={<RefreshCw size={14} />}
-                onClick={() => {
-                  if (window.confirm('Reset all demo data back to baseline fixtures?')) {
-                    resetDemoData();
-                  }
-                }}
-              >
-                Reset Demo State
-              </Button>
-            </div>
-          </ContentCard>
-        )}
-
-        {/* 2. BRAND TAB */}
-        {activeTab === 'brand' && (
-          <ContentCard>
-            <h3 style={{ fontSize: 16, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginBottom: 16 }}>
-              Brand & Design System Parameters
-            </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-              <Input
-                label="Brand Tagline"
-                value={tagline}
-                onChange={(e) => { setTagline(e.target.value); markDirty(); }}
-              />
-              <div>
-                <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', display: 'block', marginBottom: 6 }}>
-                  Primary Accent Token
-                </label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <input
-                    type="color"
-                    value={brandColor}
-                    onChange={(e) => { setBrandColor(e.target.value); markDirty(); }}
-                    style={{ width: 44, height: 40, border: 'none', cursor: 'pointer', borderRadius: 6 }}
-                  />
-                  <span style={{ fontSize: 14, fontFamily: 'monospace' }}>{brandColor}</span>
-                  <Badge variant="info">Figma Node 1:26969</Badge>
-                </div>
-              </div>
-            </div>
-          </ContentCard>
-        )}
-
-        {/* 3. PAYMENTS TAB */}
-        {activeTab === 'payments' && (
-          <ContentCard>
-            <h3 style={{ fontSize: 16, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginBottom: 16 }}>
-              Merchant Gateways (Simulated Connection Previews)
-            </h3>
-            <div style={{ padding: 14, backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)', borderRadius: 8, fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', marginBottom: 16 }}>
-              <ShieldCheck size={16} color="var(--tuw-action-primary, #7539FF)" style={{ display: 'inline', marginRight: 6 }} />
-              Credentials and live secret keys are kept strictly out of frontend demonstration environments.
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{ padding: 16, border: '1px solid var(--tuw-border-subtle, #E2E4E6)', borderRadius: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>Stripe Connect API</div>
-                  <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', marginTop: 2 }}>
-                    Connection Status: <strong style={{ color: 'var(--tuw-text-success, #187343)' }}>Connected (Mock Mode)</strong> · Webhook endpoint active
+            {tab === 'general' && (
+              <>
+                <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid var(--tuw-border-subtle, #E2E4E6)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+                  <div>
+                    <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', margin: 0 }}>Attribute Library</h3>
+                    <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: '4px 0 0' }}>Define colors, sizes, fabrics, and other product attributes once — link them into any product.</p>
                   </div>
+                  <LinkButton href="/settings/attributes" variant="secondary" size="sm" icon={<Library size={14} />}>Open Attribute Library</LinkButton>
                 </div>
-                <Badge variant="success">Active</Badge>
-              </div>
-
-              <div style={{ padding: 16, border: '1px solid var(--tuw-border-subtle, #E2E4E6)', borderRadius: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>Apple Pay & Google Pay Express</div>
-                  <div style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', marginTop: 2 }}>
-                    Domain token verification passed for storefront checkout
+                <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid var(--tuw-border-subtle, #E2E4E6)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+                  <div>
+                    <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', margin: 0 }}>Demo screens</h3>
+                    <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', margin: '4px 0 0' }}>Reset the screens that still run on demo data (orders, products, content…) to their baseline. Settings, customers and team are real and are not affected.</p>
                   </div>
+                  <Button variant="secondary" size="sm" icon={<RefreshCw size={14} />} onClick={() => { if (window.confirm('Reset the demo screens back to baseline fixtures?')) resetDemoData(); }}>
+                    Reset Demo State
+                  </Button>
                 </div>
-                <Badge variant="success">Verified</Badge>
-              </div>
-            </div>
+              </>
+            )}
           </ContentCard>
         )}
 
-        {/* 4. FULFILLMENT TAB */}
-        {activeTab === 'fulfillment' && (
-          <ContentCard>
-            <h3 style={{ fontSize: 16, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginBottom: 16 }}>
-              On-Demand Print Partner Integrations
-            </h3>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-              <div style={{ padding: 16, border: '1px solid var(--tuw-border-subtle, #E2E4E6)', borderRadius: 10 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                  <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>Qikink Direct API</span>
-                  <Badge variant="info">{qikinkEnv.toUpperCase()}</Badge>
-                </div>
-                <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                  Automated routing for heavy tees and embroidered hoodies.
-                </p>
-                <div style={{ marginTop: 12 }}>
-                  <label style={{ fontSize: 12, fontWeight: 500, color: 'var(--tuw-text-secondary, #5D6772)', display: 'block', marginBottom: 4 }}>
-                    Environment Mode
-                  </label>
-                  <select
-                    value={qikinkEnv}
-                    onChange={(e) => { setQikinkEnv(e.target.value as 'sandbox' | 'production'); markDirty(); }}
-                    style={{ width: '100%', height: 36, borderRadius: 6, border: '1px solid var(--tuw-border-control, #90979F)', padding: '0 8px', fontSize: 13 }}
-                  >
-                    <option value="sandbox">Sandbox (Simulated floor tests)</option>
-                    <option value="production">Production Floor Queue</option>
-                  </select>
-                </div>
-              </div>
-
-              <div style={{ padding: 16, border: '1px solid var(--tuw-border-subtle, #E2E4E6)', borderRadius: 10 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                  <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>Printrove Hub</span>
-                  <Badge variant="success">Connected</Badge>
-                </div>
-                <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                  Secondary overflow printer for accessories and caps.
-                </p>
-              </div>
+        {providerGroups.map(([category, title]) => (
+          <ContentCard key={category}>
+            <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', margin: '0 0 12px' }}>{title}</h2>
+            <div style={{ padding: 14, backgroundColor: 'var(--tuw-bg-canvas, #F7F8F9)', borderRadius: 8, fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)', marginBottom: 16, display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+              <ShieldCheck size={16} color="var(--tuw-action-primary, #7539FF)" style={{ flexShrink: 0, marginTop: 1 }} />
+              <span>API keys live in the server environment only — never in the database or this screen. Live mode unlocks once a provider’s real adapter and keys are installed (integrations phase).</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {providers.filter((p) => p.category === category).map(providerRow)}
+              {providers.every((p) => p.category !== category) && <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>No providers registered.</p>}
             </div>
           </ContentCard>
-        )}
-
-        {/* 5. SHIPPING TAB */}
-        {activeTab === 'shipping' && (
-          <ContentCard>
-            <h3 style={{ fontSize: 16, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginBottom: 16 }}>
-              Shipping Rules & Thresholds
-            </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-              <Input
-                label="Free Shipping Minimum Threshold (₹)"
-                type="number"
-                value={freeShippingThreshold}
-                onChange={(e) => { setFreeShippingThreshold(e.target.value); markDirty(); }}
-                helperText="Orders with subtotal exceeding this amount receive zero shipping fees"
-              />
-              <Input
-                label="Standard Flat Rate Shipping Fee (₹)"
-                type="number"
-                value={standardShippingFee}
-                onChange={(e) => { setStandardShippingFee(e.target.value); markDirty(); }}
-                helperText="Applied to domestic and global standard deliveries"
-              />
-            </div>
-          </ContentCard>
-        )}
-
-        {/* 6. TAXES TAB */}
-        {activeTab === 'taxes' && (
-          <ContentCard>
-            <h3 style={{ fontSize: 16, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', marginBottom: 16 }}>
-              Tax Calculation Policy
-            </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: 14 }}>
-                <input
-                  type="checkbox"
-                  checked={taxIncluded}
-                  onChange={(e) => { setTaxIncluded(e.target.checked); markDirty(); }}
-                  style={{ width: 18, height: 18 }}
-                />
-                <span>Prices shown on storefront include VAT / Sales Tax (European & UK model)</span>
-              </label>
-              <p style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
-                Demonstration setting only. Real tax rates depend on nexus calculation and merchant location.
-              </p>
-            </div>
-          </ContentCard>
-        )}
-
-        {/* 7. NOTIFICATIONS TAB */}
-        {activeTab === 'notifications' && (
-          <ContentCard>
-            <h3 style={{ fontSize: 16, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-              Operational Alerts & Webhooks
-            </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, marginTop: 16 }}>
-              <Input
-                label="Daily Digest Dispatch Email"
-                value={notifyEmail}
-                onChange={(e) => { setNotifyEmail(e.target.value); markDirty(); }}
-                helperText="Receives automated fulfillment exception summaries"
-              />
-            </div>
-          </ContentCard>
-        )}
+        ))}
       </div>
     </DashboardShell>
   );

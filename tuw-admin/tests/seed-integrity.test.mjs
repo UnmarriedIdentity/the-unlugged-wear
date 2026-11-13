@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 // ---------------------------------------------------------------
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const SEED_FILE = join(HERE, '..', 'src', 'server', 'db', 'seed', '001-seed-core.sql');
+const SEED_FILE = join(HERE, '..', '..', 'db', 'seed', '001-seed-core.sql');
 
 const raw = readFileSync(SEED_FILE, 'utf8');
 const sql = raw.replace(/--.*$/gm, '');
@@ -42,7 +42,7 @@ describe('seed integrity', () => {
   test('the seed file exists and only inserts', () => {
     assert.equal(existsSync(SEED_FILE), true, 'seed file is missing');
     assert.equal(/^\s*(UPDATE|DELETE|DROP|TRUNCATE|ALTER)\b/im.test(sql), false);
-    assert.equal(inserts.length, 13);
+    assert.equal(inserts.length, 14);
   });
 
   test('every statement is idempotent', () => {
@@ -82,17 +82,36 @@ describe('seed integrity', () => {
     assert.equal(rowCount(insertFor('navigation_settings')), 1);
 
     const storeSettings = insertFor('store_settings');
-    assert.equal((storeSettings.match(/^\s*\('/gm) ?? []).length, 14);
+    // 21 keys = the settings registry (packages/heart/src/modules/settings/keys.ts).
+    assert.equal((storeSettings.match(/^\s*\('/gm) ?? []).length, 21);
     for (const key of [
       'store.name',
       'brand.color',
       'shipping.free_threshold',
-      'fulfillment.partner',
-      'payments.stripe_live_mode',
+      'shipping.express_fee',
+      'exchange.window_days',
+      'orders.cancel_window_minutes',
+      'inventory.low_stock_threshold',
+      'invoice.seller_gstin',
     ]) {
       assert.match(storeSettings, new RegExp(`'${key.replace(/\./g, '\\.')}'`), `${key} missing`);
     }
+    // Provider state lives in integration_providers (017-settings-registry).
+    for (const retired of ['fulfillment.partner', 'fulfillment.environment', 'payments.stripe_live_mode']) {
+      assert.equal(storeSettings.includes(`'${retired}'`), false, `${retired} must not come back`);
+    }
+    // Money is a rupee string, never a JSON number.
+    assert.match(storeSettings, /'shipping\.standard_fee',\s*to_jsonb\('150\.00'::text\)/);
     assert.equal(/api_key|secret|password|token/i.test(storeSettings), false, 'a secret key reached store_settings');
+  });
+
+  test('integration providers are registry rows with no secrets', () => {
+    const providers = insertFor('integration_providers');
+    assert.equal(rowCount(providers), 8);
+    for (const slug of ['mock', 'razorpay', 'qikink']) {
+      assert.match(providers, new RegExp(`'${slug}'`));
+    }
+    assert.equal(/secret|api_key|password|token/i.test(providers), false);
   });
 
   test('coupons carry no fabricated redemption counts or expiry windows', () => {
@@ -122,6 +141,6 @@ describe('seed integrity', () => {
         `the seed must not write ${table}`,
       );
     }
-    assert.equal(/argon2|\$argon2id\$/i.test(sql), false, 'no password hashes in the seed');
+    assert.equal(/argon2|\$argon2id\$|\$2[aby]\$\d{2}\$/i.test(sql), false, 'no password hashes in the seed');
   });
 });

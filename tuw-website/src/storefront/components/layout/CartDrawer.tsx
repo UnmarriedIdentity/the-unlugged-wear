@@ -152,8 +152,10 @@ export default function CartDrawer() {
                       <button
                         type="button"
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        disabled={item.maxQty !== undefined && item.quantity >= item.maxQty}
+                        title={item.maxQty !== undefined && item.quantity >= item.maxQty ? 'No more available' : undefined}
                         aria-label="Increase quantity"
-                        className="p-1.5 text-[#5A5A5A] hover:text-[#1A1A1A] transition-colors"
+                        className="p-1.5 text-[#5A5A5A] hover:text-[#1A1A1A] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                         <Plus size={13} />
                       </button>

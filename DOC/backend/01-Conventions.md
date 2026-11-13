@@ -19,10 +19,12 @@
 
 ## 2. Money, enums, statuses
 
-- **Money is `DECIMAL(12,2)` + `CHECK (col >= 0)`.** No floats, no
-  minor-unit integers in the schema (the admin UI's paise convention stays
-  a *presentation* concern until the currency decision in `00-README.md`
-  §7 resolves). Percent fields add `CHECK (value <= 100)`.
+- **Money is `DECIMAL(12,2)` rupees + `CHECK (col >= 0)`** (decided
+  2026-11-10). No floats and no minor-unit integer columns in the schema.
+  Application code may still do arithmetic in integer paise (both UIs
+  already do); the API layer converts at the boundary
+  (`paise = round(rupees × 100)`), so the database is always rupees.
+  Percent fields add `CHECK (value <= 100)`.
 - **Enums are `varchar` + `CHECK (col IN (...))`.** Adding a value alters a
   constraint — never a native ENUM type migration.
 - **Workflow status is a `status` varchar + CHECK** (`draft/active/archived`,
@@ -60,7 +62,7 @@
 - Errors follow the envelope in `13-API-Contracts.md`
   (`code/message/details/requestId`) — no bare 500s, no stack leaks.
 
-## 5. Migration rules (structure lives in code at `server/db/migrate/`)
+## 5. Migration rules (structure lives in code at `db/migrate/`)
 
 - **Numbered, single history:** `NNN-domain.sql` (`001-auth.sql`,
   `002-catalog.sql`…), strictly forward-only. No down migrations in v1 —

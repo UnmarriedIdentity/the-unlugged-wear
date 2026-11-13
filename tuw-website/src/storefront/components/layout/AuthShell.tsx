@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { AlertCircle, ArrowLeft, Eye, EyeOff, Info } from 'lucide-react';
 import TuwEmblem from './TuwEmblem';
+import { CopyrightYear } from './CopyrightYear';
 
 // Shared split layout for the sign-in and sign-up pages: brand photo on the
 // left (desktop only), form on the right, with an always-visible demo notice.
@@ -18,7 +19,8 @@ export interface AuthShellProps {
   caption: string;
   title: string;
   intro: string;
-  demoNotice: string;
+  /** Truthful notice for features still on demo adapters (e.g. email not sent). */
+  demoNotice?: string;
   children: React.ReactNode;
 }
 
@@ -92,19 +94,21 @@ export default function AuthShell({
           </div>
 
           {/* Truthful demo feedback (project rule): shown before any input */}
-          <div
-            role="note"
-            className="flex items-start gap-2.5 rounded-xl border border-store-gold/40 bg-store-cream px-3.5 py-3 text-sm text-store-text-primary"
-          >
-            <Info size={16} aria-hidden="true" className="mt-0.5 shrink-0 text-store-gold" />
-            <p>{demoNotice}</p>
-          </div>
+          {demoNotice && (
+            <div
+              role="note"
+              className="flex items-start gap-2.5 rounded-xl border border-store-gold/40 bg-store-cream px-3.5 py-3 text-sm text-store-text-primary"
+            >
+              <Info size={16} aria-hidden="true" className="mt-0.5 shrink-0 text-store-gold" />
+              <p>{demoNotice}</p>
+            </div>
+          )}
 
           {children}
         </div>
 
         <div className="w-full pt-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-store-text-secondary border-t border-store-border/40">
-          <span>The Unplugged Wear © {new Date().getFullYear()}</span>
+          <span>The Unplugged Wear © <CopyrightYear /></span>
           <nav aria-label="Legal" className="flex items-center gap-4">
             <Link href="/policies/privacy" className="inline-flex items-center min-h-6 hover:underline">Privacy</Link>
             <Link href="/policies/terms" className="inline-flex items-center min-h-6 hover:underline">Terms</Link>

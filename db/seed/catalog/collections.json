@@ -1,0 +1,47 @@
+[
+ {
+  "id": "col-1",
+  "slug": "hoodies-and-sweats",
+  "title": "Hoodies & Sweats",
+  "tagline": "Pullovers, sweatshirts and the Acid Wash hoodie",
+  "description": "Our hoodies and sweatshirts, each printed with the leaping deer after you order.",
+  "coverImage": "/images/lifestyle/linen-man.jpg",
+  "categories": [
+   "hoodies"
+  ]
+ },
+ {
+  "id": "col-2",
+  "slug": "everyday-tees",
+  "title": "Everyday Tees",
+  "tagline": "Oversized, raglan, polo and crop",
+  "description": "Everyday t-shirts and tops in a range of colours, printed to order.",
+  "coverImage": "/images/pdp-figma/shirt/front.png",
+  "categories": [
+   "tees"
+  ]
+ },
+ {
+  "id": "col-3",
+  "slug": "objects",
+  "title": "Objects",
+  "tagline": "Mugs, bags, phone cases, wall art and more",
+  "description": "Everyday objects printed with the leaping deer.",
+  "coverImage": "/images/pdp-figma/mug/on-desk.png",
+  "categories": [
+   "accessories",
+   "mugs"
+  ]
+ },
+ {
+  "id": "col-4",
+  "slug": "acid-wash",
+  "title": "Acid Wash",
+  "tagline": "Washed hoodies and tees with a worn-in look",
+  "description": "Our acid wash pieces, printed to order.",
+  "coverImage": "/images/lifestyle/linen-man.jpg",
+  "titleIncludes": [
+   "acid wash"
+  ]
+ }
+]

@@ -6,7 +6,7 @@ import Badge from '@storefront/components/ui/Badge';
 import { useStore } from '@storefront/mocks/store';
 import { formatINR } from '@storefront/lib/format';
 import { cn } from '@storefront/lib/cn';
-import { STORE_PRODUCTS } from '@storefront/mocks/fixtures';
+import type { Product } from '@storefront/lib/types';
 
 export type FittingAudience = 'men' | 'women' | 'kids';
 
@@ -29,44 +29,59 @@ const AUDIENCE_LABELS: Record<FittingAudience, string> = {
   kids: 'Kids',
 };
 
-// Looks come straight from the catalog: each audience shows the pieces whose
-// placeholder model photo matches it (men: /images/lifestyle, women:
-// /images/about), so the name, price and picture on a card stay together.
-const MODEL_FOLDER: Record<FittingAudience, string> = {
-  men: '/images/lifestyle/',
-  women: '/images/about/',
-  kids: '/images/kids/',
+// One photo per look so every card shows something different on the model.
+// These are sample lifestyle photos until each garment is photographed.
+const LOOK_PHOTOS: Record<FittingAudience, string[]> = {
+  men: [
+    '/images/lifestyle/linen-man.jpg',
+    '/images/samples/men-linen-blazer.jpg',
+    '/images/samples/men-navy-blazer.jpg',
+    '/images/samples/men-linen-shirt.jpg',
+    '/images/about/story-man-suit.jpg',
+  ],
+  women: [
+    '/images/about/street-polo.jpg',
+    '/images/samples/women-suede-jacket.jpg',
+    '/images/samples/women-brown-top.jpg',
+    '/images/samples/women-white-cardigan.jpg',
+    '/images/samples/women-pleated-skirt.jpg',
+    '/images/about/cream-polo.jpg',
+  ],
+  kids: [],
 };
 
-function buildFittingSet(audience: FittingAudience): FittingSet {
-  const looks: FittingLook[] = STORE_PRODUCTS.filter((p) => {
-    const url = p.images[0]?.url || '';
-    return url.startsWith(MODEL_FOLDER[audience]) && Boolean(p.audience?.includes(audience));
-  })
-    .slice(0, 4)
-    .map((p) => ({
+// Clothing for this audience, hand-written catalogue pieces first.
+function buildFittingSet(audience: FittingAudience, products: Product[]): FittingSet {
+  const photos = LOOK_PHOTOS[audience];
+  const looks: FittingLook[] = products.filter(
+    (p) => Boolean(p.audience?.includes(audience)) && p.category !== 'accessories' && p.category !== 'mugs'
+  )
+    .slice(0, photos.length)
+    .map((p, i) => ({
       id: p.id,
       title: p.title,
       cat: p.title.split(' ').slice(-1)[0].toUpperCase(),
       priceINR: p.priceINR,
-      image: encodeURI(p.images[0].url),
+      image: photos[i],
     }));
-  return { base: { ...looks[0], badge: 'Printed to order' }, cards: looks };
+  return { base: { ...(looks[0] ?? { id: '', title: '', cat: '', priceINR: 0, image: '' }), badge: 'Sample photos' }, cards: looks };
 }
 
-const FITTING_SETS: Record<FittingAudience, FittingSet> = {
-  men: buildFittingSet('men'),
-  women: buildFittingSet('women'),
-  kids: buildFittingSet('kids'),
-};
-
-// Only offer tabs that have at least one photographed piece.
-const AUDIENCE_ORDER = (['men', 'women', 'kids'] as FittingAudience[]).filter(
-  (key) => FITTING_SETS[key].cards.length > 0
-);
+// Built from the live catalogue (database) inside the component.
+const fittingSets = (products: Product[]): Record<FittingAudience, FittingSet> => ({
+  men: buildFittingSet('men', products),
+  women: buildFittingSet('women', products),
+  kids: buildFittingSet('kids', products),
+});
 
 export default function VirtualFittingRoom() {
-  const { isInWishlist, toggleWishlist } = useStore();
+  const { isInWishlist, toggleWishlist, products } = useStore();
+  const FITTING_SETS = React.useMemo(() => fittingSets(products), [products]);
+  // Only offer tabs that have at least one photographed piece.
+  const AUDIENCE_ORDER = React.useMemo(
+    () => (['men', 'women', 'kids'] as FittingAudience[]).filter((key) => FITTING_SETS[key].cards.length > 0),
+    [FITTING_SETS]
+  );
   const [audience, setAudience] = useState<FittingAudience>('men');
   const [current, setCurrent] = useState(-1);
   const [liveMsg, setLiveMsg] = useState('Men base look.');
@@ -341,6 +356,26 @@ export default function VirtualFittingRoom() {
     setLiveMsg(`${AUDIENCE_LABELS[key]} base look.`);
   }, []);
 
+  const trackRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track || reducedRef.current) return;
+    const sideways = window.matchMedia('(max-width: 899px)').matches;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter((e) => e.isIntersecting);
+        if (visible.length === 0) return;
+        const index = Number((visible[0].target as HTMLElement).dataset.index);
+        if (!Number.isNaN(index) && index !== currentRef.current) enqueue(index);
+      },
+      sideways
+        ? { root: track, rootMargin: '0px -45% 0px -45%' }
+        : { rootMargin: '-45% 0px -45% 0px' }
+    );
+    track.querySelectorAll<HTMLElement>('[data-index]').forEach((slot) => observer.observe(slot));
+    return () => observer.disconnect();
+  }, [audience, enqueue]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && currentRef.current !== -1) requestWear(-1);
@@ -367,10 +402,6 @@ export default function VirtualFittingRoom() {
       {/* Header with right-aligned audience tabs */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 sm:mb-12">
         <div>
-          <span className="flex items-center gap-3 text-base font-medium uppercase tracking-widest text-store-text-secondary font-sans mb-2">
-            <span aria-hidden="true" className="w-7 h-px bg-store-gold" />
-            Virtual Fitting Room
-          </span>
           <h2 className="font-heading text-[clamp(1.75rem,4vw+0.5rem,3rem)] font-medium tracking-tight text-store-text-primary">
             Choose a piece. Watch it get worn.
           </h2>
@@ -414,12 +445,12 @@ export default function VirtualFittingRoom() {
         onPointerMove={handleRoomMove}
         onPointerLeave={resetRoomTilt}
       >
-        <div className="vfr-track">
+        <div ref={trackRef} className="vfr-track">
           {set.cards.map((look, i) => {
             const isOn = current === i;
             const isFav = isInWishlist(look.id);
             return (
-              <div key={look.id} className="vfr-slot">
+              <div key={look.id} className="vfr-slot" data-index={i}>
                 <button
                   type="button"
                   aria-pressed={isOn}
@@ -434,8 +465,6 @@ export default function VirtualFittingRoom() {
                     <img
                       src={look.image}
                       alt={look.title}
-                      width={941}
-                      height={1672}
                       loading="lazy"
                       draggable={false}
                     />
@@ -445,7 +474,7 @@ export default function VirtualFittingRoom() {
                   <div>
                     <p className="font-sans text-base font-medium text-store-text-primary">{look.title}</p>
                     <p className="text-xs text-store-text-secondary mt-0.5">
-                      {isOn ? 'ON THE MODEL' : `0${i + 1} / ${look.cat} · TAP TO WEAR`}
+                      {isOn ? 'On the model' : 'Tap or scroll to wear'}
                     </p>
                     <p className="font-heading font-medium text-base text-store-text-primary tuw-tabular-nums mt-1">
                       {formatINR(look.priceINR * 100)}
@@ -461,7 +490,7 @@ export default function VirtualFittingRoom() {
                     <Heart
                       size={14}
                       color="currentColor"
-                      className={cn(isFav ? 'fill-secondary-purple text-secondary-purple' : 'text-store-text-primary')}
+                      className={cn(isFav ? 'fill-store-terracotta text-store-terracotta' : 'text-store-text-primary')}
                     />
                   </button>
                 </div>

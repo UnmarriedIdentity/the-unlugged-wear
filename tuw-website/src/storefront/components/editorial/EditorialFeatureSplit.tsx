@@ -24,14 +24,14 @@ export default function EditorialFeatureSplit({
 }: EditorialFeatureSplitProps) {
   return (
     <section className={`w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-16 ${className}`}>
-      <div className="bg-store-cream border border-store-card-border rounded-3xl p-6 sm:p-12 lg:p-16 overflow-hidden">
+      <div className="bg-store-cream border border-store-card-border p-6 sm:p-12 lg:p-16 overflow-hidden">
         <div
           className={`grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center ${
             reversed ? 'lg:flex-row-reverse' : ''
           }`}
         >
           {/* Visual Column */}
-          <div className="lg:col-span-6 relative aspect-16/10 rounded-2xl overflow-hidden bg-store-surface border border-store-card-border shadow-xs">
+          <div className="lg:col-span-6 relative aspect-16/10 overflow-hidden bg-store-surface border border-store-card-border shadow-xs">
             <Image
               src={imageSrc}
               alt={imageAlt}

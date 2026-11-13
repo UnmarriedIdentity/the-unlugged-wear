@@ -1,6 +1,6 @@
 # Idempotency — Duplicate-Proofing in the Schema
 
-> Status: Active | Last Updated: 2026-10-30
+> Status: Active | Last Updated: 2026-11-10
 > The rule this file enforces: **a retried request, a replayed webhook, an
 > offline event flush or a double-clicked button must resolve to the same
 > row or to the stored response — never to a second one.**
@@ -13,7 +13,7 @@
 
 | Layer | Table / key | Stops | Lifetime |
 |---|---|---|---|
-| 1. Generic retry guard | `idempotency_keys` — `UNIQUE (scope, key)` | the same HTTP request executed twice | 24h (checkout) / 7d (others) |
+| 1. Generic retry guard | `idempotency_keys` — `UNIQUE (scope, actor_ref, key)` | the same HTTP request executed twice | 24h (checkout) / 7d (others) |
 | 2. Provider replay guard | `webhook_events` — `UNIQUE (provider, provider_event_id)` | a payment/shipment event applied twice | 30d |
 | 3. Natural keys | one constraint per business table | duplicates that survive the TTL sweep | forever |
 
@@ -27,6 +27,7 @@ return*. Together they mean a retry is safe at any distance in time.
 CREATE TABLE idempotency_keys (
   id             uuid         PRIMARY KEY,
   scope          varchar(60)  NOT NULL,
+  actor_ref      varchar(80)  NOT NULL,   -- 'user:<uuid>' | 'guest:<session id>'
   key            varchar(255) NOT NULL,
   user_id        uuid         REFERENCES users (id) ON DELETE SET NULL,
   request_hash   char(64)     NOT NULL,
@@ -40,7 +41,7 @@ CREATE TABLE idempotency_keys (
   expires_at     timestamptz  NOT NULL,
   created_at     timestamptz  NOT NULL DEFAULT now(),
   completed_at   timestamptz,
-  UNIQUE (scope, key)
+  UNIQUE (scope, actor_ref, key)
 );
 CREATE INDEX idx_idempotency_keys_user_id    ON idempotency_keys (user_id);
 CREATE INDEX idx_idempotency_keys_expires_at ON idempotency_keys (expires_at);
@@ -48,11 +49,18 @@ CREATE INDEX idx_idempotency_keys_status     ON idempotency_keys (status)
   WHERE status = 'in_progress';
 ```
 
-### Scopes (the `key` is only unique *inside* one)
+### Scopes (the `key` is only unique *inside* one scope, for one caller)
 
 `checkout` · `payment.capture` · `refund.create` · `return.create` ·
 `cart.merge` · `import.apply` · `support.create` · `household.invite` ·
-`auth.signup` · `auth.invite` · `auth.reset` · `cms.publish`
+`auth.signup` · `auth.invite` · `auth.reset` · `cms.publish` ·
+`order.cancel` · `order.claim` · `newsletter.subscribe` ·
+`stock_alert.create` · `fulfillment.submit` · `claim.create` ·
+`wallet.entry` · `gift_card.adjust`
+
+`actor_ref` (`user:<uuid>` or `guest:<session id>`) is part of the unique
+key: a caller who learns someone else's key cannot replay that person's
+stored response — their lookup simply misses.
 
 A client key is a UUIDv7 generated once per user intent — not per attempt.
 The same key reused under a different scope is a different operation and
@@ -125,9 +133,22 @@ Rules:
 
 | Table | Constraint | What it stops |
 |---|---|---|
-| `orders` | partial unique `(placed_by_user_id, idempotency_key)` | a retried checkout forking into two orders |
-| `payments` | `transaction_id` UNIQUE | double capture |
-| `refunds` | partial unique `one_open_refund (order_id) WHERE status='processing'` | two refunds processing one order |
+| `orders` | partial unique `(COALESCE(placed_by_user_id, 'guest:'‖lower(guest_email)), idempotency_key)` | a retried checkout (account or guest) forking into two orders |
+| `orders` (status) | conditional update `UPDATE … WHERE status = <expected>` + history row in the same TX | a retried status change writing twice |
+| `payments` | `transaction_id` UNIQUE; partial unique `one_captured_payment_per_order WHERE status IN ('captured','refunded')` | double capture of one transaction; **two successful payments for one order** |
+| `refunds` | `one_open_refund (order_id) WHERE status='processing'`; `one_refund_per_idempotency_key (order_id, idempotency_key)`; `one_refund_per_payout_reference (method, payout_reference)` | two refunds in flight; a retried refund after the first completed; one gateway refund id / bank UTR recorded twice |
+| `returns` | `one_return_per_idempotency_key (requested_by_profile_id, idempotency_key)` | a double-submitted exchange/replacement form |
+| `return_items` | `one_exchange_per_order_item`, `one_replacement_per_order_item` | a second exchange or defect claim on the same line |
+| `stock_movements` | `one_stock_movement_per_line_reason (order_item_id, reason) WHERE reason IN ('sale','cancel')` | stock taken or given back twice for one order line |
+| `gift_cards` | `UNIQUE (purchased_order_item_id, purchased_unit_no)` | a line buying N cards issuing N+1 |
+| `gift_card_transactions` | `one_gift_card_issue`, `one_gift_card_redeem_per_order`, `one_gift_card_reversal_per_order`, `one_gift_card_adjust_per_key` | issuing twice, spending twice, restoring twice, a retried staff adjustment |
+| `fulfillment_orders` | `UNIQUE (provider_id, external_ref)`, `one_provider_order_id`, `one_initial_submission_per_provider (order_id, provider_id) WHERE reason='initial'` | the same order sent to the print partner twice (printed and charged twice) |
+| `provider_wallet_ledger` | `one_wallet_entry_per_external_ref`, `one_wallet_entry_per_fulfillment_kind (fulfillment_order_id, kind)` for `order_debit` / `cancel_credit` | a wallet charge or credit recorded twice |
+| `provider_cod_remittances` | `UNIQUE (provider_id, transfer_ref)` | one COD payout recorded twice |
+| `fulfillment_claims` | `one_open_claim_per_type (fulfillment_order_id, type)` while draft/submitted | two open claims for the same defect |
+| `newsletter_subscribers` | unique `lower(email)` | a double sign-up |
+| `stock_alert_subscriptions` | `one_waiting_stock_alert (lower(email), product, variant)` | duplicate back-in-stock requests |
+| `invoices` (planned, file 24) | one invoice per order + gap-free `document_sequences` | two invoices or a skipped number |
 | `reviews` | unique `(product_id, user_id)` | a double-clicked review |
 | `email_logs` | `dedupe_key` + partial unique | a retried producer sending twice |
 | `notifications` | `dedupe_key` + partial unique | the same bell ringing twice |
@@ -144,9 +165,9 @@ Rules:
 
 Deliberately **no** uniqueness on:
 
-- `stock_movements` — two legitimate lines can share an order and a
-  variant (partial fulfilment, split restock); duplication is prevented
-  upstream by the order's idempotency key.
+- `stock_movements` rows other than `sale` / `cancel` (imports, restocks,
+  admin adjustments, returns) — several legitimate rows can share a line;
+  those writes are protected by their own job's / action's key.
 - `import_jobs` — re-importing the same file must **update**;
   `products.source_group_key` UNIQUE already prevents duplicate products.
 

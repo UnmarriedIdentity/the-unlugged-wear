@@ -1,4 +1,4 @@
-export { localSearch, getPopularTargets } from './localSearch';
+export { buildSections, getPopularTargets } from './localSearch';
 export { SearchModal } from './SearchModal';
 export { ShortcutChips } from './ShortcutChips';
 export { SpotlightRow } from './SpotlightRow';

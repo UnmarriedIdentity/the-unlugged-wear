@@ -167,7 +167,7 @@ another.
 `pnpm run dev` (or `pnpm dev:website` from the workspace root) starts this app on port 3007:
 
 * Storefront — <http://localhost:3007/>
-* Admin panel — separate app, port 3001 (`pnpm dev:admin`)
+* Admin panel — separate app, port 3024 (`pnpm dev:admin`)
 
 ### Internal QA pages
 
@@ -179,6 +179,6 @@ TUW_INTERNAL_PAGES=1 pnpm run build
 
 ### Demo sign-in
 
-Login is a local demo: there is no server, and only the seeded demo account can sign in. Its email and password live in `src/storefront/mocks/auth.ts` (`DEMO_ACCOUNT`), and the login page has a **Fill in the demo account** button. Signing in as `uk1115@tuw.co` unlocks `/account` and its order pages, and fills checkout with the account's saved address; guests can still check out by typing their details. Payments are simulated on the checkout page and nothing is charged.
+Login is a local demo: there is no server, and only the seeded demo account can sign in. Its email and password live in `src/storefront/mocks/auth.ts` (`DEMO_ACCOUNT`), and the login page has a **Fill in the demo account** button. Signing in as `urvil.kargathala@example.com` unlocks `/account` and its order pages, and fills checkout with the account's saved address; guests can still check out by typing their details. Payments are simulated on the checkout page and nothing is charged.
 
 The admin panel has its own sign-in at `/login` on its own origin.

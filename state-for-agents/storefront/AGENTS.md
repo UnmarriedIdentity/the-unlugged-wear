@@ -7,19 +7,23 @@ work stopped — without ever opening the admin app. Start here, in this order:
    `pending_verifications`), then the task list. Verify `HEAD` matches
    `session.tip`; if not, reconcile before touching code.
 2. `TRACKER_GUIDE.md` → how to read and update the tracker.
+   Backend phase: storefront screen tasks are `TL-WEB-BE-*` here; the module
+   sequence they depend on is `TL-BE-*` in `state-for-agents/admin/tasks.json`.
 3. `rules/` (in numeric order) → **inviolable constraints**. Rules are
    permissions, not techniques: pixel-perfect tolerance, git hygiene, gates,
-   never-push, task discipline, branch hygiene, PDP lifecycle flow, component reusability (DRY), and never-commit. Every report quotes rule compliance.
+   commit-and-push, task discipline, branch hygiene, PDP lifecycle flow, component reusability (DRY), and SEO page rules. Every report quotes rule compliance.
 4. `skills/` → capabilities, loaded per task: `theme-tokens`,
    `utility-first-jsx`, `cascade-layers`, `stylesheet-anatomy`,
    `design-system`, `motion`, `decorative-graphics`, `debug-frontend`,
    `responsive-system`, `code-standards`, `component-scalability`,
    `component-creation`, `folder-structure`, `hooks`, `routes`,
-   `pdp-flow`, `backend-readiness`, `performance-budgets`, `skill-maintenance`.
+   `pdp-flow`, `backend-readiness`, `nextjs-rendering`, `server-components`, `client-components`, `cache-components`, `performance-budgets`, `stress-testing`, `seo`, `skill-maintenance`. Backend
+   work (`packages/heart`, `db/`, actions, route handlers) also loads the
+   skills in `state-for-agents/backend/` (see its `AGENTS.md`).
 
 ## Rules vs skills (the split — never confuse them)
 
-- **Rules** say what agents must/must-not do (no pushes ever — the human pushes
+- **Rules** say what agents must/must-not do (commit and push every finished change to urvil-ui
   after browser-testing; exact-path commits; gates before every commit).
 - **Skills** say how to build pixel-perfect UI (tokens, utilities, layers,
   motion, debugging playbooks). Skills never grant permissions.

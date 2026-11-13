@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Header from '@storefront/components/layout/Header';
 import Footer from '@storefront/components/layout/Footer';
@@ -8,12 +8,24 @@ import Breadcrumb from '@storefront/components/ui/Breadcrumb';
 import Badge from '@storefront/components/ui/Badge';
 import Button from '@storefront/components/ui/Button';
 import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
-import { useStore } from '@storefront/mocks/store';
+import { myOrdersAction } from '@/server/order-actions';
+import { toStoreOrder } from '@storefront/lib/orders';
+import type { Order } from '@storefront/lib/types';
 import { formatINR } from '@storefront/lib/format';
 import { Package, Truck, ExternalLink, ArrowRight, ShieldCheck, ShoppingBag } from 'lucide-react';
 
 export default function AccountOrdersPage() {
-  const { orders } = useStore();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  useEffect(() => {
+    let live = true;
+    void myOrdersAction({}).then((result) => {
+      if (!live) return;
+      setOrders(result.ok ? result.data.map(toStoreOrder) : []);
+      setLoaded(true);
+    });
+    return () => { live = false; };
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF9F6]">
@@ -41,7 +53,9 @@ export default function AccountOrdersPage() {
           </Button>
         </div>
 
-        {orders.length === 0 ? (
+        {!loaded ? (
+          <p role="status" className="py-16 text-center text-sm text-stone-500">Loading your orders…</p>
+        ) : orders.length === 0 ? (
           <div className="py-20 text-center bg-white rounded-2xl border border-stone-200 mt-8 p-8">
             <div className="w-16 h-16 rounded-full bg-stone-100 flex items-center justify-center text-stone-500 mx-auto mb-4">
               <ShoppingBag size={28} />
@@ -101,7 +115,7 @@ export default function AccountOrdersPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      href={`/account/orders/${encodeURIComponent(order.id)}`}
+                      href={`/account/orders/${encodeURIComponent(order.orderNumber)}`}
                     >
                       View Details
                     </Button>

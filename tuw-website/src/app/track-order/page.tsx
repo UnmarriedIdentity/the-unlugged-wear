@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Header from '@storefront/components/layout/Header';
 import Footer from '@storefront/components/layout/Footer';
@@ -9,24 +9,47 @@ import Input from '@storefront/components/ui/Input';
 import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
 import Button from '@storefront/components/ui/Button';
 import Badge from '@storefront/components/ui/Badge';
-import { useStore } from '@storefront/mocks/store';
+import { useSession } from '@storefront/lib/session';
+import { toStoreOrder } from '@storefront/lib/orders';
+import type { Order } from '@storefront/lib/types';
+import { getOrderAction, trackOrderAction } from '@/server/order-actions';
 import { Truck, CheckCircle2, Clock, AlertCircle, Package, Search } from 'lucide-react';
 
 function TrackOrderContent() {
   const searchParams = useSearchParams();
-  const refParam = searchParams.get('ref') || 'TUW-9042';
+  const refParam = searchParams.get('ref') || searchParams.get('order') || '';
+  const { session } = useSession();
 
-  const { getOrderByNumber } = useStore();
   const [query, setQuery] = useState(refParam);
-  const [searchedRef, setSearchedRef] = useState(refParam);
+  const [email, setEmail] = useState(session?.email ?? '');
+  const [searchedRef, setSearchedRef] = useState('');
+  const [order, setOrder] = useState<Order | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [searching, setSearching] = useState(false);
 
-  const order = getOrderByNumber(searchedRef);
+  // A signed-in customer opening their own order from a link needs no email.
+  useEffect(() => {
+    if (!refParam || !session) return;
+    let live = true;
+    void getOrderAction({ orderNumber: refParam }).then((result) => {
+      if (live && result.ok) { setOrder(toStoreOrder(result.data)); setSearchedRef(refParam); }
+    });
+    return () => { live = false; };
+  }, [refParam, session]);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (query.trim()) {
-      setSearchedRef(query.trim());
+    if (!query.trim() || !email.trim()) {
+      setError('Enter the order number and the email used for the order.');
+      return;
     }
+    setSearching(true);
+    setError(null);
+    const result = await trackOrderAction({ orderNumber: query.trim(), email: email.trim() });
+    setSearching(false);
+    setSearchedRef(query.trim());
+    if (result.ok) setOrder(toStoreOrder(result.data));
+    else { setOrder(null); setError(result.error.message); }
   };
 
   return (
@@ -40,57 +63,44 @@ function TrackOrderContent() {
 
       <div className="my-6">
         <h1 className="text-[clamp(1.75rem,3vw+0.5rem,2.25rem)] font-extrabold tracking-tight text-[#1A1A1A]">
-          Track Your Shipment
+          Track Your Order
         </h1>
         <p className="text-sm text-[#666] mt-1">
-          Monitor your on-demand print progress, carrier dispatch, and estimated doorstep arrival.
+          Enter the order number from your confirmation and the email you used at checkout.
         </p>
       </div>
 
       {/* Lookup Form */}
       <div className="bg-white rounded-3xl border border-[#E2DDCF] p-6 shadow-xs mb-8">
-        <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3">
-          <div className="flex-1">
-            <Input
-              aria-label="Order reference"
-              placeholder="Enter order reference (e.g. TUW-9042 or TUW-8812)"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              prefix={<Search size={18} />}
-            />
-          </div>
-          <Button variant="dark" size="lg" type="submit" icon={<Truck size={18} />}>
-            Track Shipment
+        <form onSubmit={handleSearch} noValidate className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+          <Input
+            id="track-order-number"
+            label="Order number"
+            placeholder="e.g. TUW-261112-K7Q4M"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            prefix={<Search size={18} />}
+            autoComplete="off"
+          />
+          <Input
+            id="track-order-email"
+            label="Email"
+            type="email"
+            placeholder="asha.rao@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+          />
+          <Button variant="dark" size="lg" type="submit" icon={<Truck size={18} />} disabled={searching}>
+            {searching ? 'Looking…' : 'Track order'}
           </Button>
         </form>
-
-        <div className="flex items-center gap-2 mt-3 text-xs text-[#8A8A8A]">
-          <span>Try demo references:</span>
-          <button
-            type="button"
-            onClick={() => {
-              setQuery('TUW-9042');
-              setSearchedRef('TUW-9042');
-            }}
-            className="text-[#7539FF] font-semibold hover:underline cursor-pointer"
-          >
-            TUW-9042
-          </button>
-          <span>•</span>
-          <button
-            type="button"
-            onClick={() => {
-              setQuery('TUW-8812');
-              setSearchedRef('TUW-8812');
-            }}
-            className="text-[#7539FF] font-semibold hover:underline cursor-pointer"
-          >
-            TUW-8812
-          </button>
-        </div>
+        <p className="mt-3 text-xs text-[#8A8A8A]">
+          Have an account? <a href="/account/orders" className="underline underline-offset-2 text-[#1A1A1A]">See all your orders</a>.
+        </p>
       </div>
 
-      {/* Shipment Status & Timeline */}
+      {/* Order Status & Timeline */}
       {order ? (
         <div className="bg-white rounded-3xl border border-[#E2DDCF] p-6 sm:p-8 shadow-xs space-y-8">
           {/* Header */}
@@ -111,15 +121,18 @@ function TrackOrderContent() {
                 </Badge>
               </div>
               <p className="text-xs text-[#8A8A8A] mt-1">
-                Carrier: <strong>{order.carrier}</strong> • Tracking Code:{' '}
-                <code>{order.trackingNumber}</code>
+                {order.carrier && order.trackingNumber ? (
+                  <>Carrier: <strong>{order.carrier}</strong> • Tracking code: <code>{order.trackingNumber}</code></>
+                ) : (
+                  'A courier and tracking code are added when it ships.'
+                )}
               </p>
             </div>
 
             <div className="text-right">
               <span className="text-xs text-[#8A8A8A] block">Estimated Delivery:</span>
               <span className="text-base font-extrabold text-[#10B981]">
-                {order.estimatedDelivery || 'Delivered'}
+                {order.sqlStatus === 'delivered' ? 'Delivered' : order.sqlStatus === 'cancelled' ? 'Cancelled' : order.estimatedDelivery || 'Shared when it ships'}
               </span>
             </div>
           </div>
@@ -173,17 +186,19 @@ function TrackOrderContent() {
             </div>
           </div>
         </div>
-      ) : (
-        <div className="text-center py-16 bg-white rounded-3xl border border-[#E2DDCF] p-8 shadow-xs">
+      ) : searchedRef && error ? (
+        <div role="alert" className="text-center py-16 bg-white rounded-3xl border border-[#E2DDCF] p-8 shadow-xs">
           <div className="w-14 h-14 rounded-full bg-[#FEF2F2] text-[#EF4444] flex items-center justify-center mx-auto mb-4">
             <AlertCircle size={28} />
           </div>
-          <h2 className="text-lg font-bold text-[#1A1A1A]">Reference &ldquo;{searchedRef}&rdquo; Not Found</h2>
+          <h2 className="text-lg font-bold text-[#1A1A1A]">{error}</h2>
           <p className="text-xs text-[#666] max-w-sm mx-auto mt-2 leading-relaxed">
-            Please verify the order reference number from your confirmation email or dispatch SMS.
+            Check the order number on your confirmation and use the same email you checked out with.
           </p>
         </div>
-      )}
+      ) : error ? (
+        <p role="alert" className="text-sm text-red-700">{error}</p>
+      ) : null}
     </div>
   );
 }

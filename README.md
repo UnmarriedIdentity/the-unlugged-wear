@@ -19,7 +19,7 @@ the-unplugged-wear/
 │   ├── tests/                   # node:test suites
 │   ├── docs/                    # Storefront specifications
 │   └── vercel.json
-├── tuw-admin/                   # Staff operations panel — port 3001, deployed on its own
+├── tuw-admin/                   # Staff operations panel — port 3024, deployed on its own
 │   ├── src/app/                 # Auth screens + the (dashboard) route group
 │   ├── src/{components,hooks,lib,mocks}/   # @/* — the panel's own design system
 │   ├── src/server/              # @/server/* — DB migrations and seed SQL
@@ -48,18 +48,39 @@ All commands run from the repository root and delegate to the package they belon
 pnpm install          # install both apps from the root lockfile
 
 pnpm dev:website      # storefront on http://localhost:3007
-pnpm dev:admin        # admin panel on http://localhost:3001
+pnpm dev:admin        # admin panel on http://localhost:3024
 
 pnpm typecheck        # tsc --noEmit in both packages
 pnpm test             # node:test suites in both packages
 
 pnpm build            # production build of both packages
 pnpm start:website    # serve the built storefront on 3007
-pnpm start:admin      # serve the built panel on 3001
+pnpm start:admin      # serve the built panel on 3024
 ```
 
 `pnpm typecheck`, `pnpm test` and `pnpm build` are aggregates: they run the admin first and stop
 if it fails.
+
+### Shared backend (`packages/heart`)
+
+Both apps import `@tuw/heart` (bundled into each build, never deployed alone).
+`pnpm test` also runs its tests; integration tests build a throwaway schema on
+`DATABASE_URL_UNPOOLED` and drop it afterwards. `GET /api/health` in each app
+checks the database connection.
+
+### Database (shared by both apps)
+
+Put the connection strings in a repo-root `.env.local` (gitignored; same keys as
+`tuw-admin/.env.example`): `DATABASE_URL` (pooled) and `DATABASE_URL_UNPOOLED` (direct).
+Any PostgreSQL works — a Neon branch or a local Postgres (`postgresql://localhost:5432/tuw`).
+
+```bash
+pnpm db:status        # applied / pending migration files and table count
+pnpm db:migrate       # apply pending db/migrate/*.sql in order
+pnpm db:seed          # re-runnable baseline data (roles, settings, providers…)
+pnpm db:types         # regenerate Drizzle types in packages/heart after a migration
+DB_ALLOW_RESET=true pnpm db:reset --yes   # DEV ONLY: drop everything, migrate, seed
+```
 
 ---
 
@@ -68,7 +89,7 @@ if it fails.
 | | [`tuw-website`](./tuw-website) | [`tuw-admin`](./tuw-admin) |
 |---|---|---|
 | Purpose | Customer shop: catalog, PDP, cart, checkout, account, order tracking | Staff workspace: catalog, orders, POD fulfillment, shipments, returns, refunds, CMS, team, settings |
-| Dev port | `3007` | `3001` |
+| Dev port | `3007` | `3024` |
 | Routes | `src/app/**` — `/`, `/shop`, `/products/[slug]`, `/checkout`, `/account/**`, … | `src/app/**` — `/login`, `/dashboard`, `/orders`, `/settings/**`, … |
 | Source root | `src/storefront/**` via `@storefront/*` | `src/{components,hooks,lib,mocks}/**` via `@/*` |
 | Stylesheet | `src/app/globals.css` — Outfit, warm editorial palette | `src/app/globals.css` — Urbanist, 18 violet/action roles |
@@ -86,7 +107,7 @@ Both apps are mock-only: there is no server, no real auth, and nothing is charge
 
 | App | Email | Password | Lands on |
 |---|---|---|---|
-| Storefront | `uk1115@tuw.co` | `uktuw1115` | `/account` |
+| Storefront | `urvil.kargathala@example.com` | `uktuw1115` | `/account` |
 | Admin | `contactstylehub@gmail.com` | anything except `wrong` / `error` | `/dashboard` |
 
 The storefront account is seeded in `tuw-website/src/storefront/mocks/auth.ts` and owns the fixture
@@ -101,7 +122,7 @@ The two packages deliberately keep separate design systems, so neither can inher
 tokens.
 
 * **Admin — Urbanist, 18 semantic roles**: canvas `#F7F8F9`, surface `#FFFFFF`, primary text
-  `#262626`, action primary `#7539FF`. Specimen at `/design-system` on port 3001.
+  `#262626`, action primary `#7539FF`. Specimen at `/design-system` on port 3024.
 * **Storefront — Outfit, warm editorial palette**: ivory canvas `#FAF9F6`, charcoal text
   `#1A1A1A`, dark purchase CTA `#111111`, gold accent `#C8A96A`. Admin violet never appears in a
   customer purchase flow. Specimen at `/design-system` on port 3007.

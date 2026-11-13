@@ -163,8 +163,10 @@ describe('Deterministic local fonts (Windows == macOS)', () => {
   });
 
   test('all product slugs are concise, clean, and bounded (<= 45 characters)', () => {
-    const fixturesContent = readFileSync(join(repoRoot, 'src/storefront/mocks/fixtures.ts'), 'utf8');
-    const slugMatches = [...fixturesContent.matchAll(/slug:\s*['"]([^'"]+)['"]/g)].map((m) => m[1]);
+    // Curated products + collections are seed data now (db/seed/catalog, TL-BE-05).
+    const seed = (f) => JSON.parse(readFileSync(join(repoRoot, '../db/seed/catalog', f), 'utf8'));
+    const slugMatches = [...seed('curated-products.json'), ...seed('collections.json')].map((x) => x.slug);
+    const fixturesContent = slugMatches.map((slug) => `slug: "${slug}"`).join('\n');
     assert.ok(slugMatches.length >= 14, 'expected at least 14 product/collection slugs');
 
     for (const slug of slugMatches) {
@@ -177,7 +179,7 @@ describe('Deterministic local fonts (Windows == macOS)', () => {
 
     // Catalog follows the Qikink listing; pre-Qikink slugs stay reachable as aliases.
     assert.ok(fixturesContent.includes('slug: "acid-wash-hoodie"'));
-    assert.ok(fixturesContent.includes('aliases: ["architectural-zip-hoodie"]'));
+    assert.ok(seed('curated-products.json').some((p) => p.aliases?.includes('architectural-zip-hoodie')));
   });
   test('ProductCard and FilterBar conform to Figma Shop All v4 specs and zero admin purple', () => {
     const cardContent = readFileSync(join(repoRoot, 'src/storefront/components/commerce/ProductCard.tsx'), 'utf8');
@@ -193,7 +195,7 @@ describe('Deterministic local fonts (Windows == macOS)', () => {
     assert.ok(cardContent.includes('toggleWishlist'), 'ProductCard must support toggleWishlist');
 
     // ProductCard Luxury Bordered Frame & Motion Invariants
-    assert.ok(cardContent.includes('rounded-2xl'), 'ProductCard has rounded-2xl corners');
+    assert.ok(!/<article[^>]*rounded-/.test(cardContent), 'ProductCard frame has square corners');
     assert.ok(cardContent.includes('border-store-card-border'), 'ProductCard has store-card-border');
     assert.ok(cardContent.includes('handlePrevImage'), 'ProductCard must support handlePrevImage');
     assert.ok(cardContent.includes('handleNextImage'), 'ProductCard must support handleNextImage');
@@ -265,14 +267,15 @@ describe('Deterministic local fonts (Windows == macOS)', () => {
 describe('Demo sign-in and checkout flow', () => {
   const read = (relative) => readFileSync(join(repoRoot, relative), 'utf8');
 
-  test('login only accepts the seeded demo account and account pages need a session', () => {
-    const auth = read('src/storefront/mocks/auth.ts');
+  test('login uses the real auth action and account pages need a session', () => {
     const login = read('src/app/login/page.tsx');
     const accountLayout = read('src/app/account/layout.tsx');
-    assert.ok(/export const DEMO_ACCOUNT = \{[\s\S]*email: '[^']+@[^']+',[\s\S]*password: '[^']+'/.test(auth), 'demo account is seeded in src/storefront/mocks/auth.ts');
-    assert.ok(login.includes('checkDemoCredentials(email, password)'), 'login checks the demo credentials');
-    assert.ok(!login.includes('any email and password will work'), 'login no longer accepts any credentials');
-    assert.ok(accountLayout.includes('<AccountGate>'), 'account routes are wrapped in the sign-in gate');
+    const proxy = read('src/proxy.ts');
+    assert.ok(login.includes('loginAction('), 'login calls the server login action');
+    assert.ok(!login.includes('checkDemoCredentials'), 'the demo credential check is gone');
+    assert.ok(!existsSync(join(repoRoot, 'src/storefront/mocks/auth.ts')), 'demo auth adapter removed');
+    assert.ok(accountLayout.includes('<AccountGate>'), 'account routes keep the in-page sign-in fallback');
+    assert.ok(proxy.includes("pathname.startsWith('/account/')"), 'proxy.ts protects /account/*');
   });
 
   test('express delivery replaces the standard fee instead of adding to it', () => {

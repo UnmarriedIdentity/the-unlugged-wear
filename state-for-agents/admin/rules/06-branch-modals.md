@@ -109,8 +109,8 @@ The agent must refuse (or explicitly pause for human override) any
 5. Working tree is dirty (tracked files) on the checkout being merged.
 6. The team has not decided spotlight wins (no decision = no merge;
    the flag plan F1–F3 exists precisely so "not yet" costs nothing).
-7. A push is requested as part of the merge (rule 03: humans push;
-   the agent stops at the local merge commit).
+7. A push of `v2` / `feat/search-modal` is requested without the owner
+   asking (rule 03: only `urvil-ui` is pushed automatically).
 
 Refusing a merge is always the safe default. State which condition
 failed and what would clear it — never merge "to see what happens".
@@ -121,7 +121,7 @@ failed and what would clear it — never merge "to see what happens".
 2. `git diff v2...feat/search-modal --stat` shows spotlight files only.
 3. `pnpm --dir tuw-admin typecheck`, `test` (4/4), `build` (37/37) green.
 4. Tracker `session` block reflects the checkout (`branch`, `tip`).
-5. All pushes by the human (rule 03). No exceptions for "small" commits.
+5. `v2` / `feat/search-modal` are pushed only when the owner asks (rule 03).
 
 ## Good / bad
 

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Plus, Filter, Search, Edit3, Trash2, CheckCircle2, Eye, AlertTriangle, LayoutGrid, List, Tag, ChevronDown, Download, Archive, GripVertical, Upload, Images, Focus, Library, RotateCcw, X } from 'lucide-react';
@@ -9,26 +10,15 @@ import { StatCard, ContentCard, SurfaceCard, UpliftSurface, Button, Badge, IconB
 import { useAdminState } from '@/mocks/state';
 import { ProductItem } from '@/mocks/fixtures';
 import { resolveVariants, variantStockTotal, buildVariantSku, deriveVariantPrice, recomputeVariants, minFromPrice, pruneAdjustments, roundPrice, hasPriceSpread, adjustmentKey, sumAdjustments } from '@/mocks/variants';
-import type { ProductVariant, ProductAttribute, PhotoSettings, ProductDiscount, SizeChart, ProductGender } from '@/mocks/fixtures';
-import { parseCompareAtPrice } from '@/lib/productPricing';
-import { groupImportRows, isValidHsnCode, UNCATEGORIZED_CATEGORY } from '@/lib/productImport';
-import type { ImportProductGroup, ImportSourceRow } from '@/lib/productImport';
-import { slugify } from '@/lib/collections';
-import { attributeDisplayLabel, normalizeAttributeDisplayType } from '@/lib/attributePresentation';
+import type { ProductVariant, ProductAttribute, PhotoSettings, ProductDiscount, ProductGender, StockMovement } from '@/mocks/fixtures';
+import type { LibraryAttribute, SizeChart } from '@tuw/heart/modules/catalog';
+import PartnerSkuPanel from './PartnerSkuPanel';
+import { saveSizeChartAction, deleteSizeChartAction, createProductAction, deleteProductsAction, getProductAction, importListingAction, setProductsStatusAction, updateProductAction } from '@/server/catalog-actions';
+import { attributeDisplayLabel, normalizeAttributeDisplayType, parseCompareAtPrice, slugify, UNCATEGORIZED_CATEGORY } from '@tuw/heart/modules/catalog/rules';
+import { groupImportRows, isValidHsnCode, parseQikinkListing } from '@tuw/heart/modules/catalog/planner';
+import type { ImportProductGroup } from '@tuw/heart/modules/catalog/planner';
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
-
-const PRODUCT_CATEGORIES: ProductItem['category'][] = [
-  'T-Shirts',
-  'Hoodies',
-  'Jackets',
-  'Pants',
-  'Accessories',
-  'Home & Living',
-  'Stationery',
-  'Phone Accessories',
-  UNCATEGORIZED_CATEGORY,
-];
 
 // SearchableSelect uses a real value for the selected row; keep the form's
 // empty-string "unspecified" state at the boundary only.
@@ -41,8 +31,6 @@ const GENDER_OPTIONS = [
   { value: 'Boy', label: 'Boy' },
   { value: 'Girl', label: 'Girl' },
 ];
-
-const IMPORT_GENDERS = ['Female', 'Male', 'Unisex', 'Kids', 'Boy', 'Girl'] as const;
 
 const PUBLICATION_OPTIONS: Array<{ value: ProductItem['publicationStatus']; label: string }> = [
   { value: 'published', label: 'Published (Live)' },
@@ -117,15 +105,119 @@ const attributeGroupLabelStyle: React.CSSProperties = {
 // (fixtures) so the seam persists it verbatim; see the REST note there.
 // swatch dots stay neutral until a value→hex map lands (recorded follow-up).
 
-export default function ProductsView() {
-  const { products, createProduct, createProducts, updateProduct, deleteProduct, canPerformAction, showToast, stockMovements, sizeCharts, createSizeChart, deleteSizeChart, addSizeChartRow, removeSizeChartRow, patchSizeChartCell, libraryAttributes, createLibraryAttribute, addLibraryValue } = useAdminState();
+export default function ProductsView({ initialProducts, categories, perms, storefrontOrigin, initialLibrary, initialSizeCharts, openId }: { initialProducts: ProductItem[]; categories: string[]; perms: string[]; storefrontOrigin: string; initialLibrary: LibraryAttribute[]; initialSizeCharts: SizeChart[]; openId?: string }) {
+  // Product photos with local paths are served by the storefront app.
+  const assetSrc = (url: string) => (url.startsWith('/') ? `${storefrontOrigin}${url}` : url);
+  // Everything here is real (TL-BE-05).
+  const { showToast } = useAdminState();
+  const router = useRouter();
+  const [products, setProducts] = useState<ProductItem[]>(initialProducts);
+  useEffect(() => setProducts(initialProducts), [initialProducts]);
+  const [stockMovements, setStockMovements] = useState<StockMovement[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [openingId, setOpeningId] = useState<string | null>(null);
 
-  // Base categories plus any category an import brought in. Keeping this
-  // derived means a Category column value never disappears from the picker.
+  // Attribute library: read-only here (/settings/attributes edits it). New
+  // names and values typed in a product are registered when the product saves.
+  const [libraryAttributes, setLibraryAttributes] = useState<LibraryAttribute[]>(initialLibrary);
+  const createLibraryAttribute = (name: string): string => {
+    const id = `new:${name}`;
+    setLibraryAttributes((list) => [...list, { id, name, slug: '', values: [], swatchHex: {}, displayType: 'pill', enabled: true, showOnPdp: true, showOnCheckout: false, showOnAdmin: true, productCount: 0, core: false }]);
+    return id;
+  };
+  const addLibraryValue = (id: string, value: string) =>
+    setLibraryAttributes((list) => list.map((a) => (a.id === id ? { ...a, values: [...a.values, value] } : a)));
+
+  // Size charts save themselves: structure at once, typed cells after a pause.
+  const [sizeCharts, setSizeCharts] = useState<SizeChart[]>(initialSizeCharts);
+  const chartTimers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
+  // Cells hold what was typed; numbers are converted only when saving.
+  const cellValue = (v: number | string): number | string | null => {
+    if (typeof v === 'number') return v;
+    const text = v.trim();
+    if (text === '') return 0;
+    if (/^\d+(\.\d+)?$/.test(text)) return Number(text);
+    return /^\d+(\.\d+)?\s*[–-]\s*\d+(\.\d+)?$/.test(text) ? text : null;
+  };
+  const persistChart = (chart: SizeChart, delay = 0) => {
+    const pending = chartTimers.current.get(chart.id);
+    if (pending) clearTimeout(pending);
+    chartTimers.current.set(chart.id, setTimeout(() => {
+      // A half-typed range waits until it is complete.
+      if (chart.rows.some((r) => Object.values(r.measures).some((v) => cellValue(v) === null))) return;
+      const rows = chart.rows.map((r) => ({ ...r, measures: Object.fromEntries(Object.entries(r.measures).map(([k, v]) => [k, cellValue(v)!])) }));
+      void saveSizeChartAction({ id: chart.id, name: chart.name, columns: chart.columns, rows }).then((r) => {
+        if (!r.ok) showToast({ type: 'warning', title: 'Size Chart Not Saved', description: r.error.message });
+      });
+    }, delay));
+  };
+  const updateChart = (chartId: string, change: (c: SizeChart) => SizeChart, delay = 0) => {
+    const chart = sizeCharts.find((c) => c.id === chartId);
+    if (!chart) return false;
+    const next = change(chart);
+    setSizeCharts((list) => list.map((c) => (c.id === chartId ? next : c)));
+    persistChart(next, delay);
+    return true;
+  };
+  const createSizeChart = (name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return false;
+    if (sizeCharts.some((c) => c.name.toLowerCase() === trimmed.toLowerCase())) {
+      showToast({ type: 'warning', title: 'Duplicate Chart', description: `"${trimmed}" already exists.` });
+      return false;
+    }
+    void saveSizeChartAction({ name: trimmed, columns: [], rows: [] }).then((r) => {
+      if (r.ok) setSizeCharts(r.data);
+      else showToast({ type: 'warning', title: 'Size Chart Not Saved', description: r.error.message });
+    });
+    return true;
+  };
+  const deleteSizeChart = (id: string) => {
+    void deleteSizeChartAction({ id }).then((r) => {
+      if (r.ok) setSizeCharts(r.data);
+      else showToast({ type: 'warning', title: 'Not Deleted', description: r.error.message });
+    });
+  };
+  const addSizeChartRow = (chartId: string, size: string) => {
+    const trimmed = size.trim();
+    const chart = sizeCharts.find((c) => c.id === chartId);
+    if (!trimmed || !chart) return false;
+    if (chart.rows.some((r) => r.size.toLowerCase() === trimmed.toLowerCase())) {
+      showToast({ type: 'warning', title: 'Duplicate Size', description: `"${trimmed}" is already in ${chart.name}.` });
+      return false;
+    }
+    // A new row starts with the chart's existing columns.
+    const blank = Object.fromEntries(chart.columns.map((k) => [k, 0]));
+    return updateChart(chartId, (c) => ({ ...c, rows: [...c.rows, { size: trimmed, measures: blank }] }));
+  };
+  const removeSizeChartRow = (chartId: string, size: string) => updateChart(chartId, (c) => ({ ...c, rows: c.rows.filter((r) => r.size !== size) }));
+  const addSizeChartColumn = (chartId: string, column: string) => {
+    const name = column.trim();
+    const chart = sizeCharts.find((c) => c.id === chartId);
+    if (!name || !chart) return false;
+    if (chart.columns.some((c) => c.toLowerCase() === name.toLowerCase())) {
+      showToast({ type: 'warning', title: 'Duplicate Column', description: `"${name}" is already in ${chart.name}.` });
+      return false;
+    }
+    return updateChart(chartId, (c) => ({ ...c, columns: [...c.columns, name], rows: c.rows.map((r) => ({ ...r, measures: { ...r.measures, [name]: 0 } })) }));
+  };
+  const patchSizeChartCell = (chartId: string, size: string, key: string, raw: string) => {
+    return updateChart(chartId, (c) => ({ ...c, rows: c.rows.map((r) => (r.size === size ? { ...r, measures: { ...r.measures, [key]: raw } } : r)) }), 700);
+  };
+  const [chartColDrafts, setChartColDrafts] = useState<Record<string, string>>({});
+  const can = (permission: string) => perms.includes(permission);
+  const libId = (name: string) => initialLibrary.find((l) => l.name.toLowerCase() === name.toLowerCase())?.id;
+  const canPerformAction = (_category: 'products') => can('product.update');
+  const refused = (what: string) => showToast({ type: 'warning', title: 'Action Restricted', description: `You do not have permission to ${what}.` });
+  /** Honest save toast: says when the storefront could not be refreshed. */
+  const storefrontNote = (storefront: { ok: true } | { ok: false; reason: string }) =>
+    storefront.ok ? 'The storefront now shows it.' : `${storefront.reason} Shoppers will see it within the hour.`;
+
+  // Real categories plus any name already on a product, and Uncategorized.
   const categoryOptions = React.useMemo(() => {
-    const categories = [...new Set([...PRODUCT_CATEGORIES, ...products.map((product) => product.category)])];
-    return categories.filter(Boolean).map((category) => ({ value: category, label: category }));
-  }, [products]);
+    const names = [...new Set([...categories, ...products.map((product) => product.category), UNCATEGORIZED_CATEGORY])];
+    return names.filter(Boolean).map((category) => ({ value: category, label: category }));
+  }, [categories, products]);
 
   const [selectedCat, setSelectedCat] = useState<string>('All');
   const [publicationFilter, setPublicationFilter] = useState<'all' | 'published' | 'draft' | 'archived'>('all');
@@ -163,7 +255,7 @@ export default function ProductsView() {
   // Form State for Create/Edit
   const [formName, setFormName] = useState('');
   const [formSlug, setFormSlug] = useState('');
-  const [formCategory, setFormCategory] = useState<ProductItem['category']>('T-Shirts');
+  const [formCategory, setFormCategory] = useState<ProductItem['category']>(categories[0] ?? UNCATEGORIZED_CATEGORY);
   const [formPrice, setFormPrice] = useState('48.00');
   const [formComparePrice, setFormComparePrice] = useState('');
   const [formCompareError, setFormCompareError] = useState<string | null>(null);
@@ -195,8 +287,11 @@ export default function ProductsView() {
   const [chartRowDrafts, setChartRowDrafts] = useState<Record<string, string>>({});
   const [newChartName, setNewChartName] = useState('');
   const [formSizeChartId, setFormSizeChartId] = useState('');
-  const chartColumns = (chart: SizeChart) => [...new Set(chart.rows.flatMap((r) => Object.keys(r.measures)))];
+  const chartColumns = (chart: SizeChart) => chart.columns;
   const [formPartner, setFormPartner] = useState<ProductItem['partner']>('Qikink Direct API');
+  const [formExchangePolicy, setFormExchangePolicy] = useState<NonNullable<ProductItem['exchangePolicy']>>('defects_only');
+  const [formProductKind, setFormProductKind] = useState<NonNullable<ProductItem['productKind']>>('physical');
+  const [formLowStock, setFormLowStock] = useState('');
   const [formStatus, setFormStatus] = useState<ProductItem['publicationStatus']>('published');
   const [formDescription, setFormDescription] = useState('Pre-shrunk premium heavyweight combed cotton with reinforced seams.');
 
@@ -222,7 +317,7 @@ export default function ProductsView() {
   const addDiscountRef = useRef<HTMLDivElement>(null);
 
   const openCreateDrawer = () => {
-    if (!canPerformAction('products')) return;
+    if (!can('product.create')) return refused('create products');
     setEditingProduct(null);
     setIsCreating(true);
     setBasicCardOpen(false);
@@ -240,7 +335,7 @@ export default function ProductsView() {
     setStageIndex(0);
     setFormName('');
     setFormSlug('');
-    setFormCategory('T-Shirts');
+    setFormCategory(categories[0] ?? UNCATEGORIZED_CATEGORY);
     setFormPrice('48.00');
     setFormComparePrice('');
     setFormCompareError(null);
@@ -256,11 +351,14 @@ export default function ProductsView() {
     setFormDiscounts([]);
     setFormSizeChartId('');
     setFormAttributes([
-      { name: 'Color', values: ['Black', 'Chalk White', 'Olive'], builtin: true, displayType: 'swatch', swatchHex: {}, libraryId: 'LIB-01' },
-      { name: 'Size', values: ['S', 'M', 'L', 'XL'], builtin: true, displayType: 'pill', swatchHex: {}, libraryId: 'LIB-02' },
-      { name: 'Placements', values: ['Front'], builtin: true, displayType: 'radio', swatchHex: {}, libraryId: 'LIB-03' },
+      { name: 'Color', values: ['Black', 'Chalk White', 'Olive'], builtin: true, displayType: 'swatch', swatchHex: {}, libraryId: libId('Color') },
+      { name: 'Size', values: ['S', 'M', 'L', 'XL'], builtin: true, displayType: 'pill', swatchHex: {}, libraryId: libId('Size') },
+      { name: 'Placements', values: ['Front'], builtin: true, displayType: 'radio', swatchHex: {}, libraryId: libId('Placements') },
     ]);
     setFormPartner('Qikink Direct API');
+    setFormExchangePolicy('defects_only');
+    setFormProductKind('physical');
+    setFormLowStock('');
     setFormStatus('published');
     setFormDescription('Pre-shrunk premium heavyweight combed cotton with reinforced seams.');
     setFormPhoto({ layout: 'carousel', ratio: '4:3', showPhotos: true });
@@ -280,7 +378,7 @@ export default function ProductsView() {
   };
 
   // Drawer tab + media draft state (elastic workspace; tabs grow per phase)
-  const [productTab, setProductTab] = useState<'general' | 'media' | 'variants' | 'specs'>('general');
+  const [productTab, setProductTab] = useState<'general' | 'media' | 'variants' | 'specs' | 'partner'>('general');
   // Gallery presentation draft (P1a): PDP stage layout + ratio + visibility.
   const [formPhoto, setFormPhoto] = useState<PhotoSettings>({ layout: 'carousel', ratio: '4:3', showPhotos: true });
   const photoAspect = formPhoto.ratio === '1:1' ? '1 / 1' : formPhoto.ratio === '16:9' ? '16 / 9' : '4 / 3';
@@ -362,7 +460,7 @@ export default function ProductsView() {
   // drawer (no 520↔880 yoyo while hopping tabs).
   const [drawerView, setDrawerView] = useState<'compact' | 'matrix' | 'full'>('compact');
   const autoExpandedRef = useRef(false);
-  const prevTab = useRef<'general' | 'media' | 'variants' | 'specs'>('general');
+  const prevTab = useRef<'general' | 'media' | 'variants' | 'specs' | 'partner'>('general');
   React.useEffect(() => {
     const entered = prevTab.current !== 'variants' && productTab === 'variants';
     prevTab.current = productTab;
@@ -637,7 +735,7 @@ export default function ProductsView() {
     setFormAttributes((prev) => [...prev, { name, values: [], builtin: false, displayType: 'pill', swatchHex: {}, libraryId: linkedId }]);
     setNewAttrName('');
     if (!lib) {
-      showToast({ type: 'info', title: 'Registered in Library', description: `"${name}" now lives in the attribute library too.` });
+      showToast({ type: 'info', title: 'New Library Attribute', description: `"${name}" joins the attribute library when you save this product.` });
     }
   };
   const removeAttribute = (name: string) => {
@@ -878,8 +976,30 @@ export default function ProductsView() {
     );
   };
 
-  const openEditDrawer = (product: ProductItem) => {
-    if (!canPerformAction('products')) return;
+  // The list is light (no variants); the full record loads when a product opens.
+  const openEditDrawer = async (summary: ProductItem) => {
+    if (!can('product.update')) return refused('edit products');
+    if (openingId) return;
+    setOpeningId(summary.id);
+    const result = await getProductAction({ id: summary.id });
+    setOpeningId(null);
+    if (!result.ok) return showToast({ type: 'warning', title: 'Could Not Open Product', description: result.error.message });
+    const { movements, ...detail } = result.data;
+    setStockMovements(movements as StockMovement[]);
+    loadEditDrawer(detail as unknown as ProductItem);
+  };
+
+  // Spotlight deep link (?open=<id>): open that product once on arrival.
+  const openedFromLink = useRef<string | null>(null);
+  useEffect(() => {
+    if (!openId || openedFromLink.current === openId) return;
+    openedFromLink.current = openId;
+    const summary = initialProducts.find((p) => p.id === openId);
+    if (summary) void openEditDrawer(summary);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openId]);
+
+  const loadEditDrawer = (product: ProductItem) => {
     setIsCreating(false);
     setEditingProduct(product);
     setBasicCardOpen(false);
@@ -929,9 +1049,9 @@ export default function ProductsView() {
       };
     });
     const builtinAttributes: ProductAttribute[] = [
-      { name: 'Color', values: [...product.colors], builtin: true, displayType: 'swatch', swatchHex: {}, libraryId: 'LIB-01' },
-      { name: 'Size', values: [...product.sizes], builtin: true, displayType: 'pill', swatchHex: {}, libraryId: 'LIB-02' },
-      { name: 'Placements', values: [], builtin: true, displayType: 'radio', swatchHex: {}, libraryId: 'LIB-03' },
+      { name: 'Color', values: [...product.colors], builtin: true, displayType: 'swatch', swatchHex: {}, libraryId: libId('Color') },
+      { name: 'Size', values: [...product.sizes], builtin: true, displayType: 'pill', swatchHex: {}, libraryId: libId('Size') },
+      { name: 'Placements', values: [], builtin: true, displayType: 'radio', swatchHex: {}, libraryId: libId('Placements') },
     ];
     const loadedAttributes: ProductAttribute[] = [
       ...builtinAttributes.map((base) => {
@@ -983,12 +1103,29 @@ export default function ProductsView() {
     setFormSizeChartId(product.sizeChartId ?? '');
     setFormAttributes(loadedAttributes);
     setFormPartner(product.partner);
+    setFormExchangePolicy(product.exchangePolicy ?? 'defects_only');
+    setFormProductKind(product.productKind ?? 'physical');
+    setFormLowStock(product.lowStockThreshold !== undefined ? String(product.lowStockThreshold) : '');
     setFormStatus(product.publicationStatus);
     setFormDescription(product.description);
   };
 
-  const handleEditSubmit = (e: React.FormEvent) => {
+  /** Field errors from the server decide which tab the editor shows. */
+  const showSaveError = (error: { message: string; details: { field?: string }[] }) => {
+    const fieldName = error.details[0]?.field ?? '';
+    if (fieldName.startsWith('variants')) setProductTab('variants');
+    else if (fieldName.startsWith('images')) setProductTab('media');
+    else if (fieldName) {
+      setProductTab('general');
+      setBasicCardOpen(true);
+      setPricingCardOpen(true);
+    }
+    showToast({ type: 'warning', title: 'Not Saved', description: error.message });
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (saving) return;
     if (!isValidHsnCode(formHsn)) {
       setPricingCardOpen(true);
       setProductTab('general');
@@ -1011,9 +1148,10 @@ export default function ProductsView() {
         return;
       }
       setFormCompareError(null);
-      createProduct({
-        name: formName || 'Untitled Garment',
-        slug: formSlug || formName.toLowerCase().replace(/\s+/g, '-'),
+      setSaving(true);
+      const created = await createProductAction({
+        name: formName,
+        slug: formSlug,
         category: formCategory,
         price: priceNum,
         compareAtPrice: compare.value,
@@ -1029,6 +1167,9 @@ export default function ProductsView() {
         taxRate: formTax.trim() !== '' && !isNaN(parseFloat(formTax)) ? parseFloat(formTax) : undefined,
         hsnCode: formHsn.trim() || undefined,
         sizeChartId: formSizeChartId || undefined,
+        exchangePolicy: formExchangePolicy,
+        lowStockThreshold: formLowStock === '' ? undefined : Number(formLowStock),
+        productKind: formProductKind,
         partner: formPartner,
         publicationStatus: formStatus,
         description: formDescription,
@@ -1048,6 +1189,11 @@ export default function ProductsView() {
             }
           : undefined,
       });
+      setSaving(false);
+      // A refused save keeps the drawer open with every input intact.
+      if (!created.ok) return showSaveError(created.error);
+      setProducts((list) => [created.data.product as unknown as ProductItem, ...list]);
+      showToast({ type: 'success', title: 'Product Created', description: `"${created.data.product.name}" was saved. ${created.data.product.publicationStatus === 'published' ? storefrontNote(created.data.storefront) : 'It stays hidden until published.'}` });
       const droppedCount = formImages.filter((im) => !im.persisted).length;
       if (droppedCount > 0) {
         showToast({
@@ -1092,7 +1238,13 @@ export default function ProductsView() {
     setFormCompareError(null);
     const cleanAdjustments = pruneAdjustments(formAdjustments, formAttributes).next;
 
-    updateProduct(editingProduct.id, {
+    setSaving(true);
+    const updated = await updateProductAction({
+      id: editingProduct.id,
+      expectedUpdatedAt: editingProduct.updatedAt,
+      colors: colorValues,
+      sizes: sizeValues,
+      stock: submitVariants.reduce((n, v) => n + v.stock, 0),
       name: formName,
       slug: formSlug,
       category: formCategory,
@@ -1112,6 +1264,9 @@ export default function ProductsView() {
       taxRate: formTax.trim() !== '' && !isNaN(parseFloat(formTax)) ? parseFloat(formTax) : undefined,
       hsnCode: formHsn.trim() || undefined,
       sizeChartId: formSizeChartId || undefined,
+      exchangePolicy: formExchangePolicy,
+      lowStockThreshold: formLowStock === '' ? undefined : Number(formLowStock),
+      productKind: formProductKind,
       photoSettings: formPhoto,
       discounts: formDiscounts,
       images: formImages.filter((im) => im.persisted).map((im) => im.src),
@@ -1129,6 +1284,10 @@ export default function ProductsView() {
           }
         : undefined,
     });
+    setSaving(false);
+    if (!updated.ok) return showSaveError(updated.error);
+    setProducts((list) => list.map((p) => (p.id === editingProduct.id ? (updated.data.product as unknown as ProductItem) : p)));
+    showToast({ type: 'success', title: 'Product Updated', description: `Changes saved. ${storefrontNote(updated.data.storefront)}` });
 
     const droppedCount = formImages.filter((im) => !im.persisted).length;
     if (droppedCount > 0) {
@@ -1157,8 +1316,8 @@ export default function ProductsView() {
       stockFilter === 'all'
         ? true
         : stockFilter === 'low'
-          ? p.stock > 0 && p.stock <= 10
-          : p.stock === 0;
+          ? !p.madeToOrder && p.stock > 0 && p.stock <= (p.lowStockAt ?? 10)
+          : !p.madeToOrder && p.stock === 0;
     return matchesSearch && matchesCat && matchesPub && matchesStock;
   });
 
@@ -1279,9 +1438,12 @@ export default function ProductsView() {
   const [importPreview, setImportPreview] = useState<{
     fileName: string;
     groups: ImportProductGroup[];
+    /** Exactly what the server import receives. */
+    listing: Record<string, unknown>[];
     errors: Array<{ row: number; message: string }>;
     hasCategoryColumn: boolean;
   } | null>(null);
+  const [importing, setImporting] = useState(false);
   const csvInputRef = useRef<HTMLInputElement>(null);
   const importVariantTotal =
     importPreview?.groups.reduce((total, group) => total + group.variants.length, 0) ?? 0;
@@ -1317,9 +1479,6 @@ export default function ProductsView() {
     }
     return rows.filter((r) => r.some((c) => c.trim() !== ''));
   };
-
-  const splitList = (s: string) =>
-    s.split(',').map((x) => x.trim()).filter(Boolean);
 
   const handleImportFile = (file: File | undefined) => {
     if (!file) return;
@@ -1373,199 +1532,62 @@ export default function ProductsView() {
       const cWeight = col(['weight']);
       const cShip = col(['shipping weight', 'ship weight']);
       const cPrice = col(['base price', 'price']);
-      const cCompare = col(['compare at price', 'compare price', 'compare-at price', 'was price', 'original price']);
       const cPlace = col(['placements', 'placement']);
       const cDims = col(['package dimensions (lxbxh)', 'package dimensions', 'dimensions', 'package dimension']);
       const cTax = col(['tax rate', 'tax']);
       const cGender = col(['gender']);
       const cHsn = col(['hsn', 'hsn code', 'hsn/sac']);
       const cCategory = col(['category', 'product category']);
-      const rows: ImportSourceRow[] = [];
-      const errors: Array<{ row: number; message: string }> = [];
-
-      grid.slice(headerRowIndex + 1).forEach((cells, i) => {
-        const rowNo = headerRowIndex + i + 2;
+      // The same planner the server import runs, so the preview cannot drift
+      // from what actually gets created.
+      const sheetRows: number[] = [];
+      const listing = grid.slice(headerRowIndex + 1).map((cells, i) => {
+        sheetRows.push(headerRowIndex + i + 2);
         const get = (c: number) => (c >= 0 ? (cells[c] ?? '').trim() : '');
-        const styleRaw = get(cStyle);
-        const [namePart, ...codeParts] = styleRaw.split('|');
-        const name = namePart?.trim() ?? '';
-        const styleCode = codeParts.join('|').trim();
-        const priceRaw = get(cPrice);
-        if (!name) {
-          errors.push({ row: rowNo, message: 'Style is required.' });
-          return;
-        }
-        const price = parseFloat(priceRaw);
-        if (priceRaw === '' || isNaN(price) || price < 0) {
-          errors.push({ row: rowNo, message: `"${name}": Base Price must be zero or more.` });
-          return;
-        }
-        const compareRaw = get(cCompare);
-        let compareAtPrice: number | undefined;
-        if (compareRaw !== '') {
-          const parsedCompare = parseCompareAtPrice(compareRaw, price);
-          if (parsedCompare.error) {
-            errors.push({
-              row: rowNo,
-              message: `"${name}": Compare-at price must be a valid amount above the base price (₹${price.toFixed(2)}).`,
-            });
-            return;
-          }
-          compareAtPrice = parsedCompare.value;
-        }
-        const serialRaw = get(cSerial);
-        let serialNo: number | undefined;
-        if (serialRaw !== '') {
-          serialNo = Number(serialRaw);
-          if (!Number.isInteger(serialNo) || serialNo <= 0) {
-            errors.push({ row: rowNo, message: `"${name}": S.No must be a positive whole number.` });
-            return;
-          }
-        }
-        const taxRaw = get(cTax);
-        if (taxRaw !== '' && (isNaN(parseFloat(taxRaw)) || parseFloat(taxRaw) < 0)) {
-          errors.push({ row: rowNo, message: `"${name}": Tax Rate must be zero or more.` });
-          return;
-        }
-        const genderRaw = get(cGender);
-        const canonicalGender = IMPORT_GENDERS.find(
-          (gender) => gender.toLowerCase() === genderRaw.toLowerCase()
-        );
-        if (genderRaw !== '' && !canonicalGender) {
-          errors.push({
-            row: rowNo,
-            message: `"${name}": Gender must be Female, Male, Unisex, Kids, Boy, or Girl.`,
-          });
-          return;
-        }
-        const hsnRaw = get(cHsn);
-        if (!isValidHsnCode(hsnRaw)) {
-          errors.push({ row: rowNo, message: `"${name}": HSN must be 4–8 digits, or blank.` });
-          return;
-        }
-
-        const raw: Record<string, string> = {};
-        headers.forEach((header, index) => {
-          if (header && header !== 'id') raw[header] = (cells[index] ?? '').trim();
-        });
-
-        rows.push({
-          rowNo,
-          serialNo,
-          name,
-          styleCode,
-          gender: canonicalGender ?? '',
-          colors: splitList(get(cColors)),
-          sizes: splitList(get(cSizes)),
-          placements: splitList(get(cPlace)),
-          price,
-          compareAtPrice,
-          weight: get(cWeight),
-          shippingWeight: get(cShip),
-          dimensions: get(cDims),
-          tax: taxRaw,
-          hsnCode: hsnRaw,
-          category: get(cCategory),
-          raw,
-        });
+        return {
+          qikinkId: get(cSerial), gender: get(cGender), style: get(cStyle), sizes: get(cSizes), colors: get(cColors), placements: get(cPlace), basePriceINR: get(cPrice),
+          weightGrams: get(cWeight), shippingWeightGrams: get(cShip), packageDimensionsCm: get(cDims), taxRatePercent: get(cTax), hsn: get(cHsn), category: get(cCategory),
+        };
       });
-
-      const grouped = groupImportRows(rows);
+      const parsed = parseQikinkListing(listing);
+      const grouped = groupImportRows(parsed.rows);
       setImportPreview({
         fileName: file.name,
         groups: grouped.groups,
-        errors: [...errors, ...grouped.errors],
+        listing,
+        errors: [...parsed.issues, ...grouped.issues].map((issue) => ({ row: sheetRows[issue.row - 1] ?? issue.row, message: issue.message })),
         hasCategoryColumn: cCategory >= 0,
       });
     };
     reader.readAsText(file);
   };
 
-  const applyImport = () => {
-    if (!importPreview || importPreview.groups.length === 0) return;
-    if (!canPerformAction('products')) return;
-    const stamp = Date.now().toString(36);
-    const stagedVariants = importPreview.groups.reduce(
-      (total, group) => total + group.variants.length,
-      0
-    );
-
-    const drafts = importPreview.groups.map((group, i) => {
-      const minPrice =
-        group.variants.length > 0 ? Math.min(...group.variants.map((variant) => variant.price)) : 0;
-      const lowestVariant = group.variants.reduce<ImportProductGroup['variants'][number] | undefined>(
-        (lowest, variant) => (!lowest || variant.price < lowest.price ? variant : lowest),
-        undefined
-      );
-      const compareAtPrice =
-        lowestVariant?.compareAtPrice !== undefined && lowestVariant.compareAtPrice > minPrice
-          ? lowestVariant.compareAtPrice
-          : undefined;
-      const gender = IMPORT_GENDERS.find(
-        (value) => value.toLowerCase() === group.gender.toLowerCase()
-      );
-
-      return {
-        name: group.name || 'Untitled Garment',
-        slug: `${slugify(group.name) || 'product'}-imp-${stamp}-${i}`,
-        category: group.category || UNCATEGORIZED_CATEGORY,
-        price: minPrice,
-        basePrice: minPrice,
-        compareAtPrice,
-        stock: 0,
-        colors: group.colors.length > 0 ? group.colors : ['Default'],
-        sizes: group.sizes.length > 0 ? group.sizes : ['Standard'],
-        partner: 'Qikink Direct API' as const,
-        publicationStatus: 'draft' as const,
-        description: '',
-        images: [],
-        styleCode: group.styleCode || undefined,
-        internalSerialNo: group.serialNo,
-        sourceGroupKey: group.key,
-        weight: group.weight || undefined,
-        shippingWeight: group.shippingWeight || undefined,
-        dimensions: group.dimensions || undefined,
-        gender,
-        taxRate: group.taxRate,
-        hsnCode: group.hsnCode || undefined,
-        sourceRows: group.sourceRows,
-        variants: group.variants.map((variant) => ({
-          id: '',
-          sku: '',
-          color: variant.color,
-          size: variant.size,
-          price: variant.price,
-          priceOverridden: true,
-          stock: 0,
-          weight: variant.weight,
-          shippingWeight: variant.shippingWeight,
-          dimensions: variant.dimensions,
-          sourceSerialNo: variant.sourceSerialNo,
-        })),
-        attributes: [
-          { name: 'Color', values: group.colors, builtin: true, displayType: 'swatch' as const, swatchHex: {} },
-          { name: 'Size', values: group.sizes, builtin: true, displayType: 'pill' as const, swatchHex: {} },
-          { name: 'Placements', values: group.placements, builtin: true, displayType: 'radio' as const, swatchHex: {} },
-        ],
-      };
+  // The server re-validates every row and creates drafts (import_jobs); the
+  // preview above is only a convenience.
+  const applyImport = async () => {
+    if (!importPreview || importPreview.groups.length === 0 || importing) return;
+    if (!can('product.import')) return refused('import products');
+    setImporting(true);
+    const result = await importListingAction({
+      rows: importPreview.listing,
     });
-
-    const staged = createProducts(drafts, true);
+    setImporting(false);
+    if (!result.ok) return showToast({ type: 'warning', title: 'Import Failed', description: result.error.message });
     setImportPreview(null);
     if (csvInputRef.current) csvInputRef.current.value = '';
+    const { created, updated, failedRows } = result.data;
     showToast({
-      type: 'success',
-      title: 'Import Staged',
-      description: `${staged} draft product${staged === 1 ? '' : 's'} with ${stagedVariants} variant${
-        stagedVariants === 1 ? '' : 's'
-      } added — review and publish each from the catalog. Demo catalog persists locally.`,
+      type: failedRows ? 'warning' : 'success',
+      title: failedRows ? 'Import Partly Done' : 'Import Staged',
+      description: `${created} new draft${created === 1 ? '' : 's'}, ${updated} already in the catalog${failedRows ? `, ${failedRows} row${failedRows === 1 ? '' : 's'} refused` : ''}. Review prices and publish each from the catalog.`,
     });
+    router.refresh();
   };
 
   // Customer-view gallery slides: the ordered image list (persisted + previews).
   const gallerySlides: Array<{ type: 'image'; src: string; alt: string }> = formImages.map((im) => ({
     type: 'image' as const,
-    src: im.src,
+    src: assetSrc(im.src),
     alt: formName || 'Product image',
   }));
 
@@ -1616,58 +1638,52 @@ export default function ProductsView() {
     clearSelection();
   };
 
-  const handleBulkStatus = (status: 'published' | 'archived', label: string) => {
+  const handleBulkStatus = async (status: 'published' | 'archived', label: string) => {
     const ids = [...selectedIds];
-    if (ids.length === 0) return;
-    if (!canPerformAction('products')) {
-      showToast({
-        type: 'warning',
-        title: 'Action Restricted',
-        description: 'Your demo role cannot update products.',
-      });
-      return;
-    }
-    ids.forEach((id) => updateProduct(id, { publicationStatus: status }, true));
-    if (editingProduct && selectedIds.has(editingProduct.id)) {
-      setEditingProduct({ ...editingProduct, publicationStatus: status });
-    }
+    if (ids.length === 0 || saving) return;
+    if (!can(status === 'archived' ? 'product.archive' : 'product.update')) return refused('change product status');
+    setSaving(true);
+    const result = await setProductsStatusAction({ ids, status });
+    setSaving(false);
+    if (!result.ok) return showToast({ type: 'warning', title: 'Not Updated', description: result.error.message });
+    const done = new Set(result.data.updated);
+    setProducts((list) => list.map((p) => (done.has(p.id) ? { ...p, publicationStatus: status } : p)));
+    if (editingProduct && done.has(editingProduct.id)) setEditingProduct({ ...editingProduct, publicationStatus: status });
     setPublicationFilter('all');
     setCurrentPage(1);
+    const { refused: skipped } = result.data;
     showToast({
-      type: 'success',
-      title: 'Bulk Update Applied',
-      description: `${ids.length} product${ids.length === 1 ? '' : 's'} marked ${label}.`,
+      type: skipped.length ? 'warning' : 'success',
+      title: skipped.length ? 'Partly Updated' : 'Bulk Update Applied',
+      description: `${done.size} product${done.size === 1 ? '' : 's'} marked ${label}.${skipped.length ? ` Skipped: ${skipped.slice(0, 3).map((x) => `${x.name} (${x.reason})`).join(', ')}${skipped.length > 3 ? ` and ${skipped.length - 3} more` : ''}.` : ''}`,
     });
     clearSelection();
   };
 
-  const handleBulkDelete = () => {
+  const removeProducts = async (ids: string[]) => {
+    if (!can('product.archive')) { refused('delete products'); return false; }
+    setSaving(true);
+    const result = await deleteProductsAction({ ids });
+    setSaving(false);
+    if (!result.ok) { showToast({ type: 'warning', title: 'Not Deleted', description: result.error.message }); return false; }
+    const gone = new Set(result.data.deleted);
+    setProducts((list) => list.filter((p) => !gone.has(p.id)));
+    return true;
+  };
+
+  const handleBulkDelete = async () => {
     const ids = [...selectedIds];
-    if (ids.length === 0) return;
-    if (!canPerformAction('products')) {
-      showToast({
-        type: 'warning',
-        title: 'Action Restricted',
-        description: 'Your demo role cannot delete products.',
-      });
-      return;
-    }
-    if (!window.confirm(`Permanently delete ${ids.length} product${ids.length === 1 ? '' : 's'} from catalog?`)) return;
-    ids.forEach((id) => deleteProduct(id, true));
-    if (editingProduct && selectedIds.has(editingProduct.id)) {
-      setEditingProduct(null);
-    }
+    if (ids.length === 0 || saving) return;
+    if (!window.confirm(`Delete ${ids.length} product${ids.length === 1 ? '' : 's'} from the catalog? They disappear from the store; past orders keep their records.`)) return;
+    if (!(await removeProducts(ids))) return;
+    if (editingProduct && selectedIds.has(editingProduct.id)) setEditingProduct(null);
     setCurrentPage(1);
-    showToast({
-      type: 'success',
-      title: 'Bulk Delete Applied',
-      description: `${ids.length} product${ids.length === 1 ? '' : 's'} removed from catalog.`,
-    });
+    showToast({ type: 'success', title: 'Bulk Delete Applied', description: `${ids.length} product${ids.length === 1 ? '' : 's'} removed from the catalog.` });
     clearSelection();
   };
 
-  const lowStockCount = products.filter((p) => p.stock > 0 && p.stock <= 10).length;
-  const outOfStockCount = products.filter((p) => p.stock === 0).length;
+  const lowStockCount = products.filter((p) => !p.madeToOrder && p.stock > 0 && p.stock <= (p.lowStockAt ?? 10)).length;
+  const outOfStockCount = products.filter((p) => !p.madeToOrder && p.stock === 0).length;
   const draftCount = products.filter((p) => p.publicationStatus === 'draft').length;
 
   // KPI cards double as filters (shared by grid + table views)
@@ -1777,7 +1793,7 @@ export default function ProductsView() {
       </span>
       <MediaFrame height={40} width={40} radius={8} style={{ flexShrink: 0 }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={im.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        <img src={assetSrc(im.src)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       </MediaFrame>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--tuw-text-primary, #262626)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -1854,7 +1870,7 @@ export default function ProductsView() {
         >
           <MediaFrame height={72} width={72} radius={8} style={{ flexShrink: 0 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={im.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src={assetSrc(im.src)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </MediaFrame>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -2058,12 +2074,18 @@ export default function ProductsView() {
             >
               <span>Attribute Library</span>
             </LinkButton>
+            <LinkButton href="/products/categories" variant="secondary" size="md" icon={<Tag size={16} />}>
+              Categories
+            </LinkButton>
+            <LinkButton href="/products/reviews" variant="secondary" size="md" icon={<CheckCircle2 size={16} />}>
+              Reviews
+            </LinkButton>
             <Button
               variant="secondary"
               size="md"
               icon={<Upload size={16} />}
               onClick={() => {
-                if (!canPerformAction('products')) return;
+                if (!can('product.import')) return refused('import products');
                 csvInputRef.current?.click();
               }}
             >
@@ -2097,7 +2119,7 @@ export default function ProductsView() {
         <StatCard
           label="Total Products"
           value={String(products.length)}
-          trend="Managed in local memory"
+          trend="In the database"
           trendType="up"
           hoverable
           role="button"
@@ -2112,7 +2134,7 @@ export default function ProductsView() {
         <StatCard
           label="Low Stock Alerts"
           value={String(lowStockCount)}
-          subtitle="Stock ≤ 10 units"
+          subtitle="At or below each product's alert level"
           trendType={lowStockCount > 0 ? 'down' : 'up'}
           hoverable
           role="button"
@@ -2265,7 +2287,8 @@ export default function ProductsView() {
                 >
                   {p.images[0] ? (
                     <Image
-                      src={p.images[0]}
+                      src={assetSrc(p.images[0])}
+                      unoptimized
                       alt={p.name}
                       fill
                       sizes="(max-width: 768px) 100vw, 320px"
@@ -2300,8 +2323,8 @@ export default function ProductsView() {
                       {p.category} · {p.partner}
                     </span>
                   </div>
-                  <Badge variant={p.stock > 10 ? 'success' : p.stock > 0 ? 'warning' : 'danger'}>
-                    {p.stock > 10 ? `${p.stock} in stock` : p.stock > 0 ? `Low: ${p.stock}` : 'Out of stock'}
+                  <Badge variant={p.madeToOrder || p.stock > (p.lowStockAt ?? 10) ? 'success' : p.stock > 0 ? 'warning' : 'danger'}>
+                    {p.madeToOrder ? 'Made to order' : p.stock > (p.lowStockAt ?? 10) ? `${p.stock} in stock` : p.stock > 0 ? `Low: ${p.stock}` : 'Out of stock'}
                   </Badge>
                 </div>
 
@@ -2316,7 +2339,7 @@ export default function ProductsView() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 14, paddingTop: 10, borderTop: '1px solid var(--tuw-border-subtle, #E2E4E6)' }}>
                   <div>
                     <span className="tuw-tabular-nums" style={{ fontSize: '18px', fontWeight: 600, color: 'var(--tuw-text-primary, #262626)' }}>
-                      {hasPriceSpread(resolveVariants(p)) && (
+                      {p.priceSpread && (
                         <span style={{ fontSize: '12px', fontWeight: 400, color: 'var(--tuw-text-secondary, #5D6772)', marginRight: 5 }}>From</span>
                       )}
                       ₹{p.price.toFixed(2)}
@@ -2328,7 +2351,7 @@ export default function ProductsView() {
                     )}
                   </div>
 
-                  <Button variant="secondary" size="sm" icon={<Edit3 size={14} />} onClick={() => openEditDrawer(p)}>
+                  <Button variant="secondary" size="sm" icon={<Edit3 size={14} />} disabled={openingId === p.id} aria-busy={openingId === p.id} onClick={() => void openEditDrawer(p)}>
                     Manage
                   </Button>
                 </div>
@@ -2409,7 +2432,7 @@ export default function ProductsView() {
               paginatedProducts.map((p) => (
                 <TableRow
                   key={p.id}
-                  onClick={() => openEditDrawer(p)}
+                  onClick={() => void openEditDrawer(p)}
                   style={{ cursor: 'pointer', backgroundColor: selectedIds.has(p.id) ? 'var(--tuw-bg-canvas, #F7F8F9)' : 'transparent' }}
                 >
                   <TableCell style={{ padding: '14px 16px' }}>
@@ -2424,7 +2447,7 @@ export default function ProductsView() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                       <div style={{ width: 40, height: 40, borderRadius: 8, overflow: 'hidden', position: 'relative', flexShrink: 0, background: 'var(--tuw-bg-canvas, #F7F8F9)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--tuw-border-subtle, #E5E7EB)' }}>
                         {p.images[0] ? (
-                          <Image src={p.images[0]} alt={p.name} fill sizes="80px" style={{ objectFit: 'cover' }} />
+                          <Image src={assetSrc(p.images[0])} unoptimized alt={p.name} fill sizes="80px" style={{ objectFit: 'cover' }} />
                         ) : (
                           <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tuw-text-secondary, #5D6772)' }}>
                             {p.name.slice(0, 2).toUpperCase()}
@@ -2447,7 +2470,7 @@ export default function ProductsView() {
                   <TableCell className="tuw-tabular-nums" style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: 'var(--tuw-text-primary, #262626)', textAlign: 'right' }}>
                     {/* "From" reads as a quiet label (VPRICE-3); the amount
                         stays the loud part of the cell. */}
-                    {hasPriceSpread(resolveVariants(p)) && (
+                    {p.priceSpread && (
                       <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--tuw-text-secondary, #5D6772)', marginRight: 4 }}>From</span>
                     )}
                     ₹{p.price.toFixed(2)}
@@ -2458,8 +2481,8 @@ export default function ProductsView() {
                     )}
                   </TableCell>
                   <TableCell style={{ padding: '14px 16px' }}>
-                    <div style={{ fontSize: 14, fontWeight: 500, color: p.stock === 0 ? 'var(--tuw-text-error, #C91818)' : p.stock <= 10 ? 'var(--tuw-text-warning, #856300)' : 'var(--tuw-text-primary, #262626)' }}>
-                      {p.stock} in stock
+                    <div style={{ fontSize: 14, fontWeight: 500, color: p.madeToOrder ? 'var(--tuw-text-primary, #262626)' : p.stock === 0 ? 'var(--tuw-text-error, #C91818)' : p.stock <= 10 ? 'var(--tuw-text-warning, #856300)' : 'var(--tuw-text-primary, #262626)' }}>
+                      {p.madeToOrder ? 'Made to order' : `${p.stock} in stock`}
                     </div>
                     <div className="tuw-tabular-nums" style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
                       {p.soldCount} sold
@@ -2479,7 +2502,7 @@ export default function ProductsView() {
                     </Badge>
                   </TableCell>
                   <TableCell style={{ padding: '14px 16px', textAlign: 'right' }}>
-                    <Button variant="secondary" size="sm" icon={<Edit3 size={14} />} onClick={(e) => { e.stopPropagation(); openEditDrawer(p); }}>
+                    <Button variant="secondary" size="sm" icon={<Edit3 size={14} />} disabled={openingId === p.id} aria-busy={openingId === p.id} onClick={(e) => { e.stopPropagation(); void openEditDrawer(p); }}>
                       Manage
                     </Button>
                   </TableCell>
@@ -2568,6 +2591,7 @@ export default function ProductsView() {
                     { id: 'media', label: 'Media', badge: formImages.length },
                     { id: 'variants', label: 'Variants & Stock', badge: formVariants.length },
                     { id: 'specs', label: 'Clothing Specs' },
+                    { id: 'partner', label: 'Partner SKUs' },
                   ]
             }
             activeTab={productTab}
@@ -2592,9 +2616,12 @@ export default function ProductsView() {
                 size="sm"
                 icon={<Trash2 size={14} />}
                 onClick={() => {
-                  if (window.confirm(`Permanently delete "${editingProduct.name}" from catalog?`)) {
-                    deleteProduct(editingProduct.id);
-                    setEditingProduct(null);
+                  if (window.confirm(`Delete "${editingProduct.name}" from the catalog? It disappears from the store; past orders keep their records.`)) {
+                    void removeProducts([editingProduct.id]).then((ok) => {
+                      if (!ok) return;
+                      showToast({ type: 'info', title: 'Product Deleted', description: `"${editingProduct.name}" was removed from the catalog.` });
+                      setEditingProduct(null);
+                    });
                   }
                 }}
               >
@@ -2604,8 +2631,8 @@ export default function ProductsView() {
                 <Button variant="secondary" size="sm" onClick={() => setEditingProduct(null)}>
                   Cancel
                 </Button>
-                <Button variant="primary" size="sm" onClick={handleEditSubmit}>
-                  Save Changes
+                <Button variant="primary" size="sm" onClick={handleEditSubmit} disabled={saving}>
+                  {saving ? 'Saving…' : 'Save Changes'}
                 </Button>
               </div>
             </div>
@@ -2614,7 +2641,9 @@ export default function ProductsView() {
         }
       >
         {(editingProduct || isCreating) && (
-          productTab === 'general' ? (
+          productTab === 'partner' && editingProduct ? (
+            <PartnerSkuPanel productId={editingProduct.id} />
+          ) : productTab === 'general' ? (
           <form
             onSubmit={handleEditSubmit}
             className={`tuw-pedit-general-grid${drawerView !== 'compact' ? ' is-expanded' : ''}`}
@@ -2936,6 +2965,34 @@ export default function ProductsView() {
                   value={formPartner}
                   onChange={(value) => setFormPartner(value as ProductItem['partner'])}
                   required
+                />
+                <SearchableSelect
+                  label="Exchange policy"
+                  options={[
+                    { value: 'defects_only', label: 'Defects only', description: 'Replaced if damaged, misprinted or wrong' },
+                    { value: 'exchangeable', label: 'Exchangeable', description: 'Another variant within the exchange window' },
+                    { value: 'none', label: 'No exchanges', description: 'Final sale' },
+                  ]}
+                  value={formExchangePolicy}
+                  onChange={(value) => setFormExchangePolicy(value as typeof formExchangePolicy)}
+                />
+              </div>
+              <div style={pairedFieldGrid}>
+                <SearchableSelect
+                  label="Product kind"
+                  options={[
+                    { value: 'physical', label: 'Physical product', description: 'Printed and shipped' },
+                    { value: 'gift_card', label: 'Gift card', description: 'Hidden from the catalog; sold through gift cards' },
+                  ]}
+                  value={formProductKind}
+                  onChange={(value) => setFormProductKind(value as typeof formProductKind)}
+                />
+                <Input
+                  label="Low stock alert at"
+                  placeholder="Store default"
+                  inputMode="numeric"
+                  value={formLowStock}
+                  onChange={(e) => setFormLowStock(e.target.value.replace(/\D/g, ''))}
                 />
               </div>
               <div style={pairedFieldGrid}>
@@ -3594,8 +3651,8 @@ export default function ProductsView() {
                                       <TableCell key={col} style={{ padding: '10px 16px' }}>
                                         <Input
                                           aria-label={`${row.size} ${col} in cm`}
-                                          type="number"
-                                          min="0"
+                                          type="text"
+                                          inputMode="decimal"
                                           value={row.measures[col] ?? ''}
                                           onChange={(e) => patchSizeChartCell(chart.id, row.size, col, e.target.value)}
                                           style={{ height: 36 }}
@@ -3652,6 +3709,29 @@ export default function ProductsView() {
                               disabled={(chartRowDrafts[chart.id] ?? '').trim() === ''}
                             >
                               Add
+                            </Button>
+                          </div>
+                          <div style={{ display: 'flex', gap: 8 }}>
+                            <div style={{ flex: 1 }}>
+                              <Input
+                                aria-label={`Add measurement column to ${chart.name}`}
+                                placeholder="Measurement, e.g. Chest"
+                                value={chartColDrafts[chart.id] ?? ''}
+                                onChange={(e) => setChartColDrafts((prev) => ({ ...prev, [chart.id]: e.target.value }))}
+                              />
+                            </div>
+                            <Button
+                              variant="secondary"
+                              size="md"
+                              type="button"
+                              onClick={() => {
+                                if (addSizeChartColumn(chart.id, chartColDrafts[chart.id] ?? '')) {
+                                  setChartColDrafts((prev) => ({ ...prev, [chart.id]: '' }));
+                                }
+                              }}
+                              disabled={(chartColDrafts[chart.id] ?? '').trim() === ''}
+                            >
+                              Add column
                             </Button>
                           </div>
                         </div>
@@ -3752,10 +3832,10 @@ export default function ProductsView() {
               variant="primary"
               size="md"
               type="button"
-              disabled={!importPreview || importPreview.groups.length === 0}
+              disabled={!importPreview || importPreview.groups.length === 0 || importing}
               onClick={applyImport}
             >
-              Stage {importPreview?.groups.length ?? 0} Product
+              {importing ? 'Importing… ' : 'Stage '}{importPreview?.groups.length ?? 0} Product
               {(importPreview?.groups.length ?? 0) === 1 ? '' : 's'}
             </Button>
           </>
@@ -3771,12 +3851,12 @@ export default function ProductsView() {
                 {importPreview.groups.slice(0, 20).map((group, i) => {
                   const fromPrice =
                     group.variants.length > 0
-                      ? Math.min(...group.variants.map((variant) => variant.price))
+                      ? Math.min(...group.variants.map((variant) => variant.costPaise)) / 100
                       : 0;
                   return (
                     <div key={i} style={{ fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>
                       {group.name} · {group.variants.length} variant
-                      {group.variants.length === 1 ? '' : 's'} · ₹{fromPrice.toLocaleString()}
+                      {group.variants.length === 1 ? '' : 's'} · partner cost from ₹{fromPrice.toLocaleString()}
                       {group.styleCode ? ` · ${group.styleCode}` : ''}
                       {group.gender ? ` · ${group.gender}` : ''}
                     </div>
@@ -3787,6 +3867,9 @@ export default function ProductsView() {
                     …and {importPreview.groups.length - 20} more
                   </div>
                 ) : null}
+              </div>
+              <div style={{ marginTop: 8, fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>
+                Base Price is treated as the partner’s cost. Drafts get a draft retail price (cost × 2.5, rounded up to ₹_99, minimum ₹299) that you can change before publishing.
               </div>
               {!importPreview.hasCategoryColumn ? (
                 <div style={{ marginTop: 8, fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>

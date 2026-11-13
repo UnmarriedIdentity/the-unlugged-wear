@@ -1,7 +1,13 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import Toast from '@storefront/components/ui/Toast';
+import { useSiteSettings } from '@storefront/lib/site-settings';
+import { Toaster, toast as sonnerToast } from 'sonner';
+import BrandToast, { type BrandToastProps } from '@storefront/components/ui/BrandToast';
+
+// Every storefront toast uses the branded card.
+const showToast = (props: Omit<BrandToastProps, 'id'>) =>
+  sonnerToast.custom((id) => <BrandToast id={id} {...props} />);
 import {
   Product,
   CartItem,
@@ -10,12 +16,12 @@ import {
   Address,
   DemoScenario,
 } from '@storefront/lib/types';
-import {
-  STORE_PRODUCTS,
-  INITIAL_ORDERS,
-  INITIAL_ADDRESS,
-  LONG_CONTENT_PRODUCTS,
-} from './fixtures';
+import { INITIAL_ORDERS, toLongContentProducts } from './fixtures';
+import { useBag } from '@storefront/lib/bag';
+import { previewDiscountAction } from '@/server/order-actions';
+import { formatPaise } from '@storefront/lib/format';
+import type { DiscountRule } from '@tuw/heart/modules/orders';
+import type { Collection, SizeChartData } from '@storefront/lib/types';
 
 export interface ToastMessage {
   id: string;
@@ -31,14 +37,19 @@ interface StoreContextType {
   simulatedError: string | null;
   retryConnection: () => void;
 
-  // Products
+  // Products (from the database via the root layout — TL-BE-05)
   products: Product[];
+  collections: Collection[];
+  hiddenCategories: string[];
+  sizeCharts: SizeChartData[];
   getProductBySlug: (slug: string) => Product | undefined;
 
   // Cart
   cart: CartItem[];
   addToCart: (item: Omit<CartItem, 'id'>) => void;
   updateQuantity: (id: string, qty: number) => void;
+  /** Change a bag line's colour/size; merges with an identical line if one exists. */
+  updateCartItemVariant: (id: string, changes: { color?: string; size?: string; image?: string }) => void;
   removeFromCart: (id: string) => void;
   clearCart: () => void;
   cartCount: number;
@@ -48,7 +59,7 @@ interface StoreContextType {
   freeShippingRemaining: number;
   promoCode: string;
   discountAmount: number;
-  applyPromoCode: (code: string) => boolean;
+  applyPromoCode: (code: string) => Promise<boolean>;
   removePromoCode: () => void;
   isCartDrawerOpen: boolean;
   setIsCartDrawerOpen: (open: boolean) => void;
@@ -77,9 +88,6 @@ interface StoreContextType {
   returns: ReturnRequest[];
   submitReturnRequest: (req: Omit<ReturnRequest, 'id' | 'createdAt' | 'status'>) => void;
 
-  // Addresses
-  addresses: Address[];
-  saveAddress: (address: Address) => void;
 
   // Search & Global filters
   searchQuery: string;
@@ -92,51 +100,57 @@ interface StoreContextType {
 
   // Reset Demo
   resetStoreData: () => void;
+
+  /** Reload the bag and wishlist from the database (after an order is placed). */
+  refreshBag: () => Promise<void>;
 }
 
 const StoreContext = createContext<StoreContextType | null>(null);
 
-const FREE_SHIPPING_THRESHOLD = 3000;
-
 // YYYY-MM-DD in the shopper's own time zone (toISOString would give the UTC
 // date, which is still "yesterday" in India until 05:30).
 const localDate = (d: Date) => d.toLocaleDateString('en-CA');
-const STANDARD_SHIPPING_FEE = 150;
 
-export function StoreProvider({ children }: { children: React.ReactNode }) {
+export function StoreProvider({ children, catalog, session }: { children: React.ReactNode; session?: unknown; catalog: { products: Product[]; collections: Collection[]; hiddenCategories: string[]; sizeCharts: SizeChartData[] } }) {
+  const STORE_PRODUCTS = catalog.products;
+  // Fees come from admin Settings (store_settings). The bag and wishlist
+  // live in the database (useBag); promo codes and orders are still demo.
+  const { shipping } = useSiteSettings();
+  const FREE_SHIPPING_THRESHOLD = shipping.freeThresholdPaise / 100;
+  const STANDARD_SHIPPING_FEE = shipping.standardFeePaise / 100;
   const [scenario, setScenarioState] = useState<DemoScenario>('normal');
   const [simulatedError, setSimulatedError] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[]>(STORE_PRODUCTS);
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [wishlist, setWishlist] = useState<string[]>([]);
+  // A fresh catalog (admin edit → revalidated layout) replaces the baseline.
+  useEffect(() => {
+    if (scenario === 'normal') setProducts(catalog.products);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [catalog.products]);
   const [orders, setOrders] = useState<Order[]>(INITIAL_ORDERS);
   const [returns, setReturns] = useState<ReturnRequest[]>([]);
-  const [addresses, setAddresses] = useState<Address[]>([INITIAL_ADDRESS]);
   const [promoCode, setPromoCode] = useState<string>('');
-  const [discountPercent, setDiscountPercent] = useState<number>(0);
+  const [promoRule, setPromoRule] = useState<DiscountRule | null>(null);
+  const [promoMinPaise, setPromoMinPaise] = useState<number | null>(null);
   const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [hasLoadedStorage, setHasLoadedStorage] = useState(false);
 
-  // Load from localStorage with schema version tuw_website_v4 (bumped when product photos became
-  // illustrations, so saved carts and orders never point at removed images). Older keys are ignored.
+  // Load from localStorage with schema version tuw_website_v5 (v4: product photos became
+  // illustrations; v5: the demo customer changed, so saved orders and addresses for the
+  // previous customer are dropped). Older keys are ignored.
   useEffect(() => {
     try {
-      const savedCart = localStorage.getItem('tuw_website_v4_cart');
-      if (savedCart) setCart(JSON.parse(savedCart));
+      // The bag and wishlist moved to the database; drop the old copies.
+      localStorage.removeItem('tuw_website_v5_cart');
+      localStorage.removeItem('tuw_website_v5_wishlist');
 
-      const savedWishlist = localStorage.getItem('tuw_website_v4_wishlist');
-      if (savedWishlist) setWishlist(JSON.parse(savedWishlist));
-
-      const savedOrders = localStorage.getItem('tuw_website_v4_orders');
+      const savedOrders = localStorage.getItem('tuw_website_v5_orders');
       if (savedOrders) setOrders(JSON.parse(savedOrders));
 
-      const savedReturns = localStorage.getItem('tuw_website_v4_returns');
+      const savedReturns = localStorage.getItem('tuw_website_v5_returns');
       if (savedReturns) setReturns(JSON.parse(savedReturns));
 
-      const savedAddresses = localStorage.getItem('tuw_website_v4_addresses');
-      if (savedAddresses) setAddresses(JSON.parse(savedAddresses));
     } catch (e) {
       console.error('Failed to load storefront state from localStorage', e);
     } finally {
@@ -144,19 +158,16 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Save to localStorage with schema version tuw_website_v4
+  // Save to localStorage with schema version tuw_website_v5
   useEffect(() => {
     if (!hasLoadedStorage) return;
     try {
-      localStorage.setItem('tuw_website_v4_cart', JSON.stringify(cart));
-      localStorage.setItem('tuw_website_v4_wishlist', JSON.stringify(wishlist));
-      localStorage.setItem('tuw_website_v4_orders', JSON.stringify(orders));
-      localStorage.setItem('tuw_website_v4_returns', JSON.stringify(returns));
-      localStorage.setItem('tuw_website_v4_addresses', JSON.stringify(addresses));
+      localStorage.setItem('tuw_website_v5_orders', JSON.stringify(orders));
+      localStorage.setItem('tuw_website_v5_returns', JSON.stringify(returns));
     } catch (e) {
       console.error('Failed to save storefront state to localStorage', e);
     }
-  }, [cart, wishlist, orders, returns, addresses, hasLoadedStorage]);
+  }, [orders, returns, hasLoadedStorage]);
 
   const lastToastRef = useRef<{ key: string; time: number } | null>(null);
 
@@ -168,131 +179,82 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
     lastToastRef.current = { key, time: now };
 
-    const id = `toast-${now}-${Math.random().toString(36).substring(2, 6)}`;
-    const newToast: ToastMessage = { ...toast, id };
-    setToasts((prev) => [...prev, newToast]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 4000);
+    // Rendered by Sonner's <Toaster> below (brand-styled, stacked, swipe-to-dismiss).
+    showToast({ title: toast.title, description: toast.description, tone: toast.type });
   }, []);
 
   const dismissToast = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
+    sonnerToast.dismiss(id);
   }, []);
 
-  // Cart operations
+  // Bag and wishlist from the database.
+  const bag = useBag({ session, onError: (title, message) => showToast({ title, description: message, tone: 'error' }) });
+  const { cart, wishlist, updateQuantity, updateCartItemVariant, clearCart } = bag;
+
   const addToCart = useCallback((item: Omit<CartItem, 'id'>) => {
-    setCart((prev) => {
-      const existingIndex = prev.findIndex(
-        (i) => i.productId === item.productId && i.color === item.color && i.size === item.size && JSON.stringify(i.selectedRadioOptions || []) === JSON.stringify(item.selectedRadioOptions || [])
-      );
-
-      if (existingIndex > -1) {
-        const updated = [...prev];
-        updated[existingIndex].quantity += item.quantity;
-        return updated;
-      }
-
-      const newItem: CartItem = {
-        ...item,
-        id: `ci-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-      };
-      return [...prev, newItem];
-    });
-
+    void bag.addToCart(item);
+    // Opening the bag drawer is the confirmation; a toast on top of it would cover the checkout button.
     setIsCartDrawerOpen(true);
-    addToast({
-      type: 'success',
-      title: 'Added to Bag',
-      description: `${item.title} (${item.color}, Size ${item.size}) added to your bag.`,
-    });
-  }, [addToast]);
-
-  const updateQuantity = useCallback((id: string, qty: number) => {
-    if (qty <= 0) {
-      setCart((prev) => prev.filter((i) => i.id !== id));
-      return;
-    }
-    setCart((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, quantity: qty } : item))
-    );
-  }, []);
+  }, [bag.addToCart]);
 
   const removeFromCart = useCallback((id: string) => {
     const item = cart.find((i) => i.id === id);
-    setCart((prev) => prev.filter((i) => i.id !== id));
-    if (item) {
-      addToast({
-        type: 'info',
-        title: 'Removed from Bag',
-        description: `${item.title} was removed.`,
-      });
-    }
-  }, [cart, addToast]);
-
-  const clearCart = useCallback(() => {
-    setCart([]);
-  }, []);
+    void bag.removeLine(id).then((ok) => {
+      if (ok && item) addToast({ type: 'info', title: 'Removed from Bag', description: `${item.title} was removed.` });
+    });
+  }, [cart, bag.removeLine, addToast]);
 
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
   const cartSubtotal = cart.reduce((acc, item) => acc + item.priceINR * item.quantity, 0);
-  const discountAmount = Math.round((cartSubtotal * discountPercent) / 100);
+  // Same rule the server applies; shown here, recomputed at checkout.
+  const subtotalPaise = Math.round(cartSubtotal * 100);
+  const discountPaise = !promoRule || (promoMinPaise !== null && subtotalPaise < promoMinPaise) ? 0
+    : promoRule.type === 'percent' ? Math.round((subtotalPaise * promoRule.percent) / 100) : Math.min(subtotalPaise, promoRule.paise);
+  const discountAmount = discountPaise / 100;
   const eligibleSubtotal = cartSubtotal - discountAmount;
   const shippingFee = cartSubtotal === 0 || eligibleSubtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_FEE;
   const freeShippingRemaining = Math.max(0, FREE_SHIPPING_THRESHOLD - eligibleSubtotal);
 
-  const applyPromoCode = (code: string): boolean => {
-    const clean = code.trim().toUpperCase();
-    if (clean === 'UNPLUGGED10' || clean === 'MINIMAL10') {
-      setPromoCode(clean);
-      setDiscountPercent(10);
-      addToast({
-        type: 'success',
-        title: 'Promo Applied',
-        description: '10% discount applied to your order.',
-      });
+  /** Checked on the server against the bag; the order total is decided again at checkout. */
+  const applyPromoCode = async (code: string): Promise<boolean> => {
+    const result = await previewDiscountAction({ code });
+    if (result.ok) {
+      setPromoCode(result.data.code);
+      setPromoRule(result.data.rule);
+      setPromoMinPaise(result.data.minOrderPaise);
+      addToast({ type: 'success', title: 'Code applied', description: `${result.data.code} takes ${formatPaise(result.data.discountPaise)} off this bag.` });
       return true;
     }
-    addToast({
-      type: 'error',
-      title: 'Invalid Promo Code',
-      description: 'Code not recognized or expired. Try "UNPLUGGED10".',
-    });
+    addToast({ type: 'error', title: 'Code not applied', description: result.error.message });
     return false;
   };
 
   const removePromoCode = () => {
     setPromoCode('');
-    setDiscountPercent(0);
+    setPromoRule(null);
+    setPromoMinPaise(null);
   };
 
-  // Wishlist operations
+  // Wishlist: customers only, so a guest's heart asks them to sign in.
   const toggleWishlist = useCallback((productId: string) => {
-    const isCurrentlySaved = wishlist.includes(productId);
     const product = products.find((p) => p.id === productId);
-
-    setWishlist((prev) => {
+    const name = product?.title ?? 'This piece';
+    const image = product?.images[0]?.url;
+    if (!bag.signedIn) {
+      const next = typeof window === 'undefined' ? '/' : window.location.pathname;
+      showToast({ title: 'Sign in to save pieces', description: 'Your wishlist is kept with your account.', image, tone: 'info', action: { label: 'Sign in', href: `/login?next=${encodeURIComponent(next)}` } });
+      return;
+    }
+    const isCurrentlySaved = wishlist.includes(productId);
+    void bag.setSaved(productId, !isCurrentlySaved).then((ok) => {
+      if (!ok) return;
       if (isCurrentlySaved) {
-        return prev.filter((id) => id !== productId);
+        showToast({ title: 'Removed from wishlist', description: name, image, tone: 'info', action: { label: 'Undo', onClick: () => void bag.setSaved(productId, true) } });
       } else {
-        return [...prev, productId];
+        showToast({ title: 'Saved to wishlist', description: name, image, action: { label: 'View', href: '/wishlist' } });
       }
     });
-
-    if (isCurrentlySaved) {
-      addToast({
-        type: 'info',
-        title: 'Removed from Wishlist',
-        description: product ? `${product.title} removed.` : undefined,
-      });
-    } else {
-      addToast({
-        type: 'success',
-        title: 'Saved to Wishlist',
-        description: product ? `${product.title} saved to your wishlist.` : undefined,
-      });
-    }
-  }, [wishlist, products, addToast]);
+  }, [wishlist, products, bag.signedIn, bag.setSaved]);
 
   const isInWishlist = useCallback(
     (productId: string) => wishlist.includes(productId),
@@ -376,23 +338,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  // Addresses
-  const saveAddress = (address: Address) => {
-    setAddresses((prev) => {
-      const idx = prev.findIndex((a) => a.id === address.id);
-      if (idx > -1) {
-        const updated = [...prev];
-        updated[idx] = address;
-        return updated;
-      }
-      return [...prev, address];
-    });
-    addToast({
-      type: 'success',
-      title: 'Address Saved',
-      description: 'Your delivery address has been updated.',
-    });
-  };
+  // Addresses live in the real address book now (storefront/lib/account, TL-BE-03).
 
   const getProductBySlug = (slug: string) =>
     products.find(
@@ -406,8 +352,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     if (sc === 'empty') {
       setProducts([]);
       setOrders([]);
-      setCart([]);
-      setWishlist([]);
+      // The bag and wishlist are real now (database); scenarios leave them alone.
       setSimulatedError(null);
       addToast({
         type: 'info',
@@ -422,7 +367,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         description: 'Simulating edge network disruption and recovery flows.',
       });
     } else if (sc === 'long_content') {
-      setProducts(LONG_CONTENT_PRODUCTS);
+      setProducts(toLongContentProducts(STORE_PRODUCTS));
       setSimulatedError(null);
       addToast({
         type: 'info',
@@ -455,14 +400,18 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setScenarioState('normal');
     setSimulatedError(null);
     setProducts(STORE_PRODUCTS);
-    setCart([]);
-    setWishlist([]);
+    // The bag and wishlist are real now (database); reset leaves them alone.
     setOrders(INITIAL_ORDERS);
     setReturns([]);
-    setAddresses([INITIAL_ADDRESS]);
     setPromoCode('');
-    setDiscountPercent(0);
+    setPromoRule(null);
+    setPromoMinPaise(null);
     try {
+      localStorage.removeItem('tuw_website_v5_cart');
+      localStorage.removeItem('tuw_website_v5_wishlist');
+      localStorage.removeItem('tuw_website_v5_orders');
+      localStorage.removeItem('tuw_website_v5_returns');
+      localStorage.removeItem('tuw_website_v5_addresses');
       localStorage.removeItem('tuw_website_v4_cart');
       localStorage.removeItem('tuw_website_v4_wishlist');
       localStorage.removeItem('tuw_website_v4_orders');
@@ -491,10 +440,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         simulatedError,
         retryConnection,
         products,
+        collections: catalog.collections,
+        hiddenCategories: catalog.hiddenCategories,
+        sizeCharts: catalog.sizeCharts,
         getProductBySlug,
         cart,
         addToCart,
         updateQuantity,
+        updateCartItemVariant,
         removeFromCart,
         clearCart,
         cartCount,
@@ -517,20 +470,19 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         getOrderByNumber,
         returns,
         submitReturnRequest,
-        addresses,
-        saveAddress,
         searchQuery,
         setSearchQuery,
         toasts,
         addToast,
         dismissToast,
         resetStoreData,
+        refreshBag: bag.refreshBag,
       }}
     >
       {children}
 
-      {/* Floating Luxury Storefront Toast Notifications */}
-      <Toast toasts={toasts} onDismiss={dismissToast} />
+      {/* Small toasts near the top edge, over the announcement bar. */}
+      <Toaster position="top-center" offset={{ top: 12 }} mobileOffset={{ top: 8 }} duration={3000} visibleToasts={3} gap={6} />
     </StoreContext.Provider>
   );
 }

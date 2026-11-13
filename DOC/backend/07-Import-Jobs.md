@@ -95,6 +95,33 @@ duplicates. `product_source_rows` preserves the row-level S.No history.
 `.xls` binaries get the Save-as-CSV guidance (recorded limitation — binary
 BIFF parsing would buy a dependency for one legacy format).
 
+## As built (TL-BE-05, 2026-11-11)
+
+`catalog.importQikinkListing(rows, { actorId })` (planner in
+`modules/catalog/planner.ts`, job in `import.ts`):
+
+- Rows are validated first (style, gender, positive base price, HSN 4–8
+  digits, tax 0–28%, at least one option); a bad row is reported with its
+  row number and skipped.
+- Grouping follows the rules above; the `sizes` column's meaning is
+  suggested per group (Size, Model, Dimensions, Capacity, Shape, Style).
+  The first real run found one HSN conflict: Polo MP25 XXL White is
+  `610990`, the rest `61091000`, so MP25 was split — fix it in the sheet.
+- Products are created as **drafts**, uncategorised, with variant prices
+  from the draft rule (partner cost × 2.5 up to ₹_99, min ₹299, integer
+  math) and `price_is_draft`. `base_price` is the retail anchor (lowest
+  tier); partner cost is kept in the source rows only.
+- Each group is its own transaction, four at a time, written with bulk
+  statements (`jsonb_to_recordset`, ~13 round trips per group). An advisory
+  lock per group key makes parallel runs safe; slug and SKU allocation take
+  a lock per base name (one style sold for four genders).
+- Re-running the same sheet creates nothing and keeps every staff edit;
+  only new colour × option combinations and source rows are added.
+- `import_jobs` records `completed` / `partial` / `failed`,
+  `success_count + failed_count = total_rows`, and the row errors.
+- Products always get `source = 'csv'` (a JSON export is still the sheet);
+  the job keeps the file format.
+
 ## Import relationship slice
 
 ```mermaid

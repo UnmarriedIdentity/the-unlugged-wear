@@ -2,6 +2,8 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { logoutAction } from '@/server/auth-actions';
 import { cn } from '@/lib/cn';
 import type { LucideIcon } from 'lucide-react';
 import SidebarNavBadge from './SidebarNavBadge';
@@ -35,11 +37,20 @@ interface SidebarNavItemProps {
 export default function SidebarNavItem({ item, active, isCollapsed, variant = 'branch' }: SidebarNavItemProps) {
   const ItemIcon = item.icon;
   const iconSize = variant === 'branch' ? 17 : 18;
+  const router = useRouter();
 
   if (variant === 'danger') {
     return (
       <Link
         href={item.href}
+        onClick={(event) => {
+          // Log out = revoke this browser's session, then go to the login page.
+          event.preventDefault();
+          void logoutAction({}).finally(() => {
+            router.push(item.href);
+            router.refresh();
+          });
+        }}
         className={cn('group relative flex w-full cursor-pointer select-none rounded-nav border-0 bg-transparent text-left text-[14px] font-medium transition-all duration-150 mt-0.5 focus-visible:outline-2 focus-visible:outline-error-text focus-visible:outline-offset-2', isCollapsed ? 'justify-center p-2' : 'items-center gap-3 px-3 py-2', 'text-secondary hover:bg-error-bg hover:text-error-text')}
         title={isCollapsed ? item.label : undefined}
       >

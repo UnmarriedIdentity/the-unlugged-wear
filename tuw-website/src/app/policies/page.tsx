@@ -1,90 +1,64 @@
-'use client';
-
-import React from 'react';
 import Link from 'next/link';
+import { ArrowRight, FileText, Lock, RefreshCw, Truck } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import Header from '@storefront/components/layout/Header';
 import Footer from '@storefront/components/layout/Footer';
 import Breadcrumb from '@storefront/components/ui/Breadcrumb';
-import { ArrowRight, ShieldAlert, FileText, RefreshCw, Truck, Lock } from 'lucide-react';
+import { getPolicies, type PolicySlug } from '@storefront/lib/policies';
+import { getStorefrontSettings } from '@/server/settings';
 
-export default function PoliciesIndexPage() {
-  const policies = [
-    {
-      title: 'Returns & Exchanges Policy',
-      path: '/policies/returns',
-      icon: <RefreshCw size={20} className="text-[#7539FF]" />,
-      desc: '14-day doorstep return pickup and exchange process for unworn garments.',
-    },
-    {
-      title: 'Shipping & Delivery Policy',
-      path: '/policies/shipping',
-      icon: <Truck size={20} className="text-[#10B981]" />,
-      desc: 'Information regarding domestic surface transit, free shipping thresholds, and POD lead times.',
-    },
-    {
-      title: 'Privacy Policy',
-      path: '/policies/privacy',
-      icon: <Lock size={20} className="text-[#F59E0B]" />,
-      desc: 'How we securely handle recipient contact info, address book tokens, and preferences.',
-    },
-    {
-      title: 'Terms of Service',
-      path: '/policies/terms',
-      icon: <FileText size={20} className="text-[#1A1A1A]" />,
-      desc: 'Legal terms governing your usage of The Unplugged Wear digital catalog and storefront.',
-    },
-  ];
+const ICONS: Record<PolicySlug, LucideIcon> = {
+  returns: RefreshCw,
+  shipping: Truck,
+  privacy: Lock,
+  terms: FileText,
+};
 
+export default async function PoliciesIndexPage() {
+  const settings = await getStorefrontSettings();
+  const policies = getPolicies({ supportEmail: settings.supportEmail, freeThresholdPaise: settings.shipping.freeThresholdPaise, standardFeePaise: settings.shipping.standardFeePaise });
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF9F6]">
+    <div className="min-h-screen flex flex-col bg-store-canvas text-store-charcoal">
       <Header />
 
-      <main className="flex-1 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 w-full">
-        <Breadcrumb
-          items={[
-            { label: 'Home', href: '/' },
-            { label: 'Studio Policies' },
-          ]}
-        />
+      <main className="flex-1 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 w-full">
+        <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Policies' }]} />
 
-        <div className="my-8">
-          <div className="inline-flex items-center gap-1.5 p-2 px-3 rounded-lg bg-[#FFFBEB] border border-[#FDE68A] text-xs font-semibold text-[#B45309] mb-4">
-            <ShieldAlert size={14} />
-            <span>Draft Notice: All policy copy is currently marked as draft pending legal counsel sign-off.</span>
-          </div>
-
-          <h1 className="text-[clamp(1.75rem,4vw+0.5rem,3rem)] font-extrabold tracking-tight text-[#1A1A1A]">
-            Studio Policies & Governance
+        <header className="mt-8 mb-10 max-w-2xl">
+          <h1 className="font-heading text-[clamp(2rem,3vw+1rem,3rem)] font-medium tracking-tight text-store-charcoal">
+            Policies
           </h1>
-          <p className="text-sm text-[#666] mt-2">
-            Clear, transparent expectations governing production, logistics, privacy, and customer satisfaction.
+          <p className="mt-3 text-base sm:text-lg text-store-text-secondary leading-relaxed">
+            How we ship, take returns and look after your details. Each one starts with a short version.
           </p>
-        </div>
+          <p className="mt-4 text-sm text-store-text-secondary border-l-2 border-store-gold pl-3">
+            Draft policies — to be reviewed before launch.
+          </p>
+        </header>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4">
-          {policies.map((p) => (
-            <Link
-              key={p.path}
-              href={p.path}
-              className="group p-6 rounded-3xl bg-white border border-[#E2DDCF] shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
-            >
-              <div>
-                <div className="w-12 h-12 rounded-2xl bg-[#F4F1EA] flex items-center justify-center mb-4">
-                  {p.icon}
-                </div>
-                <h3 className="text-base font-bold text-[#1A1A1A] group-hover:underline">
-                  {p.title}
-                </h3>
-                <p className="text-xs text-[#666] mt-1.5 leading-relaxed">{p.desc}</p>
-              </div>
-
-              <div className="pt-6 mt-4 border-t border-[#E2DDCF] flex items-center justify-between text-xs font-semibold text-[#1A1A1A]">
-                <span>Read Full Document</span>
-                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-              </div>
-            </Link>
-          ))}
-        </div>
+        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {policies.map((policy) => {
+            const Icon = ICONS[policy.slug];
+            return (
+              <li key={policy.slug}>
+                <Link
+                  href={`/policies/${policy.slug}`}
+                  className="group h-full flex flex-col gap-4 p-6 sm:p-8 bg-store-surface border border-store-card-border hover:border-store-charcoal transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-store-gold"
+                >
+                  <Icon size={22} strokeWidth={1.5} aria-hidden="true" className="text-store-charcoal" />
+                  <span className="flex-1">
+                    <span className="block font-heading text-xl font-medium text-store-charcoal">{policy.title}</span>
+                    <span className="block mt-2 text-sm text-store-text-secondary leading-relaxed">{policy.summary}</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 text-sm font-medium text-store-charcoal">
+                    Read policy
+                    <ArrowRight size={14} aria-hidden="true" className="transition-transform group-hover:translate-x-0.5" />
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       </main>
 
       <Footer />

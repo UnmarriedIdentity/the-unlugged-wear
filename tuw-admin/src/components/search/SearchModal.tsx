@@ -3,18 +3,13 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import EmptyState from '@/components/ui/EmptyState';
-import { localSearch } from './localSearch';
-import { getPopularTargets } from './localSearch';
+import { buildSections, getPopularTargets, type ServerHits } from './localSearch';
+import { globalSearchAction } from '@/server/search-actions';
 import { SpotlightRow } from './SpotlightRow';
 import { useFrequentQueries } from './useFrequentQueries';
 import { parseScopedQuery, type ResultSection, type SpotlightResult } from './types';
-import type { CustomerItem, OrderItem, ProductItem, ShipmentItem } from '@/mocks/fixtures';
 
 interface SearchModalProps {
-  orders: OrderItem[];
-  products: ProductItem[];
-  customers: CustomerItem[];
-  shipments: ShipmentItem[];
   onNavigate: (href: string) => void;
   onClose: () => void;
 }
@@ -23,7 +18,7 @@ interface SearchModalProps {
 // prefix shortcut chips, sectioned tile rows with Jump pills. Query state
 // lives here; results come from the search adapter (local store today,
 // database tomorrow). Overlay + entrance motion untouched.
-export function SearchModal({ orders, products, customers, shipments, onNavigate, onClose }: SearchModalProps) {
+export function SearchModal({ onNavigate, onClose }: SearchModalProps) {
   const [query, setQuery] = React.useState('');
   const inputRef = React.useRef<HTMLInputElement>(null);
   const resultsRef = React.useRef<HTMLDivElement>(null);
@@ -33,10 +28,25 @@ export function SearchModal({ orders, products, customers, shipments, onNavigate
     return () => clearTimeout(t);
   }, []);
 
-  const sections: ResultSection[] = React.useMemo(
-    () => localSearch({ orders, products, customers, shipments }, query),
-    [orders, products, customers, shipments, query],
-  );
+  // Database search, debounced; an older answer never replaces a newer one.
+  const [hits, setHits] = React.useState<ServerHits | null>(null);
+  const [searching, setSearching] = React.useState(false);
+  const latest = React.useRef(0);
+  React.useEffect(() => {
+    const { scope, term } = parseScopedQuery(query);
+    if (term.length < 2 || scope === 'pages' || scope === 'shipments') { setHits(null); setSearching(false); return; }
+    const mine = ++latest.current;
+    setSearching(true);
+    const t = setTimeout(() => {
+      void globalSearchAction({ q: term, scope: scope ?? undefined }).then((result) => {
+        if (mine !== latest.current) return;
+        setSearching(false);
+        setHits(result.ok ? result.data : null);
+      });
+    }, 250);
+    return () => clearTimeout(t);
+  }, [query]);
+  const sections: ResultSection[] = React.useMemo(() => buildSections(hits, query), [hits, query]);
   const frequent = useFrequentQueries();
   const popular = React.useMemo(() => getPopularTargets(), []);
   const showingHome = query.trim() === '';
@@ -249,14 +259,20 @@ export function SearchModal({ orders, products, customers, shipments, onNavigate
             )}
           </>
         ) : sections.length === 0 ? (
-          <EmptyState
-            title="No matches found"
-            description={
-              query.trim()
-                ? `Nothing matches "${query.trim()}". Try a prefix like #orders or @customer.`
-                : 'Type to search orders, products, customers, and shipments.'
-            }
-          />
+          searching ? (
+            <p role="status" style={{ padding: '24px 12px', textAlign: 'center', fontSize: 13, color: 'var(--tuw-text-secondary, #5D6772)' }}>Searching…</p>
+          ) : (
+            <EmptyState
+              title="No matches found"
+              description={
+                parseScopedQuery(query).scope === 'shipments'
+                  ? 'Shipments arrive with the fulfilment module; nothing to search yet.'
+                  : query.trim()
+                    ? `Nothing matches "${query.trim()}". Try a prefix like #orders or @customer, or at least two characters.`
+                    : 'Type to search orders, products and customers.'
+              }
+            />
+          )
         ) : (
           sections.map((section) => (
             <div key={section.key}>

@@ -9,6 +9,7 @@ import Breadcrumb from '@storefront/components/ui/Breadcrumb';
 import Input from '@storefront/components/ui/Input';
 import Button from '@storefront/components/ui/Button';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
+import { resetPasswordAction } from '@/server/auth-actions';
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -29,12 +30,23 @@ export default function ResetPasswordPage() {
       return;
     }
 
+    const token = new URLSearchParams(window.location.search).get('token');
+    if (!token) {
+      setError('Open the reset link from your email to set a new password.');
+      return;
+    }
     setError(null);
     setIsSubmitting(true);
-    setTimeout(() => {
+    void resetPasswordAction({ token, password }).then((result) => {
       setIsSubmitting(false);
+      if (!result.ok) {
+        setError(result.error.message); // typed passwords are kept
+        return;
+      }
+      setPassword('');
+      setConfirmPassword('');
       setSuccess(true);
-    }, 700);
+    });
   };
 
   return (

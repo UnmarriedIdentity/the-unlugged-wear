@@ -2,123 +2,89 @@
 
 import React, { useState } from 'react';
 import Modal from '@storefront/components/ui/Modal';
+import type { SizeChartData } from '@storefront/lib/types';
 
 export interface SizeGuideModalProps {
   isOpen: boolean;
   onClose: () => void;
-  category?: string;
+  /** The chart staff linked to this product (size_charts). */
+  chart: SizeChartData;
+  /** Column heading for the size, e.g. "Age". */
+  sizeHeader?: string;
+  /** Sizes this product is sold in; rows outside it are hidden. */
+  sizes?: string[];
 }
 
-export default function SizeGuideModal({
-  isOpen,
-  onClose,
-  category = 'hoodies',
-}: SizeGuideModalProps) {
-  const [unit, setUnit] = useState<'cm' | 'inches'>('cm');
+const sameSize = (a: string, b: string) => a.replace(/\s+/g, '').toLowerCase() === b.replace(/\s+/g, '').toLowerCase();
 
-  const hoodieMeasurementsCM = [
-    { size: 'XS', chest: 108, length: 66, shoulder: 54, sleeve: 59 },
-    { size: 'S', chest: 114, length: 69, shoulder: 57, sleeve: 61 },
-    { size: 'M', chest: 120, length: 72, shoulder: 60, sleeve: 63 },
-    { size: 'L', chest: 126, length: 74, shoulder: 63, sleeve: 64 },
-    { size: 'XL', chest: 132, length: 76, shoulder: 66, sleeve: 65 },
-    { size: 'XXL', chest: 138, length: 78, shoulder: 69, sleeve: 66 },
-  ];
+export default function SizeGuideModal({ isOpen, onClose, chart, sizeHeader = 'Size', sizes }: SizeGuideModalProps) {
+  const [unit, setUnit] = useState<'cm' | 'in'>('cm');
+  const rows = sizes?.length ? chart.rows.filter((r) => sizes.some((s) => sameSize(s, r.size))) : chart.rows;
+  const shownRows = rows.length ? rows : chart.rows;
 
-  const toInches = (cm: number) => (cm / 2.54).toFixed(1);
+  const format = (value: number | string | undefined) => {
+    if (value === undefined) return '—';
+    if (typeof value === 'string') {
+      return unit === 'cm' ? `${value} cm` : `${value.split('–').map((v) => (Number(v) / 2.54).toFixed(0)).join('–')}″`;
+    }
+    return unit === 'cm' ? `${value} cm` : `${(value / 2.54).toFixed(1)}″`;
+  };
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       maxWidth="max-w-2xl"
-      title="Fit & Sizing Measurement Chart"
-      subtitle="All measurements reflect garment dimensions laid flat."
+      title={`Size guide · ${chart.name}`}
+      subtitle="Garment measured laid flat. Draft measurements, to be confirmed with our print partner."
     >
-      <div className="space-y-6">
-        {/* Unit Toggle */}
-        <div className="flex items-center justify-between">
-          <p className="text-xs text-store-text-secondary">
-            Select your preferred unit of measurement:
-          </p>
-
-          <div className="flex items-center p-1 rounded-lg bg-store-cream border border-store-card-border">
-            <button
-              type="button"
-              onClick={() => setUnit('cm')}
-              className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${
-                unit === 'cm'
-                  ? 'bg-white text-store-charcoal shadow-xs'
-                  : 'text-store-muted hover:text-store-charcoal'
-              }`}
-            >
-              Centimeters (CM)
-            </button>
-            <button
-              type="button"
-              onClick={() => setUnit('inches')}
-              className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${
-                unit === 'inches'
-                  ? 'bg-white text-store-charcoal shadow-xs'
-                  : 'text-store-muted hover:text-store-charcoal'
-              }`}
-            >
-              Inches (IN)
-            </button>
+      <div className="space-y-5">
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-sm text-store-text-secondary">Units</p>
+          <div className="flex items-center p-1 bg-store-cream border border-store-card-border" role="group" aria-label="Measurement unit">
+            {(['cm', 'in'] as const).map((u) => (
+              <button
+                key={u}
+                type="button"
+                aria-pressed={unit === u}
+                onClick={() => setUnit(u)}
+                className={`px-3 py-1 text-xs font-medium transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-store-gold ${
+                  unit === u ? 'bg-store-surface text-store-charcoal shadow-xs' : 'text-store-text-secondary hover:text-store-charcoal'
+                }`}
+              >
+                {u === 'cm' ? 'Centimetres' : 'Inches'}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto rounded-xl border border-store-card-border">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-store-cream border-b border-store-card-border font-bold text-store-charcoal uppercase tracking-wider">
+        <div className="overflow-x-auto border border-store-card-border">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-store-cream border-b border-store-card-border text-store-charcoal">
               <tr>
-                <th className="p-3.5">Size</th>
-                <th className="p-3.5">Chest Circumference</th>
-                <th className="p-3.5">Body Length</th>
-                <th className="p-3.5">Shoulder Width</th>
-                <th className="p-3.5">Sleeve Length</th>
+                <th scope="col" className="p-3 font-medium">{sizeHeader}</th>
+                {chart.columns.map((c) => (
+                  <th key={c} scope="col" className="p-3 font-medium">{c}</th>
+                ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-store-card-border font-medium text-store-text-secondary">
-              {hoodieMeasurementsCM.map((row) => (
-                <tr key={row.size} className="hover:bg-store-canvas">
-                  <td className="p-3.5 font-bold text-store-charcoal">{row.size}</td>
-                  <td className="p-3.5">
-                    {unit === 'cm' ? `${row.chest} cm` : `${toInches(row.chest)}"`}
-                  </td>
-                  <td className="p-3.5">
-                    {unit === 'cm' ? `${row.length} cm` : `${toInches(row.length)}"`}
-                  </td>
-                  <td className="p-3.5">
-                    {unit === 'cm' ? `${row.shoulder} cm` : `${toInches(row.shoulder)}"`}
-                  </td>
-                  <td className="p-3.5">
-                    {unit === 'cm' ? `${row.sleeve} cm` : `${toInches(row.sleeve)}"`}
-                  </td>
+            <tbody className="divide-y divide-store-card-border text-store-text-secondary tuw-tabular-nums">
+              {shownRows.map((row) => (
+                <tr key={row.size}>
+                  <th scope="row" className="p-3 font-medium text-store-charcoal">{row.size}</th>
+                  {chart.columns.map((c) => (
+                    <td key={c} className="p-3">{format(row.measures[c])}</td>
+                  ))}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
 
-        {/* Silhouette Guidance Notes */}
-        <div className="p-4 rounded-xl bg-store-canvas border border-store-card-border text-xs text-store-text-secondary space-y-2 leading-relaxed">
-          <h4 className="font-bold text-store-charcoal uppercase tracking-wide">
-            Silhouette & Fit Recommendations
-          </h4>
-          <p>
-            • <strong>Intended Drape:</strong> Our garments are engineered with relaxed drop-shoulders
-            and boxy proportions. Order your regular size for the signature Unplugged Wear relaxed look.
-          </p>
-          <p>
-            • <strong>Fitted Silhouette:</strong> If you prefer a tailored, traditional fit close to the
-            torso, consider sizing down by one full size.
-          </p>
-          <p>
-            • <strong>Pre-Shrunk Guarantee:</strong> Fabrics are pre-washed and heat-set. They will not
-            shrink when laundered according to care instructions (machine wash cold, line dry).
-          </p>
+        <div className="p-4 bg-store-canvas border border-store-card-border text-sm text-store-text-secondary space-y-1.5 leading-relaxed">
+          <p className="font-medium text-store-charcoal">How to choose</p>
+          <p>Measure a piece you already like, laid flat, and compare it with the table.</p>
+          <p>Between two sizes? Take the larger one for a relaxed fit.</p>
         </div>
       </div>
     </Modal>

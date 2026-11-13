@@ -1,7 +1,7 @@
 # Rule 05 — Branch hygiene (topic branches)
 
 Permissions for where code may be committed. Supplements (never overrides)
-rules 01 (git hygiene), 03 (never push), and 04 (task discipline).
+rules 01 (git hygiene), 03 (commit and push), and 04 (task discipline).
 
 ## The rule
 
@@ -18,8 +18,8 @@ rules 01 (git hygiene), 03 (never push), and 04 (task discipline).
 - Merge direction is one-way: `feat/*` merges into `v2` on explicit human
   approval. Never merge `v2` into a topic branch to "catch up" without
   stating why; prefer rebasing the topic branch and re-running gates.
-- Pushing any branch (including topic branches) is exclusively human
-  (rule 03). Local-only branches are normal.
+- Agents push the working branch (`urvil-ui`) after every commit (rule 03);
+  other branches are pushed only when the owner asks.
 
 ## Good / bad
 

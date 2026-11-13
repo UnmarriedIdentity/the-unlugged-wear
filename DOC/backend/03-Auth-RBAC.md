@@ -5,7 +5,8 @@
 > +91 phones); currency has no auth meaning — see the open decision in `00-README.md` §7.
 > Identity is two rows: `users` (credential) + `profiles` (person). Household
 > grouping lives in `17-Household-Accounts.md`.
-> Auth is **custom Argon2id** — never Supabase Auth. Retry safety for signup,
+> Auth is **custom, in-app** (bcrypt password hashes) — no third-party auth
+> provider, so both deployments share one users table with no extra glue. Retry safety for signup,
 > invite and reset lives in `21-Idempotency.md`.
 
 ## 1. users
@@ -14,7 +15,7 @@
 |---|---|---|---|
 | id | uuid | PK, UUIDv7 | Global identity; unguessable session subject |
 | email | varchar(255) | NOT NULL, UNIQUE | Login key; lowercased in app (no citext extension) |
-| password_hash | varchar(255) | **NULL** | Argon2id output fits 255. NULL + `status='pending'` = invited customer (or staff member) who has never set a password — the row exists so the invite token has an owner |
+| password_hash | varchar(255) | **NULL** | bcrypt hash (`$2b$`, 60 chars) fits 255 with room for a future algorithm. NULL + `status='pending'` = invited customer (or staff member) who has never set a password — the row exists so the invite token has an owner |
 | status | varchar(20) | NOT NULL DEFAULT 'active', CHECK IN ('pending','active','disabled') | `pending` blocks login until the set-password flow completes; `disabled` is the off-switch (history preserved, deletes RESTRICT-blocked) |
 | last_login_at | timestamptz | NULL | Idle detection, security review |
 | locked_until | timestamptz | NULL | Set by the lockout policy (N failures in a window). A future timestamp blocks sign-in with **no row reads** on the hot path; NULL or past means unlocked |
@@ -132,7 +133,7 @@ construction, cascade both sides. Reverse indexes:
 
 ### Seed block (idempotent, `ON CONFLICT DO NOTHING`)
 
-Lives in `src/server/db/seed/001-seed-core.sql` (guarded by
+Lives in `db/seed/001-seed-core.sql` (guarded by
 `tests/seed-integrity.test.mjs`), not in a migration.
 
 | Role | Grants | Reads like |
@@ -202,17 +203,47 @@ visibility widens reads, file 17 §4), never a permission row.
 
 ## 7. AuthN rules
 
-- Argon2id for passwords (memory-hard; no legacy hashes accepted).
-  Parameters: m=19456 KiB, t=2, p=1 (`@node-rs/argon2`); the encoded hash
-  stays well under `varchar(255)`.
+- bcrypt for passwords, cost factor 12 (`bcrypt` / `bcryptjs` in Node);
+  the encoded `$2b$` hash is 60 characters. bcrypt reads only the first 72
+  bytes of a password, so the API rejects longer passwords with a clear
+  validation error instead of silently truncating. Raise the cost factor
+  as hardware improves; rehash on next successful login when it changes.
 - Access token 15 min; refresh token 30-day rotation; reuse of a rotated
   token revokes the whole family.
 - Password change / explicit logout revokes all sessions via
   `idx_refresh_tokens_user_id`.
 - Login + refresh endpoints rate-limited (limits in `13-API-Contracts.md`).
-- Lockout: every attempt writes a `login_attempts` row; N failures inside
-  the window sets `users.locked_until`, and login reads that column
-  instead of recounting. A success clears both.
+- Lockout: every attempt writes a `login_attempts` row; **5 failures within
+  15 minutes** (since the last success) set `users.locked_until = now() + 15
+  min`, and login reads that column instead of recounting. A success or a
+  password reset clears it. Unknown emails run one bcrypt compare against a
+  dummy hash so timing never reveals whether an account exists.
+
+### As built (TL-BE-02, 2026-11-10)
+
+- **Access token:** HMAC-SHA256 signed (`AUTH_SECRET`, domain-separated per
+  app), 15 minutes, carries user id, name, email, role slugs and permission
+  slugs — so guards and `proxy.ts` need no database read. Role changes apply
+  at the next refresh (≤ 15 min); a role change or disable also revokes
+  refresh tokens.
+- **Refresh token:** 256-bit random, stored as SHA-256 in `refresh_tokens`
+  with `family_id` + `app` (`016-auth-sessions.sql`). Every refresh rotates;
+  replaying an already-rotated token (outside a 10-second grace for parallel
+  tabs) revokes the whole family.
+- **Cookies (httpOnly, SameSite=Lax, Secure in production):** storefront
+  `tuw_sf_at` / `tuw_sf_rt`, admin `tuw_admin_at` / `tuw_admin_rt`. "Remember
+  me" off = refresh cookie ends with the browser.
+- **Flows:** register (user + `customer` role + profile + solo household, in
+  one TX, then a verification link), email verification by button press
+  (`/verify-email`), forgot/reset (1-hour single-use link, revokes every
+  session), staff invite (7 days, one pending per email) → `/accept-invite`,
+  first admin via `pnpm auth:bootstrap-admin` (env `ADMIN_EMAIL`,
+  `ADMIN_PASSWORD`). At least one active admin always remains.
+- **Email:** `mock_email` adapter writes `email_logs` and sends nothing until
+  TL-INT-EMAIL; links are shown on screen only when
+  `AUTH_SHOW_DEV_LINKS=true` and not in production.
+- Code: `packages/heart/src/modules/auth`, `src/next/session.ts`,
+  `src/next/proxy.ts`; break-it tests `modules/auth/auth.int.test.ts`.
 - `last_login_at` updates are fire-and-forget (never block the login response).
 - Signup creates `users` + `profiles` + a solo `households` +
   `household_members` row in one TX (file 17 §4) — no user exists without

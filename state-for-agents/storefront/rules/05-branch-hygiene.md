@@ -15,7 +15,7 @@ discipline is load-bearing.
    not, reconcile first (stale bases produce phantom diffs).
 4. Never commit conflict markers. Resolve conflicts immediately, re-gate,
    then commit the resolution with the work (exact paths only, Rule 01).
-5. Pushes and merges are human-only (Rule 03). Report "ready for your push"
+5. Commits are pushed to `urvil-ui` after each change (Rule 03); merges to `main` stay human-only. Report "ready for your push"
    with the exact commit range.
 
 ## Good / bad

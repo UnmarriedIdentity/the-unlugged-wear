@@ -20,14 +20,20 @@ describe('Server Route & Asset Coverage Invariants', () => {
     'src/app/policies/returns/page.tsx',
     'src/app/policies/privacy/page.tsx',
     'src/app/policies/terms/page.tsx',
-    'src/app/api/checkout/route.ts',
-    'src/app/api/orders/[id]/route.ts',
+    'src/server/order-actions.ts',
     'src/app/api/contact/route.ts',
     'src/app/api/webhooks/razorpay/route.ts',
     'src/app/api/fulfillment/qikink/route.ts',
     'src/storefront/lib/razorpay.ts',
     'src/storefront/lib/qikink.ts',
   ];
+
+  // Checkout and order reads are guarded server actions on the database now (TL-BE-08).
+  test('the demo checkout and order routes are gone', () => {
+    for (const gone of ['src/app/api/checkout/route.ts', 'src/app/api/orders/[id]/route.ts']) {
+      assert.equal(existsSync(join(repoRoot, gone)), false, `${gone} should be removed`);
+    }
+  });
 
   for (const relPath of requiredRoutes) {
     test(`route or module exists: ${relPath}`, () => {

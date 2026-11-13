@@ -1,6 +1,6 @@
 # Catalog — Columns, Constraints, Indexes
 
-> Status: Filling | Last Updated: 2026-10-30
+> Status: Active (as built §TL-BE-05) | Last Updated: 2026-11-11
 > 17 tables. Conventions: `01-Conventions.md`. Money semantics follow the
 > open currency decision (`00-README.md` §7) — DECIMAL(12,2) shape is final.
 > The attribute library is the single attribute system; the retired compare
@@ -33,7 +33,7 @@ GIN `idx_categories_search_vector` · partial
 `idx_categories_navbar (is_active, show_in_navbar, sort_order)
 WHERE is_active AND show_in_navbar` (nav render = one narrow read).
 
-## brands (defined, unbuilt v1)
+## brands (table created — v1; seed/UI built in the backend phase)
 
 | Column | Type | Constraints | Reason |
 |---|---|---|---|
@@ -88,6 +88,9 @@ No seed, no UI, no queries in v1 — launch is seed + UI only.
 | monogram_enabled | boolean | NOT NULL DEFAULT false | Clothing Specs monogram offer |
 | monogram_max_chars | smallint | NOT NULL DEFAULT 3, CHECK (monogram_max_chars >= 1) | Monogram character limit |
 | monogram_upcharge | DECIMAL(12,2) | NOT NULL DEFAULT 0, CHECK (monogram_upcharge >= 0) | Monogram add-on price |
+| product_kind | varchar(20) | NOT NULL DEFAULT 'physical', CHECK IN ('physical','gift_card') | Gift cards are digital and never sent to a fulfilment provider |
+| exchange_policy | varchar(20) | NOT NULL DEFAULT 'defects_only', CHECK IN ('defects_only','exchangeable','none') | After delivery: `defects_only` = replaced only if defective/damaged/misprinted/wrong (the print partner reprints those); `exchangeable` = also one size/variant exchange per item; `none` = final sale. Copied onto each order line at purchase |
+| low_stock_threshold | integer | NULL, CHECK (>= 0) | Staff low-stock alert level; NULL = store-wide setting |
 | partner_provider | varchar(20) | NULL, CHECK IN ('qikink','printrove','custom_atelier') | Who produces this item — the drawer's Partner field, filterable |
 | partner_availability | varchar(20) | NULL, CHECK IN ('ready_to_print','partner_delayed','discontinued') | Can the partner print it right now; storefront filters/badges read this, nothing else |
 | deleted_at | timestamptz | NULL | Soft-delete |
@@ -320,7 +323,7 @@ visibility='scheduled'` (the scheduler's only query).
 | variant_id | uuid | NULL, FK → product_variants(id) ON DELETE CASCADE | Variant-level movement |
 | qty_change | integer | NOT NULL | Signed delta (+ restock, − sale) |
 | reason | varchar(30) | NOT NULL, CHECK IN ('sale','restock','import','admin_adjustment','return','cancel') | Audit classification |
-| order_id | uuid | NULL, FK → orders(id) ON DELETE SET NULL | Real FK (monolith) — sale linkage without coupling deletes |
+| order_id | uuid | NULL, FK → orders(id) ON DELETE SET NULL | Real FK (one shared database) — sale linkage without coupling deletes |
 | qty_after | integer | NOT NULL | Balance snapshot — full audit trail |
 | created_at | timestamptz | NOT NULL | |
 
@@ -348,7 +351,7 @@ partial `(starts_at, ends_at) WHERE is_active` (scheduler).
 |---|---|---|---|
 | id | uuid | PK | |
 | product_id | uuid | NOT NULL, FK → products(id) ON DELETE CASCADE | |
-| user_id | uuid | NOT NULL, FK → users(id) ON DELETE CASCADE | Real FK (monolith) |
+| user_id | uuid | NOT NULL, FK → users(id) ON DELETE CASCADE | Real FK (one shared database) |
 | rating | smallint | NOT NULL, CHECK (rating BETWEEN 1 AND 5) | |
 | title | varchar(255) | NULL | |
 | body | text | NULL | |
@@ -388,3 +391,128 @@ erDiagram
     products ||--o{ collection_products : collected-in
     collections ||--o{ collection_products : groups
 ```
+
+## As built (TL-BE-05 slice 1, 2026-11-11)
+
+Module `packages/heart/src/modules/catalog` (`planner.ts` pure rules,
+`import.ts` import job, `read.ts` storefront read model).
+
+**Migration 018** adds what the storefront renders: `products.product_type`,
+`variant_label`, `details text[]`, `composition`, `spec_table jsonb`,
+`price_is_draft`, `slug_aliases varchar[]` (old URLs keep resolving),
+`badge`; `product_images.label` + `color_value_id` (colour-specific photos);
+`product_attribute_link_values.position` (per-product value order).
+
+**Storefront read model** (`getStorefrontCatalog()`): only `status =
+'active'`, not deleted, physical products with at least one active
+variant. Shaped exactly like the storefront `Product` type.
+
+- Public `id` = `external_id` (legacy demo id such as `prod-1` / `qk-uh83`)
+  so saved bags and wishlists keep working; `productId` is the uuid.
+- `priceINR` is the **From** price (lowest active variant). When sizes are
+  priced differently (31 Qikink styles, e.g. posters ₹399–₹1,499), each size
+  carries `priceINR`/`priceMinorINR`; cards and the PDP headline say
+  "From ₹…", add-to-bag and the checkout route charge the chosen size.
+- Made-to-order variants (Qikink, Printrove) are available while active and
+  the partner is `ready_to_print`, capped at 100 per order. Custom Atelier is
+  in-house, so its items use real stock counts (see `22-Commerce-Extras.md`).
+- No colour axis → one neutral "Standard" swatch.
+- Partner cost (kept only in `product_source_rows.raw_data`), source rows
+  and staff fields never leave `read.ts` (test: "partner cost never reaches the storefront").
+
+**Storefront wiring.** `src/server/catalog.ts` → `getCatalog()`
+(`'use cache'`, tag `products`, `cacheLife('hours')`, no silent fallback),
+read in the root layout next to settings and handed to the demo store
+provider, so every existing page reads database products unchanged.
+PDP / collection layouts use it for `generateStaticParams`, metadata and
+404s. `POST /api/revalidate {"tags":["products"]}` expires it at once.
+`catalog.generated.ts` and `scripts/generate-catalog.mjs` are deleted.
+
+**Demo catalog.** `pnpm db:seed-catalog` imports
+`tuw-website/data/qikink-listing.json` through the import job, then applies
+the old storefront classification + the 14 curated products and 4
+collections (`db/seed/catalog/*.json`) and publishes: 155 products,
+2,348 active variants. Re-running classifies only new products.
+
+**Not yet:** Shop/PDP are still Client Components reading the catalog from
+the provider (≈25 KB gzipped, same as the old bundle); moving them to Server
+Components is TL-WEB-BE-08/10. Everything else listed for this task landed in
+slice 3, below.
+
+## As built (TL-BE-05 slice 2, 2026-11-11)
+
+`modules/catalog/admin.ts` + `schemas.ts`; actions in
+`tuw-admin/src/server/catalog-actions.ts`.
+
+**Pricing anchor.** `products.base_price` is the retail anchor the editor
+derives prices from (`base + Σ adjustments`). Migration 019 corrected the
+first import, which had stored the partner's cost there. Tiers are pinned
+(`price_overridden`). `products.price` is always the lowest active variant.
+
+**Permissions** (checked per action, not only on the page): any staff member
+can read the catalog; `product.create`, `product.update`, `product.archive`
+(archive + delete, also when archiving through the editor), `product.import`,
+`category.manage`. Collections use `product.update`.
+
+**Rules the service enforces:**
+
+- Publishing needs a category and at least one variant priced above ₹0
+  (bulk publish reports which products were skipped and why).
+- Slugs are unique across slugs *and* aliases; a renamed product keeps its
+  old URL as an alias and may take it back.
+- Stale edits are refused (`expectedUpdatedAt`); saves lock the product row.
+- Removing a variant switches it off (orders reference it); deleting a
+  product is a soft delete and its URL stays reserved.
+- Manual stock changes write `stock_movements` (`admin_adjustment`).
+- Images are matched by URL, so labels and colour links survive a reorder.
+  Local paths are served by the storefront: the admin prefixes
+  `STOREFRONT_URL` for display and stores the path unchanged.
+- Image URLs must be a `/path` or http(s) — no `javascript:`/`data:`.
+- Every write is audited and expires the storefront's `products` tag.
+
+**Screens.** `/products` (light list without variants; the full record
+loads when a product opens; CSV import goes through the real import job),
+`/collections` (scheduled collections now have a drop date),
+`/products/categories` (names, order, active, "in storefront menu").
+The storefront menu drops links to categories hidden there; editing the
+menu's own links belongs to the CMS task (TL-BE-13.06).
+
+## As built (TL-BE-05 slice 3, 2026-11-11)
+
+`packages/heart/src/modules/catalog/`: `search.ts`, `library.ts`,
+`mappings.ts`, `reviews.ts`, `rules.ts`. Tests: `extras.int.test.ts`,
+`rules.test.mjs`.
+
+**Search.** Letters and digits only become a prefix `tsquery`, so hostile
+input cannot break the query. Order: exact name, name prefix, name hit, then
+`ts_rank`; name, style code and category also match by `ILIKE`. Results are
+cached per term (`products` tag); every search is logged to `search_terms`
+after the response, including zero-result terms. There is no typo tolerance
+because `pg_trgm` is not installed.
+
+**Attribute library** (`/settings/attributes`). New option types are rows,
+never schema changes. Colour and size cannot be deleted or disabled; an
+attribute or value in use cannot be deleted; an attribute must stay visible
+on at least one surface. Non-axis attributes with `show_on_pdp` appear in the
+product details on the storefront.
+
+**Size charts** (migration 020, `size_charts.columns text[]`). `jsonb` does
+not keep key order, so column order is stored explicitly. Cells hold a number
+or a range such as `76–86`. Charts are edited inside the product editor and
+save on a short delay; a chart linked to products cannot be deleted. The seed
+is `db/seed/catalog/size-charts.json`. `/size-guide` and the product-page
+modal now read the same rows.
+
+**Editor fields.** `size_chart_id`, `exchange_policy` (default
+`defects_only`) and `product_kind` are saved with the product.
+
+**Reviews** (`/products/reviews`). A customer can review a product only after
+an order containing it is delivered, once per product; editing sends the
+review back to moderation. The storefront shows approved reviews only and
+never invents counts or ratings. Cached under the `reviews` tag. Until orders
+exist (TL-BE-08) no review can be written.
+
+**Shared rules.** Pure catalog logic the admin needs in the browser
+(`rules.ts`, `planner.ts`) is exported from `@tuw/heart`; the admin's
+`lib/productPricing`, `productImport`, `attributePresentation` and
+`collections` copies are gone, and their tests now import the real code.

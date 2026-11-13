@@ -1,6 +1,10 @@
 # Database Feature Report — the-unplugged-wear
 
-> Scope: `tuw-admin/src/server/db/migrate/` (13 files, 88 tables) audited against
+> **Update 2026-11-10:** store credit dropped; exchange fulfilment, guest
+> checkout, newsletter, FAQs, gift cards and stock alerts added (94 tables,
+> 14 files). See `DOC/backend/00-README.md` §7 for the decisions.
+>
+> Scope: `db/migrate/` (13 files, 88 tables) audited against
 > `DOC/backend/` (01–21). Generated 2026-10-31. No schema changes made.
 
 ## 1. Cart — fully covered (`003-cart.sql`)
@@ -28,12 +32,12 @@
 | Immutable order lines with snapshots | ✅ | `order_items` (name, SKU, unit price, options JSONB frozen) |
 | Discount coupons | ✅ | `discount_codes` (percent/fixed, min amount, usage cap, validity window) |
 | Payments | ✅ | `payments` (mock/razorpay/stripe; upi/card/netbanking/wallet/COD; idempotent capture via unique `transaction_id`) |
-| Refunds (partial, audit) | ✅ | `refunds` (method source/store_credit; one open refund per order guard) |
+| Refunds (partial, audit) | ✅ | `refunds` (method `source` only — no store credit; one open refund per order guard) |
 | Shipping + tracking timeline | ✅ | `shipments` + `shipment_events` (carrier, AWB, ETA; scan dedupe) |
 | Checkout idempotency | ✅ | `orders.idempotency_key` + `one_order_per_idempotency_key` |
 | Address snapshots | ✅ | `shipping_address` / `billing_address` JSONB |
 | Stock ledger linked to orders | ✅ | `stock_movements` (reason incl. `return`, `cancel`; `order_id` FK appended in 004) |
-| Partner fulfillment (Qikink) | ✅ | `009-partner.sql`: `partner_orders`, `partner_wallet_ledger` |
+| Partner fulfillment (Qikink and future providers) | ✅ | `009-fulfillment.sql`: provider registry, fulfilment orders/items, wallet, COD remittances, claims |
 | Order history per user / profile | ✅ | indexes on `placed_by_user_id`, `for_profile_id` |
 
 ## 3. Returns (RMA) — present (`004-orders.sql`)
@@ -121,15 +125,13 @@ Guest checkout is intentionally unsupported (checkout requires login).
 
 ## 7. Documented features that cannot be built without new tables
 
-1. **Store-credit wallet** — `refunds.method='store_credit'` exists, but no
-   balance/ledger table; spendable credit needs e.g. `store_credit_entries`.
-2. **Exchange fulfillment** — `disposition='exchange'` is recorded, but nothing
-   tracks the replacement shipment; needs an exchange table or an
-   `orders.is_exchange` seam.
-3. **Return-policy window** — no table; can be held in `store_settings` JSONB
-   without schema change, but eligibility is not DB-enforced.
-4. **Brands** — DDL present but explicitly "unbuilt in v1" (seed/UI/queries
-   deferred, not a schema gap).
+1. ~~Store-credit wallet~~ — **dropped 2026-11-10**: the product has no store
+   credit; `store_credit` was removed from `refunds` and `returns`.
+2. **Exchange fulfillment** — **resolved 2026-11-10**: `returns.replacement_order_id`
+   → an `orders.order_type = 'exchange'` order that ships normally.
+3. **Exchange window** — **resolved 2026-11-10**: `store_settings`
+   `exchange.window_days` = 7, enforced by the order service.
+4. **Brands** — table created and part of v1; seed/UI built in the backend phase.
 5. Everything else documented in `DOC/backend` has DDL (migrate README:
    88/88 specified tables written).
 
@@ -139,5 +141,4 @@ Cart, orders, and returns/RMA are complete at the schema level. All basic
 e-commerce primitives (catalog, search, reviews, discounts, payments incl.
 COD, shipping/tracking, accounts, analytics, support) are present. The
 megamenu at exactly 3 depths works today without new tables. The only true
-table-level gaps are store-credit wallet, exchange fulfillment, and optional
-return-window enforcement.
+table-level gaps listed here have since been closed (2026-11-10).

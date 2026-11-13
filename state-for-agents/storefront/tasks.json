@@ -5,25 +5,26 @@
     "code": "tuw-website/src",
     "tokens": "tuw-website/src/app/globals.css (@theme store roles)",
     "skill-index": "tuw-website/state-for-agents/skills",
-    "reference": "Figma canonical Node 82:5702 (Futura Headings, Outfit Body everywhere else, 3-tier Color Style, 1612x529 Auto-layout Frame)"
+    "reference": "Figma canonical Node 82:5702 (Futura Headings, Outfit Body everywhere else, 3-tier Color Style, 1612x529 Auto-layout Frame)",
+    "backend_plan": "state-for-agents/admin/tasks.json (TL-BE-*) + DOC/backend/23-Backend-Implementation.md"
   },
   "_demo": "Figma source of truth established. First track TL-WEB-001 closed.",
   "summary": {
-    "total": 74,
-    "done": 74,
-    "in_progress": 0,
-    "backlog": 0,
-    "total_tasks": 74,
-    "pending": 0
+    "total": 114,
+    "done": 94,
+    "in_progress": 5,
+    "backlog": 15,
+    "total_tasks": 114,
+    "pending": 15
   },
   "session": {
-    "branch": "temp",
+    "branch": "urvil-ui",
     "tip": "59b9de0",
     "unpushed": [],
-    "next_up": "Owner confirmations: rights for the supplied lifestyle photos, draft retail prices, social URLs in src/lib/site.ts, fabric facts; move forgot/reset password onto AuthShell; replace placeholder model photos with real garment photography before launch.",
+    "next_up": "Backend phase: work the admin sequence TL-BE-00 → TL-BE-17 (state-for-agents/admin/tasks.json); complete TL-WEB-BE children as their depends_on mains finish.",
     "pending_verifications": [],
-    "last_updated": "2026-10-30",
-    "updated_by": "Urvil Kargathala & Meet Rabadiya"
+    "last_updated": "2026-11-10",
+    "updated_by": "agent (Claude)"
   },
   "workflow": {
     "how_to_close_a_task": "gates green → status done + log commit + design_match + verified + finished → recompute summary → refresh session → commit code + tracker together",
@@ -1432,7 +1433,7 @@
     },
     {
       "id": "TL-WEB-062",
-"category": "typography",
+      "category": "typography",
       "title": "Outfit-only storefront typography (retire Jost headings and Playfair headline)",
       "status": "done",
       "owner": "Urvil Kargathala",
@@ -2025,6 +2026,1017 @@
         "Guaranteed 100% adherence to Rule 02: zero hex codes and zero arbitrary bracket classes across all touched JSX lines",
         "All verification gates passed: typecheck 0, 45/45 tests pass, 44 routes build cleanly, selector CSS proof verified, HTTP 200 confirmed"
       ]
+    },
+    {
+      "id": "TL-WEB-BE",
+      "title": "Storefront backend wiring — every storefront screen and API route moved off demo data",
+      "category": "backend",
+      "status": "backlog",
+      "owner": "unassigned",
+      "started": null,
+      "finished": null,
+      "verified": false,
+      "design_match": null,
+      "pushed": false,
+      "description": "Storefront side of the backend plan. The module work (shared services in packages/heart) is tracked in state-for-agents/admin/tasks.json TL-BE-00…TL-BE-17, in that order. Each child here is one storefront screen or route; admin_ref names the admin step that builds what it needs, depends_on the admin mains that must be done first. Order of work: follow the admin sequence; when an admin main is done, complete the TL-WEB-BE children that depend on it; at the end, any TL-WEB-BE child still in backlog is the remaining storefront work.",
+      "key_decisions": [
+        "Admin tracker stays the master sequence; this tracker holds the storefront screen tasks",
+        "The storefront never calls Qikink; provider work runs in the admin app"
+      ],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-BE-01",
+      "title": "Wire the storefront to @tuw/heart, turn on cacheComponents, add /api/health",
+      "category": "backend",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "verified": true,
+      "design_match": null,
+      "pushed": true,
+      "admin_ref": "TL-BE-01.01",
+      "depends_on": [
+        "TL-BE-01"
+      ],
+      "files": [
+        "tuw-website/package.json",
+        "tuw-website/next.config.ts",
+        "src/app/api/health/route.ts"
+      ],
+      "description": "Add @tuw/heart dependency + transpilePackages; cacheComponents: true; fix blocking-prerender insights; health route reads the DB.",
+      "key_decisions": [],
+      "follow_ups": [],
+      "log": "c4aa5ef + 9519313 — @tuw/heart dependency + transpilePackages, cacheComponents on (CopyrightYear, BrandIntro Suspense, generateStaticParams for products/collections/journal, account Suspense), GET /api/health ok on Neon."
+    },
+    {
+      "id": "TL-WEB-BE-02",
+      "title": "Login and register on the DB",
+      "category": "backend",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "verified": true,
+      "design_match": null,
+      "pushed": true,
+      "admin_ref": "TL-BE-02.07",
+      "depends_on": [
+        "TL-BE-02"
+      ],
+      "files": [
+        "src/app/login/page.tsx",
+        "src/app/register/page.tsx",
+        "src/storefront/mocks/auth.ts"
+      ],
+      "description": "Server actions with action({access:'public'}); keep typed values on error; remove the demo auth adapter from these screens.",
+      "key_decisions": [],
+      "follow_ups": [],
+      "log": "eb1506b — /login and /register call loginAction/registerAction; demo auth adapter deleted; tests updated."
+    },
+    {
+      "id": "TL-WEB-BE-03",
+      "title": "Forgot password, reset password and email verification pages",
+      "category": "backend",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "verified": true,
+      "design_match": null,
+      "pushed": true,
+      "admin_ref": "TL-BE-02.04",
+      "depends_on": [
+        "TL-BE-02"
+      ],
+      "files": [
+        "src/app/forgot-password/page.tsx",
+        "src/app/reset-password/page.tsx",
+        "src/app/verify/page.tsx (new)"
+      ],
+      "description": "Mock email adapter: the dev link is shown on screen and logged in email_logs (truthful demo copy).",
+      "key_decisions": [],
+      "follow_ups": [],
+      "log": "eb1506b — /forgot-password, /reset-password (token from link) and new /verify-email (button POST)."
+    },
+    {
+      "id": "TL-WEB-BE-04",
+      "title": "Storefront proxy.ts + session-aware header (account icon, sign out)",
+      "category": "backend",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "verified": true,
+      "design_match": null,
+      "pushed": true,
+      "admin_ref": "TL-BE-02.06",
+      "depends_on": [
+        "TL-BE-02"
+      ],
+      "files": [
+        "tuw-website/src/proxy.ts (new)",
+        "src/storefront/components/layout/Header.tsx"
+      ],
+      "description": "Optimistic redirect for /account/* only; header session read inside Suspense ('use cache: private').",
+      "key_decisions": [],
+      "follow_ups": [],
+      "log": "eb1506b — src/proxy.ts protects /account/*; header account link streams in Suspense from SessionProvider (use())."
+    },
+    {
+      "id": "TL-WEB-BE-05",
+      "title": "Account overview, profile, addresses and household sections",
+      "category": "backend",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": "2026-11-10",
+      "finished": "2026-11-11",
+      "verified": true,
+      "design_match": null,
+      "pushed": true,
+      "admin_ref": "TL-BE-03.02",
+      "depends_on": [
+        "TL-BE-03"
+      ],
+      "files": [
+        "src/app/account/page.tsx",
+        "src/app/account/layout.tsx",
+        "src/app/account/household/join/page.tsx (new)",
+        "src/app/checkout/layout.tsx",
+        "src/app/checkout/page.tsx",
+        "src/server/account.ts (new)",
+        "src/server/customer-actions.ts (new)",
+        "src/storefront/lib/account.tsx (new)",
+        "src/storefront/components/commerce/AccountProfileSection.tsx (new)",
+        "src/storefront/mocks/store.tsx (demo address book removed)"
+      ],
+      "description": "Decide tabs vs sub-pages (folders exist but are empty); DAL requireCustomer(); one default address per type.",
+      "key_decisions": [
+        "Kept tabs on /account (empty profile/ and addresses/ folders not used); account data streams once per layout via use()",
+        "Checkout reads the same AccountDataProvider for saved addresses"
+      ],
+      "follow_ups": [
+        "Size preferences per member (with catalog)"
+      ],
+      "log": "75eea1e — Profile tab (details, password, household), address book and checkout addresses on real data; household join page. Verified in browser."
+    },
+    {
+      "id": "TL-WEB-BE-06",
+      "title": "POST /api/revalidate for admin-driven cache refresh",
+      "category": "backend",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "verified": true,
+      "design_match": null,
+      "pushed": true,
+      "admin_ref": "TL-BE-04.03",
+      "depends_on": [
+        "TL-BE-04"
+      ],
+      "files": [
+        "src/app/api/revalidate/route.ts (new)"
+      ],
+      "description": "route({secret: REVALIDATE_SECRET}) → revalidateTag(tag,'max') for each tag sent by the admin.",
+      "key_decisions": [
+        "settings expires immediately; other tags 'max'"
+      ],
+      "follow_ups": [],
+      "log": "af12876 — src/app/api/revalidate/route.ts — guards.route({ secret }) → revalidateTag(settings, { expire: 0 }) / others max."
+    },
+    {
+      "id": "TL-WEB-BE-07",
+      "title": "Public settings on the storefront (shipping threshold copy, store name, support email)",
+      "category": "backend",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "verified": true,
+      "design_match": null,
+      "pushed": true,
+      "admin_ref": "TL-BE-04.01",
+      "depends_on": [
+        "TL-BE-04"
+      ],
+      "files": [
+        "src/server/settings.ts (new)",
+        "src/storefront/lib/site-settings.tsx (new)",
+        "src/app/layout.tsx",
+        "src/app/providers.tsx",
+        "src/storefront/mocks/store.tsx",
+        "src/storefront/lib/policies.ts",
+        "src/storefront/components/editorial/PolicyPage.tsx",
+        "src/app/policies/page.tsx",
+        "src/storefront/components/commerce/VariantSelector.tsx",
+        "src/app/contact/page.tsx",
+        "src/storefront/lib/invoice.ts"
+      ],
+      "description": "Read through modules/settings (cacheTag 'settings'); no hard-coded fees.",
+      "key_decisions": [
+        "Read once in the root layout (cached, part of the static shell) — no client fetch, no flash",
+        "Database down → seed defaults cached for minutes only"
+      ],
+      "follow_ups": [
+        "Returns copy / RETURN_WINDOW_DAYS wait for the exchanges module (TL-BE-10)"
+      ],
+      "log": "af12876 — getStorefrontSettings() cached in the root layout → useSiteSettings(); demo cart fees, shipping policy copy, PDP delivery line, contact page and demo invoice read it. support email now comes from settings (care@… seed) instead of the hard-coded studio@…."
+    },
+    {
+      "id": "TL-WEB-BE-08",
+      "title": "/shop on the DB (filters + sort from searchParams in Suspense)",
+      "category": "backend",
+      "status": "in_progress",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": "2026-11-11",
+      "finished": null,
+      "verified": false,
+      "design_match": null,
+      "pushed": true,
+      "admin_ref": "TL-BE-05.07",
+      "depends_on": [
+        "TL-BE-05"
+      ],
+      "files": [
+        "src/app/shop/page.tsx"
+      ],
+      "description": "Shell = chrome; grid is the hole.",
+      "key_decisions": [],
+      "follow_ups": [],
+      "log": "Shop lists DB products (155) through the store provider; filters/sort unchanged. Remaining: Server Component grid + searchParams in Suspense."
+    },
+    {
+      "id": "TL-WEB-BE-09",
+      "title": "/collections and /collections/[slug] on the DB",
+      "category": "backend",
+      "status": "in_progress",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": "2026-11-11",
+      "finished": null,
+      "verified": false,
+      "design_match": null,
+      "pushed": true,
+      "admin_ref": "TL-BE-05.07",
+      "depends_on": [
+        "TL-BE-05"
+      ],
+      "files": [
+        "src/app/collections/page.tsx",
+        "src/app/collections/[slug]/page.tsx"
+      ],
+      "description": "'use cache' + cacheTag('collection:<id>'); generateStaticParams ≥ 1.",
+      "key_decisions": [],
+      "follow_ups": [],
+      "log": "Collections and collection pages read DB collections (membership + order from collection_products); static params + 404 from the DB. Remaining: Server Components with cacheTag per collection."
+    },
+    {
+      "id": "TL-WEB-BE-10",
+      "title": "/products/[slug] PDP on the DB (cached body, live stock hole, FAQs, size chart)",
+      "category": "backend",
+      "status": "in_progress",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": "2026-11-11",
+      "finished": null,
+      "verified": false,
+      "design_match": null,
+      "pushed": true,
+      "admin_ref": "TL-BE-05.07",
+      "depends_on": [
+        "TL-BE-05"
+      ],
+      "files": [
+        "src/app/products/[slug]/page.tsx"
+      ],
+      "description": "Follows the pdp-flow and cache-components skills; unknown slug → notFound().",
+      "key_decisions": [],
+      "follow_ups": [],
+      "log": "PDP from the DB: old slugs resolve via slug_aliases, unknown slug → 404, price tiers ('From' headline, chosen-size price in the bag). Remaining: cached Server Component body + live stock hole."
+    },
+    {
+      "id": "TL-WEB-BE-11",
+      "title": "/search on the DB (ranked results + suggestions)",
+      "category": "backend",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "verified": true,
+      "design_match": null,
+      "pushed": true,
+      "admin_ref": "TL-BE-05.06",
+      "depends_on": [
+        "TL-BE-05"
+      ],
+      "files": [
+        "src/app/search/page.tsx"
+      ],
+      "description": "Results inside Suspense; zero-result terms logged.",
+      "key_decisions": [],
+      "follow_ups": [
+        "No typo tolerance"
+      ],
+      "log": "Server Component search page, ranked cached results, debounced header suggestions, every search logged after the response."
+    },
+    {
+      "id": "TL-WEB-BE-12",
+      "title": "Header megamenu and navigation from the DB",
+      "category": "backend",
+      "status": "in_progress",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": "2026-11-11",
+      "finished": null,
+      "verified": false,
+      "design_match": null,
+      "pushed": true,
+      "admin_ref": "TL-BE-05.02",
+      "depends_on": [
+        "TL-BE-05"
+      ],
+      "files": [
+        "src/storefront/components/layout/navigation.ts",
+        "Header.tsx"
+      ],
+      "description": "Cached with cacheTag('nav').",
+      "key_decisions": [],
+      "follow_ups": [],
+      "log": "Header and mobile menu hide links to categories staff switched off (catalog hiddenCategories, products tag). The menu structure itself stays in navigation.ts until the CMS navigation editor (TL-BE-13.06)."
+    },
+    {
+      "id": "TL-WEB-BE-13",
+      "title": "/size-guide from size_charts",
+      "category": "backend",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "verified": true,
+      "design_match": null,
+      "pushed": true,
+      "admin_ref": "TL-BE-05.05",
+      "depends_on": [
+        "TL-BE-05"
+      ],
+      "files": [
+        "src/app/size-guide/page.tsx"
+      ],
+      "description": "Cached; per product type.",
+      "key_decisions": [],
+      "follow_ups": [],
+      "log": "/size-guide and the PDP modal read size_charts through the catalog; column order comes from the chart."
+    },
+    {
+      "id": "TL-WEB-BE-14",
+      "title": "Retire catalog.generated.ts and the generate-catalog script once products come from the DB",
+      "category": "backend",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "verified": true,
+      "design_match": null,
+      "pushed": true,
+      "admin_ref": "TL-BE-05.04",
+      "depends_on": [
+        "TL-BE-05"
+      ],
+      "files": [
+        "src/storefront/mocks/catalog.generated.ts",
+        "tuw-website/scripts/generate-catalog.mjs",
+        "tuw-website/data/qikink-listing.json"
+      ],
+      "description": "The listing JSON becomes import input for the admin import job (keep the file, drop the generated TS).",
+      "key_decisions": [],
+      "follow_ups": [],
+      "log": "catalog.generated.ts and scripts/generate-catalog.mjs deleted; data/qikink-listing.json kept as import input (pnpm db:seed-catalog). tests/catalog.test.mjs now guards that nothing imports a static catalogue and no partner cost reaches source."
+    },
+    {
+      "id": "TL-WEB-BE-15",
+      "title": "PDP 'notify me when back in stock'",
+      "category": "backend",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "verified": true,
+      "design_match": null,
+      "pushed": true,
+      "admin_ref": "TL-BE-06.03",
+      "depends_on": [
+        "TL-BE-06"
+      ],
+      "files": [
+        "src/app/products/[slug]/page.tsx"
+      ],
+      "description": "Guest email or customer; one waiting request per product/variant.",
+      "key_decisions": [],
+      "follow_ups": [],
+      "log": "Sold-out options are selectable on the PDP and show a notify-me form; guests give an email, signed-in customers are linked. Buy now is blocked on a sold-out option."
+    },
+    {
+      "id": "TL-WEB-BE-16",
+      "title": "/cart, cart drawer and header bag count on the DB",
+      "category": "backend",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "verified": true,
+      "design_match": null,
+      "pushed": true,
+      "admin_ref": "TL-BE-07.05",
+      "depends_on": [
+        "TL-BE-07"
+      ],
+      "files": [
+        "src/app/cart/page.tsx",
+        "src/storefront/mocks/store.tsx (cart parts)"
+      ],
+      "description": "useOptimistic count; updateTag('cart:<id>'); guest cookie cart.",
+      "key_decisions": [],
+      "follow_ups": [],
+      "log": "Cart drawer, /cart, checkout lines and the header bag count read and write the database cart through storefront/lib/bag.ts; guest cookie cart; + buttons stop at what can be bought."
+    },
+    {
+      "id": "TL-WEB-BE-17",
+      "title": "/wishlist and hearts on the DB",
+      "category": "backend",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "verified": true,
+      "design_match": null,
+      "pushed": true,
+      "admin_ref": "TL-BE-07.04",
+      "depends_on": [
+        "TL-BE-07"
+      ],
+      "files": [
+        "src/app/wishlist/page.tsx"
+      ],
+      "description": "Customer only; guest heart prompts sign-in.",
+      "key_decisions": [],
+      "follow_ups": [],
+      "log": "/wishlist and every heart use the database wishlist; guests are asked to sign in."
+    },
+    {
+      "id": "TL-WEB-BE-18",
+      "title": "Personalised items: preview + approve before adding to bag",
+      "category": "backend",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": null,
+      "finished": null,
+      "verified": false,
+      "design_match": null,
+      "pushed": false,
+      "admin_ref": "TL-BE-07.03",
+      "depends_on": [
+        "TL-BE-07"
+      ],
+      "files": [
+        "src/app/products/[slug]/page.tsx"
+      ],
+      "description": "No unapproved custom print can reach checkout.",
+      "key_decisions": [],
+      "follow_ups": [],
+      "log": "Backend rules done (TL-BE-07.03). No personalisation form exists on the storefront yet, and real previews need uploads (TL-INT-R2)."
+    },
+    {
+      "id": "TL-WEB-BE-19",
+      "title": "/checkout on the DB (guest + account) — replaces api/checkout stub",
+      "category": "backend",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "verified": true,
+      "design_match": null,
+      "pushed": true,
+      "admin_ref": "TL-BE-08.07",
+      "depends_on": [
+        "TL-BE-08"
+      ],
+      "files": [
+        "src/app/checkout/page.tsx",
+        "src/app/api/checkout/route.ts (remove)"
+      ],
+      "description": "Server action with idempotent:true; mock payment with truthful demo copy; cancel window explained.",
+      "key_decisions": [],
+      "follow_ups": [],
+      "log": "Checkout sends the form to placeOrderAction (one key per attempt, typed values kept on refusal); prices from the server bag; demo payment copy kept; api/checkout removed."
+    },
+    {
+      "id": "TL-WEB-BE-20",
+      "title": "/checkout/success on the DB",
+      "category": "backend",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "verified": true,
+      "design_match": null,
+      "pushed": true,
+      "admin_ref": "TL-BE-08.07",
+      "depends_on": [
+        "TL-BE-08"
+      ],
+      "files": [
+        "src/app/checkout/success/page.tsx"
+      ],
+      "description": "Reads the placed order; shows cancel-until time.",
+      "key_decisions": [],
+      "follow_ups": [],
+      "log": "Success page reads the order (owner or receipt token) and shows the free-cancel deadline."
+    },
+    {
+      "id": "TL-WEB-BE-21",
+      "title": "/account/orders and /account/orders/[id] on the DB — replaces api/orders/[id] stub",
+      "category": "backend",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "verified": true,
+      "design_match": null,
+      "pushed": true,
+      "admin_ref": "TL-BE-08.05",
+      "depends_on": [
+        "TL-BE-08"
+      ],
+      "files": [
+        "src/app/account/orders/page.tsx",
+        "src/app/account/orders/[id]/page.tsx",
+        "src/app/api/orders/[id]/route.ts (remove)"
+      ],
+      "description": "Per-user cached data with cacheTag('orders:<userId>').",
+      "key_decisions": [],
+      "follow_ups": [],
+      "log": "/account/orders and /account/orders/[number] read the database (per-person, not cached); api/orders/[id] removed."
+    },
+    {
+      "id": "TL-WEB-BE-22",
+      "title": "/track-order for guests (order number + email)",
+      "category": "backend",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "verified": true,
+      "design_match": null,
+      "pushed": true,
+      "admin_ref": "TL-BE-08.05",
+      "depends_on": [
+        "TL-BE-08"
+      ],
+      "files": [
+        "src/app/track-order/page.tsx"
+      ],
+      "description": "Rate-limited; never reveals whether an email exists.",
+      "key_decisions": [],
+      "follow_ups": [],
+      "log": "/track-order asks for order number + email; rate-limited; never says which half was wrong; signed-in owners skip the email."
+    },
+    {
+      "id": "TL-WEB-BE-23",
+      "title": "Claim guest orders after sign-up (account banner)",
+      "category": "backend",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "verified": true,
+      "design_match": null,
+      "pushed": true,
+      "admin_ref": "TL-BE-08.05",
+      "depends_on": [
+        "TL-BE-08",
+        "TL-BE-02"
+      ],
+      "files": [
+        "src/app/account/page.tsx"
+      ],
+      "description": "Verified email only.",
+      "key_decisions": [],
+      "follow_ups": [],
+      "log": "Account page banner offers to add guest orders placed with the account email, verified email only."
+    },
+    {
+      "id": "TL-WEB-BE-24",
+      "title": "Customer cancel inside the cancel window (order detail)",
+      "category": "backend",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "verified": true,
+      "design_match": null,
+      "pushed": true,
+      "admin_ref": "TL-BE-08.04",
+      "depends_on": [
+        "TL-BE-08"
+      ],
+      "files": [
+        "src/app/account/orders/[id]/page.tsx"
+      ],
+      "description": "Button disappears after cancellable_until.",
+      "key_decisions": [],
+      "follow_ups": [],
+      "log": "Order page shows \"free to cancel until\" and cancels with a confirm step; refund shown."
+    },
+    {
+      "id": "TL-WEB-BE-25",
+      "title": "Discount code and gift card entry at checkout",
+      "category": "backend",
+      "status": "in_progress",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": "2026-11-12",
+      "finished": null,
+      "verified": false,
+      "design_match": null,
+      "pushed": false,
+      "admin_ref": "TL-BE-08.01",
+      "depends_on": [
+        "TL-BE-08",
+        "TL-BE-12"
+      ],
+      "files": [
+        "src/app/checkout/page.tsx"
+      ],
+      "description": "Discount applies first, then gift card.",
+      "key_decisions": [],
+      "follow_ups": [],
+      "log": "Discount codes checked on the server and applied at checkout. Gift cards come with TL-BE-12."
+    },
+    {
+      "id": "TL-WEB-BE-26",
+      "title": "Mock payment step + lib/razorpay.ts behind the payments registry; keep api/webhooks/razorpay as the placeholder for TL-INT-RAZORPAY",
+      "category": "backend",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": null,
+      "finished": null,
+      "verified": false,
+      "design_match": null,
+      "pushed": false,
+      "admin_ref": "TL-BE-09.01",
+      "depends_on": [
+        "TL-BE-09"
+      ],
+      "files": [
+        "src/storefront/lib/razorpay.ts",
+        "src/app/api/webhooks/razorpay/route.ts"
+      ],
+      "description": "No live Razorpay calls until the integrations phase.",
+      "key_decisions": [],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-BE-27",
+      "title": "/account/returns + exchange / replacement request flow",
+      "category": "backend",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": null,
+      "finished": null,
+      "verified": false,
+      "design_match": null,
+      "pushed": false,
+      "admin_ref": "TL-BE-10.04",
+      "depends_on": [
+        "TL-BE-10"
+      ],
+      "files": [
+        "src/app/account/returns/ (empty today)"
+      ],
+      "description": "Rules from DOC/backend/06; photo required; price difference shown before submit.",
+      "key_decisions": [],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-BE-28",
+      "title": "Order tracking timeline from shipments; delete api/fulfillment/qikink and lib/qikink.ts (admin owns provider calls)",
+      "category": "backend",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": null,
+      "finished": null,
+      "verified": false,
+      "design_match": null,
+      "pushed": false,
+      "admin_ref": "TL-BE-11.05",
+      "depends_on": [
+        "TL-BE-11"
+      ],
+      "files": [
+        "src/app/api/fulfillment/qikink/route.ts (remove)",
+        "src/storefront/lib/qikink.ts (remove)",
+        "src/app/account/orders/[id]/page.tsx"
+      ],
+      "description": "The storefront never talks to Qikink.",
+      "key_decisions": [],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-BE-29",
+      "title": "Gift card product purchase + balance check page",
+      "category": "backend",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": null,
+      "finished": null,
+      "verified": false,
+      "design_match": null,
+      "pushed": false,
+      "admin_ref": "TL-BE-12.02",
+      "depends_on": [
+        "TL-BE-12"
+      ],
+      "files": [
+        "src/app/products/[slug]/page.tsx",
+        "src/app/gift-cards/balance/page.tsx (new)"
+      ],
+      "description": "Expiry date shown at purchase.",
+      "key_decisions": [],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-BE-30",
+      "title": "Home page sections from the CMS",
+      "category": "backend",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": null,
+      "finished": null,
+      "verified": false,
+      "design_match": null,
+      "pushed": false,
+      "admin_ref": "TL-BE-13.01",
+      "depends_on": [
+        "TL-BE-13"
+      ],
+      "files": [
+        "src/app/page.tsx"
+      ],
+      "description": "cacheTag('cms:home').",
+      "key_decisions": [],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-BE-31",
+      "title": "/about, /about/sustainability and /policies/* from CMS pages",
+      "category": "backend",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": null,
+      "finished": null,
+      "verified": false,
+      "design_match": null,
+      "pushed": false,
+      "admin_ref": "TL-BE-13.01",
+      "depends_on": [
+        "TL-BE-13"
+      ],
+      "files": [
+        "src/app/about/page.tsx",
+        "src/app/about/sustainability/page.tsx",
+        "src/app/policies/page.tsx",
+        "src/app/policies/privacy/page.tsx",
+        "src/app/policies/returns/page.tsx",
+        "src/app/policies/shipping/page.tsx",
+        "src/app/policies/terms/page.tsx"
+      ],
+      "description": "Draft notices stay until legal copy is final.",
+      "key_decisions": [],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-BE-32",
+      "title": "/journal and /journal/[slug] from blogs",
+      "category": "backend",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": null,
+      "finished": null,
+      "verified": false,
+      "design_match": null,
+      "pushed": false,
+      "admin_ref": "TL-BE-13.02",
+      "depends_on": [
+        "TL-BE-13"
+      ],
+      "files": [
+        "src/app/journal/page.tsx",
+        "src/app/journal/[slug]/page.tsx"
+      ],
+      "description": "Retired slugs 301 via blog_slug_history.",
+      "key_decisions": [],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-BE-33",
+      "title": "/faq and PDP FAQs from the faqs table",
+      "category": "backend",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": null,
+      "finished": null,
+      "verified": false,
+      "design_match": null,
+      "pushed": false,
+      "admin_ref": "TL-BE-13.03",
+      "depends_on": [
+        "TL-BE-13"
+      ],
+      "files": [
+        "src/app/faq/page.tsx",
+        "src/storefront/components/commerce/DynamicAccordionFaq.tsx"
+      ],
+      "description": "cacheTag('faqs').",
+      "key_decisions": [],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-BE-34",
+      "title": "Footer newsletter subscribe + confirm / unsubscribe pages",
+      "category": "backend",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": null,
+      "finished": null,
+      "verified": false,
+      "design_match": null,
+      "pushed": false,
+      "admin_ref": "TL-BE-13.04",
+      "depends_on": [
+        "TL-BE-13"
+      ],
+      "files": [
+        "src/storefront/components/layout/Footer.tsx",
+        "src/app/newsletter/confirm/page.tsx (new)",
+        "src/app/newsletter/unsubscribe/page.tsx (new)"
+      ],
+      "description": "Double opt-in via mock email.",
+      "key_decisions": [],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-BE-35",
+      "title": "/contact form → support ticket — replaces api/contact stub",
+      "category": "backend",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": null,
+      "finished": null,
+      "verified": false,
+      "design_match": null,
+      "pushed": false,
+      "admin_ref": "TL-BE-14.01",
+      "depends_on": [
+        "TL-BE-14"
+      ],
+      "files": [
+        "src/app/contact/page.tsx",
+        "src/app/api/contact/route.ts (remove)"
+      ],
+      "description": "source 'contact_form'; guest name + email.",
+      "key_decisions": [],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-BE-36",
+      "title": "Analytics beacon (page, product and cart events)",
+      "category": "backend",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": null,
+      "finished": null,
+      "verified": false,
+      "design_match": null,
+      "pushed": false,
+      "admin_ref": "TL-BE-15.01",
+      "depends_on": [
+        "TL-BE-15"
+      ],
+      "files": [
+        "src/app/api/analytics/route.ts (new)"
+      ],
+      "description": "Client-generated UUIDv7 + ts; no personal data in events.",
+      "key_decisions": [],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-BE-37",
+      "title": "PDP Complete the Look section",
+      "category": "backend",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": null,
+      "finished": null,
+      "verified": false,
+      "design_match": null,
+      "pushed": false,
+      "admin_ref": "TL-BE-16.02",
+      "depends_on": [
+        "TL-BE-16"
+      ],
+      "files": [
+        "src/app/products/[slug]/page.tsx"
+      ],
+      "description": "Ships last.",
+      "key_decisions": [],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-BE-38",
+      "title": "Remove the demo store and Reset Demo once every screen is live; replace lib/invoice.ts with the GST invoice",
+      "category": "backend",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": null,
+      "finished": null,
+      "verified": false,
+      "design_match": null,
+      "pushed": false,
+      "admin_ref": "TL-BE-17.04",
+      "depends_on": [
+        "TL-BE-17"
+      ],
+      "files": [
+        "src/storefront/mocks/store.tsx",
+        "src/storefront/mocks/fixtures.ts",
+        "src/storefront/lib/invoice.ts"
+      ],
+      "description": "Invoice replacement waits for TL-INT-GST-INVOICES.",
+      "key_decisions": [],
+      "follow_ups": []
+    },
+    {
+      "id": "TL-WEB-BE-39",
+      "title": "Developer-only pages stay static: /design-system, /checklist, api/checklist, [...notfound]",
+      "category": "backend",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-WEB-BE",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "verified": true,
+      "design_match": null,
+      "pushed": true,
+      "admin_ref": "TL-BE-17.04",
+      "depends_on": [
+        "TL-BE-01"
+      ],
+      "files": [
+        "src/app/design-system/page.tsx",
+        "src/app/checklist/page.tsx",
+        "src/app/api/checklist/route.ts",
+        "src/app/[...notfound]/page.tsx"
+      ],
+      "description": "No backend; just confirm they build under cacheComponents.",
+      "key_decisions": [],
+      "follow_ups": [],
+      "log": "c4aa5ef — /design-system, /checklist, api/checklist and [...notfound] build under cacheComponents; no backend."
     }
   ]
 }

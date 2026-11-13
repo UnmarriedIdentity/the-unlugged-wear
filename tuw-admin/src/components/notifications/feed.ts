@@ -1,16 +1,14 @@
-import type { OrderItem, ProductItem, SupportTicket } from '@/mocks/fixtures';
+import type { OrderItem, SupportTicket } from '@/mocks/fixtures';
 import type { Notification } from './types';
 
 interface OpsSignals {
   orders: OrderItem[];
-  products: ProductItem[];
   supportTickets: SupportTicket[];
 }
 
-// Pure ops feed builder (N1): live store state in, notification items out.
-// Deterministic demo copy with stable ids; a database feed replaces this
-// function later without touching any component.
-export function buildNotifications({ orders, products, supportTickets }: OpsSignals): Notification[] {
+// Pure ops feed builder (N1): demo order and support items until those
+// modules go live. Inventory alerts come from the database (useStaffAlerts).
+export function buildNotifications({ orders, supportTickets }: OpsSignals): Notification[] {
   const items: Notification[] = [];
 
   orders
@@ -40,19 +38,6 @@ export function buildNotifications({ orders, products, supportTickets }: OpsSign
       href: '/orders',
     });
   }
-
-  const lowStock = products.filter((p) => p.stock > 0 && p.stock <= 10).slice(0, 2);
-  lowStock.forEach((p) => {
-    items.push({
-      id: `low-${p.id}`,
-      category: 'inventory',
-      tone: 'warning',
-      title: `${p.name} is low on stock`,
-      body: `Only ${p.stock} units left. Restock soon to avoid missing sales.`,
-      time: '1 h',
-      href: '/products',
-    });
-  });
 
   const openTickets = supportTickets.filter((t) => t.status === 'open').slice(0, 2);
   openTickets.forEach((t) => {

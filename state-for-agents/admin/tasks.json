@@ -8,82 +8,16 @@
     "reference": "Figma WmpPcdGcXerVgqNpgr6Q6S + production screenshots"
   },
   "summary": {
-    "total": 284,
-    "done": 259,
-    "in_progress": 0,
-    "backlog": 25
+    "total": 440,
+    "done": 350,
+    "in_progress": 1,
+    "backlog": 89
   },
   "session": {
-    "branch": "feat/search-modal",
-    "tip": "6c7e124",
-    "unpushed": [
-      "6c7e124",
-      "c344fea",
-      "dca4e76",
-      "c081f00",
-      "90c3526",
-      "5f24d18",
-      "325999b",
-      "0b9a554",
-      "639ead5",
-      "d657564",
-      "da55a2c",
-      "491a39d",
-      "cde5e5f",
-      "1da9df2",
-      "777198a",
-      "cc93003",
-      "75363c6",
-      "52a8216",
-      "6c3f82f",
-      "4cf0a30",
-      "4f40103",
-      "344be18",
-      "7c7a3f5",
-      "1e4955a",
-      "3edfb26",
-      "080837d",
-      "bec4d63",
-      "159181b",
-      "15c48b4",
-      "d77f9ed",
-      "fee3c6e",
-      "fd1812e",
-      "7e3a14d",
-      "8d6d500",
-      "f286600",
-      "8147632",
-      "33396a3",
-      "806fee6",
-      "8164bc6",
-      "d4c42ad",
-      "04f31ec",
-      "28eccec",
-      "1ed268d",
-      "c86e718",
-      "67bdf97",
-      "f9de18b",
-      "2645eb0",
-      "5e7e8b7",
-      "ac255fa",
-      "a396de7",
-      "71daaec",
-      "4e36f1e",
-      "3ee3844",
-      "fe3cb9f",
-      "1bf3c68",
-      "8657b23",
-      "a76c28e",
-      "1cb23d5",
-      "463acd1",
-      "912348b",
-      "8eea694",
-      "b8f80f8",
-      "eb198a1",
-      "f5c9cea",
-      "e3e12f9"
-    ],
-    "next_up": "Phase 3 storefront Journal SHIPPED (75363c6..6c7e124): validated block-JSON rendering, URL-driven category/author/tag/search/sort filters, pagination and empty states, SEO-rich article pages with one BlogPosting JSON-LD block, related essays, real reading time, Urbanist italic prose, charcoal/gold styling and a Culture-aligned taxonomy. The admin Journal editor runtime crash was fixed at the Tiptap boundary (90c3526: compact block JSON -> full ProseMirror doc and back; media URLs resolve from mediaId) and deterministic timestamps removed the hydration mismatch (c081f00 + dca4e76). NEXT: Phase 4 live CMS backend — PostgreSQL reads/writes, public/admin API, publish transaction, slug redirects, revision retention, R2 media, cache revalidation, analytics-backed views, and fixture retirement. Awaiting approval before implementation.",
+    "branch": "urvil-ui",
+    "tip": "9519313",
+    "unpushed": [],
+    "next_up": "TL-BE-09",
     "pending_verifications": [
       "admin journal editor + list full keyboard/focus/Reset Demo pass at 360/768/1024/1440 (CDP route-load check passed; interactive pass pending)",
       "SQL dry-run: apply 001 + 002 + 006-cms.sql against a real PostgreSQL instance; verify generated blogs.search_vector, slug/CHECK constraints, FK RESTRICT/CASCADE behavior, and partial indexes. psql remains unavailable locally.",
@@ -118,8 +52,8 @@
       "PEDIT Clothing Specs cards (c86e718): Compact one card per row; Expanded/Full pairs Display options+Clothing specs and Size chart+Monogram at 1024/1440; Display options switch hides/shows the monogram card; independent collapse survives tab switches; size-chart table scrolls inside a half-width card; monogram pair collapses to one column at 360; chart add/remove + in-use guard feedback; Reset Demo; 360/768/1024/1440 - browser pass pending",
       "SQL dry-run (f9de18b + 04f31ec): psql is not installed; validate 002 + 010 against a real Postgres instance before the first migration run. The static schema guard (28eccec + 04f31ec) checks inventory/FK order/retired names/semantic columns but does not replace a real parser."
     ],
-    "last_updated": "2026-10-27",
-    "updated_by": "agent"
+    "last_updated": "2026-11-10",
+    "updated_by": "agent (Claude)"
   },
   "tasks": [
     {
@@ -2117,7 +2051,7 @@
         "junction over arrays; legacy rows valid, new writes go library"
       ],
       "verified": true,
-      "pushed": false,
+      "pushed": true,
       "follow_ups": [
         "UI N1a model/linking",
         "UI N1b write-through",
@@ -2173,7 +2107,7 @@
         "customer_notes → profiles; tickets/reviews/views stay user-scoped (login-attached)"
       ],
       "verified": true,
-      "pushed": false,
+      "pushed": true,
       "follow_ups": [
         "household UI build (dropdown + 'Edit member' panel + autofill) follows the file-17 contract",
         "deferrals recorded in file 17 §7 (+Add member at checkout, per-order privacy toggle, size fallback)"
@@ -2197,7 +2131,7 @@
         "build order: LAST — after the core e-commerce app"
       ],
       "verified": true,
-      "pushed": false,
+      "pushed": true,
       "follow_ups": [
         "feature build is the project's final step: P1 (seed + scorer + API + PDP rail + events) → P2 (admin screens + Styling report + co-purchase job) → P3 (personalization, size-aware via profile_size_preferences)",
         "styling_events doubles as the shadow-mode harness (variant + contributors columns) — no schema change needed at any stage",
@@ -2222,7 +2156,7 @@
         "no views column — analytics page_views owns that data"
       ],
       "verified": true,
-      "pushed": false,
+      "pushed": true,
       "follow_ups": [
         "runtime SQL dry-run on a real PostgreSQL instance (006-cms.sql, incl. generated column + check constraints)",
         "Phase 2: admin blog state + taxonomy + full-page Tiptap editor"
@@ -4846,7 +4780,7 @@
         "No ALTER: 002 and 010 are edited at creation time"
       ],
       "verified": true,
-      "pushed": false,
+      "pushed": true,
       "follow_ups": [
         "Run the migrations against a real Postgres instance once provisioned (psql is not installed in this environment)",
         "Add dynamic variant-axis UI from product_attribute_links metadata"
@@ -4870,7 +4804,7 @@
         "Variant shipping fields are row-derived overrides with product-level fallbacks"
       ],
       "verified": true,
-      "pushed": false,
+      "pushed": true,
       "follow_ups": [
         "Dynamic variant-axis UI from product_attribute_links metadata",
         "Browser visual pass for workbook import at 360/768/1024/1440"
@@ -4892,7 +4826,7 @@
         "PDP compare, if scoped later, builds on attribute_definitions — never a second definition table"
       ],
       "verified": true,
-      "pushed": false,
+      "pushed": true,
       "follow_ups": [
         "Run the migrations against a real Postgres instance once provisioned (psql is unavailable)",
         "If PDP compare is scoped later, add typed spec fields then; do not reintroduce the retired pair"
@@ -4914,7 +4848,7 @@
         "No new dependency; the test runs under the existing node --test glob"
       ],
       "verified": true,
-      "pushed": false,
+      "pushed": true,
       "follow_ups": [
         "Runtime SQL validation still requires a real PostgreSQL instance"
       ]
@@ -4937,13 +4871,2872 @@
         "No seed file: migrate/ remains schema-only; the importer/library creates the six definitions at runtime"
       ],
       "verified": true,
-      "pushed": false,
+      "pushed": true,
       "follow_ups": [
         "Phase 2: importer token classifier + editable preview label + mixed-cell flags",
         "Phase 3: admin N-axis matrix, dynamic attribute card, definition-scoped search",
         "Phase 4: storefront generic options/selector/PDP/cart/filters + representative fixtures",
         "Runtime SQL validation of 010 still requires a real PostgreSQL instance"
       ]
+    },
+    {
+      "id": "TL-DB-BACKEND-PREP",
+      "title": "Backend prep — fix docs and schema before writing backend code (two deployments, one Neon DB)",
+      "status": "in_progress",
+      "owner": "agent",
+      "started": "2026-11-10",
+      "finished": null,
+      "log": "Parent for the 2026-11-10 decisions: two separate deployments (tuw-admin, tuw-website) sharing one Neon Postgres; custom bcrypt auth; DECIMAL money; SQL order status vocabulary; guest checkout; no store credit; exchanges; newsletter/FAQ/gift cards/stock alerts. Children below.",
+      "design_match": "n/a",
+      "key_decisions": [
+        "Docs and schema are fixed first; backend code starts only after the open questions are answered"
+      ],
+      "verified": false,
+      "pushed": false
+    },
+    {
+      "id": "TL-DB-SHARED-ROOT",
+      "title": "Move migrations + seed to repo-root db/ (shared by both apps)",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-DB-BACKEND-PREP",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "9767bcc — git mv tuw-admin/src/server/db → db/; schema/seed tests and DOC paths updated. Admin 112 tests green.",
+      "design_match": "n/a",
+      "key_decisions": [
+        "Schema belongs to neither app; both deployments apply nothing themselves"
+      ],
+      "verified": true,
+      "pushed": true
+    },
+    {
+      "id": "TL-DB-SCHEMA-DECISIONS",
+      "title": "Schema: guest checkout, exchanges, no store credit, contact source, low-stock threshold, bcrypt note",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-DB-BACKEND-PREP",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "19fc666 — orders guest_email/name/phone + orders_buyer_identity CHECK, order_type, guest-aware idempotency index, for_household_id nullable only for guests; returns.replacement_order_id + requester_email; store_credit removed; support_tickets.source/order_id; products.low_stock_threshold; brands marked created; seed exchange.window_days=7, inventory.low_stock_threshold=10.",
+      "design_match": "n/a",
+      "key_decisions": [
+        "Exchange replacement = new order_type='exchange' order, so shipments/partner_orders are reused",
+        "Contact form = support_tickets source 'contact_form' (one staff inbox)",
+        "Free-shipping threshold already in store_settings.shipping.free_threshold"
+      ],
+      "verified": true,
+      "pushed": true
+    },
+    {
+      "id": "TL-DB-COMMERCE-EXTRAS",
+      "title": "008-commerce-extras.sql: newsletter_subscribers, faqs, gift_cards, gift_card_transactions, stock_alert_subscriptions",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-DB-BACKEND-PREP",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "19fc666 — fills the unused 008 slot (no renumbering, no table removed). 94 tables total. Doc: DOC/backend/22-Commerce-Extras.md.",
+      "design_match": "n/a",
+      "key_decisions": [
+        "Newsletter is its own table (guests subscribe without accounts; consent history outlives accounts)",
+        "Gift card = cached balance + append-only ledger; code stored hashed",
+        "Staff low/out-of-stock alerts reuse notifications kind 'inventory' — no table"
+      ],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "Owner to confirm: can customers buy gift cards on the storefront or only staff issue them? Expiry? Usable with discount codes?"
+      ]
+    },
+    {
+      "id": "TL-DB-DOCS-TWO-APPS",
+      "title": "Docs: two deployments, Neon, bcrypt, guest checkout, exchange/cancel rules, table inventory",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-DB-BACKEND-PREP",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "13d02af, 370c754 — 12 → 12-Two-App-Deploy.md, 14 → 14-Access-Gating.md (rewritten); 00/01/02/03/04/05/06/11/13/15/20 updated; 22 added; 02-Data-Tables lists all 94 tables.",
+      "design_match": "n/a",
+      "key_decisions": [
+        "Cancel only while pending; exchange only when delivered, within 7 days, same product other variant",
+        "Old storefront words map queued→confirmed, printing→processing, submission_failed→failed"
+      ],
+      "verified": true,
+      "pushed": true
+    },
+    {
+      "id": "TL-DB-REPO-CLEANUP",
+      "title": "Neon env examples, db.ts stubs, store-credit UI removed, AGENTS money/status rules",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-DB-BACKEND-PREP",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "bc696e6 — .env.example DATABASE_URL/AUTH_SECRET; lib/supabase.ts → lib/db.ts stubs (no importers); refunds Store Credit option + fixture removed; AGENTS.md (x3) updated; report.md marked. Typecheck both apps clean; admin 112/112; website 53/55 (2 pre-existing homepage-typography failures, unchanged by this work).",
+      "design_match": "n/a",
+      "key_decisions": [
+        "3.Database-Schema.md and 4.API-Design.md left untouched pending owner decision"
+      ],
+      "verified": true,
+      "pushed": true
+    },
+    {
+      "id": "TL-DB-MIGRATION-RUNNER",
+      "title": "Small script to create/apply the schema on any Postgres (Neon or local)",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-BE-CORE",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "db/scripts/db.mjs (pg 8.13.1 root devDependency): status / migrate / seed / reset. Per-file transactions, schema_migrations ledger with SHA-256 (changed applied file refused), advisory lock, dev-only reset behind DB_ALLOW_RESET=true + --yes. Root scripts db:*. Applied to Neon dev: 14 files, 99 tables; seed run twice (roles 4, permissions 19, store_settings 19, integration_providers 7).",
+      "design_match": "n/a",
+      "key_decisions": [
+        "Forward-only migrations from now on (new numbered files); dev may reset while pre-launch"
+      ],
+      "verified": true,
+      "pushed": true
+    },
+    {
+      "id": "TL-DB-FRONTEND-STATUS-VOCAB",
+      "title": "Switch storefront/admin order status types to the SQL vocabulary",
+      "status": "backlog",
+      "owner": "agent",
+      "parent": "TL-DB-BACKEND-PREP",
+      "started": null,
+      "finished": null,
+      "log": "Docs now use pending/confirmed/processing/shipped/delivered/cancelled/failed/refunded; UI code (types.ts, fixtures, account/orders, fulfillment page) still uses queued/printing/submission_failed. Code change only, no schema change.",
+      "design_match": "n/a",
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false
+    },
+    {
+      "id": "TL-DB-OPEN-QUESTIONS",
+      "title": "Owner answers needed before backend code",
+      "status": "backlog",
+      "owner": "agent",
+      "parent": "TL-DB-BACKEND-PREP",
+      "started": null,
+      "finished": null,
+      "log": "Answered 2026-11-10: price difference charged/refunded; exchanges need an account; COD refunds via UPI/bank; gift cards sold on site, combinable with discount codes, expire 6 months after issue; old root docs rewritten; no money-back returns. Still open: (1) exchange policy for POD — customer keeps old garment vs ships it back, and whether personalised/custom prints are defects-only (proposed products.exchange_policy); (2) shared packages/heart vs per-app module copies; (3) Qikink live API access + tracking/webhook endpoints; (4) legal check that a 6-month expiry suits a closed-loop store gift card.",
+      "design_match": "n/a",
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false
+    },
+    {
+      "id": "TL-DB-FULFILLMENT-PROVIDERS",
+      "title": "Provider-agnostic fulfilment (009-fulfillment.sql) + Qikink research + exchange pricing / COD refunds",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-DB-BACKEND-PREP",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "9f69e61 — 009-partner → 009-fulfillment (7 tables: integration_providers, provider_product_mappings, provider_cod_remittances, fulfillment_orders, fulfillment_order_items, provider_wallet_ledger, fulfillment_claims); provider slugs FK to the registry; returns exchange|replacement + price_difference, account required; refunds upi/bank_transfer + payout_reference; products.product_kind; 7 provider seed rows; 99 tables; doc 16 rewritten from the Qikink help centre. Admin 113/113.",
+      "design_match": "n/a",
+      "key_decisions": [
+        "Qikink has no money-back returns or size exchanges → no money-back returns; exchange = new partner order paid by us",
+        "Defects: 7-day claim window with unboxing video → fulfillment_claims",
+        "New provider = integration_providers row + adapter, no migration"
+      ],
+      "verified": true,
+      "pushed": true
+    },
+    {
+      "id": "TL-DB-ROOT-DOCS",
+      "title": "Rewrite 3.Database-Schema.md and 4.API-Design.md for the modular two-backend design",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-DB-BACKEND-PREP",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "Old microservices/MongoDB/Redis content replaced: schema-by-module ownership map; module layout (index/service/repository/schemas/events), integration registries, events for side effects, per-app module table.",
+      "design_match": "n/a",
+      "key_decisions": [
+        "Modular monolith per app, not microservices",
+        "Modules own their tables and talk via index.ts + events"
+      ],
+      "verified": true,
+      "pushed": true
+    },
+    {
+      "id": "TL-DB-GIFT-CARD-RULES",
+      "title": "Gift cards: 6-month expiry, combinable with discount codes",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-DB-BACKEND-PREP",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "store_settings gift_card.validity_months = 6 (seed, 17 keys); 008 + doc 22 describe expiry at issue and discount-then-gift-card order of application. Admin 113/113.",
+      "design_match": "n/a",
+      "key_decisions": [
+        "Discount code applies first, gift card pays down the remainder",
+        "Expiry is a setting, not hard-coded"
+      ],
+      "verified": true,
+      "pushed": true
+    },
+    {
+      "id": "TL-DB-EXCHANGE-POLICY",
+      "title": "exchange_policy (default defects_only), print preview, cancel window, abuse limits; no ADD COLUMN ALTERs",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-DB-BACKEND-PREP",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "products.exchange_policy + order_items snapshot; cart_items/order_items personalization + preview_image_url + preview_approved_at (CHECK: no unapproved custom print); orders.cancellable_until + store_settings orders.cancel_window_minutes=60; returns.evidence_media_ids (>=1 photo), return_items.request_type with reason CHECKs and one_exchange_per_order_item. All ALTER ... ADD COLUMN moved into CREATE TABLE; only 6 forward-FK ADD CONSTRAINTs remain. Full schema + seed (twice) applied on PostgreSQL 17 via PGlite: 99 tables, 17 partitions; guest/provider/refund constraints behave. Admin 114/114.",
+      "design_match": "n/a",
+      "key_decisions": [
+        "Defects-only by default because Qikink reprints defects but never takes items back",
+        "Paid orders stay pending during the cancel window, then become confirmed when sent to Qikink",
+        "Customer mistakes on defects-only items are not compensated"
+      ],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "Qikink reply pending on defect claims without unboxing video",
+        "Consider adding the PGlite schema check as a repo script (needs a devDependency)"
+      ]
+    },
+    {
+      "id": "TL-INT-PHASE",
+      "title": "Integrations phase (LAST) — wire third-party services only after core modules are done",
+      "status": "backlog",
+      "owner": "agent",
+      "started": null,
+      "finished": null,
+      "log": "Owner decision 2026-11-10: build every core module first with mock/sandbox adapters; integrate providers last. Do not start a TL-INT task until the owner opens this phase.",
+      "design_match": "n/a",
+      "key_decisions": [
+        "Providers sit behind integrations/<category>/registry.ts so each is swappable"
+      ],
+      "verified": false,
+      "pushed": false
+    },
+    {
+      "id": "TL-INT-RAZORPAY",
+      "title": "Razorpay payments + webhook + refunds; COD rules",
+      "status": "backlog",
+      "owner": "agent",
+      "parent": "TL-INT-PHASE",
+      "started": null,
+      "finished": null,
+      "log": "Proposed defaults to confirm then: COD allowed up to ₹3,000 and not for custom prints; Razorpay test account needed; webhook via webhook_events.",
+      "design_match": "n/a",
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false
+    },
+    {
+      "id": "TL-INT-EMAIL",
+      "title": "Transactional email provider (verification, reset, orders, newsletter double opt-in, gift cards, back-in-stock)",
+      "status": "backlog",
+      "owner": "agent",
+      "parent": "TL-INT-PHASE",
+      "started": null,
+      "finished": null,
+      "log": "Recommended Resend (or AWS SES at volume); domain verification needed; delivery logged in email_logs.",
+      "design_match": "n/a",
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false
+    },
+    {
+      "id": "TL-INT-STORAGE",
+      "title": "Cloudflare R2 uploads (media, return evidence photos/unboxing videos, design files)",
+      "status": "backlog",
+      "owner": "agent",
+      "parent": "TL-INT-PHASE",
+      "started": null,
+      "finished": null,
+      "log": "Proposed limits: 100 MB per video, 10 MB per photo; direct browser upload with presigned URLs; rows in media.",
+      "design_match": "n/a",
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false
+    },
+    {
+      "id": "TL-INT-QIKINK",
+      "title": "Qikink live API adapter (create order, poll status, cancel, wallet)",
+      "status": "backlog",
+      "owner": "agent",
+      "parent": "TL-INT-PHASE",
+      "started": null,
+      "finished": null,
+      "log": "Needs live API access from care@qikink.com and answers to the defect-claim email (sent 2026-11-10). Product mapping source: tuw-website/data/qikink-listing.json (qikinkId, style code, placements, base cost, HSN); store SKU + design links still to be confirmed.",
+      "design_match": "n/a",
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [
+        "Ask Qikink support: is search_from_my_products: 0 (design links per order) accepted in live?"
+      ]
+    },
+    {
+      "id": "TL-INT-GST-INVOICES",
+      "title": "GST tax invoices + credit notes (format in DOC/backend/24-GST-Invoices.md)",
+      "status": "backlog",
+      "owner": "agent",
+      "parent": "TL-INT-PHASE",
+      "started": null,
+      "finished": null,
+      "log": "Seller address recorded: 17-Sanskruti Park Row House, Behind Subhash Garden, Near Doctor's Park Society, Jahangirpura, Surat, Gujarat 395005, India. PENDING from owner: GSTIN and legal entity name. To add: document_sequences, invoices, invoice_items, credit_notes (+ items); PDF generation and email.",
+      "design_match": "n/a",
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [
+        "Accountant to confirm GST slab rules for apparel and gift-card voucher timing"
+      ]
+    },
+    {
+      "id": "TL-INT-SHIPPING-FEES",
+      "title": "Final shipping fees",
+      "status": "backlog",
+      "owner": "agent",
+      "parent": "TL-INT-PHASE",
+      "started": null,
+      "finished": null,
+      "log": "Not decided. Values live only in store_settings (shipping.standard_fee, shipping.free_threshold, shipping.cod_fee) — seed values are placeholders; change in admin Settings, no code change.",
+      "design_match": "n/a",
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false
+    },
+    {
+      "id": "TL-BE-CORE",
+      "title": "Backend core modules — replace demo data screen by screen, module by module",
+      "status": "backlog",
+      "owner": "agent",
+      "started": null,
+      "finished": null,
+      "log": "Backend core — build modules in order TL-BE-01 → TL-BE-17 (respect depends_on), integrations (TL-INT-*) only after. HOW TO PICK UP WORK: 1) read state-for-agents/backend/AGENTS.md and DOC/backend/23-Backend-Implementation.md; 2) take the lowest-numbered backlog child whose parent's depends_on are all done; 3) set it in_progress (owner = you) — exactly one in_progress per person; 4) build inside packages/heart/src/modules/<name> + thin app actions/routes, follow the skills; 5) gates: pnpm typecheck, pnpm test, pnpm build, pnpm db:migrate on dev if SQL changed; 6) commit code + this tracker together (status done, log = commit hash, verified true, finished date); 7) a parent is done when all children are done and its done_when holds. Each module ends by replacing the demo adapter on its screens (screen by screen). STOREFRONT: every storefront screen/route is a task in state-for-agents/storefront/tasks.json (TL-WEB-BE-NN). Admin mains and steps list them in storefront_tasks[]; when you finish an admin step, do (or hand off) its storefront_tasks next. After TL-BE-17, any TL-WEB-BE task still in backlog is the remaining storefront work.",
+      "design_match": "n/a",
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false
+    },
+    {
+      "id": "TL-BE-00",
+      "title": "Decisions to confirm before coding (owner)",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-CORE",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "All five owner decisions recorded (see children).",
+      "wiring": "n/a",
+      "done_when": "Owner has answered every child; answers copied into DOC/backend/00-README.md §7.",
+      "depends_on": [],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [],
+      "storefront_tasks": []
+    },
+    {
+      "id": "TL-BE-00.01",
+      "title": "Shared package name — @tuw/heart (as docs assume)?",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-00",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "Owner: package name @tuw/heart → folder packages/heart; all docs, skills, trackers and memory renamed.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-00.02",
+      "title": "Neon region — move dev/prod project to Singapore while the DB is empty?",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-00",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "Owner: keep Neon in US East (us-east-2) for now; revisit before launch (latency for Indian customers).",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-00.03",
+      "title": "Repo rules 03-never-push / 10-never-commit vs owner instruction to commit + push on urvil-ui",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-00",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "dde825c — owner: no never-commit rule; commit after each change and push to urvil-ui. Rule 03 rewritten as 03-commit-and-push (admin + storefront), storefront rule 10 deleted, guides/AGENTS updated.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-00.04",
+      "title": "Qikink store SKUs + design links per variant — created in Qikink first, or pasted by staff in admin?",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-00",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "Researched 2026-11-10: strategy A (Store SKU, search_from_my_products 1) is the verified live path; strategy B (design per order, 0) appears only as Qikink's sandbox test format. Decision: build for A, keep B as data in provider_payload; confirm B with Qikink support in TL-INT-QIKINK. DOC/backend/16 §6.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-00.05",
+      "title": "Exchange old garment — customer keeps it (recommended) or ships it back?",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-00",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "Owner: customer keeps the old garment on a size/variant exchange (no reverse pickup). Qikink evidence rules applied in 015. Recorded in DOC/backend/06.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-01",
+      "title": "Platform foundation — packages/heart + shared plumbing",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-CORE",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "Done: done_when met — both apps typecheck/test/build with cacheComponents on; /api/health ok on Neon dev; drift test green. Commits 041cc4b, 2d688a1, c4aa5ef 9519313.",
+      "wiring": "packages/heart is a pnpm workspace package; tuw-admin and tuw-website add it as a dependency and list it in next.config transpilePackages; each app imports @tuw/heart/... from server code only.",
+      "done_when": "Both apps typecheck, test and build with cacheComponents on; GET /api/health in each app returns {db:'ok'} against Neon dev; drift test green.",
+      "depends_on": [
+        "TL-BE-00"
+      ],
+      "design_match": null,
+      "key_decisions": [
+        "Guards are framework-free: each app passes a resolveContext (Next cookies/headers) to createGuards",
+        "Integration tests build a throwaway schema per run; never the shared public schema",
+        "Warm Neon round trip from India ~320 ms per query — region revisit stays on the go-live list"
+      ],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-01"
+      ]
+    },
+    {
+      "id": "TL-BE-01.01",
+      "title": "Create packages/heart (package.json, tsconfig, src/index.ts), add to pnpm-workspace, wire both apps (dependency + transpilePackages)",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-01",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "041cc4b — packages/heart (@tuw/heart) workspace package; both apps depend on workspace:* and transpile it; root typecheck/test include it.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-01"
+      ]
+    },
+    {
+      "id": "TL-BE-01.02",
+      "title": "platform/db — pg Pool from DATABASE_URL, Drizzle instance, transaction helper",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-01",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "041cc4b — platform/db: pg pool singleton, Drizzle, withTransaction, closeDb; checkDatabase() added in 9519313.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-01.03",
+      "title": "Drizzle schema types via drizzle-kit pull from Neon dev + drift test",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-01",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "041cc4b — pnpm db:types (drizzle-kit pull + scripts/fix-generated.mjs: tsvector, empty defaults, .ts imports); drift test vs live Neon schema green. Partitioned analytics parents not generated (TL-BE-15).",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-01.04",
+      "title": "platform/errors — AppError codes + API envelope {error:{code,message,details},requestId,timestamp}",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-01",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "041cc4b — platform/errors: AppError codes from DOC/backend/13 + envelope.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-01.05",
+      "title": "platform/money — toPaise / toRupees / formatINR + node tests",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-01",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "041cc4b — platform/money: toPaise/toRupees/formatINR/percentOf/taxableFromInclusive + tests.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-01.06",
+      "title": "platform/guards — action() and route() wrappers (zod input, access/role/permission, idempotent flag)",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-01",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "041cc4b — platform/guards: createGuards({resolveContext}) → action()/route(); access levels, staff role/permission, zod, idempotent scopes; resolver is wired to real sessions in TL-BE-02.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-01.07",
+      "title": "platform/idempotency — idempotency_keys service (scope, actor_ref, key; replay / 409 / 422)",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-01",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "041cc4b — platform/idempotency: claim/complete/fail/sweepExpired per DOC/backend/21 (scope, actor_ref, key).",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-01.08",
+      "title": "platform/events — in-process typed event bus (emit/subscribe)",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-01",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "2d688a1 — platform/events typed in-process bus.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-01.09",
+      "title": "platform/jobs — job registry + runJob(name) + /api/cron/[job] route in tuw-admin (CRON_SECRET) + vercel.json crons stub",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-01",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "2d688a1 — platform/jobs + jobs/catalog (platform.sweepIdempotencyKeys); tuw-admin GET /api/cron/[job] with Bearer CRON_SECRET; vercel.json daily cron.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-01.10",
+      "title": "Enable cacheComponents in both next.config.ts and fix build insights",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-01",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "c4aa5ef — cacheComponents on in both apps; both production builds pass (admin dashboard streams in one Suspense for now; storefront slugs prerendered).",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "Move DashboardShell sidebar/header into (dashboard)/layout as the static shell when admin screens go live (TL-BE-17.06)"
+      ]
+    },
+    {
+      "id": "TL-BE-01.11",
+      "title": "platform/test — integration test harness: throwaway schema per run on DATABASE_URL_UNPOOLED, apply migrations, drop after",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-01",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "platform/test createTestDatabase(): throwaway schema on DATABASE_URL_UNPOOLED, migrations + seed, search_path via connection options, dropped after; integration tests for idempotency and jobs green on Neon (5/5, no leftover schemas). (9519313)",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-01.12",
+      "title": "GET /api/health in both apps (select 1 + migration count) and verification note",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-01",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "GET /api/health in tuw-admin and tuw-website → {status:'ok', db:{migrations:15}} verified against Neon dev (warm query ~640 ms from India to us-east-2). (9519313)",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-02",
+      "title": "Auth & sessions — customers (storefront) and staff (admin)",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-CORE",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "Done: done_when met (customer register/verify/login/logout/reset on the storefront; staff invite/accept/login on the admin; role-gated pages refuse non-staff; demo auth removed). Commits fa4c6aa + eb1506b.",
+      "wiring": "modules/auth used by platform/guards + DAL (requireCustomer, requireStaff(permission)); each app has its own proxy.ts (optimistic redirect) and its own session cookie; emails go through integrations/email mock adapter.",
+      "done_when": "Customer can register, verify (mock email link shown in dev), log in/out, reset password on the storefront; staff can be invited, set a password and log in on the admin; role-gated admin pages refuse non-staff; demo auth adapters removed from these screens.",
+      "depends_on": [
+        "TL-BE-01"
+      ],
+      "design_match": null,
+      "key_decisions": [
+        "Access token carries roles/permissions → no DB read in proxy or guards; ≤ 15 min staleness, revocation on role change",
+        "Email links on screen only in development with AUTH_SHOW_DEV_LINKS",
+        "Admin is invitation only"
+      ],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-02",
+        "TL-WEB-BE-03",
+        "TL-WEB-BE-04"
+      ]
+    },
+    {
+      "id": "TL-BE-02.01",
+      "title": "modules/auth repository + service: users/profiles, bcrypt (cost 12, 72-byte limit), login_attempts + locked_until lockout",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-02",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "fa4c6aa — modules/auth: users/profiles via customers.createAccountHolder, bcrypt cost 12 + 72-byte limit + rehash, timing-safe login, lockout 5/15 min.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-02.02",
+      "title": "Sessions: 15-min access token + 30-day rotating refresh tokens (hashed), reuse detection, logout/revoke all",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-02",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "fa4c6aa — HMAC access tokens (15 min, roles+perms) + rotating refresh families per app (016), replay revokes the family (bug caught by tests and fixed).",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-02.03",
+      "title": "DAL: getCurrentUser / requireCustomer / requireStaff(permission) with 'use cache: private' + Suspense pattern",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-02",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "eb1506b — heart next/session: currentClaims, requireUser, requireStaff(permission) → /access-denied, resolveContext for guards, refresh route; session-aware storefront via SessionProvider + use() in Suspense.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-02.04",
+      "title": "Register + email verification + password reset/set (tokens hashed; mock email adapter logs to email_logs)",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-02",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "fa4c6aa + eb1506b — register, verify (button POST at /verify-email), forgot/reset (single use, revokes sessions); mock_email adapter + dev links only with AUTH_SHOW_DEV_LINKS outside production.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-03"
+      ]
+    },
+    {
+      "id": "TL-BE-02.05",
+      "title": "Staff invites (staff_invitations) + accept-invite + role assignment",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-02",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "fa4c6aa + eb1506b — staff invite / revoke / accept (existing customer must prove password), role + status changes keep one active admin.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-02.06",
+      "title": "proxy.ts in each app (optimistic redirect only) + first-admin env seed",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-02",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "eb1506b — proxy.ts in both apps (heart next/proxy, no DB), /api/auth/refresh in both, pnpm auth:bootstrap-admin (env ADMIN_EMAIL/ADMIN_PASSWORD).",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-04"
+      ]
+    },
+    {
+      "id": "TL-BE-02.07",
+      "title": "Wire storefront: /login, /register, /forgot-password, /reset-password, account menu",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-02",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "eb1506b — storefront /login, /register, /forgot-password, /reset-password, /verify-email, header account link, account/checkout/contact sessions on real auth; mocks/auth.ts deleted. Browser e2e: register → logout → wrong password (values kept) → login (upper-case email) OK.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-02"
+      ]
+    },
+    {
+      "id": "TL-BE-02.08",
+      "title": "Wire admin: /login, /signup, /verify, /accept-invite, /reset-password, /team, sidebar role gating",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-02",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "eb1506b — admin /login (real, social buttons truthful), /forgot-password, /reset-password (new set-password view), /accept-invite (invite decides email+role), /signup invitation-only, /verify → /login, sidebar Log out revokes the session, /team on real staff + invites, /access-denied. Browser e2e: wrong/right login, double-click invite = 1 invite, accept invite, support user blocked from /team.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-02.09",
+      "title": "Tests: lockout, token rotation/reuse, permission checks, guest vs customer access",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-02",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "fa4c6aa — 13 break-it integration tests (parallel signups, lockout, token theft replay, 6 concurrent refreshes, single-use links, forged tokens, last-admin guard) + guard unit tests; heart 28/28.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-02.10",
+      "title": "Replace lib/permissions.ts (admin/manager/support) with DB RBAC (admin/support/warehouse + 19 permission slugs); map UI personas; sidebar gating",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-02",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "eb1506b — lib/permissions.ts (fake 'manager' role) deleted; guards and DAL use DB role/permission slugs from the access token. Sidebar item hiding by permission moved to TL-BE-17.11.",
+      "files": [
+        "tuw-admin/src/lib/permissions.ts",
+        "tuw-admin/src/components/layout/Sidebar.tsx"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "Added by the 2026-11-10 admin screen audit"
+      ]
+    },
+    {
+      "id": "TL-BE-03",
+      "title": "Customers & households — profile, addresses, family members, sizes",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-CORE",
+      "started": "2026-11-10",
+      "finished": "2026-11-11",
+      "log": "Done: profile, addresses, households (managed members, invitations), size preferences and admin directory on real data across both apps. Commits 4bb2a16 + 75eea1e.",
+      "wiring": "modules/customers; storefront account pages via Server Components + actions; admin customers pages; checkout reads addresses through customers/index.ts.",
+      "done_when": "Account profile/addresses/household screens and admin customer list/detail/notes run on the DB.",
+      "depends_on": [
+        "TL-BE-02"
+      ],
+      "design_match": null,
+      "key_decisions": [
+        "Admin \"Add customer\" creates a pending login + 7-day set-password link (auth.createCustomerAccount); tier is computed (tierFor), not chosen",
+        "Addresses owner-only: another profile's address id answers NOT_FOUND (no existence leak)",
+        "Removed household member moves to a solo household — never orphaned",
+        "Validation message names the first problem; details carry every field"
+      ],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "Claim flow for managed members who later get their own login",
+        "Size preferences UI when the catalog module lands (TL-BE-05)",
+        "Real order history + LTV in the customer drawer once orders exist (TL-BE-08)"
+      ],
+      "storefront_tasks": [
+        "TL-WEB-BE-05"
+      ]
+    },
+    {
+      "id": "TL-BE-03.01",
+      "title": "modules/customers: profiles, addresses (one default per type), households + members + invitations, size preferences",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-03",
+      "started": "2026-11-10",
+      "finished": "2026-11-11",
+      "log": "4bb2a16 + 75eea1e — modules/customers: service + schemas; address default under row lock; household rules; size chart composite FK.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-03.02",
+      "title": "Wire storefront /account/profile, /account/addresses, household management",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-03",
+      "started": "2026-11-10",
+      "finished": "2026-11-11",
+      "log": "75eea1e — Storefront /account profile tab (details, password, household) + address book + checkout addresses from AccountDataProvider; /account/household/join. Verified in browser.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-05"
+      ]
+    },
+    {
+      "id": "TL-BE-03.03",
+      "title": "Wire admin /customers list + detail + customer_notes",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-03",
+      "started": "2026-11-10",
+      "finished": "2026-11-11",
+      "log": "75eea1e — Admin /customers Server Component: requireStaff(customer.view); URL-driven search/paging; drawer opens on click then streams detail; notes + create customer (idempotent, field errors). loading.tsx for /customers and /team (instant navigation). Browser-verified: search incl. bare %, profile, note with HTML stays text, create, duplicate email refused case-insensitively.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-03.04",
+      "title": "Tests: address defaults, household membership rules (file 17)",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-03",
+      "started": "2026-11-10",
+      "finished": "2026-11-11",
+      "log": "4bb2a16 + 75eea1e — customers.int.test.ts — 9 break-it tests on a throwaway Neon schema; guard validation message test.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-04",
+      "title": "Settings & integration registry",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-CORE",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "Done: admin settings tabs save to store_settings and the storefront reflects them without a deploy (verified: ₹2,500/₹175 shown on /policies/shipping right after saving, then restored). Provider registry with mock adapters and toggles. Commit af12876.",
+      "wiring": "modules/settings exposes getSetting(key) cached with cacheTag('settings'); admin saves call updateTag + POST storefront /api/revalidate (REVALIDATE_SECRET).",
+      "done_when": "Admin settings tabs (store, shipping fees, tax, exchange window, cancel window, gift card validity, low-stock) save to the DB and the storefront reflects changes without a deploy.",
+      "depends_on": [
+        "TL-BE-02"
+      ],
+      "design_match": null,
+      "key_decisions": [
+        "One registry entry per key (zod rule, fallback, tab, public/staff); seed = registry, checked by a test",
+        "Money in store_settings is a rupee string (\"150.00\"), paise in code (017 rewrote numeric rows)",
+        "Provider state only in integration_providers; duplicate settings keys removed (017)",
+        "Storefront 'settings' tag expires immediately ({ expire: 0 }); other tags 'max'",
+        "A provider switches on only with an adapter; live only with live keys; payment/email keep exactly one active",
+        "Qikink runs as a sandbox simulator until TL-INT-QIKINK"
+      ],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "Returns policy copy still says 14-day money-back returns (RETURN_WINDOW_DAYS) — rewrite to the exchange-only policy with the owner in TL-BE-10",
+        "Express delivery ₹250 is hard-coded in the shipping policy copy (not offered at checkout; add a setting when it is)",
+        "Admin header still shows the demo persona name instead of the signed-in staff member",
+        "Editing non-secret provider settings (e.g. Qikink default print type) — with TL-BE-11",
+        "Demo cart converts paise to rupee numbers until the cart module (TL-BE-07)"
+      ],
+      "storefront_tasks": [
+        "TL-WEB-BE-06",
+        "TL-WEB-BE-07"
+      ]
+    },
+    {
+      "id": "TL-BE-04.01",
+      "title": "modules/settings: typed keys + defaults from seed, cached reads",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-04",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "af12876 — modules/settings: keys.ts registry (20 keys), getSettings/getPublicSettings/updateSettings, audit via platform/audit; settings.int.test.ts (7 break-it tests).",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-07"
+      ]
+    },
+    {
+      "id": "TL-BE-04.02",
+      "title": "integrations registry base (payments/fulfillment/email/storage interfaces + mock adapters) reading integration_providers",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-04",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "af12876 — integrations/registry + payments (mock), fulfillment (Qikink simulator, custom atelier), storage (memory) interfaces; registry.int.test.ts (5) + adapters.test.ts (4).",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-04.03",
+      "title": "Storefront POST /api/revalidate (secret) + admin helper to call it",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-04",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "af12876 — Storefront POST /api/revalidate (secret, tag allow-list, constant-time secretMatches); admin refreshStorefront() helper. Break-it checked: 401 no/wrong secret, 400 unknown/empty tags and non-JSON, 405 GET.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-06"
+      ]
+    },
+    {
+      "id": "TL-BE-04.04",
+      "title": "Wire admin /settings/* tabs and provider toggles (sandbox/live, active)",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-04",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "af12876 — Payments/Fulfillment tabs: provider on/off + sandbox/live via updateProviderAction; refusals shown inline (last payment provider, no adapter, no live keys).",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-04.05",
+      "title": "Wire each settings tab: /settings/general, /brand, /shipping, /taxes, /payments, /fulfillment, /notifications",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-04",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "af12876 — All /settings/<tab> routes on real data (+ new /settings/policies), per-tab Suspense, field errors, dirty warning, truthful storefront-refresh notice; mock StoreSettings removed from the admin demo state.",
+      "files": [
+        "tuw-admin/src/app/(dashboard)/settings/general/page.tsx",
+        "tuw-admin/src/app/(dashboard)/settings/brand/page.tsx",
+        "tuw-admin/src/app/(dashboard)/settings/shipping/page.tsx",
+        "tuw-admin/src/app/(dashboard)/settings/taxes/page.tsx",
+        "tuw-admin/src/app/(dashboard)/settings/payments/page.tsx",
+        "tuw-admin/src/app/(dashboard)/settings/fulfillment/page.tsx",
+        "tuw-admin/src/app/(dashboard)/settings/notifications/page.tsx",
+        "tuw-admin/src/app/(dashboard)/settings/_components/SettingsView.tsx"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "Added by the 2026-11-10 admin screen audit"
+      ]
+    },
+    {
+      "id": "TL-BE-05",
+      "title": "Catalog — products, variants, categories, collections, import",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-CORE",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "Slice 1 of 3 done (commit 794eb68): catalog module (planner, import job, storefront read model), migration 018, demo catalog seed (155 products / 2,348 variants from the Qikink listing + 14 curated + 4 collections), storefront reads products and collections from the DB (cached, products tag expires immediately), catalog.generated.ts retired, price tiers. Slice 2 of 3 done (commit f966eaa): admin products list + editor, CSV import through the job, collections with drop dates, categories screen, storefront menu respects category flags, pricing anchor corrected (migration 019). Slice 3 of 3 done (commit 23abc9e): search, size charts, reviews, attribute library, SKU mappings, exchange_policy/product_kind fields, pure logic moved to the shared package.",
+      "wiring": "modules/catalog (reads cached with product/collection tags); admin product editor + import; storefront shop/collections/PDP/search as cached Server Components per the rendering skills.",
+      "done_when": "Products imported from tuw-website/data/qikink-listing.json appear in admin and on the storefront from the DB; editing a product updates the storefront via tag revalidation; catalog.generated.ts no longer used.",
+      "depends_on": [
+        "TL-BE-04"
+      ],
+      "design_match": null,
+      "key_decisions": [
+        "Imports create uncategorised drafts (doc 07); the demo seed applies the old storefront classification and publishes",
+        "Public product id = external_id (legacy 'prod-1'/'qk-…') so saved bags/wishlists keep working",
+        "Price tiers: product price is 'From' (lowest variant); sizes carry their own price; checkout route charges the chosen size",
+        "Made-to-order variants: available while partner is ready_to_print, capped at 100 per order; stock only for stocked items",
+        "'products' cache tag expires immediately on revalidate (prices shown)",
+        "Bulk SQL (jsonb_to_recordset) + advisory locks: parallel imports never duplicate; one style sold for 4 genders gets 4 slugs",
+        "products.base_price is the retail anchor; partner cost lives only in source rows (migration 019)",
+        "Removing a variant switches it off; deleting a product is soft; renamed products keep their old URL",
+        "Publishing needs a category and a priced variant; stale edits are refused",
+        "Size chart column order is stored explicitly (jsonb loses key order)",
+        "Reviews require a delivered order; approved only on the storefront"
+      ],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "Qikink sheet: Polo MP25 XXL White has HSN 610990 vs 61091000 on every other row — split into 2 products until fixed",
+        "Storefront demo checkout reads the cached catalog; the real checkout (TL-BE-08) must price from live variant rows",
+        "Poster/dimension options keep sheet order (A3, 16x24, 16x16, …); sort by size when the attribute library editor lands",
+        "First uncached catalog read is ~5.5 s from India (US East DB); fine when cached, revisit with the region decision",
+        "Admin /products loads every product (light, no variants); add server paging before the catalog reaches thousands",
+        "Admin orders, discounts, designs, reports and the header search still read demo products until their modules move",
+        "Image uploads stay session previews until TL-INT-R2; only URLs persist",
+        "Returns copy still pending (TL-BE-10)"
+      ],
+      "storefront_tasks": [
+        "TL-WEB-BE-08",
+        "TL-WEB-BE-09",
+        "TL-WEB-BE-10",
+        "TL-WEB-BE-11",
+        "TL-WEB-BE-12",
+        "TL-WEB-BE-13",
+        "TL-WEB-BE-14"
+      ]
+    },
+    {
+      "id": "TL-BE-05.01",
+      "title": "modules/catalog read model: product DTOs, variant ladder pricing ('From' price), images, attributes",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-05",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "modules/catalog/read.ts — getStorefrontCatalog(): active products, From price, per-size price tiers, colours from active variants, images with colour/label, product FAQs, collections (published/scheduled), categories. Tests in catalog.int.test.ts.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-05.02",
+      "title": "Categories + megamenu navigation (navigation_settings, category flags)",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-05",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "Categories screen (/products/categories): names, order, active, in-storefront-menu; delete refused while in use. Storefront header and mobile menu drop links to hidden categories. Editing the menu links themselves is TL-BE-13.06.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-12"
+      ]
+    },
+    {
+      "id": "TL-BE-05.03",
+      "title": "Admin product CRUD: create/edit/archive, variants, pricing overrides, images (mock storage adapter)",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-05",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "modules/catalog/admin.ts: create/edit/archive/soft-delete, variants, price ladder + pins, images by URL, discounts, attributes, monogram, stock ledger, stale-edit refusal. Uploads remain previews until TL-INT-R2.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-05.04",
+      "title": "CSV/JSON import job (import_jobs, product_source_rows): Qikink listing → draft products (DOC/backend/07)",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-05",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "modules/catalog/import.ts + planner.ts — importQikinkListing(): validated rows, code-first grouping, HSN split, draft products, bulk writes, parallel-safe, idempotent re-runs; import_jobs counts. Admin upload screen comes with TL-BE-05.13.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-14"
+      ]
+    },
+    {
+      "id": "TL-BE-05.05",
+      "title": "Collections + size charts + exchange_policy / product_kind fields in the editor",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-05",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "Collections, size charts (library, ordered columns, migration 020, auto-save editor, seed) and exchange_policy / product_kind in the editor. /size-guide and the PDP modal read the same rows.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-13"
+      ]
+    },
+    {
+      "id": "TL-BE-05.06",
+      "title": "Search: tsvector ranked query + suggest; search_terms logging",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-05",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "modules/catalog/search.ts: prefix tsquery from letters/digits, ranked exact/prefix/name/ts_rank, style code + category, suggest, search_terms logging including zero results.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "No typo tolerance: pg_trgm is not installed"
+      ],
+      "storefront_tasks": [
+        "TL-WEB-BE-11"
+      ]
+    },
+    {
+      "id": "TL-BE-05.07",
+      "title": "Wire storefront /shop, /collections/[slug], /products/[slug], /search with cacheTag + generateStaticParams",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-05",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "Storefront /shop, /collections, /products/[slug] read DB products via getCatalog(); /search is a Server Component with a cached ranked query.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "Server Component shop grid and PDP body remain as TL-WEB-BE-08 and TL-WEB-BE-10"
+      ],
+      "storefront_tasks": [
+        "TL-WEB-BE-08",
+        "TL-WEB-BE-09",
+        "TL-WEB-BE-10"
+      ]
+    },
+    {
+      "id": "TL-BE-05.08",
+      "title": "provider_product_mappings editor (Qikink SKU, print type, designs, unit cost)",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-05",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "Partner SKU tab: per-variant SKU and unit cost with the sheet cost as a hint; duplicates and foreign variants refused; blank removes.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "Strategy B design fields are stored but have no editor yet"
+      ]
+    },
+    {
+      "id": "TL-BE-05.09",
+      "title": "Reviews (approved only on PDP; one per user/product)",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-05",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "modules/catalog/reviews.ts + /products/reviews moderation + PDP reviews: delivered order required, one per user/product, edit re-queues, approved only, no fabricated numbers.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "No review can be written until orders exist (TL-BE-08)"
+      ]
+    },
+    {
+      "id": "TL-BE-05.10",
+      "title": "Tests: pricing ladder, import grouping, search ranking",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-05",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "planner.test.ts, rules.test.mjs, catalog.int.test.ts, admin.int.test.ts, extras.int.test.ts: search ranking and hostile input, library guards, size charts, mappings, reviews, plus the earlier pricing and import cases.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-05.11",
+      "title": "/settings/attributes → attribute library editor (attribute_definitions + attribute_values)",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-05",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "/settings/attributes on attribute_definitions + attribute_values: create, edit surfaces, add/remove values; core attributes and in-use rows protected.",
+      "files": [
+        "tuw-admin/src/app/(dashboard)/settings/attributes/page.tsx"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "Added by the 2026-11-10 admin screen audit"
+      ]
+    },
+    {
+      "id": "TL-BE-05.12",
+      "title": "Move pure catalog logic into modules/catalog: lib/productPricing.ts, productImport.ts, attributePresentation.ts, collections.ts (tests move with it)",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-05",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "Pure logic in modules/catalog/rules.ts and planner.ts, exported from @tuw/heart; admin lib copies deleted; tests moved to real imports in the shared package.",
+      "files": [
+        "tuw-admin/src/lib/productPricing.ts",
+        "tuw-admin/src/lib/productImport.ts",
+        "tuw-admin/src/lib/attributePresentation.ts",
+        "tuw-admin/src/lib/collections.ts",
+        "tuw-admin/tests/product-pricing.test.mjs",
+        "tuw-admin/tests/product-import.test.mjs",
+        "tuw-admin/tests/attribute-presentation.test.mjs",
+        "tuw-admin/tests/collections.test.mjs"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "Added by the 2026-11-10 admin screen audit"
+      ]
+    },
+    {
+      "id": "TL-BE-05.13",
+      "title": "Wire admin /products (ProductsView) and /collections pages; drop their localStorage state",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-05",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "f966eaa — /products and /collections are Server Components on the DB; ProductsView and collection drawers call guarded actions; demo product writes removed from these screens.",
+      "files": [
+        "tuw-admin/src/app/(dashboard)/products/_components/ProductsView.tsx",
+        "tuw-admin/src/app/(dashboard)/collections/page.tsx"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "Added by the 2026-11-10 admin screen audit"
+      ]
+    },
+    {
+      "id": "TL-BE-06",
+      "title": "Inventory & stock alerts",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-CORE",
+      "started": "2026-11-11",
+      "finished": "2026-11-12",
+      "log": "Inventory module, staff alerts, back-in-stock requests and the restock job are done (commit bbbc924). Checkout now calls reserve and cancel calls release (TL-BE-08 slice 1), so done_when is met.",
+      "wiring": "modules/inventory called by checkout/cancel via index.ts; emits stock.restocked; notifications module subscribes.",
+      "done_when": "Checkout decrements atomically, cancel restores once, staff get inventory bell alerts, 'notify me' works for guests/customers.",
+      "depends_on": [
+        "TL-BE-05"
+      ],
+      "design_match": null,
+      "key_decisions": [
+        "Qikink and Printrove are made to order; Custom Atelier and no-partner products use real stock",
+        "Inventory owns products.stock and product_variants.stock",
+        "Restock emails are driven by rows and a job, not an in-process event, so a crash cannot lose one",
+        "Staff stock edits are applied as changes from what the editor loaded"
+      ],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-15"
+      ]
+    },
+    {
+      "id": "TL-BE-06.01",
+      "title": "reserve/release with one sale/cancel movement per order line (guards from TL-DB-IDEMPOTENCY-AUDIT)",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-06",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "modules/inventory/stock.ts: reserve and release with one sale/cancel movement per line, all-or-nothing, ordered locks. Tested for overselling, deadlocks, parallel retries and repeat cancels.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "Not called by the app until checkout exists (TL-BE-08)"
+      ]
+    },
+    {
+      "id": "TL-BE-06.02",
+      "title": "Low-stock / out-of-stock staff notifications (threshold from product or settings, dedupe_key)",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-06",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "Alerts written in the stock transaction; product level, else the store setting; dedupe per variant, level, day and recipient. First slice of modules/notifications; the admin bell reads them.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-06.03",
+      "title": "Back-in-stock subscriptions + job inventory.notifyRestocked (mock email)",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-06",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "stock_alert_subscriptions requests, job inventory.notifyRestocked (mock email), run after a product save and daily from Cron.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-15"
+      ]
+    },
+    {
+      "id": "TL-BE-06.04",
+      "title": "Wire admin stock edits (admin_adjustment movements) + storefront 'notify me'",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-06",
+      "started": "2026-11-11",
+      "finished": "2026-11-11",
+      "log": "Editor stock saves go through inventory.adjustStock as changes, so a sale during an edit is kept; low-stock level field; PDP notify-me on sold-out options.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-07",
+      "title": "Cart & wishlist",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-CORE",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "log": "Done (commit b5fdf93): cart and wishlist module, signed guest sessions, merge on sign-in, personalised-line rules, storefront bag and wishlist on the database.",
+      "wiring": "modules/cart; storefront actions with access guestOrCustomer, updateTag('cart:<id>'); header count in Suspense.",
+      "done_when": "Bag and wishlist persist in the DB for guests and customers, merge on login, and the demo store adapter is gone from these screens.",
+      "depends_on": [
+        "TL-BE-05",
+        "TL-BE-02"
+      ],
+      "design_match": null,
+      "key_decisions": [
+        "Guest cookie is a random id plus HMAC; unsigned cookies are ignored",
+        "Cart lines keep colour and size as columns (migration 021)",
+        "The bag stays a client mirror of the server cart so 24 components keep one interface",
+        "Wishlist is customers only; a guest heart asks them to sign in",
+        "Reset Demo no longer clears the bag or wishlist (real data now)"
+      ],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-16",
+        "TL-WEB-BE-17",
+        "TL-WEB-BE-18"
+      ]
+    },
+    {
+      "id": "TL-BE-07.01",
+      "title": "modules/cart: get/add/update/remove with snapshots and unique line rule (incl. personalisation)",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-07",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "log": "modules/cart/service.ts: get/add/set qty/change variant/remove/clear with frozen snapshots, database price, stock caps, per-owner lock, 100-line cap; migration 021 keeps colour and size.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-07.02",
+      "title": "Guest cart cookie (signed x-session-id) + merge on login (cart.merge idempotent)",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-07",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "log": "Signed guest cookie tuw_sid (HMAC, verified in resolveContext); login and sign-up merge the guest bag (capped, guest cart converted, rerun-safe) and clear the cookie.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-07.03",
+      "title": "Personalised lines: preview image + approval before checkout",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-07",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "log": "Personalised lines: monogram only where offered, preview URL required, separate line per monogram, approvePreview, approval cleared by a new preview or variant; checkoutBlockers() for checkout.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "Storefront personalisation form is TL-WEB-BE-18; real previews need uploads (TL-INT-R2); checkout must call checkoutBlockers (TL-BE-08)"
+      ],
+      "storefront_tasks": [
+        "TL-WEB-BE-18"
+      ]
+    },
+    {
+      "id": "TL-BE-07.04",
+      "title": "Wishlist add/remove/list",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-07",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "log": "modules/cart/wishlist.ts: customers only, one entry per product, unlisted products drop out, 500 cap.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-17"
+      ]
+    },
+    {
+      "id": "TL-BE-07.05",
+      "title": "Wire storefront cart drawer, /cart, /wishlist, header counts (useOptimistic)",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-07",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "log": "Store context backed by storefront/lib/bag.ts: one load action, optimistic changes sent in order, server answer wins; drawer, /cart, checkout, header counts and /wishlist on the DB; localStorage copies removed.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "Bag UI is still a Client Component mirror rather than a Server Component; revisit with the shop/PDP move (TL-WEB-BE-08/10)"
+      ],
+      "storefront_tasks": [
+        "TL-WEB-BE-16"
+      ]
+    },
+    {
+      "id": "TL-BE-08",
+      "title": "Checkout & orders",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-CORE",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "log": "Slice 1 of 3 done (commit 224a785): pricing, discount codes, checkout transaction, demo payment, cancel window, storefront checkout/success/account orders on the DB. Slice 2 of 3 done (commit 45f6a6e): admin orders and discounts on the DB, guest tracking, claiming guest orders, shared rate limiter (migration 023). Slice 3 of 3 done (commit ba6adfb): admin spotlight search on the database. done_when met.",
+      "wiring": "modules/checkout orchestrates cart + inventory + payments + gift-cards + orders via index.ts in one transaction; emits order.placed / order.paid; admin orders module views.",
+      "done_when": "A guest and a customer can place an order with the mock payment; double submit returns the same order; customer can cancel inside the cancel window; admin can list/filter orders and change status with history.",
+      "depends_on": [
+        "TL-BE-07",
+        "TL-BE-03",
+        "TL-BE-06"
+      ],
+      "design_match": null,
+      "key_decisions": [
+        "Checkout lives in modules/orders (it owns the tables) and calls cart, inventory, payments and customers through their index files",
+        "A declined payment rolls the whole checkout back; nothing is written",
+        "The checkout key is re-checked after the bag lock, so a double submit returns the first order",
+        "Stock locks are FOR NO KEY UPDATE to avoid deadlocks with order-line foreign keys",
+        "Express delivery fee is a setting (migration 022)",
+        "Order access: placing account, or the receipt token from the success URL",
+        "Allowed status moves are fixed in NEXT_STATUS; refunds and partner sync drive the other states",
+        "Guest tracking answers the same for a wrong email and an unknown number; rate-limited via hashed keys",
+        "Claiming guest orders needs a verified email",
+        "Customers see only their own notes on the timeline"
+      ],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-19",
+        "TL-WEB-BE-20",
+        "TL-WEB-BE-21",
+        "TL-WEB-BE-22",
+        "TL-WEB-BE-23",
+        "TL-WEB-BE-24",
+        "TL-WEB-BE-25"
+      ]
+    },
+    {
+      "id": "TL-BE-08.01",
+      "title": "Pricing service: subtotal, discount code, shipping (settings), tax (inclusive), gift card amount, grand total — paise tests",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-08",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "log": "orders/pricing.ts: subtotal, discount first, shipping from settings (free threshold, standard, express, COD), tax inclusive or per-line exclusive, grand total; paise tests incl. 200 random orders.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "Gift card amount is 0 until TL-BE-12"
+      ],
+      "storefront_tasks": [
+        "TL-WEB-BE-25"
+      ]
+    },
+    {
+      "id": "TL-BE-08.02",
+      "title": "Checkout transaction: orders + order_items + stock reserve + cart converted + discount uses, idempotency_key, guest vs account identity",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-08",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "log": "orders/checkout.ts: one transaction for order, lines, stock reserve, discount use, payment, history, converted bag; checkout key returns the same order (parallel and later); guest vs account identity.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-08.03",
+      "title": "Mock payment adapter + payments rows (one captured payment per order); order.paid event",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-08",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "log": "modules/payments: demo gateway capture for card/UPI, COD pending, refund to source on cancel; a decline rolls the whole checkout back. order.placed / order.cancelled emitted after commit.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-08.04",
+      "title": "Cancel window: cancellable_until, customer cancel (order.cancel), status → confirmed after window (job in TL-BE-11)",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-08",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "log": "cancellable_until from the setting; customer cancel by one conditional update; stock released; payment refunded.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "Guests cannot cancel online (refund needs a user actor); job to confirm after the window is TL-BE-11"
+      ],
+      "storefront_tasks": [
+        "TL-WEB-BE-24"
+      ]
+    },
+    {
+      "id": "TL-BE-08.05",
+      "title": "Customer views: /account/orders, order detail; guest /track-order (number + email); claim guest orders after sign-up",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-08",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "log": "/account/orders, order detail and the account page on the DB; guest /track-order by number + email (rate-limited, same answer for wrong pair or unknown number); claiming guest orders with a verified email; staff notes hidden from customers.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-21",
+        "TL-WEB-BE-22",
+        "TL-WEB-BE-23"
+      ]
+    },
+    {
+      "id": "TL-BE-08.06",
+      "title": "Admin /orders list + detail + status change (conditional update + history), discount codes admin (/discounts)",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-08",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "log": "Admin /orders: SQL filters, search, paging, stats; detail with lines, totals, history; allowed-move status changes (conditional update + history), staff cancel with refund permission, bulk mark with named refusals. /discounts: codes from the DB (create, kill switch, delete refused when used, audited) and product discount schedules.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "Partial refunds: TL-BE-09",
+        "Partner sync retry: TL-BE-11",
+        "Manual (phone) orders from admin removed with the demo form; owner to decide if needed"
+      ]
+    },
+    {
+      "id": "TL-BE-08.07",
+      "title": "Wire storefront /checkout and /checkout/success; remove demo checkout adapter",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-08",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "log": "/checkout, /checkout/success on the DB; demo api/checkout and api/orders/[id] removed.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-19",
+        "TL-WEB-BE-20"
+      ]
+    },
+    {
+      "id": "TL-BE-08.08",
+      "title": "Tests: idempotent checkout, oversell, cancel window, totals",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-08",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "log": "pricing.test.ts (6), orders.int.test.ts (8), orders-admin.int.test.ts (10): totals, double submit, declines, discount races, cancel window, parallel buyers, admin filters/status rules/bulk/cancel refunds, discount admin, tracking, claiming, rate limits, staff notes hidden.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-08.09",
+      "title": "Admin global search modal (orders, products, customers, pages) from the DB",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-08",
+      "started": "2026-11-12",
+      "finished": "2026-11-12",
+      "log": "Spotlight searches orders, products (incl. drafts, SKUs) and customers on the server by permission, page shortcuts stay local, every hit deep-links (?open=, ?customer=); recent queries stay in localStorage.",
+      "files": [
+        "tuw-admin/src/components/search/localSearch.ts",
+        "tuw-admin/src/components/search/useFrequentQueries.ts",
+        "tuw-admin/src/components/search/SearchModal.tsx"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "Added by the 2026-11-10 admin screen audit",
+        "Shipments join the search with TL-BE-11"
+      ]
+    },
+    {
+      "id": "TL-BE-09",
+      "title": "Payments & refunds",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-CORE",
+      "started": null,
+      "finished": null,
+      "log": "Not started. Scope: Payment records, refunds (source / UPI / bank transfer for COD), admin payments + refunds pages.",
+      "wiring": "modules/payments behind integrations/payments registry (mock now, Razorpay in TL-INT-RAZORPAY).",
+      "done_when": "Staff can refund prepaid orders (mock gateway) and record COD payouts with UTR; duplicate refunds impossible; admin /payments and /refunds run on the DB.",
+      "depends_on": [
+        "TL-BE-08"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-26"
+      ]
+    },
+    {
+      "id": "TL-BE-09.01",
+      "title": "Refund service: amount ≤ remaining, one open refund, idempotency_key, payout_reference rules",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-09",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-26"
+      ]
+    },
+    {
+      "id": "TL-BE-09.02",
+      "title": "Wire admin /payments and /refunds",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-09",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-09.03",
+      "title": "Tests: partial refunds, COD payout proof, retry safety",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-09",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-10",
+      "title": "Returns — exchanges & defect replacements",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-CORE",
+      "started": null,
+      "finished": null,
+      "log": "Not started. Scope: Exchange (size/variant, 7-day window, price difference) and replacement (defect, evidence) requests; admin board.",
+      "wiring": "modules/returns calls orders (replacement order), payments (difference refund), fulfillment (claims) via index.ts.",
+      "done_when": "Customers request exchanges/replacements within the rules (abuse limits enforced); admin approves → replacement order created, difference charged or refunded.",
+      "depends_on": [
+        "TL-BE-08",
+        "TL-BE-09"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-27"
+      ]
+    },
+    {
+      "id": "TL-BE-10.01",
+      "title": "Eligibility rules: delivered, window, exchange_policy, one per line, reason codes, account required",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-10",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-10.02",
+      "title": "Evidence upload via mock storage adapter (photo required; unboxing video for defects)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-10",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-10.03",
+      "title": "Approve/reject flow + history; replacement order (order_type exchange/replacement); price difference charge/refund",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-10",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-10.04",
+      "title": "Wire storefront /account/returns + request flow; admin /returns board",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-10",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-27"
+      ]
+    },
+    {
+      "id": "TL-BE-10.05",
+      "title": "Tests: window, policy, abuse limits, price difference both ways",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-10",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-11",
+      "title": "Fulfilment & shipping (mock provider until TL-INT-QIKINK)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-CORE",
+      "started": null,
+      "finished": null,
+      "log": "Not started. Scope: Provider submission after the cancel window, status sync, shipments + tracking, wallet ledger, COD remittances, claims, re-ship.",
+      "wiring": "modules/fulfillment subscribes to order.paid; jobs fulfillment.submitDue / fulfillment.syncOpen via Cron; integrations/fulfillment mock adapter mimics Qikink statuses.",
+      "done_when": "Paid orders move pending → confirmed → processing → shipped → delivered through the mock provider; customer sees tracking; admin /fulfillment and /shipments run on the DB.",
+      "depends_on": [
+        "TL-BE-08"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-28"
+      ]
+    },
+    {
+      "id": "TL-BE-11.01",
+      "title": "Mock fulfilment adapter implementing FulfillmentProvider (createOrder, getOrder, cancelOrder, mapStatus)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-11",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-11.02",
+      "title": "Job fulfillment.submitDue (cancel window passed, SKIP LOCKED, one initial submission per provider)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-11",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-11.03",
+      "title": "Job fulfillment.syncOpen → shipments + shipment_events + orders.status",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-11",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-11.04",
+      "title": "Wallet ledger + COD remittance recording; claims + re-ship",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-11",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-11.05",
+      "title": "Wire admin /fulfillment, /shipments; storefront order tracking timeline",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-11",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-28"
+      ]
+    },
+    {
+      "id": "TL-BE-11.06",
+      "title": "lib/qikink.ts stub → integrations/fulfillment/qikink adapter skeleton (mock behaviour; live calls in TL-INT-QIKINK)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-11",
+      "started": null,
+      "finished": null,
+      "log": "Not started. Admin /settings/fulfillment shows provider status from integration_providers.",
+      "files": [
+        "tuw-admin/src/lib/qikink.ts"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [
+        "Added by the 2026-11-10 admin screen audit"
+      ]
+    },
+    {
+      "id": "TL-BE-12",
+      "title": "Gift cards",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-CORE",
+      "started": null,
+      "finished": null,
+      "log": "Not started. Scope: Gift card product, issue on payment, redeem at checkout (with discount codes), balance check, 6-month expiry.",
+      "wiring": "modules/gift-cards subscribes to order.paid; checkout calls giftCards.redeem via index.ts; job giftCards.expireDue.",
+      "done_when": "A customer buys a card, the code is issued (mock email), another order redeems it alongside a discount code, and expired cards stop working.",
+      "depends_on": [
+        "TL-BE-08"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-29"
+      ]
+    },
+    {
+      "id": "TL-BE-12.01",
+      "title": "Issue N cards per gift-card line (hashed codes, ledger issue rows)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-12",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-12.02",
+      "title": "Redeem/reversal at checkout and cancel; balance check page",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-12",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-29"
+      ]
+    },
+    {
+      "id": "TL-BE-12.03",
+      "title": "Job giftCards.expireDue; admin issue/disable + ledger view",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-12",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-13",
+      "title": "Content & marketing — CMS, journal, FAQs, newsletter",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-CORE",
+      "started": null,
+      "finished": null,
+      "log": "Not started. Scope: CMS pages/sections/navigation/theme, blog/journal, media (mock storage), FAQs, newsletter double opt-in.",
+      "wiring": "modules/content (cached, tags cms:<pageKey>, faqs, nav) and modules/marketing; admin editors revalidate the storefront.",
+      "done_when": "Home, journal, FAQ, policies and footer newsletter run on the DB; admin content editors publish to the storefront.",
+      "depends_on": [
+        "TL-BE-04"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-30",
+        "TL-WEB-BE-31",
+        "TL-WEB-BE-32",
+        "TL-WEB-BE-33",
+        "TL-WEB-BE-34"
+      ]
+    },
+    {
+      "id": "TL-BE-13.01",
+      "title": "CMS read model: pages, cms_sections, navigation, theme — storefront home/about/policies",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-13",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-30",
+        "TL-WEB-BE-31"
+      ]
+    },
+    {
+      "id": "TL-BE-13.02",
+      "title": "Blog/journal: posts, categories, authors, tags, revisions, slug redirects",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-13",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-32"
+      ]
+    },
+    {
+      "id": "TL-BE-13.03",
+      "title": "FAQs (general/product/category) on /faq and PDP",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-13",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-33"
+      ]
+    },
+    {
+      "id": "TL-BE-13.04",
+      "title": "Newsletter subscribe → confirm → unsubscribe (mock email)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-13",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-34"
+      ]
+    },
+    {
+      "id": "TL-BE-13.05",
+      "title": "Wire admin /content/* editors + media library (mock storage)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-13",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-13.06",
+      "title": "Wire /content/pages and /content/navigation editors",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-13",
+      "started": null,
+      "finished": null,
+      "log": "Not started. Publishing pings the storefront revalidate endpoint.",
+      "files": [
+        "tuw-admin/src/app/(dashboard)/content/pages/page.tsx",
+        "tuw-admin/src/app/(dashboard)/content/navigation/page.tsx",
+        "tuw-admin/src/app/(dashboard)/content/page.tsx"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [
+        "Added by the 2026-11-10 admin screen audit"
+      ]
+    },
+    {
+      "id": "TL-BE-13.07",
+      "title": "Wire /content/journal (list, new, edit) with revisions and slug history; move lib/blog.ts into modules/content",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-13",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "files": [
+        "tuw-admin/src/app/(dashboard)/content/journal/page.tsx",
+        "tuw-admin/src/app/(dashboard)/content/journal/new/page.tsx",
+        "tuw-admin/src/app/(dashboard)/content/journal/[id]/edit/page.tsx",
+        "tuw-admin/src/lib/blog.ts",
+        "tuw-admin/tests/blog-model.test.mjs"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [
+        "Added by the 2026-11-10 admin screen audit"
+      ]
+    },
+    {
+      "id": "TL-BE-13.08",
+      "title": "Wire /content/media library (mock storage adapter until TL-INT-STORAGE)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-13",
+      "started": null,
+      "finished": null,
+      "log": "Not started. Truthful demo copy for uploads.",
+      "files": [
+        "tuw-admin/src/app/(dashboard)/content/media/page.tsx"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [
+        "Added by the 2026-11-10 admin screen audit"
+      ]
+    },
+    {
+      "id": "TL-BE-13.09",
+      "title": "Wire /designs — print-artwork library (design_assets) with approval status",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-13",
+      "started": null,
+      "finished": null,
+      "log": "Not started. Design links feed provider_product_mappings.",
+      "files": [
+        "tuw-admin/src/app/(dashboard)/designs/page.tsx"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [
+        "Added by the 2026-11-10 admin screen audit"
+      ]
+    },
+    {
+      "id": "TL-BE-14",
+      "title": "Support & notifications",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-CORE",
+      "started": null,
+      "finished": null,
+      "log": "Not started. Scope: Contact form → support tickets, admin inbox + replies, in-app notifications bell, email log + templates (mock sender).",
+      "wiring": "modules/support and modules/notifications; other modules emit events, notifications subscribes; job notifications.sendQueued.",
+      "done_when": "Contact form creates a ticket staff can answer; order/stock/payment events ring the admin bell; every email is logged with dedupe.",
+      "depends_on": [
+        "TL-BE-02"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-35"
+      ]
+    },
+    {
+      "id": "TL-BE-14.01",
+      "title": "Contact form (support.create, guest fields) + admin /support inbox and replies",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-14",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-35"
+      ]
+    },
+    {
+      "id": "TL-BE-14.02",
+      "title": "Notifications bell (unread count, mark read) for staff and customers",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-14",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-14.03",
+      "title": "email_logs queue + templates + mock sender job notifications.sendQueued",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-14",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-14.04",
+      "title": "Notification panel from the notifications table (replace computed feed.ts)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-14",
+      "started": null,
+      "finished": null,
+      "log": "Not started. Unread count in its own Suspense.",
+      "files": [
+        "tuw-admin/src/components/notifications/feed.ts",
+        "tuw-admin/src/components/notifications/useNotifications.ts",
+        "tuw-admin/src/components/notifications/NotificationPanel.tsx"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [
+        "Added by the 2026-11-10 admin screen audit"
+      ]
+    },
+    {
+      "id": "TL-BE-15",
+      "title": "Analytics & reports",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-CORE",
+      "started": null,
+      "finished": null,
+      "log": "Not started. Scope: Page/product/cart events, sessions, abandoned carts, daily rollups, admin dashboard + reports.",
+      "wiring": "modules/analytics ingest route (beacon) on the storefront; jobs analytics.detectAbandoned / analytics.rollupDaily; admin cards cached with report:<name> tags.",
+      "done_when": "Dashboard and reports show real numbers (empty states before data, never fabricated).",
+      "depends_on": [
+        "TL-BE-08"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-36"
+      ]
+    },
+    {
+      "id": "TL-BE-15.01",
+      "title": "Event ingest endpoint + partition maintenance (monthly partitions, 30-day raw retention)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-15",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-36"
+      ]
+    },
+    {
+      "id": "TL-BE-15.02",
+      "title": "Abandoned-cart detection + daily rollup jobs",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-15",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-15.03",
+      "title": "Wire admin /dashboard, /reports, /abandoned cards (one Suspense per card)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-15",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-16",
+      "title": "Styling — Complete the Look (ships last of core)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-CORE",
+      "started": null,
+      "finished": null,
+      "log": "Not started. Scope: Slot-based recommendations (DOC/backend/19).",
+      "wiring": "modules/styling read-only from catalog.",
+      "done_when": "PDP shows Complete the Look from rules + overrides; admin can edit rules.",
+      "depends_on": [
+        "TL-BE-05",
+        "TL-BE-08"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-37"
+      ]
+    },
+    {
+      "id": "TL-BE-16.01",
+      "title": "Recommendation query from slots/rules/affinity/overrides",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-16",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-16.02",
+      "title": "Admin rules + overrides editor; PDP section",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-16",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-37"
+      ]
+    },
+    {
+      "id": "TL-BE-17",
+      "title": "Release & operations",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-CORE",
+      "started": null,
+      "finished": null,
+      "log": "Not started. Scope: Environments, CI, crons, demo-mode removal, docs — so the team can ship each module safely.",
+      "wiring": "Vercel projects (admin, storefront) env vars; Neon branches dev/preview/prod; CI runs typecheck/test/build and migrations on a throwaway schema.",
+      "done_when": "Preview deploys use a Neon preview branch; production migration checklist documented; no screen still on demo data without a TL-BE task.",
+      "depends_on": [
+        "TL-BE-01"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-38",
+        "TL-WEB-BE-39"
+      ]
+    },
+    {
+      "id": "TL-BE-17.01",
+      "title": "Env var matrix per app/environment (DATABASE_URL*, AUTH_SECRET, CRON_SECRET, REVALIDATE_SECRET) in DOC/backend/23",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-17",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-17.02",
+      "title": "CI workflow: pnpm typecheck, test, build + db:migrate on a temp schema",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-17",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-17.03",
+      "title": "Vercel cron schedule (submitDue, syncOpen, sendQueued, notifyRestocked, expireDue, rollups)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-17",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-17.04",
+      "title": "Demo-mode removal tracker: list each screen + its module; remove reset-demo once all its data is live",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-17",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [],
+      "storefront_tasks": [
+        "TL-WEB-BE-38",
+        "TL-WEB-BE-39"
+      ]
+    },
+    {
+      "id": "TL-BE-17.05",
+      "title": "Production go-live checklist (rotate dev password, prod branch, first admin, backups)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-17",
+      "started": null,
+      "finished": null,
+      "log": "Not started.",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-17.06",
+      "title": "Remove the admin demo state once every admin screen is live: mocks/state.tsx, fixtures.ts, blogFixtures.ts, variants.ts (34 files import @/mocks) and the Reset Demo control",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-17",
+      "started": null,
+      "finished": null,
+      "log": "Not started. Keep localStorage only for per-user UI preferences (sidebar collapse, frequent searches); rewrite tests that read fixtures.",
+      "files": [
+        "tuw-admin/src/mocks/state.tsx",
+        "tuw-admin/src/mocks/fixtures.ts",
+        "tuw-admin/src/mocks/blogFixtures.ts",
+        "tuw-admin/src/mocks/variants.ts",
+        "tuw-admin/src/components/layout/DashboardShell.tsx",
+        "tuw-admin/src/components/layout/Sidebar.tsx",
+        "tuw-admin/tests/business-logic.test.mjs",
+        "tuw-admin/tests/seed-integrity.test.mjs"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": [
+        "Added by the 2026-11-10 admin screen audit"
+      ]
+    },
+    {
+      "id": "TL-BE-17.07",
+      "title": "Developer-only and redirect pages stay static: /design-system, app/page.tsx and (dashboard)/page.tsx redirects",
+      "status": "done",
+      "owner": "unassigned",
+      "parent": "TL-BE-17",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "c4aa5ef — /design-system and redirect pages build under cacheComponents; no backend needed.",
+      "files": [
+        "tuw-admin/src/app/(dashboard)/design-system/page.tsx",
+        "tuw-admin/src/app/page.tsx",
+        "tuw-admin/src/app/(dashboard)/page.tsx"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": [
+        "Added by the 2026-11-10 admin screen audit"
+      ]
+    },
+    {
+      "id": "TL-BE-17.08",
+      "title": "Add Playwright for UI stress tests (portals, double submit, keyboard, offline) in both apps",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-17",
+      "started": null,
+      "finished": null,
+      "log": "Not started. Needed by the stress-testing skills (storefront + admin). Run against next build && next start; include 360/768/1024/1440 viewports and Lighthouse budget checks.",
+      "files": [
+        "tuw-website/tests/e2e/",
+        "tuw-admin/tests/e2e/"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-17.09",
+      "title": "Automated SEO / page-rule checks + fix current violations (h1 count, titles, descriptions, canonical, noindex, html lang en-IN, sitemap.ts, robots.ts)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-17",
+      "started": null,
+      "finished": null,
+      "log": "Not started. Rule 08 (storefront) / Rule 07 (admin). Audit 2026-11-10: these storefront pages contain two <h1> in source — verify they are mutually exclusive states or fix: account/orders/[id], checkout, checkout/success, collections/[slug], journal/[slug], products/[slug]. Root layout uses lang=\"en\" (rule wants en-IN). No sitemap.ts/robots.ts yet; admin has no noindex.",
+      "files": [
+        "tuw-website/tests/seo-rules.test.mjs",
+        "tuw-admin/tests/page-rules.test.mjs",
+        "tuw-website/src/app/sitemap.ts",
+        "tuw-website/src/app/robots.ts",
+        "tuw-admin/src/app/robots.ts"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-17.10",
+      "title": "Skills: backend + UI stress testing, speed budgets, SEO skill and page rules",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-BE-17",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "stress-testing skills (backend, storefront, admin) with edge-case catalogs (portals, races, money, auth, time, volume…); performance-budgets gained TTFB/FCP/LCP/INP/TBT/CLS budgets; storefront seo skill + Rule 08; admin Rule 07; Rule 02 gates now require stress/vitals/seo proof.",
+      "design_match": null,
+      "key_decisions": [
+        "Tests are written to break the code; a step closes only when its break-it suite passes"
+      ],
+      "verified": true,
+      "pushed": true,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-17.11",
+      "title": "Admin sidebar/menus hide items the staff role cannot use (from access-token permissions)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-17",
+      "started": null,
+      "finished": null,
+      "log": "Not started. Sidebar still uses the demo persona canPerformAction from mocks/state. Hiding is UX only — guards already enforce.",
+      "files": [
+        "tuw-admin/src/components/layout/Sidebar.tsx"
+      ],
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-17.12",
+      "title": "Rate limits on login, refresh, reset and register (per IP + per email)",
+      "status": "backlog",
+      "owner": "unassigned",
+      "parent": "TL-BE-17",
+      "started": null,
+      "finished": null,
+      "log": "Not started. DOC/backend/13 limits (login/refresh 10/s per IP). Lockout per account already exists; add an IP limiter (Postgres-backed or Vercel firewall rule).",
+      "design_match": null,
+      "key_decisions": [],
+      "verified": false,
+      "pushed": false,
+      "follow_ups": []
+    },
+    {
+      "id": "TL-BE-SKILLS",
+      "title": "Agent skills: nextjs-rendering + server-data-and-auth (admin + storefront)",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-BE-CORE",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "Written from the bundled Next.js 16.3.8 docs: Cache Components/PPR model (experimental.ppr removed), per-component placement tables and route maps per app, use cache / private / remote rules, cacheLife presets, updateTag vs revalidateTag(tag, profile) vs refresh, server/client boundary, proxy = optimistic only, DAL + declarative guards, forms. Registered in both AGENTS.md skill indexes.",
+      "design_match": "n/a",
+      "key_decisions": [
+        "Suspense as low as possible; admin = one boundary per card/table",
+        "Admin edits reach the storefront cache via a secret revalidation endpoint (separate deployments)"
+      ],
+      "verified": true,
+      "pushed": true
+    },
+    {
+      "id": "TL-DB-IDEMPOTENCY-AUDIT",
+      "title": "Idempotency audit: 10 missing duplicate guards added (refunds, payments, gift cards, stock, returns, fulfilment, wallet, claims, retry keys)",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-DB-BACKEND-PREP",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "refunds idempotency_key + unique payout reference; one captured payment per order; gift_cards purchased_unit_no; gift_card_transactions issue/reversal/adjust uniques; stock_movements.order_item_id + one sale/cancel per line; returns idempotency_key + one replacement per line; one initial provider submission per order; wallet debit/credit per fulfilment order; one open claim per type; idempotency_keys UNIQUE (scope, actor_ref, key) + new scopes. Doc 21 natural-key table rewritten; doc 24 invoice guards. Verified on Neon dev in a throwaway schema: 99 tables, seed x2, 15/15 duplicate checks rejected by the intended constraint and legit rows allowed; schema dropped (public still empty). Admin tests green.",
+      "design_match": "n/a",
+      "key_decisions": [
+        "Retry keys are scoped per caller so responses cannot be replayed across users",
+        "Stock guard keys on the order line, not the product, because personalised lines can share a variant"
+      ],
+      "verified": true,
+      "pushed": true
+    },
+    {
+      "id": "TL-BE-SKILLS-2",
+      "title": "Skills: server/client/cache components per app + 9 backend skills (state-for-agents/backend)",
+      "status": "done",
+      "owner": "agent",
+      "parent": "TL-BE-CORE",
+      "started": "2026-11-10",
+      "finished": "2026-11-10",
+      "log": "Per app (admin + storefront): server-components, client-components, cache-components with project-specific good/bad cases; nextjs-rendering cut down to a short route map; long server-data-and-auth skills removed (content moved to backend skills). New state-for-agents/backend/AGENTS.md + skills: backend-modules, data-access, server-actions, route-handlers, auth-guards, idempotency, background-jobs, integrations, migrations. Indexes and AGENTS.md (x3) updated.",
+      "design_match": "n/a",
+      "key_decisions": [
+        "Skills follow the house format: short rules + good/bad, not documentation",
+        "Backend skills live once in state-for-agents/backend because packages/heart is shared"
+      ],
+      "verified": true,
+      "pushed": true
     }
   ],
   "workflow": {

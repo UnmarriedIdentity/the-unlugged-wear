@@ -24,6 +24,18 @@ export interface ProductItem {
    * product_attribute_link_values.price_adjustment. */
   priceAdjustments?: Record<string, number>;
   stock: number;
+  /** Partner prints to order: stock numbers do not apply (database products). */
+  madeToOrder?: boolean;
+  /** Sizes are priced differently, so the list shows "From". */
+  priceSpread?: boolean;
+  /** Row version for stale-edit protection. */
+  updatedAt?: string;
+  exchangePolicy?: 'defects_only' | 'exchangeable' | 'none';
+  /** At or below this many units the product counts as low. */
+  lowStockAt?: number;
+  /** This product's own level; empty uses the store default. */
+  lowStockThreshold?: number;
+  productKind?: 'physical' | 'gift_card';
   publicationStatus: 'published' | 'draft' | 'archived';
   description: string;
   colors: string[];
@@ -104,6 +116,8 @@ export interface ProductVariant {
   sku: string;
   /** Sorted axis-value signature; unique per product in the DB. */
   variantKey?: string;
+  /** Stock when the editor opened; the save applies only the change from it. */
+  loadedStock?: number;
   price: number;
   /** Explicit cell override (R1): true pins this price through recomputes
    * until reset. Absent = derived pipeline value. Mirrors
@@ -265,6 +279,8 @@ export interface CollectionItem {
   /** Ordered product links — the single source of truth for count + content. */
   productIds: string[];
   visibility: 'published' | 'draft' | 'scheduled';
+  /** Drop date (required when scheduled). */
+  publishedAt?: string;
   updatedAt: string;
   description: string;
 }
@@ -1092,7 +1108,7 @@ export const initialRefunds: RefundItem[] = [
     customer: 'Michael Chang',
     reason: 'Defective hem stitching on sleeve',
     amount: 84.5,
-    method: 'Store Credit',
+    method: 'Original Payment Method',
     date: '14 Apr 2026',
     status: 'processing',
   },
@@ -1236,42 +1252,6 @@ export interface SizeChart {
   rows: SizeChartRow[];
 }
 
-export const initialSizeCharts: SizeChart[] = [
-  {
-    id: 'SC-01',
-    name: 'Hoodies',
-    rows: [
-      { size: 'XS', measures: { chest: 108, length: 66, shoulder: 54, sleeve: 59 } },
-      { size: 'S', measures: { chest: 114, length: 69, shoulder: 57, sleeve: 61 } },
-      { size: 'M', measures: { chest: 120, length: 72, shoulder: 60, sleeve: 63 } },
-      { size: 'L', measures: { chest: 126, length: 74, shoulder: 63, sleeve: 64 } },
-      { size: 'XL', measures: { chest: 132, length: 76, shoulder: 66, sleeve: 65 } },
-      { size: 'XXL', measures: { chest: 138, length: 78, shoulder: 69, sleeve: 66 } },
-    ],
-  },
-  {
-    id: 'SC-02',
-    name: 'Tees',
-    rows: [
-      { size: 'XS', measures: { chest: 104, length: 68, shoulder: 50, sleeve: 22 } },
-      { size: 'S', measures: { chest: 110, length: 71, shoulder: 53, sleeve: 23 } },
-      { size: 'M', measures: { chest: 116, length: 74, shoulder: 56, sleeve: 24 } },
-      { size: 'L', measures: { chest: 122, length: 76, shoulder: 59, sleeve: 25 } },
-      { size: 'XL', measures: { chest: 128, length: 78, shoulder: 62, sleeve: 26 } },
-      { size: 'XXL', measures: { chest: 134, length: 80, shoulder: 65, sleeve: 27 } },
-    ],
-  },
-  {
-    id: 'SC-03',
-    name: 'Pants',
-    rows: [
-      { size: 'S (30)', measures: { waist: 78, hip: 106, length: 102, thigh: 66 } },
-      { size: 'M (32)', measures: { waist: 83, hip: 112, length: 104, thigh: 69 } },
-      { size: 'L (34)', measures: { waist: 88, hip: 118, length: 106, thigh: 72 } },
-      { size: 'XL (36)', measures: { waist: 93, hip: 124, length: 108, thigh: 75 } },
-    ],
-  },
-];
 
 /** Global attribute library (settings manager): starter definitions products
  * copy values from. Copy semantics — drafts diverge after copy (documented).
@@ -1290,21 +1270,7 @@ export interface LibraryAttribute {
   showOnAdmin: boolean;
 }
 
-/** Visibility defaults for a definition: first-party shopper attributes
- * show on PDP + Admin; internal operational attributes (Placements) are
- * admin-only; checkout is opt-in. */
-export const defaultLibraryVisibility = (name: string) => ({
-  showOnPdp: name.trim().toLowerCase() !== 'placements',
-  showOnCheckout: false,
-  showOnAdmin: true,
-});
 
-export const initialLibraryAttributes: LibraryAttribute[] = [
-  { id: 'LIB-01', name: 'Color', values: ['Black', 'Onyx', 'Chalk White', 'Olive', 'Navy Blue', 'Maroon'], displayType: 'swatch', enabled: true, ...defaultLibraryVisibility('Color') },
-  { id: 'LIB-02', name: 'Size', values: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], displayType: 'pill', enabled: true, ...defaultLibraryVisibility('Size') },
-  { id: 'LIB-03', name: 'Placements', values: ['Front', 'Back', 'Left Pocket', 'Right Pocket', 'Left Sleeve', 'Right Sleeve'], displayType: 'radio', enabled: true, ...defaultLibraryVisibility('Placements') },
-  { id: 'LIB-04', name: 'Fabric', values: ['Cotton', 'French Terry', 'Fleece', 'Linen'], displayType: 'pill', enabled: true, ...defaultLibraryVisibility('Fabric') },
-];
 
 export const initialDiscountCodes: DiscountCode[] = [
   {
@@ -1678,36 +1644,5 @@ export const initialTeam: TeamMember[] = [
   },
 ];
 
-export interface StoreSettings {
-  storeName: string;
-  legalEntity: string;
-  supportEmail: string;
-  defaultCurrency: string;
-  timezone: string;
-  brandTagline: string;
-  brandColor: string;
-  qikinkApiKey: string;
-  qikinkEnvironment: 'sandbox' | 'production';
-  stripeLiveMode: boolean;
-  freeShippingThreshold: number;
-  standardShippingFee: number;
-  taxIncluded: boolean;
-  orderNotificationEmail: string;
-}
+// Store settings moved to the database (TL-BE-04: modules/settings).
 
-export const initialSettings: StoreSettings = {
-  storeName: 'The Unplugged Wear',
-  legalEntity: 'The Unplugged Wear Apparel LLC',
-  supportEmail: 'care@theunpluggedwear.com',
-  defaultCurrency: 'INR (₹)',
-  timezone: 'UTC+00:00 (London, Edinburgh)',
-  brandTagline: 'Unplugged Luxury & Urban Minimalism',
-  brandColor: '#7539FF',
-  qikinkApiKey: 'qik_live_mock_connection_89172',
-  qikinkEnvironment: 'sandbox',
-  stripeLiveMode: false,
-  freeShippingThreshold: 3000,
-  standardShippingFee: 150,
-  taxIncluded: true,
-  orderNotificationEmail: 'orders@theunpluggedwear.com',
-};

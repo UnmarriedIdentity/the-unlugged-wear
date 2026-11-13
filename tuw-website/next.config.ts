@@ -2,6 +2,10 @@ import type { NextConfig } from 'next';
 
 // Configure when the Next.js application is initialized.
 const nextConfig: NextConfig = {
+  // Shared backend package (TypeScript source) compiled into this app's build.
+  transpilePackages: ['@tuw/heart'],
+  // Cache Components: Partial Prerendering by default (nextjs-rendering skill).
+  cacheComponents: true,
   async redirects() {
     return [
       {

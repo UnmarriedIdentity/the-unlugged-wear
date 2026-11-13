@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { useAdminState } from '@/mocks/state';
 import { SearchModal } from '@/components/search';
-import { buildNotifications, useNotifications, NotificationPanel } from '@/components/notifications';
+import { buildNotifications, useNotifications, useStaffAlerts, NotificationPanel } from '@/components/notifications';
 import { usePopoverAnimation } from '@/hooks/usePopoverAnimation';
 
 interface HeaderProps {
@@ -31,9 +31,6 @@ export default function Header({
     retryConnection,
     supportTickets,
     orders,
-    products,
-    customers,
-    shipments,
   } = useAdminState();
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -60,13 +57,13 @@ export default function Header({
     router.push(href);
   };
 
-  // Live ops notification feed (N3): store state in, repository out.
-  // Mock items today; a database feed replaces the builder later.
+  // Ops feed (N3): real inventory alerts plus demo order/support items.
+  const alerts = useStaffAlerts(showNotifications);
   const notificationItems = React.useMemo(
-    () => buildNotifications({ orders, products, supportTickets }),
-    [orders, products, supportTickets],
+    () => [...alerts.items, ...buildNotifications({ orders, supportTickets })],
+    [alerts.items, orders, supportTickets],
   );
-  const notifications = useNotifications(notificationItems);
+  const notifications = useNotifications(notificationItems, alerts.remote);
 
   return (
     <>
@@ -224,10 +221,6 @@ export default function Header({
           onClick={() => setIsSearchOpen(false)}
         >
           <SearchModal
-            orders={orders}
-            products={products}
-            customers={customers}
-            shipments={shipments}
             onNavigate={handleNavigate}
             onClose={() => setIsSearchOpen(false)}
           />

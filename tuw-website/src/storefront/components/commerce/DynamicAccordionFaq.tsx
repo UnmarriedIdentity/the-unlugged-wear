@@ -15,7 +15,7 @@ export interface DynamicAccordionFaqProps {
 export default function DynamicAccordionFaq({
   faqs,
   title = 'Frequently Asked Questions',
-  eyebrow = 'Atelier Specifications',
+  eyebrow = 'Questions',
   description = 'Clear transparency on how our slow-living garments and studio objects are milled, crafted, and delivered to your doorstep.',
   className = '',
 }: DynamicAccordionFaqProps) {
@@ -54,7 +54,7 @@ export default function DynamicAccordionFaq({
             return (
               <div
                 key={faq.id || idx}
-                className={`rounded-2xl transition-all border ${
+                className={`transition-all border ${
                   isOpen
                     ? 'bg-store-deep-teal text-white border-store-deep-teal p-6 shadow-xs'
                     : 'bg-store-surface border-store-card-border p-5 text-store-text-primary hover:border-store-charcoal'

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '@storefront/components/layout/Header';
 import Footer from '@storefront/components/layout/Footer';
 import ProductGrid from '@storefront/components/commerce/ProductGrid';
@@ -10,6 +10,8 @@ import Breadcrumb from '@storefront/components/ui/Breadcrumb';
 import { useStore } from '@storefront/mocks/store';
 import { ShieldCheck, Sparkles, Truck } from 'lucide-react';
 import Link from 'next/link';
+import { CATEGORY_LABELS, matchesShopFilter } from '@storefront/lib/product';
+import type { ProductType } from '@storefront/lib/types';
 
 const availableCategories = [
   { value: '', label: 'View all' },
@@ -22,7 +24,19 @@ const availableCategories = [
 
 // Header navigation lands on /shop?category=men|women; these filter by who a
 // piece is cut for rather than by garment type.
-const audienceLabels: Record<string, string> = { men: 'Men', women: 'Women' };
+const audienceLabels: Record<string, string> = { men: 'Men', women: 'Women', kids: 'Kids' };
+
+const TYPE_LABELS: Record<ProductType, string> = {
+  apparel: 'Clothing',
+  'kids-apparel': 'Kids clothing',
+  pet: 'For pets',
+  drinkware: 'Mugs & Bottles',
+  'wall-art': 'Wall art',
+  'phone-case': 'Phone cases',
+  bag: 'Bags & Totes',
+  stationery: 'Stationery',
+  home: 'Home & table',
+};
 
 function ShopContent() {
   const searchParams = useSearchParams();
@@ -30,8 +44,22 @@ function ShopContent() {
   // Mega-menu links combine who and what, e.g. ?audience=men&category=hoodies
   const audienceParam = searchParams.get('audience') || '';
   const sortParam = searchParams.get('sort') || 'featured';
+  // Menu links can also narrow by product type, title words and new pieces.
+  const typeParam = (searchParams.get('type') || '') as ProductType | '';
+  const qParam = searchParams.get('q') || '';
+  const newParam = searchParams.get('new') === '1';
+  const qWords = useMemo(() => qParam.split(',').map((w) => w.trim()).filter(Boolean), [qParam]);
 
   const { products } = useStore();
+
+  const router = useRouter();
+  // Category pills also update the address bar, so the URL, heading and results always agree.
+  const changeFilters = (next: FilterState) => {
+    if (next.category !== filters.category) {
+      router.replace(next.category ? `/shop?category=${encodeURIComponent(next.category)}` : '/shop', { scroll: false });
+    }
+    setFilters(next);
+  };
 
   const [filters, setFilters] = useState<FilterState>({
     category: categoryParam,
@@ -46,11 +74,24 @@ function ShopContent() {
     setFilters((prev) => ({ ...prev, category: categoryParam }));
   }, [categoryParam]);
 
+  // The catalogue has 150+ pieces; show them a page at a time.
+  const [visibleCount, setVisibleCount] = useState(SHOP_PAGE_SIZE);
+  useEffect(() => {
+    setVisibleCount(SHOP_PAGE_SIZE);
+  }, [filters, audienceParam, typeParam, qParam, newParam]);
+
   const filteredProducts = useMemo(() => {
     let result = [...products];
 
-    if (audienceParam === 'men' || audienceParam === 'women') {
-      result = result.filter((p) => p.audience?.includes(audienceParam));
+    if (audienceParam === 'men' || audienceParam === 'women' || audienceParam === 'kids' || typeParam || qWords.length || newParam) {
+      result = result.filter((p) =>
+        matchesShopFilter(p, {
+          audience: audienceParam === 'men' || audienceParam === 'women' || audienceParam === 'kids' ? audienceParam : undefined,
+          type: typeParam || undefined,
+          q: qWords,
+          isNew: newParam,
+        })
+      );
     }
 
     // Filter by category
@@ -125,7 +166,23 @@ function ShopContent() {
     }
 
     return result;
-  }, [products, filters, audienceParam]);
+  }, [products, filters, audienceParam, typeParam, qWords, newParam]);
+
+  // Heading reads like the menu path, e.g. "Men · Hoodies & Sweats".
+  const shopHeading =
+    [
+      audienceLabels[audienceParam],
+      newParam ? 'New in' : '',
+      typeParam ? TYPE_LABELS[typeParam] : '',
+      filters.category
+        ? audienceLabels[filters.category] ||
+          CATEGORY_LABELS[filters.category as keyof typeof CATEGORY_LABELS] ||
+          'Catalog'
+        : '',
+      qWords.map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' / '),
+    ]
+      .filter(Boolean)
+      .join(' · ') || 'All products';
 
   return (
     <div className="w-full">
@@ -156,18 +213,7 @@ function ShopContent() {
           />
           <div className="flex items-baseline gap-3">
             <h1 className="text-2xl sm:text-3xl font-heading font-medium tracking-tight text-store-charcoal">
-              {[
-                audienceLabels[audienceParam],
-                filters.category
-                  ? audienceLabels[filters.category] ||
-                    availableCategories.find((c) => c.value === filters.category)?.label ||
-                    'Catalog'
-                  : audienceParam
-                  ? ''
-                  : 'New In',
-              ]
-                .filter(Boolean)
-                .join(' · ')}
+              {shopHeading}
             </h1>
             <span className="text-sm text-store-text-secondary tuw-tabular-nums" aria-live="polite">
               {filteredProducts.length} {filteredProducts.length === 1 ? 'item' : 'items'}
@@ -180,7 +226,7 @@ function ShopContent() {
         {/* ======================================================== */}
         <FilterBar
           filters={filters}
-          onFilterChange={setFilters}
+          onFilterChange={changeFilters}
           resultCount={filteredProducts.length}
           availableCategories={availableCategories}
           products={products}
@@ -192,11 +238,25 @@ function ShopContent() {
         <div className="pt-6">
           <h2 className="sr-only">Products</h2>
           <ProductGrid
-            products={filteredProducts}
+            products={filteredProducts.slice(0, visibleCount)}
             onResetFilters={() =>
               setFilters({ category: '', size: '', color: '', sort: 'featured', price: '' })
             }
           />
+          {filteredProducts.length > visibleCount && (
+            <div className="mt-12 flex flex-col items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setVisibleCount((n) => n + SHOP_PAGE_SIZE)}
+                className="inline-flex items-center h-11 px-6 rounded-full border border-store-charcoal text-store-charcoal text-xs font-medium uppercase tracking-wider hover:bg-store-charcoal hover:text-white transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-store-gold"
+              >
+                Load more
+              </button>
+              <p className="text-xs text-store-text-secondary" aria-live="polite">
+                Showing {Math.min(visibleCount, filteredProducts.length)} of {filteredProducts.length}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* ======================================================== */}
@@ -249,6 +309,8 @@ function ShopContent() {
     </div>
   );
 }
+
+const SHOP_PAGE_SIZE = 24;
 
 export default function ShopPage() {
   return (

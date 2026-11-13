@@ -5,18 +5,27 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, Mail, UserRound, ArrowLeft } from 'lucide-react';
+import { acceptInviteAction } from '@/server/auth-actions';
 // Class map - selectors live in src/app/globals.css (single app.css, signup- prefix).
 // Verbatim port of SignUpPage.module.css; JSX untouched for zero pixel drift.
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'signup-' + String(p) });
 
 type SignUpStateMode = 'default' | 'filled' | 'verify-empty' | 'verify-filled';
 
+export interface StaffInvite {
+  token: string;
+  email: string;
+  role: string;
+}
+
 interface SignUpPageProps {
   initialMode?: SignUpStateMode;
   initialStep?: number;
+  /** Staff join only by invitation (TL-BE-02); null = no valid invite in the URL. */
+  invite?: StaffInvite | null;
 }
 
-function SignUpPageContent({ initialMode }: SignUpPageProps) {
+function SignUpPageContent({ initialMode, invite = null }: SignUpPageProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -32,6 +41,8 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
+  const [notice, setNotice] = useState('');
+  const [pending, setPending] = useState(false);
 
   // OTP Fields (4 digits)
   const [otp, setOtp] = useState<string[]>(['', '', '', '']);
@@ -91,9 +102,30 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
   // Handle Form Submit -> Goes to Verification
   const handleSignUpSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setView('verify');
-    setCurrentMode('verify-empty');
+    if (pending) return;
+    if (!invite) return setNotice('The Unplugged Wear admin is invitation only. Ask an admin to invite you.');
+    if (!username.trim()) return setNotice('Enter your name.');
+    if (password !== confirmPassword) return setNotice('The two passwords do not match.');
+    if (!agreeTerms) return setNotice('Please accept the terms to continue.');
+    const [firstName = '', ...rest] = username.trim().split(/\s+/);
+    setPending(true);
+    void acceptInviteAction({ token: invite.token, password, firstName, lastName: rest.join(' ') || firstName }).then((result) => {
+      setPending(false);
+      if (!result.ok) return setNotice(result.error.message); // typed values are kept
+      setPassword('');
+      setConfirmPassword('');
+      router.push(result.data.next);
+      router.refresh();
+    });
   };
+
+  // The invitation fixes the email address.
+  useEffect(() => {
+    if (invite) setEmail(invite.email);
+  }, [invite]);
+
+  const socialUnavailable = (provider: string) => () =>
+    setNotice(`${provider} sign-up is not available. Accept your invitation with a password.`);
 
   // OTP Input Handlers
   const handleOtpChange = (index: number, val: string) => {
@@ -140,7 +172,7 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
       <section className="relative flex h-full min-h-screen w-[49.444%] flex-[0_0_49.444%] flex-col justify-end overflow-hidden bg-auth-hero max-[900px]:h-[320px] max-[900px]:min-h-[320px] max-[900px]:w-full max-[900px]:flex-none">
         <Image
           src="/images/signup-hero.png"
-          alt="Retail Storeflow Team Members"
+          alt="The Unplugged Wear team members"
           fill
           priority
           sizes="(max-width: 900px) 100vw, 50vw"
@@ -151,7 +183,7 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
 
         {/* Frame 60511: Brand Mark, Headline, Subtitle */}
         <div className="relative z-2 flex flex-col gap-[clamp(8px,1.4vh,16px)] px-[clamp(24px,3.88vw,56px)] pb-[clamp(24px,4.5vh,68px)] max-w-[600px] max-[900px]:px-6 max-[900px]:pb-7">
-          <div className="text-auth-signup-brand font-bold leading-auth-headline text-white">Storeflow</div>
+          <div className="text-auth-signup-brand font-bold leading-auth-headline text-white">The Unplugged Wear</div>
           <h1 className="text-auth-signup-headline font-bold leading-auth-signup-headline tracking-auth-title text-white whitespace-pre-line max-w-auth-hero-copy m-0">
             All your store{'\n'}essentials{'\n'}in one place
           </h1>
@@ -182,7 +214,7 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
                     className="h-[25px] w-[25px] object-contain"
                   />
                 </div>
-                <h2 className="text-auth-signup-title font-semibold text-auth-ink tracking-auth-title m-0">Create an account</h2>
+                <h2 className="text-auth-signup-title font-semibold text-auth-ink tracking-auth-title m-0">{invite ? 'Join the team' : 'Invitation only'}</h2>
                 <div className="flex items-center justify-center gap-1.5 text-auth-subrow text-auth-muted m-0">
                   <span>Already have an account?</span>
                   <Link href="/login" className="text-auth-teal font-semibold no-underline cursor-pointer transition-opacity duration-150 hover:opacity-80 hover:underline" id="link-to-login">
@@ -198,7 +230,7 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
                   <button
                     type="button"
                     className="flex h-12 items-center justify-center gap-2 rounded-auth-social border border-auth-line bg-white px-3.5 py-2 cursor-pointer transition-all duration-200 hover:bg-auth-hover-canvas hover:border-auth-hover-line"
-                    onClick={() => applyState('filled')}
+                    onClick={socialUnavailable('Apple')}
                     id="signup-apple-btn"
                   >
                     <div className="flex h-7.5 w-7.5 items-center justify-center rounded-full border border-auth-line bg-white">
@@ -215,7 +247,7 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
                   <button
                     type="button"
                     className="flex h-12 items-center justify-center gap-2 rounded-auth-social border border-auth-line bg-white px-3.5 py-2 cursor-pointer transition-all duration-200 hover:bg-auth-hover-canvas hover:border-auth-hover-line"
-                    onClick={() => applyState('filled')}
+                    onClick={socialUnavailable('Google')}
                     id="signup-google-btn"
                   >
                     <div className="flex h-7.5 w-7.5 items-center justify-center rounded-full border border-auth-line bg-white">
@@ -272,6 +304,8 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
                           type="email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
+                          readOnly={Boolean(invite)}
+                          aria-describedby={invite ? 'signup-email-note' : undefined}
                           placeholder="Enter your email here"
                           className="w-full h-11.5 py-2.5 pl-4 pr-11 border border-auth-line rounded-xl bg-white outline-none text-auth-signup-input tracking-auth-signup-input text-auth-ink placeholder:text-auth-faint placeholder:font-normal transition-all duration-200 focus:border-auth-teal focus:shadow-auth-input"
                           required
@@ -377,9 +411,11 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
                       </div>
                     </div>
 
+                    {notice && <p role="alert" className="text-sm text-auth-error">{notice}</p>}
+                    {invite && <p id="signup-email-note" className="text-sm text-auth-muted">Invited as {invite.role}. The email comes from your invitation.</p>}
                     {/* 6. Primary Button: Sign Up */}
-                    <button type="submit" className="flex h-12 w-full items-center justify-center rounded-xl bg-auth-button text-auth-btn font-bold text-white cursor-pointer transition-all duration-200 hover:bg-auth-pure active:scale-99" id="signup-submit-btn">
-                      Sign Up
+                    <button type="submit" disabled={pending} aria-busy={pending} className="flex h-12 w-full items-center justify-center rounded-xl bg-auth-button text-auth-btn font-bold text-white cursor-pointer transition-all duration-200 hover:bg-auth-pure active:scale-99 disabled:opacity-70" id="signup-submit-btn">
+                      {pending ? 'Joining…' : invite ? 'Accept invitation' : 'Sign Up'}
                     </button>
                   </div>
                 </form>
@@ -467,10 +503,10 @@ function SignUpPageContent({ initialMode }: SignUpPageProps) {
   );
 }
 
-export default function SignUpPage({ initialMode }: SignUpPageProps) {
+export default function SignUpPage({ initialMode, invite }: SignUpPageProps) {
   return (
       <Suspense fallback={<div style={{ minHeight: '100vh', background: 'var(--color-surface)' }} />}>
-      <SignUpPageContent initialMode={initialMode} />
+      <SignUpPageContent initialMode={initialMode} invite={invite} />
     </Suspense>
   );
 }

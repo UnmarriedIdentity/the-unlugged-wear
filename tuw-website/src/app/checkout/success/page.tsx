@@ -5,18 +5,33 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import Header from '@storefront/components/layout/Header';
 import Footer from '@storefront/components/layout/Footer';
-import Button from '@storefront/components/ui/Button';
-import Badge from '@storefront/components/ui/Badge';
 import ImageWithFallback from '@storefront/components/ui/ImageWithFallback';
 import { useStore } from '@storefront/mocks/store';
-import { Order } from '@storefront/lib/types';
-import { formatINR } from '@storefront/lib/format';
-import { CheckCircle2, AlertCircle, Clock, Truck, ArrowRight, ShieldCheck, ShoppingBag } from 'lucide-react';
+import { getOrderAction } from '@/server/order-actions';
+import { toStoreOrder } from '@storefront/lib/orders';
+import { useSession } from '@storefront/lib/session';
+import type { Order } from '@storefront/lib/types';
+import { formatPaise, formatShortDate } from '@storefront/lib/format';
+import { RETURN_WINDOW_DAYS, deliveryEstimate } from '@storefront/lib/product';
+import { downloadInvoicePdf } from '@storefront/lib/invoice';
+import { useSiteSettings } from '@storefront/lib/site-settings';
+import { AlertCircle, ArrowRight, Check, Clock, Download, Info, Mail } from 'lucide-react';
+
+const STEPS = ['Order placed', 'Printing', 'Shipped', 'Delivered'] as const;
+const STEP_INDEX: Record<string, number> = { queued: 0, printing: 1, shipped: 2, delivered: 3 };
+
+// Money in paise; order shipping/discount are stored in whole rupees.
+const linePaise = (item: Order['items'][number]) =>
+  (item.priceMinorINR ?? Math.round(item.priceINR * 100)) * item.quantity;
+
 
 function OrderSuccessContent() {
   const searchParams = useSearchParams();
   const orderNumber = searchParams.get('order') || searchParams.get('id');
-  const { getOrderByNumber, getOrderById } = useStore();
+  const receipt = searchParams.get('t') ?? undefined;
+  const { products } = useStore();
+  const { session } = useSession();
+  const { supportEmail } = useSiteSettings();
 
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,18 +41,21 @@ function OrderSuccessContent() {
       setLoading(false);
       return;
     }
-
-    // Lookup order by order number or ID
-    const found = getOrderByNumber(orderNumber) || getOrderById(orderNumber);
-    setOrder(found || null);
-    setLoading(false);
-  }, [orderNumber, getOrderByNumber, getOrderById]);
+    let live = true;
+    // The account that placed it, or whoever holds its receipt link, may see it.
+    void getOrderAction({ orderNumber, receipt }).then((result) => {
+      if (!live) return;
+      setOrder(result.ok ? toStoreOrder(result.data) : null);
+      setLoading(false);
+    });
+    return () => { live = false; };
+  }, [orderNumber, receipt]);
 
   if (loading) {
     return (
-      <div className="py-24 text-center">
-        <div className="w-12 h-12 border-2 border-stone-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-        <p className="text-sm text-stone-600">Verifying order details...</p>
+      <div className="py-24 text-center" role="status">
+        <div className="w-10 h-10 border-2 border-store-charcoal border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+        <p className="text-sm text-store-text-secondary">Finding your order…</p>
       </div>
     );
   }
@@ -45,190 +63,230 @@ function OrderSuccessContent() {
   if (!order) {
     return (
       <div className="py-20 text-center max-w-lg mx-auto px-4">
-        <div className="w-16 h-16 rounded-full bg-stone-100 flex items-center justify-center text-stone-500 mx-auto mb-4">
-          <AlertCircle size={28} />
-        </div>
-        <h1 className="text-2xl font-bold text-stone-900">Order Not Found</h1>
-        <p className="text-sm text-stone-600 mt-2 leading-relaxed">
-          We could not locate an order matching reference{' '}
-          <code className="bg-stone-100 px-2 py-0.5 rounded text-stone-800 font-mono text-xs">
-            {orderNumber || 'unspecified'}
-          </code>
-          . A forged or expired confirmation link cannot be displayed as a confirmed order.
+        <AlertCircle size={28} aria-hidden="true" className="mx-auto text-store-text-secondary" />
+        <h1 className="mt-4 font-heading text-3xl font-medium text-store-charcoal">We couldn’t find that order</h1>
+        <p className="text-sm text-store-text-secondary mt-3 leading-relaxed">
+          There’s no order with the reference “{orderNumber || 'unspecified'}” in this browser. If you placed it
+          somewhere else, you can still track it with its reference.
         </p>
-        <div className="mt-8 flex justify-center gap-4">
-          <Button variant="dark" size="md" href="/shop">
-            Return to Shop
-          </Button>
-          <Button variant="outline" size="md" href="/track-order">
-            Track Existing Order
-          </Button>
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <Link href="/track-order" className="inline-flex items-center h-11 px-6 rounded-full bg-[#111111] text-white text-sm font-medium hover:bg-black">
+            Track an order
+          </Link>
+          <Link href="/shop" className="inline-flex items-center h-11 px-6 rounded-full border border-store-border text-sm font-medium text-store-charcoal hover:border-store-charcoal">
+            Continue shopping
+          </Link>
         </div>
       </div>
     );
   }
 
-  const isPaid = order.paymentStatus === 'paid' || order.status === 'Confirmed' || order.status === 'Printing';
+  const isPaid = order.paymentStatus === 'paid';
   const isPending = order.paymentStatus === 'pending';
+  const step = STEP_INDEX[order.fulfillmentStatus ?? 'queued'] ?? 0;
+  const estimate = deliveryEstimate(order.shippingAddress.postalCode, new Date(order.date));
+  const subtotal = order.items.reduce((sum, item) => sum + linePaise(item), 0);
+  // The total the server charged (includes any tax or cash-on-delivery fee).
+  const total = Math.round(order.totalINR * 100);
+  void subtotal;
+  const hasShipped = order.fulfillmentStatus === 'shipped' || order.fulfillmentStatus === 'delivered';
+  const address = order.shippingAddress;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 w-full">
-      <div className="bg-white rounded-3xl border border-stone-200 p-8 sm:p-12 shadow-xs text-center">
-        <div
-          className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 ${
-            isPaid
-              ? 'bg-emerald-50 border border-emerald-200 text-emerald-600'
-              : 'bg-amber-50 border border-amber-200 text-amber-600'
-          }`}
-        >
-          {isPaid ? <CheckCircle2 size={40} /> : <Clock size={40} />}
-        </div>
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 w-full">
+      {/* Demo notice (required for simulated checkouts) */}
+      <p className="flex items-start gap-2 text-sm text-store-text-secondary border-l-2 border-store-gold pl-3 mb-10">
+        <Info size={16} aria-hidden="true" className="mt-0.5 shrink-0" />
+        Demo order — no payment was collected and nothing will be printed or shipped.
+      </p>
 
-        <span
-          className={`text-xs uppercase font-bold tracking-[0.2em] ${
-            isPaid ? 'text-emerald-600' : 'text-amber-600'
-          }`}
-        >
-          {isPaid ? 'Order Confirmed' : 'Payment Processing'}
+      <header className="text-center max-w-2xl mx-auto">
+        <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-store-charcoal text-white">
+          {isPending ? <Clock size={22} aria-hidden="true" /> : <Check size={22} aria-hidden="true" />}
         </span>
-        <h1 className="text-[clamp(1.75rem,3vw+0.5rem,2.25rem)] font-extrabold tracking-tight text-stone-900 mt-2">
-          {isPaid ? 'Thank You for Your Order' : 'Awaiting Payment Settlement'}
+        <h1 className="mt-5 font-heading text-[clamp(2rem,3vw+1rem,3rem)] font-medium tracking-tight text-store-charcoal">
+          {isPending ? 'Your order is placed' : 'Thank you for your order'}
         </h1>
-        <p className="text-sm text-stone-600 max-w-md mx-auto mt-2 leading-relaxed">
-          Order reference <strong className="text-stone-900">{order.orderNumber}</strong> has been registered.
-          {isPaid
-            ? ' It is now queued for on-demand production at our studio.'
-            : ' Confirmation will update once the payment provider verifies the transaction.'}
+        <p className="mt-3 text-base text-store-text-secondary leading-relaxed">
+          Order <strong className="font-medium text-store-charcoal">{order.orderNumber}</strong> is confirmed.{' '}
+          {isPending
+            ? 'Payment is due on delivery.'
+            : 'We’ll print it in 2–3 business days and send you tracking as soon as it ships.'}
         </p>
+        <p className="mt-3 inline-flex items-center gap-1.5 text-sm text-store-text-secondary">
+          <Mail size={14} aria-hidden="true" />
+          {session
+            ? `Confirmation sent to ${session.email} (demo — no email is sent)`
+            : 'A confirmation would be emailed to you (demo — no email is sent)'}
+        </p>
+        {order.cancellableUntil && order.sqlStatus === 'pending' && (
+          <p className="mt-4 text-sm text-store-text-secondary">
+            Changed your mind? You can cancel free of charge until{' '}
+            <strong className="font-medium text-store-charcoal">
+              {new Date(order.cancellableUntil).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Kolkata' })}
+            </strong>
+            {session ? ' from your order page.' : '. Sign up with this email to manage it from your account, or contact us.'}
+          </p>
+        )}
+      </header>
 
-        {/* Status badges */}
-        <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
-          <Badge variant={isPaid ? 'success' : 'warning'}>
-            Payment: {order.paymentStatus || (isPaid ? 'paid' : 'pending')}
-          </Badge>
-          <Badge variant="neutral">Fulfillment: {order.fulfillmentStatus || 'queued'}</Badge>
-          {order.partnerOrderId && (
-            <Badge variant="neutral">Qikink Ref: {order.partnerOrderId}</Badge>
+      {/* What happens next */}
+      <section aria-labelledby="next-steps" className="mt-12 p-6 sm:p-8 bg-store-surface border border-store-card-border">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 id="next-steps" className="font-heading text-xl font-medium text-store-charcoal">
+            What happens next
+          </h2>
+          {estimate && (
+            <p className="text-sm text-store-charcoal">
+              Expected {formatShortDate(estimate.earliest)} – {formatShortDate(estimate.latest)}
+            </p>
           )}
         </div>
+        <ol className="mt-6 grid grid-cols-4 gap-2">
+          {STEPS.map((label, idx) => (
+            <li key={label} aria-current={idx === step ? 'step' : undefined}>
+              <span className={`block h-1 ${idx <= step ? 'bg-store-charcoal' : 'bg-store-card-border'}`} />
+              <span className={`mt-2 block text-xs sm:text-sm ${idx <= step ? 'text-store-charcoal font-medium' : 'text-store-text-secondary'}`}>
+                {label}
+              </span>
+              <span className="block text-xs text-store-text-secondary">
+                {idx === 1 ? '2–3 business days' : idx === 2 ? (hasShipped && order.carrier ? order.carrier : 'Courier assigned when it ships') : ''}
+              </span>
+            </li>
+          ))}
+        </ol>
+      </section>
 
-        {/* Order overview card */}
-        <div className="my-8 p-6 rounded-2xl bg-stone-50 border border-stone-200 text-left max-w-2xl mx-auto space-y-6">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pb-4 border-b border-stone-200 text-xs">
-            <div>
-              <span className="text-stone-500 block">Order Reference:</span>
-              <span className="font-bold text-stone-900">{order.orderNumber}</span>
-            </div>
-            <div>
-              <span className="text-stone-500 block">Payment Mode:</span>
-              <span className="font-bold text-stone-900">{order.paymentMethod}</span>
-            </div>
-            <div>
-              <span className="text-stone-500 block">Carrier:</span>
-              <span className="font-bold text-stone-900">{order.carrier || 'Delhivery Express'}</span>
-            </div>
-            <div>
-              <span className="text-stone-500 block">Est. Delivery:</span>
-              <span className="font-bold text-emerald-700">{order.estimatedDelivery || '3–5 business days'}</span>
-            </div>
-          </div>
-
-          {/* Purchased items list */}
-          <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-stone-900 mb-3">
-              Items Ordered ({order.items.length})
-            </h4>
-            <div className="divide-y divide-stone-200 bg-white rounded-xl border border-stone-200 px-4 py-1">
-              {order.items.map((item) => (
-                <div key={item.id} className="py-3 flex items-center justify-between text-xs gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-14 rounded-lg overflow-hidden bg-stone-100 shrink-0 border border-stone-200">
-                      <ImageWithFallback
-                        src={item.image}
-                        alt={item.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+      <div className="mt-8 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-8 items-start">
+        {/* Items */}
+        <section aria-labelledby="items-heading" className="p-6 sm:p-8 bg-store-surface border border-store-card-border">
+          <h2 id="items-heading" className="font-heading text-xl font-medium text-store-charcoal">
+            Your items ({order.items.reduce((n, i) => n + i.quantity, 0)})
+          </h2>
+          <ul className="mt-4 divide-y divide-store-card-border">
+            {order.items.map((item) => {
+              const product = products.find((p) => p.id === item.productId);
+              const swatch = product?.colors.find((c) => c.name === item.color)?.hex;
+              const href = product ? `/products/${product.slug}` : '/shop';
+              return (
+                <li key={item.id} className="py-4 flex gap-4">
+                  <Link href={href} className="w-20 h-28 shrink-0 overflow-hidden bg-store-cream border border-store-card-border">
+                    <ImageWithFallback src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                  </Link>
+                  <div className="flex-1 min-w-0 flex justify-between gap-4">
                     <div>
-                      <div className="font-semibold text-stone-900">{item.title}</div>
-                      <div className="text-stone-500 text-xs mt-0.5">
-                        {item.color} • Size {item.size} • Qty {item.quantity}
-                      </div>
+                      <Link href={href} className="text-base font-medium text-store-charcoal hover:underline underline-offset-4 decoration-store-gold">
+                        {item.title}
+                      </Link>
+                      <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-store-text-secondary">
+                        {swatch && (
+                          <span aria-hidden="true" className="w-3 h-3 rounded-full border border-store-card-border" style={{ backgroundColor: swatch }} />
+                        )}
+                        {item.color} · {item.size} · Qty {item.quantity}
+                      </p>
                     </div>
+                    <span className="text-base text-store-charcoal tuw-tabular-nums">{formatPaise(linePaise(item))}</span>
                   </div>
-                  <div className="font-mono font-medium text-stone-900 text-right">
-                    {formatINR(item.priceINR * item.quantity * 100)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
 
-          {/* Pricing summary */}
-          <div className="space-y-1.5 text-xs border-t border-stone-200 pt-4">
-            <div className="flex justify-between text-stone-600">
-              <span>Subtotal</span>
-              <span className="font-mono">{formatINR(order.subtotalINR * 100)}</span>
-            </div>
-            {order.discountINR > 0 && (
-              <div className="flex justify-between text-emerald-700 font-medium">
-                <span>Promotional Discount</span>
-                <span className="font-mono">-{formatINR(order.discountINR * 100)}</span>
-              </div>
-            )}
-            <div className="flex justify-between text-stone-600">
-              <span>Shipping Fee</span>
-              <span className="font-mono">{order.shippingINR === 0 ? 'FREE' : formatINR(order.shippingINR * 100)}</span>
-            </div>
-            <div className="flex justify-between text-sm font-bold text-stone-900 pt-2 border-t border-stone-200">
-              <span>{order.paymentStatus === 'pending' ? 'Total due on delivery' : 'Total Paid'}</span>
-              <span className="font-mono">{formatINR(order.totalINR * 100)}</span>
-            </div>
-          </div>
+        {/* Summary + address */}
+        <aside className="space-y-6">
+          <section aria-labelledby="summary-heading" className="p-6 bg-store-surface border border-store-card-border">
+            <h2 id="summary-heading" className="font-heading text-xl font-medium text-store-charcoal">Summary</h2>
+            <dl className="mt-4 grid grid-cols-[1fr_auto] gap-y-2 text-sm text-store-text-secondary tuw-tabular-nums">
+              <dt>Items</dt>
+              <dd className="text-right text-store-charcoal">{formatPaise(subtotal)}</dd>
+              {order.discountINR > 0 && (
+                <>
+                  <dt>Discount</dt>
+                  <dd className="text-right text-store-charcoal">−{formatPaise(order.discountINR * 100)}</dd>
+                </>
+              )}
+              <dt>Delivery</dt>
+              <dd className="text-right text-store-charcoal">{order.shippingINR ? formatPaise(order.shippingINR * 100) : 'Free'}</dd>
+              <dt>GST</dt>
+              <dd className="text-right text-store-charcoal">Included</dd>
+              <dt className="pt-3 border-t border-store-card-border font-medium text-store-charcoal">
+                {isPending ? 'Due on delivery' : isPaid ? 'Total paid' : 'Total'}
+              </dt>
+              <dd className="pt-3 border-t border-store-card-border text-right text-lg font-medium text-store-charcoal">
+                {formatPaise(total)}
+              </dd>
+              <dt className="text-xs">Payment</dt>
+              <dd className="text-right text-xs">{order.paymentMethod}</dd>
+            </dl>
+            <button
+              type="button"
+              onClick={() => void downloadInvoicePdf(order, session?.email, supportEmail)}
+              className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-store-charcoal underline-offset-4 decoration-store-gold hover:underline cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-store-gold"
+            >
+              <Download size={14} aria-hidden="true" /> Download invoice PDF (demo)
+            </button>
+          </section>
 
-          {/* Delivery address */}
-          <div className="pt-2 border-t border-stone-200 text-xs">
-            <span className="font-bold text-stone-900 block mb-1">Delivering to:</span>
-            <p className="text-stone-600 leading-relaxed">
-              {order.shippingAddress.fullName} • {order.shippingAddress.phone}
+          <section aria-labelledby="address-heading" className="p-6 bg-store-surface border border-store-card-border text-sm">
+            <h2 id="address-heading" className="font-heading text-xl font-medium text-store-charcoal">Delivering to</h2>
+            <p className="mt-3 text-store-text-secondary leading-relaxed">
+              <span className="text-store-charcoal">{address.fullName}</span>
               <br />
-              {order.shippingAddress.addressLine1}
-              {order.shippingAddress.addressLine2 ? `, ${order.shippingAddress.addressLine2}` : ''}
+              {address.addressLine1}
+              {address.addressLine2 ? `, ${address.addressLine2}` : ''}
               <br />
-              {order.shippingAddress.city}, {order.shippingAddress.state} – {order.shippingAddress.postalCode}
+              {address.city}, {address.state} {address.postalCode}
+              <br />
+              {address.phone}
             </p>
-          </div>
-        </div>
-
-        {/* Action buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Button variant="dark" size="md" href={`/track-order?order=${encodeURIComponent(order.orderNumber)}`}>
-            Track Shipment Status
-          </Button>
-          <Button variant="outline" size="md" href="/account/orders">
-            View All Orders
-          </Button>
-        </div>
-
-        <div className="mt-8 flex items-center justify-center gap-2 text-xs text-stone-500">
-          <ShieldCheck size={16} className="text-emerald-600" />
-          <span>Need support? Contact support@theunpluggedwear.com</span>
-        </div>
+          </section>
+        </aside>
       </div>
+
+      {/* Actions */}
+      <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+        <Link
+          href={`/track-order?ref=${encodeURIComponent(order.orderNumber)}`}
+          className="inline-flex items-center gap-2 h-11 px-6 rounded-full bg-[#111111] text-white text-sm font-medium hover:bg-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-store-gold focus-visible:ring-offset-2"
+        >
+          Track order
+          <ArrowRight size={16} aria-hidden="true" />
+        </Link>
+        <Link
+          href={`/account/orders/${encodeURIComponent(order.orderNumber)}`}
+          className="inline-flex items-center h-11 px-6 rounded-full border border-store-charcoal text-sm font-medium text-store-charcoal hover:bg-store-charcoal hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-store-gold"
+        >
+          View order details
+        </Link>
+        <Link
+          href="/shop"
+          className="inline-flex items-center h-11 px-6 rounded-full border border-store-border text-sm font-medium text-store-charcoal hover:border-store-charcoal transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-store-gold"
+        >
+          Continue shopping
+        </Link>
+      </div>
+
+      {/* Help */}
+      <p className="mt-10 text-center text-sm text-store-text-secondary leading-relaxed">
+        Need to change something? <Link href="/contact" className="text-store-charcoal underline underline-offset-4 decoration-store-gold">Contact us</Link>{' '}
+        before printing starts. {RETURN_WINDOW_DAYS}-day returns on unworn clothing —{' '}
+        <Link href="/policies/returns" className="text-store-charcoal underline underline-offset-4 decoration-store-gold">returns policy</Link>.
+      </p>
     </div>
   );
 }
 
 export default function CheckoutSuccessPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF9F6]">
+    <div className="min-h-screen flex flex-col bg-store-canvas text-store-charcoal">
       <Header />
       <main className="flex-1">
         <Suspense
           fallback={
-            <div className="py-24 text-center">
-              <div className="w-12 h-12 border-2 border-stone-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-sm text-stone-600">Loading order status...</p>
+            <div className="py-24 text-center" role="status">
+              <div className="w-10 h-10 border-2 border-store-charcoal border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+              <p className="text-sm text-store-text-secondary">Finding your order…</p>
             </div>
           }
         >

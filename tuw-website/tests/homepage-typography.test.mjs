@@ -73,28 +73,15 @@ describe('Homepage typography roles (weight & size only)', () => {
     }
   });
 
-  test('every section eyebrow is 16px / weight 500', () => {
+  test('homepage eyebrows stay removed and no 10px/600/700 eyebrows return', () => {
     assert.ok(
       !read('src/app/page.tsx').includes('SS26 • Slow-Living Atelier'),
       'hero must not bring back the SS26 kicker above the headline'
     );
 
-    const eyebrows = [
-      {
-        name: 'Our Philosophy eyebrow',
-        src: read('src/storefront/components/commerce/OurPhilosophy.tsx'),
-        re: /text-base uppercase tracking-widest text-store-gold font-sans font-medium/,
-      },
-      {
-        name: 'Virtual Fitting Room eyebrow',
-        src: read('src/storefront/components/commerce/VirtualFittingRoom.tsx'),
-        re: /text-base font-medium uppercase tracking-widest text-store-text-secondary font-sans/,
-      },
-    ];
-
-    for (const eyebrow of eyebrows) {
-      assert.ok(eyebrow.re.test(eyebrow.src), `${eyebrow.name} must be text-base (16px) / font-medium (500)`);
-    }
+    // The owner removed the Our Philosophy and Virtual Fitting Room eyebrows; keep them out.
+    assert.ok(!read('src/storefront/components/commerce/OurPhilosophy.tsx').includes('>Our Philosophy<'));
+    assert.ok(!read('src/storefront/components/commerce/VirtualFittingRoom.tsx').includes('Virtual Fitting Room\n'));
 
     for (const { file, src } of sectionSources) {
       assert.ok(
@@ -141,7 +128,7 @@ describe('Homepage typography roles (weight & size only)', () => {
     const vfr = read('src/storefront/components/commerce/VirtualFittingRoom.tsx');
 
     const descriptions = [
-      { name: 'Explore description (16px)', src: page, re: /<p className="text-base text-store-text-secondary font-sans leading-relaxed">/ },
+      { name: 'Explore description (16px)', src: page, re: /<p className="(?:mt-3 )?text-base text-store-text-secondary font-sans leading-relaxed">/ },
       { name: 'Customer Experience description (16 -> 20px)', src: page, re: /<p className="text-base sm:text-xl text-white\/70 font-sans leading-relaxed">/ },
       { name: 'Recommendations description (18px, frozen)', src: page, re: /<p className="text-lg text-store-text-secondary font-sans mt-1">/ },
       { name: 'Stratosphere description (16 -> 18px)', src: page, re: /<p className="text-base sm:text-lg text-white\/80 max-w-xl mx-auto leading-relaxed font-sans">/ },
@@ -200,12 +187,12 @@ describe('Homepage typography roles (weight & size only)', () => {
 });
 
 
-describe('Honest demo authentication', () => {
-  test('login and register state demo status and fake no third-party sign-in', () => {
+describe('Honest authentication', () => {
+  test('auth pages are truthful about what is not live yet and fake no third-party sign-in', () => {
     const login = read('src/app/login/page.tsx');
     const register = read('src/app/register/page.tsx');
-    assert.ok(login.includes('demoNotice="Demo sign-in'), 'login must state it is a demo sign-in');
-    assert.ok(register.includes('demoNotice="Demo sign-up'), 'register must state it is a demo sign-up');
+    assert.ok(!login.includes('demoNotice="Demo sign-in'), 'login is real now — no demo notice');
+    assert.ok(register.includes('the confirmation email is not sent yet'), 'register states that email delivery is not connected');
     for (const src of [login, register]) {
       assert.ok(!/Sign in with (Google|Apple)/.test(src), 'no simulated Google/Apple sign-in buttons');
       assert.ok(src.includes('noValidate'), 'forms use inline errors instead of browser bubbles');

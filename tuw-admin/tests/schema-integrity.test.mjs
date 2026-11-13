@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url';
 // ---------------------------------------------------------------
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const MIGRATE_DIR = join(HERE, '..', 'src', 'server', 'db', 'migrate');
+const MIGRATE_DIR = join(HERE, '..', '..', 'db', 'migrate');
 const DOCS_DIR = join(HERE, '..', '..', 'DOC', 'backend');
 
 // Apply order. Parents always precede their children, so 009 (which
@@ -26,12 +26,15 @@ const FILES = [
   '005-platform.sql',
   '006-cms.sql',
   '007-cms-pages.sql',
-  '009-partner.sql',
+  '008-commerce-extras.sql',
+  '009-fulfillment.sql',
   '010-attr-library.sql',
   '011-household.sql',
   '012-styling.sql',
   '013-analytics.sql',
   '014-operations.sql',
+  '015-claim-evidence.sql',
+  '016-auth-sessions.sql',
 ];
 
 const IMPLEMENTED = {
@@ -104,7 +107,22 @@ const IMPLEMENTED = {
     'pages',
     'store_settings',
   ],
-  '009-partner.sql': ['partner_orders', 'partner_wallet_ledger'],
+  '008-commerce-extras.sql': [
+    'newsletter_subscribers',
+    'faqs',
+    'gift_cards',
+    'gift_card_transactions',
+    'stock_alert_subscriptions',
+  ],
+  '009-fulfillment.sql': [
+    'integration_providers',
+    'provider_product_mappings',
+    'provider_cod_remittances',
+    'fulfillment_orders',
+    'fulfillment_order_items',
+    'provider_wallet_ledger',
+    'fulfillment_claims',
+  ],
   '010-attr-library.sql': [
     'attribute_definitions',
     'attribute_values',
@@ -138,6 +156,8 @@ const IMPLEMENTED = {
     'search_terms',
   ],
   '014-operations.sql': ['support_tickets', 'support_messages', 'notifications'],
+  '015-claim-evidence.sql': [],
+  '016-auth-sessions.sql': [],
 };
 
 // Every specified table is now written as DDL. Kept as an explicit empty
@@ -185,14 +205,81 @@ const block = (sql, table) =>
   sql.match(new RegExp(`CREATE\\s+TABLE\\s+${table}\\s*\\(([\\s\\S]*?)\\n\\);`, 'i'))?.[1] ?? '';
 
 describe('schema integrity', () => {
-  test('inventory matches the 89 implemented tables, file by file', () => {
+  test('inventory matches the 99 implemented tables, file by file', () => {
     const actual = {};
     for (const file of FILES) actual[file] = tablesIn(code(file));
 
     assert.deepEqual(actual, IMPLEMENTED);
-    assert.equal(EXPECTED_IMPLEMENTED, 89);
+    assert.equal(EXPECTED_IMPLEMENTED, 99);
     assert.equal(DOCUMENTED_ONLY.length, 0);
-    assert.equal(EXPECTED_TOTAL, 89);
+    assert.equal(EXPECTED_TOTAL, 99);
+  });
+
+  test('guest checkout, exchanges and no store credit are encoded in DDL', () => {
+    const orders = code('004-orders.sql');
+    const ordersBlock = block(orders, 'orders');
+    assert.match(ordersBlock, /placed_by_user_id\s+uuid\s+REFERENCES/i);
+    assert.match(ordersBlock, /guest_email\s+varchar\(255\)/i);
+    assert.match(ordersBlock, /orders_buyer_identity/i);
+    assert.match(ordersBlock, /order_type\s+varchar\(20\)/i);
+    assert.match(block(orders, 'returns'), /replacement_order_id\s+uuid\s+UNIQUE REFERENCES orders/i);
+    assert.match(block(orders, 'returns'), /requested_by_profile_id\s+uuid\s+NOT NULL/i);
+    assert.match(block(orders, 'returns'), /price_difference\s+DECIMAL/i);
+    assert.match(block(orders, 'refunds'), /'upi','bank_transfer'/);
+    // Provider slugs are data rows, not CHECK lists.
+    assert.match(code('009-fulfillment.sql'), /payments_provider_fk/);
+    assert.equal(/provider IN \(/i.test(code('005-platform.sql')), false);
+    assert.equal(/store_credit/i.test(orders), false, 'store credit is not a feature');
+    assert.match(code('014-operations.sql'), /'contact_form'/);
+  });
+
+  test('columns live in CREATE TABLE; later files only attach forward FKs', () => {
+    // 001–014 are the pre-provision baseline; 015+ are forward migrations
+    // on an applied database, where ALTER … ADD COLUMN is the normal tool.
+    for (const file of FILES.filter((f) => f < '015')) {
+      assert.equal(/ADD\s+COLUMN/i.test(code(file)), false, `${file} adds a column with ALTER`);
+    }
+    const products = block(code('002-catalog.sql'), 'products');
+    assert.match(products, /exchange_policy\s+varchar\(20\)\s+NOT NULL DEFAULT 'defects_only'/i);
+    const orders = code('004-orders.sql');
+    assert.match(block(orders, 'orders'), /cancellable_until\s+timestamptz/i);
+    assert.match(orders, /CREATE UNIQUE INDEX one_exchange_per_order_item/i);
+    assert.match(block(orders, 'returns'), /cardinality\(evidence_media_ids\) >= 1/i);
+  });
+
+  test('015 encodes the Qikink unboxing-video rule', () => {
+    const sql = code('015-claim-evidence.sql');
+    assert.match(sql, /'missing_item'/);
+    assert.match(sql, /fulfillment_claims_video_required[\s\S]*?has_unboxing_video/);
+  });
+
+  test('money and stock writes carry duplicate guards', () => {
+    const guards = {
+      '002-catalog.sql': ['one_stock_movement_per_line_reason'],
+      '004-orders.sql': [
+        'one_order_per_idempotency_key', 'one_captured_payment_per_order',
+        'one_refund_per_idempotency_key', 'one_refund_per_payout_reference',
+        'one_return_per_idempotency_key', 'one_exchange_per_order_item',
+        'one_replacement_per_order_item',
+      ],
+      '008-commerce-extras.sql': [
+        'one_gift_card_redeem_per_order', 'one_gift_card_issue',
+        'one_gift_card_reversal_per_order', 'one_gift_card_adjust_per_key',
+      ],
+      '009-fulfillment.sql': [
+        'one_initial_submission_per_provider', 'one_provider_order_id',
+        'one_wallet_entry_per_external_ref', 'one_wallet_entry_per_fulfillment_kind',
+        'one_open_claim_per_type',
+      ],
+    };
+    for (const [file, names] of Object.entries(guards)) {
+      const sql = code(file);
+      for (const name of names) {
+        assert.match(sql, new RegExp(`CREATE UNIQUE INDEX ${name}\\b`), `${file}: ${name} missing`);
+      }
+    }
+    assert.match(block(code('005-platform.sql'), 'idempotency_keys'), /UNIQUE \(scope, actor_ref, key\)/);
+    assert.match(block(code('008-commerce-extras.sql'), 'gift_cards'), /UNIQUE \(purchased_order_item_id, purchased_unit_no\)/);
   });
 
   test('no duplicate CREATE TABLE names across files', () => {
@@ -227,10 +314,10 @@ describe('schema integrity', () => {
     }
   });
 
-  test('009-partner applies after 004-orders', () => {
-    assert.ok(FILES.indexOf('004-orders.sql') < FILES.indexOf('009-partner.sql'));
+  test('009-fulfillment applies after 004-orders', () => {
+    assert.ok(FILES.indexOf('004-orders.sql') < FILES.indexOf('009-fulfillment.sql'));
     // The dependency is real in the DDL, not just in the file name order.
-    assert.match(code('009-partner.sql'), /REFERENCES\s+orders\s*\(id\)/i);
+    assert.match(code('009-fulfillment.sql'), /REFERENCES\s+orders\s*\(id\)/i);
   });
 
   test('retired systems stay out of the DDL', () => {
@@ -270,13 +357,13 @@ describe('schema integrity', () => {
     assert.match(links, /\bdisplay_position\b\s+smallint/i);
   });
 
-  test('docs counts match 89 implemented tables', () => {
+  test('docs counts match 99 implemented tables', () => {
     const readme = read(join(DOCS_DIR, '00-README.md'));
     const dataTables = read(join(DOCS_DIR, '02-Data-Tables.md'));
     const catalog = read(join(DOCS_DIR, '04-Catalog.md'));
 
-    assert.match(readme, /Data at a glance \(89 tables, all implemented in DDL\)/);
-    assert.match(dataTables, /> 89 tables \(89 implemented DDL \+ 0 specified\)/);
+    assert.match(readme, /Data at a glance \(99 tables, all implemented in DDL\)/);
+    assert.match(dataTables, /> 99 tables \(99 implemented DDL \+ 0 specified\)/);
     assert.match(catalog, /> 17 tables\./);
 
     // Catalog = 002 (12) + 010 (5).
@@ -412,7 +499,7 @@ describe('schema integrity', () => {
   test('idempotency guards live in the schema, not only in handlers', () => {
     const platform = code('005-platform.sql');
     const idem = block(platform, 'idempotency_keys');
-    assert.match(idem, /UNIQUE \(scope, key\)/i);
+    assert.match(idem, /UNIQUE \(scope, actor_ref, key\)/i);
     assert.match(block(platform, 'webhook_events'), /UNIQUE \(provider, provider_event_id\)/i);
 
     // Retried checkout cannot fork an order; survives idempotency_keys TTL.
@@ -465,7 +552,7 @@ describe('schema integrity', () => {
 
   test('migration README declares the full apply order and no blocked file', () => {
     const readme = read(join(MIGRATE_DIR, 'README.md'));
-    assert.match(readme, /Total.*\*\*89\*\*/);
+    assert.match(readme, /Total.*\*\*99\*\*/);
     assert.equal(/blocked/i.test(readme), false, 'no file is blocked any more');
     for (const file of FILES) {
       assert.match(readme, new RegExp(file.replace('.', '\\.')), `${file} missing from the apply order`);

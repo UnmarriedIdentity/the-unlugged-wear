@@ -10,6 +10,9 @@ export type ProductSize = {
   size: string;
   inStock: boolean;
   stockCount: number;
+  /** Set only when sizes are priced differently (partner price tiers). */
+  priceINR?: number;
+  priceMinorINR?: number;
 };
 
 
@@ -69,6 +72,10 @@ export interface ProductFaqItem {
 
 export type Product = {
   id: string;
+  /** Database id (the public `id` keeps the legacy demo id for saved bags/wishlists). */
+  productId?: string;
+  /** Linked size chart (see SizeChartData); none means no size guide. */
+  sizeChartId?: string;
   slug: string;
   aliases?: string[];
   title: string;
@@ -104,6 +111,36 @@ export type Product = {
   isNew?: boolean;
   isBestseller?: boolean;
   videoUrl?: string;
+  /** Page layout family; defaults from category when missing (see productTypeOf). */
+  productType?: ProductType;
+  /** Label for the variant picker, e.g. "Size", "Phone model", "Age". */
+  variantLabel?: string;
+  /** Retail price not yet confirmed by the owner; shown with a draft notice. */
+  priceIsDraft?: boolean;
+  /** Print areas offered by the print partner (verbatim from their sheet). */
+  printAreas?: string[];
+  weightGrams?: number;
+  taxRatePercent?: number;
+  hsnCode?: string;
+};
+
+export type ProductType =
+  | 'apparel'
+  | 'kids-apparel'
+  | 'pet'
+  | 'drinkware'
+  | 'wall-art'
+  | 'phone-case'
+  | 'bag'
+  | 'stationery'
+  | 'home';
+
+export type SizeChartData = {
+  id: string;
+  name: string;
+  /** Measurement names, in display order. */
+  columns: string[];
+  rows: { size: string; measures: Record<string, number | string> }[];
 };
 
 export type Collection = {
@@ -114,8 +151,8 @@ export type Collection = {
   coverImage: string;
   productCount: number;
   tagline: string;
-  /** Product categories this collection groups; omitted means every product. */
-  categories?: Product['category'][];
+  /** Member product ids in merchandising order (from collection_products). */
+  productIds: string[];
 };
 
 export type CartItem = {
@@ -128,6 +165,8 @@ export type CartItem = {
   priceMinorINR?: number;
   quantity: number;
   image: string;
+  /** How many this line may hold right now (from the server; 0 = no longer available). */
+  maxQty?: number;
   selectedRadioOptions?: {
     groupKey: string;
     groupLabel: string;
@@ -139,6 +178,8 @@ export type CartItem = {
 
 export type Address = {
   id: string;
+  /** Customer's name for the address, e.g. "Home", "Work", "Friend". */
+  label?: string;
   fullName: string;
   addressLine1: string;
   addressLine2?: string;
@@ -151,13 +192,19 @@ export type Address = {
 };
 
 export type PaymentStatus = 'paid' | 'pending' | 'failed' | 'refunded';
-export type FulfillmentStatus = 'queued' | 'printing' | 'shipped' | 'delivered' | 'submission_failed';
+export type FulfillmentStatus = 'queued' | 'printing' | 'shipped' | 'delivered' | 'submission_failed' | 'cancelled';
 
 export type Order = {
   id: string;
   orderNumber: string;
   date: string;
-  status: 'Confirmed' | 'Printing' | 'Shipped' | 'Delivered' | 'Returned' | 'Failed' | 'Refunded';
+  status: 'Confirmed' | 'Printing' | 'Shipped' | 'Delivered' | 'Returned' | 'Failed' | 'Refunded' | 'Cancelled';
+  /** The database status (SQL vocabulary), when the order came from the database. */
+  sqlStatus?: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'failed' | 'refunded';
+  /** End of the free-cancel window (ISO). */
+  cancellableUntil?: string;
+  /** True while the account that placed it may still cancel. */
+  canCancel?: boolean;
   paymentStatus?: PaymentStatus;
   fulfillmentStatus?: FulfillmentStatus;
   items: CartItem[];

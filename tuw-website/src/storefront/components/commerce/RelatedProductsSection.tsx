@@ -80,17 +80,17 @@ export default function RelatedProductsSection({
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {pairsItems!.map((item) => (
             <div key={item.id} className="group flex flex-col">
-              <div className="relative aspect-4/5 rounded-2xl overflow-hidden border border-store-card-border bg-store-canvas flex items-center justify-center p-3 shadow-2xs transition-all hover:border-store-charcoal/40">
+              <div className="relative aspect-4/5 overflow-hidden border border-store-card-border bg-store-canvas flex items-center justify-center p-3 shadow-2xs transition-all hover:border-store-charcoal/40">
                 <img
                   src={item.image}
                   alt={item.title}
-                  className="w-full h-full object-cover rounded-xl transition-transform duration-300 group-hover:scale-102"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-102"
                   loading="lazy"
                 />
                 <button
                   type="button"
                   onClick={() => handleQuickAdd(item)}
-                  className="absolute bottom-3 right-3 w-8 h-8 rounded-lg bg-white/95 text-store-charcoal border border-store-card-border flex items-center justify-center shadow-xs hover:bg-store-charcoal hover:text-white transition-colors cursor-pointer active:scale-95"
+                  className="absolute bottom-3 right-3 w-8 h-8 bg-white/95 text-store-charcoal border border-store-card-border flex items-center justify-center shadow-xs hover:bg-store-charcoal hover:text-white transition-colors cursor-pointer active:scale-95"
                   aria-label={`Quick add ${item.title}`}
                 >
                   <Plus size={16} />

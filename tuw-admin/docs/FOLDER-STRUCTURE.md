@@ -67,14 +67,14 @@ tuw-admin/
 
 | Path | Purpose | Put here | Do NOT put here |
 |------|---------|----------|-----------------|
-| `src/app/` | URL mapping only. Each `page.tsx` fetches + composes. | `page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx`, `_components/` (route-private), `_actions.ts` (route-private server actions) | Reusable UI, Supabase queries used twice, validation schemas shared across routes |
+| `src/app/` | URL mapping only. Each `page.tsx` fetches + composes. | `page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx`, `_components/` (route-private), `_actions.ts` (route-private server actions) | Reusable UI, DB queries used twice, validation schemas shared across routes |
 | `src/app/globals.css` | Single design-system entry. Imported once in `layout.tsx`. Holds `@import "tailwindcss"`, `@theme` tokens (Urbanist, brand colors, radius, shadow), `body` base, scrollbar/line-clamp utilities. | All CSS | Second CSS files, CSS modules, per-component CSS |
 | `src/app/(auth)/` vs `(dashboard)/` | Route groups (parentheses = no URL segment). Auth = no sidebar. Dashboard = sidebar + staff guard. | Auth pages vs staff pages | Business logic |
-| `src/components/ui/` | Copy of V2 design system primitives. Dumb, no Supabase, no router. Same API copied to website, evolved independently. | `Button.tsx`, `Input.tsx`, `Badge.tsx` | `ProductTable.tsx`, anything with `supabase.from()` |
+| `src/components/ui/` | Copy of V2 design system primitives. Dumb, no database access, no router. Same API copied to website, evolved independently. | `Button.tsx`, `Input.tsx`, `Badge.tsx` | `ProductTable.tsx`, anything that queries the database |
 | `src/components/layout/` | Dashboard chrome. Only place Sidebar/Header live (old `components/header` + `components/sidebar` merged here). | `Sidebar.tsx`, `Header.tsx`, `PageHeader.tsx` | Page content |
 | `src/components/data-display/` | Tables/charts/dialogs merged. Only generic versions. | `DataTable.tsx`, `Charts.tsx`, `StatCard.tsx` | `Product-specific` columns — those live in `app/(dashboard)/products/_components/` |
 | `src/components/forms/` | Shared form plumbing. | `Form.tsx`, `Field.tsx` | Zod schemas for products — those live next to the route in `_schemas.ts` |
-| `src/lib/` | Flat toolbox. Import as `@/lib/cn`, `@/lib/supabase`. No nesting until painful. Replaces old `lib/ + services/ + hooks/ + config/ + types/ + permissions/` sprawl. | Pure helpers + single-purpose clients | React components, route code |
+| `src/lib/` | Flat toolbox. Import as `@/lib/cn`, `@/lib/db`. No nesting until painful. Replaces old `lib/ + services/ + hooks/ + config/ + types/ + permissions/` sprawl. | Pure helpers + single-purpose clients | React components, route code |
 | `src/lib/permissions.ts` | Staff RBAC. Used in `(dashboard)/layout.tsx` + `api/` handlers. | `isAdmin()`, `requireStaff()` | UI |
 | `design/` | Figma SVGs + plugin. Reference only. | `.svg`, import instructions | Anything imported by `src/` |
 | `public/` | Static served as-is. | Fonts, logos, icons | Code |
@@ -88,7 +88,7 @@ src/app/(dashboard)/products/
   _components/
     ProductList.tsx     # ONLY used by this route
     ProductForm.tsx     # ONLY used by this route
-  _actions.ts           # create/update product, calls @/lib/supabase
+  _actions.ts           # create/update product, calls @/lib/db
   _schemas.ts           # zod schema, private to this route
 ```
 
