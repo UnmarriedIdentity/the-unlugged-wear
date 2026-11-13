@@ -11,20 +11,22 @@
   "_demo": "Figma source of truth established. First track TL-WEB-001 closed.",
   "summary": {
     "total": 114,
-    "done": 94,
-    "in_progress": 5,
+    "done": 95,
+    "in_progress": 4,
     "backlog": 15,
     "total_tasks": 114,
     "pending": 15
   },
   "session": {
     "branch": "urvil-ui",
-    "tip": "59b9de0",
-    "unpushed": [],
-    "next_up": "Backend phase: work the admin sequence TL-BE-00 → TL-BE-17 (state-for-agents/admin/tasks.json); complete TL-WEB-BE children as their depends_on mains finish.",
+    "tip": "bd9de89",
+    "unpushed": [
+      "bd9de89"
+    ],
+    "next_up": "TL-WEB-BE-09 — /collections and /collections/[slug] as Server Components (next storefront task).",
     "pending_verifications": [],
-    "last_updated": "2026-11-10",
-    "updated_by": "agent (Claude)"
+    "last_updated": "2026-11-13",
+    "updated_by": "agent (Buffy)"
   },
   "workflow": {
     "how_to_close_a_task": "gates green → status done + log commit + design_match + verified + finished → recompute summary → refresh session → commit code + tracker together",
@@ -2354,14 +2356,14 @@
       "id": "TL-WEB-BE-12",
       "title": "Header megamenu and navigation from the DB",
       "category": "backend",
-      "status": "in_progress",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-WEB-BE",
       "started": "2026-11-11",
-      "finished": null,
-      "verified": false,
+      "finished": "2026-11-13",
+      "verified": true,
       "design_match": null,
-      "pushed": true,
+      "pushed": false,
       "admin_ref": "TL-BE-05.02",
       "depends_on": [
         "TL-BE-05"
@@ -2371,9 +2373,15 @@
         "Header.tsx"
       ],
       "description": "Cached with cacheTag('nav').",
-      "key_decisions": [],
-      "follow_ups": [],
-      "log": "Header and mobile menu hide links to categories staff switched off (catalog hiddenCategories, products tag). The menu structure itself stays in navigation.ts until the CMS navigation editor (TL-BE-13.06)."
+      "key_decisions": [
+        "Menu structure stays in navigation.ts until the CMS navigation editor (TL-BE-13.06).",
+        "Navigation comes from a dedicated cached category read (getStorefrontNavigation -> getNavigation) tagged nav + products, so the revalidate route can target the menu and admin category saves still expire it.",
+        "show_in_navbar is exposed as navbarCategories but has no consumer yet; it stays reserved for the CMS editor."
+      ],
+      "follow_ups": [
+        "Wire show_in_navbar into the CMS navigation editor (TL-BE-13.06) once menu structure is editable."
+      ],
+      "log": "Header and mobile menu hide links to categories staff switched off, now from a dedicated cached category read tagged nav + products. Commit bd9de89. Verified: pnpm typecheck, pnpm test (two pre-existing homepage-typography failures, reproduced on a clean tree), tuw-website build with DATABASE_URL, live query returned 8 categories."
     },
     {
       "id": "TL-WEB-BE-13",
