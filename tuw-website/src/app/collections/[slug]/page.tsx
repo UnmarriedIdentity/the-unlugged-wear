@@ -1,46 +1,22 @@
-'use client';
-
-import React, { use } from 'react';
-import Link from 'next/link';
+import React from 'react';
+import { notFound } from 'next/navigation';
 import Header from '@storefront/components/layout/Header';
 import Footer from '@storefront/components/layout/Footer';
 import Breadcrumb from '@storefront/components/ui/Breadcrumb';
 import ProductGrid from '@storefront/components/commerce/ProductGrid';
-import { useStore } from '@storefront/mocks/store';
+import { getCollectionPage } from '@/server/collections';
 
-export default function CollectionDetailPage({
+// Membership and order come from collection_products (database); the route
+// layout already 404s unknown slugs, this is the page's own guard.
+export default async function CollectionDetailPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const resolvedParams = use(params);
-  const { products, collections } = useStore();
-
-  const collection = collections.find((c) => c.slug === resolvedParams.slug);
-  // Membership and order come from collection_products (database).
-  const collectionProducts = collection
-    ? collection.productIds.map((id) => products.find((p) => p.id === id)).filter((p): p is (typeof products)[number] => Boolean(p))
-    : products;
-
-  if (!collection) {
-    return (
-      <div className="min-h-screen flex flex-col bg-[#FAF9F6]">
-        <Header />
-        <main className="flex-1 max-w-7xl mx-auto px-4 py-24 text-center">
-          <h1 className="text-3xl font-bold">Capsule Not Found</h1>
-          <div className="mt-6">
-            <Link
-              href="/collections"
-              className="inline-flex px-6 py-3 rounded-full bg-[#1A1A1A] text-white text-xs font-bold uppercase tracking-wider hover:bg-black"
-            >
-              Back to Collections
-            </Link>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
+  const { slug } = await params;
+  const page = await getCollectionPage(slug);
+  if (!page) notFound();
+  const { collection, products } = page;
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF9F6]">
@@ -74,7 +50,11 @@ export default function CollectionDetailPage({
         {/* Garment Grid for Capsule */}
         <div className="pt-6">
           <h2 className="sr-only">Products</h2>
-          <ProductGrid products={collectionProducts} />
+          <ProductGrid
+            products={products}
+            emptyTitle="This capsule is being restocked"
+            emptyDescription="Its pieces are between print runs right now. Explore the full shop in the meantime."
+          />
         </div>
       </main>
 

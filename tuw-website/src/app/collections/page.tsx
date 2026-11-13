@@ -1,14 +1,21 @@
-'use client';
-
-import React from 'react';
+import type { Metadata } from 'next';
 import Header from '@storefront/components/layout/Header';
 import Footer from '@storefront/components/layout/Footer';
 import Breadcrumb from '@storefront/components/ui/Breadcrumb';
 import CollectionCard from '@storefront/components/commerce/CollectionCard';
-import { useStore } from '@storefront/mocks/store';
+import EmptyState from '@storefront/components/ui/EmptyState';
+import { getCollections } from '@/server/collections';
 
-export default function CollectionsPage() {
-  const { collections } = useStore();
+export const metadata: Metadata = {
+  title: 'Collections | The Unplugged Wear',
+  description: 'Browse The Unplugged Wear by collection: hoodies and sweats, everyday tees, and objects.',
+};
+
+// Published capsules come from the database (cached under the products tag),
+// so the list is the same for everyone and needs no client store.
+export default async function CollectionsPage() {
+  const collections = await getCollections();
+
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF9F6]">
       <Header />
@@ -30,11 +37,22 @@ export default function CollectionsPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pt-4">
-          {collections.map((col) => (
-            <CollectionCard key={col.id} collection={col} />
-          ))}
-        </div>
+        {collections.length === 0 ? (
+          <div className="pt-4">
+            <EmptyState
+              title="No capsules published yet"
+              description="New capsules appear here as soon as the studio publishes them."
+              actionLabel="Explore the shop"
+              actionHref="/shop"
+            />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pt-4">
+            {collections.map((col) => (
+              <CollectionCard key={col.id} collection={col} />
+            ))}
+          </div>
+        )}
       </main>
 
       <Footer />
