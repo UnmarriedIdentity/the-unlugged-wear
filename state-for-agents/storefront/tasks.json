@@ -11,19 +11,21 @@
   "_demo": "Figma source of truth established. First track TL-WEB-001 closed.",
   "summary": {
     "total": 114,
-    "done": 95,
-    "in_progress": 4,
+    "done": 96,
+    "in_progress": 3,
     "backlog": 15,
     "total_tasks": 114,
     "pending": 15
   },
   "session": {
     "branch": "urvil-ui",
-    "tip": "bd9de89",
+    "tip": "cf43e33",
     "unpushed": [
-      "bd9de89"
+      "bd9de89",
+      "ff72136",
+      "cf43e33"
     ],
-    "next_up": "TL-WEB-BE-09 — /collections and /collections/[slug] as Server Components (next storefront task).",
+    "next_up": "TL-WEB-BE-08 — /shop on the database (next storefront task).",
     "pending_verifications": [],
     "last_updated": "2026-11-13",
     "updated_by": "agent (Buffy)"
@@ -2281,26 +2283,34 @@
       "id": "TL-WEB-BE-09",
       "title": "/collections and /collections/[slug] on the DB",
       "category": "backend",
-      "status": "in_progress",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-WEB-BE",
       "started": "2026-11-11",
-      "finished": null,
-      "verified": false,
+      "finished": "2026-11-13",
+      "verified": true,
       "design_match": null,
-      "pushed": true,
+      "pushed": false,
       "admin_ref": "TL-BE-05.07",
       "depends_on": [
         "TL-BE-05"
       ],
       "files": [
+        "src/server/collections.ts",
         "src/app/collections/page.tsx",
-        "src/app/collections/[slug]/page.tsx"
+        "src/app/collections/[slug]/page.tsx",
+        "src/app/collections/[slug]/layout.tsx"
       ],
       "description": "'use cache' + cacheTag('collection:<id>'); generateStaticParams ≥ 1.",
-      "key_decisions": [],
-      "follow_ups": [],
-      "log": "Collections and collection pages read DB collections (membership + order from collection_products); static params + 404 from the DB. Remaining: Server Components with cacheTag per collection."
+      "key_decisions": [
+        "getCollections()/getCollectionPage(slug) wrap the cached getCatalog() read, tagged products + collection:<slug>; the per-collection tag is a handle for a future targeted refresh, since catalogue writes already invalidate products.",
+        "Both collection routes are async Server Components; membership and order come from collection_products via the shared read, and the detail page 404s through notFound() instead of a bespoke not-found block.",
+        "collections/layout.tsx was deleted (pass-through plus stale comment) now that the index page itself exports metadata."
+      ],
+      "follow_ups": [
+        "Wire a collection:<slug> revalidate path once the admin gains per-collection publishing controls (TL-BE-05.07)."
+      ],
+      "log": "Collections index and detail page are async Server Components backed by src/server/collections.ts. Prerendered counts match the database (hoodies-and-sweats 9, everyday-tees 64, objects 63, acid-wash 2) and product order matches collection_products. typecheck and build pass; pnpm test shows only the two pre-existing homepage-typography failures (reproduced on a clean tree)."
     },
     {
       "id": "TL-WEB-BE-10",
