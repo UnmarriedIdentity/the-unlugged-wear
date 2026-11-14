@@ -6665,7 +6665,7 @@
       "parent": "TL-BE-CORE",
       "started": "2026-11-14",
       "finished": "2026-11-14",
-      "log": "Done (commit PAYHASH): staff refunds for prepaid (demo gateway) and COD payouts with UTR, duplicate refunds impossible, admin /payments and /refunds on the DB.",
+      "log": "Done (commit 9ff4f5a): staff refunds for prepaid (demo gateway) and COD payouts with UTR, duplicate refunds impossible, admin /payments and /refunds on the DB.",
       "wiring": "modules/payments behind integrations/payments registry (mock now, Razorpay in TL-INT-RAZORPAY).",
       "done_when": "Staff can refund prepaid orders (mock gateway) and record COD payouts with UTR; duplicate refunds impossible; admin /payments and /refunds run on the DB.",
       "depends_on": [
