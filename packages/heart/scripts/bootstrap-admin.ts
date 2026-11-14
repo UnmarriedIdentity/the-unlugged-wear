@@ -11,8 +11,15 @@ if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
   process.exit(1);
 }
 try {
-  const { created } = await bootstrapAdmin({ email: ADMIN_EMAIL, password: ADMIN_PASSWORD, firstName: ADMIN_FIRST_NAME, lastName: ADMIN_LAST_NAME });
-  console.log(created ? `Admin ${ADMIN_EMAIL} created.` : `${ADMIN_EMAIL} already existed — admin role ensured (password unchanged).`);
+  const { created, passwordUpdated } = await bootstrapAdmin(
+    { email: ADMIN_EMAIL, password: ADMIN_PASSWORD, firstName: ADMIN_FIRST_NAME, lastName: ADMIN_LAST_NAME },
+    { updatePassword: true },
+  );
+  console.log(
+    created
+      ? `Admin ${ADMIN_EMAIL} created.`
+      : `${ADMIN_EMAIL} already existed — admin role ensured (password ${passwordUpdated ? 'updated' : 'unchanged'}).`,
+  );
 } catch (error) {
   console.error(`Error: ${error instanceof Error ? error.message : String(error)}`);
   process.exitCode = 1;

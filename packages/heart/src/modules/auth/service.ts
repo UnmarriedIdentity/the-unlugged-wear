@@ -441,20 +441,27 @@ async function assertAnAdminRemains(tx: Transaction): Promise<void> {
 }
 
 /** First admin from env (no password hashes in SQL seeds — DOC/backend/03 §4). Idempotent. */
-export async function bootstrapAdmin(input: { email: string; password: string; firstName: string; lastName: string }): Promise<{ userId: string; created: boolean }> {
+export async function bootstrapAdmin(
+  input: { email: string; password: string; firstName: string; lastName: string },
+  opts?: { updatePassword?: boolean },
+): Promise<{ userId: string; created: boolean; passwordUpdated: boolean }> {
   assertPassword(input.password);
   const email = normalizeEmail(input.email);
   const hash = await hashPassword(input.password);
   return withTransaction(async (tx) => {
     const existing = await one<{ id: string }>(tx, sql`SELECT id FROM users WHERE email = ${email}`);
     let userId = existing?.id;
+    let passwordUpdated = false;
     if (!userId) {
       userId = uuidv7();
       await tx.execute(sql`INSERT INTO users (id, email, password_hash, status, email_verified_at) VALUES (${userId}, ${email}, ${hash}, 'active', now())`);
       await createAccountHolder(tx, { userId, firstName: input.firstName, lastName: input.lastName });
+    } else if (opts?.updatePassword) {
+      await tx.execute(sql`UPDATE users SET password_hash = ${hash}, status = 'active', email_verified_at = COALESCE(email_verified_at, now()) WHERE id = ${userId}`);
+      passwordUpdated = true;
     }
     await tx.execute(sql`INSERT INTO user_roles (user_id, role_id) SELECT ${userId}, id FROM roles WHERE slug = 'admin' ON CONFLICT DO NOTHING`);
-    return { userId, created: !existing };
+    return { userId, created: !existing, passwordUpdated };
   });
 }
 
