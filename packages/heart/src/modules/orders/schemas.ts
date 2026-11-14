@@ -58,3 +58,22 @@ export const discountCreate = z.object({
 export const discountToggle = z.object({ id: z.string().uuid(), isActive: z.boolean() });
 export const discountRef = z.object({ id: z.string().uuid() });
 
+export const refundIssue = z.object({
+  orderNumber: z.string().trim().max(30),
+  amount: rupees.refine((v) => v > 0, 'Enter an amount above zero'),
+  reason: z.string().trim().min(3, 'Give a reason for the refund').max(255),
+  method: z.enum(['source', 'upi', 'bank_transfer']),
+  /** UPI id or bank account for a cash-on-delivery payout; only a masked copy is stored. */
+  destination: z.string().trim().max(60).optional(),
+  /** One per staff intent, reused on retries. (The guards reserve the name idempotencyKey.) */
+  refundKey: z.string().uuid(),
+});
+export const refundComplete = z.object({ refundId: z.string().uuid(), payoutReference: z.string().trim().max(30) });
+export const refundReject = z.object({ refundId: z.string().uuid(), note: z.string().trim().max(500) });
+export const moneyList = z.object({
+  q: z.string().trim().max(100).optional(),
+  status: z.string().trim().max(20).optional(),
+  page: z.number().int().min(1).max(100_000).default(1),
+  perPage: z.number().int().min(1).max(5000).default(20),
+});
+

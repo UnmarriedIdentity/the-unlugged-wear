@@ -9,15 +9,15 @@
   },
   "summary": {
     "total": 440,
-    "done": 350,
+    "done": 354,
     "in_progress": 1,
-    "backlog": 89
+    "backlog": 85
   },
   "session": {
     "branch": "urvil-ui",
     "tip": "9519313",
     "unpushed": [],
-    "next_up": "TL-BE-09",
+    "next_up": "TL-BE-10",
     "pending_verifications": [
       "admin journal editor + list full keyboard/focus/Reset Demo pass at 360/768/1024/1440 (CDP route-load check passed; interactive pass pending)",
       "SQL dry-run: apply 001 + 002 + 006-cms.sql against a real PostgreSQL instance; verify generated blogs.search_vector, slug/CHECK constraints, FK RESTRICT/CASCADE behavior, and partial indexes. psql remains unavailable locally.",
@@ -6660,21 +6660,27 @@
     {
       "id": "TL-BE-09",
       "title": "Payments & refunds",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-CORE",
-      "started": null,
-      "finished": null,
-      "log": "Not started. Scope: Payment records, refunds (source / UPI / bank transfer for COD), admin payments + refunds pages.",
+      "started": "2026-11-14",
+      "finished": "2026-11-14",
+      "log": "Done (commit PAYHASH): staff refunds for prepaid (demo gateway) and COD payouts with UTR, duplicate refunds impossible, admin /payments and /refunds on the DB.",
       "wiring": "modules/payments behind integrations/payments registry (mock now, Razorpay in TL-INT-RAZORPAY).",
       "done_when": "Staff can refund prepaid orders (mock gateway) and record COD payouts with UTR; duplicate refunds impossible; admin /payments and /refunds run on the DB.",
       "depends_on": [
         "TL-BE-08"
       ],
       "design_match": null,
-      "key_decisions": [],
-      "verified": false,
-      "pushed": false,
+      "key_decisions": [
+        "Refunds are orchestrated in modules/orders so the refund row, payment and order payment_status change in one transaction",
+        "Refundable = captured − completed − open payout, checked under the order lock",
+        "COD must be marked collected before it can be refunded",
+        "A UTR is unique across UPI and bank transfer (migration 024)",
+        "The form field is refundKey because the guards reserve idempotencyKey"
+      ],
+      "verified": true,
+      "pushed": true,
       "follow_ups": [],
       "storefront_tasks": [
         "TL-WEB-BE-26"
@@ -6683,16 +6689,16 @@
     {
       "id": "TL-BE-09.01",
       "title": "Refund service: amount ≤ remaining, one open refund, idempotency_key, payout_reference rules",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-09",
-      "started": null,
-      "finished": null,
-      "log": "Not started.",
+      "started": "2026-11-14",
+      "finished": "2026-11-14",
+      "log": "Refund service: amount ≤ captured − refunded − open, one open payout, retry key, prepaid to source via gateway, COD by UPI/bank with UTR proof (unique across methods, migration 024), masked destinations, audited.",
       "design_match": null,
       "key_decisions": [],
-      "verified": false,
-      "pushed": false,
+      "verified": true,
+      "pushed": true,
       "follow_ups": [],
       "storefront_tasks": [
         "TL-WEB-BE-26"
@@ -6701,31 +6707,31 @@
     {
       "id": "TL-BE-09.02",
       "title": "Wire admin /payments and /refunds",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-09",
-      "started": null,
-      "finished": null,
-      "log": "Not started.",
+      "started": "2026-11-14",
+      "finished": "2026-11-14",
+      "log": "/payments (real payments, provider cards from the registry, mark COD collected) and /refunds (issue form with order lookup, finish payout with UTR, reject) on the DB; order drawer links to the refund form.",
       "design_match": null,
       "key_decisions": [],
-      "verified": false,
-      "pushed": false,
+      "verified": true,
+      "pushed": true,
       "follow_ups": []
     },
     {
       "id": "TL-BE-09.03",
       "title": "Tests: partial refunds, COD payout proof, retry safety",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-BE-09",
-      "started": null,
-      "finished": null,
-      "log": "Not started.",
+      "started": "2026-11-14",
+      "finished": "2026-11-14",
+      "log": "refunds.int.test.ts (8): partial refunds, last rupee settles, over-refund refused, retry key in parallel, racing staff, COD collect → payout → UTR → reject, UTR reuse across methods refused, cancel after partial refund, lists.",
       "design_match": null,
       "key_decisions": [],
-      "verified": false,
-      "pushed": false,
+      "verified": true,
+      "pushed": true,
       "follow_ups": []
     },
     {

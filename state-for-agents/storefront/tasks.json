@@ -11,11 +11,11 @@
   "_demo": "Figma source of truth established. First track TL-WEB-001 closed.",
   "summary": {
     "total": 114,
-    "done": 98,
+    "done": 99,
     "in_progress": 1,
-    "backlog": 15,
+    "backlog": 14,
     "total_tasks": 114,
-    "pending": 15
+    "pending": 14
   },
   "session": {
     "branch": "urvil-ui",
@@ -2743,14 +2743,14 @@
       "id": "TL-WEB-BE-26",
       "title": "Mock payment step + lib/razorpay.ts behind the payments registry; keep api/webhooks/razorpay as the placeholder for TL-INT-RAZORPAY",
       "category": "backend",
-      "status": "backlog",
+      "status": "done",
       "owner": "unassigned",
       "parent": "TL-WEB-BE",
-      "started": null,
-      "finished": null,
-      "verified": false,
+      "started": "2026-11-14",
+      "finished": "2026-11-14",
+      "verified": true,
       "design_match": null,
-      "pushed": false,
+      "pushed": true,
       "admin_ref": "TL-BE-09.01",
       "depends_on": [
         "TL-BE-09"
@@ -2761,7 +2761,8 @@
       ],
       "description": "No live Razorpay calls until the integrations phase.",
       "key_decisions": [],
-      "follow_ups": []
+      "follow_ups": [],
+      "log": "Checkout pays through the payments registry (demo gateway, truthful demo copy) since TL-BE-08; lib/razorpay.ts and api/webhooks/razorpay stay as the placeholders for TL-INT-RAZORPAY with no live calls."
     },
     {
       "id": "TL-WEB-BE-27",

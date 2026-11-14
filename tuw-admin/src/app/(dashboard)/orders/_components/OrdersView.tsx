@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Download, Search, Eye, RotateCcw, Clock, Printer, ChevronDown } from 'lucide-react';
 import type { AdminOrderDetail, AdminOrderRow, AdminOrderStats, AdminOrderTab, OrderStatus } from '@tuw/heart/modules/orders';
 import DashboardShell from '@/components/layout/DashboardShell';
@@ -31,7 +32,7 @@ import { getOrderAction, listOrdersAction, setOrderStatusAction, setOrdersStatus
 
 // Orders from the database (TL-BE-08). The server filters, searches and
 // pages; every status change is checked there and written with its history.
-// Refunds arrive with the payments task (TL-BE-09); partner sync with TL-BE-11.
+// Refunds live on /refunds (TL-BE-09); partner sync arrives with TL-BE-11.
 
 const styles = new Proxy<Record<string, string>>({}, { get: (_t, p) => 'sub-' + String(p) });
 
@@ -54,6 +55,7 @@ const MOVE_LABEL: Partial<Record<OrderStatus, string>> = { confirmed: 'Confirm o
 
 export default function OrdersView({ initial, perms, openOrder: openFromLink }: { initial: ListResult; perms: string[]; openOrder?: string }) {
   const { showToast } = useAdminState();
+  const router = useRouter();
   const canUpdate = perms.includes('order.update_status');
   const canRefund = perms.includes('order.refund');
 
@@ -433,7 +435,12 @@ export default function OrdersView({ initial, perms, openOrder: openFromLink }: 
                   </div>
                 )}
               </div>
-              <p style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)', margin: '10px 0 0' }}>Partial refunds arrive with the payments task. Cancelling refunds the full payment.</p>
+              {detail.paymentStatus === 'paid' && detail.paidPaise > detail.refundedPaise && (
+                <div style={{ marginTop: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 12, color: 'var(--tuw-text-secondary, #5D6772)' }}>Refund part or all of {rupees(detail.paidPaise - detail.refundedPaise)} still held.</span>
+                  <Button variant="secondary" size="sm" icon={<RotateCcw size={14} />} disabled={!canRefund} title={canRefund ? undefined : 'Needs the refund permission'} onClick={() => router.push(`/refunds?order=${encodeURIComponent(detail.orderNumber)}`)}>Refund…</Button>
+                </div>
+              )}
             </div>
 
             <div>

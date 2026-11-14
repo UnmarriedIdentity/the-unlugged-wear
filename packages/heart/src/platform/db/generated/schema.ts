@@ -891,8 +891,9 @@ export const refunds = pgTable("refunds", {
 	index("idx_refunds_order_id").using("btree", table.orderId.asc().nullsLast().op("uuid_ops")),
 	index("idx_refunds_payment_id").using("btree", table.paymentId.asc().nullsLast().op("uuid_ops")),
 	index("idx_refunds_status").using("btree", table.status.asc().nullsLast().op("text_ops")),
+	uniqueIndex("one_manual_payout_per_reference").using("btree", sql`upper((payout_reference)::text)`).where(sql`(((method)::text = ANY ((ARRAY['upi'::character varying, 'bank_transfer'::character varying])::text[])) AND (payout_reference IS NOT NULL))`),
 	uniqueIndex("one_open_refund").using("btree", table.orderId.asc().nullsLast().op("uuid_ops")).where(sql`((status)::text = 'processing'::text)`),
-	uniqueIndex("one_refund_per_idempotency_key").using("btree", table.orderId.asc().nullsLast().op("uuid_ops"), table.idempotencyKey.asc().nullsLast().op("uuid_ops")).where(sql`(idempotency_key IS NOT NULL)`),
+	uniqueIndex("one_refund_per_idempotency_key").using("btree", table.orderId.asc().nullsLast().op("text_ops"), table.idempotencyKey.asc().nullsLast().op("text_ops")).where(sql`(idempotency_key IS NOT NULL)`),
 	uniqueIndex("one_refund_per_payout_reference").using("btree", table.method.asc().nullsLast().op("text_ops"), table.payoutReference.asc().nullsLast().op("text_ops")).where(sql`(payout_reference IS NOT NULL)`),
 	foreignKey({
 			columns: [table.actor],

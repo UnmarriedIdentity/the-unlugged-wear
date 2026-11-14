@@ -491,3 +491,43 @@ local. Results deep-link to the record: `/orders?open=<number>`,
 that shipments arrive with TL-BE-11. Recent queries stay in localStorage, a
 per-person preference. Test: `catalog/staff-search.int.test.ts`.
 
+## As built (TL-BE-09, 2026-11-14): payments and refunds
+
+`modules/payments/service.ts` (payment state, `createRefund`,
+`completeRefund`, `rejectRefund`, `recordCodCollected`, `maskDestination`),
+`modules/orders/refunds.ts` (the refund transaction under the order lock) and
+`modules/orders/money.ts` (lists). Tests: `refunds.int.test.ts`. Migration
+`024-payout-reference.sql` makes a manual payout reference unique across UPI
+and bank transfer.
+
+**Rules.**
+
+- What can be refunded = captured − completed refunds − the open payout.
+  Every refund is checked against that under the order's lock, so parallel
+  staff can never refund more than was paid.
+- Prepaid money goes back to its source through the gateway at once
+  (`completed`, `payout_reference` = the gateway refund id).
+- Cash on delivery must be marked collected first. It is then paid out by
+  UPI or bank transfer and stays `processing` until staff record the UTR,
+  which proves one payout only. Only a masked destination is stored
+  (`as***@okaxis`, `••••1234`).
+- One open payout per order (`one_open_refund`). A rejected payout frees its
+  amount.
+- The retry key (`refundKey` in the form; `idempotencyKey` on the row) makes
+  a double click one refund. The same key with another amount is refused.
+- Partial refunds keep the order `paid`. The last rupee marks the payment and
+  the order `refunded`. Cancelling after a partial refund sends back only
+  what is left.
+- Every create, complete and reject is audited. Moving money needs
+  `order.refund`; reading needs `order.view`.
+
+**Screens.**
+
+- `/payments`: real payments, the payment providers from
+  `integration_providers` (replacing the invented Stripe and PayPal cards and
+  fraud score), and "Mark cash collected" for cash on delivery.
+- `/refunds`: real refunds and the issue form (look up the order, see paid,
+  refunded and available, pick the method allowed for it), plus finishing a
+  payout with the UTR or rejecting it with a reason.
+- The order drawer's "Refund…" opens `/refunds?order=<number>`.
+
