@@ -36,6 +36,13 @@ const nextConfig: NextConfig = {
         destination: '/support',
         permanent: false,
       },
+      {
+        // Settings opens on its first tab. Redirecting here, before the page
+        // renders, keeps Next's instant-navigation check quiet.
+        source: '/settings',
+        destination: '/settings/general',
+        permanent: false,
+      },
     ];
   },
 };

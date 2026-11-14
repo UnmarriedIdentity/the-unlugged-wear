@@ -23,6 +23,7 @@ import { NAV_ITEMS, type NavItem, type NavLink } from './navigation';
 import { suggestAction } from '@/server/catalog-actions';
 import { matchesShopFilter } from '@storefront/lib/product';
 import { site } from '@storefront/lib/site';
+import { rupeesLabel, useSiteSettings } from '@storefront/lib/site-settings';
 
 // Desktop mega-menu panel: link columns (with live product counts) on the left,
 // product tiles on the right, and a "Shop all" link along the bottom.
@@ -281,8 +282,8 @@ const MOBILE_MENU_LINKS = [
 ];
 
 // Announcement bar: calm, factual service notes (no discounts or urgency).
-const ANNOUNCEMENTS = [
-  { text: 'Free delivery across India on orders over ₹3,000', href: '/policies/shipping' },
+const announcements = (freeFrom: string) => [
+  { text: `Free delivery across India on orders over ${freeFrom}`, href: '/policies/shipping' },
   { text: 'Every piece is printed for you after you order', href: '/about#how-it-works' },
   { text: '14-day returns on unworn clothing', href: '/policies/returns' },
 ];
@@ -290,6 +291,7 @@ const ANNOUNCEMENT_INTERVAL_MS = 4500;
 
 // Rotates through ANNOUNCEMENTS; pauses on hover/focus and stays still for reduced motion.
 function AnnouncementTicker() {
+  const ANNOUNCEMENTS = announcements(rupeesLabel(useSiteSettings().shipping.freeThresholdPaise));
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
 

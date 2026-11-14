@@ -14,7 +14,7 @@ import { placeOrderAction } from '@/server/order-actions';
 import { useSession } from '@storefront/lib/session';
 import { useAccount } from '@storefront/lib/account';
 import { RETURN_WINDOW_DAYS, deliveryEstimate, variantLabelOf } from '@storefront/lib/product';
-import { formatShortDate } from '@storefront/lib/format';
+import { formatRupees, formatShortDate } from '@storefront/lib/format';
 import { Address, Order } from '@storefront/lib/types';
 import {
   ShieldCheck,
@@ -777,7 +777,7 @@ export default function CheckoutPage() {
                         </div>
                       </div>
                       <span className="text-sm font-bold text-store-charcoal">
-                        {shippingFee === 0 ? 'FREE' : `₹${shippingFee}`}
+                        {shippingFee === 0 ? 'FREE' : formatRupees(shippingFee)}
                       </span>
                     </label>
 
@@ -807,7 +807,7 @@ export default function CheckoutPage() {
                           </p>
                         </div>
                       </div>
-                      <span className="text-sm font-bold text-store-charcoal">₹{EXPRESS_FEE}</span>
+                      <span className="text-sm font-bold text-store-charcoal">{formatRupees(EXPRESS_FEE)}</span>
                     </label>
                   </div>
                 </div>
@@ -879,20 +879,20 @@ export default function CheckoutPage() {
               <div className="space-y-2.5 text-xs text-white/80">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span className="font-semibold text-white">₹{cartSubtotal.toLocaleString()}</span>
+                  <span className="font-semibold text-white">{formatRupees(cartSubtotal)}</span>
                 </div>
 
                 {discountAmount > 0 && (
                   <div className="flex justify-between text-emerald-300 font-medium">
-                    <span>Discount (10%)</span>
-                    <span>-₹{discountAmount.toLocaleString()}</span>
+                    <span>Discount{promoCode ? ` (${promoCode})` : ''}</span>
+                    <span>-{formatRupees(discountAmount)}</span>
                   </div>
                 )}
 
                 <div className="flex justify-between">
                   <span>Delivery{deliverySpeed === 'express' ? ' (express)' : ''}</span>
                   <span className="font-semibold text-white">
-                    {deliveryFee === 0 ? 'Free' : `₹${deliveryFee}`}
+                    {deliveryFee === 0 ? 'Free' : formatRupees(deliveryFee)}
                   </span>
                 </div>
 
@@ -923,7 +923,7 @@ export default function CheckoutPage() {
                         </div>
                       </div>
                       <span className="font-semibold text-white shrink-0">
-                        ₹{(item.priceINR * item.quantity).toLocaleString()}
+                        {formatRupees((item.priceINR * item.quantity))}
                       </span>
                     </div>
                   ))}
@@ -990,7 +990,7 @@ export default function CheckoutPage() {
                 )}
                 {discountAmount > 0 && !promoMessage && (
                   <div className="flex items-center justify-between text-2xs text-emerald-300 pt-0.5 font-medium">
-                    <span>Coupon applied: 10% off</span>
+                    <span>Code {promoCode} applied</span>
                     <button
                       type="button"
                       onClick={removePromoCode}
@@ -1007,7 +1007,7 @@ export default function CheckoutPage() {
                 <span className="text-xs text-white font-medium block">
                   {freeShippingRemaining === 0
                     ? 'You have unlocked free shipping'
-                    : `Add ₹${freeShippingRemaining.toLocaleString()} to unlock free shipping`}
+                    : `Add ${formatRupees(freeShippingRemaining)} to unlock free shipping`}
                 </span>
                 <div className="w-full h-1.5 rounded-full bg-black/25 overflow-hidden">
                   <div
@@ -1023,7 +1023,7 @@ export default function CheckoutPage() {
               <div className="pt-4 border-t border-white/15 flex items-baseline justify-between">
                 <span className="text-sm font-medium text-white/90">Total</span>
                 <span className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-                  ₹{total.toLocaleString()}
+                  {formatRupees(total)}
                 </span>
               </div>
 
@@ -1063,7 +1063,7 @@ export default function CheckoutPage() {
             <ul className="p-5 bg-white border border-store-card-border space-y-2.5 text-xs text-store-text-secondary">
               <li className="flex items-center gap-2.5">
                 <Truck size={16} aria-hidden="true" className="text-store-charcoal shrink-0" />
-                Free delivery across India on orders over ₹3,000
+                Free delivery across India on orders over {formatRupees(freeShippingThreshold)}
               </li>
               <li className="flex items-center gap-2.5">
                 <RotateCcw size={16} aria-hidden="true" className="text-store-charcoal shrink-0" />

@@ -6,6 +6,7 @@ import { ShoppingBag, Heart, Truck } from 'lucide-react';
 import { Product, ProductColor, ProductSize } from '@storefront/lib/types';
 import { useStore } from '@storefront/mocks/store';
 import Button from '@storefront/components/ui/Button';
+import { formatRupees } from '@storefront/lib/format';
 import SizeGuideModal from './SizeGuideModal';
 import ColorSwatchSelector from './ColorSwatchSelector';
 import VariantPillSelector from './VariantPillSelector';
@@ -229,7 +230,7 @@ export default function VariantSelector({
 
       {/* 4. Quantity & Purchase Actions */}
       <div id="purchase-actions" className="space-y-3 pt-2 scroll-mt-28">
-        <div className="flex gap-3">
+        <div className="flex gap-2 sm:gap-3">
           {/* Quantity Selector */}
           <div className="flex items-center border border-store-card-border rounded-full bg-store-surface h-14 px-3 shrink-0" role="group" aria-label="Quantity">
             <button
@@ -261,14 +262,14 @@ export default function VariantSelector({
           <button
             type="button"
             onClick={handleAddToCart}
-            className="w-full h-14 px-6 rounded-full bg-[#111111] text-white hover:bg-black transition-all flex items-center justify-between font-medium text-xs uppercase tracking-wider shadow-sm cursor-pointer active:scale-98 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-store-gold focus-visible:ring-offset-2"
+            className="min-w-0 flex-1 h-14 px-4 sm:px-6 gap-2 rounded-full bg-[#111111] text-white hover:bg-black transition-all flex items-center justify-between font-medium text-xs uppercase tracking-wider shadow-sm cursor-pointer active:scale-98 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-store-gold focus-visible:ring-offset-2"
           >
             <span className="flex items-center gap-2">
-              <ShoppingBag size={18} aria-hidden="true" />
+              <ShoppingBag size={18} aria-hidden="true" className="hidden sm:block" />
               <span>Add to bag</span>
             </span>
             <span className="text-sm tracking-normal tuw-tabular-nums">
-              ₹{(effectiveUnitPriceINR * quantity).toLocaleString('en-IN')}
+              {formatRupees(effectiveUnitPriceINR * quantity)}
             </span>
           </button>
 

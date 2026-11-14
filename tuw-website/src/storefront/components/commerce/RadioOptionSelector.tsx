@@ -1,4 +1,5 @@
 'use client';
+import { formatRupees } from '@storefront/lib/format';
 
 import React from 'react';
 import { ProductRadioGroup } from '@storefront/lib/types';
@@ -97,7 +98,7 @@ export default function RadioOptionSelector({
               {/* Price Delta Pill */}
               {option.priceDeltaINR !== undefined && option.priceDeltaINR > 0 && (
                 <span className="text-xs font-bold text-store-action-primary bg-store-cream px-2 py-1 rounded-lg shrink-0 border border-store-card-border">
-                  +₹{option.priceDeltaINR.toLocaleString()}
+                  +{formatRupees(option.priceDeltaINR)}
                 </span>
               )}
             </label>

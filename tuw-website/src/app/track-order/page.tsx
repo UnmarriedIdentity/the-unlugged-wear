@@ -124,7 +124,9 @@ function TrackOrderContent() {
                 {order.carrier && order.trackingNumber ? (
                   <>Carrier: <strong>{order.carrier}</strong> • Tracking code: <code>{order.trackingNumber}</code></>
                 ) : (
-                  'A courier and tracking code are added when it ships.'
+                  order.sqlStatus === 'shipped' || order.sqlStatus === 'delivered'
+                    ? 'No tracking code was added for this shipment.'
+                    : 'A courier and tracking code are added when it ships.'
                 )}
               </p>
             </div>

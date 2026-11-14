@@ -6,11 +6,9 @@ import TuwEmblem from './TuwEmblem';
 
 // The intro plays once per browser session, on the homepage only, so deep
 // links (shared product pages) and repeat visits open straight to content.
-const INTRO_SEEN_KEY = 'tuw_intro_seen';
-
-// Runs while the server HTML is parsed, before first paint: hides the overlay
-// for visitors who already saw it this session, avoiding a dark flash.
-const INTRO_SEEN_SCRIPT = `try{if(sessionStorage.getItem('${INTRO_SEEN_KEY}')==='1')document.documentElement.setAttribute('data-intro-seen','')}catch(e){}`;
+// The pre-paint script that hides the overlay for repeat visitors lives in the
+// root layout's <head> (a client component may not render a <script>).
+import { INTRO_SEEN_KEY } from '@storefront/lib/intro';
 
 const BRAND_WORDS = [
   { word: 'THE', chars: ['T', 'H', 'E'] },
@@ -133,7 +131,6 @@ export default function BrandIntro() {
 
   return (
     <>
-    <script dangerouslySetInnerHTML={{ __html: INTRO_SEEN_SCRIPT }} />
     <aside
       aria-label="The Unplugged Wear Brand Introduction"
       aria-live="polite"

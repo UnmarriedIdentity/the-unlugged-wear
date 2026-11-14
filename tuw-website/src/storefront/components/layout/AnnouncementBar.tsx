@@ -1,11 +1,12 @@
 'use client';
+import { formatRupees } from '@storefront/lib/format';
 
 import React from 'react';
 import Link from 'next/link';
 import { useStore } from '@storefront/mocks/store';
 
 export default function AnnouncementBar() {
-  const { freeShippingRemaining, cartSubtotal, simulatedError, retryConnection } = useStore();
+  const { freeShippingRemaining, freeShippingThreshold, cartSubtotal, simulatedError, retryConnection } = useStore();
 
   if (simulatedError) {
     return (
@@ -29,7 +30,7 @@ export default function AnnouncementBar() {
     <div className="bg-[#1A1A1A] text-white py-2 px-4 text-center text-xs tracking-wider uppercase font-medium flex items-center justify-center gap-2 select-none">
       {cartSubtotal > 0 && freeShippingRemaining > 0 ? (
         <span>
-          Add <strong className="text-[#C8A96A]">₹{freeShippingRemaining.toLocaleString()}</strong> more for complimentary delivery
+          Add <strong className="text-[#C8A96A]">{formatRupees(freeShippingRemaining)}</strong> more for complimentary delivery
         </span>
       ) : cartSubtotal > 0 && freeShippingRemaining === 0 ? (
         <span className="text-[#A7F3D0]">
@@ -37,7 +38,7 @@ export default function AnnouncementBar() {
         </span>
       ) : (
         <span>
-          Complimentary domestic delivery over ₹3,000 • Printed to order in Tiruppur
+          Complimentary domestic delivery over {formatRupees(freeShippingThreshold)} • Printed to order in Tiruppur
         </span>
       )}
     </div>

@@ -260,8 +260,10 @@ async function writeVariants(tx: Transaction, productId: string, productSku: str
       ...options.map((o, i) => ({ def: optionDef, val: idOf(optionDef, o), pos: i, adj: adjOf('Size', o) })),
     ])} AS x(def uuid, val uuid, pos smallint, adj numeric)
     ON CONFLICT (product_id, definition_id, value_id) DO UPDATE SET position = EXCLUDED.position, price_adjustment = EXCLUDED.price_adjustment`);
-  for (const c of colors) {
-    if (hexOf(c)) await tx.execute(sql`UPDATE attribute_values SET swatch_hex = ${hexOf(c)} WHERE id = ${idOf(defs.color!, c)}`);
+  // One statement for every swatch colour, not one per colour.
+  const swatches = colors.flatMap((c) => (hexOf(c) ? [{ id: idOf(defs.color!, c), hex: hexOf(c) }] : []));
+  if (swatches.length) {
+    await tx.execute(sql`UPDATE attribute_values av SET swatch_hex = x.hex FROM ${records(swatches)} AS x(id uuid, hex text) WHERE av.id = x.id AND av.swatch_hex IS DISTINCT FROM x.hex`);
   }
 
   const { rows: before } = await tx.execute<{ id: string; variant_key: string; stock: number; sku: string }>(sql`SELECT id, variant_key, stock, sku FROM product_variants WHERE product_id = ${productId}`);
@@ -361,7 +363,7 @@ export async function adminCreateProduct(input: ProductInput, actorId: string): 
   const drafts = variantDrafts(input);
   const id = uuidv7();
   try {
-    return await withTransaction(async (tx) => {
+    await withTransaction(async (tx) => {
       const categoryId = await resolveCategory(tx, input.category);
       assertPublishable(input, categoryId, drafts);
       assertCompare(input, Math.min(...drafts.map((d) => d.paise)));
@@ -372,9 +374,10 @@ export async function adminCreateProduct(input: ProductInput, actorId: string): 
         VALUES (${id}, ${sku}, ${input.name}, ${slug}, ${toRupees(toPaise(input.price))}, 'draft', 'local', ${PARTNER_SLUG[input.partner]}, 'ready_to_print')`);
       await applyProduct(tx, id, sku, input, drafts, categoryId, slug, []);
       await recordAudit(tx, { actorId, action: 'product.create', entity: 'products', entityId: id, diff: { name: { from: null, to: input.name } } });
-      return adminGetProduct(id, tx);
     });
   } catch (error) { return translate(error); }
+  // Read after commit: the pool runs these reads in parallel, a transaction would queue them.
+  return adminGetProduct(id);
 }
 
 async function applyProduct(tx: Transaction, id: string, sku: string, input: ProductInput, drafts: VariantDraft[], categoryId: string | null, slug: string, aliases: string[]) {
@@ -408,7 +411,7 @@ export async function findVariantId(productId: string, color: string | undefined
 export async function adminUpdateProduct(id: string, input: ProductInput, actorId: string, expectedUpdatedAt?: string): Promise<AdminProductDetail> {
   const drafts = variantDrafts(input);
   try {
-    return await withTransaction(async (tx) => {
+    await withTransaction(async (tx) => {
       const { rows } = await tx.execute<{ sku: string; name: string; slug: string; slug_aliases: string[]; status: string; price: string; updated_at: string }>(sql`
         SELECT sku, name, slug, slug_aliases, status, price, updated_at FROM products WHERE id = ${id} AND deleted_at IS NULL FOR UPDATE`);
       const current = rows[0];
@@ -434,9 +437,9 @@ export async function adminUpdateProduct(id: string, input: ProductInput, actorI
       const min = toRupees(Math.min(...drafts.map((d) => d.paise)));
       if (toRupees(toPaise(current.price)) !== min) diff.price = { from: current.price, to: min };
       await recordAudit(tx, { actorId, action: 'product.update', entity: 'products', entityId: id, diff });
-      return adminGetProduct(id, tx);
     });
   } catch (error) { return translate(error); }
+  return adminGetProduct(id);
 }
 
 export async function adminSetProductsStatus(ids: string[], status: ProductInput['publicationStatus'], actorId: string): Promise<{ updated: string[]; refused: { id: string; name: string; reason: string }[] }> {

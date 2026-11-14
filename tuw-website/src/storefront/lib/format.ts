@@ -24,3 +24,8 @@ export function formatShortDate(d: string | Date): string {
   const date = new Date(d);
   return `${date.getDate()} ${SHORT_MONTHS[date.getMonth()]} ${date.getFullYear()}`;
 }
+
+/** Rupee amounts held as numbers in the bag: ₹779.80, never ₹779.8. */
+export function formatRupees(rupees: number): string {
+  return formatPaise(Math.round(rupees * 100));
+}

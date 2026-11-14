@@ -99,7 +99,7 @@ describe('Homepage typography roles (weight & size only)', () => {
     const vfr = read('src/storefront/components/commerce/VirtualFittingRoom.tsx');
 
     // Explore the Collection renders the shared Figma ProductCard (18-20px / 500 name, 16px / 400 price).
-    assert.ok(page.includes('<ProductCard key={product.id} product={product} />'), 'homepage uses the shared ProductCard');
+    assert.ok(/<ProductCard\b[^>]*product=\{product\}[^>]*\/>/.test(page), 'homepage uses the shared ProductCard');
     const roles = [
       { name: 'Card product name (18-20px / 500)', src: card, re: /<h3 className="text-lg @\[22rem\]:text-xl font-medium text-primary-dark leading-snug">/ },
       { name: 'Card product price (16px / 400)', src: card, re: /<p className="text-base text-store-text-secondary tuw-tabular-nums">/ },

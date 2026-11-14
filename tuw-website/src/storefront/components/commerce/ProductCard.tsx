@@ -1,4 +1,5 @@
 'use client';
+import { formatRupees } from '@storefront/lib/format';
 
 import React, { useState } from 'react';
 import { priceLabel, sizePriceINR } from '@storefront/lib/product';
@@ -345,7 +346,7 @@ export default function ProductCard({
           </p>
           {product.compareAtPriceINR && (
             <span className="text-xs text-store-muted line-through tuw-tabular-nums">
-              ₹{product.compareAtPriceINR.toLocaleString()}
+              {formatRupees(product.compareAtPriceINR)}
             </span>
           )}
         </div>

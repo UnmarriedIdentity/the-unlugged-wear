@@ -1,4 +1,5 @@
 'use client';
+import { formatRupees } from '@storefront/lib/format';
 
 import React, { useState } from 'react';
 import {
@@ -396,7 +397,7 @@ export default function PaymentSimulationPanel({
             <>
               <span>
                 {/* Nothing is charged now for pay on delivery, so it places the order instead */}
-                {selectedMethod === 'COD (Demo)' ? 'Place Order' : 'Complete Payment'} (₹{totalAmount.toLocaleString()})
+                {selectedMethod === 'COD (Demo)' ? 'Place Order' : 'Complete Payment'} ({formatRupees(totalAmount)})
               </span>
               <ArrowRight size={14} />
             </>

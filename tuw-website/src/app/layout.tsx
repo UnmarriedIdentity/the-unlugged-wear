@@ -8,6 +8,7 @@ import { getStorefrontSettings } from '@/server/settings';
 import { getCatalog } from '@/server/catalog';
 import { getNavigation } from '@/server/nav';
 import BrandIntro from '@storefront/components/layout/BrandIntro';
+import { INTRO_SEEN_SCRIPT } from '@storefront/lib/intro';
 
 // Self-hosted Outfit for headings and body (vendored from @fontsource, OFL licensed).
 // next/font/local keeps Turbopack production builds deterministic with zero
@@ -55,6 +56,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const [settings, catalog, nav] = await Promise.all([getStorefrontSettings(), getCatalog(), getNavigation()]);
   return (
     <html lang="en" className={outfit.variable} suppressHydrationWarning>
+      <head>
+        {/* Before first paint: skip the brand intro for visitors who saw it this session. */}
+        <script dangerouslySetInnerHTML={{ __html: INTRO_SEEN_SCRIPT }} />
+      </head>
       <body className="font-sans antialiased bg-store-canvas text-store-text-primary min-h-screen">
         <a
           href="#main-content"

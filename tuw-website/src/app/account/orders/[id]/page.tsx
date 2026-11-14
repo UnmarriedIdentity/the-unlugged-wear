@@ -116,6 +116,7 @@ export default function OrderDetailPage({ params }: PageProps) {
   const estimate = deliveryEstimate(order.shippingAddress.postalCode, new Date(order.date));
   const subtotal = order.items.reduce((sum, item) => sum + linePaise(item), 0);
   const total = Math.round(order.totalINR * 100);
+  const itemCount = order.items.reduce((n, i) => n + i.quantity, 0);
   void subtotal;
   const isCancelled = order.sqlStatus === 'cancelled';
   const address = order.shippingAddress;
@@ -139,7 +140,7 @@ export default function OrderDetailPage({ params }: PageProps) {
               Order {order.orderNumber}
             </h1>
             <p className="mt-2 text-sm text-store-text-secondary">
-              Placed {formatShortDate(order.date)} · {order.items.reduce((n, i) => n + i.quantity, 0)} items ·{' '}
+              Placed {formatShortDate(order.date)} · {itemCount} {itemCount === 1 ? 'item' : 'items'} ·{' '}
               <span className="tuw-tabular-nums">{formatPaise(total)}</span>
             </p>
             <div className="mt-3 flex flex-wrap gap-1.5">

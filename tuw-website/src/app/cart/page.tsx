@@ -1,4 +1,5 @@
 'use client';
+import { formatRupees } from '@storefront/lib/format';
 
 import React, { useState } from 'react';
 import Link from 'next/link';
@@ -82,10 +83,10 @@ export default function CartPage() {
                 <div className="flex items-center justify-between text-xs font-semibold mb-2">
                   <span className="text-[#1A1A1A]">
                     {freeShippingRemaining > 0
-                      ? `Add ₹${freeShippingRemaining.toLocaleString()} more for complimentary delivery`
+                      ? `Add ${formatRupees(freeShippingRemaining)} more for complimentary delivery`
                       : '✓ You have unlocked free domestic delivery'}
                   </span>
-                  <span className="text-[#8A8A8A]">Threshold: ₹{freeShippingThreshold}</span>
+                  <span className="text-[#8A8A8A]">Threshold: {formatRupees(freeShippingThreshold)}</span>
                 </div>
                 <div className="w-full h-2 bg-[#F4F1EA] rounded-full overflow-hidden">
                   <div
@@ -159,7 +160,7 @@ export default function CartPage() {
                         </div>
 
                         <div className="text-base font-extrabold text-[#1A1A1A]">
-                          ₹{(item.priceINR * item.quantity).toLocaleString()}
+                          {formatRupees((item.priceINR * item.quantity))}
                         </div>
                       </div>
                     </div>
@@ -180,7 +181,7 @@ export default function CartPage() {
                   {promoCode ? (
                     <div className="flex items-center justify-between p-3 rounded-xl bg-[#F0FDF4] border border-[#BBF7D0] text-xs">
                       <span className="text-[#15803D] font-semibold">
-                        Code {promoCode} (-₹{discountAmount.toLocaleString()})
+                        Code {promoCode} (-{formatRupees(discountAmount)})
                       </span>
                       <button
                         type="button"
@@ -209,26 +210,26 @@ export default function CartPage() {
                 <div className="space-y-2.5 text-xs text-[#5A5A5A] pt-2">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span className="font-semibold text-[#1A1A1A]">₹{cartSubtotal.toLocaleString()}</span>
+                    <span className="font-semibold text-[#1A1A1A]">{formatRupees(cartSubtotal)}</span>
                   </div>
 
                   {discountAmount > 0 && (
                     <div className="flex justify-between text-[#15803D] font-semibold">
                       <span>Promo Discount</span>
-                      <span>-₹{discountAmount.toLocaleString()}</span>
+                      <span>-{formatRupees(discountAmount)}</span>
                     </div>
                   )}
 
                   <div className="flex justify-between">
                     <span>Domestic Shipping</span>
                     <span className="font-semibold text-[#1A1A1A]">
-                      {shippingFee === 0 ? 'FREE' : `₹${shippingFee}`}
+                      {shippingFee === 0 ? 'FREE' : formatRupees(shippingFee)}
                     </span>
                   </div>
 
                   <div className="flex justify-between text-base font-extrabold text-[#1A1A1A] pt-3 border-t border-[#E2DDCF]">
                     <span>Total Amount</span>
-                    <span>₹{total.toLocaleString()}</span>
+                    <span>{formatRupees(total)}</span>
                   </div>
                 </div>
 

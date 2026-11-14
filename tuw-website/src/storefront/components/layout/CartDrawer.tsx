@@ -1,4 +1,5 @@
 'use client';
+import { formatRupees } from '@storefront/lib/format';
 
 import React, { useState } from 'react';
 import Link from 'next/link';
@@ -73,10 +74,10 @@ export default function CartDrawer() {
             <div className="flex items-center justify-between text-xs font-semibold mb-2">
               <span className="text-[#1A1A1A]">
                 {freeShippingRemaining > 0
-                  ? `Add ₹${freeShippingRemaining.toLocaleString()} for complimentary delivery`
+                  ? `Add ${formatRupees(freeShippingRemaining)} for complimentary delivery`
                   : '✓ Free domestic delivery unlocked'}
               </span>
-              <span className="text-[#8A8A8A]">₹{freeShippingThreshold}</span>
+              <span className="text-[#8A8A8A]">{formatRupees(freeShippingThreshold)}</span>
             </div>
             <div className="w-full h-1.5 bg-[#E2DDCF] rounded-full overflow-hidden">
               <div
@@ -162,7 +163,7 @@ export default function CartDrawer() {
                     </div>
 
                     <div className="text-sm font-bold text-[#1A1A1A]">
-                      ₹{(item.priceINR * item.quantity).toLocaleString()}
+                      {formatRupees((item.priceINR * item.quantity))}
                     </div>
                   </div>
                 </div>
@@ -175,7 +176,7 @@ export default function CartDrawer() {
             {promoCode ? (
               <div className="flex items-center justify-between p-2.5 rounded-lg bg-[#F0FDF4] border border-[#BBF7D0] text-xs">
                 <span className="text-[#15803D] font-medium">
-                  Code <strong>{promoCode}</strong> applied (-₹{discountAmount.toLocaleString()})
+                  Code <strong>{promoCode}</strong> applied (-{formatRupees(discountAmount)})
                 </span>
                 <button
                   type="button"
@@ -205,24 +206,24 @@ export default function CartDrawer() {
           <div className="space-y-2 pt-2 border-t border-[#E2DDCF] text-xs">
             <div className="flex justify-between text-[#5A5A5A]">
               <span>Subtotal</span>
-              <span>₹{cartSubtotal.toLocaleString()}</span>
+              <span>{formatRupees(cartSubtotal)}</span>
             </div>
 
             {discountAmount > 0 && (
               <div className="flex justify-between text-[#15803D]">
                 <span>Discount</span>
-                <span>-₹{discountAmount.toLocaleString()}</span>
+                <span>-{formatRupees(discountAmount)}</span>
               </div>
             )}
 
             <div className="flex justify-between text-[#5A5A5A]">
               <span>Estimated Shipping</span>
-              <span>{shippingFee === 0 ? 'FREE' : `₹${shippingFee}`}</span>
+              <span>{shippingFee === 0 ? 'FREE' : formatRupees(shippingFee)}</span>
             </div>
 
             <div className="flex justify-between text-base font-bold text-[#1A1A1A] pt-2 border-t border-[#E2DDCF]">
               <span>Total</span>
-              <span>₹{total.toLocaleString()}</span>
+              <span>{formatRupees(total)}</span>
             </div>
 
             <div className="pt-2">
