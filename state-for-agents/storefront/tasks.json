@@ -11,8 +11,8 @@
   "_demo": "Figma source of truth established. First track TL-WEB-001 closed.",
   "summary": {
     "total": 114,
-    "done": 96,
-    "in_progress": 3,
+    "done": 97,
+    "in_progress": 2,
     "backlog": 15,
     "total_tasks": 114,
     "pending": 15
@@ -25,9 +25,9 @@
       "ff72136",
       "cf43e33"
     ],
-    "next_up": "TL-WEB-BE-08 — /shop on the database (next storefront task).",
+    "next_up": "TL-WEB-BE-10 — /products/[slug] PDP on the database (cached Server Component body + live stock hole).",
     "pending_verifications": [],
-    "last_updated": "2026-11-13",
+    "last_updated": "2026-11-14",
     "updated_by": "agent (Buffy)"
   },
   "workflow": {
@@ -2259,12 +2259,12 @@
       "id": "TL-WEB-BE-08",
       "title": "/shop on the DB (filters + sort from searchParams in Suspense)",
       "category": "backend",
-      "status": "in_progress",
-      "owner": "unassigned",
+      "status": "done",
+      "owner": "agent (Buffy)",
       "parent": "TL-WEB-BE",
       "started": "2026-11-11",
-      "finished": null,
-      "verified": false,
+      "finished": "2026-11-14",
+      "verified": true,
       "design_match": null,
       "pushed": true,
       "admin_ref": "TL-BE-05.07",
@@ -2272,12 +2272,21 @@
         "TL-BE-05"
       ],
       "files": [
-        "src/app/shop/page.tsx"
+        "src/app/shop/page.tsx",
+        "src/app/shop/_components/ShopResults.tsx",
+        "src/app/shop/_components/ShopToolbar.tsx",
+        "src/storefront/lib/shop-query.ts",
+        "src/storefront/components/commerce/FilterBar.tsx"
       ],
       "description": "Shell = chrome; grid is the hole.",
-      "key_decisions": [],
+      "key_decisions": [
+        "URL is the single source of truth: every filter, sort and the Load-more cursor (?show=) is a query param, parsed once on the server by src/storefront/lib/shop-query.ts.",
+        "Shell (header, banner, trust ribbon, footer) is static; heading + toolbar + grid stream as one Suspense hole keyed by searchParams.",
+        "FilterBar is now a thin client wrapper (router.replace) and takes server-computed facet counts instead of the catalogue; drawer option lists moved to shop-query.ts and are re-exported.",
+        "Category change preserves audience/type/q/new (the old code dropped them); Clear all and the empty state go to /shop."
+      ],
       "follow_ups": [],
-      "log": "Shop lists DB products (155) through the store provider; filters/sort unchanged. Remaining: Server Component grid + searchParams in Suspense."
+      "log": "Server-rendered /shop. Verified against the running build: /shop 155 items (24 shown, Load more -> ?show=48), ?category=hoodies 9 (matches collection membership), ?category=men 61, ?audience=men&type=drinkware 0 (drinkware has no audience) and ?q=zzzznotathing 0 both show the empty state, price sort ascending/descending confirmed from the rendered cards. shop/layout.tsx deleted; metadata moved to the page. Typecheck clean, build prerenders /shop as partial prerender, test suite back to its two pre-existing failures."
     },
     {
       "id": "TL-WEB-BE-09",
