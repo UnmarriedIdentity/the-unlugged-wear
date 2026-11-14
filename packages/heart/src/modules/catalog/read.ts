@@ -1,6 +1,7 @@
 import 'server-only';
 import { sql } from 'drizzle-orm';
 import { getDb } from '../../platform/db/index.ts';
+import { isUuid } from '../../platform/ids/index.ts';
 import { toPaise } from '../../platform/money/index.ts';
 import { slugify } from './planner.ts';
 import { isMadeToOrder } from '../inventory/index.ts';
@@ -116,6 +117,38 @@ export const MADE_TO_ORDER_CAP = 100;
 
 const rupees = (paise: number) => paise / 100;
 
+/**
+ * One size row per value of the product's variant axis, with the price
+ * ladder folded in when sizes cost different amounts. Shared by the full
+ * catalogue read and the single-product stock read so the two can never
+ * disagree about what "in stock" means.
+ */
+function sizesFor<V extends { stock: number; paise: number; values: Map<string, string> }>(
+  variants: V[],
+  optionSlug: string | undefined,
+  optionLinks: { value_id: string; value: string }[],
+  available: (v: V) => boolean,
+  madeToOrder: boolean,
+): StorefrontProduct['sizes'] {
+  const sizeRows = optionLinks
+    .map((l) => {
+      const matching = variants.filter((v) => v.values.get(optionSlug!) === l.value_id);
+      if (!matching.length) return null;
+      return {
+        size: l.value,
+        inStock: matching.some(available),
+        stockCount: madeToOrder ? MADE_TO_ORDER_CAP : Math.max(...matching.map((v) => v.stock)),
+        paise: Math.min(...matching.map((v) => v.paise)),
+      };
+    })
+    .filter((x): x is NonNullable<typeof x> => x !== null);
+  const laddered = new Set(sizeRows.map((s) => s.paise)).size > 1;
+  if (!sizeRows.length) {
+    return [{ size: 'One size', inStock: variants.some(available), stockCount: madeToOrder ? MADE_TO_ORDER_CAP : Math.max(...variants.map((v) => v.stock)) }];
+  }
+  return sizeRows.map(({ paise, ...s }) => (laddered ? { ...s, priceINR: rupees(paise), priceMinorINR: paise } : s));
+}
+
 /** Extra attributes staff chose to show on the product page ("Fabric: Cotton"). */
 function extraDetails(links: { slug: string; def_name: string; visible: boolean; is_variant_axis: boolean; value: string }[]): string[] {
   const by = new Map<string, string[]>();
@@ -211,23 +244,8 @@ export async function getStorefrontCatalog(): Promise<StorefrontCatalog> {
     const usedColors = new Set(vs.map((v) => v.values.get('color')).filter(Boolean));
     const colors = colorLinks.filter((l) => usedColors.has(l.value_id)).map((l) => ({ name: l.value, hex: l.swatch_hex ?? '#D9D4C7', value: slugify(l.value) }));
 
-    const sizeRows = optionLinks
-      .map((l) => {
-        const matching = vs.filter((v) => v.values.get(optionSlug!) === l.value_id);
-        if (!matching.length) return null;
-        return {
-          size: l.value,
-          inStock: matching.some(available),
-          stockCount: madeToOrder ? MADE_TO_ORDER_CAP : Math.max(...matching.map((v) => v.stock)),
-          paise: Math.min(...matching.map((v) => v.paise)),
-        };
-      })
-      .filter((x): x is NonNullable<typeof x> => x !== null);
     const minPaise = Math.min(...vs.map((v) => v.paise));
-    const laddered = new Set(sizeRows.map((s) => s.paise)).size > 1;
-    const sizes = sizeRows.length
-      ? sizeRows.map(({ paise, ...s }) => (laddered ? { ...s, priceINR: rupees(paise), priceMinorINR: paise } : s))
-      : [{ size: 'One size', inStock: vs.some(available), stockCount: madeToOrder ? MADE_TO_ORDER_CAP : Math.max(...vs.map((v) => v.stock)) }];
+    const sizes = sizesFor(vs, optionSlug, optionLinks, available, madeToOrder);
 
     const type = p.product_type ?? undefined;
     const compare = p.compare_at_price ? toPaise(p.compare_at_price) : null;
@@ -289,4 +307,49 @@ export async function getStorefrontCatalog(): Promise<StorefrontCatalog> {
     }),
     categories: categories.rows.map((c) => ({ slug: c.slug, name: c.name, parentSlug: c.parent_slug, showInNavbar: c.show_in_navbar, showInMegamenu: c.show_in_megamenu, sortOrder: c.sort_order })),
   };
+}
+
+/**
+ * Live availability for one product's sizes, read fresh on every call and
+ * deliberately not cached: the catalogue may be hours old, but a buy button
+ * must not be. Same derivation as the catalogue (sizesFor), three small
+ * queries instead of eleven table scans. `null` when the product is gone or
+ * no longer purchasable.
+ */
+export async function getStorefrontProductStock(productId: string): Promise<StorefrontProduct['sizes'] | null> {
+  if (!isUuid(productId)) return null;
+  const db = getDb();
+  const { rows: productRows } = await db.execute<{ partner_provider: string | null; partner_availability: StorefrontProduct['partnerAvailability'] | null }>(sql`
+    SELECT partner_provider, partner_availability FROM products
+    WHERE id = ${productId} AND status = 'active' AND deleted_at IS NULL AND product_kind = 'physical'`);
+  const product = productRows[0];
+  if (!product) return null;
+
+  const [variants, variantValues, optionLinks] = await Promise.all([
+    db.execute<{ id: string; price: string; stock: number }>(sql`
+      SELECT id, price, stock FROM product_variants WHERE product_id = ${productId} AND is_active`),
+    db.execute<{ variant_id: string; slug: string; value_id: string }>(sql`
+      SELECT pvav.variant_id, d.slug, pvav.value_id FROM product_variant_attribute_values pvav
+      JOIN attribute_definitions d ON d.id = pvav.definition_id
+      WHERE pvav.product_id = ${productId}`),
+    db.execute<{ slug: string; value_id: string; value: string }>(sql`
+      SELECT d.slug, lv.value_id, av.value FROM product_attribute_links l
+      JOIN attribute_definitions d ON d.id = l.definition_id
+      JOIN product_attribute_link_values lv ON lv.product_id = l.product_id AND lv.definition_id = l.definition_id
+      JOIN attribute_values av ON av.id = lv.value_id
+      WHERE l.product_id = ${productId} AND l.is_variant_axis AND d.slug <> 'color'
+      ORDER BY l.variant_axis_position, lv.position, av.position`),
+  ]);
+  if (!variants.rows.length) return null;
+
+  const valuesOfVariant = new Map<string, Map<string, string>>();
+  for (const r of variantValues.rows) {
+    const m = valuesOfVariant.get(r.variant_id) ?? new Map<string, string>();
+    m.set(r.slug, r.value_id);
+    valuesOfVariant.set(r.variant_id, m);
+  }
+  const vs = variants.rows.map((v) => ({ ...v, paise: toPaise(v.price), values: valuesOfVariant.get(v.id) ?? new Map<string, string>() }));
+  const madeToOrder = isMadeToOrder(product.partner_provider);
+  const available = (v: (typeof vs)[number]) => (madeToOrder ? product.partner_availability === 'ready_to_print' : v.stock > 0);
+  return sizesFor(vs, optionLinks.rows[0]?.slug, optionLinks.rows, available, madeToOrder);
 }

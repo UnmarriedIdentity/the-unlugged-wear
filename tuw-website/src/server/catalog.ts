@@ -1,7 +1,7 @@
 import 'server-only';
 import { cacheLife, cacheTag } from 'next/cache';
-import { approvedReviews, getStorefrontCatalog, searchProducts, PRODUCTS_TAG, REVIEWS_TAG, type ReviewSummary, type SearchResult } from '@tuw/heart/modules/catalog';
-import type { Collection, Product, SizeChartData } from '@storefront/lib/types';
+import { approvedReviews, getStorefrontCatalog, getStorefrontProductStock, searchProducts, PRODUCTS_TAG, REVIEWS_TAG, type ReviewSummary, type SearchResult } from '@tuw/heart/modules/catalog';
+import type { Collection, Product, ProductSize, SizeChartData } from '@storefront/lib/types';
 
 export interface Catalog {
   products: Product[];
@@ -31,6 +31,17 @@ export async function getCatalog(): Promise<Catalog> {
 export async function getProductBySlug(slug: string): Promise<Product | null> {
   const { products } = await getCatalog();
   return products.find((p) => p.slug === slug) ?? products.find((p) => p.aliases?.includes(slug)) ?? null;
+}
+
+/**
+ * Live sizes for one product, read on every request. Intentionally not
+ * cached: the catalogue behind it is tagged and can be hours old, and the
+ * buy box is the one thing on the page that must not be. `null` when the
+ * piece is no longer published or has nothing purchasable.
+ */
+export async function getProductStock(productId: string | undefined): Promise<ProductSize[] | null> {
+  if (!productId) return null;
+  return (await getStorefrontProductStock(productId)) as ProductSize[] | null;
 }
 
 /** Ranked search, cached per term for a few minutes and expired with the catalog. */

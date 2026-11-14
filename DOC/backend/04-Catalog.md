@@ -443,10 +443,19 @@ cursor live in the query string (`category`, `audience`, `type`, `q`, `new`,
 rewrites the URL. The option lists moved there too, so facet counts are
 computed server-side instead of shipping the catalogue.
 
-**Not yet:** the PDP is still a Client Component reading the catalog from the
-provider, and the provider still hands the catalogue to `Header`/mega-menu
-(≈25 KB gzipped). Moving the PDP to a Server Component is TL-WEB-BE-10.
-Everything else listed for this task landed in slice 3, below.
+The PDP followed (TL-WEB-BE-10): `src/app/products/[slug]/page.tsx` is an async
+Server Component over the cached catalogue, and the only dynamic part is a
+small Suspense hole (`_components/LiveStock.tsx`) that reads fresh sizes from
+`getStorefrontProductStock()` — deliberately uncached, since the catalogue
+behind it may be an hour old — and hands them to the already-hydrated buy box
+through `src/storefront/lib/live-stock.ts`. The interactive top section lives
+in one client island (`_components/ProductShowcase.tsx`) because the gallery
+and the size picker share the selected colourway.
+
+**Not yet:** the root layout still hands the whole catalogue to the client
+store provider for `Header` (mega-menu counts, search); narrowing that is the
+remaining payload win. Everything else listed for this task landed in slice 3,
+below.
 
 ## As built (TL-BE-05 slice 2, 2026-11-11)
 

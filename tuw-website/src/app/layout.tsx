@@ -49,8 +49,9 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   // All cached ('settings' / 'products' / 'nav' tags) — part of the static
-  // shell, not dynamic holes. The catalog reaches Client Components through the
-  // store provider until shop/PDP become Server Components (TL-WEB-BE-08/10).
+  // shell, not dynamic holes. Shop and PDP now read the catalog on the server;
+  // the provider keeps it for Header (mega-menu counts, suggestions) and the
+  // per-browser bag/wishlist. Narrowing it to a nav-sized read is the next win.
   const [settings, catalog, nav] = await Promise.all([getStorefrontSettings(), getCatalog(), getNavigation()]);
   return (
     <html lang="en" className={outfit.variable} suppressHydrationWarning>

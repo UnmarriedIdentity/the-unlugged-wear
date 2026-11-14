@@ -12,6 +12,7 @@ import VariantPillSelector from './VariantPillSelector';
 import RadioOptionSelector from './RadioOptionSelector';
 import NotifyMe from './NotifyMe';
 import { useSiteSettings, rupeesLabel } from '@storefront/lib/site-settings';
+import { useLiveSizes } from '@storefront/lib/live-stock';
 import {
   sizePriceINR,
   RETURN_WINDOW_DAYS,
@@ -45,8 +46,12 @@ export default function VariantSelector({
   const sizeChart = sizeCharts.find((c) => c.id === product.sizeChartId) ?? null;
   const wearable = isWearable(productType);
 
+  // Stock arrives from the page's live read (see LiveStock) and replaces the
+  // cached catalogue's sizes once it lands; until then the cached values show.
+  const sizes = useLiveSizes(product.slug, product.sizes);
+
   const hasColors = Boolean(product.colors && product.colors.length > 0);
-  const hasSizes = Boolean(product.sizes && product.sizes.length > 0);
+  const hasSizes = sizes.length > 0;
   const hasRadioGroups = Boolean(product.radioGroups && product.radioGroups.length > 0);
 
   const [internalColor, setInternalColor] = useState<ProductColor | undefined>(
@@ -54,11 +59,14 @@ export default function VariantSelector({
   );
   const [internalSize, setInternalSize] = useState<ProductSize | null>(
     // A single sold-out option starts selected, so "notify me" is on show.
-    hasSizes ? product.sizes!.find((s) => s.inStock) || (product.sizes!.length === 1 ? product.sizes![0]! : null) : null
+    hasSizes ? sizes.find((s) => s.inStock) || (sizes.length === 1 ? sizes[0]! : null) : null
   );
 
   const selectedColor = controlledColor !== undefined ? controlledColor : internalColor;
-  const selectedSize = controlledSize !== undefined ? controlledSize : internalSize;
+  // Re-read the chosen size from the live list so its stock and tier price
+  // refresh with the stream, while the selection itself is preserved.
+  const chosenSize = controlledSize !== undefined ? controlledSize : internalSize;
+  const selectedSize = chosenSize ? sizes.find((s) => s.size === chosenSize.size) ?? chosenSize : null;
 
   // Track active radio option selections per group
   const [selectedRadioValues, setSelectedRadioValues] = useState<Record<string, string>>(() => {
@@ -86,7 +94,7 @@ export default function VariantSelector({
   }, 0);
 
   // Price tiers: the chosen size's own price (see lib/product sizePriceINR).
-  const effectiveUnitPriceINR = sizePriceINR(product, selectedSize?.size) + radioDeltaINR;
+  const effectiveUnitPriceINR = sizePriceINR({ ...product, sizes }, selectedSize?.size) + radioDeltaINR;
 
   const handleColorSelect = (color: ProductColor) => {
     if (onColorChange) {
@@ -186,7 +194,7 @@ export default function VariantSelector({
       {/* 2. Dynamic Variant Pill Selector (Omitted if no sizes defined) */}
       {hasSizes && (
         <VariantPillSelector
-          sizes={product.sizes}
+          sizes={sizes}
           selectedSize={selectedSize}
           onSelect={handleSizeSelect}
           label={`${variantLabel}:`}
@@ -319,7 +327,7 @@ export default function VariantSelector({
           onClose={() => setIsSizeGuideOpen(false)}
           chart={sizeChart}
           sizeHeader={product.variantLabel}
-          sizes={product.sizes.map((s) => s.size)}
+          sizes={sizes.map((s) => s.size)}
         />
       )}
     </div>
