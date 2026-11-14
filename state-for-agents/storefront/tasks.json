@@ -11,21 +11,24 @@
   "_demo": "Figma source of truth established. First track TL-WEB-001 closed.",
   "summary": {
     "total": 114,
-    "done": 97,
-    "in_progress": 2,
+    "done": 98,
+    "in_progress": 1,
     "backlog": 15,
     "total_tasks": 114,
     "pending": 15
   },
   "session": {
     "branch": "urvil-ui",
-    "tip": "cf43e33",
+    "tip": "43625ec",
     "unpushed": [
       "bd9de89",
       "ff72136",
-      "cf43e33"
+      "cf43e33",
+      "44039bd",
+      "f713433",
+      "43625ec"
     ],
-    "next_up": "TL-WEB-BE-10 — /products/[slug] PDP on the database (cached Server Component body + live stock hole).",
+    "next_up": "TL-WEB-BE-25 — checkout gift cards, blocked on the admin gift-card module TL-BE-12.",
     "pending_verifications": [],
     "last_updated": "2026-11-14",
     "updated_by": "agent (Buffy)"
@@ -2325,25 +2328,39 @@
       "id": "TL-WEB-BE-10",
       "title": "/products/[slug] PDP on the DB (cached body, live stock hole, FAQs, size chart)",
       "category": "backend",
-      "status": "in_progress",
-      "owner": "unassigned",
+      "status": "done",
+      "owner": "agent (Buffy)",
       "parent": "TL-WEB-BE",
       "started": "2026-11-11",
-      "finished": null,
-      "verified": false,
+      "finished": "2026-11-14",
+      "verified": true,
       "design_match": null,
-      "pushed": true,
+      "pushed": false,
       "admin_ref": "TL-BE-05.07",
       "depends_on": [
         "TL-BE-05"
       ],
       "files": [
-        "src/app/products/[slug]/page.tsx"
+        "src/app/products/[slug]/page.tsx",
+        "src/app/products/[slug]/_components/ProductShowcase.tsx",
+        "src/app/products/[slug]/_components/LiveStock.tsx",
+        "src/app/products/[slug]/_components/StockSink.tsx",
+        "src/server/catalog.ts",
+        "src/storefront/lib/live-stock.ts",
+        "src/storefront/components/commerce/VariantSelector.tsx",
+        "packages/heart/src/modules/catalog/read.ts"
       ],
       "description": "Follows the pdp-flow and cache-components skills; unknown slug → notFound().",
-      "key_decisions": [],
-      "follow_ups": [],
-      "log": "PDP from the DB: old slugs resolve via slug_aliases, unknown slug → 404, price tiers ('From' headline, chosen-size price in the bag). Remaining: cached Server Component body + live stock hole."
+      "key_decisions": [
+        "Page body is an async Server Component over the cached catalogue; the one dynamic part is a Suspense hole that is a sibling of the body, not a wrapper, so the static shell stays static.",
+        "Stock is read live by getStorefrontProductStock() (three small queries, shared sizesFor() derivation with the catalogue read) and reaches the already-hydrated buy box through src/storefront/lib/live-stock.ts (useSyncExternalStore); no second copy of the catalogue is serialised for it.",
+        "Gallery, summary, variant picker, accordions and the phone buy bar stay one client island (ProductShowcase) because the gallery follows the selected colourway; it receives only its own product.",
+        "notFound() moves into the page; the layout keeps generateStaticParams/metadata/404 so old slugs still resolve and unknown ones 404 before the body renders."
+      ],
+      "follow_ups": [
+        "Root layout still passes the full catalogue to the client store provider for Header (mega-menu counts, suggestions); narrowing that to a nav-sized read is the remaining payload win."
+      ],
+      "log": "Server-rendered PDP. Verified against the running build: /products/mens-classic-crew-t-shirt returns 200 with title, description, spec table, accordions and FAQ in the static HTML, a legacy slug (atelier-raw-edge-relaxed-tee) still resolves 200 and a bogus slug 404s. Flipping one product partner_availability to partner_delayed in the database changed only the streamed stock payload (cached shell still inStock:true, live hole inStock:false) and was restored. Size order matches the catalogue read. typecheck and build pass (PDP prerenders as partial prerender); pnpm test shows only the pre-existing catalog ENOENT and homepage-typography failures."
     },
     {
       "id": "TL-WEB-BE-11",
