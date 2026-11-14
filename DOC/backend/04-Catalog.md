@@ -434,10 +434,19 @@ the old storefront classification + the 14 curated products and 4
 collections (`db/seed/catalog/*.json`) and publishes: 155 products,
 2,348 active variants. Re-running classifies only new products.
 
-**Not yet:** Shop/PDP are still Client Components reading the catalog from
-the provider (≈25 KB gzipped, same as the old bundle); moving them to Server
-Components is TL-WEB-BE-08/10. Everything else listed for this task landed in
-slice 3, below.
+**Shop** is now a Server Component (TL-WEB-BE-08): the shell and trust
+ribbon are static, and the heading, filter toolbar and grid stream as one
+Suspense hole that reads the URL. Every filter, sort and the "Load more"
+cursor live in the query string (`category`, `audience`, `type`, `q`, `new`,
+`size`, `color`, `price`, `sort`, `show`), parsed once on the server by
+`src/storefront/lib/shop-query.ts`; the toolbar is a thin client wrapper that
+rewrites the URL. The option lists moved there too, so facet counts are
+computed server-side instead of shipping the catalogue.
+
+**Not yet:** the PDP is still a Client Component reading the catalog from the
+provider, and the provider still hands the catalogue to `Header`/mega-menu
+(≈25 KB gzipped). Moving the PDP to a Server Component is TL-WEB-BE-10.
+Everything else listed for this task landed in slice 3, below.
 
 ## As built (TL-BE-05 slice 2, 2026-11-11)
 

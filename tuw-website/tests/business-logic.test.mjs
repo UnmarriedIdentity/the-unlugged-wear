@@ -185,6 +185,9 @@ describe('Deterministic local fonts (Windows == macOS)', () => {
     const cardContent = readFileSync(join(repoRoot, 'src/storefront/components/commerce/ProductCard.tsx'), 'utf8');
     const filterContent = readFileSync(join(repoRoot, 'src/storefront/components/commerce/FilterBar.tsx'), 'utf8');
     const gridContent = readFileSync(join(repoRoot, 'src/storefront/components/commerce/ProductGrid.tsx'), 'utf8');
+    // The option lists moved here so the server can count matches without the
+    // catalogue; FilterBar still re-exports them for the drawer.
+    const facetsContent = readFileSync(join(repoRoot, 'src/storefront/lib/shop-query.ts'), 'utf8');
 
     // Invariant: Zero admin purple (#7539FF) in storefront card and filter components
     assert.ok(!cardContent.includes('#7539FF'), 'ProductCard must not contain admin purple #7539FF');
@@ -224,8 +227,8 @@ describe('Deterministic local fonts (Windows == macOS)', () => {
     assert.ok(filterContent.includes('FIGMA_PRICE_RANGES'), 'FilterBar must export FIGMA_PRICE_RANGES');
     assert.ok(filterContent.includes('Clear all'), 'FilterBar must provide Clear all outline pill CTA');
     assert.ok(filterContent.includes('results'), 'FilterBar must provide Show results pill CTA');
-    assert.ok(filterContent.includes('Bottle Green'), 'FilterBar must include Bottle Green in Figma colors');
-    assert.ok(filterContent.includes('Light Baby Pink'), 'FilterBar must include Light Baby Pink in Figma colors');
+    assert.ok(facetsContent.includes('Bottle Green'), 'the Figma color list must include Bottle Green');
+    assert.ok(facetsContent.includes('Light Baby Pink'), 'the Figma color list must include Light Baby Pink');
     // Rolls-Royce luxury typography reveal invariants
     const cssContent = readFileSync(join(repoRoot, 'src/app/globals.css'), 'utf8');
     assert.ok(cssContent.includes('tuw-stagger-reveal'), 'globals.css must define tuw-stagger-reveal keyframes');

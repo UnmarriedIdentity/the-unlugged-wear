@@ -1,9 +1,19 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import type { Product } from '@storefront/lib/types';
 import { SlidersHorizontal, X, Plus, Minus, Check } from 'lucide-react';
 import Drawer from '@storefront/components/ui/Drawer';
+import {
+  FIGMA_CATEGORIES,
+  FIGMA_FILTER_COLORS,
+  FIGMA_PRICE_RANGES,
+  FIGMA_SORT_OPTIONS,
+  type ShopFacetCounts,
+} from '@storefront/lib/shop-query';
+
+// The option lists live in shop-query.ts so the server can count matches for
+// them without shipping the catalogue to this component.
+export { FIGMA_CATEGORIES, FIGMA_FILTER_COLORS, FIGMA_PRICE_RANGES, FIGMA_SORT_OPTIONS };
 
 export interface FilterState {
   category: string;
@@ -20,63 +30,25 @@ export interface FilterBarProps {
   availableCategories: { value: string; label: string; count?: number }[];
   availableSizes?: string[];
   availableColors?: { value: string; name: string; hex: string; count?: number }[];
-  /** Full catalog, used to show real match counts beside each filter option. */
-  products?: Product[];
+  /** Match counts per option, computed on the server from the catalogue. */
+  productCounts?: ShopFacetCounts;
+  /** Clears every filter, including ones that came from a menu link. */
+  onReset?: () => void;
 }
 
-export const FIGMA_FILTER_COLORS = [
-  { value: 'black', name: 'Black', hex: '#1A1A1A', count: 22 },
-  { value: 'white', name: 'White', hex: '#FFFFFF', count: 10 },
-  { value: 'navy-blue', name: 'Navy Blue', hex: '#1D2A44', count: 16 },
-  { value: 'grey-melange', name: 'Grey Melange', hex: '#8A8A8E', count: 6 },
-  { value: 'bottle-green', name: 'Bottle Green', hex: '#1A4329', count: 15 },
-  { value: 'maroon', name: 'Maroon', hex: '#6A1A26', count: 15 },
-  { value: 'red', name: 'Red', hex: '#C82333', count: 11 },
-  { value: 'lavender', name: 'Lavender', hex: '#B8A9D9', count: 12 },
-  { value: 'light-baby-pink', name: 'Light Baby Pink', hex: '#F3C5CD', count: 11 },
-  { value: 'off-white', name: 'Off White', hex: '#EAE6DF', count: 4 },
-];
-
-export const FIGMA_SORT_OPTIONS = [
-  { value: 'featured', label: 'Novelty' },
-  { value: 'price-high', label: 'Highest to Lowest Price' },
-  { value: 'price-low', label: 'Lowest to Highest Price' },
-];
-
-export const FIGMA_CATEGORIES = [
-  { value: 'tees', label: 'T-shirts', count: 6 },
-  { value: 'hoodies', label: 'Hoodies & sweats', count: 4 },
-  { value: 'pants', label: 'Joggers', count: 3 },
-  { value: 'kids', label: 'Kids', count: 2 },
-  { value: 'accessories', label: 'Accessories', count: 4 },
-];
-
-export const FIGMA_PRICE_RANGES = [
-  { value: 'under-1500', label: 'Under ₹1,500', count: 4 },
-  { value: '1500-3000', label: '₹1,500 – ₹3,000', count: 12 },
-  { value: '3000-5000', label: '₹3,000 – ₹5,000', count: 6 },
-  { value: 'above-5000', label: 'Above ₹5,000', count: 2 },
-];
+export const EMPTY_FACET_COUNTS: ShopFacetCounts = { categories: {}, colors: {}, prices: {} };
 
 export default function FilterBar({
   filters,
   onFilterChange,
   resultCount,
   availableCategories,
-  products = [],
+  productCounts = EMPTY_FACET_COUNTS,
+  onReset,
 }: FilterBarProps) {
-  // Real per-option counts from the catalog (the Figma mock's numbers were placeholders).
-  const countByCategory = (value: string) =>
-    products.filter((p) => (value === 'kids' ? p.category === 'kids' || Boolean(p.audience?.includes('kids')) : p.category === value)).length;
-  const countByColour = (value: string) =>
-    products.filter((p) => p.colors.some((c) => c.value === value)).length;
-  const countByPrice = (value: string) =>
-    products.filter((p) =>
-      value === 'under-1500' ? p.priceINR < 1500
-      : value === '1500-3000' ? p.priceINR >= 1500 && p.priceINR <= 3000
-      : value === '3000-5000' ? p.priceINR > 3000 && p.priceINR <= 5000
-      : p.priceINR > 5000
-    ).length;
+  const countByCategory = (value: string) => productCounts.categories[value] ?? 0;
+  const countByColour = (value: string) => productCounts.colors[value] ?? 0;
+  const countByPrice = (value: string) => productCounts.prices[value] ?? 0;
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   // Accordion section states matching Figma screenshot (Sort: open, Category: closed, Colour: open, Price: closed)
@@ -130,6 +102,10 @@ export default function FilterBar({
     (filters.sort && filters.sort !== 'featured' ? 1 : 0);
 
   const handleReset = () => {
+    if (onReset) {
+      onReset();
+      return;
+    }
     onFilterChange({
       category: '',
       size: '',
